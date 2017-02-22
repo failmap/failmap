@@ -6,11 +6,11 @@
 
 # Quickstart
 
-    pip install -r requirements.txt
-    ./manage.py migrate
-    ./manage.py loaddata fail/fixtures/testdata.yaml
-    ./manage.py createsuperuser
-    ./manage.py runserver
+    pip3 install -e .
+    failmap-admin migrate
+    failmap-admin loaddata failmap_admin/fail/fixtures/testdata.yaml
+    failmap-admin createsuperuser
+    failmap-admin runserver
 
 Now login at: http://127.0.0.1:8000/admin/
 
