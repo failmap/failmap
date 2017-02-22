@@ -25,6 +25,9 @@ class Organization(models.Model):
         managed = True
         db_table = 'organization'
 
+    def __str__(self):
+        return self.name
+
 
 
 class Coordinate(models.Model):
@@ -49,6 +52,9 @@ class ScansDnssec(models.Model):
         managed = True
         db_table = 'scans_dnssec'
 
+    def __str__(self):
+        return self.url
+
 
 class ScansSsllabs(models.Model):
     url = models.CharField(max_length=255)
@@ -69,6 +75,9 @@ class ScansSsllabs(models.Model):
         managed = True
         db_table = 'scans_ssllabs'
 
+    def __str__(self):
+        return self.url
+
 
 
 # missing on update, so updates can cascade through the model. That is excellent for merges.
@@ -83,3 +92,6 @@ class Url(models.Model):
         managed = True
         db_table = 'url'
         unique_together = (('organization', 'url'),)
+
+    def __str__(self):
+        return self.url
