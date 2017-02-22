@@ -20,11 +20,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='url',
             name='isdeadreason',
-            field=models.CharField(blank=True, db_column='isDeadReason', max_length=255, null=True),
+            field=models.CharField(
+                blank=True, db_column='isDeadReason', max_length=255, null=True),
         ),
         migrations.AlterField(
             model_name='url',
             name='isdeadsince',
-            field=models.DateTimeField(blank=True, db_column='isDeadSince', null=True),
+            field=models.DateTimeField(
+                blank=True, db_column='isDeadSince', null=True),
         ),
     ]

@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='url',
             name='isdeadreason',
-            field=models.CharField(blank=True, db_column='isDeadReason', max_length=255),
+            field=models.CharField(
+                blank=True, db_column='isDeadReason', max_length=255),
         ),
         migrations.AlterField(
             model_name='url',
