@@ -6,12 +6,19 @@ from django.contrib import admin
 from .models import Coordinate, Organization, Url
 
 
+class UrlAdminInline(admin.TabularInline):
+    model = Url
+
+class CoordinateAdminInline(admin.StackedInline):
+    model = Coordinate
+
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
     search_fields = ('name', 'type', 'country')
     list_filter = ('type', 'country')
     fields = ('name', 'type', 'country')
 
+    inlines = [UrlAdminInline, CoordinateAdminInline]
 
 class UrlAdmin(admin.ModelAdmin):
     list_display = ('organization', 'url', 'isdeadreason')
@@ -27,7 +34,6 @@ class UrlAdmin(admin.ModelAdmin):
 
     isdead.boolean = True
     isdead = property(isdead)
-
 
 class CoordinateAdmin(admin.ModelAdmin):
     list_display = ('organization', 'geojsontype')
