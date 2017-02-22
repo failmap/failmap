@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'fail'
+    'fail',
+    'django_countries'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -77,17 +78,21 @@ WSGI_APPLICATION = 'admin.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
+# Since we don't use anything specific from a db engine, we move to sqllite.
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'faalkaart',
-        'USER': 'root',
-        'PASS': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'ENGINE': 'django.db.backends.sqlite3', # mysql or sqlite3
+        'NAME': os.path.join(PROJECT_DIR, 'failmap.db'),
+
+        #'NAME': 'faalkaart',
+        #'USER': 'root',
+        #'PASS': '',
+        #'HOST': '127.0.0.1',
+        #'PORT': '3306',
+        #'OPTIONS': {
+        #    'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        #}
     }
 }
 
