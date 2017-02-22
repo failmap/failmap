@@ -32,13 +32,12 @@ class Organization(models.Model):
 
 class Coordinate(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
-    geojsontype = models.CharField(db_column='geoJsonType', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    geojsontype = models.CharField(db_column='geoJsonType', max_length=20, blank=True, null=True)
     area = models.CharField(max_length=10000)
 
     class Meta:
         managed = True
         db_table = 'coordinate'
-
 
 
 class ScansDnssec(models.Model):
@@ -65,11 +64,11 @@ class ScansSsllabs(models.Model):
     scantime = models.TimeField()
     scanmoment = models.DateTimeField()
     rating = models.CharField(max_length=3)
-    ratingnotrust = models.CharField(db_column='ratingNoTrust', max_length=3)  # Field name made lowercase.
-    rawdata = models.TextField(db_column='rawData')  # Field name made lowercase.
-    isdead = models.IntegerField(db_column='isDead')  # Field name made lowercase.
-    isdeadsince = models.DateTimeField(db_column='isDeadSince')  # Field name made lowercase.
-    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255)  # Field name made lowercase.
+    ratingnotrust = models.CharField(db_column='ratingNoTrust', max_length=3)
+    rawdata = models.TextField(db_column='rawData')
+    isdead = models.IntegerField(db_column='isDead', default=False)
+    isdeadsince = models.DateTimeField(db_column='isDeadSince', blank=True, null=True)
+    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -84,9 +83,9 @@ class ScansSsllabs(models.Model):
 class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
-    isdead = models.BooleanField(db_column='isDead', default=False)  # Field name made lowercase.
-    isdeadsince = models.DateTimeField(db_column='isDeadSince', blank=True, null=True)  # Field name made lowercase.
-    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    isdead = models.BooleanField(db_column='isDead', default=False)
+    isdeadsince = models.DateTimeField(db_column='isDeadSince', blank=True, null=True)
+    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255, blank=True, null=True)
 
     class Meta:
         managed = True
