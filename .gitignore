@@ -3,3 +3,4 @@
 .DS_Store
 configuration.php
 db.sqlite3
+*.py[co]
