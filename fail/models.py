@@ -75,9 +75,9 @@ class ScansSsllabs(models.Model):
 class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
-    isdead = models.BooleanField(db_column='isDead')  # Field name made lowercase.
-    isdeadsince = models.DateTimeField(db_column='isDeadSince', blank=True)  # Field name made lowercase.
-    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255, blank=True)  # Field name made lowercase.
+    isdead = models.BooleanField(db_column='isDead', default=False)  # Field name made lowercase.
+    isdeadsince = models.DateTimeField(db_column='isDeadSince', blank=True, null=True)  # Field name made lowercase.
+    isdeadreason = models.CharField(db_column='isDeadReason', max_length=255, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = True
