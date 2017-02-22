@@ -3,19 +3,15 @@ from __future__ import unicode_literals
 from django.db import models
 from django_countries.fields import CountryField
 
-# Create your models here.
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
+class OrganizationType(models.Model):
+    name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
 
 class Organization(models.Model):
     country = CountryField()
-    type = models.CharField(max_length=40)
+    type = models.ForeignKey(OrganizationType, on_delete=models.PROTECT, default=1)
     name = models.CharField(max_length=50)
 
     def __unicode__(self):
