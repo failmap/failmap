@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django_countries.fields import CountryField
 
 # Create your models here.
 # This is an auto-generated Django model module.
@@ -13,7 +14,7 @@ from django.db import models
 
 
 class Organization(models.Model):
-    country = models.CharField(max_length=255)
+    country = CountryField()
     type = models.CharField(max_length=40)
     name = models.CharField(max_length=50)
 

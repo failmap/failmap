@@ -7,9 +7,9 @@ from .models import Coordinate, Organization, Url
 
 
 class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ('type', 'country', 'name')
-    search_fields = ('type', 'country', 'name')
-    list_filter = ( 'type', 'country')
+    list_display = ('name', 'type', 'country')
+    search_fields = ('name', 'type', 'country')
+    list_filter = ('type', 'country')
     fields = ('name', 'type', 'country')
 
 
