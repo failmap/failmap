@@ -14,15 +14,21 @@
 
 Now login at: http://127.0.0.1:8000/admin/
 
-# Code quality
+# Code quality / Testing
 
-This project sticks to default pycodestyle/pyflakes configuration to maintain code quality. To run code quality checks run:
+This project sticks to default pycodestyle/pyflakes configuration to maintain code quality.
+
+To run code quality checks and unit tests run:
 
     tox
 
 To make life easier you can use `autopep8` before running `tox` to automatically fix most style issues:
 
     autopep8 -ri fail
+
+Failing tests can be debugged interactively using:
+
+    tox -- --pdb
 
 # Direnv
 
