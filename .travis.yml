@@ -1,0 +1,15 @@
+language: python
+python:
+- 3.4
+- 3.5
+- 2.7
+- pypy3
+install: pip install tox-travis codeclimate-test-reporter
+script: tox
+matrix:
+  allow_failures:
+  - python: 2.7
+  - python: pypy3
+after_success:
+  - coveralls
+  # - CODECLIMATE_REPO_TOKEN=e94e70f9013dce55ec6649577c839054b2236c00 codeclimate-test-reporter

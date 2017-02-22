@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin)
+
 # Requirement
 
 - Python3
