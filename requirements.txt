@@ -2,3 +2,5 @@ django
 django-jet
 django-countries
 pyyaml
+tox
+autopep8
