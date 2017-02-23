@@ -6,6 +6,8 @@
 
 # Quickstart
 
+It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project dependencies isolated and managed. 
+
     pip3 install -e .
     failmap-admin migrate
     failmap-admin loaddata testdata
@@ -30,6 +32,15 @@ Failing tests can be debugged interactively using:
 
     tox -- --pdb
 
-# Direnv
+# Direnv / Virtualenv
 
-This project uses [direnv](https://direnv.net/) to manage Python environment. Optionally install direnv and run `direnv allow` to enable.
+This project has [direnv](https://direnv.net/) configuration to automatically manage the Python virtual environment. Install direnv and run `direnv allow` to enable.
+
+Alternatively you can manually create a virtualenv using:
+
+    virtualenv venv
+    
+Be sure to active the environment before starting development every time:
+
+    . venv/bin/activate
+    
