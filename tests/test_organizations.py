@@ -1,4 +1,4 @@
-from failmap_admin.fail.models import Organization, OrganizationType
+from failmap_admin.organizations.models import Organization, OrganizationType
 
 
 def test_create_organization(db):
