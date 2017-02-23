@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'failmap_admin.fail',
+    'failmap_admin.organizations',
+    'failmap_admin.scanners',
     'django_countries'
 ]
 

@@ -8,7 +8,7 @@
 
     pip3 install -e .
     failmap-admin migrate
-    failmap-admin loaddata failmap_admin/fail/fixtures/testdata.yaml
+    failmap-admin loaddata testdata
     failmap-admin createsuperuser
     failmap-admin runserver
 
