@@ -34,6 +34,11 @@ To only run a specific test suite user for example:
 
     .tox/py34/bin/failmap-admin test tests/test_smarturl.py
 
+To generate coverage report after tests in HTML run:
+
+    coverage html
+    open htmlcov/index.html
+
 # Direnv / Virtualenv
 
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python virtual environment. Install direnv and run `direnv allow` to enable.
