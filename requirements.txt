@@ -3,6 +3,8 @@ django-jet
 django-countries
 django-jsonfield
 pyyaml
+tldextract
+
+# dev. tools
 tox
 autopep8
-tldextract

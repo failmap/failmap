@@ -7,7 +7,7 @@
 
 # Quickstart
 
-It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project dependencies isolated and managed. 
+It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project dependencies isolated and managed.
 
     pip3 install -e .
     failmap-admin migrate
@@ -25,13 +25,14 @@ To run code quality checks and unit tests run:
 
     tox
 
-To make life easier you can use `autopep8` before running `tox` to automatically fix most style issues:
+To make life easier you can use `autopep8`/`isort` before running `tox` to automatically fix most style issues:
 
     autopep8 -ri failmap_admin tests
+    isort -rc failmap_admin tests
 
-Failing tests can be debugged interactively using:
+To only run a specific test suite user for example:
 
-    tox -- --pdb
+    .tox/py34/bin/failmap-admin test tests/test_smarturl.py
 
 # Direnv / Virtualenv
 
@@ -40,8 +41,8 @@ This project has [direnv](https://direnv.net/) configuration to automatically ma
 Alternatively you can manually create a virtualenv using:
 
     virtualenv venv
-    
+
 Be sure to active the environment before starting development every time:
 
     . venv/bin/activate
-    
+

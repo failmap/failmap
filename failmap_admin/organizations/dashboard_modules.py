@@ -5,16 +5,20 @@
 # https://docs.djangoproject.com/en/1.10/intro/overview/#enjoy-the-free-api
 # https://docs.djangoproject.com/en/1.10/topics/db/queries/
 
-from jet.dashboard.modules import DashboardModule
-from failmap_admin.organizations.models import Url
 import tldextract
 from django import forms
+from jet.dashboard.modules import DashboardModule
+
+from failmap_admin.organizations.models import Url
 
 
 # todo: evaluate if we should clean domains after importing,
-# i think not: now it's easy to see what the last action was, even after reloading and over time
+# i think not: now it's easy to see what the last action was, even after
+# reloading and over time
 
 # works only on edit, ok... fine, then we're abusing that.
+
+
 class SmartAddUrlForm(forms.Form):
     newUrls = forms.CharField(label='URL Input', widget=forms.Textarea(), required=False,
                               help_text="Use one line per domain. Empty lines are fine.")
@@ -63,30 +67,28 @@ class SmartAddUrl(DashboardModule):
 
         self.addresult = []
 
-        if urls is None:
+        if urls is None:  # -> if not urls:
             self.addresult.append(SmartAddUrlResult('-', 1,
                                                     'No url was added ever via this module.'))
             return False
 
-        lines = urls.split('\n')
-
         # We're expecting the most ridiculous crap, which hopefully gets filtered by tldextract
         # Checked: tldextract removed queries, usernames, passwords, protocols, ports, etc.
-        # It seems this has no problems with xss, but what about unicode (international names) (db?)
-        for line in lines:
-
+        # It seems this has no problems with xss, but what about unicode
+        # (international names) (db?)
+        for line in urls.splitlines():
             # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
             # todo: remove the xss problems by filtering input (on what?)
             xtrct = tldextract.extract(line)
             domainandtld = xtrct.domain + '.' + xtrct.suffix
             completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-            if xtrct.domain == "":
+            if xtrct.domain == "":  # -> if not xtrct.domain
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'No domain entered.'))
                 continue
 
-            if xtrct.subdomain == "":
+            if xtrct.subdomain == "":  # -> etc
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine what organisation a '
                                                         'domain belongs to without a subdomain.'))
@@ -98,7 +100,8 @@ class SmartAddUrl(DashboardModule):
                                                         'unknown top level domain.'))
                 continue
 
-            if not Url.objects.filter(url=domainandtld).exists():
+            if not Url.objects.filter(
+                    url=domainandtld).exists():  # -> can drop the exists
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine the organization if '
                                                         'there is no organization that uses this '
@@ -112,7 +115,8 @@ class SmartAddUrl(DashboardModule):
                                                         'same domain.'))
                 continue
 
-            if Url.objects.filter(url=completedomain).count() > 0:
+            if Url.objects.filter(url=completedomain).count(
+            ) > 0:  # -> can drop the '> 0'
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'This domain is already in the database.'))
                 continue
@@ -123,8 +127,10 @@ class SmartAddUrl(DashboardModule):
             # There are a lot of silent errors (the module just stops) when you're not working
             # correctly with querysets inside this module. So errors will in most cases be
             # silent. Fortunately the manual hints a GET which is really easy to work with.
-            # the pprint(vars( of the queryset didn't give a hint how to get the first/only object.
-            o = Url.objects.get(url=domainandtld)  # are domains unique? no. Might cause issues.
+            # the pprint(vars( of the queryset didn't give a hint how to get
+            # the first/only object.
+            # are domains unique? no. Might cause issues.
+            o = Url.objects.get(url=domainandtld)
             newurl = Url(organization_id=o.organization_id, url=completedomain)
             newurl.save()
 
