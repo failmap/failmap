@@ -24,7 +24,16 @@ class UrlAdmin(admin.ModelAdmin):
     list_display = ('organization', 'url', 'isdeadreason')
     search_field = ('url', 'isdead', 'isdeadreason')
     list_filter = ('url', 'isdead', 'isdeadsince', 'isdeadreason')
-    fields = ('url', 'organization', 'isdead', 'isdeadsince', 'isdeadreason')
+
+    fieldsets = (
+        (None, {
+            'fields': ('url', 'organization')
+        }),
+        ('dead URL management', {
+            'fields': ('isdead', 'isdeadsince', 'isdeadreason'),
+        }),
+    )
+
 
     def isdead(self):
         if self.something == '1':

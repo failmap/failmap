@@ -57,14 +57,17 @@ class Coordinate(models.Model):
         managed = True
         db_table = 'coordinate'
 
-# missing on update, so updates can cascade through the model. That is
-# excellent for merges.
 
-
+#  No cascade?
 class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
-    isdead = models.BooleanField(db_column='isDead', default=False)
+
+    isdead = models.BooleanField(
+        db_column='isDead',
+        default=False,
+        help_text="Dead url's will not be rendered on the map. Scanners can set this check "
+                  "automatically (which might change in the future)")
     isdeadsince = models.DateTimeField(
         db_column='isDeadSince', blank=True, null=True)
     isdeadreason = models.CharField(
