@@ -43,6 +43,7 @@ GEOJSON_TYPES = (
     ('Point', 'Point'),
 )
 
+
 class Coordinate(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     geojsontype = models.CharField(
