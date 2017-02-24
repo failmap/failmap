@@ -1,8 +1,9 @@
 [![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin)
 
-# Requirement
+# Requirements
 
 - Python3
+- Tox
 
 # Quickstart
 
