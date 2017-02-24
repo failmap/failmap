@@ -34,13 +34,23 @@ class Organization(models.Model):
         return self.name
 
 
+GEOJSON_TYPES = (
+    ('MultiPolygon', 'MultiPolygon'),
+    ('MultiLineString', 'MultiLineString'),
+    ('MultiPoint', 'MultiPoint'),
+    ('Polygon', 'Polygon'),
+    ('LineString', 'LineString'),
+    ('Point', 'Point'),
+)
+
 class Coordinate(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     geojsontype = models.CharField(
         db_column='geoJsonType',
         max_length=20,
         blank=True,
-        null=True)
+        null=True,
+        choices=GEOJSON_TYPES)
     area = JSONField(max_length=10000)
 
     class Meta:
