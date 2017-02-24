@@ -34,7 +34,6 @@ class UrlAdmin(admin.ModelAdmin):
         }),
     )
 
-
     def isdead(self):
         if self.something == '1':
             return True
