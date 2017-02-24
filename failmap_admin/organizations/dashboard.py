@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from jet.dashboard import modules
 from failmap_admin.organizations import dashboard_modules
-from jet.dashboard.dashboard import Dashboard, AppIndexDashboard
+from jet.dashboard.dashboard import Dashboard
 
 
 # todo: add history to dashboard.

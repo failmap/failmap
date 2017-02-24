@@ -64,14 +64,15 @@ class SmartAddUrl(DashboardModule):
         self.addresult = []
 
         if urls is None:
-            self.addresult.append(SmartAddUrlResult('-', 1, 'No url was added ever via this module.'))
+            self.addresult.append(SmartAddUrlResult('-', 1,
+                                                    'No url was added ever via this module.'))
             return False
 
         lines = urls.split('\n')
 
         # We're expecting the most ridiculous crap, which hopefully gets filtered by tldextract
         # Checked: tldextract removed queries, usernames, passwords, protocols, ports, etc.
-        # It seems this has no problems with xss, but what about unicode (international names?) (with db)
+        # It seems this has no problems with xss, but what about unicode (international names) (db?)
         for line in lines:
 
             # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
@@ -81,32 +82,39 @@ class SmartAddUrl(DashboardModule):
             completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
             if xtrct.domain == "":
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'No domain entered.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'No domain entered.'))
                 continue
 
             if xtrct.subdomain == "":
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'Can\'t determine what organisation a '
-                                                                           'domain belongs to without a subdomain.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'Can\'t determine what organisation a '
+                                                        'domain belongs to without a subdomain.'))
                 continue
 
             if xtrct.subdomain == "" and xtrct.suffix == "":
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'Can\'t determine organization by IP or '
-                                                                           'unknown top level domain.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'Can\'t determine organization by IP or '
+                                                        'unknown top level domain.'))
                 continue
 
             if not Url.objects.filter(url=domainandtld).exists():
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'Can\'t determine the organization if there '
-                                                                           'is no organization that uses this domain.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'Can\'t determine the organization if '
+                                                        'there is no organization that uses this '
+                                                        'domain.'))
                 continue
 
             if Url.objects.filter(url=domainandtld).count() > 1:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'Can\'t determine the organization if there '
-                                                                           'are more organizations that use the same '
-                                                                           'domain.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'Can\'t determine the organization if '
+                                                        'there are more organizations that use the '
+                                                        'same domain.'))
                 continue
 
             if Url.objects.filter(url=completedomain).count() > 0:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1, 'This domain is already in the database.'))
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'This domain is already in the database.'))
                 continue
 
             # looks legit, let's add it.
@@ -116,7 +124,7 @@ class SmartAddUrl(DashboardModule):
             # correctly with querysets inside this module. So errors will in most cases be
             # silent. Fortunately the manual hints a GET which is really easy to work with.
             # the pprint(vars( of the queryset didn't give a hint how to get the first/only object.
-            o = Url.objects.get(url=domainandtld)  # should always be one, domain and organization are unique together.
+            o = Url.objects.get(url=domainandtld)  # are domains unique? no. Might cause issues.
             newurl = Url(organization_id=o.organization_id, url=completedomain)
             newurl.save()
 
