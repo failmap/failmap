@@ -12,8 +12,11 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Changed BASE_DIR so templates need to include the module and such. The idea
+# was that otherwise the wrong template could be used when they have the same name
+# over different dirs. Is this correct?
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -59,7 +62,7 @@ ROOT_URLCONF = 'failmap_admin.urls'
 
 # template needed for admin template
 # this step is missing in the django jet tutorial, maybe because it's fairly common.
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -168,6 +171,7 @@ JET_THEMES = [
     }
 ]
 
-# see: https://github.com/geex-arts/django-jet/blob/fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
+# see: https://github.com/geex-arts/django-jet/blob/
+#   fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
 # required for custom modules
 JET_APP_INDEX_DASHBOARD = 'failmap_admin.organizations.dashboard.CustomIndexDashboard'
