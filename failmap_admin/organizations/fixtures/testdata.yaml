@@ -3,1168 +3,1168 @@
   fields: {name: municipality}
 - model: organizations.organization
   pk: 1
-  fields: {country: netherlands, type: 1, name: Aa en Hunze}
+  fields: {country: NL, type: 1, name: Aa en Hunze}
 - model: organizations.organization
   pk: 2
-  fields: {country: netherlands, type: 1, name: Aalburg}
+  fields: {country: NL, type: 1, name: Aalburg}
 - model: organizations.organization
   pk: 3
-  fields: {country: netherlands, type: 1, name: Aalsmeer}
+  fields: {country: NL, type: 1, name: Aalsmeer}
 - model: organizations.organization
   pk: 4
-  fields: {country: netherlands, type: 1, name: Aalten}
+  fields: {country: NL, type: 1, name: Aalten}
 - model: organizations.organization
   pk: 5
-  fields: {country: netherlands, type: 1, name: Achtkarspelen}
+  fields: {country: NL, type: 1, name: Achtkarspelen}
 - model: organizations.organization
   pk: 6
-  fields: {country: netherlands, type: 1, name: Alblasserdam}
+  fields: {country: NL, type: 1, name: Alblasserdam}
 - model: organizations.organization
   pk: 7
-  fields: {country: netherlands, type: 1, name: Albrandswaard}
+  fields: {country: NL, type: 1, name: Albrandswaard}
 - model: organizations.organization
   pk: 8
-  fields: {country: netherlands, type: 1, name: Alkmaar}
+  fields: {country: NL, type: 1, name: Alkmaar}
 - model: organizations.organization
   pk: 9
-  fields: {country: netherlands, type: 1, name: Almelo}
+  fields: {country: NL, type: 1, name: Almelo}
 - model: organizations.organization
   pk: 10
-  fields: {country: netherlands, type: 1, name: Almere}
+  fields: {country: NL, type: 1, name: Almere}
 - model: organizations.organization
   pk: 11
-  fields: {country: netherlands, type: 1, name: Alphen aan den Rijn}
+  fields: {country: NL, type: 1, name: Alphen aan den Rijn}
 - model: organizations.organization
   pk: 12
-  fields: {country: netherlands, type: 1, name: Alphen-Chaam}
+  fields: {country: NL, type: 1, name: Alphen-Chaam}
 - model: organizations.organization
   pk: 13
-  fields: {country: netherlands, type: 1, name: Ameland}
+  fields: {country: NL, type: 1, name: Ameland}
 - model: organizations.organization
   pk: 14
-  fields: {country: netherlands, type: 1, name: Amersfoort}
+  fields: {country: NL, type: 1, name: Amersfoort}
 - model: organizations.organization
   pk: 15
-  fields: {country: netherlands, type: 1, name: Amstelveen}
+  fields: {country: NL, type: 1, name: Amstelveen}
 - model: organizations.organization
   pk: 16
-  fields: {country: netherlands, type: 1, name: Amsterdam}
+  fields: {country: NL, type: 1, name: Amsterdam}
 - model: organizations.organization
   pk: 17
-  fields: {country: netherlands, type: 1, name: Apeldoorn}
+  fields: {country: NL, type: 1, name: Apeldoorn}
 - model: organizations.organization
   pk: 18
-  fields: {country: netherlands, type: 1, name: Appingedam}
+  fields: {country: NL, type: 1, name: Appingedam}
 - model: organizations.organization
   pk: 19
-  fields: {country: netherlands, type: 1, name: Arnhem}
+  fields: {country: NL, type: 1, name: Arnhem}
 - model: organizations.organization
   pk: 20
-  fields: {country: netherlands, type: 1, name: Assen}
+  fields: {country: NL, type: 1, name: Assen}
 - model: organizations.organization
   pk: 21
-  fields: {country: netherlands, type: 1, name: Asten}
+  fields: {country: NL, type: 1, name: Asten}
 - model: organizations.organization
   pk: 22
-  fields: {country: netherlands, type: 1, name: Baarle-Nassau}
+  fields: {country: NL, type: 1, name: Baarle-Nassau}
 - model: organizations.organization
   pk: 23
-  fields: {country: netherlands, type: 1, name: Baarn}
+  fields: {country: NL, type: 1, name: Baarn}
 - model: organizations.organization
   pk: 24
-  fields: {country: netherlands, type: 1, name: Barendrecht}
+  fields: {country: NL, type: 1, name: Barendrecht}
 - model: organizations.organization
   pk: 25
-  fields: {country: netherlands, type: 1, name: Barneveld}
+  fields: {country: NL, type: 1, name: Barneveld}
 - model: organizations.organization
   pk: 26
-  fields: {country: netherlands, type: 1, name: Bedum}
+  fields: {country: NL, type: 1, name: Bedum}
 - model: organizations.organization
   pk: 27
-  fields: {country: netherlands, type: 1, name: Beek}
+  fields: {country: NL, type: 1, name: Beek}
 - model: organizations.organization
   pk: 28
-  fields: {country: netherlands, type: 1, name: Beemster}
+  fields: {country: NL, type: 1, name: Beemster}
 - model: organizations.organization
   pk: 29
-  fields: {country: netherlands, type: 1, name: Beesel}
+  fields: {country: NL, type: 1, name: Beesel}
 - model: organizations.organization
   pk: 30
-  fields: {country: netherlands, type: 1, name: Bellingwedde}
+  fields: {country: NL, type: 1, name: Bellingwedde}
 - model: organizations.organization
   pk: 31
-  fields: {country: netherlands, type: 1, name: Berg en Dal}
+  fields: {country: NL, type: 1, name: Berg en Dal}
 - model: organizations.organization
   pk: 32
-  fields: {country: netherlands, type: 1, name: Bergeijk}
+  fields: {country: NL, type: 1, name: Bergeijk}
 - model: organizations.organization
   pk: 33
-  fields: {country: netherlands, type: 1, name: Bergen (Limburg)}
+  fields: {country: NL, type: 1, name: Bergen (Limburg)}
 - model: organizations.organization
   pk: 34
-  fields: {country: netherlands, type: 1, name: Bergen (Noord-Holland)}
+  fields: {country: NL, type: 1, name: Bergen (Noord-Holland)}
 - model: organizations.organization
   pk: 35
-  fields: {country: netherlands, type: 1, name: Bergen op Zoom}
+  fields: {country: NL, type: 1, name: Bergen op Zoom}
 - model: organizations.organization
   pk: 36
-  fields: {country: netherlands, type: 1, name: Berkelland}
+  fields: {country: NL, type: 1, name: Berkelland}
 - model: organizations.organization
   pk: 37
-  fields: {country: netherlands, type: 1, name: Bernheze}
+  fields: {country: NL, type: 1, name: Bernheze}
 - model: organizations.organization
   pk: 38
-  fields: {country: netherlands, type: 1, name: Best}
+  fields: {country: NL, type: 1, name: Best}
 - model: organizations.organization
   pk: 39
-  fields: {country: netherlands, type: 1, name: Beuningen}
+  fields: {country: NL, type: 1, name: Beuningen}
 - model: organizations.organization
   pk: 40
-  fields: {country: netherlands, type: 1, name: Beverwijk}
+  fields: {country: NL, type: 1, name: Beverwijk}
 - model: organizations.organization
   pk: 41
-  fields: {country: netherlands, type: 1, name: Binnenmaas}
+  fields: {country: NL, type: 1, name: Binnenmaas}
 - model: organizations.organization
   pk: 42
-  fields: {country: netherlands, type: 1, name: Bladel}
+  fields: {country: NL, type: 1, name: Bladel}
 - model: organizations.organization
   pk: 43
-  fields: {country: netherlands, type: 1, name: Blaricum}
+  fields: {country: NL, type: 1, name: Blaricum}
 - model: organizations.organization
   pk: 44
-  fields: {country: netherlands, type: 1, name: Bloemendaal}
+  fields: {country: NL, type: 1, name: Bloemendaal}
 - model: organizations.organization
   pk: 45
-  fields: {country: netherlands, type: 1, name: Bodegraven-Reeuwijk}
+  fields: {country: NL, type: 1, name: Bodegraven-Reeuwijk}
 - model: organizations.organization
   pk: 46
-  fields: {country: netherlands, type: 1, name: Boekel}
+  fields: {country: NL, type: 1, name: Boekel}
 - model: organizations.organization
   pk: 47
-  fields: {country: netherlands, type: 1, name: Borger-Odoorn}
+  fields: {country: NL, type: 1, name: Borger-Odoorn}
 - model: organizations.organization
   pk: 48
-  fields: {country: netherlands, type: 1, name: Borne}
+  fields: {country: NL, type: 1, name: Borne}
 - model: organizations.organization
   pk: 49
-  fields: {country: netherlands, type: 1, name: Borsele}
+  fields: {country: NL, type: 1, name: Borsele}
 - model: organizations.organization
   pk: 50
-  fields: {country: netherlands, type: 1, name: Boxmeer}
+  fields: {country: NL, type: 1, name: Boxmeer}
 - model: organizations.organization
   pk: 51
-  fields: {country: netherlands, type: 1, name: Boxtel}
+  fields: {country: NL, type: 1, name: Boxtel}
 - model: organizations.organization
   pk: 52
-  fields: {country: netherlands, type: 1, name: Breda}
+  fields: {country: NL, type: 1, name: Breda}
 - model: organizations.organization
   pk: 53
-  fields: {country: netherlands, type: 1, name: Brielle}
+  fields: {country: NL, type: 1, name: Brielle}
 - model: organizations.organization
   pk: 54
-  fields: {country: netherlands, type: 1, name: Bronckhorst}
+  fields: {country: NL, type: 1, name: Bronckhorst}
 - model: organizations.organization
   pk: 55
-  fields: {country: netherlands, type: 1, name: Brummen}
+  fields: {country: NL, type: 1, name: Brummen}
 - model: organizations.organization
   pk: 56
-  fields: {country: netherlands, type: 1, name: Brunssum}
+  fields: {country: NL, type: 1, name: Brunssum}
 - model: organizations.organization
   pk: 57
-  fields: {country: netherlands, type: 1, name: Bunnik}
+  fields: {country: NL, type: 1, name: Bunnik}
 - model: organizations.organization
   pk: 58
-  fields: {country: netherlands, type: 1, name: Bunschoten}
+  fields: {country: NL, type: 1, name: Bunschoten}
 - model: organizations.organization
   pk: 59
-  fields: {country: netherlands, type: 1, name: Buren}
+  fields: {country: NL, type: 1, name: Buren}
 - model: organizations.organization
   pk: 60
-  fields: {country: netherlands, type: 1, name: Capelle aan den IJssel}
+  fields: {country: NL, type: 1, name: Capelle aan den IJssel}
 - model: organizations.organization
   pk: 61
-  fields: {country: netherlands, type: 1, name: Castricum}
+  fields: {country: NL, type: 1, name: Castricum}
 - model: organizations.organization
   pk: 62
-  fields: {country: netherlands, type: 1, name: Coevorden}
+  fields: {country: NL, type: 1, name: Coevorden}
 - model: organizations.organization
   pk: 63
-  fields: {country: netherlands, type: 1, name: Cranendonck}
+  fields: {country: NL, type: 1, name: Cranendonck}
 - model: organizations.organization
   pk: 64
-  fields: {country: netherlands, type: 1, name: Cromstrijen}
+  fields: {country: NL, type: 1, name: Cromstrijen}
 - model: organizations.organization
   pk: 65
-  fields: {country: netherlands, type: 1, name: Cuijk}
+  fields: {country: NL, type: 1, name: Cuijk}
 - model: organizations.organization
   pk: 66
-  fields: {country: netherlands, type: 1, name: Culemborg}
+  fields: {country: NL, type: 1, name: Culemborg}
 - model: organizations.organization
   pk: 67
-  fields: {country: netherlands, type: 1, name: Dalfsen}
+  fields: {country: NL, type: 1, name: Dalfsen}
 - model: organizations.organization
   pk: 68
-  fields: {country: netherlands, type: 1, name: Dantumadiel}
+  fields: {country: NL, type: 1, name: Dantumadiel}
 - model: organizations.organization
   pk: 69
-  fields: {country: netherlands, type: 1, name: De Bilt}
+  fields: {country: NL, type: 1, name: De Bilt}
 - model: organizations.organization
   pk: 70
-  fields: {country: netherlands, type: 1, name: De Fryske Marren}
+  fields: {country: NL, type: 1, name: De Fryske Marren}
 - model: organizations.organization
   pk: 71
-  fields: {country: netherlands, type: 1, name: De Marne}
+  fields: {country: NL, type: 1, name: De Marne}
 - model: organizations.organization
   pk: 72
-  fields: {country: netherlands, type: 1, name: De Ronde Venen}
+  fields: {country: NL, type: 1, name: De Ronde Venen}
 - model: organizations.organization
   pk: 73
-  fields: {country: netherlands, type: 1, name: De Wolden}
+  fields: {country: NL, type: 1, name: De Wolden}
 - model: organizations.organization
   pk: 74
-  fields: {country: netherlands, type: 1, name: Delft}
+  fields: {country: NL, type: 1, name: Delft}
 - model: organizations.organization
   pk: 75
-  fields: {country: netherlands, type: 1, name: Delfzijl}
+  fields: {country: NL, type: 1, name: Delfzijl}
 - model: organizations.organization
   pk: 76
-  fields: {country: netherlands, type: 1, name: Den Haag}
+  fields: {country: NL, type: 1, name: Den Haag}
 - model: organizations.organization
   pk: 77
-  fields: {country: netherlands, type: 1, name: Den Helder}
+  fields: {country: NL, type: 1, name: Den Helder}
 - model: organizations.organization
   pk: 78
-  fields: {country: netherlands, type: 1, name: Deurne}
+  fields: {country: NL, type: 1, name: Deurne}
 - model: organizations.organization
   pk: 79
-  fields: {country: netherlands, type: 1, name: Deventer}
+  fields: {country: NL, type: 1, name: Deventer}
 - model: organizations.organization
   pk: 80
-  fields: {country: netherlands, type: 1, name: Diemen}
+  fields: {country: NL, type: 1, name: Diemen}
 - model: organizations.organization
   pk: 81
-  fields: {country: netherlands, type: 1, name: Dinkelland}
+  fields: {country: NL, type: 1, name: Dinkelland}
 - model: organizations.organization
   pk: 82
-  fields: {country: netherlands, type: 1, name: Doesburg}
+  fields: {country: NL, type: 1, name: Doesburg}
 - model: organizations.organization
   pk: 83
-  fields: {country: netherlands, type: 1, name: Doetinchem}
+  fields: {country: NL, type: 1, name: Doetinchem}
 - model: organizations.organization
   pk: 84
-  fields: {country: netherlands, type: 1, name: Dongen}
+  fields: {country: NL, type: 1, name: Dongen}
 - model: organizations.organization
   pk: 85
-  fields: {country: netherlands, type: 1, name: Dongeradeel}
+  fields: {country: NL, type: 1, name: Dongeradeel}
 - model: organizations.organization
   pk: 86
-  fields: {country: netherlands, type: 1, name: Dordrecht}
+  fields: {country: NL, type: 1, name: Dordrecht}
 - model: organizations.organization
   pk: 87
-  fields: {country: netherlands, type: 1, name: Drechterland}
+  fields: {country: NL, type: 1, name: Drechterland}
 - model: organizations.organization
   pk: 88
-  fields: {country: netherlands, type: 1, name: Drimmelen}
+  fields: {country: NL, type: 1, name: Drimmelen}
 - model: organizations.organization
   pk: 89
-  fields: {country: netherlands, type: 1, name: Dronten}
+  fields: {country: NL, type: 1, name: Dronten}
 - model: organizations.organization
   pk: 90
-  fields: {country: netherlands, type: 1, name: Druten}
+  fields: {country: NL, type: 1, name: Druten}
 - model: organizations.organization
   pk: 91
-  fields: {country: netherlands, type: 1, name: Duiven}
+  fields: {country: NL, type: 1, name: Duiven}
 - model: organizations.organization
   pk: 92
-  fields: {country: netherlands, type: 1, name: Echt-Susteren}
+  fields: {country: NL, type: 1, name: Echt-Susteren}
 - model: organizations.organization
   pk: 93
-  fields: {country: netherlands, type: 1, name: Edam-Volendam}
+  fields: {country: NL, type: 1, name: Edam-Volendam}
 - model: organizations.organization
   pk: 94
-  fields: {country: netherlands, type: 1, name: Ede}
+  fields: {country: NL, type: 1, name: Ede}
 - model: organizations.organization
   pk: 95
-  fields: {country: netherlands, type: 1, name: Eemnes}
+  fields: {country: NL, type: 1, name: Eemnes}
 - model: organizations.organization
   pk: 96
-  fields: {country: netherlands, type: 1, name: Eemsmond}
+  fields: {country: NL, type: 1, name: Eemsmond}
 - model: organizations.organization
   pk: 97
-  fields: {country: netherlands, type: 1, name: Eersel}
+  fields: {country: NL, type: 1, name: Eersel}
 - model: organizations.organization
   pk: 98
-  fields: {country: netherlands, type: 1, name: Eijsden-Margraten}
+  fields: {country: NL, type: 1, name: Eijsden-Margraten}
 - model: organizations.organization
   pk: 99
-  fields: {country: netherlands, type: 1, name: Eindhoven}
+  fields: {country: NL, type: 1, name: Eindhoven}
 - model: organizations.organization
   pk: 100
-  fields: {country: netherlands, type: 1, name: Elburg}
+  fields: {country: NL, type: 1, name: Elburg}
 - model: organizations.organization
   pk: 101
-  fields: {country: netherlands, type: 1, name: Emmen}
+  fields: {country: NL, type: 1, name: Emmen}
 - model: organizations.organization
   pk: 102
-  fields: {country: netherlands, type: 1, name: Enkhuizen}
+  fields: {country: NL, type: 1, name: Enkhuizen}
 - model: organizations.organization
   pk: 103
-  fields: {country: netherlands, type: 1, name: Enschede}
+  fields: {country: NL, type: 1, name: Enschede}
 - model: organizations.organization
   pk: 104
-  fields: {country: netherlands, type: 1, name: Epe}
+  fields: {country: NL, type: 1, name: Epe}
 - model: organizations.organization
   pk: 105
-  fields: {country: netherlands, type: 1, name: Ermelo}
+  fields: {country: NL, type: 1, name: Ermelo}
 - model: organizations.organization
   pk: 106
-  fields: {country: netherlands, type: 1, name: Etten-Leur}
+  fields: {country: NL, type: 1, name: Etten-Leur}
 - model: organizations.organization
   pk: 107
-  fields: {country: netherlands, type: 1, name: Ferwerderadiel}
+  fields: {country: NL, type: 1, name: Ferwerderadiel}
 - model: organizations.organization
   pk: 108
-  fields: {country: netherlands, type: 1, name: Franekeradeel}
+  fields: {country: NL, type: 1, name: Franekeradeel}
 - model: organizations.organization
   pk: 109
-  fields: {country: netherlands, type: 1, name: Geertruidenberg}
+  fields: {country: NL, type: 1, name: Geertruidenberg}
 - model: organizations.organization
   pk: 110
-  fields: {country: netherlands, type: 1, name: Geldermalsen}
+  fields: {country: NL, type: 1, name: Geldermalsen}
 - model: organizations.organization
   pk: 111
-  fields: {country: netherlands, type: 1, name: Geldrop-Mierlo}
+  fields: {country: NL, type: 1, name: Geldrop-Mierlo}
 - model: organizations.organization
   pk: 112
-  fields: {country: netherlands, type: 1, name: Gemert-Bakel}
+  fields: {country: NL, type: 1, name: Gemert-Bakel}
 - model: organizations.organization
   pk: 113
-  fields: {country: netherlands, type: 1, name: Gennep}
+  fields: {country: NL, type: 1, name: Gennep}
 - model: organizations.organization
   pk: 114
-  fields: {country: netherlands, type: 1, name: Giessenlanden}
+  fields: {country: NL, type: 1, name: Giessenlanden}
 - model: organizations.organization
   pk: 115
-  fields: {country: netherlands, type: 1, name: Gilze en Rijen}
+  fields: {country: NL, type: 1, name: Gilze en Rijen}
 - model: organizations.organization
   pk: 116
-  fields: {country: netherlands, type: 1, name: Goeree-Overflakkee}
+  fields: {country: NL, type: 1, name: Goeree-Overflakkee}
 - model: organizations.organization
   pk: 117
-  fields: {country: netherlands, type: 1, name: Goes}
+  fields: {country: NL, type: 1, name: Goes}
 - model: organizations.organization
   pk: 118
-  fields: {country: netherlands, type: 1, name: Goirle}
+  fields: {country: NL, type: 1, name: Goirle}
 - model: organizations.organization
   pk: 119
-  fields: {country: netherlands, type: 1, name: Gooise Meren}
+  fields: {country: NL, type: 1, name: Gooise Meren}
 - model: organizations.organization
   pk: 120
-  fields: {country: netherlands, type: 1, name: Gorinchem}
+  fields: {country: NL, type: 1, name: Gorinchem}
 - model: organizations.organization
   pk: 121
-  fields: {country: netherlands, type: 1, name: Gouda}
+  fields: {country: NL, type: 1, name: Gouda}
 - model: organizations.organization
   pk: 122
-  fields: {country: netherlands, type: 1, name: Grave}
+  fields: {country: NL, type: 1, name: Grave}
 - model: organizations.organization
   pk: 123
-  fields: {country: netherlands, type: 1, name: Groningen}
+  fields: {country: NL, type: 1, name: Groningen}
 - model: organizations.organization
   pk: 124
-  fields: {country: netherlands, type: 1, name: Grootegast}
+  fields: {country: NL, type: 1, name: Grootegast}
 - model: organizations.organization
   pk: 125
-  fields: {country: netherlands, type: 1, name: Gulpen-Wittem}
+  fields: {country: NL, type: 1, name: Gulpen-Wittem}
 - model: organizations.organization
   pk: 126
-  fields: {country: netherlands, type: 1, name: Haaksbergen}
+  fields: {country: NL, type: 1, name: Haaksbergen}
 - model: organizations.organization
   pk: 127
-  fields: {country: netherlands, type: 1, name: Haaren}
+  fields: {country: NL, type: 1, name: Haaren}
 - model: organizations.organization
   pk: 128
-  fields: {country: netherlands, type: 1, name: Haarlem}
+  fields: {country: NL, type: 1, name: Haarlem}
 - model: organizations.organization
   pk: 129
-  fields: {country: netherlands, type: 1, name: Haarlemmerliede en Spaarnwoude}
+  fields: {country: NL, type: 1, name: Haarlemmerliede en Spaarnwoude}
 - model: organizations.organization
   pk: 130
-  fields: {country: netherlands, type: 1, name: Haarlemmermeer}
+  fields: {country: NL, type: 1, name: Haarlemmermeer}
 - model: organizations.organization
   pk: 131
-  fields: {country: netherlands, type: 1, name: Halderberge}
+  fields: {country: NL, type: 1, name: Halderberge}
 - model: organizations.organization
   pk: 132
-  fields: {country: netherlands, type: 1, name: Hardenberg}
+  fields: {country: NL, type: 1, name: Hardenberg}
 - model: organizations.organization
   pk: 133
-  fields: {country: netherlands, type: 1, name: Harderwijk}
+  fields: {country: NL, type: 1, name: Harderwijk}
 - model: organizations.organization
   pk: 134
-  fields: {country: netherlands, type: 1, name: Hardinxveld-Giessendam}
+  fields: {country: NL, type: 1, name: Hardinxveld-Giessendam}
 - model: organizations.organization
   pk: 135
-  fields: {country: netherlands, type: 1, name: Haren}
+  fields: {country: NL, type: 1, name: Haren}
 - model: organizations.organization
   pk: 136
-  fields: {country: netherlands, type: 1, name: Harlingen}
+  fields: {country: NL, type: 1, name: Harlingen}
 - model: organizations.organization
   pk: 137
-  fields: {country: netherlands, type: 1, name: Hattem}
+  fields: {country: NL, type: 1, name: Hattem}
 - model: organizations.organization
   pk: 138
-  fields: {country: netherlands, type: 1, name: Heemskerk}
+  fields: {country: NL, type: 1, name: Heemskerk}
 - model: organizations.organization
   pk: 139
-  fields: {country: netherlands, type: 1, name: Heemstede}
+  fields: {country: NL, type: 1, name: Heemstede}
 - model: organizations.organization
   pk: 140
-  fields: {country: netherlands, type: 1, name: Heerde}
+  fields: {country: NL, type: 1, name: Heerde}
 - model: organizations.organization
   pk: 141
-  fields: {country: netherlands, type: 1, name: Heerenveen}
+  fields: {country: NL, type: 1, name: Heerenveen}
 - model: organizations.organization
   pk: 142
-  fields: {country: netherlands, type: 1, name: Heerhugowaard}
+  fields: {country: NL, type: 1, name: Heerhugowaard}
 - model: organizations.organization
   pk: 143
-  fields: {country: netherlands, type: 1, name: Heerlen}
+  fields: {country: NL, type: 1, name: Heerlen}
 - model: organizations.organization
   pk: 144
-  fields: {country: netherlands, type: 1, name: Heeze-Leende}
+  fields: {country: NL, type: 1, name: Heeze-Leende}
 - model: organizations.organization
   pk: 145
-  fields: {country: netherlands, type: 1, name: Heiloo}
+  fields: {country: NL, type: 1, name: Heiloo}
 - model: organizations.organization
   pk: 146
-  fields: {country: netherlands, type: 1, name: Hellendoorn}
+  fields: {country: NL, type: 1, name: Hellendoorn}
 - model: organizations.organization
   pk: 147
-  fields: {country: netherlands, type: 1, name: Hellevoetsluis}
+  fields: {country: NL, type: 1, name: Hellevoetsluis}
 - model: organizations.organization
   pk: 148
-  fields: {country: netherlands, type: 1, name: Helmond}
+  fields: {country: NL, type: 1, name: Helmond}
 - model: organizations.organization
   pk: 149
-  fields: {country: netherlands, type: 1, name: Hendrik-Ido-Ambacht}
+  fields: {country: NL, type: 1, name: Hendrik-Ido-Ambacht}
 - model: organizations.organization
   pk: 150
-  fields: {country: netherlands, type: 1, name: Hengelo}
+  fields: {country: NL, type: 1, name: Hengelo}
 - model: organizations.organization
   pk: 151
-  fields: {country: netherlands, type: 1, name: Het Bildt}
+  fields: {country: NL, type: 1, name: Het Bildt}
 - model: organizations.organization
   pk: 152
-  fields: {country: netherlands, type: 1, name: Heumen}
+  fields: {country: NL, type: 1, name: Heumen}
 - model: organizations.organization
   pk: 153
-  fields: {country: netherlands, type: 1, name: Heusden}
+  fields: {country: NL, type: 1, name: Heusden}
 - model: organizations.organization
   pk: 154
-  fields: {country: netherlands, type: 1, name: Hillegom}
+  fields: {country: NL, type: 1, name: Hillegom}
 - model: organizations.organization
   pk: 155
-  fields: {country: netherlands, type: 1, name: Hilvarenbeek}
+  fields: {country: NL, type: 1, name: Hilvarenbeek}
 - model: organizations.organization
   pk: 156
-  fields: {country: netherlands, type: 1, name: Hilversum}
+  fields: {country: NL, type: 1, name: Hilversum}
 - model: organizations.organization
   pk: 157
-  fields: {country: netherlands, type: 1, name: Hof van Twente}
+  fields: {country: NL, type: 1, name: Hof van Twente}
 - model: organizations.organization
   pk: 158
-  fields: {country: netherlands, type: 1, name: Hollands Kroon}
+  fields: {country: NL, type: 1, name: Hollands Kroon}
 - model: organizations.organization
   pk: 159
-  fields: {country: netherlands, type: 1, name: Hoogeveen}
+  fields: {country: NL, type: 1, name: Hoogeveen}
 - model: organizations.organization
   pk: 160
-  fields: {country: netherlands, type: 1, name: Hoogezand-Sappemeer}
+  fields: {country: NL, type: 1, name: Hoogezand-Sappemeer}
 - model: organizations.organization
   pk: 161
-  fields: {country: netherlands, type: 1, name: Hoorn}
+  fields: {country: NL, type: 1, name: Hoorn}
 - model: organizations.organization
   pk: 162
-  fields: {country: netherlands, type: 1, name: Horst aan de Maas}
+  fields: {country: NL, type: 1, name: Horst aan de Maas}
 - model: organizations.organization
   pk: 163
-  fields: {country: netherlands, type: 1, name: Houten}
+  fields: {country: NL, type: 1, name: Houten}
 - model: organizations.organization
   pk: 164
-  fields: {country: netherlands, type: 1, name: Huizen}
+  fields: {country: NL, type: 1, name: Huizen}
 - model: organizations.organization
   pk: 165
-  fields: {country: netherlands, type: 1, name: Hulst}
+  fields: {country: NL, type: 1, name: Hulst}
 - model: organizations.organization
   pk: 166
-  fields: {country: netherlands, type: 1, name: IJsselstein}
+  fields: {country: NL, type: 1, name: IJsselstein}
 - model: organizations.organization
   pk: 167
-  fields: {country: netherlands, type: 1, name: Kaag en Braassem}
+  fields: {country: NL, type: 1, name: Kaag en Braassem}
 - model: organizations.organization
   pk: 168
-  fields: {country: netherlands, type: 1, name: Kampen}
+  fields: {country: NL, type: 1, name: Kampen}
 - model: organizations.organization
   pk: 169
-  fields: {country: netherlands, type: 1, name: Kapelle}
+  fields: {country: NL, type: 1, name: Kapelle}
 - model: organizations.organization
   pk: 170
-  fields: {country: netherlands, type: 1, name: Katwijk}
+  fields: {country: NL, type: 1, name: Katwijk}
 - model: organizations.organization
   pk: 171
-  fields: {country: netherlands, type: 1, name: Kerkrade}
+  fields: {country: NL, type: 1, name: Kerkrade}
 - model: organizations.organization
   pk: 172
-  fields: {country: netherlands, type: 1, name: Koggenland}
+  fields: {country: NL, type: 1, name: Koggenland}
 - model: organizations.organization
   pk: 173
-  fields: {country: netherlands, type: 1, name: Kollumerland en Nieuwkruisland}
+  fields: {country: NL, type: 1, name: Kollumerland en Nieuwkruisland}
 - model: organizations.organization
   pk: 174
-  fields: {country: netherlands, type: 1, name: Korendijk}
+  fields: {country: NL, type: 1, name: Korendijk}
 - model: organizations.organization
   pk: 175
-  fields: {country: netherlands, type: 1, name: Krimpen aan den IJssel}
+  fields: {country: NL, type: 1, name: Krimpen aan den IJssel}
 - model: organizations.organization
   pk: 176
-  fields: {country: netherlands, type: 1, name: Krimpenerwaard}
+  fields: {country: NL, type: 1, name: Krimpenerwaard}
 - model: organizations.organization
   pk: 177
-  fields: {country: netherlands, type: 1, name: Laarbeek}
+  fields: {country: NL, type: 1, name: Laarbeek}
 - model: organizations.organization
   pk: 178
-  fields: {country: netherlands, type: 1, name: Landerd}
+  fields: {country: NL, type: 1, name: Landerd}
 - model: organizations.organization
   pk: 179
-  fields: {country: netherlands, type: 1, name: Landgraaf}
+  fields: {country: NL, type: 1, name: Landgraaf}
 - model: organizations.organization
   pk: 180
-  fields: {country: netherlands, type: 1, name: Landsmeer}
+  fields: {country: NL, type: 1, name: Landsmeer}
 - model: organizations.organization
   pk: 181
-  fields: {country: netherlands, type: 1, name: Langedijk}
+  fields: {country: NL, type: 1, name: Langedijk}
 - model: organizations.organization
   pk: 182
-  fields: {country: netherlands, type: 1, name: Lansingerland}
+  fields: {country: NL, type: 1, name: Lansingerland}
 - model: organizations.organization
   pk: 183
-  fields: {country: netherlands, type: 1, name: Laren}
+  fields: {country: NL, type: 1, name: Laren}
 - model: organizations.organization
   pk: 184
-  fields: {country: netherlands, type: 1, name: Leek}
+  fields: {country: NL, type: 1, name: Leek}
 - model: organizations.organization
   pk: 185
-  fields: {country: netherlands, type: 1, name: Leerdam}
+  fields: {country: NL, type: 1, name: Leerdam}
 - model: organizations.organization
   pk: 186
-  fields: {country: netherlands, type: 1, name: Leeuwarden}
+  fields: {country: NL, type: 1, name: Leeuwarden}
 - model: organizations.organization
   pk: 187
-  fields: {country: netherlands, type: 1, name: Leeuwarderadeel}
+  fields: {country: NL, type: 1, name: Leeuwarderadeel}
 - model: organizations.organization
   pk: 188
-  fields: {country: netherlands, type: 1, name: Leiden}
+  fields: {country: NL, type: 1, name: Leiden}
 - model: organizations.organization
   pk: 189
-  fields: {country: netherlands, type: 1, name: Leiderdorp}
+  fields: {country: NL, type: 1, name: Leiderdorp}
 - model: organizations.organization
   pk: 190
-  fields: {country: netherlands, type: 1, name: Leidschendam-Voorburg}
+  fields: {country: NL, type: 1, name: Leidschendam-Voorburg}
 - model: organizations.organization
   pk: 191
-  fields: {country: netherlands, type: 1, name: Lelystad}
+  fields: {country: NL, type: 1, name: Lelystad}
 - model: organizations.organization
   pk: 192
-  fields: {country: netherlands, type: 1, name: Leudal}
+  fields: {country: NL, type: 1, name: Leudal}
 - model: organizations.organization
   pk: 193
-  fields: {country: netherlands, type: 1, name: Leusden}
+  fields: {country: NL, type: 1, name: Leusden}
 - model: organizations.organization
   pk: 194
-  fields: {country: netherlands, type: 1, name: Lingewaal}
+  fields: {country: NL, type: 1, name: Lingewaal}
 - model: organizations.organization
   pk: 195
-  fields: {country: netherlands, type: 1, name: Lingewaard}
+  fields: {country: NL, type: 1, name: Lingewaard}
 - model: organizations.organization
   pk: 196
-  fields: {country: netherlands, type: 1, name: Lisse}
+  fields: {country: NL, type: 1, name: Lisse}
 - model: organizations.organization
   pk: 197
-  fields: {country: netherlands, type: 1, name: Littenseradiel}
+  fields: {country: NL, type: 1, name: Littenseradiel}
 - model: organizations.organization
   pk: 198
-  fields: {country: netherlands, type: 1, name: Lochem}
+  fields: {country: NL, type: 1, name: Lochem}
 - model: organizations.organization
   pk: 199
-  fields: {country: netherlands, type: 1, name: Loon op Zand}
+  fields: {country: NL, type: 1, name: Loon op Zand}
 - model: organizations.organization
   pk: 200
-  fields: {country: netherlands, type: 1, name: Lopik}
+  fields: {country: NL, type: 1, name: Lopik}
 - model: organizations.organization
   pk: 201
-  fields: {country: netherlands, type: 1, name: Loppersum}
+  fields: {country: NL, type: 1, name: Loppersum}
 - model: organizations.organization
   pk: 202
-  fields: {country: netherlands, type: 1, name: Losser}
+  fields: {country: NL, type: 1, name: Losser}
 - model: organizations.organization
   pk: 203
-  fields: {country: netherlands, type: 1, name: Maasdriel}
+  fields: {country: NL, type: 1, name: Maasdriel}
 - model: organizations.organization
   pk: 204
-  fields: {country: netherlands, type: 1, name: Maasgouw}
+  fields: {country: NL, type: 1, name: Maasgouw}
 - model: organizations.organization
   pk: 205
-  fields: {country: netherlands, type: 1, name: Maassluis}
+  fields: {country: NL, type: 1, name: Maassluis}
 - model: organizations.organization
   pk: 206
-  fields: {country: netherlands, type: 1, name: Maastricht}
+  fields: {country: NL, type: 1, name: Maastricht}
 - model: organizations.organization
   pk: 207
-  fields: {country: netherlands, type: 1, name: Marum}
+  fields: {country: NL, type: 1, name: Marum}
 - model: organizations.organization
   pk: 208
-  fields: {country: netherlands, type: 1, name: Medemblik}
+  fields: {country: NL, type: 1, name: Medemblik}
 - model: organizations.organization
   pk: 209
-  fields: {country: netherlands, type: 1, name: Meerssen}
+  fields: {country: NL, type: 1, name: Meerssen}
 - model: organizations.organization
   pk: 210
-  fields: {country: netherlands, type: 1, name: Meierijstad}
+  fields: {country: NL, type: 1, name: Meierijstad}
 - model: organizations.organization
   pk: 211
-  fields: {country: netherlands, type: 1, name: Menameradiel}
+  fields: {country: NL, type: 1, name: Menameradiel}
 - model: organizations.organization
   pk: 212
-  fields: {country: netherlands, type: 1, name: Menterwolde}
+  fields: {country: NL, type: 1, name: Menterwolde}
 - model: organizations.organization
   pk: 213
-  fields: {country: netherlands, type: 1, name: Meppel}
+  fields: {country: NL, type: 1, name: Meppel}
 - model: organizations.organization
   pk: 214
-  fields: {country: netherlands, type: 1, name: Middelburg}
+  fields: {country: NL, type: 1, name: Middelburg}
 - model: organizations.organization
   pk: 215
-  fields: {country: netherlands, type: 1, name: Midden-Delfland}
+  fields: {country: NL, type: 1, name: Midden-Delfland}
 - model: organizations.organization
   pk: 216
-  fields: {country: netherlands, type: 1, name: Midden-Drenthe}
+  fields: {country: NL, type: 1, name: Midden-Drenthe}
 - model: organizations.organization
   pk: 217
-  fields: {country: netherlands, type: 1, name: Mill en Sint Hubert}
+  fields: {country: NL, type: 1, name: Mill en Sint Hubert}
 - model: organizations.organization
   pk: 218
-  fields: {country: netherlands, type: 1, name: Moerdijk}
+  fields: {country: NL, type: 1, name: Moerdijk}
 - model: organizations.organization
   pk: 219
-  fields: {country: netherlands, type: 1, name: Molenwaard}
+  fields: {country: NL, type: 1, name: Molenwaard}
 - model: organizations.organization
   pk: 220
-  fields: {country: netherlands, type: 1, name: Montferland}
+  fields: {country: NL, type: 1, name: Montferland}
 - model: organizations.organization
   pk: 221
-  fields: {country: netherlands, type: 1, name: Montfoort}
+  fields: {country: NL, type: 1, name: Montfoort}
 - model: organizations.organization
   pk: 222
-  fields: {country: netherlands, type: 1, name: Mook en Middelaar}
+  fields: {country: NL, type: 1, name: Mook en Middelaar}
 - model: organizations.organization
   pk: 223
-  fields: {country: netherlands, type: 1, name: Neder-Betuwe}
+  fields: {country: NL, type: 1, name: Neder-Betuwe}
 - model: organizations.organization
   pk: 224
-  fields: {country: netherlands, type: 1, name: Nederweert}
+  fields: {country: NL, type: 1, name: Nederweert}
 - model: organizations.organization
   pk: 225
-  fields: {country: netherlands, type: 1, name: Neerijnen}
+  fields: {country: NL, type: 1, name: Neerijnen}
 - model: organizations.organization
   pk: 226
-  fields: {country: netherlands, type: 1, name: Nieuwegein}
+  fields: {country: NL, type: 1, name: Nieuwegein}
 - model: organizations.organization
   pk: 227
-  fields: {country: netherlands, type: 1, name: Nieuwkoop}
+  fields: {country: NL, type: 1, name: Nieuwkoop}
 - model: organizations.organization
   pk: 228
-  fields: {country: netherlands, type: 1, name: Nijkerk}
+  fields: {country: NL, type: 1, name: Nijkerk}
 - model: organizations.organization
   pk: 229
-  fields: {country: netherlands, type: 1, name: Nijmegen}
+  fields: {country: NL, type: 1, name: Nijmegen}
 - model: organizations.organization
   pk: 230
-  fields: {country: netherlands, type: 1, name: Nissewaard}
+  fields: {country: NL, type: 1, name: Nissewaard}
 - model: organizations.organization
   pk: 231
-  fields: {country: netherlands, type: 1, name: Noord-Beveland}
+  fields: {country: NL, type: 1, name: Noord-Beveland}
 - model: organizations.organization
   pk: 232
-  fields: {country: netherlands, type: 1, name: Noordenveld}
+  fields: {country: NL, type: 1, name: Noordenveld}
 - model: organizations.organization
   pk: 233
-  fields: {country: netherlands, type: 1, name: Noordoostpolder}
+  fields: {country: NL, type: 1, name: Noordoostpolder}
 - model: organizations.organization
   pk: 234
-  fields: {country: netherlands, type: 1, name: Noordwijk}
+  fields: {country: NL, type: 1, name: Noordwijk}
 - model: organizations.organization
   pk: 235
-  fields: {country: netherlands, type: 1, name: Noordwijkerhout}
+  fields: {country: NL, type: 1, name: Noordwijkerhout}
 - model: organizations.organization
   pk: 236
-  fields: {country: netherlands, type: 1, name: 'Nuenen, Gerwen en Nederwetten'}
+  fields: {country: NL, type: 1, name: 'Nuenen, Gerwen en Nederwetten'}
 - model: organizations.organization
   pk: 237
-  fields: {country: netherlands, type: 1, name: Nunspeet}
+  fields: {country: NL, type: 1, name: Nunspeet}
 - model: organizations.organization
   pk: 238
-  fields: {country: netherlands, type: 1, name: Nuth}
+  fields: {country: NL, type: 1, name: Nuth}
 - model: organizations.organization
   pk: 239
-  fields: {country: netherlands, type: 1, name: Oegstgeest}
+  fields: {country: NL, type: 1, name: Oegstgeest}
 - model: organizations.organization
   pk: 240
-  fields: {country: netherlands, type: 1, name: Oirschot}
+  fields: {country: NL, type: 1, name: Oirschot}
 - model: organizations.organization
   pk: 241
-  fields: {country: netherlands, type: 1, name: Oisterwijk}
+  fields: {country: NL, type: 1, name: Oisterwijk}
 - model: organizations.organization
   pk: 242
-  fields: {country: netherlands, type: 1, name: Oldambt}
+  fields: {country: NL, type: 1, name: Oldambt}
 - model: organizations.organization
   pk: 243
-  fields: {country: netherlands, type: 1, name: Oldebroek}
+  fields: {country: NL, type: 1, name: Oldebroek}
 - model: organizations.organization
   pk: 244
-  fields: {country: netherlands, type: 1, name: Oldenzaal}
+  fields: {country: NL, type: 1, name: Oldenzaal}
 - model: organizations.organization
   pk: 245
-  fields: {country: netherlands, type: 1, name: Olst-Wijhe}
+  fields: {country: NL, type: 1, name: Olst-Wijhe}
 - model: organizations.organization
   pk: 246
-  fields: {country: netherlands, type: 1, name: Ommen}
+  fields: {country: NL, type: 1, name: Ommen}
 - model: organizations.organization
   pk: 247
-  fields: {country: netherlands, type: 1, name: Onderbanken}
+  fields: {country: NL, type: 1, name: Onderbanken}
 - model: organizations.organization
   pk: 248
-  fields: {country: netherlands, type: 1, name: Oost Gelre}
+  fields: {country: NL, type: 1, name: Oost Gelre}
 - model: organizations.organization
   pk: 249
-  fields: {country: netherlands, type: 1, name: Oosterhout}
+  fields: {country: NL, type: 1, name: Oosterhout}
 - model: organizations.organization
   pk: 250
-  fields: {country: netherlands, type: 1, name: Ooststellingwerf}
+  fields: {country: NL, type: 1, name: Ooststellingwerf}
 - model: organizations.organization
   pk: 251
-  fields: {country: netherlands, type: 1, name: Oostzaan}
+  fields: {country: NL, type: 1, name: Oostzaan}
 - model: organizations.organization
   pk: 252
-  fields: {country: netherlands, type: 1, name: Opmeer}
+  fields: {country: NL, type: 1, name: Opmeer}
 - model: organizations.organization
   pk: 253
-  fields: {country: netherlands, type: 1, name: Opsterland}
+  fields: {country: NL, type: 1, name: Opsterland}
 - model: organizations.organization
   pk: 254
-  fields: {country: netherlands, type: 1, name: Oss}
+  fields: {country: NL, type: 1, name: Oss}
 - model: organizations.organization
   pk: 255
-  fields: {country: netherlands, type: 1, name: Oud-Beijerland}
+  fields: {country: NL, type: 1, name: Oud-Beijerland}
 - model: organizations.organization
   pk: 256
-  fields: {country: netherlands, type: 1, name: Oude IJsselstreek}
+  fields: {country: NL, type: 1, name: Oude IJsselstreek}
 - model: organizations.organization
   pk: 257
-  fields: {country: netherlands, type: 1, name: Ouder-Amstel}
+  fields: {country: NL, type: 1, name: Ouder-Amstel}
 - model: organizations.organization
   pk: 258
-  fields: {country: netherlands, type: 1, name: Oudewater}
+  fields: {country: NL, type: 1, name: Oudewater}
 - model: organizations.organization
   pk: 259
-  fields: {country: netherlands, type: 1, name: Overbetuwe}
+  fields: {country: NL, type: 1, name: Overbetuwe}
 - model: organizations.organization
   pk: 260
-  fields: {country: netherlands, type: 1, name: Papendrecht}
+  fields: {country: NL, type: 1, name: Papendrecht}
 - model: organizations.organization
   pk: 261
-  fields: {country: netherlands, type: 1, name: Peel en Maas}
+  fields: {country: NL, type: 1, name: Peel en Maas}
 - model: organizations.organization
   pk: 262
-  fields: {country: netherlands, type: 1, name: Pekela}
+  fields: {country: NL, type: 1, name: Pekela}
 - model: organizations.organization
   pk: 263
-  fields: {country: netherlands, type: 1, name: Pijnacker-Nootdorp}
+  fields: {country: NL, type: 1, name: Pijnacker-Nootdorp}
 - model: organizations.organization
   pk: 264
-  fields: {country: netherlands, type: 1, name: Purmerend}
+  fields: {country: NL, type: 1, name: Purmerend}
 - model: organizations.organization
   pk: 265
-  fields: {country: netherlands, type: 1, name: Putten}
+  fields: {country: NL, type: 1, name: Putten}
 - model: organizations.organization
   pk: 266
-  fields: {country: netherlands, type: 1, name: Raalte}
+  fields: {country: NL, type: 1, name: Raalte}
 - model: organizations.organization
   pk: 267
-  fields: {country: netherlands, type: 1, name: Reimerswaal}
+  fields: {country: NL, type: 1, name: Reimerswaal}
 - model: organizations.organization
   pk: 268
-  fields: {country: netherlands, type: 1, name: Renkum}
+  fields: {country: NL, type: 1, name: Renkum}
 - model: organizations.organization
   pk: 269
-  fields: {country: netherlands, type: 1, name: Renswoude}
+  fields: {country: NL, type: 1, name: Renswoude}
 - model: organizations.organization
   pk: 270
-  fields: {country: netherlands, type: 1, name: Reusel-De Mierden}
+  fields: {country: NL, type: 1, name: Reusel-De Mierden}
 - model: organizations.organization
   pk: 271
-  fields: {country: netherlands, type: 1, name: Rheden}
+  fields: {country: NL, type: 1, name: Rheden}
 - model: organizations.organization
   pk: 272
-  fields: {country: netherlands, type: 1, name: Rhenen}
+  fields: {country: NL, type: 1, name: Rhenen}
 - model: organizations.organization
   pk: 273
-  fields: {country: netherlands, type: 1, name: Ridderkerk}
+  fields: {country: NL, type: 1, name: Ridderkerk}
 - model: organizations.organization
   pk: 274
-  fields: {country: netherlands, type: 1, name: Rijnwaarden}
+  fields: {country: NL, type: 1, name: Rijnwaarden}
 - model: organizations.organization
   pk: 275
-  fields: {country: netherlands, type: 1, name: Rijssen-Holten}
+  fields: {country: NL, type: 1, name: Rijssen-Holten}
 - model: organizations.organization
   pk: 276
-  fields: {country: netherlands, type: 1, name: Rijswijk}
+  fields: {country: NL, type: 1, name: Rijswijk}
 - model: organizations.organization
   pk: 277
-  fields: {country: netherlands, type: 1, name: Roerdalen}
+  fields: {country: NL, type: 1, name: Roerdalen}
 - model: organizations.organization
   pk: 278
-  fields: {country: netherlands, type: 1, name: Roermond}
+  fields: {country: NL, type: 1, name: Roermond}
 - model: organizations.organization
   pk: 279
-  fields: {country: netherlands, type: 1, name: Roosendaal}
+  fields: {country: NL, type: 1, name: Roosendaal}
 - model: organizations.organization
   pk: 280
-  fields: {country: netherlands, type: 1, name: Rotterdam}
+  fields: {country: NL, type: 1, name: Rotterdam}
 - model: organizations.organization
   pk: 281
-  fields: {country: netherlands, type: 1, name: Rozendaal}
+  fields: {country: NL, type: 1, name: Rozendaal}
 - model: organizations.organization
   pk: 282
-  fields: {country: netherlands, type: 1, name: Rucphen}
+  fields: {country: NL, type: 1, name: Rucphen}
 - model: organizations.organization
   pk: 283
-  fields: {country: netherlands, type: 1, name: s-Hertogenbosch}
+  fields: {country: NL, type: 1, name: s-Hertogenbosch}
 - model: organizations.organization
   pk: 284
-  fields: {country: netherlands, type: 1, name: Schagen}
+  fields: {country: NL, type: 1, name: Schagen}
 - model: organizations.organization
   pk: 285
-  fields: {country: netherlands, type: 1, name: Scherpenzeel}
+  fields: {country: NL, type: 1, name: Scherpenzeel}
 - model: organizations.organization
   pk: 286
-  fields: {country: netherlands, type: 1, name: Schiedam}
+  fields: {country: NL, type: 1, name: Schiedam}
 - model: organizations.organization
   pk: 287
-  fields: {country: netherlands, type: 1, name: Schiermonnikoog}
+  fields: {country: NL, type: 1, name: Schiermonnikoog}
 - model: organizations.organization
   pk: 288
-  fields: {country: netherlands, type: 1, name: Schinnen}
+  fields: {country: NL, type: 1, name: Schinnen}
 - model: organizations.organization
   pk: 289
-  fields: {country: netherlands, type: 1, name: Schouwen-Duiveland}
+  fields: {country: NL, type: 1, name: Schouwen-Duiveland}
 - model: organizations.organization
   pk: 290
-  fields: {country: netherlands, type: 1, name: Simpelveld}
+  fields: {country: NL, type: 1, name: Simpelveld}
 - model: organizations.organization
   pk: 291
-  fields: {country: netherlands, type: 1, name: Sint Anthonis}
+  fields: {country: NL, type: 1, name: Sint Anthonis}
 - model: organizations.organization
   pk: 292
-  fields: {country: netherlands, type: 1, name: Sint-Michielsgestel}
+  fields: {country: NL, type: 1, name: Sint-Michielsgestel}
 - model: organizations.organization
   pk: 293
-  fields: {country: netherlands, type: 1, name: Sittard-Geleen}
+  fields: {country: NL, type: 1, name: Sittard-Geleen}
 - model: organizations.organization
   pk: 294
-  fields: {country: netherlands, type: 1, name: Sliedrecht}
+  fields: {country: NL, type: 1, name: Sliedrecht}
 - model: organizations.organization
   pk: 295
-  fields: {country: netherlands, type: 1, name: Slochteren}
+  fields: {country: NL, type: 1, name: Slochteren}
 - model: organizations.organization
   pk: 296
-  fields: {country: netherlands, type: 1, name: Sluis}
+  fields: {country: NL, type: 1, name: Sluis}
 - model: organizations.organization
   pk: 297
-  fields: {country: netherlands, type: 1, name: Smallingerland}
+  fields: {country: NL, type: 1, name: Smallingerland}
 - model: organizations.organization
   pk: 298
-  fields: {country: netherlands, type: 1, name: Soest}
+  fields: {country: NL, type: 1, name: Soest}
 - model: organizations.organization
   pk: 299
-  fields: {country: netherlands, type: 1, name: Someren}
+  fields: {country: NL, type: 1, name: Someren}
 - model: organizations.organization
   pk: 300
-  fields: {country: netherlands, type: 1, name: Son en Breugel}
+  fields: {country: NL, type: 1, name: Son en Breugel}
 - model: organizations.organization
   pk: 301
-  fields: {country: netherlands, type: 1, name: Stadskanaal}
+  fields: {country: NL, type: 1, name: Stadskanaal}
 - model: organizations.organization
   pk: 302
-  fields: {country: netherlands, type: 1, name: Staphorst}
+  fields: {country: NL, type: 1, name: Staphorst}
 - model: organizations.organization
   pk: 303
-  fields: {country: netherlands, type: 1, name: Stede Broec}
+  fields: {country: NL, type: 1, name: Stede Broec}
 - model: organizations.organization
   pk: 304
-  fields: {country: netherlands, type: 1, name: Steenbergen}
+  fields: {country: NL, type: 1, name: Steenbergen}
 - model: organizations.organization
   pk: 305
-  fields: {country: netherlands, type: 1, name: Steenwijkerland}
+  fields: {country: NL, type: 1, name: Steenwijkerland}
 - model: organizations.organization
   pk: 306
-  fields: {country: netherlands, type: 1, name: Stein}
+  fields: {country: NL, type: 1, name: Stein}
 - model: organizations.organization
   pk: 307
-  fields: {country: netherlands, type: 1, name: Stichtse Vecht}
+  fields: {country: NL, type: 1, name: Stichtse Vecht}
 - model: organizations.organization
   pk: 308
-  fields: {country: netherlands, type: 1, name: Strijen}
+  fields: {country: NL, type: 1, name: Strijen}
 - model: organizations.organization
   pk: 309
-  fields: {country: netherlands, type: 1, name: "S\xFAdwest-Frysl\xE2n"}
+  fields: {country: NL, type: 1, name: "S\xFAdwest-Frysl\xE2n"}
 - model: organizations.organization
   pk: 310
-  fields: {country: netherlands, type: 1, name: Ten Boer}
+  fields: {country: NL, type: 1, name: Ten Boer}
 - model: organizations.organization
   pk: 311
-  fields: {country: netherlands, type: 1, name: Terneuzen}
+  fields: {country: NL, type: 1, name: Terneuzen}
 - model: organizations.organization
   pk: 312
-  fields: {country: netherlands, type: 1, name: Terschelling}
+  fields: {country: NL, type: 1, name: Terschelling}
 - model: organizations.organization
   pk: 313
-  fields: {country: netherlands, type: 1, name: Texel}
+  fields: {country: NL, type: 1, name: Texel}
 - model: organizations.organization
   pk: 314
-  fields: {country: netherlands, type: 1, name: Teylingen}
+  fields: {country: NL, type: 1, name: Teylingen}
 - model: organizations.organization
   pk: 315
-  fields: {country: netherlands, type: 1, name: Tholen}
+  fields: {country: NL, type: 1, name: Tholen}
 - model: organizations.organization
   pk: 316
-  fields: {country: netherlands, type: 1, name: Tiel}
+  fields: {country: NL, type: 1, name: Tiel}
 - model: organizations.organization
   pk: 317
-  fields: {country: netherlands, type: 1, name: Tilburg}
+  fields: {country: NL, type: 1, name: Tilburg}
 - model: organizations.organization
   pk: 318
-  fields: {country: netherlands, type: 1, name: Tubbergen}
+  fields: {country: NL, type: 1, name: Tubbergen}
 - model: organizations.organization
   pk: 319
-  fields: {country: netherlands, type: 1, name: Twenterand}
+  fields: {country: NL, type: 1, name: Twenterand}
 - model: organizations.organization
   pk: 320
-  fields: {country: netherlands, type: 1, name: Tynaarlo}
+  fields: {country: NL, type: 1, name: Tynaarlo}
 - model: organizations.organization
   pk: 321
-  fields: {country: netherlands, type: 1, name: Tytsjerksteradiel}
+  fields: {country: NL, type: 1, name: Tytsjerksteradiel}
 - model: organizations.organization
   pk: 322
-  fields: {country: netherlands, type: 1, name: Uden}
+  fields: {country: NL, type: 1, name: Uden}
 - model: organizations.organization
   pk: 323
-  fields: {country: netherlands, type: 1, name: Uitgeest}
+  fields: {country: NL, type: 1, name: Uitgeest}
 - model: organizations.organization
   pk: 324
-  fields: {country: netherlands, type: 1, name: Uithoorn}
+  fields: {country: NL, type: 1, name: Uithoorn}
 - model: organizations.organization
   pk: 325
-  fields: {country: netherlands, type: 1, name: Urk}
+  fields: {country: NL, type: 1, name: Urk}
 - model: organizations.organization
   pk: 326
-  fields: {country: netherlands, type: 1, name: Utrecht}
+  fields: {country: NL, type: 1, name: Utrecht}
 - model: organizations.organization
   pk: 327
-  fields: {country: netherlands, type: 1, name: Utrechtse Heuvelrug}
+  fields: {country: NL, type: 1, name: Utrechtse Heuvelrug}
 - model: organizations.organization
   pk: 328
-  fields: {country: netherlands, type: 1, name: Vaals}
+  fields: {country: NL, type: 1, name: Vaals}
 - model: organizations.organization
   pk: 329
-  fields: {country: netherlands, type: 1, name: Valkenburg aan de Geul}
+  fields: {country: NL, type: 1, name: Valkenburg aan de Geul}
 - model: organizations.organization
   pk: 330
-  fields: {country: netherlands, type: 1, name: Valkenswaard}
+  fields: {country: NL, type: 1, name: Valkenswaard}
 - model: organizations.organization
   pk: 331
-  fields: {country: netherlands, type: 1, name: Veendam}
+  fields: {country: NL, type: 1, name: Veendam}
 - model: organizations.organization
   pk: 332
-  fields: {country: netherlands, type: 1, name: Veenendaal}
+  fields: {country: NL, type: 1, name: Veenendaal}
 - model: organizations.organization
   pk: 333
-  fields: {country: netherlands, type: 1, name: Veere}
+  fields: {country: NL, type: 1, name: Veere}
 - model: organizations.organization
   pk: 334
-  fields: {country: netherlands, type: 1, name: Veldhoven}
+  fields: {country: NL, type: 1, name: Veldhoven}
 - model: organizations.organization
   pk: 335
-  fields: {country: netherlands, type: 1, name: Velsen}
+  fields: {country: NL, type: 1, name: Velsen}
 - model: organizations.organization
   pk: 336
-  fields: {country: netherlands, type: 1, name: Venlo}
+  fields: {country: NL, type: 1, name: Venlo}
 - model: organizations.organization
   pk: 337
-  fields: {country: netherlands, type: 1, name: Venray}
+  fields: {country: NL, type: 1, name: Venray}
 - model: organizations.organization
   pk: 338
-  fields: {country: netherlands, type: 1, name: Vianen}
+  fields: {country: NL, type: 1, name: Vianen}
 - model: organizations.organization
   pk: 339
-  fields: {country: netherlands, type: 1, name: Vlaardingen}
+  fields: {country: NL, type: 1, name: Vlaardingen}
 - model: organizations.organization
   pk: 340
-  fields: {country: netherlands, type: 1, name: Vlagtwedde}
+  fields: {country: NL, type: 1, name: Vlagtwedde}
 - model: organizations.organization
   pk: 341
-  fields: {country: netherlands, type: 1, name: Vlieland}
+  fields: {country: NL, type: 1, name: Vlieland}
 - model: organizations.organization
   pk: 342
-  fields: {country: netherlands, type: 1, name: Vlissingen}
+  fields: {country: NL, type: 1, name: Vlissingen}
 - model: organizations.organization
   pk: 343
-  fields: {country: netherlands, type: 1, name: Voerendaal}
+  fields: {country: NL, type: 1, name: Voerendaal}
 - model: organizations.organization
   pk: 344
-  fields: {country: netherlands, type: 1, name: Voorschoten}
+  fields: {country: NL, type: 1, name: Voorschoten}
 - model: organizations.organization
   pk: 345
-  fields: {country: netherlands, type: 1, name: Voorst}
+  fields: {country: NL, type: 1, name: Voorst}
 - model: organizations.organization
   pk: 346
-  fields: {country: netherlands, type: 1, name: Vught}
+  fields: {country: NL, type: 1, name: Vught}
 - model: organizations.organization
   pk: 347
-  fields: {country: netherlands, type: 1, name: Waalre}
+  fields: {country: NL, type: 1, name: Waalre}
 - model: organizations.organization
   pk: 348
-  fields: {country: netherlands, type: 1, name: Waalwijk}
+  fields: {country: NL, type: 1, name: Waalwijk}
 - model: organizations.organization
   pk: 349
-  fields: {country: netherlands, type: 1, name: Waddinxveen}
+  fields: {country: NL, type: 1, name: Waddinxveen}
 - model: organizations.organization
   pk: 350
-  fields: {country: netherlands, type: 1, name: Wageningen}
+  fields: {country: NL, type: 1, name: Wageningen}
 - model: organizations.organization
   pk: 351
-  fields: {country: netherlands, type: 1, name: Wassenaar}
+  fields: {country: NL, type: 1, name: Wassenaar}
 - model: organizations.organization
   pk: 352
-  fields: {country: netherlands, type: 1, name: Waterland}
+  fields: {country: NL, type: 1, name: Waterland}
 - model: organizations.organization
   pk: 353
-  fields: {country: netherlands, type: 1, name: Weert}
+  fields: {country: NL, type: 1, name: Weert}
 - model: organizations.organization
   pk: 354
-  fields: {country: netherlands, type: 1, name: Weesp}
+  fields: {country: NL, type: 1, name: Weesp}
 - model: organizations.organization
   pk: 355
-  fields: {country: netherlands, type: 1, name: Werkendam}
+  fields: {country: NL, type: 1, name: Werkendam}
 - model: organizations.organization
   pk: 356
-  fields: {country: netherlands, type: 1, name: West Maas en Waal}
+  fields: {country: NL, type: 1, name: West Maas en Waal}
 - model: organizations.organization
   pk: 357
-  fields: {country: netherlands, type: 1, name: Westerveld}
+  fields: {country: NL, type: 1, name: Westerveld}
 - model: organizations.organization
   pk: 358
-  fields: {country: netherlands, type: 1, name: Westervoort}
+  fields: {country: NL, type: 1, name: Westervoort}
 - model: organizations.organization
   pk: 359
-  fields: {country: netherlands, type: 1, name: Westland}
+  fields: {country: NL, type: 1, name: Westland}
 - model: organizations.organization
   pk: 360
-  fields: {country: netherlands, type: 1, name: Weststellingwerf}
+  fields: {country: NL, type: 1, name: Weststellingwerf}
 - model: organizations.organization
   pk: 361
-  fields: {country: netherlands, type: 1, name: Westvoorne}
+  fields: {country: NL, type: 1, name: Westvoorne}
 - model: organizations.organization
   pk: 362
-  fields: {country: netherlands, type: 1, name: Wierden}
+  fields: {country: NL, type: 1, name: Wierden}
 - model: organizations.organization
   pk: 363
-  fields: {country: netherlands, type: 1, name: Wijchen}
+  fields: {country: NL, type: 1, name: Wijchen}
 - model: organizations.organization
   pk: 364
-  fields: {country: netherlands, type: 1, name: Wijdemeren}
+  fields: {country: NL, type: 1, name: Wijdemeren}
 - model: organizations.organization
   pk: 365
-  fields: {country: netherlands, type: 1, name: Wijk bij Duurstede}
+  fields: {country: NL, type: 1, name: Wijk bij Duurstede}
 - model: organizations.organization
   pk: 366
-  fields: {country: netherlands, type: 1, name: Winsum}
+  fields: {country: NL, type: 1, name: Winsum}
 - model: organizations.organization
   pk: 367
-  fields: {country: netherlands, type: 1, name: Winterswijk}
+  fields: {country: NL, type: 1, name: Winterswijk}
 - model: organizations.organization
   pk: 368
-  fields: {country: netherlands, type: 1, name: Woensdrecht}
+  fields: {country: NL, type: 1, name: Woensdrecht}
 - model: organizations.organization
   pk: 369
-  fields: {country: netherlands, type: 1, name: Woerden}
+  fields: {country: NL, type: 1, name: Woerden}
 - model: organizations.organization
   pk: 370
-  fields: {country: netherlands, type: 1, name: Wormerland}
+  fields: {country: NL, type: 1, name: Wormerland}
 - model: organizations.organization
   pk: 371
-  fields: {country: netherlands, type: 1, name: Woudenberg}
+  fields: {country: NL, type: 1, name: Woudenberg}
 - model: organizations.organization
   pk: 372
-  fields: {country: netherlands, type: 1, name: Woudrichem}
+  fields: {country: NL, type: 1, name: Woudrichem}
 - model: organizations.organization
   pk: 373
-  fields: {country: netherlands, type: 1, name: Zaanstad}
+  fields: {country: NL, type: 1, name: Zaanstad}
 - model: organizations.organization
   pk: 374
-  fields: {country: netherlands, type: 1, name: Zaltbommel}
+  fields: {country: NL, type: 1, name: Zaltbommel}
 - model: organizations.organization
   pk: 375
-  fields: {country: netherlands, type: 1, name: Zandvoort}
+  fields: {country: NL, type: 1, name: Zandvoort}
 - model: organizations.organization
   pk: 376
-  fields: {country: netherlands, type: 1, name: Zederik}
+  fields: {country: NL, type: 1, name: Zederik}
 - model: organizations.organization
   pk: 377
-  fields: {country: netherlands, type: 1, name: Zeewolde}
+  fields: {country: NL, type: 1, name: Zeewolde}
 - model: organizations.organization
   pk: 378
-  fields: {country: netherlands, type: 1, name: Zeist}
+  fields: {country: NL, type: 1, name: Zeist}
 - model: organizations.organization
   pk: 379
-  fields: {country: netherlands, type: 1, name: Zevenaar}
+  fields: {country: NL, type: 1, name: Zevenaar}
 - model: organizations.organization
   pk: 380
-  fields: {country: netherlands, type: 1, name: Zoetermeer}
+  fields: {country: NL, type: 1, name: Zoetermeer}
 - model: organizations.organization
   pk: 381
-  fields: {country: netherlands, type: 1, name: Zoeterwoude}
+  fields: {country: NL, type: 1, name: Zoeterwoude}
 - model: organizations.organization
   pk: 382
-  fields: {country: netherlands, type: 1, name: Zuidhorn}
+  fields: {country: NL, type: 1, name: Zuidhorn}
 - model: organizations.organization
   pk: 383
-  fields: {country: netherlands, type: 1, name: Zuidplas}
+  fields: {country: NL, type: 1, name: Zuidplas}
 - model: organizations.organization
   pk: 384
-  fields: {country: netherlands, type: 1, name: Zundert}
+  fields: {country: NL, type: 1, name: Zundert}
 - model: organizations.organization
   pk: 385
-  fields: {country: netherlands, type: 1, name: Zutphen}
+  fields: {country: NL, type: 1, name: Zutphen}
 - model: organizations.organization
   pk: 386
-  fields: {country: netherlands, type: 1, name: Zwartewaterland}
+  fields: {country: NL, type: 1, name: Zwartewaterland}
 - model: organizations.organization
   pk: 387
-  fields: {country: netherlands, type: 1, name: Zwijndrecht}
+  fields: {country: NL, type: 1, name: Zwijndrecht}
 - model: organizations.organization
   pk: 388
-  fields: {country: netherlands, type: 1, name: Zwolle}
+  fields: {country: NL, type: 1, name: Zwolle}
 - model: organizations.url
   pk: 1
   fields: {organization: 1, url: aaenhunze.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
