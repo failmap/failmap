@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django_countries.fields import CountryField
+from jsonfield import JSONField
 
 
 class OrganizationType(models.Model):
@@ -40,7 +41,7 @@ class Coordinate(models.Model):
         max_length=20,
         blank=True,
         null=True)
-    area = models.CharField(max_length=10000)
+    area = JSONField(max_length=10000)
 
     class Meta:
         managed = True

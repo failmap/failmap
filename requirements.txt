@@ -1,6 +1,7 @@
 django
 django-jet
 django-countries
+django-jsonfield
 pyyaml
 tox
 autopep8
