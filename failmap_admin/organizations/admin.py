@@ -1,14 +1,18 @@
 from django.contrib import admin
+from jet.admin import CompactInline
 
 from .models import Coordinate, Organization, Url
 
 
-class UrlAdminInline(admin.TabularInline):
+class UrlAdminInline(CompactInline):
     model = Url
+    extra = 0
+    show_change_link = True
 
 
 class CoordinateAdminInline(admin.StackedInline):
     model = Coordinate
+    extra = 0
 
 
 class OrganizationAdmin(admin.ModelAdmin):
