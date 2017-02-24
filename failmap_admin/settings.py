@@ -57,10 +57,15 @@ MIDDLEWARE_CLASSES = [
 
 ROOT_URLCONF = 'failmap_admin.urls'
 
+# template needed for admin template
+# this step is missing in the django jet tutorial, maybe because it's fairly common.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR + '/',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -129,7 +134,7 @@ STATIC_URL = '/static/'
 
 TEST_RUNNER = 'failmap_admin.testrunner.PytestTestRunner'
 
-
+# From the Jet documentation, a different color for a different season.
 JET_THEMES = [
     {
         'theme': 'default',  # theme folder name
@@ -162,3 +167,7 @@ JET_THEMES = [
         'title': 'Light Gray'
     }
 ]
+
+# see: https://github.com/geex-arts/django-jet/blob/fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
+# required for custom modules
+JET_APP_INDEX_DASHBOARD = 'failmap_admin.organizations.dashboard.CustomIndexDashboard'

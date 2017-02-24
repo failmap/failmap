@@ -5,3 +5,4 @@ django-jsonfield
 pyyaml
 tox
 autopep8
+tldextract
