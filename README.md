@@ -1,8 +1,9 @@
 [![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin)
 
-# Requirement
+# Requirements
 
 - Python3
+- Tox
 
 # Quickstart
 
@@ -26,7 +27,7 @@ To run code quality checks and unit tests run:
 
 To make life easier you can use `autopep8` before running `tox` to automatically fix most style issues:
 
-    autopep8 -ri fail
+    autopep8 -ri failmap_admin tests
 
 Failing tests can be debugged interactively using:
 
