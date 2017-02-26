@@ -38,7 +38,7 @@ http://nonexistingdomain.nl
 
     # can be only added once automatically, the model accepts the same domain over multiple
     # organizations. Auto-adding cannot determine what other organization would match of course.
-    assert Url.objects.filter(url='dubbelnieuw.arnhem.nl').count == 1
+    assert Url.objects.filter(url='dubbelnieuw.arnhem.nl').count() == 1
 
     # invalid entries
     assert not Url.objects.filter(url='a.a')
