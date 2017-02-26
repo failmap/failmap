@@ -2,6 +2,9 @@ from django.contrib import admin
 from jet.admin import CompactInline
 
 from .models import Coordinate, Organization, Url
+# Solved: http://stackoverflow.com/questions/11754877/
+#   troubleshooting-related-field-has-invalid-lookup-icontains
+#   while correct, error should point to ModelAdmin.search fields documentation
 
 
 class UrlAdminInline(CompactInline):
@@ -17,8 +20,8 @@ class CoordinateAdminInline(admin.StackedInline):
 
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
-    search_fields = ('name', 'type', 'country')
-    list_filter = ('type', 'country')
+    search_fields = (['name', 'country', 'type__name'])
+    list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
     fields = ('name', 'type', 'country')
 
     inlines = [UrlAdminInline, CoordinateAdminInline]
