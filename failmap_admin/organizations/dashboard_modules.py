@@ -12,11 +12,14 @@ from jet.dashboard.modules import DashboardModule
 from failmap_admin.organizations.models import Url
 
 
-# todo: evaluate if we should clean domains after importing,
-# i think not: now it's easy to see what the last action was, even after
-# reloading and over time
+# Intended workings: after adding a list of domains, hitting save, you'll see
+# the results of the attempt to add those domains to organizations. The results
+# as well as well as the domains that have been added in the edit-modus stay there.
+# this helps people to see what has been added most recently.
 
-# works only on edit, ok... fine, then we're abusing that.
+# This module can only manage data on it's edit form. So we're abusing that. There
+# is no documented way to add modules to the jet dashboard otherwise. Also
+# the Jet dashboard calls this a widget, which it just isn't :)
 
 
 class SmartAddUrlForm(forms.Form):
@@ -48,12 +51,10 @@ class SmartAddUrl(DashboardModule):
     settings_form = SmartAddUrlForm
 
     newUrls = None
-
     addresult = []
 
     def load_settings(self, settings):
         self.newUrls = settings.get('newUrls')
-        self.add(self.newUrls)
 
     def settings_dict(self):
         return {
@@ -61,53 +62,60 @@ class SmartAddUrl(DashboardModule):
         }
 
     def init_with_context(self, context):
+        self.add(self.newUrls)
         self.children = self.addresult  # todo: make sure the results are added here
 
+    # this is called 3 times per reload, highly inefficient. Can't really do much about it
     def add(self, urls):
 
-        self.addresult = []
+        self.addresult = []  # todo: 3-times reload symptom suppression. I don't like it.
 
-        if urls is None:  # -> if not urls:
-            self.addresult.append(SmartAddUrlResult('-', 1,
+        if not urls:
+            self.addresult.append(SmartAddUrlResult('', 1,
                                                     'No url was added ever via this module.'))
             return False
 
         # We're expecting the most ridiculous crap, which hopefully gets filtered by tldextract
         # Checked: tldextract removed queries, usernames, passwords, protocols, ports, etc.
-        # It seems this has no problems with xss, but what about unicode
-        # (international names) (db?)
+        # Probably unicode is still a challenge, as it relies on underlying DB.
         for line in urls.splitlines():
             # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
-            # todo: remove the xss problems by filtering input (on what?)
+            # Looks susceptible to xss, tested an xss wordlist on it: no problem.
             xtrct = tldextract.extract(line)
             domainandtld = xtrct.domain + '.' + xtrct.suffix
             completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-            if xtrct.domain == "":  # -> if not xtrct.domain
+            if not xtrct.domain:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'No domain entered.'))
                 continue
 
-            if xtrct.subdomain == "":  # -> etc
+            if not xtrct.subdomain:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine what organisation a '
                                                         'domain belongs to without a subdomain.'))
                 continue
 
-            if xtrct.subdomain == "" and xtrct.suffix == "":
+            if not xtrct.subdomain and not xtrct.suffix:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine organization by IP or '
                                                         'unknown top level domain.'))
                 continue
 
-            if not Url.objects.filter(
-                    url=domainandtld).exists():  # -> can drop the exists
+            if not Url.objects.filter(url=domainandtld):  # an exists-type query
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine the organization if '
                                                         'there is no organization that uses this '
                                                         'domain.'))
                 continue
 
+            # this happens when two separate organizations use the same generic service provider
+            # it will also result in an erroneous add with the first domain. Not much you
+            # can do about it. One solution would be to check if the sub domain matches a domain.
+            # and use that organization. That might work in 50% of the cases.
+
+            # also: this test is just incorrect, it doesn't check for multiple organizations at all
+            # todo: fix
             if Url.objects.filter(url=domainandtld).count() > 1:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine the organization if '
@@ -115,8 +123,7 @@ class SmartAddUrl(DashboardModule):
                                                         'same domain.'))
                 continue
 
-            if Url.objects.filter(url=completedomain).count(
-            ) > 0:  # -> can drop the '> 0'
+            if Url.objects.filter(url=completedomain).count():
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'This domain is already in the database.'))
                 continue
