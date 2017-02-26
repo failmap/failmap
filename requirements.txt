@@ -9,3 +9,4 @@ tldextract
 tox
 autopep8
 coverage
+pytest
