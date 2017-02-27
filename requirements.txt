@@ -1,6 +1,7 @@
+celery >=4
 django
-django-jet
 django-countries
+django-jet
 django-jsonfield
 pyyaml
 tldextract
