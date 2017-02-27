@@ -30,6 +30,10 @@ To make life easier you can use `autopep8`/`isort` before running `tox` to autom
     autopep8 -ri failmap_admin tests
     isort -rc failmap_admin tests
 
+To run only a specific test use:
+
+    tox -- -k test_name
+
 To only run a specific test suite user for example:
 
     .tox/py34/bin/failmap-admin test tests/test_smarturl.py
