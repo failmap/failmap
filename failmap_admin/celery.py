@@ -3,14 +3,12 @@ from __future__ import absolute_import, unicode_literals
 import os
 import sys
 
-print(sys.path)
+from celery import Celery
 
-if True:
-    from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'failmap_admin.settings')
 
-app = Celery('failmap')
+app = Celery('failmap', broker_url='memory://')
 
 # Using a string here means the worker don't have to serialize
 # the configuration object to child processes.

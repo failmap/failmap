@@ -1,4 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+from .tasks import task_blascanner, task_store_scanresult
 
 
 class ScansDnssec(models.Model):
@@ -42,3 +46,27 @@ class ScansSsllabs(models.Model):
 
     def __str__(self):
         return self.url
+
+
+class ScansBla(models.Model):
+    state = models.CharField(max_length=64, default='PENDING')
+    task_id = models.CharField(max_length=128, null=True, blank=True)
+    url = models.CharField(max_length=255)
+    rating = models.CharField(max_length=3, blank=True)
+
+
+@receiver(post_save, sender=ScansBla)
+def dispatch_scan_task(sender, instance, **kwargs):
+    """After creating and saving scansbla object, spawn a scan task."""
+
+    # create task objects for scanning and storing the result
+    scan_task = task_blascanner.s(instance.url)
+    store_task = task_store_scanresult.s(sender.__name__, instance.id)
+    # bind the tasks together, if the scan task is finished the result is passed to store_task
+    task = (scan_task | store_task)
+
+    # put the tasks on the queue, this returns result object which can be used
+    # to get intermediate state
+    async_result = task.apply_async()
+    # store async_result for future reference
+    sender.objects.filter(pk=instance.pk).update(task_id=async_result.id)

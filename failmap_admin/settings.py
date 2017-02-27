@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'failmap_admin.fail',
     'failmap_admin.organizations',
     'failmap_admin.scanners',
-    'django_countries'
+    'django_countries',
+    'celery',
 ]
 
 MIDDLEWARE_CLASSES = [
