@@ -39,6 +39,10 @@ To generate coverage report after tests in HTML run:
     coverage html
     open htmlcov/index.html
 
+Pytest allows to drop into Python debugger when a tests fails. To enable run:
+
+    tox -- --pdb
+
 # Direnv / Virtualenv
 
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python virtual environment. Install direnv and run `direnv allow` to enable.
