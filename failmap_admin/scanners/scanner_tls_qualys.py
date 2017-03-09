@@ -11,17 +11,18 @@
 # todo: this can be done distributed, using a different approach.
 
 import json
-from datetime import date, datetime, timedelta
 import logging
+import sys
+from datetime import date, datetime, timedelta
 from random import randint
 from time import sleep
-import pytz
-import sys
 
+import pytz
 import requests
 
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import TlsQualysScan, TlsQualysScratchpad, Endpoint
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad
+
 
 """
     Selery tasks:

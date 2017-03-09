@@ -12,7 +12,7 @@
 
 import json
 
-from colorama import Fore, init, Style
+from colorama import Fore, Style, init
 from freezegun import freeze_time
 from httmock import HTTMock, response
 
@@ -223,7 +223,6 @@ def test_tls_scan_qualys_sample_result(db):
             assert TlsQualysScan.objects.filter(qualys_rating="A").count() == 8
 
     # announce_testcase(8, "Simulate a domain that just doesn't get out of the DNS phase.")
-
 
     # todo: add a scan that has has not yet finished
     # todo: check if the endpoints are set to pending when a scan has been requested.

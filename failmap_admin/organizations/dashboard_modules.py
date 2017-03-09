@@ -82,8 +82,16 @@ class SmartAddUrl(DashboardModule):
             # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
             # Looks susceptible to xss, tested an xss wordlist on it: no problem.
             xtrct = tldextract.extract(line)
+            print (xtrct)
+
             domainandtld = xtrct.domain + '.' + xtrct.suffix
             completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
+
+            if not xtrct.suffix:
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'Domain is missing a top level extension.'
+                                                        'such as .NL or .ORG...'))
+                continue
 
             if not xtrct.domain:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
@@ -128,6 +136,13 @@ class SmartAddUrl(DashboardModule):
                                                         'This domain is already in the database.'))
                 continue
 
+            if not Url.objects.filter(url=domainandtld).count():
+                self.addresult.append(SmartAddUrlResult(completedomain, 1,
+                                                        'The domain ' + completedomain + 'is not '
+                                                        'in the database, so its'
+                                                        'impossible to determine the organization'))
+                continue
+
             # looks legit, let's add it.
 
             # todo: things can still go wrong here, database errors and such.
@@ -137,6 +152,7 @@ class SmartAddUrl(DashboardModule):
             # the pprint(vars( of the queryset didn't give a hint how to get
             # the first/only object.
             # are domains unique? no. Might cause issues.
+            print("Domain and tld: " + domainandtld)
             o = Url.objects.get(url=domainandtld)
             newurl = Url(organization_id=o.organization_id, url=completedomain)
             newurl.save()
