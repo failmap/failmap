@@ -102,7 +102,7 @@ class SmartAddUrl(DashboardModule):
                                                         'unknown top level domain.'))
                 continue
 
-            if not Url.objects.filter(url=domainandtld):  # an exists-type query
+            if not Url.objects.filter(url=domainandtld).exists:
                 self.addresult.append(SmartAddUrlResult(completedomain, 1,
                                                         'Can\'t determine the organization if '
                                                         'there is no organization that uses this '

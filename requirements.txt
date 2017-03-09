@@ -1,9 +1,19 @@
+# django admin
 django
 django-jet
 django-countries
 django-jsonfield
 pyyaml
 tldextract
+
+# scanners
+requests
+pytz
+
+# tests (of scanners)
+httmock
+freezegun
+colorama
 
 # dev. tools
 tox
