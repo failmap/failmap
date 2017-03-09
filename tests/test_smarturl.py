@@ -29,7 +29,7 @@ http://nonexistingdomain.nl
     smartaddurl.add(urls)
 
     # for debugging failed test
-    print([(r.domain, r.error, r.message) for r in smartaddurl.addresult])
+    print([(r.domain, r.error, r.message) for r in smartaddurl.addresults])
 
     # these urls should have been added
     assert Url.objects.filter(url='arnhem.nl')
