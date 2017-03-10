@@ -46,17 +46,17 @@ class TlsQualysScan(models.Model):
     qualys_rating_no_trust = models.CharField(max_length=3, default=0)
 
     # scan management
-    pending = models.BooleanField(default=1)  # scan in progress
-    pending_since = models.DateTimeField(auto_now_add=True)
+    pending = models.BooleanField(default=0)  # scan in progress
+    pending_since = models.DateTimeField(null=True)
 
     # This is the last completed scan, we scan often, but the rating doesn't change that much
     # This is just so we can manage when to scan next and to say when we've last checked.
     scan_date = models.DateField(auto_now_add=True)  # completed scan
-    scan_time = models.TimeField(auto_now_add=True)
-    scan_moment = models.DateTimeField(auto_now_add=True)
+    scan_time = models.TimeField(auto_now_add=True)  # For database indexes
+    scan_moment = models.DateTimeField(auto_now_add=True)  # For database indexes
 
     # This is when the rating was determined. Ratings don't change that much.
-    rating_determined_on = models.DateTimeField(auto_now_add=True)
+    rating_determined_on = models.DateTimeField()
 
     class Meta:
         managed = True

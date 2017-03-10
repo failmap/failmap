@@ -5,6 +5,7 @@ django-countries
 django-jsonfield
 pyyaml
 tldextract
+docutils
 
 # scanners
 requests
