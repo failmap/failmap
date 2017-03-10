@@ -1,8 +1,10 @@
 from django.contrib import admin
+from jet.admin import CompactInline
+
 from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad
 
 
-class TlsQualysScanAdminInline(admin.StackedInline):
+class TlsQualysScanAdminInline(CompactInline):
     model = TlsQualysScan
     extra = 0
     show_change_link = True

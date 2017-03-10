@@ -11,6 +11,9 @@ docutils
 requests
 pytz
 
+# manual scans
+django-autocomplete-light
+
 # tests (of scanners)
 httmock
 freezegun

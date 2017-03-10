@@ -130,7 +130,7 @@ class ScannerTlsQualys:
 
             if self.rate_limit:
                 # wait 25 seconds + 0-9 random seconds, wait longer with fewer domains
-                sleep(25 + randint(0, 9) + (300 / sq.length()))  # don't pulsate.
+                sleep(25 + randint(0, 9))  # don't pulsate.
 
             data = self.service_provider_scan_via_api(domain)
             self.scratch(domain, data)  # for debugging
@@ -164,6 +164,14 @@ class ScannerTlsQualys:
         # we do manage some endpoints (https, http on port 443)
         for domain in domains:
             if not self.endpoints_alive_in_past_24_hours(domain):
+                domains_to_scan.append(domain)
+
+        # todo: we can use tldextract to verify the correctness of domains. (not ip's)
+        domains = domains_to_scan
+        domains_to_scan = list()
+        # check if the domain is... sort of valid...
+        for domain in domains:
+            if len(domain) > 3:
                 domains_to_scan.append(domain)
 
         # prevent duplicates

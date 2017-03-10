@@ -63,7 +63,7 @@ class TlsQualysScan(models.Model):
         db_table = 'scanner_tls_qualys'
 
     def __str__(self):
-        return self.url
+        return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
 # A debugging table to help with API interactions.

@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'failmap_admin.scanners',
     'django_countries',
     'django.contrib.admindocs',
-    'django.contrib.humanize'
+    'django.contrib.humanize',
+    'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
+    'dal_select2',  # django-autocomplete-light
 ]
 
 MIDDLEWARE_CLASSES = [
