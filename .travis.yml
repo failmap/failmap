@@ -8,4 +8,4 @@ script: tox
 
 after_success:
   - coveralls
-  # - CODECLIMATE_REPO_TOKEN=e94e70f9013dce55ec6649577c839054b2236c00 codeclimate-test-reporter
+  - CODECLIMATE_REPO_TOKEN=4bd7b6de99845dea19ae759dd9021a652198cc89c7003a562045ece83ae541bd codeclimate-test-reporter
