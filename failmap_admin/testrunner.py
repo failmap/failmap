@@ -1,10 +1,24 @@
-class PytestTestRunner(object):
+from django.test.runner import DiscoverRunner
+
+
+class PytestTestRunner(DiscoverRunner):
     """Runs pytest to discover and run tests."""
 
-    def __init__(self, verbosity=1, failfast=False, keepdb=False, **kwargs):
+    pdb = False
+
+    def __init__(self, verbosity=1, failfast=False, keepdb=False, pdb=False, **kwargs):
         self.verbosity = verbosity
         self.failfast = failfast
         self.keepdb = keepdb
+        self.pdb = pdb
+
+    @classmethod
+    def add_arguments(cls, parser):
+        parser.add_argument(
+            '--pdb',
+            action='store_true', default=False, dest='pdb',
+            help='Drop into PDB on test failure.')
+        DiscoverRunner.add_arguments(parser)
 
     def run_tests(self, test_labels):
         """Run pytest and return the exitcode.
@@ -24,6 +38,8 @@ class PytestTestRunner(object):
             argv.append('--exitfirst')
         if self.keepdb:
             argv.append('--reuse-db')
+        if self.pdb:
+            argv.append('--pdb')
 
         argv.extend(test_labels)
         return pytest.main(argv)

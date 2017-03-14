@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin)
+[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin) [![Test Coverage](https://codeclimate.com/github/failmap/admin/badges/coverage.svg)](https://codeclimate.com/github/failmap/admin/coverage)
 
 # Requirements
 
@@ -30,6 +30,10 @@ To make life easier you can use `autopep8`/`isort` before running `tox` to autom
     autopep8 -ri failmap_admin tests
     isort -rc failmap_admin tests
 
+To run only a specific test use:
+
+    tox -- -k test_name
+
 To only run a specific test suite user for example:
 
     .tox/py34/bin/failmap-admin test tests/test_smarturl.py
@@ -38,6 +42,10 @@ To generate coverage report after tests in HTML run:
 
     coverage html
     open htmlcov/index.html
+
+Pytest allows to drop into Python debugger when a tests fails. To enable run:
+
+    tox -- --pdb
 
 # Direnv / Virtualenv
 
