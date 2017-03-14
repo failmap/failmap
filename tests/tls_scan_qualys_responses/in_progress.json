@@ -1,0 +1,22 @@
+{
+  "status": "IN_PROGRESS",
+  "protocol": "HTTP",
+  "criteriaVersion": "2009l",
+  "isPublic": false,
+  "host": "inprogress.example.com",
+  "startTime": 1470610189143,
+  "engineVersion": "1.23.50",
+  "endpoints": [
+    {
+      "serverName": "inprogress.example.com",
+      "delegation": 1,
+      "eta": -1,
+      "progress": -1,
+      "statusDetailsMessage": "Testing deprecated cipher suites",
+      "ipAddress": "46.29.240.130",
+      "statusDetails": "TESTING_SUITES_DEPRECATED",
+      "statusMessage": "In progress"
+    }
+  ],
+  "port": 443
+}

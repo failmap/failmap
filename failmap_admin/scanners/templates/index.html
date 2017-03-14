@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet"
+              href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+              integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ"
+              crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+                integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n"
+                crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+                integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb"
+                crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+                integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn"
+                crossorigin="anonymous"></script>
+        <meta charset="utf-8">
+        <title>
+            Emanual Scannings Homepage
+        </title>
+    </head>
+    <body>
+
+        <div class="jumbotron">
+          <div class="container">
+            <h1 class="display-3">Emanual Scannings Homepage</h1>
+            <p>Hello, my name is Emanual Scanning. I will be assisting you poorly with running manual scans.</p>
+            <p>Be aware, scans are launched and queued automatically (soon). So performing too much manual
+        scans might result in noise.</p>
+            <p><a class="btn btn-primary btn-lg" href="#" role="button">Get started &raquo;</a></p>
+          </div>
+        </div>
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>Qualys TLS Scanning</h3>
+                    <p>This scans a domain using scanner_tls_qualys.</p>
+                    <p>This scan happens live and can take a while... about 2 minutes.</p>
+
+                    <form method="POST" class="post-form">{% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="save btn btn-default">Scan</button>
+                    </form>
+                </div>
+                <div class="col-md-4">
+                    <h3>Scan results</h3>
+                    <ul>
+                        <li>Scratchpad: <a href="/admin/scanners/tlsqualysscratchpad/">here</a></li>
+                        <li>endpoints: <a href="/admin/scanners/endpoint/">here</a></li>
+                        <li>Scans: <a href="/admin/scanners/tlsqualysscan/">here</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+            {{ form.media }}
+        </div>
+
+    </body>
+</html>

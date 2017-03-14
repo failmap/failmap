@@ -44,7 +44,11 @@ INSTALLED_APPS = [
     'failmap_admin.fail',
     'failmap_admin.organizations',
     'failmap_admin.scanners',
-    'django_countries'
+    'django_countries',
+    'django.contrib.admindocs',
+    'django.contrib.humanize',
+    'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
+    'dal_select2',  # django-autocomplete-light
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -56,6 +60,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.contrib.admindocs.middleware.XViewMiddleware',  # admindocs
 ]
 
 ROOT_URLCONF = 'failmap_admin.urls'
@@ -118,6 +123,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
+
+# .tox/py34/bin/failmap-admin testserver --settings failmap_admin.settings testdata
+# testserver does not work, runserver does. Not clear what goes wrong.
+# Go to admin: language_code = language_code.replace('_', '-').lower()
+# AttributeError: 'NoneType' object has no attribute 'replace'
+# while settings are loaded and Django uses LANGUAGE_CODE as default. What overrides this?
+# a possible undesired solution, http://source.mihelac.org/2009/11/12/django-set-language-for-admin/
 
 LANGUAGE_CODE = 'en-us'
 

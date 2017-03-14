@@ -1,0 +1,11 @@
+{
+  "status": "DNS",
+  "protocol": "HTTP",
+  "criteriaVersion": "2009l",
+  "isPublic": false,
+  "host": "resolving.example.com",
+  "startTime": 1470598717036,
+  "engineVersion": "1.23.50",
+  "port": 443,
+  "statusMessage": "Resolving domain names"
+}

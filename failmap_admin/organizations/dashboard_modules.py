@@ -28,7 +28,7 @@ class SmartAddUrlForm(forms.Form):
 
 
 # A helping class to nicely display results on the module output.
-class SmartAddUrlResult:
+class AddResult:
 
     def __init__(self, domain, error, message):
         self.domain = domain
@@ -51,7 +51,7 @@ class SmartAddUrl(DashboardModule):
     settings_form = SmartAddUrlForm
 
     newUrls = None
-    addresult = []
+    addresults = []
 
     def load_settings(self, settings):
         self.newUrls = settings.get('newUrls')
@@ -63,82 +63,98 @@ class SmartAddUrl(DashboardModule):
 
     def init_with_context(self, context):
         self.add(self.newUrls)
-        self.children = self.addresult  # todo: make sure the results are added here
+        self.children = self.addresults  # todo: make sure the results are added here
 
     # this is called 3 times per reload, highly inefficient. Can't really do much about it
     def add(self, urls):
 
-        self.addresult = []  # todo: 3-times reload symptom suppression. I don't like it.
+        self.addresults = []  # todo: 3-times reload symptom suppression. I don't like it.
 
         if not urls:
-            self.addresult.append(SmartAddUrlResult('', 1,
-                                                    'No url was added ever via this module.'))
+            self.addresults.append(AddResult('', 1, 'No url was added ever via this module.'))
             return False
 
         # We're expecting the most ridiculous crap, which hopefully gets filtered by tldextract
         # Checked: tldextract removed queries, usernames, passwords, protocols, ports, etc.
         # Probably unicode is still a challenge, as it relies on underlying DB.
         for line in urls.splitlines():
-            # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
-            # Looks susceptible to xss, tested an xss wordlist on it: no problem.
             xtrct = tldextract.extract(line)
-            domainandtld = xtrct.domain + '.' + xtrct.suffix
-            completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-            if not xtrct.domain:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'No domain entered.'))
-                continue
+            valid_domain, add_result = self.is_valid_domain(xtrct)
 
-            if not xtrct.subdomain:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'Can\'t determine what organisation a '
-                                                        'domain belongs to without a subdomain.'))
-                continue
+            if not valid_domain:
+                self.addresults.append(add_result)
+            else:
+                # looks legit, let's add it.
 
-            if not xtrct.subdomain and not xtrct.suffix:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'Can\'t determine organization by IP or '
-                                                        'unknown top level domain.'))
-                continue
+                # todo: things can still go wrong here, database errors and such.
+                # There are a lot of silent errors (the module just stops) when you're not working
+                # correctly with querysets inside this module. So errors will in most cases be
+                # silent. Fortunately the manual hints a GET which is really easy to work with.
+                # the pprint(vars( of the queryset didn't give a hint how to get
+                # the first/only object.
+                # are domains unique? no. Might cause issues.
 
-            if not Url.objects.filter(url=domainandtld):  # an exists-type query
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'Can\'t determine the organization if '
-                                                        'there is no organization that uses this '
-                                                        'domain.'))
-                continue
+                domainandtld = xtrct.domain + '.' + xtrct.suffix
+                completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-            # this happens when two separate organizations use the same generic service provider
-            # it will also result in an erroneous add with the first domain. Not much you
-            # can do about it. One solution would be to check if the sub domain matches a domain.
-            # and use that organization. That might work in 50% of the cases.
+                o = Url.objects.get(url=domainandtld)
+                newurl = Url(organization_id=o.organization_id, url=completedomain)
+                newurl.save()
 
-            # also: this test is just incorrect, it doesn't check for multiple organizations at all
-            # todo: fix
-            if Url.objects.filter(url=domainandtld).count() > 1:
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'Can\'t determine the organization if '
-                                                        'there are more organizations that use the '
-                                                        'same domain.'))
-                continue
+                self.addresults.append(AddResult(completedomain, 0, 'Domain Added'))
 
-            if Url.objects.filter(url=completedomain).count():
-                self.addresult.append(SmartAddUrlResult(completedomain, 1,
-                                                        'This domain is already in the database.'))
-                continue
+    @staticmethod
+    def is_valid_domain(xtrct):
 
-            # looks legit, let's add it.
+        # ExtractResult(subdomain='forums.news', domain='cnn', suffix='com')
+        # Looks susceptible to xss, tested an xss wordlist on it: no problem.
 
-            # todo: things can still go wrong here, database errors and such.
-            # There are a lot of silent errors (the module just stops) when you're not working
-            # correctly with querysets inside this module. So errors will in most cases be
-            # silent. Fortunately the manual hints a GET which is really easy to work with.
-            # the pprint(vars( of the queryset didn't give a hint how to get
-            # the first/only object.
-            # are domains unique? no. Might cause issues.
-            o = Url.objects.get(url=domainandtld)
-            newurl = Url(organization_id=o.organization_id, url=completedomain)
-            newurl.save()
+        domainandtld = xtrct.domain + '.' + xtrct.suffix
+        completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-            self.addresult.append(SmartAddUrlResult(completedomain, 0, 'Domain Added'))
+        if not xtrct.domain:
+            return False, AddResult(completedomain, 1,
+                                    'No domain entered.')
+
+        if not xtrct.subdomain:
+            return False, AddResult(completedomain, 1,
+                                    'Can\'t determine what organisation a domain belongs to '
+                                    'without a subdomain.')
+
+        if not xtrct.subdomain and not xtrct.suffix:
+            return False, AddResult(completedomain, 1,
+                                    'Can\'t determine organization by IP or '
+                                    'unknown top level domain.')
+
+        if not xtrct.suffix:
+            return False, AddResult(completedomain, 1,
+                                    'Domain is missing a top level extension.'
+                                    'such as .NL or .ORG...')
+
+        if not Url.objects.filter(url=domainandtld).exists:
+            return False, AddResult(completedomain, 1,
+                                    'Can\'t determine the organization if '
+                                    'there is no organization that uses this domain.')
+
+        # this happens when two separate organizations use the same generic service provider
+        # it will also result in an erroneous add with the first domain. Not much you
+        # can do about it. One solution would be to check if the sub domain matches a domain.
+        # and use that organization. That might work in 50% of the cases.
+
+        # also: this test is just incorrect, it doesn't check for multiple organizations at all
+        # todo: fix
+        if Url.objects.filter(url=domainandtld).count() > 1:
+            return False, AddResult(completedomain, 1,
+                                    'Can\'t determine the organization if there are more '
+                                    'organizations that use the same domain.')
+
+        if Url.objects.filter(url=completedomain).count():
+            return False, AddResult(completedomain, 1, 'This domain is already in the database.')
+
+        if not Url.objects.filter(url=domainandtld).count():
+            return False, AddResult(completedomain, 1,
+                                    'The domain.tld is not in the database, so its'
+                                    'impossible to determine the organization')
+
+        return True, AddResult(completedomain, 0, 'Domain seems fine')

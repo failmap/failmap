@@ -16,9 +16,14 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+# Django 1.10 http://stackoverflow.com/questions/38744285/
+# django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
+
 urlpatterns = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     url(r'^jet/dashboard/', include('jet.dashboard.urls',
                                     'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', admin.site.urls),
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^', include('failmap_admin.scanners.urls')),
 ]
