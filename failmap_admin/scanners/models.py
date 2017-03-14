@@ -32,6 +32,9 @@ class Endpoint(models.Model):
     is_dead_since = models.DateTimeField(blank=True, null=True)
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
+    def __str__(self):
+        return "%s = %s | %s/%s" % (self.domain,  self.ip, self.protocol, self.port)
+
 
 # todo: to save data, you can also only save the changes in the scan over time.
 # and dump the rest / intermediates elsewhere.

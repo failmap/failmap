@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from jet.admin import CompactInline
 
 from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad
@@ -8,6 +9,7 @@ class TlsQualysScanAdminInline(CompactInline):
     model = TlsQualysScan
     extra = 0
     show_change_link = True
+    ordering = ["-rating_determined_on"]
 
 # can't make this admin, there is no join.
 # class TlsQualysScratchpadAdminInline(admin.StackedInline):
@@ -16,7 +18,7 @@ class TlsQualysScanAdminInline(CompactInline):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead')
+    list_display = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead', 'scan_count')
     search_fields = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
     list_filter = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead')
@@ -28,13 +30,17 @@ class EndpointAdmin(admin.ModelAdmin):
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
+
+    def scan_count(self, inst):
+        return TlsQualysScan.objects.filter(endpoint=inst.id).count()
+
     inlines = [TlsQualysScanAdminInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
 
 
 class TlsQualysScanAdmin(admin.ModelAdmin):
-    list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'pending',
-                    'pending_since', 'scan_date', 'rating_determined_on')
+    list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
+                    'scan_date', 'rating_determined_on')
     search_fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'pending',
                      'pending_since', 'scan_date', 'rating_determined_on')
     list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'pending',
