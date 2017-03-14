@@ -166,8 +166,10 @@ migrations.RunSQL("UPDATE faalmigratie.URL set Organization = 'Meierijstad' \
 # be aware that the old database uses named foreign keys and the new database uses ID everywhere.
 migrations.RunSQL("INSERT IGNORE INTO newdatabase.url \
                    (url, isdead, isdeadsince, isdeadreason, organization_id) \
-                        SELECT url, isdead, IF(isdeadsince = '0000-00-00 00:00:00', NULL, isdeadsince ), isdeadreason, \
-                        (SELECT id FROM newdatabase.organization ndbo WHERE ndbo.name = odbo.organization) \
+                        SELECT url, isdead, IF(isdeadsince = '0000-00-00 00:00:00', NULL, \
+                        isdeadsince ), isdeadreason, \
+                        (SELECT id FROM newdatabase.organization ndbo \
+                        WHERE ndbo.name = odbo.organization) \
                         FROM faalmigratie.url odbo;")
 
 # both result in an empty set, while there is an warning of orgnaization_id not being null.
@@ -209,5 +211,6 @@ migrations.RunSQL("INSERT IGNORE INTO newdatabase.scanner_tls_qualys ( \
                         AND ip = faalmigratie.scans_ssllabs.ipadres \
                         AND server_name = faalmigratie.scans_ssllabs.servernaam \
                         AND is_dead = faalmigratie.scans_ssllabs.isdead), \
-                   rating, ratingnotrust, 0, NULL, DATE(scanmoment), TIME(scanmoment), scanmoment, scanmoment \
+                   rating, ratingnotrust, 0, NULL, DATE(scanmoment), TIME(scanmoment), \
+                   scanmoment, scanmoment \
                    from faalmigratie.scans_ssllabs;")
