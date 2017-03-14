@@ -34,7 +34,7 @@ If your're looking on how many sequential scans had the same data (query below),
 that there are 187968 records with the same endpoint and scan result information. (96.77%)
 If you would omit the scan result information, it has 189632 results (97.63%).
 
-This means that only 1664 records have changed in 9 months.
+This means that only 1664 records have changed in 9 months...
 
 These records have been accumulated over a 9 months period of about +/-1000 domains. The choice
 of reducing the dataset to only record changes has saved 99.14 percent of data in the database.
