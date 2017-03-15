@@ -1,0 +1,74 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-15 09:43+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: map/templates/index.html:15
+msgid "Site Title"
+msgstr "Fail Map - This is how safely your data is treated."
+
+#: map/templates/index.html:67
+msgid "Toggle navigation"
+msgstr ""
+
+#: map/templates/index.html:72 map/templates/index.html:90
+msgid "Fail Map"
+msgstr "Fail Map"
+
+#: map/templates/index.html:76
+msgid "Home"
+msgstr ""
+
+#: map/templates/index.html:77
+msgid "Map"
+msgstr ""
+
+#: map/templates/index.html:78
+msgid "Bar"
+msgstr ""
+
+#: map/templates/index.html:79
+msgid "Numbers"
+msgstr ""
+
+#: map/templates/index.html:80
+msgid "Domains"
+msgstr ""
+
+#: map/templates/index.html:81
+msgid "Explanation"
+msgstr ""
+
+#: map/templates/index.html:91
+msgid "Fail Map Introduction"
+msgstr ""
+"Fail Map visualizes how safe critical information and systems are governed"
+"when connected to the internet. For example, it looks at the safety of "
+"data being exchanged. It's important that his done correctly, since these"
+" connections are also used to transfer your personal data."
+
+#: map/templates/index.html:110
+msgid "The Map"
+msgstr ""
+
+#: map/templates/index.html:111
+msgid "The Map Introduction"
+msgstr ""
+"This map reads as a traffic light. Every municipality and organization is "
+"displayed in a color. Red means insufficient safety, green means sufficient: "
+"there seems to be nothing wrong with the things we (can/are allowed to) check."
+"There are various nuances, which are described elsewhere on this site."

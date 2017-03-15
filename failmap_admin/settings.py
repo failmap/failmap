@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'failmap_admin.fail',
     'failmap_admin.organizations',
     'failmap_admin.scanners',
+    'failmap_admin.map',
     'django_countries',
     'django.contrib.admindocs',
     'django.contrib.humanize',
@@ -131,7 +132,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # while settings are loaded and Django uses LANGUAGE_CODE as default. What overrides this?
 # a possible undesired solution, http://source.mihelac.org/2009/11/12/django-set-language-for-admin/
 
-LANGUAGE_CODE = 'en-us'
+# http://stackoverflow.com/questions/1832709/django-how-to-make-translation-work
+# shoddy documentation on dashes and underscores... different than the "ll" suggestion.
+# LANGUAGE_CODE = 'en-gb'  # The official EU language, ohai England, how are you doing?
+LANGUAGE_CODE = 'nl-nl'
 
 TIME_ZONE = 'UTC'
 
@@ -140,6 +144,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = ['locale']
 
 
 # Static files (CSS, JavaScript, Images)
