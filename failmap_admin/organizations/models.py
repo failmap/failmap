@@ -1,4 +1,5 @@
-from __future__ import unicode_literals
+# coding=UTF-8
+# from __future__ import unicode_literals
 
 from django.db import models
 from django_countries.fields import CountryField
@@ -64,14 +65,14 @@ class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
 
-    isdead = models.BooleanField(
+    is_dead = models.BooleanField(
         db_column='isDead',
         default=False,
         help_text="Dead url's will not be rendered on the map. Scanners can set this check "
                   "automatically (which might change in the future)")
-    isdeadsince = models.DateTimeField(
+    is_dead_since = models.DateTimeField(
         db_column='isDeadSince', blank=True, null=True)
-    isdeadreason = models.CharField(
+    is_dead_reason = models.CharField(
         db_column='isDeadReason',
         max_length=255,
         blank=True,
@@ -83,4 +84,7 @@ class Url(models.Model):
         unique_together = (('organization', 'url'),)
 
     def __str__(self):
-        return self.url
+        if self.is_dead:
+            return "✝ %s" % self.url
+        else:
+            return self.url

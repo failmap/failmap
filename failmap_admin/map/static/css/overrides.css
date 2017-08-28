@@ -1,0 +1,43 @@
+/*
+Overrides some values given in CSS from frameworks and third party stuff.
+
+Todo: there is a layer over the control box / time slider. (leaflet map pane).
+Todo: make sure the control box is OVER the map, not under the map.
+Todo: better separation of UI and data. The JS messes things up.
+**/
+
+/* Some leaflet user styling to make it more attractive */
+
+#map {
+    width: 1100px;
+    height: 900px;
+}
+
+.info {
+    min-width: 280px;
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 1px;
+}
+
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+.legend {
+    text-align: left;
+    line-height: 18px;
+    color: #555;
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}

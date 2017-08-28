@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.db.models import Count
 from jet.admin import CompactInline
 
 from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad
@@ -18,13 +17,14 @@ class TlsQualysScanAdminInline(CompactInline):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead', 'scan_count')
-    search_fields = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
+    list_display = ('url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
+                    'scan_count')
+    search_fields = ('url__url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
-    list_filter = ('domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead')
+    list_filter = ('server_name', 'ip', 'port', 'protocol', 'is_dead')
     fieldsets = (
         (None, {
-            'fields': ('domain', 'server_name', 'ip', 'port')
+            'fields': ('url', 'domain', 'server_name', 'ip', 'port')
         }),
         ('dead endpoint management', {
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),

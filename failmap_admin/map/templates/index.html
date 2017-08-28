@@ -1,13 +1,5 @@
-{% load static %}
-{% load i18n %}
-
-{# done: Static files toevoegen #}
-{# todo: Vertalingen toevoegen #}
-{# todo: variabelen assignen #}
-{# todo: Alle data ophalen met Javascript (hoe is dat te templaten?) #}
-{# todo: het voorkeursland als initieel laten zien als kaart. Op basis daarvan ook de db tonen? #}
-
-<!DOCTYPE html>
+<!DOCTYPE html>{% load static %} {% load i18n %}
+{# todo: de rest vertalen naar Brits als basistaal #}
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -29,33 +21,16 @@
         <link rel="stylesheet"
               type="text/css"
               href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'css/overrides.css' %}">
 
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/jquery.tooltipster.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vue.js' %}"></script> <!-- deps mngr? -->
 
-        <!-- custom libraries / files -->
-        <script type="text/javascript" src="{% static 'js/mapdata.php' %}?t={{ today }}"></script>
-        <!-- You can rip this, but also check our github repo for more :) -->
-        <script type="text/javascript" src="{% static 'js/tooltips.php' %}?t={{ today }}"></script>
-
-        <!-- leaflet user styling -->
-        <style>
-            #map { width: 1100px; height: 900px; }
-            .info {
-                min-width: 280px;
-                padding: 6px 8px; font: 14px/16px Arial, Helvetica, sans-serif;
-                background: white; background: rgba(255,255,255,0.8);
-                box-shadow: 0 0 15px rgba(0,0,0,0.2);
-                border-radius: 1px; }
-            .info h4 { margin: 0 0 5px; color: #777; }
-            .legend { text-align: left; line-height: 18px; color: #555; }
-            .legend i { width: 18px; height: 18px; float: left; margin-right: 8px; opacity: 0.7; }
-        </style>
-        <!-- /leaflet user styling -->
-
-            </head>
+    </head>
 
     <body role="document">
 
@@ -77,277 +52,396 @@
                         <li><a href="#kaart">{% trans "Map" %}</a></li>
                         <li><a href="#balk">{% trans "Bar" %}</a></li>
                         <li><a href="#cijfers">{% trans "Numbers" %}</a></li>
-                        <li><a href="#domeinen">{% trans "Domains" %}</a></li>
+                        <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#uitleg">{% trans "Explanation" %}</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
         </nav>
 
-    <div class="container theme-showcase" role="main">
+        <div class="container theme-showcase" role="main">
 
-        <div class="jumbotron">
-            <h1>{% trans "Fail Map" %}</h1>
-            <p>{% trans "Fail Map Introduction" %}</p>
-            <p>Stuur nieuwe subdomeinen in via twitter:
-                <a href="https://twitter.com/faalkaart">@faalkaart</a>
-                of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
-            </p>
-            <p>
-                <small>Update 15 februari 2017: Inmiddels wordt er weer
-                    <a href="https://github.com/failmap" target="_blank">volop gewerkt</a> aan
-                    faalkaart. De kaart is bijgewerkt naar nieuwe, goed onderhoudbare, technieken.
-                    Inmiddels is er een
-                    <a href="https://internetcleanup.foundation" target="_blank">stichting opgericht</a>
-                    om de ontwikkeling van de kaart te stimuleren. Binnenkort wordt er gewerkt aan
-                    het beter scannen van e.e.a: er gaat meer en sneller gescand worden.
-                </small>
-            </p>
-        </div>
-
-        <div class="page-header">
-            <a name="kaart"></a>
-            <h1>{% trans "The Map" %}</h1>
-            <p>{% trans "The Map Introduction" %}</p>
-        </div>
-
-        <div id='map'></div>
-        <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ today }}"></script>
-
-        <div class="page-header">
-            <a name="balk"></a>
-            <h1>De Balk</h1>
-            <p>Deze balk geeft in percentages aan hoe het er voor staat. Het kan zijn dat en gemeente 1 oranje en 20 groene verbindingen heeft. Dat is beter zichtbaar in deze balk.</p>
-        </div>
-
-        <div class="progress">
-            <div class="progress-bar progress-bar-success" style="width: {{ green }}%">
-                <span class="sr-only">35% Complete (success)</span>
+            <div class="jumbotron">
+                <h1>{% trans "Fail Map" %}</h1>
+                <p>{% trans "Fail Map Introduction" %}</p>
+                <p>Stuur nieuwe subdomeinen in via twitter:
+                    <a href="https://twitter.com/faalkaart">@faalkaart</a>
+                    of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
+                </p>
+                <p>
+                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden er punten uitgedeeld,
+                        bij meer dan 100 punten is de beveiliging niet op orde: voor een onjuist versleutelde verbinding
+                        worden al 200 punten verdiend. Het betekent dus ook echt iets om weinig punten te hebben.<br><br>
+                        De kaart is bijgewerkt zodat ook historie bekeken kan worden. Achter de schermen zijn er veel
+                        aanpassingen geweest.
+                    </small>
+                </p>
             </div>
-            <div class="progress-bar progress-bar-warning" style="width: {{ orange }}%">
-                <span class="sr-only">20% Complete (warning)</span>
-            </div>
-            <div class="progress-bar progress-bar-danger" style="width: {{ red }}%">
-                <span class='sr-only'>10% Complete (danger)</span>
-            </div>
-        </div>
-
-        <div class="page-header">
-            <a name="cijfers"></a>
-            <h1>De Cijfers</h1>
-            <p><i>Let op: verwijderde/opgeruimde subdomeinen en endpoints staan niet in deze
-                statistieken. Dit zijn er ongeveer 10, wat toeneemt over tijd.</i></p>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Wanneer</th>
-                        <th>Domeinen</th>
-                        <th>Voldoende</th>
-                        <th>Matig</th>
-                        <th>Onvoldoende</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-
-        <div class="col-md-6">
-            <div class="page-header">
-                <a name="uitleg"></a>
-                <h1>Over Faalkaart</h1>
-            </div>
-
-            <h2>Waarom Faalkaart?</h2>
-            <p>
-                Antwoord: Het is boeiend om te zien wat de status is van veiligheid van
-                dataverbindingen van publieke diensten, daar wordt namelijk vaak gevoelige
-                informatie verwerkt. De kaart heet Faalkaart omdat initieel werd aangenomen dat er
-                nog veel te verbeteren viel en een tendentieuze naam eerder leidt tot actie dan een
-                schattige naam. De naam bleek verkeerd gekozen.
-            </p>
-
-            <h2>Mijn gemeente is rood, wat nu?</h2>
-            <p>
-                Antwoord: Helaas zit er een gat in de muur: de gemeente zal actie moeten ondernemen
-                om e.e.a. goed in te richten of een <a href="https://letsencrypt.org">nieuw
-                certificaat te installeren</a>. Er wordt uitgegaan van de zwakste schakel: ergens
-                een onvoldoende betekent een rode vlek op de kaart.
-            </p>
-
-            <h2>Mijn gemeente is groen, is alles goed?</h2>
-            <p>
-                Antwoord: De kans dat een subdomein mist, en juist daar een gat in de muur zit, is
-                aanwezig. De vuistregel is dat meer subdomeinen meer zekerheid geven.
-            </p>
-
-            <h2>Hoe compleet is dit?</h2>
-            <p>
-                Antwoord: Er zijn meer dan 1800 domeinen getest van 350+ gemeenten. Er wordt getest
-                op poort 443 (https). De geteste domeinen staan links op deze site vermeld. Er is
-                alleen getest op *.gemeentenaam.tld, dus niet op doorverwijzingen. Sommige diensten
-                zitten achter ip- en certificaatfiltering en zijn dus niet testbaar zonder de juiste
-                voorwaarden. Sommige gemeenten accepteren DNS wildcards, hiervan zijn alleen www.~
-                en ~ getest: dit is dus incompleet en kan voor deze gemeenten de schijn wekken dat
-                alles in orde is. De kaartdata en gemeente-websites komen uit 2014 en het is
-                mogelijk dat er dus wat mist door o.a. het samengaan van gemeenten.
-            </p>
-
-            <h2>Hoe komt de score tot stand?</h2>
-            <p>
-                Antwoord: Er wordt verbinding gemaakt op poort 443. Als er een verbinding is, en er
-                is een beveiligde verbinding bedoeld, dan wordt gecontroleerd hoe goed die
-                verbinding is. Als er een beveiligde verbinding is, dan wordt deze geacht als nodig.
-                Het is lastig om automatisch te bepalen of een domein wel of geen beveiligde
-                verbinding vereist: publieke informatie moet ook bereikbaar zijn voor mensen die
-                internetten via een aardappel.
-            </p>
-
-            <h2>Hoe moet SSL/TLS worden ingericht?</h2>
-            <p>
-                Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration&aqs=chrome..69i57.6276j0j1&sourceid=chrome&es_sm=93&ie=UTF-8">aantal goede handleidingen te vinden</a>.
-                Toonaangevend advies komt van het <a href="https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html">Nationaal Cyber Security Centrum</a>.
-                Een variant toegespitst op gemeenten, die ook ingaat op DNSSEC, staat op de site van
-                <a href="https://www.ibdgemeenten.nl/3619-2/" target="_blank">IBD Gemeenten</a>.
-                Lijsten met goede instellingen zijn te vinden op <a href="https://cipherli.st">Cipher List</a>.
-            </p>
-
-            <h2>Sinds wanneer bestaat deze kaart?</h2>
-            <p>
-                Antwoord: De kaart is gepresenteerd door sprekers op de
-                "<a href="http://inhethoofdvandehacker.nl/" target="_blank">in het hoofd van de hacker</a>"
-                conferentie van 16 maart 2016. Een volledig programma van de conferentie is terug
-                te zien op de site van de conferentie.
-            </p>
-
-            <h2>Hoe is dit tot stand gekomen?</h2>
-            <p>Antwoord: Dit project is tot stand gekomen door:</p>
-            <ul>
-                <li>Programmeer, hak en breekwerk door Elger Jonker</li>
-                <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
-                <li>Actuele lijst gemeenten: 200ok.nl</li>
-                <li>Beoordeling op veiligheid door Qualys SSL labs</li>
-                <li>URLs en polygonen van de klikbare gemeentekaart van Imergis. Kaartdata 2014.</li>
-                <li>Simpele DNS verkenning met DNS Recon</li>
-                <li>Styling: Twitter Bootstrap</li>
-                <li>Talen: Python, PHP op MariaDB.</li>
-                <li>JQuery MapHighlight door David Lynch</li>
-            </ul>
-
-            <h2>Wat is de historie van Faalkaart?</h2>
-
-            <p>
-                <small>
-                    <b>7 augustus 2016</b>:
-                    Faalkaart heeft de steun gekregen van het SIDN fonds, we zullen het komende jaar
-                    de kaart uitbreiden en op veel meer controleren. We gaan de kaartrot oplossen en
-                    zorgen dat het makkelijk wordt om zelf de kaart te kunnen draaien
-                    (onafhankelijk). Ook is de chaching van de site ingevoerd, dus het voelt weer
-                    snel(ler) aan.
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>9 juni 2016</b>:
-                    Door een nieuwe kwetsbaarheid zijn er 100+ domeinen in het rood beland, van 2%
-                    naar 9% kwetsbaar dus. Het aantal matige domeinen blijft gelukkig afnemen. Hoe
-                    lang zal het duren tot alles gepatched is? Wie patcht het laatst?
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>Extra update</b>:
-                    Faalkaart heeft een projectbijdrage gevraagd aan het SIDN
-                    fonds om er voor te zorgen dat dit middel breder en makkelijker kan worden
-                    ingezet. We gaan hierdoor vele honderdduizenden kwetsbaarheden aan de kaak te
-                    stellen en blijven motiveren om ze te verhelpen. De techneuten, hackers en nerds
-                    achter faalkaart staan te trappelen om het internet robuuster te maken. Half
-                    Juni weten we meer. Spannend!
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>Extra update 2</b>:
-                    We zien dat door de grote hoeveelheid data we caching
-                    moeten gaan toepassen en verder moeten optimaliseren. De bedoeling is om de
-                    kaart zo actueel mogelijk weer te geven. Tot dit opgelost is zal het iets langer
-                    duren voordat de kaart geladen is.
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>8 april 2016</b>:
-                    Het aantal domeinen met een onvoldoende is gezakt naar 2%,
-                    was ooit 8%. Er zijn zojuist 1200 domeinen toegevoegd. Er is een team aan het
-                    ontstaan dat de faalkaart verder gaat uitbreiden en onderhouden. Vele handen
-                    maken licht werk. Dank aan gemeenten voor het insturen van subdomeinen. Dit is
-                    altijd welkom!
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>25 maart 2016</b>:
-                    De kaart wordt automatisch ververst. Onder de uitleg staat
-                    een overzicht met domeinen die onvoldoende scoren.
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>18 maart 2016</b>:
-                    De kaart wordt zeer binnenkort automatisch bijgewerkt.
-                    Nieuw zijn statistieken met historie. De domeinenlijst is verbeterd en er is
-                    tekst toegevoegd over de totstandkoming van het cijfer. Binnenkort ook open
-                    source.
-                </small>
-            </p>
-            <p>
-                <small>
-                    <b>16 maart 2016</b>:
-                    De eerste serie van 1800 domeinen is geladen, dit wordt nog aangevuld en zal
-                    binnenkort opnieuw worden gecontroleerd. De testdatum is nu zichtbaar. De eerste
-                    verbeteringen schijnen een half uur na presentatie al te zijn doorgevoerd.
-                    Dat is stoer!
-                </small>
-            </p>
-
 
             <div class="page-header">
-                <a name="takenlijst"></a>
-                <h2>Wat scoort onvoldoende?</h2>
+                <a name="kaart"></a>
+                <h1>{% trans "The Map" %}</h1>
+                <p>{% trans "The Map Introduction" %}</p>
             </div>
-            <table class="table table-striped">
-                <thead>
-                <tr><th>Gemeente</th><th>Domeinen / oordeel</th></tr>
-                </thead><tbody>
 
-                </tbody>
-            </table>
-        </div>
+            <h4>Time slider</h4>
+            <input id="history" type="range" value="0" min="0" max="52" step="1" style="direction: rtl"/><br/>
 
-        <div class="col-md-6">
+            <div id='map'></div>
+            <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
+
+
+            <div class="page-header" id="report" v-if="name">
+                <h1>{% trans "Report" %}</h1>
+                <div>
+                    <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
+                    {% trans "Rating" %}: {% verbatim %}{{ rating }}{% endverbatim %}<br />
+                    {% trans "Created on" %}: {% verbatim %}{{ when }}{% endverbatim %}<br />
+                    <br />
+                    {% trans "Score layout" %}: <br />
+                    <div v-html="calculation"></div>
+                </div>
+            </div>
+
+            <div id="statistics">
+                <div class="page-header">
+                    <a name="balk"></a>
+                    <h1>{% trans "The Bar" %}</h1>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar progress-bar-info" :style="{width:unknownpercentage}">
+                        <span class='sr-only'>We didn't scan them then...</span>
+                    </div>
+                    <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
+                        <span class="sr-only">Oh, wow!</span>
+                    </div>
+                    <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
+                        <span class="sr-only">Pretty fair, but not really there.</span>
+                    </div>
+                    <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
+                        <span class='sr-only'>They have a lot to learn.</span>
+                    </div>
+                </div>
+
+                <div class="page-header">
+                    <a name="cijfers"></a>
+                    <h1>{% trans "The Numbers" %}</h1>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>{% trans "When" %}</th>
+                                <th>{% trans "Organizations" %}</th>
+                                <th>{% trans "Good" %}</th>
+                                <th>{% trans "Average" %}</th>
+                                <th>{% trans "Bad" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="data.data">
+                                <tr>
+                                    <td>{% trans "Now" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data.now["total_organizations"] }}</td>
+                                    <td>{{ data.data.now["green"] }} <small>({{ data.data.now["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data.now["orange"] }} <small>({{ data.data.now["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data.now["red"] }} <small>({{ data.data.now["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "7 days ago ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["7 days ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["7 days ago"]["green"] }} <small>({{ data.data["7 days ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["7 days ago"]["orange"] }} <small>({{ data.data["7 days ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["7 days ago"]["red"] }} <small>({{ data.data["7 days ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "2 weeks ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["2 weeks ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["2 weeks ago"]["green"] }} <small>({{ data.data["2 weeks ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["2 weeks ago"]["orange"] }} <small>({{ data.data["2 weeks ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["2 weeks ago"]["red"] }} <small>({{ data.data["2 weeks ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "1 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["1 month ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["1 month ago"]["green"] }} <small>({{ data.data["1 month ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["1 month ago"]["orange"] }} <small>({{ data.data["1 month ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["1 month ago"]["red"] }} <small>({{ data.data["1 month ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "2 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["2 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["2 months ago"]["green"] }} <small>({{ data.data["2 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["2 months ago"]["orange"] }} <small>({{ data.data["2 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["2 months ago"]["red"] }} <small>({{ data.data["2 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "3 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["3 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["3 months ago"]["green"] }} <small>({{ data.data["3 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["3 months ago"]["orange"] }} <small>({{ data.data["3 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["3 months ago"]["red"] }} <small>({{ data.data["3 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "4 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["4 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["4 months ago"]["green"] }} <small>({{ data.data["4 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["4 months ago"]["orange"] }} <small>({{ data.data["4 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["4 months ago"]["red"] }} <small>({{ data.data["4 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "5 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["5 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["5 months ago"]["green"] }} <small>({{ data.data["5 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["5 months ago"]["orange"] }} <small>({{ data.data["5 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["5 months ago"]["red"] }} <small>({{ data.data["5 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                                <tr>
+                                    <td>{% trans "6 months ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["6 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["6 months ago"]["green"] }} <small>({{ data.data["6 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["6 months ago"]["orange"] }} <small>({{ data.data["6 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["6 months ago"]["red"] }} <small>({{ data.data["6 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="page-header">
+                        <a name="uitleg"></a>
+                        <h1>{% trans "About Failmap" %}</h1>
+                    </div>
+
+                    <h2>Waarom Faalkaart?</h2>
+                    <p>
+                        Antwoord: Het is boeiend om te zien wat de status is van veiligheid van
+                        dataverbindingen van publieke diensten, daar wordt namelijk vaak gevoelige
+                        informatie verwerkt. De kaart heet Faalkaart omdat initieel werd aangenomen dat er
+                        nog veel te verbeteren viel en een tendentieuze naam eerder leidt tot actie dan een
+                        schattige naam. De naam bleek verkeerd gekozen.
+                    </p>
+
+                    <h2>Mijn gemeente is rood, wat nu?</h2>
+                    <p>
+                        Antwoord: Helaas zit er een gat in de muur: de gemeente zal actie moeten ondernemen
+                        om e.e.a. goed in te richten of een <a href="https://letsencrypt.org">nieuw
+                        certificaat te installeren</a>. Er wordt uitgegaan van de zwakste schakel: ergens
+                        een onvoldoende betekent een rode vlek op de kaart.
+                    </p>
+
+                    <h2>Mijn gemeente is groen, is alles goed?</h2>
+                    <p>
+                        Antwoord: De kans dat een subdomein mist, en juist daar een gat in de muur zit, is
+                        aanwezig. De vuistregel is dat meer subdomeinen meer zekerheid geven.
+                    </p>
+
+                    <h2>Hoe compleet is dit?</h2>
+                    <p>
+                        Antwoord: Er zijn meer dan 1800 domeinen getest van 350+ gemeenten. Er wordt getest
+                        op poort 443 (https). De geteste domeinen staan links op deze site vermeld. Er is
+                        alleen getest op *.gemeentenaam.tld, dus niet op doorverwijzingen. Sommige diensten
+                        zitten achter ip- en certificaatfiltering en zijn dus niet testbaar zonder de juiste
+                        voorwaarden. Sommige gemeenten accepteren DNS wildcards, hiervan zijn alleen www.~
+                        en ~ getest: dit is dus incompleet en kan voor deze gemeenten de schijn wekken dat
+                        alles in orde is. De kaartdata en gemeente-websites komen uit 2014 en het is
+                        mogelijk dat er dus wat mist door o.a. het samengaan van gemeenten.
+                    </p>
+
+                    <h2>Hoe komt de score tot stand?</h2>
+                    <p>
+                        Sinds faalkaart 2.0 wordt de score anders opgebouwd. Er wordt nu gerekend in punten.
+                        Bij 0 punten heeft een organisatie alles op orde. Bij ieder beveiligingsprobleem
+                        worden punten toegekend, meer naarmate de ernst van het probleem hoger is.
+                        Bij 1000 punten is de veiligheid absoluut niet op orde, wat donkerrood is.
+                        In de nieuwe versie worden beoordelingen bij elkaar opgeteld: meer domeinen betekent
+                        dus meer kans op problemen. Dus ook een hogere kans op een slechter oordeel.
+                    </p>
+
+                    <h2>Hoe komt de score tot stand?</h2>
+                    <p>
+                        Antwoord: Er wordt verbinding gemaakt op poort 443. Als er een verbinding is, en er
+                        is een beveiligde verbinding bedoeld, dan wordt gecontroleerd hoe goed die
+                        verbinding is. Als er een beveiligde verbinding is, dan wordt deze geacht als nodig.
+                        Het is lastig om automatisch te bepalen of een domein wel of geen beveiligde
+                        verbinding vereist: publieke informatie moet ook bereikbaar zijn voor mensen die
+                        internetten via een aardappel.
+                    </p>
+
+                    <h2>Hoe moet SSL/TLS worden ingericht?</h2>
+                    <p>
+                        Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration&aqs=chrome..69i57.6276j0j1&sourceid=chrome&es_sm=93&ie=UTF-8">aantal goede handleidingen te vinden</a>.
+                        Toonaangevend advies komt van het <a href="https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html">Nationaal Cyber Security Centrum</a>.
+                        Een variant toegespitst op gemeenten, die ook ingaat op DNSSEC, staat op de site van
+                        <a href="https://www.ibdgemeenten.nl/3619-2/" target="_blank">IBD Gemeenten</a>.
+                        Lijsten met goede instellingen zijn te vinden op <a href="https://cipherli.st">Cipher List</a>.
+                    </p>
+
+                    <h2>Sinds wanneer bestaat deze kaart?</h2>
+                    <p>
+                        Antwoord: De kaart is gepresenteerd door sprekers op de
+                        "<a href="http://inhethoofdvandehacker.nl/" target="_blank">in het hoofd van de hacker</a>"
+                        conferentie van 16 maart 2016. Een volledig programma van de conferentie is terug
+                        te zien op de site van de conferentie.
+                    </p>
+
+                    <h2>Hoe is dit tot stand gekomen?</h2>
+                    <p>Antwoord: Dit project is tot stand gekomen door:</p>
+                    <ul>
+                        <li>Programmeer, hak en breekwerk door Elger Jonker</li>
+                        <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
+                        <li>Actuele lijst gemeenten: 200ok.nl</li>
+                        <li>Beoordeling op veiligheid door Qualys SSL labs</li>
+                        <li>URLs en polygonen van de klikbare gemeentekaart van Imergis. Kaartdata 2014.</li>
+                        <li>Simpele DNS verkenning met DNS Recon</li>
+                        <li>Styling: Twitter Bootstrap</li>
+                        <li>Talen: Python, PHP op MariaDB.</li>
+                        <li>JQuery MapHighlight door David Lynch</li>
+                    </ul>
+
+                    <h2>Wat is de historie van Faalkaart?</h2>
+
+                    <p>
+                        <small><b>15 februari 2017</b>:
+                            Inmiddels wordt er weer
+                            <a href="https://github.com/failmap" target="_blank">volop gewerkt</a> aan
+                            faalkaart. De kaart is bijgewerkt naar nieuwe, goed onderhoudbare, technieken.
+                            Inmiddels is er een
+                            <a href="https://internetcleanup.foundation" target="_blank">stichting opgericht</a>
+                            om de ontwikkeling van de kaart te stimuleren. Binnenkort wordt er gewerkt aan
+                            het beter scannen van e.e.a: er gaat meer en sneller gescand worden.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>7 augustus 2016</b>:
+                            Faalkaart heeft de steun gekregen van het SIDN fonds, we zullen het komende jaar
+                            de kaart uitbreiden en op veel meer controleren. We gaan de kaartrot oplossen en
+                            zorgen dat het makkelijk wordt om zelf de kaart te kunnen draaien
+                            (onafhankelijk). Ook is de chaching van de site ingevoerd, dus het voelt weer
+                            snel(ler) aan.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>9 juni 2016</b>:
+                            Door een nieuwe kwetsbaarheid zijn er 100+ domeinen in het rood beland, van 2%
+                            naar 9% kwetsbaar dus. Het aantal matige domeinen blijft gelukkig afnemen. Hoe
+                            lang zal het duren tot alles gepatched is? Wie patcht het laatst?
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>Extra update</b>:
+                            Faalkaart heeft een projectbijdrage gevraagd aan het SIDN
+                            fonds om er voor te zorgen dat dit middel breder en makkelijker kan worden
+                            ingezet. We gaan hierdoor vele honderdduizenden kwetsbaarheden aan de kaak te
+                            stellen en blijven motiveren om ze te verhelpen. De techneuten, hackers en nerds
+                            achter faalkaart staan te trappelen om het internet robuuster te maken. Half
+                            Juni weten we meer. Spannend!
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>Extra update 2</b>:
+                            We zien dat door de grote hoeveelheid data we caching
+                            moeten gaan toepassen en verder moeten optimaliseren. De bedoeling is om de
+                            kaart zo actueel mogelijk weer te geven. Tot dit opgelost is zal het iets langer
+                            duren voordat de kaart geladen is.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>8 april 2016</b>:
+                            Het aantal domeinen met een onvoldoende is gezakt naar 2%,
+                            was ooit 8%. Er zijn zojuist 1200 domeinen toegevoegd. Er is een team aan het
+                            ontstaan dat de faalkaart verder gaat uitbreiden en onderhouden. Vele handen
+                            maken licht werk. Dank aan gemeenten voor het insturen van subdomeinen. Dit is
+                            altijd welkom!
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>25 maart 2016</b>:
+                            De kaart wordt automatisch ververst. Onder de uitleg staat
+                            een overzicht met domeinen die onvoldoende scoren.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>18 maart 2016</b>:
+                            De kaart wordt zeer binnenkort automatisch bijgewerkt.
+                            Nieuw zijn statistieken met historie. De domeinenlijst is verbeterd en er is
+                            tekst toegevoegd over de totstandkoming van het cijfer. Binnenkort ook open
+                            source.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>16 maart 2016</b>:
+                            De eerste serie van 1800 domeinen is geladen, dit wordt nog aangevuld en zal
+                            binnenkort opnieuw worden gecontroleerd. De testdatum is nu zichtbaar. De eerste
+                            verbeteringen schijnen een half uur na presentatie al te zijn doorgevoerd.
+                            Dat is stoer!
+                        </small>
+                    </p>
+                </div>
+
+                <div class="col-md-6" id="topfail">
+                    <div class="page-header">
+                        <a name="topfail"></a>
+                        <h1>{% trans "Top Fail" %}</h1>
+                        <p v-if="top.metadata">{% trans "Updated on" %} {% verbatim %}{{ top.metadata.data_from_time }}{% endverbatim %}</p>
+                    </div>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>{% trans "Rank" %}</th>
+                            <th>{% trans "Organization" %}</th>
+                            <th>{% trans "Points" %}</th>
+                        </tr>
+                        </thead><tbody>
+                        <tr v-for='rank in top.ranking'>
+                            <td>{% verbatim %}{{ rank.Rank }}{% endverbatim %}</td>
+                            <td>{% verbatim %}{{ rank.OrganizationName }}{% endverbatim %}</td>
+                            <td>{% verbatim %}{{ rank.Points }}{% endverbatim %}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="page-header">
-                <a name="domeinen"></a>
-                <h1>Domeinen</h1>
+                <a name="footer"></a>
+                <h1>Support Fail Map</h1>
+                 <p>Failmap is open software by the <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a>.
+                        Support our mission to clean up the internet of dangerous failures: it helps protect your data and privacy as well.</p>
             </div>
-            <table class="table table-striped">
-                <thead>
-                <tr><th>Gemeente</th><th>Domeinen / oordeel</th></tr>
-                </thead><tbody>
-
-                </tbody>
-            </table>
         </div>
-
-
-    </div>
-</body>
+    </body>
 </html>
 <!--
-This page was generated with MSPAINT.EXE on {{ timestamp }} in <?php echo round((microtime(TRUE)-$_SERVER['REQUEST_TIME_FLOAT']), 4); ?>s
+This page was generated with MSPAINT.EXE on {{ timestamp }} in {{ rendertime }} seconds.
 -->
