@@ -339,8 +339,16 @@ class ScannerTlsQualys:
             ip_addresses.append(endpoint['ipAddress'])
 
         e = Endpoint
-        e.objects.filter(is_dead=0, domain=domain, port=443, protocol="https")
-        killable_endpoints = e.objects.exclude(ip__in=ip_addresses)
+        # bugfix: the result of the filter was not stored in e.So all endpoints where set to deleted
+        # exclude was in a separate assignment.
+        # 2017-0 -- scanner_tls_qualys.py:334  -- Cleaning endpoints for mail.albrandswaard.nl
+        # 2017-Found an endpoint that can get killed: webmail.alkmaar.nl
+        # above should not be possible...
+
+        killable_endpoints = e.objects.filter(is_dead=0,
+                                              domain=domain,
+                                              port=443,
+                                              protocol="https").exclude(ip__in=ip_addresses)
 
         for killable_endpoint in killable_endpoints:
             self.log.debug('Found an endpoint that can get killed: %s', killable_endpoint.domain)
