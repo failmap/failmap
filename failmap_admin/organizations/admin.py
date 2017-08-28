@@ -1,9 +1,11 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import Coordinate, Organization, Url
-from failmap_admin.scanners.models import Endpoint
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
+from failmap_admin.scanners.models import Endpoint
+
+from .models import Coordinate, Organization, Url
+
 
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
@@ -58,7 +60,8 @@ class OrganizationAdmin(admin.ModelAdmin):
 
         self.message_user(request, "Organization(s) have been rated")
 
-    rate_organization.short_description = "Rate selected Organizations based on available scansresults"
+    rate_organization.short_description = \
+        "Rate selected Organizations based on available scansresults"
 
 
 class UrlAdmin(admin.ModelAdmin):

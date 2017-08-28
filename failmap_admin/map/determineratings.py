@@ -1,11 +1,13 @@
 from datetime import datetime
-from dateutil.relativedelta import relativedelta  # history
 
 import pytz
+from dateutil.relativedelta import relativedelta  # history
+
+from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan
 
 from .models import OrganizationRating, UrlRating
-from failmap_admin.organizations.models import Url, Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan
+
 
 # todo: determine ratings over the past few months by changing the When.
 
@@ -57,32 +59,32 @@ class DetermineRatings:
     def rate_organization(self, organization, when=""):
         print("rating on %s organization %s" % (when, organization))
         """
-        Perhaps i don't understand SQL very well... but this is the case 
+        Perhaps i don't understand SQL very well... but this is the case
         that is currently going wrong.
-        
+
         The query that i wanted, which accounts for multiple ratings a the same time:
-        
+
         SELECT "url"."url", COUNT("url"."url") AS "n_urls", "map_urlrating"."id"
-        FROM "url" 
-        INNER JOIN "map_urlrating" ON ("url"."id" = "map_urlrating"."url_id") 
+        FROM "url"
+        INNER JOIN "map_urlrating" ON ("url"."id" = "map_urlrating"."url_id")
         WHERE "url"."organization_id" = 289 AND "url"."is_dead" = False
         GROUP BY "url"."url"
-        HAVING ("map_urlrating"."when" = (MAX("map_urlrating"."when")) 
+        HAVING ("map_urlrating"."when" = (MAX("map_urlrating"."when"))
         AND "map_urlrating"."id" = (MAX("map_urlrating"."id")))
-        
-        This was simply not possible via the ORM since there where multiple 
+
+        This was simply not possible via the ORM since there where multiple
         things thrown in the group by that i didn't ask for.
-        
+
         Using this i came pretty close:
         ratings = ratings.filter(urlrating__when=Max("urlrating__when"),
                                  urlrating__id=Max("urlrating__id"))
-        
+
         But it throws in a few extra group by's on urlrating and id. Which make the
         resultset even larger. I can't think in sets using the django orm (yet). :(
-        
+
         Using the MAX() annotation you get the Max ID, but what if that is NOT the latest
         over time.
-        
+
         Both go wrong, in adding an additional group by:
         ratings = Url.objects
         ratings = ratings.values("url")
@@ -96,19 +98,19 @@ class DetermineRatings:
         ratings = ratings.filter(url__organization=organization, url__is_dead=False)
         ratings = ratings.filter(when=Max("when"))
         ratings = ratings.annotate(n_urls=Count("url"))
-        
+
         GROUP BY "map_urlrating"."id", "map_urlrating"."when" H
-        
+
         and all we want is exactly that query WITHOUT the group by on "when".
-        
+
         That's why you don't want to annotate (left outer join) but filter (inner join).
         Only the ORM decides i need to also group by, which is just not ok.
-        
+
         The filter often creates an extra table, which is even more annoying.
-        
-        :param organization: 
+
+        :param organization:
         :param when: slide through time
-        :return: 
+        :return:
         """
         # sum the latest url ratings where URL is not dead of this organization.
         # save that sum as the most recent rating. That will be retrieved by the site.
@@ -241,7 +243,7 @@ class DetermineRatings:
     # and get those sweet rating improvements.
     # does not add information when there is nothing to find for this url.
     def get_url_score(self, url, when):
-        print ("calculating score on %s for %s" % (when, url.url))
+        print("calculating score on %s for %s" % (when, url.url))
 
         explanation = ""
         rating = 0
