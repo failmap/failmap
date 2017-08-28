@@ -181,1344 +181,1344 @@
 
 - model: organizations.url
   pk: 1
-  fields: {organization: 1, url: aaenhunze.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 1, url: aaenhunze.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 2
-  fields: {organization: 1, url: sip.aaenhunze.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 1, url: sip.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 3
-  fields: {organization: 1, url: webmail.aaenhunze.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 1, url: webmail.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 4
-  fields: {organization: 1, url: www.aaenhunze.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 1, url: www.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 5
-  fields: {organization: 2, url: aalburg.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 2, url: aalburg.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 6
-  fields: {organization: 2, url: intranet.aalburg.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 2, url: intranet.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 7
-  fields: {organization: 2, url: secure.aalburg.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 2, url: secure.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 8
-  fields: {organization: 2, url: www.aalburg.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 2, url: www.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 9
-  fields: {organization: 3, url: aalsmeer.nl, isdead: true, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 3, url: aalsmeer.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 10
-  fields: {organization: 3, url: webmail.aalsmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 3, url: webmail.aalsmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 11
-  fields: {organization: 3, url: www.aalsmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 3, url: www.aalsmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 12
-  fields: {organization: 4, url: aalten.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 4, url: aalten.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 13
-  fields: {organization: 4, url: intranet.aalten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 4, url: intranet.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 14
-  fields: {organization: 4, url: mail.aalten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 4, url: mail.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 15
-  fields: {organization: 4, url: secure.aalten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 4, url: secure.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 16
-  fields: {organization: 4, url: webmail.aalten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 4, url: webmail.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 17
-  fields: {organization: 4, url: www.aalten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 4, url: www.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 18
-  fields: {organization: 5, url: achtkarspelen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 5, url: achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 19
-  fields: {organization: 5, url: mail.achtkarspelen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 5, url: mail.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 20
-  fields: {organization: 5, url: portaal.achtkarspelen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 5, url: portaal.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 21
-  fields: {organization: 5, url: secure.achtkarspelen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 5, url: secure.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 22
-  fields: {organization: 5, url: www.achtkarspelen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 5, url: www.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 23
-  fields: {organization: 6, url: alblasserdam.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 6, url: alblasserdam.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 24
-  fields: {organization: 6, url: webmail.alblasserdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 6, url: webmail.alblasserdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 25
-  fields: {organization: 6, url: www.alblasserdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 6, url: www.alblasserdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 26
-  fields: {organization: 7, url: albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 27
-  fields: {organization: 7, url: intranet.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: intranet.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 28
-  fields: {organization: 7, url: mail.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: mail.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 29
-  fields: {organization: 7, url: portaal.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: portaal.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 30
-  fields: {organization: 7, url: raad.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: raad.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 31
-  fields: {organization: 7, url: secure.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: secure.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 32
-  fields: {organization: 7, url: www.albrandswaard.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 7, url: www.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 33
-  fields: {organization: 8, url: alkmaar.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 8, url: alkmaar.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 34
-  fields: {organization: 8, url: graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 35
-  fields: {organization: 8, url: intranet.graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: intranet.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 36
-  fields: {organization: 8, url: intranet.schermer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: intranet.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 37
-  fields: {organization: 8, url: mail.graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: mail.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 38
-  fields: {organization: 8, url: pers.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: pers.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 39
-  fields: {organization: 8, url: raad.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: raad.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 40
-  fields: {organization: 8, url: schermer.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 8, url: schermer.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 41
-  fields: {organization: 8, url: secure.graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: secure.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 42
-  fields: {organization: 8, url: secure.schermer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: secure.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 43
-  fields: {organization: 8, url: sip.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: sip.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 44
-  fields: {organization: 8, url: telewerken.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: telewerken.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 45
-  fields: {organization: 8, url: webmail.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: webmail.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 46
-  fields: {organization: 8, url: webmail.graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: webmail.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 47
-  fields: {organization: 8, url: www.alkmaar.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: www.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 48
-  fields: {organization: 8, url: www.graftderijp.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: www.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 49
-  fields: {organization: 8, url: www.schermer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 8, url: www.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 50
-  fields: {organization: 9, url: almelo.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 9, url: almelo.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 51
-  fields: {organization: 9, url: intranet.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: intranet.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 52
-  fields: {organization: 9, url: mail.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: mail.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 53
-  fields: {organization: 9, url: portaal.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: portaal.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 54
-  fields: {organization: 9, url: resetww.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: resetww.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 55
-  fields: {organization: 9, url: ris.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: ris.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 56
-  fields: {organization: 9, url: secure.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: secure.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 57
-  fields: {organization: 9, url: sip.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: sip.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 58
-  fields: {organization: 9, url: sites.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: sites.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 59
-  fields: {organization: 9, url: subsidie.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: subsidie.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 60
-  fields: {organization: 9, url: webmail.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: webmail.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 61
-  fields: {organization: 9, url: www.almelo.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 9, url: www.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 62
-  fields: {organization: 10, url: almere.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 10, url: almere.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 63
-  fields: {organization: 10, url: mail.almere.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 10, url: mail.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 64
-  fields: {organization: 10, url: owa.almere.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 10, url: owa.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 65
-  fields: {organization: 10, url: webmail.almere.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 10, url: webmail.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 66
-  fields: {organization: 10, url: www.almere.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 10, url: www.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 67
-  fields: {organization: 11, url: alphenaandenrijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 11, url: alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 68
-  fields: {organization: 11, url: intranet.alphenaandenrijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 11, url: intranet.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 69
-  fields: {organization: 11, url: mail.alphenaandenrijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 11, url: mail.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 70
-  fields: {organization: 11, url: sip.alphenaandenrijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 11, url: sip.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 71
-  fields: {organization: 11, url: www.alphenaandenrijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 11, url: www.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 72
-  fields: {organization: 12, url: alphen-chaam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 12, url: alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 73
-  fields: {organization: 12, url: intranet.alphen-chaam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 12, url: intranet.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 74
-  fields: {organization: 12, url: secure.alphen-chaam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 12, url: secure.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 75
-  fields: {organization: 12, url: www.alphen-chaam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 12, url: www.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 76
-  fields: {organization: 13, url: ameland.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 13, url: ameland.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 77
-  fields: {organization: 13, url: mail.ameland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 13, url: mail.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 78
-  fields: {organization: 13, url: secure.ameland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 13, url: secure.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 79
-  fields: {organization: 13, url: www.ameland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 13, url: www.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 80
-  fields: {organization: 14, url: amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 81
-  fields: {organization: 14, url: mail.amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: mail.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 82
-  fields: {organization: 14, url: mail2.amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: mail2.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 83
-  fields: {organization: 14, url: sip.amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: sip.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 84
-  fields: {organization: 14, url: webmail.amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: webmail.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 85
-  fields: {organization: 14, url: www.amersfoort.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 14, url: www.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 86
-  fields: {organization: 15, url: amstelveen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 15, url: amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 87
-  fields: {organization: 15, url: raad.amstelveen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 15, url: raad.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 88
-  fields: {organization: 15, url: webmail.amstelveen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 15, url: webmail.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 89
-  fields: {organization: 15, url: www.amstelveen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 15, url: www.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 90
-  fields: {organization: 16, url: amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 91
-  fields: {organization: 16, url: intranet.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: intranet.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 92
-  fields: {organization: 16, url: mail.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: mail.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 93
-  fields: {organization: 16, url: portaal.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: portaal.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 94
-  fields: {organization: 16, url: ris.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: ris.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 95
-  fields: {organization: 16, url: telewerken.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: telewerken.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 96
-  fields: {organization: 16, url: webmail.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: webmail.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 97
-  fields: {organization: 16, url: www.amsterdam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 16, url: www.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 98
-  fields: {organization: 17, url: apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 99
-  fields: {organization: 17, url: gis.apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: gis.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 100
-  fields: {organization: 17, url: intranet.apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: intranet.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 101
-  fields: {organization: 17, url: mail2.apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: mail2.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 102
-  fields: {organization: 17, url: webmail.apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: webmail.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 103
-  fields: {organization: 17, url: www.apeldoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 17, url: www.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 104
-  fields: {organization: 18, url: afspreken.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: afspreken.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 105
-  fields: {organization: 18, url: appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 106
-  fields: {organization: 18, url: castmanage3.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: castmanage3.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 107
-  fields: {organization: 18, url: cijfers.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: cijfers.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 108
-  fields: {organization: 18, url: gis.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: gis.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 109
-  fields: {organization: 18, url: gwpprod.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: gwpprod.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 110
-  fields: {organization: 18, url: intranet.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: intranet.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 111
-  fields: {organization: 18, url: mail.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: mail.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 112
-  fields: {organization: 18, url: mail2.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: mail2.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 113
-  fields: {organization: 18, url: openbareruimte.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: openbareruimte.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 114
-  fields: {organization: 18, url: owa.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: owa.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 115
-  fields: {organization: 18, url: pers.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: pers.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 116
-  fields: {organization: 18, url: portaal.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: portaal.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 117
-  fields: {organization: 18, url: raad.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: raad.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 118
-  fields: {organization: 18, url: resetww.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: resetww.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 119
-  fields: {organization: 18, url: ris.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: ris.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 120
-  fields: {organization: 18, url: ropubliceer.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: ropubliceer.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 121
-  fields: {organization: 18, url: secure.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: secure.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 122
-  fields: {organization: 18, url: sip.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: sip.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 123
-  fields: {organization: 18, url: sites.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: sites.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 124
-  fields: {organization: 18, url: subsidie.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: subsidie.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 125
-  fields: {organization: 18, url: telewerken.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: telewerken.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 126
-  fields: {organization: 18, url: webmail.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: webmail.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 127
-  fields: {organization: 18, url: www.appingedam.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 18, url: www.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 128
-  fields: {organization: 19, url: arnhem.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 19, url: arnhem.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 129
-  fields: {organization: 19, url: mail.arnhem.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 19, url: mail.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 130
-  fields: {organization: 19, url: sip.arnhem.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 19, url: sip.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 131
-  fields: {organization: 19, url: www.arnhem.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 19, url: www.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 132
-  fields: {organization: 20, url: assen.nl, isdead: true, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 20, url: assen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 133
-  fields: {organization: 20, url: www.assen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 20, url: www.assen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 134
-  fields: {organization: 21, url: asten.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 21, url: asten.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 135
-  fields: {organization: 21, url: mail.asten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 21, url: mail.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 136
-  fields: {organization: 21, url: raad.asten.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 21, url: raad.asten.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 137
-  fields: {organization: 21, url: webmail.asten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 21, url: webmail.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 138
-  fields: {organization: 21, url: www.asten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 21, url: www.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 139
-  fields: {organization: 22, url: baarle-nassau.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 22, url: baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 140
-  fields: {organization: 22, url: intranet.baarle-nassau.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 22, url: intranet.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 141
-  fields: {organization: 22, url: secure.baarle-nassau.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 22, url: secure.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 142
-  fields: {organization: 22, url: www.baarle-nassau.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 22, url: www.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 143
-  fields: {organization: 23, url: baarn.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 23, url: baarn.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 144
-  fields: {organization: 23, url: intranet.baarn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 23, url: intranet.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 145
-  fields: {organization: 23, url: secure.baarn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 23, url: secure.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 146
-  fields: {organization: 23, url: telewerken.baarn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 23, url: telewerken.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 147
-  fields: {organization: 23, url: webmail.baarn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 23, url: webmail.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 148
-  fields: {organization: 23, url: www.baarn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 23, url: www.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 149
-  fields: {organization: 24, url: barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 150
-  fields: {organization: 24, url: intranet.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: intranet.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 151
-  fields: {organization: 24, url: loket.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: loket.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 152
-  fields: {organization: 24, url: mail.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: mail.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 153
-  fields: {organization: 24, url: secure.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: secure.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 154
-  fields: {organization: 24, url: simsite.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: simsite.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 155
-  fields: {organization: 24, url: webmail.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: webmail.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 156
-  fields: {organization: 24, url: www.barendrecht.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 24, url: www.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 157
-  fields: {organization: 25, url: barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 158
-  fields: {organization: 25, url: extranet.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: extranet.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 159
-  fields: {organization: 25, url: gis.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: gis.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 160
-  fields: {organization: 25, url: intranet.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: intranet.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 161
-  fields: {organization: 25, url: kaart.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: kaart.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 162
-  fields: {organization: 25, url: secure.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: secure.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 163
-  fields: {organization: 25, url: www.barneveld.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 25, url: www.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 164
-  fields: {organization: 26, url: bedum.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 26, url: bedum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 165
-  fields: {organization: 26, url: intranet.bedum.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 26, url: intranet.bedum.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 166
-  fields: {organization: 26, url: mail.bedum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 26, url: mail.bedum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 167
-  fields: {organization: 26, url: webmail.bedum.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 26, url: webmail.bedum.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 168
-  fields: {organization: 26, url: www.bedum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 26, url: www.bedum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 169
-  fields: {organization: 27, url: gemeentebeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 27, url: gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 170
-  fields: {organization: 27, url: mail.gemeentebeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 27, url: mail.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 171
-  fields: {organization: 27, url: secure.gemeentebeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 27, url: secure.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 172
-  fields: {organization: 27, url: webmail.gemeentebeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 27, url: webmail.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 173
-  fields: {organization: 27, url: www.gemeentebeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 27, url: www.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 174
-  fields: {organization: 28, url: beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 175
-  fields: {organization: 28, url: gemeentebestuur.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: gemeentebestuur.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 176
-  fields: {organization: 28, url: intranet.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: intranet.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 177
-  fields: {organization: 28, url: mail.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: mail.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 178
-  fields: {organization: 28, url: portaal.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: portaal.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 179
-  fields: {organization: 28, url: secure.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: secure.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 180
-  fields: {organization: 28, url: webmail.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: webmail.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 181
-  fields: {organization: 28, url: www.beemster.net, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 28, url: www.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 182
-  fields: {organization: 29, url: beesel.nl, isdead: true, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 29, url: beesel.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 183
-  fields: {organization: 29, url: webmail.beesel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 29, url: webmail.beesel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 184
-  fields: {organization: 29, url: www.beesel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 29, url: www.beesel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 185
-  fields: {organization: 30, url: bellingwedde.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 30, url: bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 186
-  fields: {organization: 30, url: intranet.bellingwedde.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 30, url: intranet.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 187
-  fields: {organization: 30, url: mail.bellingwedde.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 30, url: mail.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 188
-  fields: {organization: 30, url: webmail.bellingwedde.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 30, url: webmail.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 189
-  fields: {organization: 30, url: www.bellingwedde.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 30, url: www.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 190
-  fields: {organization: 31, url: groesbeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 191
-  fields: {organization: 31, url: intranet.groesbeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: intranet.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 192
-  fields: {organization: 31, url: mail.groesbeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: mail.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 193
-  fields: {organization: 31, url: mail.millingenaanderijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: mail.millingenaanderijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 194
-  fields: {organization: 31, url: mail.ubbergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: mail.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 195
-  fields: {organization: 31, url: millingenaanderijn.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: millingenaanderijn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 196
-  fields: {organization: 31, url: ruimtelijkeplannen.millingenaanderijn.nl, isdead: false,
-    isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 31, url: ruimtelijkeplannen.millingenaanderijn.nl, is_dead: false,
+    is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 197
-  fields: {organization: 31, url: ruimtelijkeplannen.ubbergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: ruimtelijkeplannen.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 198
-  fields: {organization: 31, url: secure.groesbeek.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: secure.groesbeek.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 199
-  fields: {organization: 31, url: ubbergen.nl, isdead: true, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 31, url: ubbergen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 200
-  fields: {organization: 31, url: webmail.groesbeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: webmail.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 201
-  fields: {organization: 31, url: webmail.millingenaanderijn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: webmail.millingenaanderijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 202
-  fields: {organization: 31, url: webmail.ubbergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: webmail.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 203
-  fields: {organization: 31, url: www.groesbeek.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: www.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 204
-  fields: {organization: 31, url: www.millingenaanderijn.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: www.millingenaanderijn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 205
-  fields: {organization: 31, url: www.ubbergen.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 31, url: www.ubbergen.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 206
-  fields: {organization: 32, url: bergeijk.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 32, url: bergeijk.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 207
-  fields: {organization: 32, url: mail.bergeijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 32, url: mail.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 208
-  fields: {organization: 32, url: secure.bergeijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 32, url: secure.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 209
-  fields: {organization: 32, url: www.bergeijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 32, url: www.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 210
-  fields: {organization: 33, url: bergen.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 33, url: bergen.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 211
-  fields: {organization: 33, url: intranet.bergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 33, url: intranet.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 212
-  fields: {organization: 33, url: telewerken.bergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 33, url: telewerken.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 213
-  fields: {organization: 33, url: webmail.bergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 33, url: webmail.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 214
-  fields: {organization: 33, url: www.bergen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 33, url: www.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 215
-  fields: {organization: 34, url: bergen-nh.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 34, url: bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 216
-  fields: {organization: 34, url: intranet.bergen-nh.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 34, url: intranet.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 217
-  fields: {organization: 34, url: webmail.bergen-nh.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 34, url: webmail.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 218
-  fields: {organization: 34, url: www.bergen-nh.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 34, url: www.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 219
-  fields: {organization: 35, url: bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 220
-  fields: {organization: 35, url: mail.bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: mail.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 221
-  fields: {organization: 35, url: secure.bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: secure.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 222
-  fields: {organization: 35, url: telewerken.bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: telewerken.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 223
-  fields: {organization: 35, url: webmail.bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: webmail.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 224
-  fields: {organization: 35, url: www.bergenopzoom.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 35, url: www.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 225
-  fields: {organization: 36, url: gemeenteberkelland.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 36, url: gemeenteberkelland.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 226
-  fields: {organization: 36, url: mail.gemeenteberkelland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 36, url: mail.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 227
-  fields: {organization: 36, url: webmail.gemeenteberkelland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 36, url: webmail.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 228
-  fields: {organization: 36, url: www.gemeenteberkelland.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 36, url: www.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 229
-  fields: {organization: 37, url: bernheze.org, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 37, url: bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 230
-  fields: {organization: 37, url: intranet.bernheze.org, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 37, url: intranet.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 231
-  fields: {organization: 37, url: mail.bernheze.org, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 37, url: mail.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 232
-  fields: {organization: 37, url: www.bernheze.org, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 37, url: www.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 233
-  fields: {organization: 38, url: gemeentebest.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 38, url: gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 234
-  fields: {organization: 38, url: mail.gemeentebest.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 38, url: mail.gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 235
-  fields: {organization: 38, url: webmail.gemeentebest.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 38, url: webmail.gemeentebest.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 236
-  fields: {organization: 38, url: www.gemeentebest.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 38, url: www.gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 237
-  fields: {organization: 39, url: beuningen.nl, isdead: true, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 39, url: beuningen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 238
-  fields: {organization: 39, url: sip.beuningen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 39, url: sip.beuningen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 239
-  fields: {organization: 39, url: www.beuningen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 39, url: www.beuningen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 240
-  fields: {organization: 40, url: beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 241
-  fields: {organization: 40, url: intranet.beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: intranet.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 242
-  fields: {organization: 40, url: secure.beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: secure.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 243
-  fields: {organization: 40, url: telewerken.beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: telewerken.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 244
-  fields: {organization: 40, url: webmail.beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: webmail.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 245
-  fields: {organization: 40, url: www.beverwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 40, url: www.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 246
-  fields: {organization: 41, url: binnenmaas.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 41, url: binnenmaas.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 247
-  fields: {organization: 41, url: secure.binnenmaas.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 41, url: secure.binnenmaas.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 248
-  fields: {organization: 41, url: www.binnenmaas.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 41, url: www.binnenmaas.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 249
-  fields: {organization: 42, url: afspraken.bladel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 42, url: afspraken.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 250
-  fields: {organization: 42, url: bladel.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 42, url: bladel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 251
-  fields: {organization: 42, url: secure.bladel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 42, url: secure.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 252
-  fields: {organization: 42, url: www.bladel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 42, url: www.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 253
-  fields: {organization: 43, url: blaricum.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 43, url: blaricum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 254
-  fields: {organization: 43, url: www.blaricum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 43, url: www.blaricum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 255
-  fields: {organization: 44, url: bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 256
-  fields: {organization: 44, url: kpn190.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: kpn190.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 257
-  fields: {organization: 44, url: mail.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: mail.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 258
-  fields: {organization: 44, url: mail2.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: mail2.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 259
-  fields: {organization: 44, url: secure.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: secure.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 260
-  fields: {organization: 44, url: webmail.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: webmail.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 261
-  fields: {organization: 44, url: www.bloemendaal.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 44, url: www.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 262
-  fields: {organization: 45, url: bodegraven-reeuwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 263
-  fields: {organization: 45, url: intranet.bodegraven-reeuwijk.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: intranet.bodegraven-reeuwijk.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 264
-  fields: {organization: 45, url: mx10.bodegraven-reeuwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: mx10.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 265
-  fields: {organization: 45, url: secure.bodegraven-reeuwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: secure.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 266
-  fields: {organization: 45, url: webmail.bodegraven-reeuwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: webmail.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 267
-  fields: {organization: 45, url: www.bodegraven-reeuwijk.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 45, url: www.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 268
-  fields: {organization: 46, url: boekel.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 46, url: boekel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 269
-  fields: {organization: 46, url: intranet.boekel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 46, url: intranet.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 270
-  fields: {organization: 46, url: secure.boekel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 46, url: secure.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 271
-  fields: {organization: 46, url: sip.boekel.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 46, url: sip.boekel.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 272
-  fields: {organization: 46, url: webmail.boekel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 46, url: webmail.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 273
-  fields: {organization: 46, url: www.boekel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 46, url: www.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 274
-  fields: {organization: 47, url: borger-odoorn.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 47, url: borger-odoorn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 275
-  fields: {organization: 47, url: www.borger-odoorn.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 47, url: www.borger-odoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 276
-  fields: {organization: 48, url: borne.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 48, url: borne.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 277
-  fields: {organization: 48, url: dacceptatieloket.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: dacceptatieloket.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 278
-  fields: {organization: 48, url: dloket.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: dloket.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 279
-  fields: {organization: 48, url: gemeente.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: gemeente.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 280
-  fields: {organization: 48, url: gemeenteraad.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: gemeenteraad.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 281
-  fields: {organization: 48, url: mail.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: mail.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 282
-  fields: {organization: 48, url: ruimtelijkeplannen.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: ruimtelijkeplannen.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 283
-  fields: {organization: 48, url: webmail.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: webmail.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 284
-  fields: {organization: 48, url: www.borne.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 48, url: www.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 285
-  fields: {organization: 49, url: borsele.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 49, url: borsele.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 286
-  fields: {organization: 49, url: intranet.borsele.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 49, url: intranet.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 287
-  fields: {organization: 49, url: mail.borsele.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 49, url: mail.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 288
-  fields: {organization: 49, url: secure.borsele.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 49, url: secure.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 289
-  fields: {organization: 49, url: webmail.borsele.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 49, url: webmail.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 290
-  fields: {organization: 49, url: www.borsele.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 49, url: www.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 291
-  fields: {organization: 50, url: boxmeer.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 50, url: boxmeer.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 292
-  fields: {organization: 50, url: ris.boxmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: ris.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 293
-  fields: {organization: 50, url: secure.boxmeer.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: secure.boxmeer.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 294
-  fields: {organization: 50, url: thuiswerken.boxmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: thuiswerken.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 295
-  fields: {organization: 50, url: toerisme.boxmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: toerisme.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 296
-  fields: {organization: 50, url: verkiezingen.boxmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: verkiezingen.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 297
-  fields: {organization: 50, url: www.boxmeer.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 50, url: www.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 298
-  fields: {organization: 51, url: boxtel.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 51, url: boxtel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 299
-  fields: {organization: 51, url: www.boxtel.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 51, url: www.boxtel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 300
-  fields: {organization: 52, url: breda.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 52, url: breda.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 301
-  fields: {organization: 52, url: gis.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: gis.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 302
-  fields: {organization: 52, url: intranet.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: intranet.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 303
-  fields: {organization: 52, url: secure.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: secure.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 304
-  fields: {organization: 52, url: sip.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: sip.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 305
-  fields: {organization: 52, url: webmail.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: webmail.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 306
-  fields: {organization: 52, url: www.breda.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 52, url: www.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 307
-  fields: {organization: 53, url: brielle.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 53, url: brielle.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 308
-  fields: {organization: 53, url: intranet.brielle.nl, isdead: true, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 53, url: intranet.brielle.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 309
-  fields: {organization: 53, url: mail.brielle.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 53, url: mail.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 310
-  fields: {organization: 53, url: secure.brielle.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 53, url: secure.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 311
-  fields: {organization: 53, url: webmail.brielle.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 53, url: webmail.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 312
-  fields: {organization: 53, url: www.brielle.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 53, url: www.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 313
-  fields: {organization: 54, url: bronckhorst.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 54, url: bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 314
-  fields: {organization: 54, url: intranet.bronckhorst.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 54, url: intranet.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 315
-  fields: {organization: 54, url: secure.bronckhorst.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 54, url: secure.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 316
-  fields: {organization: 54, url: webmail.bronckhorst.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 54, url: webmail.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 317
-  fields: {organization: 54, url: www.bronckhorst.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 54, url: www.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 318
-  fields: {organization: 55, url: brummen.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 55, url: brummen.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 319
-  fields: {organization: 55, url: mail.brummen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 55, url: mail.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 320
-  fields: {organization: 55, url: portaal.brummen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 55, url: portaal.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 321
-  fields: {organization: 55, url: raad.brummen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 55, url: raad.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 322
-  fields: {organization: 55, url: www.brummen.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 55, url: www.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 323
-  fields: {organization: 56, url: brunssum.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 56, url: brunssum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 324
-  fields: {organization: 56, url: intranet.brunssum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 56, url: intranet.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 325
-  fields: {organization: 56, url: sip.brunssum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 56, url: sip.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 326
-  fields: {organization: 56, url: webmail.brunssum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 56, url: webmail.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 327
-  fields: {organization: 56, url: www.brunssum.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 56, url: www.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 328
-  fields: {organization: 57, url: bunnik.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 57, url: bunnik.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 329
-  fields: {organization: 57, url: telewerken.bunnik.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 57, url: telewerken.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 330
-  fields: {organization: 57, url: webmail.bunnik.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 57, url: webmail.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 331
-  fields: {organization: 57, url: www.bunnik.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 57, url: www.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 332
-  fields: {organization: 58, url: bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 333
-  fields: {organization: 58, url: intranet.bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: intranet.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 334
-  fields: {organization: 58, url: secure.bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: secure.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 335
-  fields: {organization: 58, url: sip.bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: sip.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 336
-  fields: {organization: 58, url: webmail.bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: webmail.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 337
-  fields: {organization: 58, url: www.bunschoten.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 58, url: www.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 338
-  fields: {organization: 59, url: buren.nl, isdead: false, isdeadsince: null, isdeadreason: ''}
+  fields: {organization: 59, url: buren.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
 - model: organizations.url
   pk: 339
-  fields: {organization: 59, url: intranet.buren.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 59, url: intranet.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 340
-  fields: {organization: 59, url: raad.buren.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 59, url: raad.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 341
-  fields: {organization: 59, url: secure.buren.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 59, url: secure.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 342
-  fields: {organization: 59, url: webmail.buren.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 59, url: webmail.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 - model: organizations.url
   pk: 343
-  fields: {organization: 59, url: www.buren.nl, isdead: false, isdeadsince: null,
-    isdeadreason: ''}
+  fields: {organization: 59, url: www.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
 
 - model: organizations.coordinate
   pk: 799
