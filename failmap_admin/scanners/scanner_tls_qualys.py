@@ -364,12 +364,12 @@ class ScannerTlsQualys:
         # if there is an endpoint that is alive, make sure that the domain is set to alive
         # this should be a task of more generic endpoint management
         if TlsQualysScan.objects.filter(endpoint__is_dead=0, endpoint__domain=domain).exists():
-            urls = Url.objects.filter(url=domain, isdead=True)
+            urls = Url.objects.filter(url=domain, is_dead=True)
 
             for url in urls:
-                url.isdead = False
-                url.isdeadsince = datetime.now(pytz.utc)
-                url.isdeadreason = "There are endpoints discovered via scanner tls qualys"
+                url.is_dead = False
+                url.is_deadsince = datetime.now(pytz.utc)
+                url.is_dead_reason = "There are endpoints discovered via scanner tls qualys"
                 url.save()  # might be empty, which is fine...
 
 

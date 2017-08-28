@@ -1,11 +1,12 @@
 // todo: create auto update feature...
 //                              Y     X
 var map = L.map('map').setView([52.15, 5.8], 8);
+map.scrollWheelZoom.disable();
 
 // mapbox handles 1600 visitors a day, for static data. Fortunately we can A cache the request, B use another map provider,
 // C the map looks fine without tiles. Paying 500 a month for max 1M visitors still sucks. Ideal case is local tiles.
 
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw', {
+L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
     '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -14,6 +15,20 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 }).addTo(map);
 
 // control that shows state info on hover
+var metadata = L.control();
+metadata.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+};
+metadata.update = function (metadata) {
+    this._div.innerHTML = '<h4>Map information</h4>' +  (metadata ?
+            '<br />' + metadata.data_from_time + ''
+            : '');
+};
+metadata.addTo(map);
+
+
 var info = L.control();
 
 info.onAdd = function (map) {
@@ -24,9 +39,9 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
     this._div.innerHTML = '<h4>Failure of your overlords</h4>' +  (props ?
-            '<br /><b>Gemeente: </b><span style="color: '+getColor(props.Overall)+'">' + props.OrganizationName + '</span>' +
+            '<br /><b>Gemeente: </b>' + props.OrganizationName + '' +
             '<br /><b>Overall Grade: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + '</span>' +
-            '<br /><br /><b>TLS: </b><span style="color: '+getColor(props.TLS)+'">' + props.TLS +'</span>' +
+            '<br /><br /><b>Data from: </b>' + props.DataFrom + '' +
             '<br /><br />Click for more information...'
             : 'Move your mouse over the map and cry...');
 };
@@ -36,13 +51,13 @@ info.addTo(map);
 
 // get color depending on population density value
 function getColor(d) {
-    return d == "F" ? '#bd0611' :
-        d == "D"  ? '#bd4f4a' :
-            d == "C"  ? '#fca87c' :
-                d == "B"  ? '#fcc25a' :
-                    d == "A-"   ? '#94fe7f' :
-                        d == "A"   ? '#94fe7f' :
-                            d == "A+"   ? '#25fe20' :
+    return d > 999 ? '#bd0611' :
+        d > 800  ? '#bd4f4a' :
+            d > 600  ? '#fca87c' :
+                d > 400  ? '#fcc25a' :
+                    d > 200   ? '#D7FE87' :
+                        d > 100   ? '#94fe7f' :
+                            d > -1   ? '#25fe20' :
                                 '#c1bcbb';
 }
 
@@ -62,7 +77,7 @@ function highlightFeature(e) {
 
     layer.setStyle({
         weight: 5,
-        color: '#666',
+        color: '#ccc',
         dashArray: '',
         fillOpacity: 0.7
     });
@@ -90,18 +105,139 @@ function gotoLink(e){
     location.hash = "#" + layer.feature.properties['OrganizationName'];
 }
 
+
+// the vue manual never states when this function can be created / called.
+// it needs to be started somewhere...
+// you can't do this in a function, since you'll get multiple instances of vue which give
+// the impression that the data is not reactive.
+window.vueReport = 1;
+window.vueStatistics = 1;
+$( document ).ready(function() {
+
+    // load initial data, from 0 weeks back. This has to be in the document.ready i guess.
+    $.getJSON('/data/map/0', function(json) {
+        geojson = L.geoJson(json, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+        metadata.update(json.metadata);
+    });
+
+
+    window.vueReport = new Vue({
+        el: '#report',
+        data: {
+            calculation: '',
+            rating: 0,
+            when: 0,
+            name: ""
+        },
+        filters: {
+            // you cannot run filters in rawHtml, so this doesn't work.
+            // therefore we explicitly do this elsewhere
+        }
+    });
+
+    window.vueStatistics = new Vue({
+        el: '#statistics',
+        data: {
+            data: Array  // whatever we get from the nice webservice
+
+        },
+        computed: {
+            greenpercentage: function() {
+                return (!this.data.data) ? "0%" :
+                    Math.round(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100) + "%";
+            },
+
+            redpercentage: function() {
+                return (!this.data.data) ? "0%" :
+                    Math.round(
+                        ( this.data.data.now["red"]) / this.data.data.now["total_organizations"] * 100) + "%";
+            },
+
+            orangepercentage: function() {
+                return (!this.data.data) ? "0%" :
+                    Math.round(
+                        (this.data.data.now["orange"]) / this.data.data.now["total_organizations"] * 100) + "%";
+            },
+
+            unknownpercentage: function() {
+                return (!this.data.data) ? "0%" :
+                    Math.round(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100) + "%";
+            }
+        }
+    });
+
+    $.getJSON('/data/stats/', function(data) {
+        vueStatistics.data = data;
+    });
+
+    // move space and time ;)
+    $("#history").on("change input", function() {
+        $.getJSON('/data/map/' + this.value, function(json) {
+            geojson.clearLayers(); // prevent overlapping polygons
+            map.removeLayer(geojson);
+
+            geojson = L.geoJson(json, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+
+            // todo: add the date info on the map, or somewhere.
+            metadata.update(json.metadata);
+        });
+    });
+
+    window.vueTopfail = new Vue({
+        el: '#topfail',
+        data: { top: Array }
+    });
+
+    $.getJSON('/data/topfail/', function(data) {
+        vueTopfail.top = data;
+    });
+
+});
+
+
+
+function showReportFromFail (OrganizationID) {
+    $.getJSON('/data/report/' + OrganizationID, function (data) {
+        vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        vueReport.rating = data.rating;
+        vueReport.when = data.when;
+        vueReport.name = data.name;
+    });
+}
+// we chose vue because of this:
+// https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
+// also: reacts patent clause and mandatory jsx syntax ... NO
+// The amount of components available for vue is limited. But we can mix it with traditional scripts
+// Javascript will not update the values when altering the data, javascript cannot observe that.
+function showreport(e){
+
+    var layer = e.target;
+    $.getJSON('/data/report/' + layer.feature.properties['OrganizationID'], function(data) {
+        vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
+        vueReport.rating = data.rating;
+        vueReport.when = data.when;
+        vueReport.name = data.name;
+    });
+
+}
+
+
+
+
 function onEachFeature(feature, layer) {
     layer.on({
         mouseover: highlightFeature,
         mouseout: resetHighlight,
-        click: gotoLink
+        click: showreport
     });
 }
 
-geojson = L.geoJson(statesData, {
-    style: style,
-    onEachFeature: onEachFeature
-}).addTo(map);
 
 
 map.attributionControl.addAttribution('Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>');
@@ -113,14 +249,14 @@ legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-    labels.push('<i style="background:' + getColor("A+") + '"></i> Perfect');
-    labels.push('<i style="background:' + getColor("A") + '"></i> Good');
-    labels.push('<i style="background:' + getColor("A-") + '"></i> OK');
-    labels.push('<i style="background:' + getColor("B") + '"></i> Substandard');
-    labels.push('<i style="background:' + getColor("C") + '"></i> Crappy');
-    labels.push('<i style="background:' + getColor("D") + '"></i> Terrible');
-    labels.push('<i style="background:' + getColor("F") + '"></i> Fail');
-    labels.push('<i style="background:' + getColor("?") + '"></i> Unknown');
+    labels.push('<i style="background:' + getColor(0) + '"></i> Perfect');
+    labels.push('<i style="background:' + getColor(100) + '"></i> Good');
+    labels.push('<i style="background:' + getColor(200) + '"></i> OK');
+    labels.push('<i style="background:' + getColor(400) + '"></i> Substandard');
+    labels.push('<i style="background:' + getColor(600) + '"></i> Crappy');
+    labels.push('<i style="background:' + getColor(800) + '"></i> Terrible');
+    labels.push('<i style="background:' + getColor(1000) + '"></i> Fail');
+    labels.push('<i style="background:' + getColor("-") + '"></i> Unknown');
 
     div.innerHTML = labels.join('<br>');
     return div;
