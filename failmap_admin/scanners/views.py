@@ -8,7 +8,7 @@ from .forms import QualysScanForm
 from .scanner_tls_qualys import ScannerTlsQualys
 
 
-def index(request):
+def tls(request):
     # now return the rendered template
 
     if request.method == "POST":
