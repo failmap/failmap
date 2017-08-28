@@ -1,18 +1,17 @@
-from datetime import datetime
-from dateutil.relativedelta import relativedelta  # stats
-
-import pytz
 import json
 import math
+from datetime import datetime
 
-from django.http import JsonResponse
-from django.shortcuts import render
+import pytz
+from dateutil.relativedelta import relativedelta  # stats
 from django.db import connection
 from django.db.models import Max
+from django.http import JsonResponse
+from django.shortcuts import render
 
-from .models import Organization
-from .models import OrganizationRating
 from failmap_admin.map.determineratings import DetermineRatings
+
+from .models import Organization, OrganizationRating
 
 
 # Create your views here.
@@ -80,13 +79,11 @@ def topfail(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
     # at least it's fast.
 
-    # This gets the organizations until a certain score that is seen as bad. From that everything with > 100 points.
+    # This gets the organizations until a certain score that is seen as bad.
+    # From that everything with > 0 points.
 
-    # aantal faal
-    # terug: organisatie, score, en datumv an de lijst
-    # limit iets van 10 ofzo? of gewoon volledig, kan je em ook omkeren. Top beste oid. Tot een bepaalde score dan maar.
-
-    # still don't have an answer how to get a top 20 organizations latest...
+    # Would we reverse this, you'd get the top best. But honestly, only those with 0 points are good
+    # enough.
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -133,7 +130,7 @@ def topfail(request, weeks_back=0):
 
     rank = 1
     for i in rows:
-        l = {
+        dataset = {
             "Rank": rank,
             "OrganizationID": i[3],
             "OrganizationType": i[2],
@@ -144,7 +141,7 @@ def topfail(request, weeks_back=0):
         rank = rank+1
 
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
-        data["ranking"].append(l)
+        data["ranking"].append(dataset)
 
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
@@ -157,23 +154,28 @@ def stats(request, weeks_back=0):
     # 389 organizations * 7 queries. i mean... come on... what's the solution already?
     # in the meantime: caching proxies all the way down.
 
-    if not weeks_back:
-        when = datetime.now(pytz.utc)
-    else:
-        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+    # Old splitting of data, really don't know why we should do it like this, as nobody understands
+    # these arbitrary numbers anyway. And the UI translating them to something useful is just a
+    # waste. From now we're just delivering understandable values.
+    # "0": 25,
+    # "1-99": 0,
+    # "100-199": 1,
+    # "200-399": 40,
+    # "400-999": 246,
+    # "1000-4999": 74,
+    # "infinite": 2,
+    # "red": 322,
+    # "orange": 41,
+    # "green": 25,
 
     os = Organization.objects.all()
-    rating = OrganizationRating.objects.filter(when__lte=when)
-    rating = rating.latest('when')
 
-    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0
-             , '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
+    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0,
+             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
              'earliest': 0}
 
     for stat in stats:
-        if stat == 'now':
-            when = datetime.now(pytz.utc)
-        elif stat == 'earliest':
+        if stat == 'now' or stat == 'earliest':
             when = datetime.now(pytz.utc)
         else:
             value, unit, _ = stat.split()
@@ -181,8 +183,7 @@ def stats(request, weeks_back=0):
 
         # Next to measurements in hard numbers, we also derive a conclusion in three categories:
         # red, orange and green. This is done to simplify the data, so it can be better understood.
-        measurement = {'0': 0, '1-99': 0, '100-199': 0, '200-399': 0, '400-999': 0, '1000-4999': 0,
-                       'infinite': 0, 'red': 0, 'orange': 0, 'green': 0,
+        measurement = {'red': 0, 'orange': 0, 'green': 0,
                        'total_organizations': 0, 'total_score': 0, 'no_rating': 0}
         for o in os:
             try:
@@ -197,38 +198,19 @@ def stats(request, weeks_back=0):
                 measurement["total_organizations"] += 1
                 measurement["total_score"] += rating.rating
 
-                if rating.rating == 0:
-                    measurement["0"] += 1
+                if rating.rating < 100:
+                    measurement["green"] += 1
 
-                if 0 < rating.rating < 100:
-                    measurement["1-99"] += 1
+                if 99 < rating.rating < 400:
+                    measurement["orange"] += 1
 
-                if 99 < rating.rating < 200:
-                    measurement["100-199"] += 1
-
-                if 199 < rating.rating < 400:
-                    measurement["200-399"] += 1
-
-                if 399 < rating.rating < 1000:
-                    measurement["400-999"] += 1
-
-                if 999 < rating.rating < 5000:
-                    measurement["1000-4999"] += 1
-
-                if rating.rating > 4999:
-                    measurement["infinite"] += 1
+                if rating.rating > 399:
+                    measurement["red"] += 1
 
             except OrganizationRating.DoesNotExist:
                 measurement["total_organizations"] += 1
                 measurement["total_score"] += 0
                 measurement["no_rating"] += 1
-
-        measurement["red"] = measurement["400-999"] + measurement["1000-4999"] + measurement["infinite"]
-        measurement["orange"] = measurement["100-199"] + measurement["200-399"]
-        measurement["green"] = measurement["1-99"] + measurement["0"]  # we're not completely insane :)
-        measurement["red percentage"] = round((measurement["red"]/measurement["total_organizations"]) * 100)
-        measurement["orange percentage"] = round((measurement["orange"] / measurement["total_organizations"]) * 100)
-        measurement["green percentage"] = round((measurement["green"] / measurement["total_organizations"]) * 100)
 
         stats[stat] = measurement
 
@@ -316,7 +298,7 @@ def map_data(request, weeks_back=0):
     #                                       'organization__type__name',
     #                                     'organization__coordinate__area',
     #                                     'organization__coordinate__geojsontype',
-    #                                     'rating').aggregate(Count('organization__coordinate__area'))
+    #                                   'rating').aggregate(Count('organization__coordinate__area'))
 
     # While the star joins are a pest, we can now do nice havings and such.
     # this might be writable in Django... but the amount of time spent on it was not OK.
@@ -351,7 +333,7 @@ def map_data(request, weeks_back=0):
 
     # unfortunately numbered results are used.
     for i in rows:
-        l = {
+        dataset = {
             "type": "Feature",
             "properties":
                 {
@@ -364,10 +346,13 @@ def map_data(request, weeks_back=0):
             "geometry":
                 {
                     "type": i[4],
-                    "coordinates": json.loads(i[3]) if type(json.loads(i[3])) is list else json.loads(json.loads(i[3]))  # hack :)
+                    # does whitespace change the meaning of the if? otherwise line too long...
+                    "coordinates":
+                        json.loads(i[3]) if type(json.loads(i[3])) is list
+                        else json.loads(json.loads(i[3]))  # hack :)
                 }
             }
 
-        data["features"].append(l)
+        data["features"].append(dataset)
 
     return JsonResponse(data, json_dumps_params={'indent': 5})

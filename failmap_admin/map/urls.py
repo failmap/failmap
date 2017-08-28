@@ -1,7 +1,7 @@
 # urls for scanners, maybe in their own url files
 from django.conf.urls import url
-from failmap_admin.map.views import index, map_data, organization_report, stats, history, topfail
 
+from failmap_admin.map.views import history, index, map_data, organization_report, stats, topfail
 
 urlpatterns = [
     url(r'^admin/history', history, name='history'),
