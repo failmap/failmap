@@ -1,5 +1,6 @@
 # coding=UTF-8
 from django.db import models
+
 from failmap_admin.organizations.models import Url
 
 

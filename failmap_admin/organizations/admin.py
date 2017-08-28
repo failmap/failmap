@@ -6,7 +6,6 @@ from failmap_admin.scanners.models import Endpoint
 
 from .models import Coordinate, Organization, Url
 
-
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
 #   while correct, error should point to ModelAdmin.search fields documentation
