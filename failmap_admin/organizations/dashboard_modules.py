@@ -11,7 +11,6 @@ from jet.dashboard.modules import DashboardModule
 
 from failmap_admin.organizations.models import Url
 
-
 # Intended workings: after adding a list of domains, hitting save, you'll see
 # the results of the attempt to add those domains to organizations. The results
 # as well as well as the domains that have been added in the edit-modus stay there.

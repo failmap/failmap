@@ -8,7 +8,6 @@ from failmap_admin.scanners.models import Endpoint, TlsQualysScan
 
 from .models import OrganizationRating, UrlRating
 
-
 # todo: determine ratings over the past few months by changing the When.
 
 
