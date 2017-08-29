@@ -2,13 +2,16 @@
 # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 
 # Todo: use celery for distributed scanning, multiple threads. (within reason)
-# Can be a max of N threads? :)
+# Currently using a pool for scanning, which was way better than the fake queue solution.
 # Todo: invalidate certificate name mismatches and self-signed certificates.
-# todo: prevent a domain being scanned by multiple of these scanners at the same time (pending)
-# todo: when are dead domains rescanned, when are they really removed from the db? that's for all
-# todo: should we set all domains entered here into pending, or only the one scanned now?
-# todo: check for network availability.
-# todo: this can be done distributed, using a different approach.
+# done: prevent a domain being scanned by multiple of these scanners at the same time (pending)
+# This becomes an issue when there are more scanners. And that would be depending on what type of
+# scan... if a connection is made, how many and such.
+# done: when are dead domains rescanned, when are they really removed from the db? never.
+# done: should we set all domains entered here into pending, or only the one scanned now?
+# The pending state is confusing: especially when things go wrong during a scan. So better
+# ignore the pending stuff and just rescan.
+# todo: check for network availability. What happens now?
 
 import json
 import logging
@@ -16,29 +19,12 @@ import sys
 from datetime import date, datetime, timedelta
 from random import randint
 from time import sleep
-
+import os
 import pytz
 import requests
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad
-
-
-"""
-    Selery tasks:
-
-    A thing for allowing an X number of scans at the same time.
-        Would do that for _all_ of these instances. So it is sort of managing a flock/fleet.
-        It would be simple and have a max number of scanners. This has to be calculated.
-
-    A thing for scanning a domain and getting back info on ERROR or READY and waiting otherwise.
-
-    A thing to do administration of the tasks.
-        And how does it "pend" things?
-
-    A set of testcases that tests the coherence between these things.
-    Another, new, way of testing...
-"""
 
 
 class ScannerTlsQualys:
@@ -77,9 +63,9 @@ class ScannerTlsQualys:
 
     def __init__(self):
 
-        self.log = logging.getLogger('scanner_tls_qualys')
-        self.log.handlers = []  # bad workaround: https://github.com/ipython/ipython/issues/8282
-        self.log.setLevel(logging.DEBUG)
+        ScannerTlsQualys.log = logging.getLogger('scanner_tls_qualys')
+        ScannerTlsQualys.log.handlers = []  # bad workaround: https://github.com/ipython/ipython/issues/8282
+        ScannerTlsQualys.log.setLevel(logging.DEBUG)
 
         # http://stackoverflow.com/questions/14058453/
         # making-python-loggers-output-all-messages-to-stdout-in-addition-to-log#14058475
@@ -92,61 +78,97 @@ class ScannerTlsQualys:
         logging.addLevelName(logging.ERROR,
                              "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
-        self.log.addHandler(console)
-        self.log.debug("Logging initialized")
+        ScannerTlsQualys.log.addHandler(console)
+        ScannerTlsQualys.log.debug("Logging initialized")
 
-    def scan(self, domains):
+    @staticmethod
+    def scan(domains):
         """
-        Qualys stores results in their cache as long as there is space.
-        We assume that this lasts about 30 minutes, which is usually the case.
+        Scans a list of domains. Skipping all that have been scanned in the past 24 hours and
+        starting each scan about every 30 seconds.
+        :param domains:
+        :return:
+        """
 
-        A scan of a domain might take over ten minutes, depending on how busy qualys is.
-        If there is no answer yet from a scan, just retry after a series of other domains
-        have been tested. To make sure that there is about-enough time in between, we're testing
-        domains per 20. So 3 passes times 20 domains should result in some meaningful output.
+        from multiprocessing import Pool
+        pool = Pool(processes=25)  # max 25 at the same time...
 
-        If you're too fast, you'll get "Too many new assessments too fast. Please slow down."
+        domains = ScannerTlsQualys.external_service_task_rate_limit(domains)
+        ScannerTlsQualys.log.debug("Loaded %s domains.", len(domains))
 
-        In case of a cache-miss qualys will restart a scan. Don't wait too long between scans.
+        # if you want to run this from multiple domains, you'd need celery still.
+        # which we now can upgrade to.
+        # with 30 seconds per domain, you can only scan 2800 domains a day...
+        # todo: check X-Max-Assessments and X-Current-Assessments headers.
+        # ('x-clientmaxassessments', ('X-ClientMaxAssessments', '25')),
+        # ('x-max-assessments', ('X-Max-Assessments', '25')),
+        # you can do 25 at the same time? wtf. If each takes two minutes (120 seconds).
+        # you can scan about every 4.8 seconds. So let's be nice and start every 10 seconds.
+        # that we we can do 8400 domains a day, which is awesome.
+        # we take it a bit slower, since perhaps there might be a manual scan or two to run.
+        # what happens if you run too many scans at the same time... well... don't know :)
+
+        for domain in domains:
+            asd = pool.apply_async(ScannerTlsQualys.scantask, [domain], callback=ScannerTlsQualys.success_callback, error_callback=ScannerTlsQualys.error_callback)
+            # ScannerTlsQualys.scantask(domain) # this task should be running independently?
+            sleep(10 + randint(0, 9))  # Start a new task, but don't pulsate too much.
+
+        pool.close()
+        pool.join()
+        ScannerTlsQualys.log.debug("Done")
+
+    @staticmethod
+    def success_callback(x):
+        print("Success!")
+
+    @staticmethod
+    def error_callback(x):
+        print("Error callback!")
+        print(vars(x))  # we're getting a statusDetails back...
+
+    # max N at the same time? how to?
+    # what happens when there is no internet?
+    @staticmethod
+    def scantask(domain):
+        """
+        Carries out a scan until the ERROR or READY is returned. There will be many checks performed
+        by the scanner, signalled by TESTING_ messages. There also are many DNS messages when
+        starting the scan.
+
+        A scan usually takes about two minutes.
 
         :param domains:
         :return:
         """
 
-        domains = self.external_service_task_rate_limit(domains)
+        data = {}
+        data['status'] = "NEW"
 
-        self.log.debug("Loaded %s domains.", len(domains))
-
-        sq = ScanQueue(domains)
-        sq.debug()
-
-        while sq.has_items():
-            domain = sq.get_next()
-            self.log.debug("Attempt scanning domain %s ", domain)
-
-            if self.endpoints_alive_in_past_24_hours(domain):
-                sq.remove(domain)
-                continue
-
-            if self.rate_limit:
-                # wait 25 seconds + 0-9 random seconds, wait longer with fewer domains
-                sleep(25 + randint(0, 9))  # don't pulsate.
-
-            data = self.service_provider_scan_via_api(domain)
-            self.scratch(domain, data)  # for debugging
-            self.report_to_console(domain, data)  # for more debugging
+        while data['status'] != "READY" and data['status'] != "ERROR":
+            data = ScannerTlsQualys.service_provider_scan_via_api(domain)
+            ScannerTlsQualys.scratch(domain, data)  # for debugging
+            ScannerTlsQualys.report_to_console(domain, data)  # for more debugging
 
             if data['status'] == "READY" and 'endpoints' in data.keys():
-                sq.remove(domain)
-                self.save_scan(domain, data)
-                self.clean_endpoints(domain, data['endpoints'])
+                ScannerTlsQualys.save_scan(domain, data)
+                ScannerTlsQualys.clean_endpoints(domain, data['endpoints'])
+                return
 
             # in nearly all cases the domain could not be retrieved, so clean the endpoints
-            # and move on.
+            # and move on. As the result was "error", over internet, you should not need to check
+            # if there is an internet connection... obviously
             if data['status'] == "ERROR":
-                self.clean_endpoints(domain, [])
+                ScannerTlsQualys.clean_endpoints(domain, [])
+                return
 
-    def external_service_task_rate_limit(self, domains):
+            # to save time the "ready" and "error" state are already checked above.
+            # because why wait when we have a result already.
+            # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+            # advice is 10 seconds... well... doesn't really matter
+            sleep(30 + randint(0, 9))  # don't pulsate.
+
+    @staticmethod
+    def external_service_task_rate_limit(domains):
         """
         Why rate limiting the domains to scan?:
         Qualys is an external, free, service that can only handle a finite amount of scans.
@@ -163,7 +185,7 @@ class ScannerTlsQualys:
         # we are not checking if the domain is dead at all... we're just doing what is asked.
         # we do manage some endpoints (https, http on port 443)
         for domain in domains:
-            if not self.endpoints_alive_in_past_24_hours(domain):
+            if not ScannerTlsQualys.endpoints_alive_in_past_24_hours(domain):
                 domains_to_scan.append(domain)
 
         # todo: we can use tldextract to verify the correctness of domains. (not ip's)
@@ -178,7 +200,8 @@ class ScannerTlsQualys:
         domains_to_scan = set(domains_to_scan)
         return list(domains_to_scan)
 
-    def report_to_console(self, domain, data):
+    @staticmethod
+    def report_to_console(domain, data):
         """
         Gives some impression of what is currently going on in the scan.
 
@@ -195,51 +218,61 @@ class ScannerTlsQualys:
 
         if data['status'] == "READY":
             for endpoint in data['endpoints']:
-                self.log.debug("%s (%s) = %s" %
+                ScannerTlsQualys.log.debug("%s (%s) = %s" %
                                (domain, endpoint['ipAddress'], endpoint['grade'])) \
-                    if 'grade' in endpoint.keys() else self.log.debug("%s = No TLS (0)" % domain)
+                    if 'grade' in endpoint.keys() else ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
 
         if data['status'] == "ERROR":
-            self.log.debug("ERROR: Got message: %s", data['statusMessage'])
+            ScannerTlsQualys.log.debug("ERROR: Got message: %s", data['statusMessage'])
 
         if data['status'] == "DNS":
-            self.log.debug("DNS: Got message: %s", data['statusMessage'])
+            ScannerTlsQualys.log.debug("DNS: Got message: %s", data['statusMessage'])
 
         if data['status'] == "IN_PROGRESS":
             for endpoint in data['endpoints']:
-                self.log.debug("Domain %s in progress. Endpoint: %s. Message: %s "
+                ScannerTlsQualys.log.debug("Domain %s in progress. Endpoint: %s. Message: %s "
                                % (domain, endpoint['ipAddress'], endpoint['statusDetails']))
 
-    # publish: off, it's friendlier to the domains scanned
-    # startnew: off, that's done automatically when needed by service provider
-    # fromcache: on: they are chached for a few hours only.
-    def service_provider_scan_via_api(self, domain):
-        self.log.debug("Requesting cached data from qualys for %s", domain)
+    @staticmethod
+    def service_provider_scan_via_api(domain):
+        """
+        Qualys parameters
+
+        # publish: off, it's friendlier to the domains scanned
+        # startnew: off, that's done automatically when needed by service provider
+        # fromcache: on: they are chached for a few hours only.
+
+        :param domain:
+        :return:
+        """
+        ScannerTlsQualys.log.debug("Requesting cached data from qualys for %s", domain)
         payload = {'host': domain, 'publish': "off", 'startNew': "off",
                    'fromCache': "on", 'all': "done"}
 
         try:
             response = requests.get("https://api.ssllabs.com/api/v2/analyze", params=payload)
+            # print(vars(response.headers))
             return response.json()
         except requests.RequestException as e:
             # todo: auto-retry after x time. By Celery.
-            self.log.debug("something when wrong when scanning domain %s", domain)
-            self.log.debug(e)
+            ScannerTlsQualys.log.debug("something when wrong when scanning domain %s", domain)
+            ScannerTlsQualys.log.debug(e)
 
     # todo: django.db.utils.IntegrityError: NOT NULL constraint failed: .endpoint_id
-    def save_scan(self, domain, data):
+    @staticmethod
+    def save_scan(domain, data):
         """
         Saves another scan to the database. Does some endpoint plumbing.
         :param domain:
         :param data: raw JSON data from qualys
         :return:
         """
-        self.log.debug("Trying to save scan for %s", domain)
+        ScannerTlsQualys.log.debug("Trying to save scan for %s", domain)
 
         # manage endpoints
         for qualys_endpoint in data['endpoints']:
             # insert or update automatically. An endpoint is unique (protocol, port, ip, domain)
-
+            # when an endpoint is found here, then it is obviously not dead....
             failmap_endpoint, created = Endpoint.objects.get_or_create(
                 domain=domain,
                 ip=qualys_endpoint['ipAddress'],
@@ -247,9 +280,14 @@ class ScannerTlsQualys:
                 protocol="https"
             )
             if created:
-                self.log.debug("Created a new endpoint for %s and adding results", domain)
+                ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results", domain)
             else:
-                self.log.debug("Updating scans of existing endpoint %s", failmap_endpoint.id)
+                ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s", failmap_endpoint.id)
+                # it exists, so cannot be dead... update it to be alive (below functions don't seem
+                # to work...
+                failmap_endpoint.is_dead = False
+                failmap_endpoint.is_dead_reason = ""
+                failmap_endpoint.save()
 
             # possibly also record the server name, as we get it. It's not really of value.
 
@@ -263,17 +301,17 @@ class ScannerTlsQualys:
                 if 'gradeTrustIgnored' in qualys_endpoint.keys() else 0
 
             if scan:
-                self.log.debug("There was already a scan on this endpoint.")
+                ScannerTlsQualys.log.debug("There was already a scan on this endpoint.")
 
                 if scan.qualys_rating == rating and scan.qualys_rating_no_trust == rating_no_trust:
-                    self.log.debug("Scan did not alter the rating, updating scan_date only.")
+                    ScannerTlsQualys.log.debug("Scan did not alter the rating, updating scan_date only.")
                     scan.scan_moment = datetime.now(pytz.utc)
                     scan.scan_time = datetime.now(pytz.utc)
                     scan.scan_date = datetime.now(pytz.utc)
                     scan.save()
 
                 else:
-                    self.log.debug("Rating changed, we're going to save the scan to retain history")
+                    ScannerTlsQualys.log.debug("Rating changed, we're going to save the scan to retain history")
                     scan = TlsQualysScan()
                     scan.endpoint = failmap_endpoint
                     scan.qualys_rating = rating
@@ -286,7 +324,7 @@ class ScannerTlsQualys:
 
             else:
                 # todo: don't like to have the same code twice.
-                self.log.debug("This endpoint was never scanned, creating a new scan.")
+                ScannerTlsQualys.log.debug("This endpoint was never scanned, creating a new scan.")
                 scan = TlsQualysScan()
                 scan.endpoint = failmap_endpoint
                 scan.qualys_rating = rating
@@ -297,26 +335,29 @@ class ScannerTlsQualys:
                 scan.rating_determined_on = datetime.now(pytz.utc)
                 scan.save()
 
-    def scratch(self, domain, data):
-        self.log.debug("Scratching data for %s", domain)
+    @staticmethod
+    def scratch(domain, data):
+        ScannerTlsQualys.log.debug("Scratching data for %s", domain)
         scratch = TlsQualysScratchpad()
         scratch.domain = domain
         scratch.data = json.dumps(data)
         scratch.save()
 
     # smart rate limiting
-    def endpoints_alive_in_past_24_hours(self, domain):
+    @staticmethod
+    def endpoints_alive_in_past_24_hours(domain):
         x = TlsQualysScan.objects.filter(endpoint__domain=domain,
                                          endpoint__port=443,
                                          endpoint__protocol__in=["https"],
                                          scan_date__gt=date.today() - timedelta(1)).exists()
         if x:
-            self.log.debug("domain %s was scanned in past 24 hours", domain)
+            ScannerTlsQualys.log.debug("domain %s was scanned in past 24 hours", domain)
         else:
-            self.log.debug("domain %s was NOT scanned in past 24 hours", domain)
+            ScannerTlsQualys.log.debug("domain %s was NOT scanned in past 24 hours", domain)
         return x
 
-    def clean_endpoints(self, domain, endpoints):
+    @staticmethod
+    def clean_endpoints(domain, endpoints):
         """
         Clean's up endpoints that where not found in a scan.
 
@@ -331,7 +372,7 @@ class ScannerTlsQualys:
         :param domain: domain.com
         :return: None
         """
-        self.log.debug("Cleaning endpoints for %s", domain)
+        ScannerTlsQualys.log.debug("Cleaning endpoints for %s", domain)
 
         # list of addresses that we're NOT going to declare dead :)
         ip_addresses = []
@@ -351,15 +392,16 @@ class ScannerTlsQualys:
                                               protocol="https").exclude(ip__in=ip_addresses)
 
         for killable_endpoint in killable_endpoints:
-            self.log.debug('Found an endpoint that can get killed: %s', killable_endpoint.domain)
+            ScannerTlsQualys.log.debug('Found an endpoint that can get killed: %s', killable_endpoint.domain)
             killable_endpoint.is_dead = 1
             killable_endpoint.is_dead_since = datetime.now(pytz.utc)
             killable_endpoint.is_dead_reason = "Endpoint not found anymore in qualys scan."
             killable_endpoint.save()
 
-        self.revive_url_with_alive_endpoints(domain)
+        ScannerTlsQualys.revive_url_with_alive_endpoints(domain)
 
-    def revive_url_with_alive_endpoints(self, domain):
+    @staticmethod
+    def revive_url_with_alive_endpoints(domain):
         """
         A generic method that revives domains that have endpoints that are not dead.
 
@@ -367,7 +409,7 @@ class ScannerTlsQualys:
 
         :return:
         """
-        self.log.debug("Genericly attempting to revive url using endpoints from %s", domain)
+        ScannerTlsQualys.log.debug("Genericly attempting to revive url using endpoints from %s", domain)
 
         # if there is an endpoint that is alive, make sure that the domain is set to alive
         # this should be a task of more generic endpoint management
@@ -379,45 +421,3 @@ class ScannerTlsQualys:
                 url.is_deadsince = datetime.now(pytz.utc)
                 url.is_dead_reason = "There are endpoints discovered via scanner tls qualys"
                 url.save()  # might be empty, which is fine...
-
-
-class ScanQueue:
-    """
-    A supporting class that has some semantic features to make the above code easier to understand
-
-    This class does the logic in what order to scan domains.
-    """
-    queue = []
-
-    def get_next(self):
-        return self.queue.pop()
-
-    # http://stackoverflow.com/questions/9671224/
-    # these control-loops might be outsourced to class, so you have while(domain=x.next()):
-    # it will save 3 nests and add some complexity.
-    def __init__(self, domains):
-
-        chunks = [domains[x:x + 20] for x in range(0, len(domains), 20)]
-        for chunk in chunks:
-
-            # do three passes, as described above
-            attempt = 0
-            while attempt < 3:
-                for domain in chunk:
-                    print("Adding " + domain + " to the queue")
-                    self.queue.append(domain)
-                attempt += 1
-
-    def remove(self, domain):
-        print("Removing " + domain + " from the queue")
-        while domain in self.queue:
-            self.queue.remove(domain)  # remove all
-
-    def has_items(self):
-        return len(self.queue)
-
-    def length(self):
-        return len(self.queue)
-
-    def debug(self):
-        print("There are " + str(len(self.queue)) + " items in the queue. ")
