@@ -10,6 +10,7 @@ docutils
 # scanners
 requests
 pytz
+celery
 
 # manual scans
 django-autocomplete-light

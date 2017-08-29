@@ -174,8 +174,9 @@ class DetermineRatings:
         # todo: de laatste check moet ook in het raport komen te staan, niet alleen sinds wanneer
         # een probleem is geconstateerd. Dat hebben we gebouwd om ruimte te besparen.
 
-        urls = Url.objects
-        urls = urls.filter(organization=organization, is_dead=False)
+        # there might be a buggy state where the endpoints are dead, but the url itself is
+        # not declared dead. The scanner should have killed the endpoints too...
+        urls = Url.objects.filter(organization=organization, is_dead=False)
 
         for url in urls:
             try:
@@ -196,7 +197,12 @@ class DetermineRatings:
         except OrganizationRating.DoesNotExist:
             last = OrganizationRating()  # create an empty one
 
-        if total_calculation and last.calculation != total_calculation:
+        # 2017 08 29 bugfix: you can have a rating of 0, eg when all urls are dead or perfect
+        # yes, a calculation can go to 0 when all urls are dead.
+        # so checking for total_calculation here doesn't make sense.
+        # if the rating is different, then save it.
+        print("%s %s" % (last.calculation, total_calculation))
+        if last.calculation != total_calculation:
             u = OrganizationRating()
             u.organization = organization
             u.rating = total_rating
@@ -241,6 +247,9 @@ class DetermineRatings:
     # and we do this for at most the last hour. (and we can go back in time to fill the db
     # and get those sweet rating improvements.
     # does not add information when there is nothing to find for this url.
+    #
+    # Extra: this does not check if all endpoints are dead (and thus the url)... it shouldn't
+    # because the scanner should check that.
     def get_url_score(self, url, when):
         print("calculating score on %s for %s" % (when, url.url))
 

@@ -8,6 +8,10 @@ from .forms import QualysScanForm
 from .scanner_tls_qualys import ScannerTlsQualys
 
 
+# let's make something that is a continuous loop that adds ALL current domains that are alive.
+# then update the ratings and then... tada! It's upgraded and works. :)
+# dat via de commandline aanroepen... dus django vanaf de commandline.
+
 def tls(request):
     # now return the rendered template
 
@@ -17,7 +21,7 @@ def tls(request):
             u = Url.objects.get(id=form.data.get('url'))
             s = ScannerTlsQualys()
             s.scan([u.url])
-            return HttpResponseRedirect("/")
+            return HttpResponseRedirect("/scanners/tls/")
 
     else:
         form = QualysScanForm

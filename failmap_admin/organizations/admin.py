@@ -3,8 +3,12 @@ from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
 from failmap_admin.scanners.models import Endpoint
+from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import Coordinate, Organization, Url
+
+from datetime import datetime  # admin functions
+import pytz  # admin functions
 
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
@@ -49,7 +53,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]
 
-    actions = ['rate_organization']
+    actions = ['rate_organization', 'scan_organization']
 
     def rate_organization(self, request, queryset):
 
@@ -59,9 +63,27 @@ class OrganizationAdmin(admin.ModelAdmin):
 
         self.message_user(request, "Organization(s) have been rated")
 
+    def scan_organization(self, request, queryset):
+
+        # it's best to add all url's in one go, resulting in the fastest processing
+
+        urls_to_scan = []
+
+        for organization in queryset:
+            urls = Url.objects.filter(organization=organization)
+            for url in urls:
+                urls_to_scan.append(url.url)
+
+        s = ScannerTlsQualys()
+        s.scan(urls_to_scan)
+
+        self.message_user(request, "Organization(s) have been scanned")
+
     rate_organization.short_description = \
         "Rate selected Organizations based on available scansresults"
 
+    scan_organization.short_description = \
+        "Scan selected Organizations"
 
 class UrlAdmin(admin.ModelAdmin):
     list_display = ('organization', 'url', 'is_dead_reason')
@@ -87,7 +109,17 @@ class UrlAdmin(admin.ModelAdmin):
 
     inlines = [EndpointAdminInline, UrlRatingAdminInline]
 
-    actions = ['rate_url']
+    actions = ['rate_url', 'scan_url', 'declare_dead']
+
+    def declare_dead(self, request, queryset):
+
+        for url in queryset:
+            url.is_dead = True
+            url.is_dead_reason = "Killed via admin interface"
+            url.is_dead_since = datetime.now(pytz.utc)
+            url.save()
+
+        self.message_user(request, "URL(s) have been declared dead")
 
     def rate_url(self, request, queryset):
 
@@ -97,7 +129,20 @@ class UrlAdmin(admin.ModelAdmin):
 
         self.message_user(request, "URL(s) have been rated")
 
-    rate_url.short_description = "Rate selected URLs based on available scansresults"
+    def scan_url(self, request, queryset):
+
+        urls_to_scan = []
+        for url in queryset:
+            urls_to_scan.append(url.url)
+
+        s = ScannerTlsQualys()
+        s.scan(urls_to_scan)
+
+        self.message_user(request, "URL(s) have been scanned")
+
+    rate_url.short_description = "Rate"
+    scan_url.short_description = "Scan"
+    declare_dead.short_description = "Declare dead"  # can still scan it
 
 
 class CoordinateAdmin(admin.ModelAdmin):
