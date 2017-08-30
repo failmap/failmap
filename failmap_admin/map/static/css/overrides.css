@@ -41,3 +41,8 @@ Todo: better separation of UI and data. The JS messes things up.
     margin-right: 8px;
     opacity: 0.7;
 }
+
+.leaflet-interactive{
+    stroke-dasharray: 0 !important; /* Away with the noise */
+    stroke-width:1 !important; /* and a bit less obnoxious please*/
+}

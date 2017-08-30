@@ -8,12 +8,6 @@
 
         <link rel="stylesheet"
               type="text/css"
-              href="{% static 'css/tooltipster.css' %}" />
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/themes/tooltipster-light.css' %}" />
-        <link rel="stylesheet"
-              type="text/css"
               href="{% static 'css/leaflet.css' %}" />
         <link rel="stylesheet"
               type="text/css"
@@ -28,7 +22,7 @@
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vue.js' %}"></script> <!-- deps mngr? -->
+        <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
 
     </head>
 
@@ -90,19 +84,6 @@
             <div id='map'></div>
             <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
 
-
-            <div class="page-header" id="report" v-if="name">
-                <h1>{% trans "Report" %}</h1>
-                <div>
-                    <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
-                    {% trans "Rating" %}: {% verbatim %}{{ rating }}{% endverbatim %}<br />
-                    {% trans "Created on" %}: {% verbatim %}{{ when }}{% endverbatim %}<br />
-                    <br />
-                    {% trans "Score layout" %}: <br />
-                    <div v-html="calculation"></div>
-                </div>
-            </div>
-
             <div id="statistics">
                 <div class="page-header">
                     <a name="balk"></a>
@@ -133,11 +114,11 @@
                         <table class="table">
                             <thead>
                             <tr>
-                                <th>{% trans "When" %}</th>
-                                <th>{% trans "Organizations" %}</th>
-                                <th>{% trans "Good" %}</th>
-                                <th>{% trans "Average" %}</th>
-                                <th>{% trans "Bad" %}</th>
+                                <th width="20%">{% trans "When" %}</th>
+                                <th width="20%">{% trans "Organizations" %}</th>
+                                <th width="20%">{% trans "Good" %}</th>
+                                <th width="20%">{% trans "Average" %}</th>
+                                <th width="20%">{% trans "Bad" %}</th>
                             </tr>
                             </thead>
                             <tbody v-if="data.data">
@@ -225,6 +206,19 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <a name="report"></a>
+            <div class="page-header" id="report" v-if="name">
+                <h1>{% trans "Report" %}</h1>
+                <div>
+                    <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
+                    {% trans "Rating" %}: {% verbatim %}{{ rating }}{% endverbatim %}<br />
+                    {% trans "Created on" %}: {% verbatim %}{{ when }}{% endverbatim %}<br />
+                    <br />
+                    {% trans "Score layout" %}: <br />
+                    <div v-html="calculation"></div>
                 </div>
             </div>
 
@@ -425,7 +419,7 @@
                         </thead><tbody>
                         <tr v-for='rank in top.ranking'>
                             <td>{% verbatim %}{{ rank.Rank }}{% endverbatim %}</td>
-                            <td>{% verbatim %}{{ rank.OrganizationName }}{% endverbatim %}</td>
+                            <td><a v-on:click="showReport(rank.OrganizationID)">{% verbatim %}{{ rank.OrganizationName }}{% endverbatim %}</a></td>
                             <td>{% verbatim %}{{ rank.Points }}{% endverbatim %}</td>
                         </tr>
                         </tbody>

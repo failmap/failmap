@@ -191,7 +191,19 @@ $( document ).ready(function() {
 
     window.vueTopfail = new Vue({
         el: '#topfail',
-        data: { top: Array }
+        data: { top: Array },
+        methods: {
+            showReport: function (OrganizationID) {
+                location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
+                location.hash = "#report";
+                $.getJSON('/data/report/' + OrganizationID, function (data) {
+                    vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
+                    vueReport.rating = data.rating;
+                    vueReport.when = data.when;
+                    vueReport.name = data.name;
+                });
+            }
+        }
     });
 
     $.getJSON('/data/topfail/', function(data) {
@@ -202,21 +214,15 @@ $( document ).ready(function() {
 
 
 
-function showReportFromFail (OrganizationID) {
-    $.getJSON('/data/report/' + OrganizationID, function (data) {
-        vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
-        vueReport.rating = data.rating;
-        vueReport.when = data.when;
-        vueReport.name = data.name;
-    });
-}
+
 // we chose vue because of this:
 // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
 // also: reacts patent clause and mandatory jsx syntax ... NO
 // The amount of components available for vue is limited. But we can mix it with traditional scripts
 // Javascript will not update the values when altering the data, javascript cannot observe that.
 function showreport(e){
-
+    location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
+    location.hash = "#report";
     var layer = e.target;
     $.getJSON('/data/report/' + layer.feature.properties['OrganizationID'], function(data) {
         vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
