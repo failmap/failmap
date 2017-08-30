@@ -91,7 +91,7 @@ class ScannerTlsQualys:
         """
 
         from multiprocessing import Pool
-        pool = Pool(processes=25)  # max 25 at the same time...
+        pool = Pool(processes=7)  # max 7 concurrent scans
 
         domains = ScannerTlsQualys.external_service_task_rate_limit(domains)
         ScannerTlsQualys.log.debug("Loaded %s domains.", len(domains))
@@ -99,19 +99,16 @@ class ScannerTlsQualys:
         # if you want to run this from multiple domains, you'd need celery still.
         # which we now can upgrade to.
         # with 30 seconds per domain, you can only scan 2800 domains a day...
-        # todo: check X-Max-Assessments and X-Current-Assessments headers.
-        # ('x-clientmaxassessments', ('X-ClientMaxAssessments', '25')),
-        # ('x-max-assessments', ('X-Max-Assessments', '25')),
-        # you can do 25 at the same time? wtf. If each takes two minutes (120 seconds).
-        # you can scan about every 4.8 seconds. So let's be nice and start every 10 seconds.
-        # that we we can do 8400 domains a day, which is awesome.
-        # we take it a bit slower, since perhaps there might be a manual scan or two to run.
-        # what happens if you run too many scans at the same time... well... don't know :)
+        # Even while the headers  X-Max-Assessments and X-Current-Assessments
+        # give the idea you might have 25 scans at the same time, it's not.
+        # the amount actually lowers. Starting a new scan every 20 seconds the scan
+        # results in there is not enough room after 30 minutes. So you need to start
+        # scans slower. Event with 30 seconds it's too fast. So just do 60.
 
         for domain in domains:
-            asd = pool.apply_async(ScannerTlsQualys.scantask, [domain], callback=ScannerTlsQualys.success_callback, error_callback=ScannerTlsQualys.error_callback)
-            # ScannerTlsQualys.scantask(domain) # this task should be running independently?
-            sleep(10 + randint(0, 9))  # Start a new task, but don't pulsate too much.
+            pool.apply_async(ScannerTlsQualys.scantask, [domain], callback=ScannerTlsQualys.success_callback, error_callback=ScannerTlsQualys.error_callback)
+            # ScannerTlsQualys.scantask(domain) # old sequential approach
+            sleep(50 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
         pool.close()
         pool.join()
@@ -119,12 +116,14 @@ class ScannerTlsQualys:
 
     @staticmethod
     def success_callback(x):
+        ScannerTlsQualys.log.debug("Success!")
         print("Success!")
 
     @staticmethod
     def error_callback(x):
         print("Error callback!")
-        print(vars(x))  # we're getting a statusDetails back...
+        print(x)
+        print(vars(x))  # we're getting a statusDetails back... probably not handled by the code
 
     # max N at the same time? how to?
     # what happens when there is no internet?
@@ -149,23 +148,28 @@ class ScannerTlsQualys:
             ScannerTlsQualys.scratch(domain, data)  # for debugging
             ScannerTlsQualys.report_to_console(domain, data)  # for more debugging
 
-            if data['status'] == "READY" and 'endpoints' in data.keys():
-                ScannerTlsQualys.save_scan(domain, data)
-                ScannerTlsQualys.clean_endpoints(domain, data['endpoints'])
-                return
+            if 'status' in data.keys():
+                if data['status'] == "READY" and 'endpoints' in data.keys():
+                    ScannerTlsQualys.save_scan(domain, data)
+                    ScannerTlsQualys.clean_endpoints(domain, data['endpoints'])
+                    return
 
-            # in nearly all cases the domain could not be retrieved, so clean the endpoints
-            # and move on. As the result was "error", over internet, you should not need to check
-            # if there is an internet connection... obviously
-            if data['status'] == "ERROR":
-                ScannerTlsQualys.clean_endpoints(domain, [])
-                return
+                # in nearly all cases the domain could not be retrieved, so clean the endpoints
+                # and move on. As the result was "error", over internet, you should not need to
+                # check if there is an internet connection... obviously
+                if data['status'] == "ERROR":
+                    ScannerTlsQualys.clean_endpoints(domain, [])
+                    return
 
-            # to save time the "ready" and "error" state are already checked above.
-            # because why wait when we have a result already.
+            else:
+                data['status'] = "FAILURE"  # stay in the loop
+                ScannerTlsQualys.log.debug("Unexpected result from API")
+                ScannerTlsQualys.log.debug(data)  # print for debugging purposes
+
             # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-            # advice is 10 seconds... well... doesn't really matter
-            sleep(30 + randint(0, 9))  # don't pulsate.
+            # it doesn't matter how fast you ask the status, it doesnt' get "ready" sooner.
+            # so, just ask that every 20 seconds.
+            sleep(20 + randint(0, 4))  # don't pulsate.
 
     @staticmethod
     def external_service_task_rate_limit(domains):
@@ -215,23 +219,41 @@ class ScannerTlsQualys:
         :param data:
         :return:
         """
+        if 'status' in data.keys():
+            if data['status'] == "READY":
+                for endpoint in data['endpoints']:
+                    ScannerTlsQualys.log.debug("%s (%s) = %s" %
+                                   (domain, endpoint['ipAddress'], endpoint['grade'])) \
+                        if 'grade' in endpoint.keys() else ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
 
-        if data['status'] == "READY":
-            for endpoint in data['endpoints']:
-                ScannerTlsQualys.log.debug("%s (%s) = %s" %
-                               (domain, endpoint['ipAddress'], endpoint['grade'])) \
-                    if 'grade' in endpoint.keys() else ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
+            if data['status'] == "ERROR":
+                ScannerTlsQualys.log.debug("ERROR: Got message: %s", data['statusMessage'])
 
-        if data['status'] == "ERROR":
-            ScannerTlsQualys.log.debug("ERROR: Got message: %s", data['statusMessage'])
+            if data['status'] == "DNS":
+                if 'statusMessage' in data.keys():
+                    ScannerTlsQualys.log.debug("DNS: Got message: %s", data['statusMessage'])
+                else:
+                    ScannerTlsQualys.log.debug("DNS: Got message: %s", data)
 
-        if data['status'] == "DNS":
-            ScannerTlsQualys.log.debug("DNS: Got message: %s", data['statusMessage'])
-
-        if data['status'] == "IN_PROGRESS":
-            for endpoint in data['endpoints']:
-                ScannerTlsQualys.log.debug("Domain %s in progress. Endpoint: %s. Message: %s "
-                               % (domain, endpoint['ipAddress'], endpoint['statusDetails']))
+            if data['status'] == "IN_PROGRESS":
+                for endpoint in data['endpoints']:
+                    if 'statusDetails' in endpoint.keys():
+                        ScannerTlsQualys.log.debug(
+                            "Domain %s in progress. Endpoint: %s. Msg: %s "
+                            % (domain, endpoint['ipAddress'], endpoint['statusDetails']))
+                    elif 'statusMessage' in endpoint.keys():
+                        ScannerTlsQualys.log.debug(
+                            "Domain %s in progress. Endpoint: %s. Msgs: %s "
+                            % (domain, endpoint['ipAddress'], endpoint['statusMessage']))
+                    else:
+                        ScannerTlsQualys.log.debug(
+                            "Domain %s in progress. Endpoint: %s. "
+                            % (domain, endpoint['ipAddress']))
+        else:
+            # no idea how to handle this, so dumping the data...
+            # ex: {'errors': [{'message': 'Concurrent assessment limit reached (7/7)'}]}
+            ScannerTlsQualys.log.debug("Unexpected data recieved")
+            ScannerTlsQualys.log.debug(data)
 
     @staticmethod
     def service_provider_scan_via_api(domain):
@@ -249,14 +271,27 @@ class ScannerTlsQualys:
         payload = {'host': domain, 'publish': "off", 'startNew': "off",
                    'fromCache': "on", 'all': "done"}
 
-        try:
-            response = requests.get("https://api.ssllabs.com/api/v2/analyze", params=payload)
-            # print(vars(response.headers))
-            return response.json()
-        except requests.RequestException as e:
-            # todo: auto-retry after x time. By Celery.
-            ScannerTlsQualys.log.debug("something when wrong when scanning domain %s", domain)
-            ScannerTlsQualys.log.debug(e)
+        retries = 3
+
+        # todo: this can lead up to too many scans at the same time... or does the pool limit this?
+        while retries > 0:
+            try:
+                response = requests.get("https://api.ssllabs.com/api/v2/analyze", params=payload)
+                ScannerTlsQualys.log.debug("Assessments")
+                ScannerTlsQualys.log.debug("Max: %s", response.headers['X-Max-Assessments'])
+                ScannerTlsQualys.log.debug("Curr: %s", response.headers['X-Current-Assessments'])
+                ScannerTlsQualys.log.debug("Client: %s", response.headers['X-ClientMaxAssessments'])
+                # ScannerTlsQualys.log.debug(vars(response))  # extreme debugging
+                return response.json()
+            except requests.RequestException as e:
+                # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+                # ex: EOF occurred in violation of protocol (_ssl.c:749)
+                ScannerTlsQualys.log.debug("something when wrong when scanning domain %s", domain)
+                ScannerTlsQualys.log.debug(e)
+                ScannerTlsQualys.log.debug("Retrying %s times, next in 20 seconds.", retries)
+                sleep(20)
+                retries = retries - 1
+
 
     # todo: django.db.utils.IntegrityError: NOT NULL constraint failed: .endpoint_id
     @staticmethod
