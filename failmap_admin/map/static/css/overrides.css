@@ -46,3 +46,21 @@ Todo: better separation of UI and data. The JS messes things up.
     stroke-dasharray: 0 !important; /* Away with the noise */
     stroke-width:1 !important; /* and a bit less obnoxious please*/
 }
+
+.green {
+    text-decoration: none;
+    color: #00ff00;
+}
+
+.orange {
+       text-decoration: none;
+    color: #FFA500;
+}
+
+.red {
+    text-decoration: none;
+    color: #ff0000;
+}
+
+/* https://iamceege.github.io/tooltipster/#getting-started */
+.tooltip_templates { display: none; }

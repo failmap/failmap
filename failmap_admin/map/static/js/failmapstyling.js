@@ -51,13 +51,9 @@ info.addTo(map);
 
 // get color depending on population density value
 function getColor(d) {
-    return d > 999 ? '#bd0611' :
-        d > 800  ? '#bd4f4a' :
-            d > 600  ? '#fca87c' :
-                d > 400  ? '#fcc25a' :
-                    d > 200   ? '#D7FE87' :
-                        d > 100   ? '#94fe7f' :
-                            d > -1   ? '#25fe20' :
+    return d > 399 ? '#bd383c' :
+        d > 99  ? '#fc9645' :
+            d > -1  ? '#62fe69' :
                                 '#c1bcbb';
 }
 
@@ -130,11 +126,27 @@ $( document ).ready(function() {
             calculation: '',
             rating: 0,
             when: 0,
-            name: ""
+            name: "",
+            urls: Array
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
             // therefore we explicitly do this elsewhere
+        },
+        methods: {
+            colorize : function (points) {
+                if (points < 100) return "green";
+                if (points < 400) return "orange";
+                if (points > 399) return "red";
+            },
+            idize: function (url){
+                url = url.toLowerCase();
+               return url.replace(/[^0-9a-z]/gi, '')
+            },
+            idizetag: function (url){
+                url = url.toLowerCase();
+               return "#" + url.replace(/[^0-9a-z]/gi, '')
+            }
         }
     });
 
@@ -198,7 +210,9 @@ $( document ).ready(function() {
                 location.hash = "#report";
                 $.getJSON('/data/report/' + OrganizationID, function (data) {
                     vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
-                    vueReport.rating = data.rating;
+                    thingsdata = JSON.parse(data.calculation);
+                    vueReport.urls = thingsdata["organization"]["urls"];
+                    vueReport.points = data.rating;
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                 });
@@ -226,7 +240,9 @@ function showreport(e){
     var layer = e.target;
     $.getJSON('/data/report/' + layer.feature.properties['OrganizationID'], function(data) {
         vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
-        vueReport.rating = data.rating;
+        thingsdata = JSON.parse(data.calculation);
+        vueReport.urls = thingsdata["organization"]["urls"];
+        vueReport.points = data.rating;
         vueReport.when = data.when;
         vueReport.name = data.name;
     });
@@ -255,13 +271,9 @@ legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-    labels.push('<i style="background:' + getColor(0) + '"></i> Perfect');
-    labels.push('<i style="background:' + getColor(100) + '"></i> Good');
-    labels.push('<i style="background:' + getColor(200) + '"></i> OK');
-    labels.push('<i style="background:' + getColor(400) + '"></i> Substandard');
-    labels.push('<i style="background:' + getColor(600) + '"></i> Crappy');
-    labels.push('<i style="background:' + getColor(800) + '"></i> Terrible');
-    labels.push('<i style="background:' + getColor(1000) + '"></i> Fail');
+    labels.push('<i style="background:' + getColor(0) + '"></i> Good');
+    labels.push('<i style="background:' + getColor(200) + '"></i> Average');
+    labels.push('<i style="background:' + getColor(400) + '"></i> Bad');
     labels.push('<i style="background:' + getColor("-") + '"></i> Unknown');
 
     div.innerHTML = labels.join('<br>');
