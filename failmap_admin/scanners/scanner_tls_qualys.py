@@ -19,7 +19,7 @@ import sys
 from datetime import date, datetime, timedelta
 from random import randint
 from time import sleep
-import os
+
 import pytz
 import requests
 
@@ -64,7 +64,8 @@ class ScannerTlsQualys:
     def __init__(self):
 
         ScannerTlsQualys.log = logging.getLogger('scanner_tls_qualys')
-        ScannerTlsQualys.log.handlers = []  # bad workaround: https://github.com/ipython/ipython/issues/8282
+        ScannerTlsQualys.log.handlers = []  # bad workaround:
+        # above workaround based on https://github.com/ipython/ipython/issues/8282
         ScannerTlsQualys.log.setLevel(logging.DEBUG)
 
         # http://stackoverflow.com/questions/14058453/
@@ -106,7 +107,9 @@ class ScannerTlsQualys:
         # scans slower. Event with 30 seconds it's too fast. So just do 60.
 
         for domain in domains:
-            pool.apply_async(ScannerTlsQualys.scantask, [domain], callback=ScannerTlsQualys.success_callback, error_callback=ScannerTlsQualys.error_callback)
+            pool.apply_async(ScannerTlsQualys.scantask, [domain],
+                             callback=ScannerTlsQualys.success_callback,
+                             error_callback=ScannerTlsQualys.error_callback)
             # ScannerTlsQualys.scantask(domain) # old sequential approach
             sleep(50 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
@@ -222,26 +225,28 @@ class ScannerTlsQualys:
         if 'status' in data.keys():
             if data['status'] == "READY":
                 for endpoint in data['endpoints']:
-                    ScannerTlsQualys.log.debug("%s (%s) = %s" %
-                                   (domain, endpoint['ipAddress'], endpoint['grade'])) \
-                        if 'grade' in endpoint.keys() else ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
+                    if 'grade' in endpoint.keys():
+                        ScannerTlsQualys.log.debug("%s (%s) = %s" %
+                                                   (domain, endpoint['ipAddress'],
+                                                    endpoint['grade']))
+                    else:
+                        ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
 
-            if data['status'] == "ERROR":
-                ScannerTlsQualys.log.debug("ERROR: Got message: %s", data['statusMessage'])
-
-            if data['status'] == "DNS":
+            if data['status'] == "DNS" or data['status'] == "ERROR":
                 if 'statusMessage' in data.keys():
-                    ScannerTlsQualys.log.debug("DNS: Got message: %s", data['statusMessage'])
+                    ScannerTlsQualys.log.debug("%s: Got message: %s", data['status'],
+                                               data['statusMessage'])
                 else:
-                    ScannerTlsQualys.log.debug("DNS: Got message: %s", data)
+                    ScannerTlsQualys.log.debug("%s: Got message: %s", data['status'], data)
 
             if data['status'] == "IN_PROGRESS":
                 for endpoint in data['endpoints']:
-                    if 'statusDetails' in endpoint.keys():
-                        ScannerTlsQualys.log.debug(
-                            "Domain %s in progress. Endpoint: %s. Msg: %s "
-                            % (domain, endpoint['ipAddress'], endpoint['statusDetails']))
-                    elif 'statusMessage' in endpoint.keys():
+                    # statusDetails was deprecated?
+                    # if 'statusDetails' in endpoint.keys():
+                    #     ScannerTlsQualys.log.debug(
+                    #        "Domain %s in progress. Endpoint: %s. Msg: %s "
+                    #        % (domain, endpoint['ipAddress'], endpoint['statusDetails']))
+                    if 'statusMessage' in endpoint.keys():
                         ScannerTlsQualys.log.debug(
                             "Domain %s in progress. Endpoint: %s. Msgs: %s "
                             % (domain, endpoint['ipAddress'], endpoint['statusMessage']))
@@ -252,7 +257,7 @@ class ScannerTlsQualys:
         else:
             # no idea how to handle this, so dumping the data...
             # ex: {'errors': [{'message': 'Concurrent assessment limit reached (7/7)'}]}
-            ScannerTlsQualys.log.debug("Unexpected data recieved")
+            ScannerTlsQualys.log.debug("Unexpected data received")
             ScannerTlsQualys.log.debug(data)
 
     @staticmethod
@@ -292,7 +297,6 @@ class ScannerTlsQualys:
                 sleep(20)
                 retries = retries - 1
 
-
     # todo: django.db.utils.IntegrityError: NOT NULL constraint failed: .endpoint_id
     @staticmethod
     def save_scan(domain, data):
@@ -315,9 +319,11 @@ class ScannerTlsQualys:
                 protocol="https"
             )
             if created:
-                ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results", domain)
+                ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results",
+                                           domain)
             else:
-                ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s", failmap_endpoint.id)
+                ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s",
+                                           failmap_endpoint.id)
                 # it exists, so cannot be dead... update it to be alive (below functions don't seem
                 # to work...
                 failmap_endpoint.is_dead = False
@@ -339,14 +345,16 @@ class ScannerTlsQualys:
                 ScannerTlsQualys.log.debug("There was already a scan on this endpoint.")
 
                 if scan.qualys_rating == rating and scan.qualys_rating_no_trust == rating_no_trust:
-                    ScannerTlsQualys.log.debug("Scan did not alter the rating, updating scan_date only.")
+                    ScannerTlsQualys.log.debug("Scan did not alter the rating, "
+                                               "updating scan date only.")
                     scan.scan_moment = datetime.now(pytz.utc)
                     scan.scan_time = datetime.now(pytz.utc)
                     scan.scan_date = datetime.now(pytz.utc)
                     scan.save()
 
                 else:
-                    ScannerTlsQualys.log.debug("Rating changed, we're going to save the scan to retain history")
+                    ScannerTlsQualys.log.debug("Rating changed, "
+                                               "we're going to save the scan to retain history")
                     scan = TlsQualysScan()
                     scan.endpoint = failmap_endpoint
                     scan.qualys_rating = rating
@@ -427,7 +435,8 @@ class ScannerTlsQualys:
                                               protocol="https").exclude(ip__in=ip_addresses)
 
         for killable_endpoint in killable_endpoints:
-            ScannerTlsQualys.log.debug('Found an endpoint that can get killed: %s', killable_endpoint.domain)
+            ScannerTlsQualys.log.debug('Found an endpoint that can get killed: %s',
+                                       killable_endpoint.domain)
             killable_endpoint.is_dead = 1
             killable_endpoint.is_dead_since = datetime.now(pytz.utc)
             killable_endpoint.is_dead_reason = "Endpoint not found anymore in qualys scan."
@@ -444,7 +453,8 @@ class ScannerTlsQualys:
 
         :return:
         """
-        ScannerTlsQualys.log.debug("Genericly attempting to revive url using endpoints from %s", domain)
+        ScannerTlsQualys.log.debug("Genericly attempting to revive url using endpoints from %s",
+                                   domain)
 
         # if there is an endpoint that is alive, make sure that the domain is set to alive
         # this should be a task of more generic endpoint management

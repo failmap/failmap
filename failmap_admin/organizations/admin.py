@@ -1,3 +1,6 @@
+from datetime import datetime  # admin functions
+
+import pytz  # admin functions
 from django.contrib import admin
 from jet.admin import CompactInline
 
@@ -6,9 +9,6 @@ from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import Coordinate, Organization, Url
-
-from datetime import datetime  # admin functions
-import pytz  # admin functions
 
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
@@ -84,6 +84,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
     scan_organization.short_description = \
         "Scan selected Organizations"
+
 
 class UrlAdmin(admin.ModelAdmin):
     list_display = ('organization', 'url', 'is_dead_reason')

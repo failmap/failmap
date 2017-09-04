@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import pytz
@@ -172,7 +173,9 @@ class DetermineRatings:
         # dan toevoegen.
 
         # todo: de laatste check moet ook in het raport komen te staan, niet alleen sinds wanneer
-        # een probleem is geconstateerd. Dat hebben we gebouwd om ruimte te besparen.
+        # een probleem is geconstateerd. Dat hebben we gebouwd om ruimte te besparen. Anders wordt
+        # er bij iedere rating nieuwe data opgeslagen: dat willen we voorkomen.
+        # we bufferen de ratings om tijdrovende berekeningen te besparen.
 
         # there might be a buggy state where the endpoints are dead, but the url itself is
         # not declared dead. The scanner should have killed the endpoints too...
@@ -187,6 +190,11 @@ class DetermineRatings:
 
                 # some urls are never rated
                 total_rating += urlrating["rating"]
+
+                # when there are multiple urls, add the mandatory comma....
+                if total_calculation:
+                    total_calculation += ","
+
                 total_calculation += urlrating["calculation"]
             except UrlRating.DoesNotExist:
                 pass
@@ -201,13 +209,31 @@ class DetermineRatings:
         # yes, a calculation can go to 0 when all urls are dead.
         # so checking for total_calculation here doesn't make sense.
         # if the rating is different, then save it.
-        print("%s %s" % (last.calculation, total_calculation))
+
+        organizationratingtemplate = \
+            '{\n\
+                "organization": {\n\
+                    "name": "%s",\n\
+                    "rating": "%s",\n\
+                    "rated on": "%s",\n\
+                    "urls": [%s]\n\
+                    \n\
+                }\n\
+            }\n'
+
+        organization_json = (organizationratingtemplate % (organization.name, total_rating,
+                                                           when, total_calculation))
+        # print(organization_json)
+        parsed = json.loads(organization_json)
+        organization_json_checked = json.dumps(parsed, indent=4)
+
+        # print("%s %s" % (last.calculation, total_calculation))
         if last.calculation != total_calculation:
             u = OrganizationRating()
             u.organization = organization
             u.rating = total_rating
             u.when = when
-            u.calculation = total_calculation
+            u.calculation = organization_json_checked
             u.save()
 
     # also callable as admin action
@@ -269,21 +295,52 @@ class DetermineRatings:
         )
 
         # todo: add database indexes. can we inspect with sqlite?
-
         explanations = {
-            "F": "%s: %s %s %s TLS: F (1000 points) \n",
-            "D": "%s: %s %s %s TLS: D (400 points) \n",
-            "C": "%s: %s %s %s TLS: C (200 points) \n",
-            "B": "%s: %s %s %s TLS: B (100 points) \n",
-            "A-": "%s: %s %s %s TLS: A- (0 points) \n",
-            "A": "%s: %s %s %s TLS: A (0 points) \n",
-            "A+": "%s: %s %s %s TLS: A+ (0 points) \n",
-            "T": "%s: %s %s %s TLS: Chain of trust missing (500 points) \n",
-            "0": "%s: %s %s %s TLS: No TLS used, no integrity and confidentiality (200 points) \n",
+            "F": "F - Failing TLS",
+            "D": "D",
+            "C": "C",
+            "B": "B",
+            "A-": "A-, Good",
+            "A": "A, Good",
+            "A+": "A+, Perfect",
+            "T": "Chain of trust missing",
+            "0": "No TLS used initially: no integrity and no confidentiality",
         }
 
         ratings = {"T": 500, "F": 1000, "D": 400, "C": 200,
                    "B": 100, "A-": 0, "A": 0, "A+": 0, "0": 200}
+
+        urlratingtemplate = \
+            '{\n\
+                "url": {\n\
+                    "url": "%s",\n\
+                    "points": "%s",\n\
+                    "endpoints": [%s]\n\
+                    \n\
+                }\n\
+            }\n'
+
+        endpointtemplate = \
+            '{\n\
+                "%s:%s": {\n\
+                    "ip": "%s",\n\
+                    "port": "%s",\n\
+                    "ratings": [%s]\n\
+                    \n\
+                }\n\
+            }\n'
+
+        tlsratingtemplate = \
+            '{\n\
+                "TLS_Qualys\": {\n\
+                    "explanation": "%s",\n\
+                    "points": "%s",\n\
+                    "since": "%s"\n\
+                }\n' \
+            '}\n'
+
+        starttls_json = ""
+        endpoint_json = ""
 
         for endpoint in endpoints:
             try:
@@ -291,11 +348,30 @@ class DetermineRatings:
                                                     scan_moment__lte=when)
                 scan = scan.latest('rating_determined_on')
 
-                explanation += (explanations[scan.qualys_rating] %
-                                (scan.scan_moment, endpoint.ip, endpoint.url.url, endpoint.port))
+                # currently there is only one rating for an endpoint... we need to refactor this.
+                # todo: refactor the way this list is created and populated. Extra table?
+                # you can only have one TLS rating on an endpoint.
+                starttls_json = (tlsratingtemplate %
+                                 (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
+                                  scan.scan_moment))
+
+                # you can only add the comma if there are multiple items...
+                if endpoint_json:
+                    endpoint_json += ", "
+
+                endpoint_json += (endpointtemplate % (endpoint.ip, endpoint.port,
+                                                      endpoint.ip, endpoint.port, starttls_json))
+
                 rating += ratings[scan.qualys_rating]
             except TlsQualysScan.DoesNotExist:
                 # can happen that a rating simply isn't there yet. Perfectly possible.
                 pass
 
-        return explanation, rating
+        #
+        url_json = urlratingtemplate % (url.url, rating, endpoint_json)
+        # print(url_json)
+        # load it up in a json parser to give it a nice format. (why not make a json object then?)
+        parsed = json.loads(url_json)
+        url_json = json.dumps(parsed, indent=4)
+
+        return url_json, rating
