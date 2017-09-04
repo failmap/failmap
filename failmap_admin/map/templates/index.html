@@ -18,12 +18,35 @@
         <link rel="stylesheet"
               type="text/css"
               href="{% static 'css/overrides.css' %}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{% static 'css/tooltipster.bundle.min.css' %}">
 
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/tooltipster.bundle.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
+        <script>
+            $(document).ready(function() {
+                $('.failtip').tooltipster({
+                    theme: 'tooltipster-light',
+                    animation: 'fade',
+                    interactive: 'true'
+                });
 
+                tooltip_notls = "<span>Geen beveiligde verbinding gevonden.<br /><br />" +
+                    "Dit komt vaak doordat:<br />" +
+                    "<ul><li></li><li>er gebruik wordt gemaakt van filtering,</li>" +
+                    "<li>er geen dienst (meer) draait,</li>" +
+                    "<li>een ander poortnummer wordt gebruikt dan 443.</li></ul>" +
+                    "<br />" +
+                    "<span style=\"color: #000000\">Domein: aaenhunze.nl<br />Adres: 62.50.4.46:443<br /></span>" +
+                    "Scantijd: 2016-05-17 10:25:35 <br /><br />" +
+                    "<a href=\"https://www.ssllabs.com/ssltest/analyze.html?d=aaenhunze.nl&hideResults=on&latest\" target=\"_blank\">Second opinion</a><br /><br /></span>"
+
+            });
+        </script>
     </head>
 
     <body role="document">
@@ -211,14 +234,23 @@
 
             <a name="report"></a>
             <div class="page-header" id="report" v-if="name">
-                <h1>{% trans "Report" %}</h1>
+                <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
-                    <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
-                    {% trans "Rating" %}: {% verbatim %}{{ rating }}{% endverbatim %}<br />
-                    {% trans "Created on" %}: {% verbatim %}{{ when }}{% endverbatim %}<br />
+                    {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, congratulations!<br />
                     <br />
                     {% trans "Score layout" %}: <br />
-                    <div v-html="calculation"></div>
+                    {% verbatim %}
+                    <div v-for="url in urls">
+                        <span class="failtip" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
+                            {{ url.url.url }}
+                        </span>
+                    </div>
+                    <div class="tooltip_templates">
+                        <span v-for="url in urls" v-bind:id="idize(url.url.url)">
+                            <strong>This is the content of my tooltip! {{ url.url.url }}</strong>
+                        </span>
+                    </div>
+                    {% endverbatim %}
                 </div>
             </div>
 
@@ -407,7 +439,6 @@
                     <div class="page-header">
                         <a name="topfail"></a>
                         <h1>{% trans "Top Fail" %}</h1>
-                        <p v-if="top.metadata">{% trans "Updated on" %} {% verbatim %}{{ top.metadata.data_from_time }}{% endverbatim %}</p>
                     </div>
                     <table class="table table-striped">
                         <thead>
@@ -424,6 +455,9 @@
                         </tr>
                         </tbody>
                     </table>
+                    <div>
+                        <p v-if="top.metadata">{% trans "Updated on" %} {% verbatim %}{{ top.metadata.data_from_time }}{% endverbatim %}</p>
+                    </div>
                 </div>
             </div>
 
