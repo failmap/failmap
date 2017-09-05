@@ -13,6 +13,89 @@
 # ignore the pending stuff and just rescan.
 # todo: check for network availability. What happens now?
 
+"""
+Todo: On network disconnect, the scanner hangs. Even though it's threaded... there is no end after
+ the error callback.
+:275  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+:285  -- Assessments
+:286  -- Max: 23
+:287  -- Curr: 1
+:288  -- Client: 23
+:383  -- Scratching data for webmail.sittard-geleen.nl
+:238  -- DNS: Got message: Resolving domain names
+:275  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+:285  -- Assessments
+:286  -- Max: 24
+:287  -- Curr: 1
+:288  -- Client: 24
+:383  -- Scratching data for webmail.sittard-geleen.nl
+:252  -- Domain webmail.sittard-geleen.nl in progress. Endpoint: 93.95.250.242. Msgs: In progress
+:275  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+:285  -- Assessments
+:286  -- Max: 24
+:287  -- Curr: 1
+:288  -- Client: 24
+:383  -- Scratching data for webmail.sittard-geleen.nl
+:252  -- Domain webmail.sittard-geleen.nl in progress. Endpoint: 93.95.250.242. Msgs: In progress
+:275  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+:294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x1054bcc88>: Failed to establish a new connection: [Errno 60] Operation timed out',))
+:296  -- Retrying 3 times, next in 20 seconds.
+:294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x1054bc9b0>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
+:296  -- Retrying 2 times, next in 20 seconds.
+:294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x105313908>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
+:296  -- Retrying 1 times, next in 20 seconds.
+:383  -- Scratching data for webmail.sittard-geleen.nl
+Error callback!
+'NoneType' object has no attribute 'keys'
+{}
+
+
+
+
+^CProcess ForkPoolWorker-2051:
+Process ForkPoolWorker-2050:
+Process ForkPoolWorker-2049:
+Process ForkPoolWorker-2047:
+Process ForkPoolWorker-2045:
+Process ForkPoolWorker-2046:
+Process ForkPoolWorker-2048:
+Traceback (most recent call last):
+
+
+En zo voort:
+2017-09-05 15:18:58,744	DEBUG    -- scanner_tls_qualys.py:154  -- Loaded 1 domains.
+2017-09-05 15:18:58,746	DEBUG    -- scanner_tls_qualys.py:333  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+2017-09-05 15:19:58,681	DEBUG    -- scanner_tls_qualys.py:352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+2017-09-05 15:19:58,685	DEBUG    -- scanner_tls_qualys.py:353  -- EOF occurred in violation of protocol (_ssl.c:749)
+2017-09-05 15:19:58,685	DEBUG    -- scanner_tls_qualys.py:354  -- Retrying 3 times, next in 20 seconds.
+2017-09-05 15:20:49,209	DEBUG    -- scanner_tls_qualys.py:352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+2017-09-05 15:20:49,209	DEBUG    -- scanner_tls_qualys.py:353  -- ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response',))
+2017-09-05 15:20:49,210	DEBUG    -- scanner_tls_qualys.py:354  -- Retrying 2 times, next in 20 seconds.
+
+
+^CProcess ForkPoolWorker-2050:
+
+
+Soms ook ZONDER enige feedback, en daar kan je dan niet veel aan doen...
+Dus wat nu? Een resume optie kan erg goed helpen... want je weet niet wanneer het gebeurd.
+En je kan het verder ook niet meten...
+
+File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
+elif lock.acquire(block, timeout):
+
+File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
+elif lock.acquire(block, timeout):
+
+
+
+todo: unable to resolve domain name fouten wegwerken: we bewaren het domain, wordt dan WEER gescand.
+Hij moet gewoon "dood" worden gemaakt. Kunnen altijd later wel kijken of hij toch niet leeft.
+- Dit kan je oplossen door alleen maar alive dingen te scannen. Het wordt wel allemaal goed uitgezet.
+"""
+
 import json
 import logging
 import sys
@@ -114,7 +197,7 @@ class ScannerTlsQualys:
             sleep(50 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
         pool.close()
-        pool.join()
+        pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min.
         ScannerTlsQualys.log.debug("Done")
 
     @staticmethod
@@ -160,7 +243,10 @@ class ScannerTlsQualys:
                 # in nearly all cases the domain could not be retrieved, so clean the endpoints
                 # and move on. As the result was "error", over internet, you should not need to
                 # check if there is an internet connection... obviously
+                # we can believe that if the scanner says "unable to resolve domain name"
+                # that this is true. We will kill the domain then.
                 if data['status'] == "ERROR":
+                    ScannerTlsQualys.scratch(domain, data)  # we always want to see what happened.
                     ScannerTlsQualys.clean_endpoints(domain, [])
                     return
 
@@ -168,6 +254,7 @@ class ScannerTlsQualys:
                 data['status'] = "FAILURE"  # stay in the loop
                 ScannerTlsQualys.log.debug("Unexpected result from API")
                 ScannerTlsQualys.log.debug(data)  # print for debugging purposes
+                ScannerTlsQualys.scratch(domain, data)  # we always want to see what happened.
 
             # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
             # it doesn't matter how fast you ask the status, it doesnt' get "ready" sooner.
@@ -392,7 +479,7 @@ class ScannerTlsQualys:
         x = TlsQualysScan.objects.filter(endpoint__domain=domain,
                                          endpoint__port=443,
                                          endpoint__protocol__in=["https"],
-                                         scan_date__gt=date.today() - timedelta(1)).exists()
+                                         scan_date__gt=date.today() - timedelta(3)).exists()
         if x:
             ScannerTlsQualys.log.debug("domain %s was scanned in past 24 hours", domain)
         else:
@@ -466,3 +553,15 @@ class ScannerTlsQualys:
                 url.is_deadsince = datetime.now(pytz.utc)
                 url.is_dead_reason = "There are endpoints discovered via scanner tls qualys"
                 url.save()  # might be empty, which is fine...
+
+        # the reverse is not always true: while you can genericly revive domains if there is a
+        # working endpoint. This scanner can not kill the domain if there is no TLS.
+        # However, you can IF there are no other endpoints and there is no TLS endpoint.
+        # after scanning a few times. ... There are a few domains in limbo: those who have
+        # no endpoints, that have been scanned, but may be visited by other scanners...
+        # This scanner doesn't check if the domain is dead (or exists at al) the benefit is that
+        # you can still re-check a domain by scanning it. So make sure the list of domains to be
+        # scanned is good enough... So let's kill some urls...
+
+
+        # if an url has NO endpoints,
