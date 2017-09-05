@@ -479,13 +479,18 @@
                             <th>{% trans "Rank" %}</th>
                             <th>{% trans "Organization" %}</th>
                             <th>{% trans "Points" %}</th>
+                            <th>{% trans "Tweet" %}</th>
                         </tr>
                         </thead><tbody>
+                        {% verbatim %}
                         <tr v-for='rank in top.ranking'>
-                            <td>{% verbatim %}{{ rank.Rank }}{% endverbatim %}</td>
-                            <td><a v-on:click="showReport(rank.OrganizationID)">{% verbatim %}{{ rank.OrganizationName }}{% endverbatim %}</a></td>
-                            <td>{% verbatim %}{{ rank.Points }}{% endverbatim %}</td>
+                            <td>{{ rank.Rank }}</td>
+                            <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
+                            <td>{{ rank.Points }}</td>
+                            <!-- https://dev.twitter.com/web/tweet-button/parameters -->
+                            <td><a :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=Gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
                         </tr>
+                        {% endverbatim %}
                         </tbody>
                     </table>
                     <div>

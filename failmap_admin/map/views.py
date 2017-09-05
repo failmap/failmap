@@ -77,6 +77,7 @@ def history(request):
 
 def topfail(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
+    # todo: add the twitter handle to the database etc...
     # at least it's fast.
 
     # This gets the organizations until a certain score that is seen as bad.
