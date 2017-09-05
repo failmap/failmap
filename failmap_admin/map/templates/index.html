@@ -109,6 +109,8 @@
             <div id='map'></div>
             <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
 
+            <!-- todo: dynamic whitespace stays visible, even when the list is rendered elsewhere.
+             patches are welcome! -->
             {% verbatim %}
             <div id="domainlist" v-if="urls">
                    <h4>Domains: </h4>
@@ -248,7 +250,8 @@
 
             <a name="report"></a>
 
-            <div class="page-header" id="report" v-if="name">
+            <div class="page-header" id="report">
+                <div v-if="name">
                 <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
                     {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, congratulations!<br />
@@ -257,13 +260,14 @@
                     {% verbatim %}
                     <div v-for="url in urls">
                         <span class="failtip" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                            {{ url.url.url }}
+                            Domein: {{ url.url.url }}
                             <div v-for="(endpoint, key) in url.url.endpoints">
                                 <div v-for="(myendpoint, mykey) in endpoint">
-                                    &nbsp; &nbsp; - {{ myendpoint.ip }}:{{ myendpoint.port }}
+                                    &nbsp; Adres: {{ myendpoint.ip }}:{{ myendpoint.port }}
                                     <div v-for="(rating, key) in myendpoint.ratings">
                                         <div v-for="(myrating, myratingkey) in rating">
-                                            &nbsp; &nbsp; - - {{ myratingkey }} {{ myrating.points }} {{ myrating.explanation }}
+                                            &nbsp; &nbsp; Score: {{ myrating.points }} punten, sinds: {{ myrating.since }} <br />
+                                            &nbsp; &nbsp; &nbsp; Uitleg: {{ myrating.explanation }}
                                         </div>
                                     </div>
                                 </div>
@@ -276,6 +280,7 @@
                         </span>
                     </div>
                     {% endverbatim %}
+                </div>
                 </div>
             </div>
 
