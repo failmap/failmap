@@ -86,11 +86,13 @@
                     of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
                 </p>
                 <p>
-                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden er punten uitgedeeld,
-                        bij meer dan 100 punten is de beveiliging niet op orde: voor een onjuist versleutelde verbinding
-                        worden al 200 punten verdiend. Het betekent dus ook echt iets om weinig punten te hebben.<br><br>
-                        De kaart is bijgewerkt zodat ook historie bekeken kan worden. Achter de schermen zijn er veel
-                        aanpassingen geweest.
+                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden er punten uitgedeeld.
+                        Een onjuist verleutelde verbinding levert tot 1000 punten op. Een niet versleutelde verbdinding levert 200 punten
+                        op (om niet meteen heel Nederland rood te kleuren).  Weinig punten hebben is lastig, zeker bij teveel domeinen.
+                        <br><br>
+                        Achter de schermen zijn er veel wijzigingen geweest. De kaartsoftware is bijvoorbeeld open source geworden
+                        en een stichting is opgericht om deze te beheren. Het originele PHP script is ingeruild voor het Django framework.
+                        De website wordt nu met Vue.js gerenderd op basis van te cachen gegevens: de site is dus veel sneller.
                     </small>
                 </p>
             </div>
@@ -106,6 +108,18 @@
 
             <div id='map'></div>
             <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
+
+            {% verbatim %}
+            <div id="domainlist" v-if="urls">
+                   <h4>Domains: </h4>
+                    <div v-for="url in urls">
+                            <span v-bind:class="colorize(url.url.points)">
+                                {{ url.url.url }}
+                            </span>
+                    </div>
+                <p><small>This list does not show history.</small></p>
+            </div>
+            {% endverbatim %}
 
             <div id="statistics">
                 <div class="page-header">
@@ -233,6 +247,7 @@
             </div>
 
             <a name="report"></a>
+
             <div class="page-header" id="report" v-if="name">
                 <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
@@ -243,6 +258,16 @@
                     <div v-for="url in urls">
                         <span class="failtip" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
                             {{ url.url.url }}
+                            <div v-for="(endpoint, key) in url.url.endpoints">
+                                <div v-for="(myendpoint, mykey) in endpoint">
+                                    &nbsp; &nbsp; - {{ myendpoint.ip }}:{{ myendpoint.port }}
+                                    <div v-for="(rating, key) in myendpoint.ratings">
+                                        <div v-for="(myrating, myratingkey) in rating">
+                                            &nbsp; &nbsp; - - {{ myratingkey }} {{ myrating.points }} {{ myrating.explanation }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </span>
                     </div>
                     <div class="tooltip_templates">
@@ -267,7 +292,8 @@
                         dataverbindingen van publieke diensten, daar wordt namelijk vaak gevoelige
                         informatie verwerkt. De kaart heet Faalkaart omdat initieel werd aangenomen dat er
                         nog veel te verbeteren viel en een tendentieuze naam eerder leidt tot actie dan een
-                        schattige naam. De naam bleek verkeerd gekozen.
+                        schattige naam. Dat bleek terecht: hoewel er meer op orde was dan aangenomen,
+                        werden er in het eerste weekend toch meer dan 150 verbindingen extra versleuteld.
                     </p>
 
                     <h2>Mijn gemeente is rood, wat nu?</h2>
@@ -292,18 +318,18 @@
                         zitten achter ip- en certificaatfiltering en zijn dus niet testbaar zonder de juiste
                         voorwaarden. Sommige gemeenten accepteren DNS wildcards, hiervan zijn alleen www.~
                         en ~ getest: dit is dus incompleet en kan voor deze gemeenten de schijn wekken dat
-                        alles in orde is. De kaartdata en gemeente-websites komen uit 2014 en het is
-                        mogelijk dat er dus wat mist door o.a. het samengaan van gemeenten.
+                        alles in orde is.
                     </p>
 
                     <h2>Hoe komt de score tot stand?</h2>
                     <p>
-                        Sinds faalkaart 2.0 wordt de score anders opgebouwd. Er wordt nu gerekend in punten.
-                        Bij 0 punten heeft een organisatie alles op orde. Bij ieder beveiligingsprobleem
-                        worden punten toegekend, meer naarmate de ernst van het probleem hoger is.
-                        Bij 1000 punten is de veiligheid absoluut niet op orde, wat donkerrood is.
-                        In de nieuwe versie worden beoordelingen bij elkaar opgeteld: meer domeinen betekent
-                        dus meer kans op problemen. Dus ook een hogere kans op een slechter oordeel.
+                        Sinds faalkaart 2.0 wordt de score anders opgebouwd: er wordt gerekend in punten.
+                        Aan ieder beveiligingsprobleem worden punten toegekend.
+                        <br />
+                        Alles onder de 100 punten wordt gezien als goed. Tussen de 100 en 399 punten is
+                        voldoende (oranje), alles daarboven is onvoldoende. Bij iedere verbinding naar
+                        het internet is er dus risico op meer punten: organisaties die erg veel kanalen
+                        naar het internet hebben, nemen dus meer risico en hebben meer te onderhouden.
                     </p>
 
                     <h2>Hoe komt de score tot stand?</h2>
@@ -340,11 +366,11 @@
                         <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
                         <li>Actuele lijst gemeenten: 200ok.nl</li>
                         <li>Beoordeling op veiligheid door Qualys SSL labs</li>
-                        <li>URLs en polygonen van de klikbare gemeentekaart van Imergis. Kaartdata 2014.</li>
+                        <li>Polygonen en kaartdata: Openstreetmaps.</li>
                         <li>Simpele DNS verkenning met DNS Recon</li>
                         <li>Styling: Twitter Bootstrap</li>
-                        <li>Talen: Python, PHP op MariaDB.</li>
-                        <li>JQuery MapHighlight door David Lynch</li>
+                        <li>Talen: Python op MariaDB.</li>
+                        <li>Financiele ondersteuning: SIDN Fonds.</li>
                     </ul>
 
                     <h2>Wat is de historie van Faalkaart?</h2>

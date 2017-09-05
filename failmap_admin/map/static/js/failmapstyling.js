@@ -1,10 +1,10 @@
-// todo: create auto update feature...
 //                              Y     X
 var map = L.map('map').setView([52.15, 5.8], 8);
 map.scrollWheelZoom.disable();
 
 // mapbox handles 1600 visitors a day, for static data. Fortunately we can A cache the request, B use another map provider,
 // C the map looks fine without tiles. Paying 500 a month for max 1M visitors still sucks. Ideal case is local tiles.
+// and real open streetmaps.
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
     maxZoom: 18,
@@ -25,6 +25,7 @@ metadata.update = function (metadata) {
     this._div.innerHTML = '<h4>Map information</h4>' +  (metadata ?
             '<br />' + metadata.data_from_time + ''
             : '');
+
 };
 metadata.addTo(map);
 
@@ -38,12 +39,18 @@ info.onAdd = function (map) {
 };
 
 info.update = function (props) {
-    this._div.innerHTML = '<h4>Failure of your overlords</h4>' +  (props ?
-            '<br /><b>Gemeente: </b>' + props.OrganizationName + '' +
+    var sometext = "<h4>Failure of your overlords</h4>";
+
+    if (props) {
+        sometext += '<br /><b>Gemeente: </b>' + props.OrganizationName + '' +
             '<br /><b>Overall Grade: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + '</span>' +
-            '<br /><br /><b>Data from: </b>' + props.DataFrom + '' +
-            '<br /><br />Click for more information...'
-            : 'Move your mouse over the map and cry...');
+            '<br /><br /><b>Data from: </b>' + props.DataFrom + '';
+        domainsDebounced(props.OrganizationID);
+    } else {
+        sometext += 'Move your mouse over the map and cry...';
+    }
+
+    this._div.innerHTML = sometext;
 };
 
 info.addTo(map);
@@ -51,10 +58,10 @@ info.addTo(map);
 
 // get color depending on population density value
 function getColor(d) {
-    return d > 399 ? '#bd383c' :
-        d > 99  ? '#fc9645' :
+    return  d > 399 ? '#bd383c' :
+            d > 99  ? '#fc9645' :
             d > -1  ? '#62fe69' :
-                                '#c1bcbb';
+                      '#c1bcbb';
 }
 
 function style(feature) {
@@ -85,6 +92,27 @@ function highlightFeature(e) {
     info.update(layer.feature.properties);
 }
 
+var domainsDebounced = debounce(function(x) {
+    $.getJSON('/data/report/' + x, function (data) {
+        var thingsdata = JSON.parse(data.calculation);
+        vueDomainlist.urls = thingsdata["organization"]["urls"];
+    });
+}, 250);
+
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		clearTimeout(timeout);
+		timeout = setTimeout(function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		}, wait);
+		if (immediate && !timeout) func.apply(context, args);
+	};
+}
+
+
 var geojson;
 
 function resetHighlight(e) {
@@ -106,8 +134,6 @@ function gotoLink(e){
 // it needs to be started somewhere...
 // you can't do this in a function, since you'll get multiple instances of vue which give
 // the impression that the data is not reactive.
-window.vueReport = 1;
-window.vueStatistics = 1;
 $( document ).ready(function() {
 
     // load initial data, from 0 weeks back. This has to be in the document.ready i guess.
@@ -186,7 +212,7 @@ $( document ).ready(function() {
     });
 
     // move space and time ;)
-    $("#history").on("change input", function() {
+    $("#history").on("change input", debounce(function() {
         $.getJSON('/data/map/' + this.value, function(json) {
             geojson.clearLayers(); // prevent overlapping polygons
             map.removeLayer(geojson);
@@ -199,6 +225,18 @@ $( document ).ready(function() {
             // todo: add the date info on the map, or somewhere.
             metadata.update(json.metadata);
         });
+    }, 250));
+
+    window.vueDomainlist = new Vue({
+        el: '#domainlist',
+        data: { urls: Array },
+        methods: {
+            colorize: function (points) {
+                if (points < 100) return "green";
+                if (points < 400) return "orange";
+                if (points > 399) return "red";
+            }
+        }
     });
 
     window.vueTopfail = new Vue({
@@ -209,7 +247,6 @@ $( document ).ready(function() {
                 location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
                 location.hash = "#report";
                 $.getJSON('/data/report/' + OrganizationID, function (data) {
-                    vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
                     thingsdata = JSON.parse(data.calculation);
                     vueReport.urls = thingsdata["organization"]["urls"];
                     vueReport.points = data.rating;
@@ -239,7 +276,6 @@ function showreport(e){
     location.hash = "#report";
     var layer = e.target;
     $.getJSON('/data/report/' + layer.feature.properties['OrganizationID'], function(data) {
-        vueReport.calculation = data.calculation.replace(/(?:\r\n|\r|\n)/g, '<br />');
         thingsdata = JSON.parse(data.calculation);
         vueReport.urls = thingsdata["organization"]["urls"];
         vueReport.points = data.rating;
