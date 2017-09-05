@@ -64,3 +64,14 @@ Todo: better separation of UI and data. The JS messes things up.
 
 /* https://iamceege.github.io/tooltipster/#getting-started */
 .tooltip_templates { display: none; }
+
+#domainlist {
+    position: relative;
+    top: -685px;
+    left: 810px;
+    z-index: 400;
+    width: 280px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
