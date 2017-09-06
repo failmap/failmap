@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-15 09:43+0000\n"
+"POT-Creation-Date: 2017-09-06 10:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,58 +17,154 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-#: map/templates/index.html:15
+
+#: failmap_admin/map/templates/index.html:7
 msgid "Site Title"
 msgstr "Fail Map - This is how safely your data is treated."
 
-#: map/templates/index.html:67
+#: failmap_admin/map/templates/index.html:61
 msgid "Toggle navigation"
 msgstr ""
 
-#: map/templates/index.html:72 map/templates/index.html:90
+#: failmap_admin/map/templates/index.html:66
+#: failmap_admin/map/templates/index.html:84
 msgid "Fail Map"
 msgstr "Fail Map"
 
-#: map/templates/index.html:76
+#: failmap_admin/map/templates/index.html:70
 msgid "Home"
 msgstr ""
 
-#: map/templates/index.html:77
+#: failmap_admin/map/templates/index.html:71
 msgid "Map"
 msgstr ""
 
-#: map/templates/index.html:78
+#: failmap_admin/map/templates/index.html:72
 msgid "Bar"
 msgstr ""
 
-#: map/templates/index.html:79
+#: failmap_admin/map/templates/index.html:73
 msgid "Numbers"
 msgstr ""
 
-#: map/templates/index.html:80
-msgid "Domains"
+#: failmap_admin/map/templates/index.html:74
+#: failmap_admin/map/templates/index.html:474
+msgid "Top Fail"
 msgstr ""
 
-#: map/templates/index.html:81
+#: failmap_admin/map/templates/index.html:75
 msgid "Explanation"
 msgstr ""
 
-#: map/templates/index.html:91
+#: failmap_admin/map/templates/index.html:85
 msgid "Fail Map Introduction"
 msgstr ""
-"Fail Map visualizes how safe critical information and systems are governed"
-"when connected to the internet. For example, it looks at the safety of "
-"data being exchanged. It's important that his done correctly, since these"
-" connections are also used to transfer your personal data."
+"Fail Map visualizes how safe critical information and systems are "
+"governedwhen connected to the internet. For example, it looks at the safety "
+"of data being exchanged. It's important that his done correctly, since these "
+"connections are also used to transfer your personal data."
 
-#: map/templates/index.html:110
+#: failmap_admin/map/templates/index.html:104
 msgid "The Map"
 msgstr ""
 
-#: map/templates/index.html:111
+#: failmap_admin/map/templates/index.html:105
 msgid "The Map Introduction"
 msgstr ""
 "This map reads as a traffic light. Every municipality and organization is "
 "displayed in a color. Red means insufficient safety, green means sufficient: "
-"there seems to be nothing wrong with the things we (can/are allowed to) check."
-"There are various nuances, which are described elsewhere on this site."
+"there seems to be nothing wrong with the things we (can/are allowed to) "
+"check.There are various nuances, which are described elsewhere on this site."
+
+#: failmap_admin/map/templates/index.html:131
+msgid "The Bar"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:151
+msgid "The Numbers"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:158
+msgid "When"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:159
+msgid "Organizations"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:160
+msgid "Good"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:161
+msgid "Average"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:162
+msgid "Bad"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:167
+msgid "Now"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:176
+msgid "7 days ago ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:185
+msgid "2 weeks ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:194
+msgid "1 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:203
+msgid "2 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:212
+msgid "3 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:221
+msgid "4 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:230
+msgid "5 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:239
+msgid "6 months ago"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:259
+#: failmap_admin/map/templates/index.html:481
+msgid "Points"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:261
+msgid "Score layout"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:293
+msgid "About Failmap"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:479
+msgid "Rank"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:480
+msgid "Organization"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:482
+msgid "Tweet"
+msgstr ""
+
+#: failmap_admin/map/templates/index.html:497
+msgid "Updated on"
+msgstr ""

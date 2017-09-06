@@ -89,11 +89,37 @@ elif lock.acquire(block, timeout):
 File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
 elif lock.acquire(block, timeout):
 
+Some other nice errors:
 
+calculating score on 2017-09-06 08:23:22.714449+00:00 for beveiligd.harlingen.nl
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/site-packages/django/db/backends/base/base.py", line 211, in _commit
+    return self.connection.commit()
+sqlite3.OperationalError: database is locked
+
+The above exception was the direct cause of the following exception:
+
+Because of the development server, and using sqlite or something like that.
+
+
+
+2017-09-06 08:2    -- scanner_tls_qualys.py:318  -- secure.zoeterwoude.nl (91.213.115.145) = T
+2017-09-06 08 G    -- scanner_tls_qualys.py:396  -- Trying to save scan for secure.zoeterwoude.nl
+Error callback!
+get() returned more than one Endpoint -- it returned 2!
+{}
+2017-09
+On secure.zoeterwoude.nl, webmail.zoeterwoude.nl, zoeterwoude.nl consistently. Why? During Save.
+todo: when the error callback is triggered, find out what line it triggered... because debugging is
+hard now.
+It's a django error, using "get" getting back multiple objects. Interesting... so the database
+can be poluted with multiple instead of one.
 
 todo: unable to resolve domain name fouten wegwerken: we bewaren het domain, wordt dan WEER gescand.
 Hij moet gewoon "dood" worden gemaakt. Kunnen altijd later wel kijken of hij toch niet leeft.
 - Dit kan je oplossen door alleen maar alive dingen te scannen. Het wordt wel allemaal goed uitgezet.
+- we kijken nu in de scans bij het aanroepen van de scanner. de scanner zelf heeft geen oordeel over
+- wat wel of niet gescanned moet worden... behalve niet "te vaak" scannen.
 """
 
 import json
@@ -197,7 +223,7 @@ class ScannerTlsQualys:
             sleep(50 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
         pool.close()
-        pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min.
+        pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min
         ScannerTlsQualys.log.debug("Done")
 
     @staticmethod
@@ -562,6 +588,5 @@ class ScannerTlsQualys:
         # This scanner doesn't check if the domain is dead (or exists at al) the benefit is that
         # you can still re-check a domain by scanning it. So make sure the list of domains to be
         # scanned is good enough... So let's kill some urls...
-
 
         # if an url has NO endpoints,

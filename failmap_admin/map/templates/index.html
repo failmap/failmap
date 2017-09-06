@@ -105,7 +105,8 @@
                 <p>{% trans "The Map Introduction" %}</p>
             </div>
 
-            <h4>Time slider</h4>
+            <h4>{% trans "Time slider" %}</h4>
+            <p>{% trans "Use the time slider to go back weeks into time, for a maximum of 52." %}</p>
             <input id="history" type="range" value="0" min="0" max="52" step="1" style="direction: rtl"/><br/>
 
             <div id='map'></div>
@@ -115,13 +116,14 @@
              patches are welcome! -->
             {% verbatim %}
             <div id="domainlist" v-if="urls">
-                   <h4>Domains: </h4>
+                   <h4>{% endverbatim %}{% trans "Domains" %}{% verbatim %}: </h4>
                     <div v-for="url in urls">
                             <span v-bind:class="colorize(url.url.points)">
                                 {{ url.url.url }}
                             </span>
                     </div>
-                <p><small>This list does not show history.</small></p>
+                <br />
+                <p><small>{% endverbatim %}{% trans "This list does not show history." %}{% verbatim %}</small></p>
             </div>
             {% endverbatim %}
 
@@ -256,29 +258,24 @@
                 <div v-if="name">
                 <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
-                    {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, congratulations!<br />
+                    {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
                     <br />
                     {% trans "Score layout" %}: <br />
                     {% verbatim %}
                     <div v-for="url in urls">
                         <span class="failtip" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                            Domein: {{ url.url.url }}
+                            {% endverbatim %}{% trans "Domain" %}{% verbatim %}: {{ url.url.url }}
                             <div v-for="(endpoint, key) in url.url.endpoints">
                                 <div v-for="(myendpoint, mykey) in endpoint">
-                                    &nbsp; Adres: {{ myendpoint.ip }}:{{ myendpoint.port }}
+                                    &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
                                     <div v-for="(rating, key) in myendpoint.ratings">
                                         <div v-for="(myrating, myratingkey) in rating">
-                                            &nbsp; &nbsp; Score: {{ myrating.points }} punten, sinds: {{ myrating.since }} <br />
-                                            &nbsp; &nbsp; &nbsp; Uitleg: {{ myrating.explanation }}
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ myrating.since }} <br />
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </span>
-                    </div>
-                    <div class="tooltip_templates">
-                        <span v-for="url in urls" v-bind:id="idize(url.url.url)">
-                            <strong>This is the content of my tooltip! {{ url.url.url }}</strong>
                         </span>
                     </div>
                     {% endverbatim %}
@@ -488,7 +485,7 @@
                             <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
                             <td>{{ rank.Points }}</td>
                             <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                            <td><a :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=Gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
+                            <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
                         </tr>
                         {% endverbatim %}
                         </tbody>
@@ -501,9 +498,10 @@
 
             <div class="page-header">
                 <a name="footer"></a>
-                <h1>Support Fail Map</h1>
+                <h1>{% trans "Support Fail Map" %}</h1>
                  <p>Failmap is open software by the <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a>.
                         Support our mission to clean up the internet of dangerous failures: it helps protect your data and privacy as well.</p>
+                <p>{% trans "Your donations are welcome in time, support, money or in any other way." %}</p>
             </div>
         </div>
     </body>
