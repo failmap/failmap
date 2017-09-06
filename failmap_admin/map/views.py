@@ -112,7 +112,8 @@ def topfail(request, weeks_back=0):
             organization.name,
             organizations_organizationtype.name,
             organization.id,
-            `when`
+            `when`,
+            organization.twitter_handle
         FROM map_organizationrating
         INNER JOIN
           organization on organization.id = map_organizationrating.organization_id
@@ -136,6 +137,7 @@ def topfail(request, weeks_back=0):
             "OrganizationID": i[3],
             "OrganizationType": i[2],
             "OrganizationName": i[1],
+            "OrganizationTwitter": i[5],
             "Points": i[0],
             "DataFrom": i[4]
         }
@@ -212,6 +214,13 @@ def stats(request, weeks_back=0):
                 measurement["total_organizations"] += 1
                 measurement["total_score"] += 0
                 measurement["no_rating"] += 1
+
+        measurement["red percentage"] = round((measurement["red"] /
+                                               measurement["total_organizations"]) * 100)
+        measurement["orange percentage"] = round((measurement["orange"] /
+                                                  measurement["total_organizations"]) * 100)
+        measurement["green percentage"] = round((measurement["green"] /
+                                                 measurement["total_organizations"]) * 100)
 
         stats[stat] = measurement
 

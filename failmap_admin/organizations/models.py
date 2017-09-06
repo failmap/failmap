@@ -4,6 +4,7 @@
 from django.db import models
 from django_countries.fields import CountryField
 from jsonfield import JSONField
+from django.core.exceptions import ValidationError
 
 
 class OrganizationType(models.Model):
@@ -16,6 +17,11 @@ class OrganizationType(models.Model):
         return self.name
 
 
+def validate_twitter(value):
+    if value[0:1] != "@":
+        raise ValidationError('Twitter handle needs to start with an @ symbol.')
+
+
 class Organization(models.Model):
     country = CountryField()
     type = models.ForeignKey(
@@ -23,6 +29,14 @@ class Organization(models.Model):
         on_delete=models.PROTECT,
         default=1)
     name = models.CharField(max_length=50)
+    twitter_handle = models.CharField(max_length=150,
+                                      help_text="Include the @ symbol. "
+                                                "Used in the top lists to let visitors tweet to the"
+                                                "organization to wake them up.",
+                                      null=True,
+                                      blank=True,
+                                      validators=[validate_twitter]
+                                      )
 
     def __unicode__(self):
         return u'%s  - %s in %s' % (self.name, self.type, self.country, )

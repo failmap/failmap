@@ -129,22 +129,46 @@ function gotoLink(e){
     location.hash = "#" + layer.feature.properties['OrganizationName'];
 }
 
+function loadmap(weeknumber){
+    $.getJSON('/data/map/' + weeknumber, function(json) {
 
-// the vue manual never states when this function can be created / called.
-// it needs to be started somewhere...
-// you can't do this in a function, since you'll get multiple instances of vue which give
-// the impression that the data is not reactive.
+            if (geojson) { // if there already was data present
+                geojson.clearLayers(); // prevent overlapping polygons
+                map.removeLayer(geojson);
+            }
+
+            geojson = L.geoJson(json, {
+                style: style,
+                onEachFeature: onEachFeature
+            }).addTo(map);
+
+            // todo: add the date info on the map, or somewhere.
+            metadata.update(json.metadata);
+        });
+}
+
+// reloads the map and the top fail every hour, so you don't need to manually refresh anymore
+var hourly = false;
+function update_hourly() {
+    if (hourly){
+        loadmap(0); // todo: also set the timeslider to 0 again.
+        loadtopfail();
+        $("#history").val(0);
+        console.log("yolo!");
+    }
+    hourly = true; // first time don't run the code, so nothing surprising happens
+    setTimeout(update_hourly,60*60*1000);
+}
+
+
+
 $( document ).ready(function() {
 
-    // load initial data, from 0 weeks back. This has to be in the document.ready i guess.
-    $.getJSON('/data/map/0', function(json) {
-        geojson = L.geoJson(json, {
-            style: style,
-            onEachFeature: onEachFeature
-        }).addTo(map);
-        metadata.update(json.metadata);
-    });
+    loadmap(0);
 
+    // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
+    // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
+    update_hourly();
 
     window.vueReport = new Vue({
         el: '#report',
@@ -179,7 +203,7 @@ $( document ).ready(function() {
     window.vueStatistics = new Vue({
         el: '#statistics',
         data: {
-            data: Array  // whatever we get from the nice webservice
+            data: Array
 
         },
         computed: {
@@ -213,18 +237,7 @@ $( document ).ready(function() {
 
     // move space and time ;)
     $("#history").on("change input", debounce(function() {
-        $.getJSON('/data/map/' + this.value, function(json) {
-            geojson.clearLayers(); // prevent overlapping polygons
-            map.removeLayer(geojson);
-
-            geojson = L.geoJson(json, {
-                style: style,
-                onEachFeature: onEachFeature
-            }).addTo(map);
-
-            // todo: add the date info on the map, or somewhere.
-            metadata.update(json.metadata);
-        });
+        loadmap(this.value);
     }, 250));
 
     window.vueDomainlist = new Vue({
@@ -257,14 +270,16 @@ $( document ).ready(function() {
         }
     });
 
-    $.getJSON('/data/topfail/', function(data) {
-        vueTopfail.top = data;
-    });
+    loadtopfail()
 
 });
 
 
-
+function loadtopfail(){
+        $.getJSON('/data/topfail/', function(data) {
+        vueTopfail.top = data;
+    });
+}
 
 // we chose vue because of this:
 // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc

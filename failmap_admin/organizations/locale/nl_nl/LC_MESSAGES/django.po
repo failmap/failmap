@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-15 09:39+0000\n"
+"POT-Creation-Date: 2017-09-06 12:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,26 +17,26 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: organizations/dashboard.py:20
+#: failmap_admin/organizations/dashboard.py:20
 msgid "Recent Actions"
 msgstr ""
 
-#: organizations/dashboard.py:27
+#: failmap_admin/organizations/dashboard.py:27
 msgid "Smart Add Url's"
 msgstr ""
 
-#: organizations/dashboard.py:33
+#: failmap_admin/organizations/dashboard.py:33
 msgid "Failmap resources"
 msgstr ""
 
-#: organizations/dashboard.py:36
+#: failmap_admin/organizations/dashboard.py:36
 msgid "Github Repository"
 msgstr ""
 
-#: organizations/dashboard.py:41
+#: failmap_admin/organizations/dashboard.py:41
 msgid "Admin repository"
 msgstr ""
 
-#: organizations/dashboard.py:46
+#: failmap_admin/organizations/dashboard.py:46
 msgid "Failmap Website"
 msgstr ""

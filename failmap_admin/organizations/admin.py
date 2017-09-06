@@ -49,7 +49,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
-    fields = ('name', 'type', 'country')
+    fields = ('name', 'type', 'country', 'twitter_handle')
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]
 
