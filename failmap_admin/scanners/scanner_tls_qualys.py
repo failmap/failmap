@@ -114,6 +114,8 @@ todo: when the error callback is triggered, find out what line it triggered... b
 hard now.
 It's a django error, using "get" getting back multiple objects. Interesting... so the database
 can be poluted with multiple instead of one.
+-> there are two endpoints, one is dead, one not. Both have the SAME ip. Should check for dead there?
+-> or ... we can't ... i see now :) How do we deal with this?
 
 todo: unable to resolve domain name fouten wegwerken: we bewaren het domain, wordt dan WEER gescand.
 Hij moet gewoon "dood" worden gemaakt. Kunnen altijd later wel kijken of hij toch niet leeft.
@@ -425,23 +427,103 @@ class ScannerTlsQualys:
         for qualys_endpoint in data['endpoints']:
             # insert or update automatically. An endpoint is unique (protocol, port, ip, domain)
             # when an endpoint is found here, then it is obviously not dead....
-            failmap_endpoint, created = Endpoint.objects.get_or_create(
-                domain=domain,
-                ip=qualys_endpoint['ipAddress'],
-                port=443,
-                protocol="https"
-            )
-            if created:
-                ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results",
-                                           domain)
-            else:
-                ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s",
-                                           failmap_endpoint.id)
-                # it exists, so cannot be dead... update it to be alive (below functions don't seem
-                # to work...
+            # todo: There is a failstate, where there is both an endpoint alive, and one dead
+            # with the same IP and all other criteria. That should not happen.
+            # get or create also doesn't really help. - dedupe endpoint function.
+
+            # take in account there might be multiple "the same" endpoints, due to human mistakes
+            # or bugs, or whatever. We're going to reduce it back to a single endpoint and continue
+            # working with that. There is really no use to have multiple the same endpoints.
+            # - especially since we don't store the reverse name as unique.
+            # todo: ah, hier maakte hij endpoints zonder URL er aan :)
+            # perhaps i have to do some fixing outside of this thing...???
+            # instead of automerging behaviour?
+            endpoints = Endpoint.objects.all().filter(domain=domain,
+                                                      ip=qualys_endpoint['ipAddress'],
+                                                      port=443,
+                                                      protocol="https")
+
+            # count here, as the number of elements is possibly modified in below process
+            count = endpoints.count()
+
+            # if there is no endpoint yet, then create it. (as with get or create
+            if count == 0:
+                ScannerTlsQualys.log.debug("This endpoint is new: %s %s:443" %
+                                           (domain, qualys_endpoint['ipAddress']))
+                # todo: find the URL that matches this ... if there is any, if not, safe it without
+                # an URL... there might be reasons for scanning things without an URL object.
+                # todo: url + organization are unique. Can be that mulitple organizations have
+                # the same URL. So add the organization to the scanner, otherwise the below
+                # association will not be OK.
+                failmap_endpoint = Endpoint()
+                try:
+                    failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
+                except:
+                    # todo: make less broad exception
+                    failmap_endpoint.url = ""
+                failmap_endpoint.domain = domain  # not used anymore. Filled for legacy reasons.
+                failmap_endpoint.port = 443
+                failmap_endpoint.protocol = "https"
+                failmap_endpoint.ip = qualys_endpoint['ipAddress']
+                failmap_endpoint.is_dead = False
+                failmap_endpoint.save()
+
+            if count > 1:
+                ScannerTlsQualys.log.debug("Multiple similar endpoints detected for %s" % domain)
+                ScannerTlsQualys.log.debug("Flattening similar endpoints to a single one.")
+                # uh oh, there are multiple endpoints that do the same... let's reduce it
+                # to a single one.
+                # first, revivive all of them, so the one we will work with has the correct state.
+                for endpoint in endpoints:
+                    endpoint.is_dead = False
+                    endpoint.is_dead_reason = ""
+                    endpoint.save()
+
+                # now merge all of these endpoints into one by transfering all
+                # associations of this endpoint to the first endpoint.
+                # https://docs.djangoproject.com/en/1.11/topics/db/queries/
+                failmap_endpoint = endpoints.first()  # the saved one
+                # and the rest, except for the first is deleted
+                for endpoint in endpoints:
+
+                    # but keep the first endpoint. Don't know if this comparison is valid.
+                    if endpoint == failmap_endpoint:
+                        continue
+
+                    # in the future there might be other scans too... be warned
+                    scans = TlsQualysScan.objects.all().filter(endpoint=endpoint)
+                    for scan in scans:
+                        scan.endpoint = failmap_endpoint
+                        scan.save()
+                    endpoint.delete()
+
+            if count == 1:
+                ScannerTlsQualys.log.debug("An endpoint exists and is set to be alive.")
+                # just one existing endpoint. Since we got it back it's alive.
+                failmap_endpoint = endpoints[0]
                 failmap_endpoint.is_dead = False
                 failmap_endpoint.is_dead_reason = ""
                 failmap_endpoint.save()
+
+            # todo: ah, hier maakt hij endpoints zonder URL er aan :)
+            # this code was the old "get or create" approach that could not handle duplicate endpoints
+            # failmap_endpoint, created = Endpoint.objects.get_or_create(
+            #     domain=domain,
+            #     ip=qualys_endpoint['ipAddress'],
+            #     port=443,
+            #     protocol="https"
+            # )
+            # if created:
+            #     ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results",
+            #                                domain)
+            # else:
+            #     ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s",
+            #                                failmap_endpoint.id)
+            #     # it exists, so cannot be dead... update it to be alive (below functions don't seem
+            #     # to work...
+            #     failmap_endpoint.is_dead = False
+            #     failmap_endpoint.is_dead_reason = ""
+            #     failmap_endpoint.save()
 
             # possibly also record the server name, as we get it. It's not really of value.
 
@@ -505,7 +587,7 @@ class ScannerTlsQualys:
         x = TlsQualysScan.objects.filter(endpoint__domain=domain,
                                          endpoint__port=443,
                                          endpoint__protocol__in=["https"],
-                                         scan_date__gt=date.today() - timedelta(3)).exists()
+                                         scan_date__gt=date.today() - timedelta(1)).exists()
         if x:
             ScannerTlsQualys.log.debug("domain %s was scanned in past 24 hours", domain)
         else:

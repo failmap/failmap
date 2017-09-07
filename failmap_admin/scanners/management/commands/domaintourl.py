@@ -24,6 +24,7 @@ class Command(BaseCommand):
 
                 # let's see if there is a domain that is exactly matching the domain
                 urls = Url.objects.all().filter(url__exact=endpoint.domain)
+                # todo: organizaiton + url are unique... we're making an assumption here.
                 for url in urls:
                     if url.url == endpoint.domain:
                         print("This domain has an equivalent url, saving...")
