@@ -97,7 +97,7 @@ var domainsDebounced = debounce(function(x) {
         var thingsdata = JSON.parse(data.calculation);
         vueDomainlist.urls = thingsdata["organization"]["urls"];
     });
-}, 250);
+}, 100);
 
 function debounce(func, wait, immediate) {
 	var timeout;
@@ -163,7 +163,6 @@ function update_hourly() {
 
 
 $( document ).ready(function() {
-
     loadmap(0);
 
     // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
@@ -231,13 +230,11 @@ $( document ).ready(function() {
         }
     });
 
-    $.getJSON('/data/stats/', function(data) {
-        vueStatistics.data = data;
-    });
-
     // move space and time ;)
     $("#history").on("change input", debounce(function() {
         loadmap(this.value);
+        loadtopfail(this.value)
+        loadstats(this.value);
     }, 250));
 
     window.vueDomainlist = new Vue({
@@ -270,14 +267,21 @@ $( document ).ready(function() {
         }
     });
 
-    loadtopfail()
+    loadtopfail(0);
+    loadstats(0);
 
 });
 
 
-function loadtopfail(){
-        $.getJSON('/data/topfail/', function(data) {
+function loadtopfail(weeknumber){
+        $.getJSON('/data/topfail/' + weeknumber, function(data) {
         vueTopfail.top = data;
+    });
+}
+
+function loadstats(weeknumber){
+    $.getJSON('/data/stats/' + weeknumber, function(data) {
+        vueStatistics.data = data;
     });
 }
 

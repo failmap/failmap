@@ -20,7 +20,7 @@
     </head>
 
     <body role="document">
-        <nav class="navbar navbar-default">
+        <nav class="navbar navbar-default navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
@@ -39,6 +39,8 @@
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
+                        <li style="width: 715px"><small>{% trans "Time slider" %} - {% trans "Use the time slider to go back weeks into time, for a maximum of 52." %}</small><br />
+                            <input id="history" type="range" value="0" min="0" max="80" step="1" style="direction: rtl"/></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -55,13 +57,13 @@
                 </p>
                 <p>
                     <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.
-                        Het doel is om zgeen punten te hebben: dan hebben we geen fouten kunnen vinden, precies wat het doel is!
-                        <br>
+                        Heeft een organisatie geen punten, dan hebben we geen fouten kunnen vinden: precies wat het doel is!
+                        <br><br>
                         In deze update is de kaartsoftware bijgewerkt: er wordt nu gebruik gemaakt van open streetmaps, beter kaartmateriaal,
                         het django python framework, dynamische javascripts en betere caching. De site laadt niet alleen sneller,
-                        het is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
-                        <br>
-                        Dit levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
+                        hij is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
+                        <br><br>
+                        Al het werk levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
                         mogelijk om door de tijd heen te scrollen (hoewel er veel rood is) en er is nu een top 50 van meest falende organisaties.
                         In plaats van afzonderlijke sites te kijken, wordt er nu per organisatie beoordeeld. Tenslotte hebben we alle sites
                         die niet meteen TLS spreken aangemerkt als een "gemiddelde" fout: in de vorige versie van de kaart werd hier nog
@@ -71,36 +73,34 @@
             </div>
 
             <div class="page-header">
-                <a name="map"></a>
+                <a name="map" class="jumptonav"></a>
                 <h1>{% trans "The Map" %}</h1>
                 <p>{% trans "The Map Introduction" %}</p>
+
+                <div id='map'></div>
+                <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
             </div>
-
-            <h4>{% trans "Time slider" %}</h4>
-            <p>{% trans "Use the time slider to go back weeks into time, for a maximum of 52." %}</p>
-            <input id="history" type="range" value="0" min="0" max="52" step="1" style="direction: rtl"/><br/>
-
-            <div id='map'></div>
-            <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
 
             <!-- todo: dynamic whitespace stays visible, even when the list is rendered elsewhere.
              patches are welcome! -->
             {% verbatim %}
-            <div id="domainlist" v-if="urls">
-                   <h4>{% endverbatim %}{% trans "Domains" %}{% verbatim %}: </h4>
+            <div id="domainlistcontainer">
+                <div id="domainlist" v-if="urls">
+                    <h4>{% endverbatim %}{% trans "Domains" %}{% verbatim %}: </h4>
                     <div v-for="url in urls">
-                            <span v-bind:class="colorize(url.url.points)">
-                                {{ url.url.url }}
-                            </span>
+                        <span v-bind:class="colorize(url.url.points)">
+                            {{ url.url.url }}
+                        </span>
                     </div>
-                <br />
-                <p><small>{% endverbatim %}{% trans "This list does not show history." %}{% verbatim %}</small></p>
+                    <br />
+                    <p><small>{% endverbatim %}{% trans "This list does not show history." %}{% verbatim %}</small></p>
+                </div>
             </div>
             {% endverbatim %}
 
             <div id="statistics">
                 <div class="page-header">
-                    <a name="bar"></a>
+                    <a name="bar" class="jumptonav"></a>
                     <h1>{% trans "The Bar" %}</h1>
                 </div>
 
@@ -120,7 +120,7 @@
                 </div>
 
                 <div class="page-header">
-                    <a name="numbers"></a>
+                    <a name="numbers" class="jumptonav"></a>
                     <h1>{% trans "The Numbers" %}</h1>
                 </div>
                 <div class="row">
@@ -223,9 +223,8 @@
                 </div>
             </div>
 
-            <a name="report"></a>
-
             <div class="page-header" id="report">
+                <a name="report" class="jumptonav"></a>
                 <div v-if="name">
                 <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
@@ -257,7 +256,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="page-header">
-                        <a name="explanation"></a>
+                        <a name="explanation" class="jumptonav"></a>
                         <h1>{% trans "About Failmap" %}</h1>
                     </div>
 
@@ -468,7 +467,7 @@
             </div>
 
             <div class="page-header">
-                <a name="footer"></a>
+                <a name="footer" class="jumptonav"></a>
                 <h1>{% trans "Support Fail Map" %}</h1>
                  <p>Failmap is open software by the <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a>.
                         Support our mission to clean up the internet of dangerous failures: it helps protect your data and privacy as well.</p>

@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from dateutil.parser import parse
 
 import pytz
 from dateutil.relativedelta import relativedelta  # history
@@ -26,7 +27,21 @@ class DetermineRatings:
         now = datetime.now(pytz.utc)
 
         times = []
-        i = 365
+        try:
+            firstscan = TlsQualysScan.objects.all().earliest(field_name="scan_date")
+            naive_date = datetime.combine(firstscan.scan_date, datetime.min.time())
+            good_date = pytz.utc.localize(naive_date)
+            i = (now - good_date).days
+
+            # add an extra week to be sure you've got everything.
+            i = i + 7
+        except:
+            # todo: narrow down overly broad exceptions
+            # no first scan? then just have some value....
+            i = 365
+
+        print("Going back %s days in time." % i)
+
         while i > 0:
             times.append(now - relativedelta(days=i))
             i -= 7
@@ -210,19 +225,22 @@ class DetermineRatings:
         # so checking for total_calculation here doesn't make sense.
         # if the rating is different, then save it.
 
+        #                     "rated on": "%s",\n\ -> removed due to it's always
+        # changing the calculation. ... do we want the "when" field to be auto updated? Or should
+        # the "when" field be read as a "since" field... and the rating didn't change since then?
+        # It's the last bit: so "when" should be "since".
         organizationratingtemplate = \
             '{\n\
                 "organization": {\n\
                     "name": "%s",\n\
                     "rating": "%s",\n\
-                    "rated on": "%s",\n\
                     "urls": [%s]\n\
                     \n\
                 }\n\
             }\n'
 
         organization_json = (organizationratingtemplate % (organization.name, total_rating,
-                                                           when, total_calculation))
+                                                           total_calculation))
         # print(organization_json)
         parsed = json.loads(organization_json)
         organization_json_checked = json.dumps(parsed, indent=4)
