@@ -33,7 +33,10 @@ def index(request):
                    "rendertime": "over 9000 seconds"})
 
 
-# return a report for an organization. By Organization ID preferably.
+# return a report for an organization.
+# todo: support weeks back, evenwhile the deleted urls and such from the past should still
+# be taken into account elsewhere (add deleted/dead urls to the report until the time they have
+# been killed... (do we know since when they exist?).../// hm.
 def organization_report(request, organization_id):
     when = datetime.now(pytz.utc)
 
@@ -61,18 +64,6 @@ def organization_report(request, organization_id):
 def string_to_delta(string_delta):
     value, unit, _ = string_delta.split()
     return datetime.timedelta(**{unit: float(value)})
-
-
-def history(request):
-    # a hack to create history, when that's not done elsewhere
-    # this is an ENORMOUS amount of queries. We should place this elsewhere...
-    # and we should add some protections to it.
-    dr = DetermineRatings()
-    # 52 weeks * 2000 urls * 2 endpoints = 200.000 ratings
-    dr.rate_urls(create_history=True)
-    # 52 weeks * 400 organizations = 20.000 ratings
-    dr.rate_organizations(create_history=True)
-    return JsonResponse({}, json_dumps_params={'indent': 5})
 
 
 def topfail(request, weeks_back=0):
@@ -122,11 +113,11 @@ def topfail(request, weeks_back=0):
         INNER JOIN
           coordinate ON coordinate.organization_id = organization.id
         WHERE `when` <= '%s' AND rating > 0 
-        AND `when` = (select MAX(`when`) FROM map_organizationrating or2 WHERE or2.organization_id = map_organizationrating.organization_id)
+        AND `when` = (select MAX(`when`) FROM map_organizationrating or2 WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
         GROUP BY organization.name
         ORDER BY `rating` DESC, `organization`.`name` ASC
         LIMIT 50
-        ''' % (when,))
+        ''' % (when, when))
 
     rows = cursor.fetchall()
 
@@ -157,20 +148,6 @@ def stats(request, weeks_back=0):
     # 389 organizations * 7 queries. i mean... come on... what's the solution already?
     # in the meantime: caching proxies all the way down.
 
-    # Old splitting of data, really don't know why we should do it like this, as nobody understands
-    # these arbitrary numbers anyway. And the UI translating them to something useful is just a
-    # waste. From now we're just delivering understandable values.
-    # "0": 25,
-    # "1-99": 0,
-    # "100-199": 1,
-    # "200-399": 40,
-    # "400-999": 246,
-    # "1000-4999": 74,
-    # "infinite": 2,
-    # "red": 322,
-    # "orange": 41,
-    # "green": 25,
-
     os = Organization.objects.all()
 
     stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0,
@@ -183,6 +160,11 @@ def stats(request, weeks_back=0):
         else:
             value, unit, _ = stat.split()
             when = datetime.now(pytz.utc) - relativedelta(**{unit: int(value)})
+
+        # take into account the starting point
+        # eg: now = 1 march, starting point: 1 january. Difference is N days. Subtract N from when.
+        if weeks_back:
+            when = when - relativedelta(weeks=int(weeks_back))
 
         # Next to measurements in hard numbers, we also derive a conclusion in three categories:
         # red, orange and green. This is done to simplify the data, so it can be better understood.

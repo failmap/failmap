@@ -5,6 +5,7 @@ from failmap_admin.organizations.models import Organization
 from failmap_admin.scanners.models import Url
 
 
+# Only the latest ratings...
 class Command(BaseCommand):
     help = 'Rate all urls and organizations.'
 
