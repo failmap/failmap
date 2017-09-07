@@ -8,51 +8,18 @@
 
         <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/>
 
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/leaflet.css' %}" />
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/overrides.css' %}">
-        <link rel="stylesheet"
-              type="text/css"
-              href="{% static 'css/tooltipster.bundle.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
 
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/tooltipster.bundle.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
-        <script>
-            $(document).ready(function() {
-                $('.failtip').tooltipster({
-                    theme: 'tooltipster-light',
-                    animation: 'fade',
-                    interactive: 'true'
-                });
-
-                tooltip_notls = "<span>Geen beveiligde verbinding gevonden.<br /><br />" +
-                    "Dit komt vaak doordat:<br />" +
-                    "<ul><li></li><li>er gebruik wordt gemaakt van filtering,</li>" +
-                    "<li>er geen dienst (meer) draait,</li>" +
-                    "<li>een ander poortnummer wordt gebruikt dan 443.</li></ul>" +
-                    "<br />" +
-                    "<span style=\"color: #000000\">Domein: aaenhunze.nl<br />Adres: 62.50.4.46:443<br /></span>" +
-                    "Scantijd: 2016-05-17 10:25:35 <br /><br />" +
-                    "<a href=\"https://www.ssllabs.com/ssltest/analyze.html?d=aaenhunze.nl&hideResults=on&latest\" target=\"_blank\">Second opinion</a><br /><br /></span>"
-
-            });
-        </script>
     </head>
 
     <body role="document">
-
         <nav class="navbar navbar-default">
             <div class="container">
                 <div class="navbar-header">
@@ -67,12 +34,11 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li class="active"><a href="#">{% trans "Home" %}</a></li>
-                        <li><a href="#kaart">{% trans "Map" %}</a></li>
-                        <li><a href="#balk">{% trans "Bar" %}</a></li>
-                        <li><a href="#cijfers">{% trans "Numbers" %}</a></li>
+                        <li><a href="#map">{% trans "Map" %}</a></li>
+                        <li><a href="#bar">{% trans "Bar" %}</a></li>
+                        <li><a href="#numbers">{% trans "Numbers" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
-                        <li><a href="#uitleg">{% trans "Explanation" %}</a></li>
+                        <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -88,19 +54,24 @@
                     of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
                 </p>
                 <p>
-                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden er punten uitgedeeld.
-                        Een onjuist verleutelde verbinding levert tot 1000 punten op. Een niet versleutelde verbdinding levert 200 punten
-                        op (om niet meteen heel Nederland rood te kleuren).  Weinig punten hebben is lastig, zeker bij teveel domeinen.
-                        <br><br>
-                        Achter de schermen zijn er veel wijzigingen geweest. De kaartsoftware is bijvoorbeeld open source geworden
-                        en een stichting is opgericht om deze te beheren. Het originele PHP script is ingeruild voor het Django framework.
-                        De website wordt nu met Vue.js gerenderd op basis van te cachen gegevens: de site is dus veel sneller.
+                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.
+                        Het doel is om zgeen punten te hebben: dan hebben we geen fouten kunnen vinden, precies wat het doel is!
+                        <br>
+                        In deze update is de kaartsoftware bijgewerkt: er wordt nu gebruik gemaakt van open streetmaps, beter kaartmateriaal,
+                        het django python framework, dynamische javascripts en betere caching. De site laadt niet alleen sneller,
+                        het is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
+                        <br>
+                        Dit levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
+                        mogelijk om door de tijd heen te scrollen (hoewel er veel rood is) en er is nu een top 50 van meest falende organisaties.
+                        In plaats van afzonderlijke sites te kijken, wordt er nu per organisatie beoordeeld. Tenslotte hebben we alle sites
+                        die niet meteen TLS spreken aangemerkt als een "gemiddelde" fout: in de vorige versie van de kaart werd hier nog
+                        geen oordeel over gegeven. Over tijd zal het puntenaantal voor sites zonder TLS toenemen: fix dit dus vandaag!
                     </small>
                 </p>
             </div>
 
             <div class="page-header">
-                <a name="kaart"></a>
+                <a name="map"></a>
                 <h1>{% trans "The Map" %}</h1>
                 <p>{% trans "The Map Introduction" %}</p>
             </div>
@@ -129,7 +100,7 @@
 
             <div id="statistics">
                 <div class="page-header">
-                    <a name="balk"></a>
+                    <a name="bar"></a>
                     <h1>{% trans "The Bar" %}</h1>
                 </div>
 
@@ -149,7 +120,7 @@
                 </div>
 
                 <div class="page-header">
-                    <a name="cijfers"></a>
+                    <a name="numbers"></a>
                     <h1>{% trans "The Numbers" %}</h1>
                 </div>
                 <div class="row">
@@ -286,7 +257,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="page-header">
-                        <a name="uitleg"></a>
+                        <a name="explanation"></a>
                         <h1>{% trans "About Failmap" %}</h1>
                     </div>
 
