@@ -154,7 +154,6 @@ function update_hourly() {
         loadmap(0); // todo: also set the timeslider to 0 again.
         loadtopfail();
         $("#history").val(0);
-        console.log("yolo!");
     }
     hourly = true; // first time don't run the code, so nothing surprising happens
     setTimeout(update_hourly,60*60*1000);

@@ -10,7 +10,7 @@ class TlsQualysScanAdminInline(CompactInline):
     show_change_link = True
     ordering = ["-rating_determined_on"]
 
-# can't make this admin, there is no join.
+# can't make this admin, there is no join. And there shouldn't be.
 # class TlsQualysScratchpadAdminInline(admin.StackedInline):
 #    model = TlsQualysScratchpad
 #    extra = 0
@@ -41,12 +41,12 @@ class EndpointAdmin(admin.ModelAdmin):
 class TlsQualysScanAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
                     'scan_date', 'rating_determined_on')
-    search_fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'pending',
-                     'pending_since', 'scan_date', 'rating_determined_on')
-    list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'pending',
-                   'pending_since', 'scan_date', 'rating_determined_on')
+    search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
+                     'scan_date', 'rating_determined_on')
+    list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
+                   'scan_date', 'rating_determined_on')
     fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-              'rating_determined_on', 'pending', 'pending_since')
+              'rating_determined_on')
 
     readonly_fields = ('scan_date', 'scan_time', 'scan_moment')
 
