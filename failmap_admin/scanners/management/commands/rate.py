@@ -10,11 +10,15 @@ class Command(BaseCommand):
     help = 'Rate all urls and organizations.'
 
     def handle(self, *args, **options):
-        o = Organization.objects.all()
-        for organization in o:
-            urls = Url.objects.filter(organization=organization)
-            dr = DetermineRatings()
-            for url in urls:
-                dr.rate_url(url=url)
+        dr = DetermineRatings()
+        dr.rate_urls()
+        dr.rate_organizations()
 
-            dr.rate_organization(organization=organization)
+        # o = Organization.objects.all()
+        # for organization in o:
+        #    urls = Url.objects.filter(organization=organization)
+        #    dr = DetermineRatings()
+        #    for url in urls:
+        #        dr.rate_url(url=url)
+        #
+        #    dr.rate_organization(organization=organization)
