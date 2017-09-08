@@ -382,7 +382,8 @@ class DetermineRatings:
                 # you can only have one TLS rating on an endpoint.
                 starttls_json = (tlsratingtemplate %
                                  (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                  scan.scan_moment))
+                                  scan.rating_determined_on))  # was "scan_moment" but that is
+                # ... updated frequently: every scan. But the rating determined on is not.
 
                 # you can only add the comma if there are multiple items...
                 if endpoint_json:
