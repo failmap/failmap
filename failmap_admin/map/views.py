@@ -112,8 +112,9 @@ def topfail(request, weeks_back=0):
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
         INNER JOIN
           coordinate ON coordinate.organization_id = organization.id
-        WHERE `when` <= '%s' AND rating > 0 
-        AND `when` = (select MAX(`when`) FROM map_organizationrating or2 WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
+        WHERE `when` <= '%s' AND rating > 0
+        AND `when` = (select MAX(`when`) FROM map_organizationrating or2
+              WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
         GROUP BY organization.name
         ORDER BY `rating` DESC, `organization`.`name` ASC
         LIMIT 50

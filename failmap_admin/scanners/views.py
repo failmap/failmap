@@ -7,9 +7,6 @@ from failmap_admin.organizations.models import Url
 from .forms import QualysScanForm
 from .scanner_tls_qualys import ScannerTlsQualys
 
-# let's make something that is a continuous loop that adds ALL current domains that are alive.
-# then update the ratings and then... tada! It's upgraded and works. :)
-# dat via de commandline aanroepen... dus django vanaf de commandline.
 
 def tls(request):
     # now return the rendered template

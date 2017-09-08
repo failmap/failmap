@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
-from failmap_admin.map.models import UrlRating, OrganizationRating
+from failmap_admin.map.models import OrganizationRating, UrlRating
 
 
 # Remove ALL organization and URL ratings and rebuild them
