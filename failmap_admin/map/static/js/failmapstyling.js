@@ -128,10 +128,11 @@ function gotoLink(e){
 
 // cache the requests on the client, so you can slide faster.
 // the cache is valid about a week...
+// only at weeknumber 0 we don't use cache, otherwise hourly updates don't work
 mapcache = Array;
 function loadmap(weeknumber){
     var data = "";
-    if (mapcache[weeknumber]) {
+    if (weeknumber !== 0 && mapcache[weeknumber]) {
         showmapdata(mapcache[weeknumber]);
     } else {
         $.getJSON('/data/map/' + weeknumber, function (json) {
@@ -158,7 +159,7 @@ function showmapdata(json){
 
 topfailcache = Array;
 function loadtopfail(weeknumber){
-    if (topfailcache[weeknumber]) {
+    if (weeknumber !== 0 && topfailcache[weeknumber]) {
         showTopFail(topfailcache[weeknumber]);
     } else {
         $.getJSON('/data/topfail/' + weeknumber, function (data) {
@@ -184,8 +185,8 @@ function loadstats(weeknumber){
 var hourly = false;
 function update_hourly() {
     if (hourly){
-        loadmap(0); // todo: also set the timeslider to 0 again.
-        loadtopfail();
+        loadmap(0);
+        loadtopfail(0);
         $("#history").val(0);
     }
     hourly = true; // first time don't run the code, so nothing surprising happens

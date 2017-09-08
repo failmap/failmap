@@ -1,5 +1,18 @@
 # References:
 # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+import json
+import logging
+import sys
+from datetime import date, datetime, timedelta
+from random import randint
+from time import sleep
+
+import pytz
+import requests
+from django.core.exceptions import ObjectDoesNotExist
+
+from failmap_admin.organizations.models import Url
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad
 
 # Todo: use celery for distributed scanning, multiple threads. (within reason)
 # Currently using a pool for scanning, which was way better than the fake queue solution.
@@ -39,13 +52,22 @@ Todo: On network disconnect, the scanner hangs. Even though it's threaded... the
 :252  -- Domain webmail.sittard-geleen.nl in progress. Endpoint: 93.95.250.242. Msgs: In progress
 :275  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
 :294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
-:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x1054bcc88>: Failed to establish a new connection: [Errno 60] Operation timed out',))
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url:
+    /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done
+    (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection
+    object at 0x1054bcc88>: Failed to establish a new connection: [Errno 60] Operation timed out',))
 :296  -- Retrying 3 times, next in 20 seconds.
 :294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
-:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x1054bc9b0>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url:
+/api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done
+(Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object
+at 0x1054bc9b0>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
 :296  -- Retrying 2 times, next in 20 seconds.
 :294  -- something when wrong when scanning domain webmail.sittard-geleen.nl
-:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url: /api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done (Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object at 0x105313908>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
+:295  -- HTTPSConnectionPool(host='api.ssllabs.com', port=443): Max retries exceeded with url:
+/api/v2/analyze?host=webmail.sittard-geleen.nl&publish=off&startNew=off&fromCache=on&all=done
+(Caused by NewConnectionError('<requests.packages.urllib3.connection.VerifiedHTTPSConnection object
+at 0x105313908>: Failed to establish a new connection: [Errno 51] Network is unreachable',))
 :296  -- Retrying 1 times, next in 20 seconds.
 :383  -- Scratching data for webmail.sittard-geleen.nl
 Error callback!
@@ -66,14 +88,14 @@ Traceback (most recent call last):
 
 
 En zo voort:
-2017-09-05 15:18:58,744	DEBUG    -- scanner_tls_qualys.py:154  -- Loaded 1 domains.
-2017-09-05 15:18:58,746	DEBUG    -- scanner_tls_qualys.py:333  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
-2017-09-05 15:19:58,681	DEBUG    -- scanner_tls_qualys.py:352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
-2017-09-05 15:19:58,685	DEBUG    -- scanner_tls_qualys.py:353  -- EOF occurred in violation of protocol (_ssl.c:749)
-2017-09-05 15:19:58,685	DEBUG    -- scanner_tls_qualys.py:354  -- Retrying 3 times, next in 20 seconds.
-2017-09-05 15:20:49,209	DEBUG    -- scanner_tls_qualys.py:352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
-2017-09-05 15:20:49,209	DEBUG    -- scanner_tls_qualys.py:353  -- ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response',))
-2017-09-05 15:20:49,210	DEBUG    -- scanner_tls_qualys.py:354  -- Retrying 2 times, next in 20 seconds.
+154  -- Loaded 1 domains.
+333  -- Requesting cached data from qualys for webmail.sittard-geleen.nl
+352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+353  -- EOF occurred in violation of protocol (_ssl.c:749)
+354  -- Retrying 3 times, next in 20 seconds.
+352  -- something when wrong when scanning domain webmail.sittard-geleen.nl
+3  -- ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response',))
+354  -- Retrying 2 times, next in 20 seconds.
 
 
 ^CProcess ForkPoolWorker-2050:
@@ -83,59 +105,26 @@ Soms ook ZONDER enige feedback, en daar kan je dan niet veel aan doen...
 Dus wat nu? Een resume optie kan erg goed helpen... want je weet niet wanneer het gebeurd.
 En je kan het verder ook niet meten...
 
-File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
+File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/
+threading.py", line 1072, in _wait_for_tstate_lock
 elif lock.acquire(block, timeout):
 
-File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/threading.py", line 1072, in _wait_for_tstate_lock
+File "/usr/local/Cellar/python3/3.6.0/Frameworks/Python.framework/Versions/3.6/lib/python3.6/
+threading.py", line 1072, in _wait_for_tstate_lock
 elif lock.acquire(block, timeout):
 
 Some other nice errors:
 
 calculating score on 2017-09-06 08:23:22.714449+00:00 for beveiligd.harlingen.nl
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/site-packages/django/db/backends/base/base.py", line 211, in _commit
+File "/usr/local/lib/python3.6/site-packages/django/db/backends/base/base.py", line 211, in _commit
     return self.connection.commit()
 sqlite3.OperationalError: database is locked
 
 The above exception was the direct cause of the following exception:
 
 Because of the development server, and using sqlite or something like that.
-
-
-
-2017-09-06 08:2    -- scanner_tls_qualys.py:318  -- secure.zoeterwoude.nl (91.213.115.145) = T
-2017-09-06 08 G    -- scanner_tls_qualys.py:396  -- Trying to save scan for secure.zoeterwoude.nl
-Error callback!
-get() returned more than one Endpoint -- it returned 2!
-{}
-2017-09
-On secure.zoeterwoude.nl, webmail.zoeterwoude.nl, zoeterwoude.nl consistently. Why? During Save.
-todo: when the error callback is triggered, find out what line it triggered... because debugging is
-hard now.
-It's a django error, using "get" getting back multiple objects. Interesting... so the database
-can be poluted with multiple instead of one.
--> there are two endpoints, one is dead, one not. Both have the SAME ip. Should check for dead there?
--> or ... we can't ... i see now :) How do we deal with this?
-
-todo: unable to resolve domain name fouten wegwerken: we bewaren het domain, wordt dan WEER gescand.
-Hij moet gewoon "dood" worden gemaakt. Kunnen altijd later wel kijken of hij toch niet leeft.
-- Dit kan je oplossen door alleen maar alive dingen te scannen. Het wordt wel allemaal goed uitgezet.
-- we kijken nu in de scans bij het aanroepen van de scanner. de scanner zelf heeft geen oordeel over
-- wat wel of niet gescanned moet worden... behalve niet "te vaak" scannen.
 """
-
-import json
-import logging
-import sys
-from datetime import date, datetime, timedelta
-from random import randint
-from time import sleep
-
-import pytz
-import requests
-
-from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad
 
 
 class ScannerTlsQualys:
@@ -458,7 +447,7 @@ class ScannerTlsQualys:
                 failmap_endpoint = Endpoint()
                 try:
                     failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
-                except:
+                except ObjectDoesNotExist:
                     # todo: make less broad exception
                     failmap_endpoint.url = ""
                 failmap_endpoint.domain = domain  # not used anymore. Filled for legacy reasons.
@@ -504,26 +493,6 @@ class ScannerTlsQualys:
                 failmap_endpoint.is_dead = False
                 failmap_endpoint.is_dead_reason = ""
                 failmap_endpoint.save()
-
-            # todo: ah, hier maakt hij endpoints zonder URL er aan :)
-            # this code was the old "get or create" approach that could not handle duplicate endpoints
-            # failmap_endpoint, created = Endpoint.objects.get_or_create(
-            #     domain=domain,
-            #     ip=qualys_endpoint['ipAddress'],
-            #     port=443,
-            #     protocol="https"
-            # )
-            # if created:
-            #     ScannerTlsQualys.log.debug("Created a new endpoint for %s and adding results",
-            #                                domain)
-            # else:
-            #     ScannerTlsQualys.log.debug("Updating scans of existing endpoint %s",
-            #                                failmap_endpoint.id)
-            #     # it exists, so cannot be dead... update it to be alive (below functions don't seem
-            #     # to work...
-            #     failmap_endpoint.is_dead = False
-            #     failmap_endpoint.is_dead_reason = ""
-            #     failmap_endpoint.save()
 
             # possibly also record the server name, as we get it. It's not really of value.
 

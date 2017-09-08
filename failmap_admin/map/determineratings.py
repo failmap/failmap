@@ -1,9 +1,10 @@
 import json
 from datetime import datetime
-from dateutil.parser import parse
 
 import pytz
+from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta  # history
+from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, TlsQualysScan
@@ -27,8 +28,8 @@ class DetermineRatings:
         now = datetime.now(pytz.utc)
 
         # the approach with a counter (i) is a very naive approach. A faster way would be to check
-        # when things where changed in the rating and only record those changes. The downside is that
-        # could be more complex.
+        # when things where changed in the rating and only record those changes.
+        # The downside is that could be more complex as there are more scanners... perhaps..
         times = []
         try:
             firstscan = TlsQualysScan.objects.all().earliest(field_name="scan_date")
@@ -38,7 +39,7 @@ class DetermineRatings:
 
             # add an extra week to be sure you've got everything.
             i = i + 7
-        except:
+        except ObjectDoesNotExist:
             # todo: narrow down overly broad exceptions
             # no first scan? then just have some value....
             i = 365
@@ -272,10 +273,11 @@ class DetermineRatings:
 
         # it's very possible there is no rating yet
         try:
-            last_url_rating = UrlRating.objects.filter(url=url, url__urlrating__when__lte=when).latest("when")
-        except:
+            last_url_rating = \
+                UrlRating.objects.filter(url=url, url__urlrating__when__lte=when).latest("when")
+        except ObjectDoesNotExist:
             # todo, fix broad exception.
-            last_url_rating = UrlRating()  # create an empty one, why? - don't make this wihtout data!
+            last_url_rating = UrlRating()  # todo: evaluate if this is a wise approach.
 
         # possibly a bug: you're not getting the latest rating... you get the whole set and
         # then get the first one (the oldest)... that's why some urls keep getting ratings.
