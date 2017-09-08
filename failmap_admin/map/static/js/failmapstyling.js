@@ -22,10 +22,8 @@ metadata.onAdd = function (map) {
     return this._div;
 };
 metadata.update = function (metadata) {
-    this._div.innerHTML = '<h4>Map information</h4>' +  (metadata ?
-            '<br />' + metadata.data_from_time + ''
-            : '');
-
+    this._div.innerHTML = '' +  (metadata ?
+            '<h4>' + new Date(metadata.data_from_time).humanTimeStamp() + '</h4>' : '<h4></h4>');
 };
 metadata.addTo(map);
 
@@ -39,15 +37,14 @@ info.onAdd = function (map) {
 };
 
 info.update = function (props) {
-    var sometext = "<h4>Failure of your overlords</h4>";
-
+    var sometext = "";
     if (props) {
-        sometext += '<br /><b>Gemeente: </b>' + props.OrganizationName + '' +
-            '<br /><b>Overall Grade: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + '</span>' +
-            '<br /><br /><b>Data from: </b>' + props.DataFrom + '';
+        sometext += "<h4>" + props.OrganizationName +"</h4>";
+        sometext += '<b>Score: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + ' points</span>';
         domainsDebounced(props.OrganizationID);
     } else {
-        sometext += 'Move your mouse over the map and cry...';
+        sometext += "<h4>-</h4>";
+        sometext += '<b>Score: </b><span>- points</span>';
     }
 
     this._div.innerHTML = sometext;
@@ -129,23 +126,59 @@ function gotoLink(e){
     location.hash = "#" + layer.feature.properties['OrganizationName'];
 }
 
+// cache the requests on the client, so you can slide faster.
+// the cache is valid about a week...
+mapcache = Array;
 function loadmap(weeknumber){
-    $.getJSON('/data/map/' + weeknumber, function(json) {
-
-            if (geojson) { // if there already was data present
-                geojson.clearLayers(); // prevent overlapping polygons
-                map.removeLayer(geojson);
-            }
-
-            geojson = L.geoJson(json, {
-                style: style,
-                onEachFeature: onEachFeature
-            }).addTo(map);
-
-            // todo: add the date info on the map, or somewhere.
-            metadata.update(json.metadata);
+    var data = "";
+    if (mapcache[weeknumber]) {
+        showmapdata(mapcache[weeknumber]);
+    } else {
+        $.getJSON('/data/map/' + weeknumber, function (json) {
+            mapcache[weeknumber] = json;
+            showmapdata(json);
         });
+    }
 }
+
+function showmapdata(json){
+    if (geojson) { // if there already was data present
+        geojson.clearLayers(); // prevent overlapping polygons
+        map.removeLayer(geojson);
+    }
+
+    geojson = L.geoJson(json, {
+        style: style,
+        onEachFeature: onEachFeature
+    }).addTo(map);
+
+    // todo: add the date info on the map, or somewhere.
+    metadata.update(json.metadata);
+}
+
+topfailcache = Array;
+function loadtopfail(weeknumber){
+    if (topfailcache[weeknumber]) {
+        showTopFail(topfailcache[weeknumber]);
+    } else {
+        $.getJSON('/data/topfail/' + weeknumber, function (data) {
+            topfailcache[weeknumber] = data;
+            showTopFail(data);
+        });
+    }
+}
+
+function showTopFail(data){
+    vueTopfail.top = data;
+}
+
+function loadstats(weeknumber){
+    $.getJSON('/data/stats/' + weeknumber, function(data) {
+        vueStatistics.data = data;
+    });
+}
+
+
 
 // reloads the map and the top fail every hour, so you don't need to manually refresh anymore
 var hourly = false;
@@ -160,6 +193,21 @@ function update_hourly() {
 }
 
 
+// support for week numbers in javascript
+// https://stackoverflow.com/questions/7765767/show-week-number-with-javascript
+Date.prototype.getWeek = function() {
+        var onejan = new Date(this.getFullYear(), 0, 1);
+        return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+};
+
+// support for an intuitive timestamp
+// translation?
+Date.prototype.humanTimeStamp = function() {
+    return this.getFullYear() + " Week " + this.getWeek();
+};
+
+// todo: add some browser cache for datasets from server :) So it feels even faster.
+// possibly just completely caching it on the client after a while... because.. why not.
 
 $( document ).ready(function() {
     loadmap(0);
@@ -191,9 +239,12 @@ $( document ).ready(function() {
                 url = url.toLowerCase();
                return url.replace(/[^0-9a-z]/gi, '')
             },
-            idizetag: function (url){
+            idizetag: function (url) {
                 url = url.toLowerCase();
-               return "#" + url.replace(/[^0-9a-z]/gi, '')
+                return "#" + url.replace(/[^0-9a-z]/gi, '')
+            },
+            humanize: function(date){
+                return new Date(date).humanTimeStamp()
             }
         }
     });
@@ -255,6 +306,9 @@ $( document ).ready(function() {
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                 });
+            },
+            humanize: function(date){
+                return new Date(date).humanTimeStamp()
             }
         }
     });
@@ -268,7 +322,8 @@ $( document ).ready(function() {
         computed: {
             visibleweek: function() {
                 x = new Date();
-                return x.setDate(x - weeksback * 7);
+                x.setDate(x.getDate() - this.weeksback * 7);
+                return x.humanTimeStamp();
             }
         }
     });
@@ -277,7 +332,7 @@ $( document ).ready(function() {
     $("#history").on("change input", debounce(function() {
         loadmap(this.value);
         loadtopfail(this.value);
-        loadstats(this.value);
+        //loadstats(this.value); // todo: cache
         vueHistory.weeksback = this.value;
     }, 250));
 
@@ -286,18 +341,6 @@ $( document ).ready(function() {
 
 });
 
-
-function loadtopfail(weeknumber){
-        $.getJSON('/data/topfail/' + weeknumber, function(data) {
-        vueTopfail.top = data;
-    });
-}
-
-function loadstats(weeknumber){
-    $.getJSON('/data/stats/' + weeknumber, function(data) {
-        vueStatistics.data = data;
-    });
-}
 
 // we chose vue because of this:
 // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
