@@ -39,8 +39,12 @@
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
-                        <li style="width: 715px"><small>{% trans "Time slider" %} - {% trans "Use the time slider to go back weeks into time, for a maximum of 52." %}</small><br />
-                            <input id="history" type="range" value="0" min="0" max="80" step="1" style="direction: rtl"/></li>
+                        <li style="width: 715px">
+                            <div id="historycontrol">
+                                <small>{% trans "Time slider" %} - {% verbatim %}{{ visibleweek }}{% endverbatim %}</small><br />
+                                <input id="history" type="range" value="0" min="0" max="80" step="1" style="direction: rtl"/>
+                            </div>
+                        </li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -266,13 +270,13 @@
                         dataverbindingen van publieke diensten, daar wordt namelijk vaak gevoelige
                         informatie verwerkt. De kaart heet Faalkaart omdat initieel werd aangenomen dat er
                         nog veel te verbeteren viel en een tendentieuze naam eerder leidt tot actie dan een
-                        schattige naam. Dat bleek terecht: hoewel er meer op orde was dan aangenomen,
-                        werden er in het eerste weekend toch meer dan 150 verbindingen extra versleuteld.
+                        schattige naam. Dat bleek terecht: hoewel er meer op orde was dan aangenomen
+                        werden er in het eerste weekend toch meer dan 150 verbindingen extra versleuteld.<br />
                     </p>
 
-                    <h2>Mijn gemeente is rood, wat nu?</h2>
+                    <h2>Mijn gemeente/organisatie is rood, wat nu?</h2>
                     <p>
-                        Antwoord: Helaas zit er een gat in de muur: de gemeente zal actie moeten ondernemen
+                        Antwoord: Helaas zit er een gat in de muur: de organisatie zal actie moeten ondernemen
                         om e.e.a. goed in te richten of een <a href="https://letsencrypt.org">nieuw
                         certificaat te installeren</a>. Er wordt uitgegaan van de zwakste schakel: ergens
                         een onvoldoende betekent een rode vlek op de kaart.
@@ -281,7 +285,8 @@
                     <h2>Mijn gemeente is groen, is alles goed?</h2>
                     <p>
                         Antwoord: De kans dat een subdomein mist, en juist daar een gat in de muur zit, is
-                        aanwezig. De vuistregel is dat meer subdomeinen meer zekerheid geven.
+                        aanwezig. Daarnaast wordt alleen gecontroleert op het laagste niveau van beveiliging:
+                        dit is toonaangevend voor de rest van de beveiliging van een organisatie.
                     </p>
 
                     <h2>Hoe compleet is dit?</h2>
@@ -318,7 +323,7 @@
 
                     <h2>Hoe moet SSL/TLS worden ingericht?</h2>
                     <p>
-                        Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration&aqs=chrome..69i57.6276j0j1&sourceid=chrome&es_sm=93&ie=UTF-8">aantal goede handleidingen te vinden</a>.
+                        Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration">aantal goede handleidingen te vinden</a>.
                         Toonaangevend advies komt van het <a href="https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html">Nationaal Cyber Security Centrum</a>.
                         Een variant toegespitst op gemeenten, die ook ingaat op DNSSEC, staat op de site van
                         <a href="https://www.ibdgemeenten.nl/3619-2/" target="_blank">IBD Gemeenten</a>.
@@ -336,15 +341,17 @@
                     <h2>Hoe is dit tot stand gekomen?</h2>
                     <p>Antwoord: Dit project is tot stand gekomen door:</p>
                     <ul>
-                        <li>Programmeer, hak en breekwerk door Elger Jonker</li>
+                        <li>Idee, programmeer, hak en breekwerk door Elger Jonker</li>
                         <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
+                        <li>PR, ondersteuning: Twan van Someren</li>
+                        <li>Server management en CI: Johan Bloemberg</li>
                         <li>Actuele lijst gemeenten: 200ok.nl</li>
                         <li>Beoordeling op veiligheid door Qualys SSL labs</li>
                         <li>Polygonen en kaartdata: Openstreetmaps.</li>
                         <li>Simpele DNS verkenning met DNS Recon</li>
                         <li>Styling: Twitter Bootstrap</li>
-                        <li>Talen: Python op MariaDB.</li>
-                        <li>Financiele ondersteuning: SIDN Fonds.</li>
+                        <li>Techniek: Django, Vue.</li>
+                        <li>Financiële ondersteuning: SIDN Fonds.</li>
                     </ul>
 
                     <h2>Wat is de historie van Faalkaart?</h2>

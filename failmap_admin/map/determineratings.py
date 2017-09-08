@@ -26,6 +26,9 @@ class DetermineRatings:
         # for the past year, create a rating every week for all organizations
         now = datetime.now(pytz.utc)
 
+        # the approach with a counter (i) is a very naive approach. A faster way would be to check
+        # when things where changed in the rating and only record those changes. The downside is that
+        # could be more complex.
         times = []
         try:
             firstscan = TlsQualysScan.objects.all().earliest(field_name="scan_date")
@@ -268,11 +271,19 @@ class DetermineRatings:
         # it cannot be random, otherwise the explanation will be different every time.
 
         # it's very possible there is no rating yet
-        last_url_rating = UrlRating.objects.filter(url=url, url__urlrating__when__lte=when)[:1]
-        if last_url_rating.exists():
-            last_url_rating = last_url_rating.get()
-        else:
-            last_url_rating = UrlRating()  # create an empty one
+        try:
+            last_url_rating = UrlRating.objects.filter(url=url, url__urlrating__when__lte=when).latest("when")
+        except:
+            # todo, fix broad exception.
+            last_url_rating = UrlRating()  # create an empty one, why? - don't make this wihtout data!
+
+        # possibly a bug: you're not getting the latest rating... you get the whole set and
+        # then get the first one (the oldest)... that's why some urls keep getting ratings.
+        # last_url_rating = UrlRating.objects.filter(url=url, url__urlrating__when__lte=when)[:1]
+        # if last_url_rating.exists():
+        #    last_url_rating = last_url_rating.get()
+        # else:
+        #    last_url_rating = UrlRating()  # create an empty one
 
         if explanation and last_url_rating.calculation != explanation:
             u = UrlRating()

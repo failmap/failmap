@@ -229,13 +229,6 @@ $( document ).ready(function() {
         }
     });
 
-    // move space and time ;)
-    $("#history").on("change input", debounce(function() {
-        loadmap(this.value);
-        loadtopfail(this.value)
-        loadstats(this.value);
-    }, 250));
-
     window.vueDomainlist = new Vue({
         el: '#domainlist',
         data: { urls: Array },
@@ -265,6 +258,28 @@ $( document ).ready(function() {
             }
         }
     });
+
+    window.vueHistory = new Vue({
+        el: '#historycontrol',
+        data: {
+            weeksback: 0
+
+        },
+        computed: {
+            visibleweek: function() {
+                x = new Date();
+                return x.setDate(x - weeksback * 7);
+            }
+        }
+    });
+
+    // move space and time ;)
+    $("#history").on("change input", debounce(function() {
+        loadmap(this.value);
+        loadtopfail(this.value);
+        loadstats(this.value);
+        vueHistory.weeksback = this.value;
+    }, 250));
 
     loadtopfail(0);
     loadstats(0);

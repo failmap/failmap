@@ -81,7 +81,7 @@ class TlsQualysScan(models.Model):
     # This is just so we can manage when to scan next and to say when we've last checked.
     scan_date = models.DateField(auto_now_add=True)  # completed scan
     scan_time = models.TimeField(auto_now_add=True)  # For database indexes
-    scan_moment = models.DateTimeField(auto_now_add=True)  # For database indexes
+    scan_moment = models.DateTimeField(auto_now_add=True, db_index=True)  # For database indexes
 
     # This is when the rating was determined. Ratings don't change that much.
     rating_determined_on = models.DateTimeField()

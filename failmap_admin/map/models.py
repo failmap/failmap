@@ -29,7 +29,7 @@ class OrganizationRating(models.Model):
     """
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT,)
     rating = models.IntegerField()
-    when = models.DateTimeField()
+    when = models.DateTimeField(db_index=True)
     calculation = models.TextField()  # calculations of the independent urls... and perhaps others?
 
     class Meta:
@@ -51,7 +51,7 @@ class UrlRating(models.Model):
     """
     url = models.ForeignKey(Url, on_delete=models.PROTECT,)
     rating = models.IntegerField()
-    when = models.DateTimeField()
+    when = models.DateTimeField(db_index=True)
     calculation = models.TextField()  # calculation of different scanners. There will be a loop
     # somewhere that just figures out the rating on different time periods per scanner.
     # This does not need to contain ALL aggegrated data, but it can as it's calculated.

@@ -6,8 +6,10 @@ from failmap_admin.map.models import UrlRating, OrganizationRating
 
 # Remove ALL organization and URL ratings and rebuild them
 class Command(BaseCommand):
-    help = 'Remove all organization and url ratings, then rebuild them from scratch'
+    help = "Remove all organization and url ratings, then rebuild them from scratch. " \
+           "This can take a while."
 
+    # history
     # this has been made when a bug caused hunderds of thousands of ratings, slowing the top fail
     # The history code was present already to make the history for the map.
     # It has now been refactored into a command, so it's easier to work with.
@@ -25,5 +27,11 @@ class Command(BaseCommand):
         # urls: 11946 (saving 85% by deduplication)
         # organizations: 20564 (saving NOTHING by deduplication)
         dr = DetermineRatings()
+
+        # this makes a rating every 7 days, if there are new things to record.
         dr.rate_urls(create_history=True)
         dr.rate_organizations(create_history=True)
+
+        # add a rating for today
+        dr.rate_urls()
+        dr.rate_organizations()
