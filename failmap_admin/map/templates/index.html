@@ -41,7 +41,7 @@
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                         <li style="width: 715px">
                             <div id="historycontrol">
-                                <small>{% trans "Time slider" %} - {% verbatim %}{{ visibleweek }}{% endverbatim %}</small><br />
+                                <small>{% trans "Data slider" %} - {% verbatim %}{{ visibleweek }}{% endverbatim %}</small><br />
                                 <input id="history" type="range" value="0" min="0" max="80" step="1" style="direction: rtl"/>
                             </div>
                         </li>
@@ -90,14 +90,14 @@
             {% verbatim %}
             <div id="domainlistcontainer">
                 <div id="domainlist" v-if="urls">
-                    <h4>{% endverbatim %}{% trans "Domains" %}{% verbatim %}: </h4>
+                    <h4>{% endverbatim %}{% trans "Domains" %}{% verbatim %} </h4>
                     <div v-for="url in urls">
                         <span v-bind:class="colorize(url.url.points)">
                             {{ url.url.url }}
                         </span>
                     </div>
                     <br />
-                    <p><small>{% endverbatim %}{% trans "This list does not show history." %}{% verbatim %}</small></p>
+                    <p><small>{% endverbatim %}{% trans "This list displays only new data, not history." %}{% verbatim %}</small></p>
                 </div>
             </div>
             {% endverbatim %}
@@ -232,6 +232,7 @@
                 <div v-if="name">
                 <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
                 <div>
+                    {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
                     {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
                     <br />
                     {% trans "Score layout" %}: <br />
@@ -244,7 +245,7 @@
                                     &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
                                     <div v-for="(rating, key) in myendpoint.ratings">
                                         <div v-for="(myrating, myratingkey) in rating">
-                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ myrating.since }} <br />
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
                                             &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
                                         </div>
                                     </div>
@@ -444,8 +445,11 @@
 
                 <div class="col-md-6" id="topfail">
                     <div class="page-header">
-                        <a name="topfail"></a>
+                        <a name="topfail"  class="jumptonav"></a>
                         <h1>{% trans "Top Fail" %}</h1>
+                    </div>
+                    <div>
+                        <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
                     </div>
                     <table class="table table-striped">
                         <thead>
@@ -467,9 +471,6 @@
                         {% endverbatim %}
                         </tbody>
                     </table>
-                    <div>
-                        <p v-if="top.metadata">{% trans "Updated on" %} {% verbatim %}{{ top.metadata.data_from_time }}{% endverbatim %}</p>
-                    </div>
                 </div>
             </div>
 
