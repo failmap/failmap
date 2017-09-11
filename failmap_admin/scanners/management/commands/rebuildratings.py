@@ -25,7 +25,7 @@ class Command(BaseCommand):
         # When the previous rating is the same as the current one, the rating will not be saved.
         # So this is the real amount of data:
         # urls: 11946 (saving 85% by deduplication)
-        # organizations: 20564 (saving NOTHING by deduplication)
+        # organizations: 2160 (saving 85% by deduplication)
         dr = DetermineRatings()
 
         # this makes a rating every 7 days, if there are new things to record.
