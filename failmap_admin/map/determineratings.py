@@ -250,7 +250,7 @@ class DetermineRatings:
         organization_json_checked = json.dumps(parsed, indent=4)
 
         # print("%s %s" % (last.calculation, total_calculation))
-        if last.calculation != total_calculation:
+        if last.calculation != organization_json_checked:
             u = OrganizationRating()
             u.organization = organization
             u.rating = total_rating
