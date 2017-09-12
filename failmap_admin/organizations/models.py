@@ -79,6 +79,8 @@ class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
 
+    created_on = models.DateField(auto_now_add=True, blank=True, null=True)
+
     is_dead = models.BooleanField(
         db_column='isDead',
         default=False,

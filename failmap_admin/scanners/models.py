@@ -33,7 +33,8 @@ class Endpoint(models.Model):
     # django way to travel between endpoints and urls, which made it impossible to main
     # database independence. Which would then result in the solution being harder to maintain.
     # Therefore we've dropped the domain field and added a foreign key to URL.
-    # todo: drop domain at the next possible option.
+    # todo-cancelled: drop domain at the next possible option.
+    # We want, for some reason, to also save scans that don't have a URL.
     domain = models.CharField(max_length=255, help_text="This is a legacy field, "
                                                         "used by the scanner. Will be obsoleted "
                                                         "after the incorrectly migrated domains"
@@ -49,6 +50,8 @@ class Endpoint(models.Model):
     port = models.IntegerField(default=443)  # 1 to 65535
     protocol = models.CharField(max_length=20)  # https://en.wikipedia.org/wiki/Transport_layer
 
+    discovered_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+
     # Till when the endpoint existed and why it was deleted.
     is_dead = models.IntegerField(default=False)  # domain may be dead
     is_dead_since = models.DateTimeField(blank=True, null=True)
@@ -61,8 +64,6 @@ class Endpoint(models.Model):
             return "%s = %s | %s/%s" % (self.domain, self.ip, self.protocol, self.port)
 
 
-# todo: to save data, you can also only save the changes in the scan over time.
-# and dump the rest / intermediates elsewhere.
 class TlsQualysScan(models.Model):
     """
     Model for scanner tls qualys
@@ -94,8 +95,20 @@ class TlsQualysScan(models.Model):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
+class Screenshot(models.Model):
+    url = models.ForeignKey(
+        Url,
+        on_delete=models.PROTECT, null=True, blank=True)
+    domain = models.CharField(max_length=255, help_text="Used when there is no known URL.")
+    filename = models.CharField(max_length=255)
+    width_pixels = models.IntegerField(default=0)
+    height_pixels = models.IntegerField(default=0)
+    created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+
 # A debugging table to help with API interactions.
 # This can be auto truncated after a few days.
+# Not anymore, since it's used to see if there are DNS problems (unresolvable domains)
+# That should be factored out first.
 class TlsQualysScratchpad(models.Model):
     """
     A debugging channel for all communications with Qualys.

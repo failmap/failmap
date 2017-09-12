@@ -325,7 +325,6 @@ class DetermineRatings:
             protocol="https"
         )
 
-        # todo: add database indexes. can we inspect with sqlite?
         explanations = {
             "F": "F - Failing TLS",
             "D": "D",
@@ -399,11 +398,14 @@ class DetermineRatings:
                 # can happen that a rating simply isn't there yet. Perfectly possible.
                 pass
 
-        #
-        url_json = urlratingtemplate % (url.url, rating, endpoint_json)
-        # print(url_json)
-        # load it up in a json parser to give it a nice format. (why not make a json object then?)
-        parsed = json.loads(url_json)
-        url_json = json.dumps(parsed, indent=4)
-
-        return url_json, rating
+        # if there is not a single endpoint that has data... then well... don't return
+        # an explanation and make sure this is not saved.
+        if endpoint_json:
+            url_json = urlratingtemplate % (url.url, rating, endpoint_json)
+            # print(url_json)
+            parsed = json.loads(url_json)
+            url_json = json.dumps(parsed, indent=4)  # nice format
+            return url_json, rating
+        else:
+            # empty explanations don't get saved.
+            return "", 0

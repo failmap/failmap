@@ -29,6 +29,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
 
 # Application definition
 
@@ -50,9 +53,12 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     'dal_select2',  # django-autocomplete-light
+    # 'silk'  # works great for debugging.
+    # debug_toolbar',  # debugging and optimization, seems mostly useless in json apps, don't use
 ]
 
 MIDDLEWARE_CLASSES = [
+    # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +68,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.admindocs.middleware.XViewMiddleware',  # admindocs
+
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'failmap_admin.urls'

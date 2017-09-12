@@ -29,3 +29,9 @@ urlpatterns = [
     url(r'^scanners/', include('failmap_admin.scanners.urls')),
     url(r'^', include('failmap_admin.map.urls')),
 ]
+
+# debugging
+# urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
+
+# Nested inlines don't work with Django Jet (yet).
+# urlpatterns += [url(r'^_nested_admin/', include('nested_admin.urls'))]

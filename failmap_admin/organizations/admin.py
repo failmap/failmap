@@ -110,7 +110,7 @@ class UrlAdmin(admin.ModelAdmin):
 
     inlines = [EndpointAdminInline, UrlRatingAdminInline]
 
-    actions = ['rate_url', 'scan_url', 'declare_dead']
+    actions = ['rate_url', 'scan_url', 'declare_dead','print_on_commandline']
 
     def declare_dead(self, request, queryset):
 
@@ -140,6 +140,10 @@ class UrlAdmin(admin.ModelAdmin):
         s.scan(urls_to_scan)
 
         self.message_user(request, "URL(s) have been scanned")
+
+    def print_on_commandline(self, request, queryset):
+        for url in queryset:
+            print(url.url)
 
     rate_url.short_description = "Rate"
     scan_url.short_description = "Scan"

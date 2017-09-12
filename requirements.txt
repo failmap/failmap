@@ -6,11 +6,16 @@ django-jsonfield
 pyyaml
 tldextract
 docutils
+# django-nested-admin (doesn't work with Django Jet).
 
 # scanners
 requests
 pytz
-celery
+# celery  # distribution, not yet used
+# cefpython3==57.0  # Screenshots
+Pillow  # screenshots
+python-resize-image  # screenshots
+selenium  # screenshots
 
 # manual scans
 django-autocomplete-light
@@ -25,3 +30,4 @@ tox
 autopep8
 coverage
 pytest
+django-silk

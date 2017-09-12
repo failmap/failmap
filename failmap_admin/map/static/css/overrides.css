@@ -98,3 +98,22 @@ body {
     height: 75px;
     visibility: hidden;
 }
+
+.perurl{
+    padding: 15px;
+    width: 100%;
+    clear: both;
+}
+
+.imagediv {
+    width: 320px;
+    height: 200px;
+    margin-right: 10px;
+    border: 1px solid black;
+    display: inline-block;
+    float: left;
+}
+
+.faildomain {
+    font-size: 23px;
+}
