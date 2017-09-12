@@ -9,3 +9,8 @@ db.sqlite3
 .cache
 .coverage
 htmlcov
+failmap_admin/scanners/data/screenshots/*
+failmap_admin/map/static/images/screenshots/*
+trash.txt
+todo.txt
+error.log

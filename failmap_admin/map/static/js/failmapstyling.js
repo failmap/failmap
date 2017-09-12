@@ -129,49 +129,34 @@ function gotoLink(e){
 // cache the requests on the client, so you can slide faster.
 // the cache is valid about a week...
 // only at weeknumber 0 we don't use cache, otherwise hourly updates don't work
-mapcache = Array;
+// caching doesnt really work: returned data is severly altered and copy by value is messy.
+// array.slice, but what if it's an object? then json things. Nope.
+// also checking a weeknumber by this is meh: weeknumber !== '0'
+// this is much simpler.
 function loadmap(weeknumber){
-    var data = "";
-    if (weeknumber !== 0 && mapcache[weeknumber]) {
-        showmapdata(mapcache[weeknumber]);
-    } else {
-        $.getJSON('/data/map/' + weeknumber, function (json) {
-            mapcache[weeknumber] = json;
-            showmapdata(json);
-        });
-    }
+    $.getJSON('/data/map/' + weeknumber, function (json) {
+        if (geojson) { // if there already was data present
+            geojson.clearLayers(); // prevent overlapping polygons
+            map.removeLayer(geojson);
+        }
+
+        geojson = L.geoJson(json, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+
+        // todo: add the date info on the map, or somewhere.
+        metadata.update(json.metadata);
+    });
 }
 
-function showmapdata(json){
-    if (geojson) { // if there already was data present
-        geojson.clearLayers(); // prevent overlapping polygons
-        map.removeLayer(geojson);
-    }
 
-    geojson = L.geoJson(json, {
-        style: style,
-        onEachFeature: onEachFeature
-    }).addTo(map);
-
-    // todo: add the date info on the map, or somewhere.
-    metadata.update(json.metadata);
-}
-
-topfailcache = Array;
 function loadtopfail(weeknumber){
-    if (weeknumber !== 0 && topfailcache[weeknumber]) {
-        showTopFail(topfailcache[weeknumber]);
-    } else {
-        $.getJSON('/data/topfail/' + weeknumber, function (data) {
-            topfailcache[weeknumber] = data;
-            showTopFail(data);
-        });
-    }
+    $.getJSON('/data/topfail/' + weeknumber, function (data) {
+        vueTopfail.top = data;
+    });
 }
 
-function showTopFail(data){
-    vueTopfail.top = data;
-}
 
 function loadstats(weeknumber){
     $.getJSON('/data/stats/' + weeknumber, function(data) {
@@ -264,13 +249,13 @@ $( document ).ready(function() {
 
             redpercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.round(
+                    Math.floor(
                         ( this.data.data.now["red"]) / this.data.data.now["total_organizations"] * 100) + "%";
             },
 
             orangepercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.round(
+                    Math.ceil(
                         (this.data.data.now["orange"]) / this.data.data.now["total_organizations"] * 100) + "%";
             },
 
@@ -335,7 +320,7 @@ $( document ).ready(function() {
         loadtopfail(this.value);
         //loadstats(this.value); // todo: cache
         vueHistory.weeksback = this.value;
-    }, 250));
+    }, 100));
 
     loadtopfail(0);
     loadstats(0);

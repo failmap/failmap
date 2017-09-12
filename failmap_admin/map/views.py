@@ -143,6 +143,8 @@ def topfail(request, weeks_back=0):
 
 def stats(request, weeks_back=0):
     # todo: add time dimension. Perhaps make this just a query...
+    # todo: The problem is not to have an earlier rating, but selecting the latest one from the
+    # earlier ratings. This happens now in two steps.
     # another time dimension slicing problem. This problem just has to be solved by the community.
     # this results in hundreds of queries, where just a few would suffice normally. This is
     # becoming a problem. - this is now extremely slow, and i know exactly why (not grouping, etc).
@@ -152,8 +154,7 @@ def stats(request, weeks_back=0):
     os = Organization.objects.all()
 
     stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0,
-             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
-             'earliest': 0}
+             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0}
 
     for stat in stats:
         if stat == 'now' or stat == 'earliest':
@@ -171,6 +172,7 @@ def stats(request, weeks_back=0):
         # red, orange and green. This is done to simplify the data, so it can be better understood.
         measurement = {'red': 0, 'orange': 0, 'green': 0,
                        'total_organizations': 0, 'total_score': 0, 'no_rating': 0}
+
         for o in os:
             try:
 

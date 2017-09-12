@@ -1,7 +1,7 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad
+from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Screenshot
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -17,7 +17,7 @@ class TlsQualysScanAdminInline(CompactInline):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
+    list_display = ('url', 'domain', 'discovered_on', 'ip', 'port', 'protocol', 'is_dead',
                     'scan_count')
     search_fields = ('url__url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
@@ -59,6 +59,15 @@ class TlsQualysScratchpadAdmin(admin.ModelAdmin):
     readonly_fields = ['when']
 
 
+class ScreenshotAdmin(admin.ModelAdmin):
+    list_display = ('url', 'domain', 'created_on', 'filename')
+    search_fields = ('url', 'domain', 'created_on', 'filename')
+    list_filter = ('url', 'domain', 'created_on', 'filename')
+    fields = ('url', 'domain', 'created_on', 'filename', 'width_pixels', 'height_pixels')
+    readonly_fields = ['created_on']
+
+
 admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
 admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
+admin.site.register(Screenshot, ScreenshotAdmin)

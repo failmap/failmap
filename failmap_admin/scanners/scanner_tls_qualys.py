@@ -211,7 +211,7 @@ class ScannerTlsQualys:
                              callback=ScannerTlsQualys.success_callback,
                              error_callback=ScannerTlsQualys.error_callback)
             # ScannerTlsQualys.scantask(domain) # old sequential approach
-            sleep(50 + randint(0, 10))  # Start a new task, but don't pulsate too much.
+            sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
         pool.close()
         pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min
@@ -424,7 +424,6 @@ class ScannerTlsQualys:
             # or bugs, or whatever. We're going to reduce it back to a single endpoint and continue
             # working with that. There is really no use to have multiple the same endpoints.
             # - especially since we don't store the reverse name as unique.
-            # todo: ah, hier maakte hij endpoints zonder URL er aan :)
             # perhaps i have to do some fixing outside of this thing...???
             # instead of automerging behaviour?
             endpoints = Endpoint.objects.all().filter(domain=domain,
@@ -434,6 +433,11 @@ class ScannerTlsQualys:
 
             # count here, as the number of elements is possibly modified in below process
             count = endpoints.count()
+
+            # todo: instead of merging 2 or more endpoints to one,
+            # keep sepearte endpoints that are alive for a period. So a certain endpoint
+            # can be used, and later unused, then used again etc etc etc. That is more in line
+            # with reality and it distorts LESS the statistics over a long run.
 
             # if there is no endpoint yet, then create it. (as with get or create
             if count == 0:
@@ -448,13 +452,13 @@ class ScannerTlsQualys:
                 try:
                     failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
                 except ObjectDoesNotExist:
-                    # todo: make less broad exception
                     failmap_endpoint.url = ""
                 failmap_endpoint.domain = domain  # not used anymore. Filled for legacy reasons.
                 failmap_endpoint.port = 443
                 failmap_endpoint.protocol = "https"
                 failmap_endpoint.ip = qualys_endpoint['ipAddress']
                 failmap_endpoint.is_dead = False
+                failmap_endpoint.discovered_on = datetime.now(pytz.utc)
                 failmap_endpoint.save()
 
             if count > 1:
