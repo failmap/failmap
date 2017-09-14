@@ -55,6 +55,7 @@ class DetermineRatings:
     def rate_organizations(self, create_history=False):
         # todo: we should create some protection that there are not insane amounts of ratings
         # created.
+        # todo: something is going wrong with typing here...?
         times = self.get_weekly_intervals() if create_history else [datetime.now(pytz.utc)]
 
         os = Organization.objects.all()
@@ -312,26 +313,39 @@ class DetermineRatings:
     # Extra: this does not check if all endpoints are dead (and thus the url)... it shouldn't
     # because the scanner should check that.
     def get_url_score(self, url, when):
-        print("calculating score on %s for %s" % (when, url.url))
+        print("Calculating score for %s on %s" % (url.url, when))
 
         explanation = ""
         rating = 0
 
         # This is done in a few simple and readable steps.
 
-        # 1: get latest alive endpoints+scans of this URL for qualys after When
         endpoints = Endpoint.objects.all()
-        # qualys endpoints are HTTPS on port 443
-        # instead of checking on is_dead, we're looking at all points in time when the
-        # endpoint was alive.
-        endpoints = endpoints.filter(
+
+        # all endpoints in the past given the timeframe
+        dead_endpoints = endpoints.filter(
             url=url,
             discovered_on__lte=when,
+            is_dead=True,
             is_dead_since__gte=when,
             port=443,
             protocol="https"
         )
-        print("Found %s endpoints for this url" % endpoints.count())
+        print("Dead endpoints for this url:  %s" % dead_endpoints.count())
+
+        # all endpoints that are still alive on the timeperiod
+        existing_endpoints = endpoints.filter(
+            url=url,
+            discovered_on__lte=when,
+            is_dead=False,
+            port=443,
+            protocol="https"
+        )
+
+        print("Alive endpoints for this url: %s" % existing_endpoints.count())
+
+        # higly inefficient merging of results :)
+        endpoint_list = list(dead_endpoints) + list(existing_endpoints)
 
         explanations = {
             "F": "F - Failing TLS",
@@ -386,7 +400,7 @@ class DetermineRatings:
 
         # todo: refactor to request a number of points in a more generic way.
         # an endpoint at most has 1 TLS rating.
-        for endpoint in endpoints:
+        for endpoint in endpoint_list:
             try:
                 scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
                 scan = scan.latest('rating_determined_on')
@@ -396,19 +410,20 @@ class DetermineRatings:
                 if scan.qualys_rating != '0':
                     starttls_json = (tlsratingtemplate %
                                      (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                      scan.rating_determined_on))  # was "scan_moment" but that is
-                    # ... updated frequently: every scan. But the rating determined on is not.
+                                      scan.rating_determined_on))
 
                     # you can only add the comma if there are multiple items...
                     if endpoint_json:
                         endpoint_json += ", "
 
                     endpoint_json += (endpointtemplate % (endpoint.ip, endpoint.port,
-                                                          endpoint.ip, endpoint.port, starttls_json))
+                                                          endpoint.ip, endpoint.port,
+                                                          starttls_json))
 
                     rating += ratings[scan.qualys_rating]
             except TlsQualysScan.DoesNotExist:
                 # can happen that a rating simply isn't there yet. Perfectly possible.
+                print("No scan on endpoint %s." % endpoint)
                 pass
 
         # if there is not a single endpoint that has data... then well... don't return

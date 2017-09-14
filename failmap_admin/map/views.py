@@ -141,8 +141,22 @@ def topfail(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
 
+def stats_determine_when(stat, weeks_back=0):
+    if stat == 'now' or stat == 'earliest':
+        when = datetime.now(pytz.utc)
+    else:
+        value, unit, _ = stat.split()
+        when = datetime.now(pytz.utc) - relativedelta(**{unit: int(value)})
+
+    # take into account the starting point
+    # eg: now = 1 march, starting point: 1 january. Difference is N days. Subtract N from when.
+    if weeks_back:
+        when = when - relativedelta(weeks=int(weeks_back))
+
+    return when
+
+
 def stats(request, weeks_back=0):
-    # todo: add time dimension. Perhaps make this just a query...
     # todo: The problem is not to have an earlier rating, but selecting the latest one from the
     # earlier ratings. This happens now in two steps.
     # another time dimension slicing problem. This problem just has to be solved by the community.
@@ -154,19 +168,12 @@ def stats(request, weeks_back=0):
     os = Organization.objects.all()
 
     stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0,
-             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0}
+             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
+             '12 months ago': 0}
 
     for stat in stats:
-        if stat == 'now' or stat == 'earliest':
-            when = datetime.now(pytz.utc)
-        else:
-            value, unit, _ = stat.split()
-            when = datetime.now(pytz.utc) - relativedelta(**{unit: int(value)})
-
-        # take into account the starting point
-        # eg: now = 1 march, starting point: 1 january. Difference is N days. Subtract N from when.
-        if weeks_back:
-            when = when - relativedelta(weeks=int(weeks_back))
+        # confusing decomposition to comply with mccabe
+        when = stats_determine_when(stat, weeks_back)
 
         # Next to measurements in hard numbers, we also derive a conclusion in three categories:
         # red, orange and green. This is done to simplify the data, so it can be better understood.

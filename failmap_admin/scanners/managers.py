@@ -1,9 +1,11 @@
-from failmap_admin.scanners.models import State
-from django.db import models
-from django.core.exceptions import ObjectDoesNotExist
-import pytz
 from datetime import datetime
+
+import pytz
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+
 from failmap_admin.organizations.models import Organization
+from failmap_admin.scanners.models import State
 
 
 class StateManager(models.Manager):
@@ -50,5 +52,5 @@ class StateManager(models.Manager):
             else:
                 previous.append(organization)
         resume = next + previous
-        print(resume)
+        # print(resume)
         return resume

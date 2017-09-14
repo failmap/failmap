@@ -1,7 +1,10 @@
-from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
-from failmap_admin.scanners.models import TlsQualysScan
 import datetime
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand
+
+from failmap_admin.scanners.models import TlsQualysScan
+
 # This script estimates when an URL started to exist, and when endpoints started to exist.
 # This is created when discovered the Endpoint data was not complete enough: missing "when"
 # the endpoint was created. Without it, it could not be easily determined what endpoints where
@@ -32,4 +35,3 @@ class Command(BaseCommand):
                     scan.endpoint.save()
             except ObjectDoesNotExist:
                 print("Scan does not have an endpoint! %s " % scan)
-

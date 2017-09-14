@@ -14,14 +14,16 @@
 # phantomjs has all kinds of tls things, and is extremely slow with real / existing sites.
 
 import os
-from datetime import datetime
-import pytz
 import re
-from failmap_admin.scanners.models import Screenshot
-from failmap_admin.organizations.models import Url
+from datetime import datetime
+from time import sleep
+
+import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from PIL import Image
-from time import sleep
+
+from failmap_admin.organizations.models import Url
+from failmap_admin.scanners.models import Screenshot
 
 
 class ScannerScreenshot:
@@ -43,15 +45,22 @@ class ScannerScreenshot:
 
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '_small.png'
-        tmp_dir = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + now
-        output_filepath = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + safe_filename
-        output_filepath_resized = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + \
-                                  safe_filename_resized
+        tmp_dir = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + now
+        output_filepath = \
+            ScannerScreenshot.script_directory + \
+            "/" + ScannerScreenshot.working_directory + "/" + safe_filename
+        output_filepath_resized = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + safe_filename_resized
 
         from selenium import webdriver  # Import selenium web driver
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
         dcap = dict(DesiredCapabilities.PHANTOMJS)
-        dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36")
+        dcap["phantomjs.page.settings.userAgent"] = ("Mozilla/5.0 (X11; Linux x86_64) "
+                                                     "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                                     "Chrome/48.0.2564.116 Safari/537.36")
         dcap["phantomjs.page.settings.resourceTimeout"] = 3000
 
         driver = webdriver.PhantomJS(desired_capabilities=dcap,
@@ -92,15 +101,23 @@ class ScannerScreenshot:
 
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '_small.png'
-        tmp_dir = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + now
-        output_filepath = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + safe_filename
-        output_filepath_resized = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + \
-                                  safe_filename_resized
+        tmp_dir = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + now
+        output_filepath = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + safe_filename
+        output_filepath_resized = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + \
+            safe_filename_resized
 
         from selenium import webdriver  # Import selenium web driver
         from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
         dcap = dict(DesiredCapabilities.FIREFOX)
-        dcap["firefox.page.settings.userAgent"] = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36")
+        dcap["firefox.page.settings.userAgent"] = ("Mozilla/5.0 (X11; Linux x86_64) "
+                                                   "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                                   "Chrome/48.0.2564.116 Safari/537.36")
         dcap["firefox.page.settings.resourceTimeout"] = 3000
 
         driver = webdriver.Firefox()
@@ -147,11 +164,20 @@ class ScannerScreenshot:
 
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '_small.png'
-        tmp_dir = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + now
-        output_filepath = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + safe_filename
-        output_filepath_resized = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + \
-                                  safe_filename_resized
-        output_filepath_latest = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + str(re.sub(r'[^a-zA-Z0-9_]', '', url + "_latest")) + '.png'
+        tmp_dir = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + now
+        output_filepath = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + safe_filename
+        output_filepath_resized = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + \
+            safe_filename_resized
+        output_filepath_latest = \
+            ScannerScreenshot.script_directory + "/" + \
+            ScannerScreenshot.working_directory + "/" + \
+            str(re.sub(r'[^a-zA-Z0-9_]', '', url + "_latest")) + '.png'
 
         # skip if there is already a latest image, just to speed things up.
         if os.path.exists(output_filepath_latest):
@@ -173,7 +199,6 @@ class ScannerScreenshot:
         subprocess.call(['cd', '..'])
         subprocess.call(['rmdir', tmp_dir])
 
-
         # and some django stuff to save the things in the database
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc)
@@ -185,6 +210,15 @@ class ScannerScreenshot:
             # remove the protocol.
             url = url.replace("https://", "")
             url = url.replace("http://", "")
+
+            # and remove the port if there is one
+            try:
+                if url.index(':'):
+                    url = url[0:url.index(':')]
+            except ValueError:
+                # not in string. fine.
+                pass
+
             scr.url = Url.objects.all().filter(url=url).first()
         except ObjectDoesNotExist:
             print("No URL exists for url: %s, saving without one." % url)
@@ -203,7 +237,7 @@ class ScannerScreenshot:
     @staticmethod
     def make_screenshot_threaded(urls):
         # Exception("This function is not yet thread safe.")
-        from multiprocessing import Pool, Process
+        from multiprocessing import Pool
         pool = Pool(processes=20)
 
         print("Making screenshots of %s urls." % len(urls))

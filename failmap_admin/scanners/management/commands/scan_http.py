@@ -10,4 +10,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         s = ScannerHttp()
-        s.scan_multithreaded(port=80, protocol="http")
+        s.scan_multithreaded(port=8443, protocol="https")

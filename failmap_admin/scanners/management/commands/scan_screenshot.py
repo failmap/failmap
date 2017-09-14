@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 
-from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint
+from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
 
 
 # todo: when tls scanner ends, it hangs.
@@ -18,11 +18,12 @@ class Command(BaseCommand):
 
         urllist = []
         if self.https_screenshot:
-            us = Url.objects.all().filter(not_resolvable=False,
-                                          endpoint__is_dead=False,
-                                          endpoint__protocol="https",
-                                          endpoint__tlsqualysscan__qualys_rating__in=
-                                          ["F", "C", "B", "A", "C", "A+", "A-", "M", "D"])
+            us = Url.objects.all().filter(
+                not_resolvable=False,
+                endpoint__is_dead=False,
+                endpoint__protocol="https",
+                endpoint__tlsqualysscan__qualys_rating__in=["F", "C", "B", "A",
+                                                            "C", "A+", "A-", "M", "D"])
 
             for u in us:
                 domain = ("https://%s:%s" % (u.url, 443))

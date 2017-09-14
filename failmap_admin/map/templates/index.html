@@ -221,6 +221,15 @@
                                     <td>{{ data.data["6 months ago"]["red"] }} <small>({{ data.data["6 months ago"]["red percentage"] }}%)</small></td>
                                     {% endverbatim %}
                                 </tr>
+                                <tr>
+                                    <td>{% trans "1 year ago" %}</td>
+                                    {% verbatim %}
+                                    <td>{{ data.data["12 months ago"]["total_organizations"] }}</td>
+                                    <td>{{ data.data["12 months ago"]["green"] }} <small>({{ data.data["12 months ago"]["green percentage"] }}%)</small></td>
+                                    <td>{{ data.data["12 months ago"]["orange"] }} <small>({{ data.data["12 months ago"]["orange percentage"] }}%)</small></td>
+                                    <td>{{ data.data["12 months ago"]["red"] }} <small>({{ data.data["12 months ago"]["red percentage"] }}%)</small></td>
+                                    {% endverbatim %}
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -248,7 +257,8 @@
                                     &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
                                     <div v-for="(rating, key) in myendpoint.ratings">
                                         <div v-for="(myrating, myratingkey) in rating">
-                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}<br />
+                                                {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
                                             &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
                                         </div>
                                     </div>
