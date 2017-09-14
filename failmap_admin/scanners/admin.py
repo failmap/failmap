@@ -1,7 +1,7 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Screenshot, State
+from .models import Endpoint, Screenshot, State, TlsQualysScan, TlsQualysScratchpad
 
 
 class TlsQualysScanAdminInline(CompactInline):

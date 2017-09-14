@@ -242,12 +242,11 @@ class ScannerTlsQualys:
 
         A scan usually takes about two minutes.
 
-        :param domains:
+        :param domain: string representing an url, without protocol or port.
         :return:
         """
 
-        data = {}
-        data['status'] = "NEW"
+        data = {'status': "NEW"}
 
         while data['status'] != "READY" and data['status'] != "ERROR":
             data = ScannerTlsQualys.service_provider_scan_via_api(domain)
@@ -486,129 +485,142 @@ class ScannerTlsQualys:
         # expect that it exists
         status_message = qualys_endpoint['statusMessage']
 
-        # todo: message: Certificate not valid for domain name
         # todo: message: "Failed to communicate with the secure server"
         ScannerTlsQualys.log.debug("Managing endpoint with message %s" % status_message)
 
         # Unable to connect to server? Declare endpoint dead.
         # The endpoint probably has another port / service than https/443
         if status_message == "Unable to connect to the server":
-            ScannerTlsQualys.log.debug("Handing could not connect to server")
-            # If this endpoint exists and is alive, mark it as dead: port 443 does not
-            # do anything.
-            alive_endpoints = Endpoint.objects.all().filter(
-                                                        domain=domain,
-                                                        ip=qualys_endpoint['ipAddress'],
-                                                        port=443,
-                                                        protocol="https",
-                                                        is_dead=False).order_by('-discovered_on')
-            # should be one, might be multiple due to human error.
-            for ep in alive_endpoints:
-                ep.is_dead = True
-                ep.is_dead_since = datetime.now(pytz.utc)
-                ep.is_dead_reason = status_message
-                ep.save()
-
-            # if there is no end point at all, add one, so we know port 443 is not available
-            if alive_endpoints.count():
-                ScannerTlsQualys.log.debug("Getting the newest endpoint to save scan.")
-                failmap_endpoint = alive_endpoints.first()
-            else:
-                ScannerTlsQualys.log.debug("Checking if there is a dead endpoint.")
-                dead_endpoints = Endpoint.objects.all().filter(
-                    domain=domain,
-                    ip=qualys_endpoint['ipAddress'],
-                    port=443,
-                    protocol="https",
-                    is_dead=True).order_by('-discovered_on')
-
-                if dead_endpoints.count():
-                    ScannerTlsQualys.log.debug("Dead endpoint exists, getting latest to save scan")
-                    failmap_endpoint = dead_endpoints.first()
-                else:
-                    ScannerTlsQualys.log.debug("Creating dead endpoint to save scan to.")
-                    failmap_endpoint = Endpoint()
-                    try:
-                        failmap_endpoint.url = Url.objects.filter(
-                            url=domain).first()  # todo: below
-                    except ObjectDoesNotExist:
-                        failmap_endpoint.url = ""
-                    failmap_endpoint.domain = domain
-                    failmap_endpoint.port = 443
-                    failmap_endpoint.protocol = "https"
-                    failmap_endpoint.ip = qualys_endpoint['ipAddress']
-                    failmap_endpoint.is_dead = True
-                    failmap_endpoint.is_dead_reason = status_message
-                    failmap_endpoint.is_dead_since = datetime.now(pytz.utc)
-                    failmap_endpoint.discovered_on = datetime.now(pytz.utc)
-                    failmap_endpoint.save()
+            return ScannerTlsQualys.\
+                endpoint_could_not_connect_to_server(qualys_endpoint, domain)
 
         # todo: handle No secure protocols supported correctly. It is a weird state (https, notls?)
-        if status_message == "Ready" or status_message == "Certificate not valid for domain name" \
-           or status_message == "No secure protocols supported":
+        if status_message == "Ready" or \
+           status_message == "Certificate not valid for domain name" or \
+           status_message == "No secure protocols supported":
 
-            # Manage endpoint
-            # Endpoint exists? If not, make it,
-            endpoints = Endpoint.objects.all().filter(domain=domain,
-                                                      ip=qualys_endpoint['ipAddress'],
-                                                      port=443,
-                                                      protocol="https",
-                                                      is_dead=False)
-            # 0: make new endpoint, representing the current result
-            # 1: update the endpoint with the current information
-            # >1: everything matches, it's basically the same endpoint and it can be merged.
-            count = endpoints.count()
+            return ScannerTlsQualys.\
+                failmap_endpoint_ratings_received(qualys_endpoint, domain)
 
-            if count == 0:
-                ScannerTlsQualys.log.debug("This endpoint is new: %s %s:443" %
-                                           (domain, qualys_endpoint['ipAddress']))
+    @staticmethod
+    def failmap_endpoint_ratings_received(qualys_endpoint, domain):
+        # Manage endpoint
+        # Endpoint exists? If not, make it,
+        endpoints = Endpoint.objects.all().filter(domain=domain,
+                                                  ip=qualys_endpoint['ipAddress'],
+                                                  port=443,
+                                                  protocol="https",
+                                                  is_dead=False)
+        # 0: make new endpoint, representing the current result
+        # 1: update the endpoint with the current information
+        # >1: everything matches, it's basically the same endpoint and it can be merged.
+        count = endpoints.count()
 
-                # Multiple organizations can have the same URL. However, this is rare and has
-                # not happened yet in the Netherlands:
-                # it's not OK to have multiple processors of sensitive data to all enter at the
-                # same entry point. If so, we need to prove that this is actually the case.
-                # and we usually can't without research.
-                # It remains a todo that multiple organizations use the same URL. For now
-                # we say this is not the case.
+        if count == 0:
+            ScannerTlsQualys.log.debug("This endpoint is new: %s %s:443" %
+                                       (domain, qualys_endpoint['ipAddress']))
+
+            # Multiple organizations can have the same URL. However, this is rare and has
+            # not happened yet in the Netherlands:
+            # it's not OK to have multiple processors of sensitive data to all enter at the
+            # same entry point. If so, we need to prove that this is actually the case.
+            # and we usually can't without research.
+            # It remains a todo that multiple organizations use the same URL. For now
+            # we say this is not the case.
+            failmap_endpoint = Endpoint()
+            try:
+                failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
+            except ObjectDoesNotExist:
+                failmap_endpoint.url = ""
+            failmap_endpoint.domain = domain  # not used anymore. Filled for legacy reasons.
+            failmap_endpoint.port = 443
+            failmap_endpoint.protocol = "https"
+            failmap_endpoint.ip = qualys_endpoint['ipAddress']
+            failmap_endpoint.is_dead = False
+            failmap_endpoint.discovered_on = datetime.now(pytz.utc)
+            failmap_endpoint.save()
+
+        if count > 1:
+            ScannerTlsQualys.log.debug("Multiple similar endpoints detected for %s" % domain)
+            ScannerTlsQualys.log.debug("Flattening similar endpoints to a single one.")
+
+            # now merge all of these endpoints into one by transfering all
+            # associations of this endpoint to the first endpoint.
+            # https://docs.djangoproject.com/en/1.11/topics/db/queries/
+            failmap_endpoint = endpoints.first()  # the saved one
+            # and the rest, except for the first is deleted
+            for endpoint in endpoints:
+
+                # but keep the first endpoint. Don't know if this comparison is valid.
+                if endpoint == failmap_endpoint:
+                    continue
+
+                # in the future there might be other scans too... be warned
+                scans = TlsQualysScan.objects.all().filter(endpoint=endpoint)
+                for scan in scans:
+                    scan.endpoint = failmap_endpoint
+                    scan.save()
+                endpoint.delete()
+
+        if count == 1:
+            ScannerTlsQualys.log.debug("An endpoint exists already, using this")
+            # just one existing endpoint. Since we got it back it's alive.
+            failmap_endpoint = endpoints[0]
+
+        return failmap_endpoint
+
+    @staticmethod
+    # Server does not have HTTPS.
+    def endpoint_could_not_connect_to_server(qualys_endpoint, domain):
+        ScannerTlsQualys.log.debug("Handing could not connect to server")
+        # If this endpoint exists and is alive, mark it as dead: port 443 does not
+        # do anything.
+        alive_endpoints = Endpoint.objects.all().filter(
+            domain=domain,
+            ip=qualys_endpoint['ipAddress'],
+            port=443,
+            protocol="https",
+            is_dead=False).order_by('-discovered_on')
+        # should be one, might be multiple due to human error.
+        for ep in alive_endpoints:
+            ep.is_dead = True
+            ep.is_dead_since = datetime.now(pytz.utc)
+            ep.is_dead_reason = "Unable to connect to the server"
+            ep.save()
+
+        # if there is no end point at all, add one, so we know port 443 is not available
+        if alive_endpoints.count():
+            ScannerTlsQualys.log.debug("Getting the newest endpoint to save scan.")
+            failmap_endpoint = alive_endpoints.first()
+        else:
+            ScannerTlsQualys.log.debug("Checking if there is a dead endpoint.")
+            dead_endpoints = Endpoint.objects.all().filter(
+                domain=domain,
+                ip=qualys_endpoint['ipAddress'],
+                port=443,
+                protocol="https",
+                is_dead=True).order_by('-discovered_on')
+
+            if dead_endpoints.count():
+                ScannerTlsQualys.log.debug("Dead endpoint exists, getting latest to save scan")
+                failmap_endpoint = dead_endpoints.first()
+            else:
+                ScannerTlsQualys.log.debug("Creating dead endpoint to save scan to.")
                 failmap_endpoint = Endpoint()
                 try:
-                    failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
+                    failmap_endpoint.url = Url.objects.filter(
+                        url=domain).first()  # todo: below
                 except ObjectDoesNotExist:
                     failmap_endpoint.url = ""
-                failmap_endpoint.domain = domain  # not used anymore. Filled for legacy reasons.
+                failmap_endpoint.domain = domain
                 failmap_endpoint.port = 443
                 failmap_endpoint.protocol = "https"
                 failmap_endpoint.ip = qualys_endpoint['ipAddress']
-                failmap_endpoint.is_dead = False
+                failmap_endpoint.is_dead = True
+                failmap_endpoint.is_dead_reason = "Unable to connect to the server"
+                failmap_endpoint.is_dead_since = datetime.now(pytz.utc)
                 failmap_endpoint.discovered_on = datetime.now(pytz.utc)
                 failmap_endpoint.save()
-
-            if count > 1:
-                ScannerTlsQualys.log.debug("Multiple similar endpoints detected for %s" % domain)
-                ScannerTlsQualys.log.debug("Flattening similar endpoints to a single one.")
-
-                # now merge all of these endpoints into one by transfering all
-                # associations of this endpoint to the first endpoint.
-                # https://docs.djangoproject.com/en/1.11/topics/db/queries/
-                failmap_endpoint = endpoints.first()  # the saved one
-                # and the rest, except for the first is deleted
-                for endpoint in endpoints:
-
-                    # but keep the first endpoint. Don't know if this comparison is valid.
-                    if endpoint == failmap_endpoint:
-                        continue
-
-                    # in the future there might be other scans too... be warned
-                    scans = TlsQualysScan.objects.all().filter(endpoint=endpoint)
-                    for scan in scans:
-                        scan.endpoint = failmap_endpoint
-                        scan.save()
-                    endpoint.delete()
-
-            if count == 1:
-                ScannerTlsQualys.log.debug("An endpoint exists already, using this")
-                # just one existing endpoint. Since we got it back it's alive.
-                failmap_endpoint = endpoints[0]
 
         return failmap_endpoint
 

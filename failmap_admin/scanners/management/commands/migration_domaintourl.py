@@ -1,9 +1,10 @@
-from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
-
-from failmap_admin.scanners.models import Endpoint, Url, TlsQualysScan
-from failmap_admin.organizations.models import Organization
 import tldextract
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.management.base import BaseCommand
+
+from failmap_admin.organizations.models import Organization
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, Url
+
 
 class Command(BaseCommand):
     help = 'Further helps with obsoleting the endpoint.domain field, to endpoint.url.'
@@ -60,7 +61,9 @@ class Command(BaseCommand):
         # with the characteristics it has.
         for missing_domain in missing_domains:
             print("Attempting to place missing domain %s " % missing_domain)
+            self.place_domain(missing_domain)
 
+    def place_domain(self, missing_domain):
             extract = tldextract.extract(missing_domain)
             domainandtld = extract.domain + '.' + extract.suffix
 
@@ -69,8 +72,10 @@ class Command(BaseCommand):
                 print("%s belongs to %s" % (missing_domain, organization))
 
                 if organization:
-                    first_scan = TlsQualysScan.objects.all().filter(endpoint__domain=missing_domain).earliest("rating_determined_on")
-                    last_scan = TlsQualysScan.objects.all().filter(endpoint__domain=missing_domain).latest("rating_determined_on")
+                    first_scan = TlsQualysScan.objects.all().filter(
+                        endpoint__domain=missing_domain).earliest("rating_determined_on")
+                    last_scan = TlsQualysScan.objects.all().filter(
+                        endpoint__domain=missing_domain).latest("rating_determined_on")
 
                     url = Url()
                     url.created_on = first_scan.rating_determined_on

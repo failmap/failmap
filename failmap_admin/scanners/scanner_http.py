@@ -15,13 +15,14 @@ https://stackoverflow.com/questions/26733462/ssl-and-tls-in-python-requests#2673
 https://stackoverflow.com/questions/45290943/how-to-force-timeout-on-pythons-request-library-including-dns-lookup
 """
 import socket
-
 from datetime import datetime
+
 import pytz
 import requests
 from requests.exceptions import ConnectionError
 
 from failmap_admin.organizations.models import Url
+
 from .models import Endpoint
 
 
@@ -74,7 +75,7 @@ class ScannerHttp:
         print(vars(x))
 
     # Simple: if there is a http response (status code), there is a http server.
-    # There might be other protocols on standard ports. # todo: handle other protocols on port
+    # There might be other protocols on standard ports.
     # Even if the IP constantly changes, we know that a scanner will find something by url
     # todo: check if we can scan https, due to our https lib not supporting "rest of world"
     # todo: check headers using another scanner, don't use this one, even though it contacts
@@ -82,14 +83,14 @@ class ScannerHttp:
     # todo: further look into dig, which at the moment doesn't return more than what we have...
     # We don't make endpoints for servers that don't exist: as opposed to qualys, since that
     # scanner is slow. (perhaps we should in that case?)
-    # todo: test op https.
+    # todo: option to not find IP's, only use existing ip's of endpoints / urls.
     @staticmethod
     def scan_url(url, port=80, protocol="https"):
         domain = "%s://%s:%s" % (protocol, url.url, port)
         print("Scanning http(s) server on: %s" % domain)
 
         (ip4, ip6) = ScannerHttp.get_ips(url.url)
-
+#
         if not ip4 and not ip6:
             print("%s: No IPv4 or IPv6 address found. Url not resolvable?" % url)
             url.not_resolvable = True
@@ -128,7 +129,7 @@ class ScannerHttp:
                 ScannerHttp.kill_endpoint(url, port, protocol, ip4)
             if ip6:
                 ScannerHttp.kill_endpoint(url, port, protocol, ip6)
-#
+
     @staticmethod
     def get_ips(url):
         ip4 = ""
@@ -208,4 +209,3 @@ class ScannerHttp:
             ep.is_dead_since = datetime.now(pytz.utc)
             ep.is_dead_reason = "Not found in HTTP Scanner anymore."
             ep.save()
-
