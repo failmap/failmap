@@ -112,8 +112,14 @@ body {
     border: 1px solid black;
     display: inline-block;
     float: left;
+    background-color: lightgray;
+
 }
 
 .faildomain {
     font-size: 23px;
+}
+
+.reportlist {
+    display: table;
 }

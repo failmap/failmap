@@ -2,39 +2,46 @@ from django.core.management.base import BaseCommand
 
 from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
 from failmap_admin.organizations.models import Url
+from failmap_admin.scanners.models import Endpoint
 
+
+# todo: when tls scanner ends, it hangs.
 # Only the latest ratings...
 class Command(BaseCommand):
     help = 'Create a screenshot'
 
+    https_screenshot = False
+    http_screenshot = True
+
     def handle(self, *args, **options):
         s = ScannerScreenshot()
 
-        us = Url.objects.all().filter(endpoint__is_dead=False,
-                                      endpoint__tlsqualysscan__qualys_rating__in=["F","C", "B", "A"])
-
         urllist = []
-        for u in us:
-            urllist.append("https://" + u.url)
-            # urllist.append("http://" + u.url)
-        # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.
-        # Affects all threads (and the main thread) since they all belong to the same process.
-        # chrome headless has no option to start with a working directory...
-        # working with processes also results into the same sorts of troubles.
-        # maybe chrome shares some state for the cwd in their processes?
+        if self.https_screenshot:
+            us = Url.objects.all().filter(not_resolvable=False,
+                                          endpoint__is_dead=False,
+                                          endpoint__protocol="https",
+                                          endpoint__tlsqualysscan__qualys_rating__in=
+                                          ["F", "C", "B", "A", "C", "A+", "A-", "M", "D"])
 
-        # endpoint without TLS, is dead? endpoint exists, but no tls. Should we make a :80 endpoint
-        # then?
+            for u in us:
+                domain = ("https://%s:%s" % (u.url, 443))
+                urllist.append(domain)
+
+        if self.http_screenshot:
+            eps = Endpoint.objects.all().filter(is_dead=False,
+                                                protocol="http",
+                                                url__not_resolvable=False)
+
+            # To make screenshots of the ipv6 addresses, we must only DNS resolve IPv6.
+            # We probably cannot force that in python. Due to SNI, it's no use to surf to
+            # an IPv6 address directly (although we could, for another test)
+            for ep in eps:
+                domain = ("http://%s:%s" % (ep.url.url, ep.port))
+                urllist.append(domain)
+
         for u in urllist:
-            # s.make_screenshot_phantomjs(u)
+            # Chrome headless, albeit single threaded, is pretty reliable and fast for existing
+            # domains. This code is also the most updated. Waiting for firefox with screenshot
+            # support. (they use --screenshot=<path>, so that might work multithreaded)
             s.make_screenshot_chrome_headless(u)
-
-
-        # for u in us:
-            # Urls are stored without protocols.
-          #  s.make_screenshot("https://" + u.url)
-           # s.make_screenshot("http://" + u.url)
-
-        # s.make_screenshot("http://faalkaart.nl")
-        # s.make_screenshot("https://tweakers.net")
-        # s.make_screenshot("http://tweakers.net")

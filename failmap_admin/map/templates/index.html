@@ -240,21 +240,22 @@
                     <div v-for="url in urls">
                         <div style="display:block" class="perurl">
                             <a v-bind:href="'https://' + url.url.url" target="_blank"><div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/https' + idize(url.url.url) + '_latest.png\');'" /></div></a>
-                        <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                            {{ url.url.url }}</span>
-                        <div v-for="(endpoint, key) in url.url.endpoints">
-                            <div v-for="(myendpoint, mykey) in endpoint">
-                                &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
-                                <div v-for="(rating, key) in myendpoint.ratings">
-                                    <div v-for="(myrating, myratingkey) in rating">
-                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
-                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
+                            <div class="reportlist">
+                            <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
+                                {{ url.url.url }}</span>
+                            <div v-for="(endpoint, key) in url.url.endpoints">
+                                <div v-for="(myendpoint, mykey) in endpoint">
+                                    &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
+                                    <div v-for="(rating, key) in myendpoint.ratings">
+                                        <div v-for="(myrating, myratingkey) in rating">
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}, {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <a :href="'https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest'" target="_blank">Second Opinion</a>
-                        <br/><br/>
+                            <a :href="'https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest'" target="_blank">Second Opinion</a>
+                            </div>
                         </div>
                     </div>
                     {% endverbatim %}

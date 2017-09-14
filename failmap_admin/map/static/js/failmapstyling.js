@@ -192,6 +192,18 @@ Date.prototype.humanTimeStamp = function() {
     return this.getFullYear() + " Week " + this.getWeek();
 };
 
+// https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
+function roundTo(n, digits) {
+     if (digits === undefined) {
+       digits = 0;
+     }
+
+     var multiplicator = Math.pow(10, digits);
+     n = parseFloat((n * multiplicator).toFixed(11));
+     var test =(Math.round(n) / multiplicator);
+     return +(test.toFixed(digits));
+   }
+
 // todo: add some browser cache for datasets from server :) So it feels even faster.
 // possibly just completely caching it on the client after a while... because.. why not.
 
@@ -244,24 +256,22 @@ $( document ).ready(function() {
         computed: {
             greenpercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.round(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100) + "%";
+                    roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             redpercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.floor(
-                        ( this.data.data.now["red"]) / this.data.data.now["total_organizations"] * 100) + "%";
+                    roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             orangepercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.ceil(
-                        (this.data.data.now["orange"]) / this.data.data.now["total_organizations"] * 100) + "%";
+                    roundTo(this.data.data.now["orange"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             unknownpercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    Math.round(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100) + "%";
+                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             }
         }
     });

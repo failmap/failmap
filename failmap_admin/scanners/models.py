@@ -45,15 +45,22 @@ class Endpoint(models.Model):
         on_delete=models.PROTECT, null=True, blank=True)
 
     # server information
-    server_name = models.CharField(max_length=255, help_text="rdns")  # a gift from the scan
+    server_name = models.CharField(max_length=255,
+                                   help_text="rdns, gift from the scan, deprecated",
+                                   blank=True)  # a gift from the scan
     ip = models.CharField(max_length=255)  # can be either IPv4, IPv6, maybe even a domain...
     port = models.IntegerField(default=443)  # 1 to 65535
     protocol = models.CharField(max_length=20)  # https://en.wikipedia.org/wiki/Transport_layer
 
     discovered_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
-    # Till when the endpoint existed and why it was deleted.
-    is_dead = models.IntegerField(default=False)  # domain may be dead
+    # Till when the endpoint existed and why it was deleted (or didn't exist at all).
+    is_dead = models.IntegerField(default=False,
+                                  help_text="If the port is closed, or the endpoint is otherwise"
+                                            "not reachable over the specified protocol, then mark"
+                                            "it as dead. A scanner for this port/protocol can also"
+                                            "declare it dead. This port is closed on this protocol."
+                                            "")
     is_dead_since = models.DateTimeField(blank=True, null=True)
     is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
 
@@ -73,10 +80,14 @@ class TlsQualysScan(models.Model):
     # result from the API
     qualys_rating = models.CharField(max_length=3, default=0)  # 0, F, D, C, B, A-, A, A+
     qualys_rating_no_trust = models.CharField(max_length=3, default=0)
+    qualys_message = models.CharField(max_length=255, help_text="Whatever Qualys said "
+                                                                "about the endpoint",
+                                      blank=True,
+                                      null=True)
 
     # scan management
     pending = models.BooleanField(default=0)  # scan in progress
-    pending_since = models.DateTimeField(null=True)
+    pending_since = models.DateTimeField(null=True, blank=True)
 
     # This is the last completed scan, we scan often, but the rating doesn't change that much
     # This is just so we can manage when to scan next and to say when we've last checked.
@@ -105,6 +116,7 @@ class Screenshot(models.Model):
     height_pixels = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
 
+
 # A debugging table to help with API interactions.
 # This can be auto truncated after a few days.
 # Not anymore, since it's used to see if there are DNS problems (unresolvable domains)
@@ -117,3 +129,12 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
+
+
+class State(models.Model):
+    """
+    A key value system (registry) to help with resuming scanners.
+    """
+    scanner = models.CharField(max_length=255, unique=True)
+    value = models.CharField(max_length=255)
+    since = models.DateTimeField(auto_now_add=True)

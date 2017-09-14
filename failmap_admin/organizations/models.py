@@ -79,7 +79,22 @@ class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
     url = models.CharField(max_length=150)
 
-    created_on = models.DateField(auto_now_add=True, blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+
+    not_resolvable = models.BooleanField(
+        default=False,
+        help_text="Url is not resolvable (anymore) and will not be picked up by scanners anymore."
+                  "When the url is not resolvable, ratings from the past will still be shown(?)#")
+
+    not_resolvable_since = models.DateTimeField(blank=True, null=True)
+
+    not_resolvable_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="A scanner might find this not resolvable, "
+                  "some details about that are placed here."
+    )
 
     is_dead = models.BooleanField(
         db_column='isDead',
@@ -104,3 +119,16 @@ class Url(models.Model):
             return "✝ %s" % self.url
         else:
             return self.url
+
+    def make_unresolvable(self, message, date):
+        self.not_resolvable = True
+        self.not_resolvable_reason = message
+        self.not_resolvable_since = date
+        self.save()
+
+# are open ports based on IP adresses.
+# adresses might change (and thus an endpoint changes).
+# for the list of endpoints, you want to know what endpoints don't exist
+# so they are not used anymore.
+# class Port(models.Model):
+#    url = models.ForeignKey(Url, on_delete=models.PROTECT)

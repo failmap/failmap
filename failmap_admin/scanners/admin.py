@@ -1,7 +1,7 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Screenshot
+from .models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Screenshot, State
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -18,7 +18,7 @@ class TlsQualysScanAdminInline(CompactInline):
 
 class EndpointAdmin(admin.ModelAdmin):
     list_display = ('url', 'domain', 'discovered_on', 'ip', 'port', 'protocol', 'is_dead',
-                    'scan_count')
+                    'tls_scan_count')
     search_fields = ('url__url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
     list_filter = ('server_name', 'ip', 'port', 'protocol', 'is_dead')
@@ -31,7 +31,7 @@ class EndpointAdmin(admin.ModelAdmin):
         }),
     )
 
-    def scan_count(self, inst):
+    def tls_scan_count(self, inst):
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()
 
     inlines = [TlsQualysScanAdminInline]
@@ -67,7 +67,16 @@ class ScreenshotAdmin(admin.ModelAdmin):
     readonly_fields = ['created_on']
 
 
+class StateAdmin(admin.ModelAdmin):
+    list_display = ('scanner', 'value', 'since')
+    search_fields = ('scanner', 'value', 'since')
+    list_filter = ('scanner', 'value', 'since')
+    fields = ('scanner', 'value', 'since')
+    readonly_fields = ['since']
+
+
 admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
 admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(Screenshot, ScreenshotAdmin)
+admin.site.register(State, StateAdmin)
