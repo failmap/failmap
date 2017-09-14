@@ -1333,7 +1333,6 @@ class Command(BaseCommand):
 
         # print(bb)
 
-        # todo: endpoint discovered on toevoegen? of gaat dat vanzelf?
         s = ScannerTlsQualys()
         s.scan(bb)
 

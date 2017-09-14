@@ -87,13 +87,17 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class UrlAdmin(admin.ModelAdmin):
-    list_display = ('organization', 'url', 'is_dead_reason')
-    search_field = ('url', 'is_dead', 'is_dead_reason')
-    list_filter = ('organization', 'url', 'is_dead', 'is_dead_since', 'is_dead_reason')
+    list_display = ('organization', 'url', 'is_dead_reason', 'not_resolvable', 'created_on')
+    search_field = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
+    list_filter = ('organization', 'url', 'is_dead', 'is_dead_since', 'is_dead_reason',
+                   'not_resolvable')
 
     fieldsets = (
         (None, {
             'fields': ('url', 'organization')
+        }),
+        ('Resolvability', {
+            'fields': ('not_resolvable', 'not_resolvable_since', 'not_resolvable_reason'),
         }),
         ('dead URL management', {
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
@@ -110,7 +114,7 @@ class UrlAdmin(admin.ModelAdmin):
 
     inlines = [EndpointAdminInline, UrlRatingAdminInline]
 
-    actions = ['rate_url', 'scan_url', 'declare_dead','print_on_commandline']
+    actions = ['rate_url', 'scan_url', 'declare_dead', 'print_on_commandline']
 
     def declare_dead(self, request, queryset):
 

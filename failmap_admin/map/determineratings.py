@@ -76,7 +76,6 @@ class DetermineRatings:
     # this is 100% based on url ratings, just an aggregate of the last status.
     # make sure the URL ratings are up to date, they will check endpoints and such.
     def rate_organization(self, organization, when=""):
-        print("rating on %s organization %s" % (when, organization))
         """
         Perhaps i don't understand SQL very well... but this is the case
         that is currently going wrong.
@@ -166,6 +165,8 @@ class DetermineRatings:
         # If there is no time slicing, then it's today.
         if not when:
             when = datetime.now(pytz.utc)
+
+        print("rating on: %s, Organization %s" % (when, organization))
 
         total_rating = 0
         total_calculation = ""
@@ -272,9 +273,12 @@ class DetermineRatings:
         # it cannot be random, otherwise the explanation will be different every time.
 
         # it's very possible there is no rating yet
+        # we do show the not_resolvable history.
         try:
             last_url_rating = \
-                UrlRating.objects.filter(url=url, url__urlrating__when__lte=when).latest("when")
+                UrlRating.objects.filter(url=url,
+                                         url__urlrating__when__lte=when,
+                                         url__is_dead=False).latest("when")
         except ObjectDoesNotExist:
             # todo, fix broad exception.
             last_url_rating = UrlRating()  # todo: evaluate if this is a wise approach.
@@ -313,17 +317,21 @@ class DetermineRatings:
         explanation = ""
         rating = 0
 
-        # to prevent django orm group by fuckery, this is done in a few simple and readable steps.
+        # This is done in a few simple and readable steps.
 
         # 1: get latest alive endpoints+scans of this URL for qualys after When
         endpoints = Endpoint.objects.all()
         # qualys endpoints are HTTPS on port 443
+        # instead of checking on is_dead, we're looking at all points in time when the
+        # endpoint was alive.
         endpoints = endpoints.filter(
             url=url,
-            is_dead=False,
+            discovered_on__lte=when,
+            is_dead_since__gte=when,
             port=443,
             protocol="https"
         )
+        print("Found %s endpoints for this url" % endpoints.count())
 
         explanations = {
             "F": "F - Failing TLS",
@@ -334,11 +342,15 @@ class DetermineRatings:
             "A": "A, Good",
             "A+": "A+, Perfect",
             "T": "Chain of trust missing",
-            "0": "No TLS used initially: no integrity and no confidentiality",
+            "0": "No TLS discovered, possibly another service available.",
         }
 
+        # 0? that's port 443 without using TLS. That is extremely rare. In that case...
+        # 0 is many cases a "not connect to server" error currently.
+        # todo: remove 0 ratings from the report. They are useless.
+        # todo: check for existing endpoint for a date range.
         ratings = {"T": 500, "F": 1000, "D": 400, "C": 200,
-                   "B": 100, "A-": 0, "A": 0, "A+": 0, "0": 200}
+                   "B": 100, "A-": 0, "A": 0, "A+": 0, "0": 0}
 
         urlratingtemplate = \
             '{\n\
@@ -372,28 +384,29 @@ class DetermineRatings:
         starttls_json = ""
         endpoint_json = ""
 
+        # todo: refactor to request a number of points in a more generic way.
+        # an endpoint at most has 1 TLS rating.
         for endpoint in endpoints:
             try:
-                scan = TlsQualysScan.objects.filter(endpoint=endpoint,
-                                                    scan_moment__lte=when)
+                scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
                 scan = scan.latest('rating_determined_on')
 
-                # currently there is only one rating for an endpoint... we need to refactor this.
-                # todo: refactor the way this list is created and populated. Extra table?
-                # you can only have one TLS rating on an endpoint.
-                starttls_json = (tlsratingtemplate %
-                                 (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                  scan.rating_determined_on))  # was "scan_moment" but that is
-                # ... updated frequently: every scan. But the rating determined on is not.
+                # Ignore ratings with 0: then there was no TLS, and we don't know if there is
+                # a normal website on port 80.
+                if scan.qualys_rating != '0':
+                    starttls_json = (tlsratingtemplate %
+                                     (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
+                                      scan.rating_determined_on))  # was "scan_moment" but that is
+                    # ... updated frequently: every scan. But the rating determined on is not.
 
-                # you can only add the comma if there are multiple items...
-                if endpoint_json:
-                    endpoint_json += ", "
+                    # you can only add the comma if there are multiple items...
+                    if endpoint_json:
+                        endpoint_json += ", "
 
-                endpoint_json += (endpointtemplate % (endpoint.ip, endpoint.port,
-                                                      endpoint.ip, endpoint.port, starttls_json))
+                    endpoint_json += (endpointtemplate % (endpoint.ip, endpoint.port,
+                                                          endpoint.ip, endpoint.port, starttls_json))
 
-                rating += ratings[scan.qualys_rating]
+                    rating += ratings[scan.qualys_rating]
             except TlsQualysScan.DoesNotExist:
                 # can happen that a rating simply isn't there yet. Perfectly possible.
                 pass

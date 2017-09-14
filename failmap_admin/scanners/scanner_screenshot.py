@@ -143,7 +143,7 @@ class ScannerScreenshot:
         import subprocess
 
         now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
-        print("Chrome Headless: Making screenshot of %s, storing in %s" % (url, now))
+        print("Chrome Headless : Making screenshot of %s, storing in %s" % (url, now))
 
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '_small.png'
@@ -152,6 +152,10 @@ class ScannerScreenshot:
         output_filepath_resized = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + \
                                   safe_filename_resized
         output_filepath_latest = ScannerScreenshot.script_directory + "/" + ScannerScreenshot.working_directory + "/" + str(re.sub(r'[^a-zA-Z0-9_]', '', url + "_latest")) + '.png'
+
+        # skip if there is already a latest image, just to speed things up.
+        if os.path.exists(output_filepath_latest):
+            return
 
         # since headless always creates the file "screenshot.png", just work in a
         # temporary dir:

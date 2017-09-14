@@ -211,9 +211,12 @@ class ScannerTlsQualys:
                              callback=ScannerTlsQualys.success_callback,
                              error_callback=ScannerTlsQualys.error_callback)
             # ScannerTlsQualys.scantask(domain) # old sequential approach
+            ScannerTlsQualys.log.debug("Applying rate limiting, waiting max 70 seconds.")
             sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
 
+        ScannerTlsQualys.log.debug("Closing pool")
         pool.close()
+        ScannerTlsQualys.log.debug("Joining pool")
         pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min
         ScannerTlsQualys.log.debug("Done")
 
@@ -262,6 +265,7 @@ class ScannerTlsQualys:
                 # check if there is an internet connection... obviously
                 # we can believe that if the scanner says "unable to resolve domain name"
                 # that this is true. We will kill the domain then.
+                # todo: make the url unresolvable?
                 if data['status'] == "ERROR":
                     ScannerTlsQualys.scratch(domain, data)  # we always want to see what happened.
                     ScannerTlsQualys.clean_endpoints(domain, [])
@@ -413,41 +417,159 @@ class ScannerTlsQualys:
         ScannerTlsQualys.log.debug("Trying to save scan for %s", domain)
 
         # manage endpoints
+        # Based on the response by Qualys.
+        # An endpoint of the same IP could already exist and be dead. Keep it dead.
+        # An endpoint can be made dead by not appearing in this list (cleaning)
+        # or when qualys says so.
         for qualys_endpoint in data['endpoints']:
-            # insert or update automatically. An endpoint is unique (protocol, port, ip, domain)
-            # when an endpoint is found here, then it is obviously not dead....
-            # todo: There is a failstate, where there is both an endpoint alive, and one dead
-            # with the same IP and all other criteria. That should not happen.
-            # get or create also doesn't really help. - dedupe endpoint function.
 
-            # take in account there might be multiple "the same" endpoints, due to human mistakes
-            # or bugs, or whatever. We're going to reduce it back to a single endpoint and continue
-            # working with that. There is really no use to have multiple the same endpoints.
-            # - especially since we don't store the reverse name as unique.
-            # perhaps i have to do some fixing outside of this thing...???
-            # instead of automerging behaviour?
+            # removes duplicates
+            # declares endpoints dead if need be
+            # created endpoints, etc.
+            # always returns a single endpoint
+            failmap_endpoint = ScannerTlsQualys.manage_endpoint(qualys_endpoint, domain)
+
+            # save scan for the endpoint
+            # get the most recent scan of this endpoint, if any and work with that to save data.
+            # data is saved when the rating didn't change, otherwise a new record is created.
+            scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint).\
+                order_by('-scan_moment').first()
+
+            rating = qualys_endpoint['grade'] if 'grade' in qualys_endpoint.keys() else 0
+            rating_no_trust = qualys_endpoint['gradeTrustIgnored'] \
+                if 'gradeTrustIgnored' in qualys_endpoint.keys() else 0
+
+            if scan:
+                ScannerTlsQualys.log.debug("There was already a scan on this endpoint.")
+
+                if scan.qualys_rating == rating and scan.qualys_rating_no_trust == rating_no_trust:
+                    ScannerTlsQualys.log.debug("Scan did not alter the rating, "
+                                               "updating scan date only.")
+                    scan.scan_moment = datetime.now(pytz.utc)
+                    scan.scan_time = datetime.now(pytz.utc)
+                    scan.scan_date = datetime.now(pytz.utc)
+                    scan.qualys_message = qualys_endpoint['statusMessage']
+                    scan.save()
+
+                else:
+                    ScannerTlsQualys.log.debug("Rating changed, "
+                                               "we're going to save the scan to retain history")
+                    scan = TlsQualysScan()
+                    scan.endpoint = failmap_endpoint
+                    scan.qualys_rating = rating
+                    scan.qualys_rating_no_trust = rating_no_trust
+                    scan.scan_moment = datetime.now(pytz.utc)
+                    scan.scan_time = datetime.now(pytz.utc)
+                    scan.scan_date = datetime.now(pytz.utc)
+                    scan.rating_determined_on = datetime.now(pytz.utc)
+                    scan.qualys_message = qualys_endpoint['statusMessage']
+                    scan.save()
+
+            else:
+                # todo: don't like to have the same code twice.
+                ScannerTlsQualys.log.debug("This endpoint was never scanned, creating a new scan.")
+                scan = TlsQualysScan()
+                scan.endpoint = failmap_endpoint
+                scan.qualys_rating = rating
+                scan.qualys_rating_no_trust = rating_no_trust
+                scan.scan_moment = datetime.now(pytz.utc)
+                scan.scan_time = datetime.now(pytz.utc)
+                scan.scan_date = datetime.now(pytz.utc)
+                scan.rating_determined_on = datetime.now(pytz.utc)
+                scan.qualys_message = qualys_endpoint['statusMessage']
+                scan.save()
+
+    @staticmethod
+    def manage_endpoint(qualys_endpoint, domain):
+        """Manages this endpoint, and returns a failmap_endpoint to work with."""
+
+        # expect that it exists
+        status_message = qualys_endpoint['statusMessage']
+
+        # todo: message: Certificate not valid for domain name
+        # todo: message: "Failed to communicate with the secure server"
+        ScannerTlsQualys.log.debug("Managing endpoint with message %s" % status_message)
+
+        # Unable to connect to server? Declare endpoint dead.
+        # The endpoint probably has another port / service than https/443
+        if status_message == "Unable to connect to the server":
+            ScannerTlsQualys.log.debug("Handing could not connect to server")
+            # If this endpoint exists and is alive, mark it as dead: port 443 does not
+            # do anything.
+            alive_endpoints = Endpoint.objects.all().filter(
+                                                        domain=domain,
+                                                        ip=qualys_endpoint['ipAddress'],
+                                                        port=443,
+                                                        protocol="https",
+                                                        is_dead=False).order_by('-discovered_on')
+            # should be one, might be multiple due to human error.
+            for ep in alive_endpoints:
+                ep.is_dead = True
+                ep.is_dead_since = datetime.now(pytz.utc)
+                ep.is_dead_reason = status_message
+                ep.save()
+
+            # if there is no end point at all, add one, so we know port 443 is not available
+            if alive_endpoints.count():
+                ScannerTlsQualys.log.debug("Getting the newest endpoint to save scan.")
+                failmap_endpoint = alive_endpoints.first()
+            else:
+                ScannerTlsQualys.log.debug("Checking if there is a dead endpoint.")
+                dead_endpoints = Endpoint.objects.all().filter(
+                    domain=domain,
+                    ip=qualys_endpoint['ipAddress'],
+                    port=443,
+                    protocol="https",
+                    is_dead=True).order_by('-discovered_on')
+
+                if dead_endpoints.count():
+                    ScannerTlsQualys.log.debug("Dead endpoint exists, getting latest to save scan")
+                    failmap_endpoint = dead_endpoints.first()
+                else:
+                    ScannerTlsQualys.log.debug("Creating dead endpoint to save scan to.")
+                    failmap_endpoint = Endpoint()
+                    try:
+                        failmap_endpoint.url = Url.objects.filter(
+                            url=domain).first()  # todo: below
+                    except ObjectDoesNotExist:
+                        failmap_endpoint.url = ""
+                    failmap_endpoint.domain = domain
+                    failmap_endpoint.port = 443
+                    failmap_endpoint.protocol = "https"
+                    failmap_endpoint.ip = qualys_endpoint['ipAddress']
+                    failmap_endpoint.is_dead = True
+                    failmap_endpoint.is_dead_reason = status_message
+                    failmap_endpoint.is_dead_since = datetime.now(pytz.utc)
+                    failmap_endpoint.discovered_on = datetime.now(pytz.utc)
+                    failmap_endpoint.save()
+
+        # todo: handle No secure protocols supported correctly. It is a weird state (https, notls?)
+        if status_message == "Ready" or status_message == "Certificate not valid for domain name" \
+           or status_message == "No secure protocols supported":
+
+            # Manage endpoint
+            # Endpoint exists? If not, make it,
             endpoints = Endpoint.objects.all().filter(domain=domain,
                                                       ip=qualys_endpoint['ipAddress'],
                                                       port=443,
-                                                      protocol="https")
-
-            # count here, as the number of elements is possibly modified in below process
+                                                      protocol="https",
+                                                      is_dead=False)
+            # 0: make new endpoint, representing the current result
+            # 1: update the endpoint with the current information
+            # >1: everything matches, it's basically the same endpoint and it can be merged.
             count = endpoints.count()
 
-            # todo: instead of merging 2 or more endpoints to one,
-            # keep sepearte endpoints that are alive for a period. So a certain endpoint
-            # can be used, and later unused, then used again etc etc etc. That is more in line
-            # with reality and it distorts LESS the statistics over a long run.
-
-            # if there is no endpoint yet, then create it. (as with get or create
             if count == 0:
                 ScannerTlsQualys.log.debug("This endpoint is new: %s %s:443" %
                                            (domain, qualys_endpoint['ipAddress']))
-                # todo: find the URL that matches this ... if there is any, if not, safe it without
-                # an URL... there might be reasons for scanning things without an URL object.
-                # todo: url + organization are unique. Can be that mulitple organizations have
-                # the same URL. So add the organization to the scanner, otherwise the below
-                # association will not be OK.
+
+                # Multiple organizations can have the same URL. However, this is rare and has
+                # not happened yet in the Netherlands:
+                # it's not OK to have multiple processors of sensitive data to all enter at the
+                # same entry point. If so, we need to prove that this is actually the case.
+                # and we usually can't without research.
+                # It remains a todo that multiple organizations use the same URL. For now
+                # we say this is not the case.
                 failmap_endpoint = Endpoint()
                 try:
                     failmap_endpoint.url = Url.objects.filter(url=domain).first()  # todo: see above
@@ -464,13 +586,6 @@ class ScannerTlsQualys:
             if count > 1:
                 ScannerTlsQualys.log.debug("Multiple similar endpoints detected for %s" % domain)
                 ScannerTlsQualys.log.debug("Flattening similar endpoints to a single one.")
-                # uh oh, there are multiple endpoints that do the same... let's reduce it
-                # to a single one.
-                # first, revivive all of them, so the one we will work with has the correct state.
-                for endpoint in endpoints:
-                    endpoint.is_dead = False
-                    endpoint.is_dead_reason = ""
-                    endpoint.save()
 
                 # now merge all of these endpoints into one by transfering all
                 # associations of this endpoint to the first endpoint.
@@ -491,60 +606,11 @@ class ScannerTlsQualys:
                     endpoint.delete()
 
             if count == 1:
-                ScannerTlsQualys.log.debug("An endpoint exists and is set to be alive.")
+                ScannerTlsQualys.log.debug("An endpoint exists already, using this")
                 # just one existing endpoint. Since we got it back it's alive.
                 failmap_endpoint = endpoints[0]
-                failmap_endpoint.is_dead = False
-                failmap_endpoint.is_dead_reason = ""
-                failmap_endpoint.save()
 
-            # possibly also record the server name, as we get it. It's not really of value.
-
-            # get the most recent scan of this endpoint, if any and work with that to save data.
-            # data is saved when the rating didn't change, otherwise a new record is created.
-            scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint).\
-                order_by('-scan_moment').first()
-
-            rating = qualys_endpoint['grade'] if 'grade' in qualys_endpoint.keys() else 0
-            rating_no_trust = qualys_endpoint['gradeTrustIgnored'] \
-                if 'gradeTrustIgnored' in qualys_endpoint.keys() else 0
-
-            if scan:
-                ScannerTlsQualys.log.debug("There was already a scan on this endpoint.")
-
-                if scan.qualys_rating == rating and scan.qualys_rating_no_trust == rating_no_trust:
-                    ScannerTlsQualys.log.debug("Scan did not alter the rating, "
-                                               "updating scan date only.")
-                    scan.scan_moment = datetime.now(pytz.utc)
-                    scan.scan_time = datetime.now(pytz.utc)
-                    scan.scan_date = datetime.now(pytz.utc)
-                    scan.save()
-
-                else:
-                    ScannerTlsQualys.log.debug("Rating changed, "
-                                               "we're going to save the scan to retain history")
-                    scan = TlsQualysScan()
-                    scan.endpoint = failmap_endpoint
-                    scan.qualys_rating = rating
-                    scan.qualys_rating_no_trust = rating_no_trust
-                    scan.scan_moment = datetime.now(pytz.utc)
-                    scan.scan_time = datetime.now(pytz.utc)
-                    scan.scan_date = datetime.now(pytz.utc)
-                    scan.rating_determined_on = datetime.now(pytz.utc)
-                    scan.save()
-
-            else:
-                # todo: don't like to have the same code twice.
-                ScannerTlsQualys.log.debug("This endpoint was never scanned, creating a new scan.")
-                scan = TlsQualysScan()
-                scan.endpoint = failmap_endpoint
-                scan.qualys_rating = rating
-                scan.qualys_rating_no_trust = rating_no_trust
-                scan.scan_moment = datetime.now(pytz.utc)
-                scan.scan_time = datetime.now(pytz.utc)
-                scan.scan_date = datetime.now(pytz.utc)
-                scan.rating_determined_on = datetime.now(pytz.utc)
-                scan.save()
+        return failmap_endpoint
 
     @staticmethod
     def scratch(domain, data):
@@ -605,7 +671,7 @@ class ScannerTlsQualys:
         for killable_endpoint in killable_endpoints:
             ScannerTlsQualys.log.debug('Found an endpoint that can get killed: %s',
                                        killable_endpoint.domain)
-            killable_endpoint.is_dead = 1
+            killable_endpoint.is_dead = True
             killable_endpoint.is_dead_since = datetime.now(pytz.utc)
             killable_endpoint.is_dead_reason = "Endpoint not found anymore in qualys scan."
             killable_endpoint.save()
