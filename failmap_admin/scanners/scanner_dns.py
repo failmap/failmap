@@ -112,7 +112,7 @@ class ScannerDns:
         file = "%s_data_brute.json" % url
         path = ScannerDns.working_directory + file
         # this will take an hour or two.
-        # todo:test 
+        # todo:test
         process = subprocess.Popen(['python', ScannerDns.dnsrecon_path,
                                     '--domain', url,
                                     '-t', 'brt',
@@ -121,23 +121,14 @@ class ScannerDns:
         ScannerDns.import_dnsrecon_report(url, path)
 
     def dnsrecon_google(self, url):
+        # todo: make this new manual scan.
         # requires: netaddr, dnspython
         # Dictionaries of the local language are available on wiktionary.
         # https://nl.wiktionary.org/wiki/WikiWoordenboek:OpenTaal
         # https://www.opentaal.org/
 
         # Brute force op DNS:
-        # python dnsrecon.py --domain amsterdam.nl -t brt -D ./OpenTaal-210G-woordenlijsten/
-        # OpenTaal-210G-basis-gekeurd.txt -c output_brt.csv
-        # takes about 5 minutes
-
-        # google search, zone transfers en alles included:
-        # python dnsrecon.py --domain amsterdam.nl -D ./OpenTaal-210G-woordenlijsten/
-        # OpenTaal-210G-basis-gekeurd.txt -c output.csv
-        # brute force takes a few hours. You don't have to do this a lot fortunately.
-
-        # works with json output, which is easy to parse. Also supports a google seach, so probably
-        # ditch theharvester.
+        # python dnsrecon.py --domain amsterdam.nl -j output_brt.json
         return
 
     @staticmethod
