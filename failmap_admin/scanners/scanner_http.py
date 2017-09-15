@@ -47,9 +47,19 @@ class ScannerHttp:
         return
 
     @staticmethod
-    def scan_multithreaded(port=80, protocol="http"):
+    def scan_multithreaded(port=80, protocol="http", only_new=False):
 
-        urls = Url.objects.all()
+        if not only_new:
+            urls = Url.objects.all()  # scans ALL urls.
+        else:
+            # todo: only new urls, those that don't have an endpoint on the protocol+port.
+            # not without _any_ endpoint, given that there will soon be endpoints for it.
+            # this also re-verifies all domains that explicitly don't have an endpoint on this
+            # port+protocol, which can be a bit slow. (we're not saving it reversely).
+            # todo: this is not correct yet.
+            urls = Url.objects.all().exclude(endpoint__port=port, endpoint__protocol=protocol)
+            urls = Url.objects.all()
+
         from multiprocessing import Pool
         pool = Pool(processes=8)
 
