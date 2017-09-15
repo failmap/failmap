@@ -22,13 +22,16 @@ class Command(BaseCommand):
             self.scan()
 
     def scan(self):
-        # todo: figure out a way to "resume" from the last scanned organization,
-        # todo: There should also be a routine that only scans urls that don't have an endpoint yet?
+        # todo: sort the organizations on the oldest scanned first, or never scanned first.
+        # or make a separate part that first scans all never scanned stuff, per organization
+        # so new stuff has some priority.
+
         # Not something that influenced from random scans from the admin interface.
         # scan per organization, to lower the amount of time for updates on the map
         # after the scan finished, update the ratings for the urls and then the organization.
 
-        # https://stackoverflow.com/questions/13694034/is-a-python-list-guaranteed-to-have-its-elements-stay-in-the-order-they-are-inse
+        # https://stackoverflow.com/questions/13694034/is-a-python-list-guaranteed-to-have-its-
+        # elements-stay-in-the-order-they-are-inse
         resume = StateManager.create_resumed_organizationlist(scanner="ScannerTlsQualys")
 
         for organization in resume:

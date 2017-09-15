@@ -20,7 +20,13 @@ from failmap_admin.scanners.scanner_http import ScannerHttp
 
 class ScannerDns:
 
+    working_directory = "/var/www/faalkaart/test/dnsrecon/output/"
+
     harvester_path = "/var/www/faalkaart/test/theHarvester/theHarvester.py"
+    dnsrecon_path = "/var/www/faalkaart/test/dnsrecon/dnsrecon.py"
+
+    wordlist_dutch = "/var/www/faalkaart/test/dnsrecon/wordlists/OpenTaal-210G-basis-gekeurd.txt"
+    wordlist_4letters = "/var/www/faalkaart/test/dnsrecon/wordlists/fourletters.txt"
 
     # todo: make a "tool" dir, or something so the harvester and such are always available.
     # todo: if ScannerHttp.has_internet_connection():
@@ -28,19 +34,26 @@ class ScannerDns:
         subdomains = ScannerDns.subdomains_harvester(url)
 
         for subdomain in subdomains:
-            fulldomain = subdomain + "." + url
-            if ScannerHttp.resolves(fulldomain):
-                if not Url.objects.all().filter(url=fulldomain).exists():
-                    print("Added domain to database: %s" % fulldomain)
-                    o = Organization.objects.get(url__url=url)
-                    u = Url()
-                    u.organization = o
-                    u.url = fulldomain
-                    u.save()
-                else:
-                    print("Subdomain already in the database: %s" % fulldomain)
+            ScannerDns.add_subdomain(subdomain, url)
+
+    @staticmethod
+    # todo: move this to url logic / url manager.
+    def add_subdomain(subdomain, url):
+        fulldomain = subdomain + "." + url
+        print("Trying to add subdomain to database: %s" % fulldomain)
+        if ScannerHttp.resolves(fulldomain):
+            if not Url.objects.all().filter(url=fulldomain).exists():
+                print("Added domain to database: %s" % fulldomain)
+                # naive adding, since we don't have an organization.
+                o = Organization.objects.all().filter(url__url=url).first()
+                u = Url()
+                u.organization = o
+                u.url = fulldomain
+                u.save()
             else:
-                print("Subdomain did not resolve: %s" % fulldomain)
+                print("Subdomain already in the database: %s" % fulldomain)
+        else:
+            print("Subdomain did not resolve: %s" % fulldomain)
 
     @staticmethod
     def subdomains_harvester(url):
@@ -79,7 +92,35 @@ class ScannerDns:
         # print(set(prefixes))
         return set(prefixes)
 
-    def dnsrecon(self, url):
+    def make_threeletterwordlist(self):
+        import itertools
+        alphabets = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+                     'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        threeletters = [''.join(i) for i in itertools.product(alphabets, repeat=3)]
+        twoletters = [''.join(i) for i in itertools.product(alphabets, repeat=2)]
+
+        with open("threeletterwordlist.txt", "w") as text_file:
+
+            for x in alphabets:
+                text_file.write(x + '\n')
+            for x in threeletters:
+                text_file.write(x + '\n')
+            for x in twoletters:
+                text_file.write(x + '\n')
+
+    def dnsrecon_brute(self, url):
+        file = "%s_data_brute.json" % url
+        path = ScannerDns.working_directory + file
+        # this will take an hour or two.
+        # todo:test 
+        process = subprocess.Popen(['python', ScannerDns.dnsrecon_path,
+                                    '--domain', url,
+                                    '-t', 'brt',
+                                    '-D', ScannerDns.wordlist_dutch,
+                                    '-c', path], stdout=subprocess.PIPE)
+        ScannerDns.import_dnsrecon_report(url, path)
+
+    def dnsrecon_google(self, url):
         # requires: netaddr, dnspython
         # Dictionaries of the local language are available on wiktionary.
         # https://nl.wiktionary.org/wiki/WikiWoordenboek:OpenTaal
@@ -99,6 +140,21 @@ class ScannerDns:
         # ditch theharvester.
         return
 
-    def import_dnsrecon_report(self, json):
+    @staticmethod
+    def import_dnsrecon_report(url, path):
+        # note: the order of the records in the report matters(!)
+
+        import json
+        with open(path) as data_file:
+            data = json.load(data_file)
+
+            for record in data:
+                if "arguments" in record.keys():
+                    continue
+
+                if record["name"].endswith(url):
+                    subdomain = record["name"][0:len(record["name"])-len(url)-1]
+                    # print(subdomain.lower())
+                    ScannerDns.add_subdomain(subdomain.lower(), url)
 
         return

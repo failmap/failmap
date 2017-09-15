@@ -9,3 +9,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         s = ScannerDns()
         s.make_wordlist()
+        s.dnsrecon_brute('rotterdam.nl')
