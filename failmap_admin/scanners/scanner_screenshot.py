@@ -27,7 +27,8 @@ from failmap_admin.scanners.models import Screenshot
 
 
 class ScannerScreenshot:
-
+    # todo: wait: https://bugzilla.mozilla.org/show_bug.cgi?id=1378010, FFX 57
+    # todo: how to instruct the environment that there is a chrome present.
     chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     working_directory = '../map/static/images/screenshots'
     script_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)))
@@ -35,6 +36,72 @@ class ScannerScreenshot:
     @staticmethod
     def make_screenshot(url):
         return ScannerScreenshot.make_screenshot_phantomjs(url)
+
+    @staticmethod
+    # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.
+    # Affects all threads (and the main thread) since they all belong to the same process.
+    # chrome headless has no option to start with a working directory...
+    # working with processes also results into the same sorts of troubles.
+    # maybe chrome shares some state for the cwd in their processes?
+    # as long as we can't specify the filename for chrome headless, it's not going to work.
+    # todo: what about directories? directory = application_endpoint?
+    def make_screenshot_chrome_headless(endpoint, skip_if_latest=False):
+        import subprocess
+
+        now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
+        print("Chrome Headless : Making screenshot: %s, on %s" % (endpoint.uri_url(), now))
+
+        safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
+        safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '',
+                                           endpoint.uri_url() + now)) + '_small.png'
+        sd = ScannerScreenshot.script_directory
+        wd = ScannerScreenshot.working_directory
+
+        tmp_dir = sd + "/" + wd + "/" + now
+        output_filepath = sd + "/" + wd + "/" + safe_filename
+        output_filepath_resized = sd + "/" + wd + "/" + safe_filename_resized
+        output_filepath_latest = sd + "/" + wd + "/" + \
+            str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + "_latest")) + '.png'
+
+        # skip if there is already a latest image, just to speed things up.
+        if skip_if_latest and os.path.exists(output_filepath_latest):
+            print("Skipped making screenshot, by request")
+            return
+
+        # since headless always creates the file "screenshot.png", just work in a
+        # temporary dir:
+        # timeout doesn't work, it just blocks the process and hangs it.
+        subprocess.call(['mkdir', tmp_dir])
+        subprocess.call(['cd', tmp_dir])
+        subprocess.call([ScannerScreenshot.chrome,
+                         '--disable-gpu',
+                         '--headless',
+                         '--screenshot',
+                         '--window-size=1920,3000',
+                         endpoint.uri_url()])
+        subprocess.call(['mv', "screenshot.png", safe_filename])
+        subprocess.call(['mv', safe_filename, output_filepath])
+        subprocess.call(['cd', '..'])
+        subprocess.call(['rmdir', tmp_dir])
+
+        # and some django stuff to save the things in the database
+        scr = Screenshot()
+        scr.created_on = datetime.now(pytz.utc)
+        scr.domain = endpoint.uri_url()
+        scr.endpoint = endpoint
+        scr.filename = safe_filename
+        scr.width_pixels = 1920
+        scr.height_pixels = 3000
+        scr.save()
+
+        # resizing a bit? a 320px wide version.
+        im = Image.open(output_filepath)
+        size = 320, 500
+        im.thumbnail(size, Image.ANTIALIAS)
+        im.save(output_filepath_resized, "PNG")
+
+        # make copies of these images, so the latest are easily accessible.
+        subprocess.call(['cp', output_filepath_resized, output_filepath_latest])
 
     @staticmethod
     # delivers transparent / empty pages all the time.
@@ -148,91 +215,6 @@ class ScannerScreenshot:
         size = 320, 500
         im.thumbnail(size, Image.ANTIALIAS)
         im.save(output_filepath_resized, "PNG")
-
-    @staticmethod
-    # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.
-    # Affects all threads (and the main thread) since they all belong to the same process.
-    # chrome headless has no option to start with a working directory...
-    # working with processes also results into the same sorts of troubles.
-    # maybe chrome shares some state for the cwd in their processes?
-    # as long as we can't specify the filename for chrome headless, it's not going to work.
-    def make_screenshot_chrome_headless(url):
-        import subprocess
-
-        now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
-        print("Chrome Headless : Making screenshot of %s, storing in %s" % (url, now))
-
-        safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '.png'
-        safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '', url + now)) + '_small.png'
-        tmp_dir = \
-            ScannerScreenshot.script_directory + "/" + \
-            ScannerScreenshot.working_directory + "/" + now
-        output_filepath = \
-            ScannerScreenshot.script_directory + "/" + \
-            ScannerScreenshot.working_directory + "/" + safe_filename
-        output_filepath_resized = \
-            ScannerScreenshot.script_directory + "/" + \
-            ScannerScreenshot.working_directory + "/" + \
-            safe_filename_resized
-        output_filepath_latest = \
-            ScannerScreenshot.script_directory + "/" + \
-            ScannerScreenshot.working_directory + "/" + \
-            str(re.sub(r'[^a-zA-Z0-9_]', '', url + "_latest")) + '.png'
-
-        # skip if there is already a latest image, just to speed things up.
-        if os.path.exists(output_filepath_latest):
-            return
-
-        # since headless always creates the file "screenshot.png", just work in a
-        # temporary dir:
-        # timeout doesn't work, it just blocks the process and hangs it.
-        subprocess.call(['mkdir', tmp_dir])
-        subprocess.call(['cd', tmp_dir])
-        subprocess.call([ScannerScreenshot.chrome,
-                         '--disable-gpu',
-                         '--headless',
-                         '--screenshot',
-                         '--window-size=1920,3000',
-                         url])
-        subprocess.call(['mv', "screenshot.png", safe_filename])
-        subprocess.call(['mv', safe_filename, output_filepath])
-        subprocess.call(['cd', '..'])
-        subprocess.call(['rmdir', tmp_dir])
-
-        # and some django stuff to save the things in the database
-        scr = Screenshot()
-        scr.created_on = datetime.now(pytz.utc)
-        scr.domain = url
-        scr.filename = safe_filename
-        scr.width_pixels = 1920
-        scr.height_pixels = 3000
-        try:
-            # remove the protocol.
-            url = url.replace("https://", "")
-            url = url.replace("http://", "")
-
-            # and remove the port if there is one
-            try:
-                if url.index(':'):
-                    url = url[0:url.index(':')]
-            except ValueError:
-                # not in string. fine.
-                pass
-
-            scr.url = Url.objects.all().filter(url=url).first()
-        except ObjectDoesNotExist:
-            print("No URL exists for url: %s, saving without one." % url)
-            pass
-        scr.save()
-
-        # resizing a bit? a 320px wide version.
-        im = Image.open(output_filepath)
-        size = 320, 500
-        im.thumbnail(size, Image.ANTIALIAS)
-        im.save(output_filepath_resized, "PNG")
-
-        # make copies of these images, so the latest are easily accessible.
-        subprocess.call(['cp', output_filepath_resized, output_filepath_latest])
 
     @staticmethod
     def make_screenshot_threaded(urls):

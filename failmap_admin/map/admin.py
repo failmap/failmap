@@ -6,7 +6,7 @@ from .models import OrganizationRating, UrlRating
 # optionally add this; https://github.com/ebertti/django-admin-easy
 
 # please, no bulk delete: that can have disastrous consequences
-admin.site.disable_action('delete_selected')
+# admin.site.disable_action('delete_selected')
 
 
 # Register your models here.

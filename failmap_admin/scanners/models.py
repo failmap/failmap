@@ -70,6 +70,12 @@ class Endpoint(models.Model):
         else:
             return "%s = %s | %s/%s" % (self.domain, self.ip, self.protocol, self.port)
 
+    def uri_url(self):
+        return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
+
+    def uri_ip(self):
+        return "%s://%s:%s" % (self.protocol, self.ip, self.port)
+
 
 class TlsQualysScan(models.Model):
     """
@@ -107,8 +113,8 @@ class TlsQualysScan(models.Model):
 
 
 class Screenshot(models.Model):
-    url = models.ForeignKey(
-        Url,
+    endpoint = models.ForeignKey(
+        Endpoint,
         on_delete=models.PROTECT, null=True, blank=True)
     domain = models.CharField(max_length=255, help_text="Used when there is no known URL.")
     filename = models.CharField(max_length=255)

@@ -60,10 +60,10 @@ class TlsQualysScratchpadAdmin(admin.ModelAdmin):
 
 
 class ScreenshotAdmin(admin.ModelAdmin):
-    list_display = ('url', 'domain', 'created_on', 'filename')
-    search_fields = ('url', 'domain', 'created_on', 'filename')
-    list_filter = ('url', 'domain', 'created_on', 'filename')
-    fields = ('url', 'domain', 'created_on', 'filename', 'width_pixels', 'height_pixels')
+    list_display = ('endpoint', 'domain', 'created_on', 'filename')
+    search_fields = ('endpoint', 'domain', 'created_on', 'filename')
+    list_filter = ('endpoint', 'domain', 'created_on', 'filename')
+    fields = ('endpoint', 'domain', 'created_on', 'filename', 'width_pixels', 'height_pixels')
     readonly_fields = ['created_on']
 
 

@@ -10,9 +10,19 @@ Perhaps makes endpoint management more generic.
 
 This also helps with making more screenshots with the browser.
 
-Don't do tls at all..
+TLS result might be flaky depending on the used TLS lib on the server:
 https://stackoverflow.com/questions/26733462/ssl-and-tls-in-python-requests#26734133
-https://stackoverflow.com/questions/45290943/how-to-force-timeout-on-pythons-request-library-including-dns-lookup
+https://stackoverflow.com/questions/45290943/how-to-force-timeout-on-pythons-request-librar
+y-including-dns-lookup
+
+https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
+HTTPS: 443, 832, 981, 1311, 7000, 7002, 8243, 8333, 8531, 8888, 9443, 12043, 12443, 18091, 18092
+Likely: 443, 8443
+
+HTTP: 80, 280, 591, 593, 2480, 4444, 4445, 4567, 5000, 5104, 5800, 5988, 7001, 8008, 8042, 8080,
+      8088, 8222, 8280, 8281, 8530, 8887, 8888, 9080, 9981, 11371, 12046, 19080,
+Likely: 80, 8080, 8008, 8888, 8088
+
 """
 import socket
 from datetime import datetime
@@ -129,6 +139,13 @@ class ScannerHttp:
                 ScannerHttp.kill_endpoint(url, port, protocol, ip4)
             if ip6:
                 ScannerHttp.kill_endpoint(url, port, protocol, ip6)
+
+    @staticmethod
+    def resolves(url):
+        (ip4, ip6) = ScannerHttp.get_ips(url)
+        if ip4 or ip6:
+            return True
+        return False
 
     @staticmethod
     def get_ips(url):

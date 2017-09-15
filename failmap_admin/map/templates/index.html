@@ -140,96 +140,15 @@
                             </tr>
                             </thead>
                             <tbody v-if="data.data">
-                                <tr>
-                                    <td>{% trans "Now" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data.now["total_organizations"] }}</td>
-                                    <td>{{ data.data.now["green"] }} <small>({{ data.data.now["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data.now["orange"] }} <small>({{ data.data.now["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data.now["red"] }} <small>({{ data.data.now["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
+                                {% verbatim %}
+                                <tr v-for="(x, key) in data.data">
+                                    <td>{{ key }}</td>
+                                    <td>{{ x["total_organizations"] }}</td>
+                                    <td>{{ x["green"] }} <small>({{ x["green percentage"] }}%)</small></td>
+                                    <td>{{ x["orange"] }} <small>({{ x["orange percentage"] }}%)</small></td>
+                                    <td>{{ x["red"] }} <small>({{ x["red percentage"] }}%)</small></td>
                                 </tr>
-                                <tr>
-                                    <td>{% trans "7 days ago ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["7 days ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["7 days ago"]["green"] }} <small>({{ data.data["7 days ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["7 days ago"]["orange"] }} <small>({{ data.data["7 days ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["7 days ago"]["red"] }} <small>({{ data.data["7 days ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "2 weeks ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["2 weeks ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["2 weeks ago"]["green"] }} <small>({{ data.data["2 weeks ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["2 weeks ago"]["orange"] }} <small>({{ data.data["2 weeks ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["2 weeks ago"]["red"] }} <small>({{ data.data["2 weeks ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "1 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["1 month ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["1 month ago"]["green"] }} <small>({{ data.data["1 month ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["1 month ago"]["orange"] }} <small>({{ data.data["1 month ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["1 month ago"]["red"] }} <small>({{ data.data["1 month ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "2 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["2 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["2 months ago"]["green"] }} <small>({{ data.data["2 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["2 months ago"]["orange"] }} <small>({{ data.data["2 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["2 months ago"]["red"] }} <small>({{ data.data["2 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "3 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["3 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["3 months ago"]["green"] }} <small>({{ data.data["3 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["3 months ago"]["orange"] }} <small>({{ data.data["3 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["3 months ago"]["red"] }} <small>({{ data.data["3 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "4 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["4 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["4 months ago"]["green"] }} <small>({{ data.data["4 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["4 months ago"]["orange"] }} <small>({{ data.data["4 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["4 months ago"]["red"] }} <small>({{ data.data["4 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "5 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["5 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["5 months ago"]["green"] }} <small>({{ data.data["5 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["5 months ago"]["orange"] }} <small>({{ data.data["5 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["5 months ago"]["red"] }} <small>({{ data.data["5 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "6 months ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["6 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["6 months ago"]["green"] }} <small>({{ data.data["6 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["6 months ago"]["orange"] }} <small>({{ data.data["6 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["6 months ago"]["red"] }} <small>({{ data.data["6 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
-                                <tr>
-                                    <td>{% trans "1 year ago" %}</td>
-                                    {% verbatim %}
-                                    <td>{{ data.data["12 months ago"]["total_organizations"] }}</td>
-                                    <td>{{ data.data["12 months ago"]["green"] }} <small>({{ data.data["12 months ago"]["green percentage"] }}%)</small></td>
-                                    <td>{{ data.data["12 months ago"]["orange"] }} <small>({{ data.data["12 months ago"]["orange percentage"] }}%)</small></td>
-                                    <td>{{ data.data["12 months ago"]["red"] }} <small>({{ data.data["12 months ago"]["red percentage"] }}%)</small></td>
-                                    {% endverbatim %}
-                                </tr>
+                                {% endverbatim %}
                             </tbody>
                         </table>
                     </div>
@@ -248,7 +167,7 @@
                     {% verbatim %}
                     <div v-for="url in urls">
                         <div style="display:block" class="perurl">
-                            <a v-bind:href="'https://' + url.url.url" target="_blank"><div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/https' + idize(url.url.url) + '_latest.png\');'" /></div></a>
+                            <a v-bind:href="'https://' + url.url.url" target="_blank"><div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/https' + idize(url.url.url) + '443_latest.png\');'" /></div></a>
                             <div class="reportlist">
                             <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
                                 {{ url.url.url }}</span>
