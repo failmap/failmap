@@ -251,7 +251,6 @@ $( document ).ready(function() {
         el: '#statistics',
         data: {
             data: Array
-
         },
         computed: {
             greenpercentage: function() {

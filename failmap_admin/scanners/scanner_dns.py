@@ -1,55 +1,104 @@
 # This is going to scan DNS using well known tools.
 
 # DNS Recon:
-# The Harvester: (using an API?) - or write something yourself?
+# The Harvester: - going to deprecated
 
 """
-Context matters, given certain subdomains will be everpresently available in certain branches.
-For example, municipalities will have some CMS vendors, hospitals will have some data transfer
-capabilities and so on...
-
-So you need to check at least all subdomains that are available in your branche / category.
-
-
 DNS Recon in some cases things all subdomains are valid, correctly, because there is always an
 answer. So we're going to test if a few random domains exist and such.
 
 Afterwards, we do know that a subdomain exist, but we don't know what ports give results we can
 audit. We will check for TLS on 443. There are infinite possibilities.
-
-
-And what do we want to check?
-
-Version 1: just expand the domains we have. We'll see what we do with it later.
-Many urls can be added by hand in the admin interface anyway.
+We can check both for endpoints on http and https for the new domains. So they can be picked up by
+other scanners.
 """
+import subprocess
+
+from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.scanners.scanner_http import ScannerHttp
 
 
 class ScannerDns:
 
-    def scan(self, domains):
+    harvester_path = "/var/www/faalkaart/test/theHarvester/theHarvester.py"
 
-        # dnsrecon / soft approach
-        # https://github.com/darkoperator/dnsrecon
-        # run check if the host will accept any subdomain as valid
-        # get a list of subdomains usual for the branche from the database
-        # try if those subdomains exist or not, and act accordingly
-        #   use the XML export feature.
+    # todo: make a "tool" dir, or something so the harvester and such are always available.
+    # todo: if ScannerHttp.has_internet_connection():
+    def manual_harvesting(self, url):
+        subdomains = ScannerDns.subdomains_harvester(url)
 
-        # dnsrecon / hard approach: brute force domains out of scope... with dictionaries.
+        for subdomain in subdomains:
+            fulldomain = subdomain + "." + url
+            if ScannerHttp.resolves(fulldomain):
+                if not Url.objects.all().filter(url=fulldomain).exists():
+                    print("Added domain to database: %s" % fulldomain)
+                    o = Organization.objects.get(url__url=url)
+                    u = Url()
+                    u.organization = o
+                    u.url = fulldomain
+                    u.save()
+                else:
+                    print("Subdomain already in the database: %s" % fulldomain)
+            else:
+                print("Subdomain did not resolve: %s" % fulldomain)
 
-        # theharvester (and such)
-        # https://github.com/laramies/theHarvester
-        # search for subdomains in search engine
-        # extract subdomains
-        # test if they exist (in some way?!)
-        # add to organization (a lot will still be manual work) - googleCSE
-        # given the harvester is still being developed, undestands google CSE and also
-        # can brute force DNS, AND is written in python, this might be the better approach...
+    @staticmethod
+    def subdomains_harvester(url):
+        # todo: very ugly parsing, should be just reading the XML output.
+        # python theHarvester.py -d zutphen.nl -b google -l 100
+        engine = "google"
+        process = subprocess.Popen(['python', ScannerDns.harvester_path,
+                                    '-d', url,
+                                    '-b', engine,
+                                    '-s', '0',
+                                    '-l', '100'], stdout=subprocess.PIPE)
 
-        # instead of writing all kinds of complex logic to deduct the correct subdomains etc, we're
-        # going to make two lists that suggest subdomains for other organizations (a dictionary per
-        # branche). Main reason is that humans will find a new way to have weird DNS names, typos,
-        # etc... based of that we will make suggestions as to what subdomains to scan and vice versa
-        # this helps preventing a list that has 99% mis.
+        output = str(process.stdout.read())
+        # we only care about the stuff after "[-] Resolving hostnames IPs... "
+        hostnames = output[output.find("[-] Resolving hostnames IPs... ") + 32:len(output)]
+        hostname_list = hostnames.split("\\n")
+        subdomains = []
+        for hostname in hostname_list:
+            # print("Found hostname: %s" % hostname)
+            if "." + url in hostname:
+                subdomain_with_ip = hostname[0:hostname.find("." + url)]
+                subdomain = subdomain_with_ip[subdomain_with_ip.find(':')+1:len(subdomain_with_ip)]
+                subdomains.append(subdomain)
+                print("Found subdomain %s" % subdomain)
+
+        return subdomains
+
+    def make_wordlist(self):
+        # todo: per branche wordlists, more to the point
+        prefixes = []
+        urls = Url.objects.all()
+        for url in urls:
+            positions = [pos for pos, char in enumerate(url.url) if char == '.']
+            if len(positions) > 1:
+                prefixes.append(url.url[0:positions[len(positions)-2]])
+        # print(set(prefixes))
+        return set(prefixes)
+
+    def dnsrecon(self, url):
+        # requires: netaddr, dnspython
+        # Dictionaries of the local language are available on wiktionary.
+        # https://nl.wiktionary.org/wiki/WikiWoordenboek:OpenTaal
+        # https://www.opentaal.org/
+
+        # Brute force op DNS:
+        # python dnsrecon.py --domain amsterdam.nl -t brt -D ./OpenTaal-210G-woordenlijsten/
+        # OpenTaal-210G-basis-gekeurd.txt -c output_brt.csv
+        # takes about 5 minutes
+
+        # google search, zone transfers en alles included:
+        # python dnsrecon.py --domain amsterdam.nl -D ./OpenTaal-210G-woordenlijsten/
+        # OpenTaal-210G-basis-gekeurd.txt -c output.csv
+        # brute force takes a few hours. You don't have to do this a lot fortunately.
+
+        # works with json output, which is easy to parse. Also supports a google seach, so probably
+        # ditch theharvester.
+        return
+
+    def import_dnsrecon_report(self, json):
+
         return
