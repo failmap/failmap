@@ -43,16 +43,22 @@ def forward(apps, schema_editor):
     AttributeError: 'Endpoint' object has no attribute 'domain'
     Nope, not anymore it does. But it does have that in the database since we're migrating now.
 
+
+    This doesn't work in the future: because you instantiate an Endpoint at a certain point, with
+    columns that don't yet exist. At this version there was no "scanners_endpoint.discovered_on"
+    column. So the migration crashes. The code of this migration has now moved to a command:
+    migration_domaintourl. This code is here for legacy reasons.
+
     :param apps:
     :param schema_editor:
     :return:
     """
-    for endpoint in Endpoint.objects.filter():
-        try:
-            endpoint.url = Url.objects.filter(url=endpoint.domain).first()
-            endpoint.save()
-        except Url.DoesNotExist:
-            endpoint.delete()
+    # for endpoint in Endpoint.objects.filter():
+    #     try:
+    #         endpoint.url = Url.objects.filter(url=endpoint.domain).first()
+    #         endpoint.save()
+    #     except Url.DoesNotExist:
+    #         endpoint.delete()
 
 
 # this is not tested...
@@ -65,13 +71,13 @@ def backward(apps, schema_editor):
     :param schema_editor:
     :return:
     """
-    for endpoint in Endpoint.objects.filter():
-        try:
-            # werkt dit uberhaupt?
-            endpoint.url = Url.objects.filter(url=endpoint.url).first()["url"]
-            endpoint.save()
-        except Url.DoesNotExist:
-            endpoint.delete()
+    # for endpoint in Endpoint.objects.filter():
+    #     try:
+    #         # werkt dit uberhaupt?
+    #         endpoint.url = Url.objects.filter(url=endpoint.url).first()["url"]
+    #         endpoint.save()
+    #     except Url.DoesNotExist:
+    #         endpoint.delete()
 
 
 class Migration(migrations.Migration):
