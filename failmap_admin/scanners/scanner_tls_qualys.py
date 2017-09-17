@@ -488,11 +488,19 @@ class ScannerTlsQualys:
         # todo: message: "Failed to communicate with the secure server"
         ScannerTlsQualys.log.debug("Managing endpoint with message %s" % status_message)
 
+        """
+        IP address is from private address space (RFC 1918)
+        Means endpoint cannot be scanned by qualys. So we set it as non-resolvable (the http scanner
+        will set it to resolvable again, and so we've to check ip's now before scanning here).
+        At least the thread will not crash.
+        todo: 10.210.9.2, 10/8 etc will not be scanned, we should check for that.
+        """
         # Unable to connect to server? Declare endpoint dead.
         # The endpoint probably has another port / service than https/443
-        if status_message == "Unable to connect to the server":
+        if status_message == "Unable to connect to the server" or \
+           status_message == "IP address is from private address space (RFC 1918)":
             return ScannerTlsQualys.\
-                endpoint_could_not_connect_to_server(qualys_endpoint, domain)
+                endpoint_could_not_connect_to_server(qualys_endpoint, domain, status_message)
 
         # todo: handle No secure protocols supported correctly. It is a weird state (https, notls?)
         if status_message == "Ready" or \
@@ -571,7 +579,7 @@ class ScannerTlsQualys:
 
     @staticmethod
     # Server does not have HTTPS.
-    def endpoint_could_not_connect_to_server(qualys_endpoint, domain):
+    def endpoint_could_not_connect_to_server(qualys_endpoint, domain, status_message):
         ScannerTlsQualys.log.debug("Handing could not connect to server")
         # If this endpoint exists and is alive, mark it as dead: port 443 does not
         # do anything.
@@ -585,7 +593,7 @@ class ScannerTlsQualys:
         for ep in alive_endpoints:
             ep.is_dead = True
             ep.is_dead_since = datetime.now(pytz.utc)
-            ep.is_dead_reason = "Unable to connect to the server"
+            ep.is_dead_reason = status_message
             ep.save()
 
         # if there is no end point at all, add one, so we know port 443 is not available
@@ -617,7 +625,7 @@ class ScannerTlsQualys:
                 failmap_endpoint.protocol = "https"
                 failmap_endpoint.ip = qualys_endpoint['ipAddress']
                 failmap_endpoint.is_dead = True
-                failmap_endpoint.is_dead_reason = "Unable to connect to the server"
+                failmap_endpoint.is_dead_reason = status_message
                 failmap_endpoint.is_dead_since = datetime.now(pytz.utc)
                 failmap_endpoint.discovered_on = datetime.now(pytz.utc)
                 failmap_endpoint.save()
