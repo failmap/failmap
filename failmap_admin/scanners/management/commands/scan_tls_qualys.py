@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
         for organization in resume:
             StateManager.set_state("ScannerTlsQualys", organization.name)
-            urls = Command.create_list_of_urls_to_scan(organization)
+            urls = Command.scannable_organization_urls(organization)
 
             if self.do_scan:
                 scanme = []
@@ -54,7 +54,7 @@ class Command(BaseCommand):
         print("Done, scanned all!")
 
     @staticmethod
-    def create_list_of_urls_to_scan(organization):
+    def scannable_organization_urls(organization):
         """
 
         :return: list of url objects
@@ -92,3 +92,16 @@ class Command(BaseCommand):
                 pass
 
         return urls_to_scan
+
+    @staticmethod
+    def scannable_new_urls():
+        # find urls that don't have an qualys scan and are resolvable on https/443
+        urls = Url.objects.filter(is_dead=False,
+                                  not_resolvable=False,
+                                  endpoint__port=443).exclude(endpoint__tlsqualysscan__isnull=True)
+
+        print("These are the new urls:")
+        for url in urls:
+            print(url)
+
+        raise NotImplemented

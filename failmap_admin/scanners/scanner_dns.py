@@ -18,6 +18,8 @@ from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_http import ScannerHttp
 
 
+# todo: record that some domains have a catch all, and should not be scanned.
+# the catch all is sometimes not detected by dnsrecon
 class ScannerDns:
 
     working_directory = "/var/www/faalkaart/test/dnsrecon/output/"
@@ -26,7 +28,8 @@ class ScannerDns:
     dnsrecon_path = "/var/www/faalkaart/test/dnsrecon/dnsrecon.py"
 
     wordlist_dutch = "/var/www/faalkaart/test/dnsrecon/wordlists/OpenTaal-210G-basis-gekeurd.txt"
-    wordlist_4letters = "/var/www/faalkaart/test/dnsrecon/wordlists/fourletters.txt"
+    wordlist_3letters = "/var/www/faalkaart/test/dnsrecon/wordlists/threeletterwordlist.txt"
+    wordlist_knownsudomains = "/var/www/faalkaart/test/dnsrecon/wordlists/knownsubdomains.txt"
 
     # todo: make a "tool" dir, or something so the harvester and such are always available.
     # todo: if ScannerHttp.has_internet_connection():
@@ -39,15 +42,14 @@ class ScannerDns:
     @staticmethod
     # todo: move this to url logic / url manager.
     def add_subdomain(subdomain, url):
-        fulldomain = subdomain + "." + url
+        fulldomain = subdomain + "." + url.url
         print("Trying to add subdomain to database: %s" % fulldomain)
         if ScannerHttp.resolves(fulldomain):
-            if not Url.objects.all().filter(url=fulldomain).exists():
-                print("Added domain to database: %s" % fulldomain)
+            if not Url.objects.all().filter(url=fulldomain, organization=url.organization).exists():
+                print("*** Added domain to database: %s" % fulldomain)
                 # naive adding, since we don't have an organization.
-                o = Organization.objects.all().filter(url__url=url).first()
                 u = Url()
-                u.organization = o
+                u.organization = url.organization
                 u.url = fulldomain
                 u.save()
             else:
@@ -81,7 +83,8 @@ class ScannerDns:
 
         return subdomains
 
-    def make_wordlist(self):
+    @staticmethod
+    def update_wordlist_known_subdomains():
         # todo: per branche wordlists, more to the point
         prefixes = []
         urls = Url.objects.all()
@@ -90,7 +93,13 @@ class ScannerDns:
             if len(positions) > 1:
                 prefixes.append(url.url[0:positions[len(positions)-2]])
         # print(set(prefixes))
-        return set(prefixes)
+        unique_prefixes = set(prefixes)
+
+        with open(ScannerDns.wordlist_knownsudomains, "w") as text_file:
+            for unique_prefix in unique_prefixes:
+                text_file.write(unique_prefix + '\n')
+
+        return unique_prefixes
 
     def make_threeletterwordlist(self):
         import itertools
@@ -108,17 +117,77 @@ class ScannerDns:
             for x in twoletters:
                 text_file.write(x + '\n')
 
-    def dnsrecon_brute(self, url):
-        file = "%s_data_brute.json" % url
-        path = ScannerDns.working_directory + file
-        # this will take an hour or two.
-        # todo:test
-        process = subprocess.Popen(['python', ScannerDns.dnsrecon_path,
-                                    '--domain', url,
-                                    '-t', 'brt',
-                                    '-D', ScannerDns.wordlist_dutch,
-                                    '-c', path], stdout=subprocess.PIPE)
-        ScannerDns.import_dnsrecon_report(url, path)
+    # 180.000 words
+    def dnsrecon_brute_dutch(self, organization):
+        urls = ScannerDns.topleveldomains(organization)
+
+        for url in urls:
+            print("Checking DNS of toplevel domain: %s" % url.url)
+            file = "%s_data_brute.json" % url.url
+            path = ScannerDns.working_directory + file
+
+            print("DNS results will be stored in file: %s" % path)
+            # this will take an hour or two.
+            # todo:test
+            subprocess.call(['python', ScannerDns.dnsrecon_path,
+                             '--domain', url.url,
+                             '-t', 'brt',
+                             '-D', ScannerDns.wordlist_dutch,
+                             '-j', path])
+
+            # wacht op output.
+            ScannerDns.import_dnsrecon_report(url, path)
+
+    # 18278 words
+    # organizations _LOVE_ three # letter acronyms!
+    def dnsrecon_brute_threeletters(self, organization):
+
+        urls = ScannerDns.topleveldomains(organization)
+
+        for url in urls:
+            print("Checking DNS of toplevel domain: %s" % url.url)
+            file = "%s_data_brute.json" % url.url
+            path = ScannerDns.working_directory + file
+
+            print("DNS results will be stored in file: %s" % path)
+            # this will take an hour or two.
+            # todo:test
+            subprocess.call(['python', ScannerDns.dnsrecon_path,
+                             '--domain', url.url,
+                             '-t', 'brt',
+                             '-D', ScannerDns.wordlist_3letters,
+                             '-j', path])
+
+            # wacht op output.
+            ScannerDns.import_dnsrecon_report(url, path)
+
+    # todo: move to Organization manager
+    @staticmethod
+    def topleveldomains(organization):
+        return Url.objects.all().filter(organization=organization, url__iregex="^[^.]*\.[^.]*$")
+
+    # hundreds of words
+    # todo: language matters, many of the NL subdomains don't make sense in other countries.
+    def dnsrecond_brute_knownsubdomains(self, organization):
+        ScannerDns.update_wordlist_known_subdomains()
+        urls = ScannerDns.topleveldomains(organization)
+
+        for url in urls:
+            print("Checking DNS of toplevel domain: %s" % url.url)
+            file = "%s_data_brute.json" % url.url
+            path = ScannerDns.working_directory + file
+
+            print("DNS results will be stored in file: %s" % path)
+            # this will take an hour or two.
+            # todo:test
+            subprocess.call(['python', ScannerDns.dnsrecon_path,
+                             '--domain', url.url,
+                             '-t', 'brt',
+                             '-D', ScannerDns.wordlist_knownsudomains,
+                             '-j', path])
+
+            # wacht op output.
+            ScannerDns.import_dnsrecon_report(url, path)
 
     def dnsrecon_google(self, url):
         # todo: make this new manual scan.
@@ -132,6 +201,7 @@ class ScannerDns:
         return
 
     @staticmethod
+    # todo: also perform basic endpoint scans for new subdomains
     def import_dnsrecon_report(url, path):
         # note: the order of the records in the report matters(!)
 
@@ -143,8 +213,8 @@ class ScannerDns:
                 if "arguments" in record.keys():
                     continue
 
-                if record["name"].endswith(url):
-                    subdomain = record["name"][0:len(record["name"])-len(url)-1]
+                if record["name"].endswith(url.url):
+                    subdomain = record["name"][0:len(record["name"])-len(url.url)-1]
                     # print(subdomain.lower())
                     ScannerDns.add_subdomain(subdomain.lower(), url)
 
