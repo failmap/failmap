@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from failmap_admin.organizations.models import Organization
 from failmap_admin.scanners.managers import StateManager
 from failmap_admin.scanners.scanner_dns import ScannerDns
+from failmap_admin.scanners.scanner_http import ScannerHttp
 
 
 class Command(BaseCommand):
@@ -29,12 +30,15 @@ class Command(BaseCommand):
                     scanner="DNS_knownsubdomains")
                 for organization in organizations:
                     StateManager.set_state("DNS_knownsubdomains", organization.name)
-                    s.dnsrecond_brute_knownsubdomains(organization)
+                    # todo: this could happen in parallel.
+                    added = s.organization_brute_knownsubdomains(organization)
+                    ScannerHttp.scan_url_list_standard_ports(added)
             else:
                 print("Looking for organization: %s" % options['organization'][0])
                 try:
                     o = Organization.objects.get(name=options['organization'][0])
                     # s.dnsrecon_brute_threeletters(o)
-                    s.dnsrecond_brute_knownsubdomains(o)
+                    added = s.organization_brute_knownsubdomains(o)
+                    ScannerHttp.scan_url_list_standard_ports(added)
                 except ObjectDoesNotExist:
                     print("Organization was not found.")
