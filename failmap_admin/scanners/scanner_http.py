@@ -47,19 +47,18 @@ class ScannerHttp:
         return
 
     @staticmethod
-    def scan_multithreaded(port=80, protocol="http", only_new=False):
+    def scan_url_list_standard_ports(urls):
+        ScannerHttp.scan_url_list(urls, 443, 'http')
+        ScannerHttp.scan_url_list(urls, 80, 'http')
+        ScannerHttp.scan_url_list(urls, 8080, 'http')
+        ScannerHttp.scan_url_list(urls, 8443, 'http')
+        # ScannerHttp.scan_url_list(urls, 8088, 'http')
+        # ScannerHttp.scan_url_list(urls, 8888, 'http')
+        # ScannerHttp.scan_url_list(urls, 8008, 'http')
+        # ScannerHttp.scan_url_list(urls, 9443, 'http')
 
-        if not only_new:
-            urls = Url.objects.all()  # scans ALL urls.
-        else:
-            # todo: only new urls, those that don't have an endpoint on the protocol+port.
-            # not without _any_ endpoint, given that there will soon be endpoints for it.
-            # this also re-verifies all domains that explicitly don't have an endpoint on this
-            # port+protocol, which can be a bit slow. (we're not saving it reversely).
-            # todo: this is not correct yet.
-            urls = Url.objects.all().exclude(endpoint__port=port, endpoint__protocol=protocol)
-            urls = Url.objects.all()
-
+    @staticmethod
+    def scan_url_list(urls, port=80, protocol="http"):
         from multiprocessing import Pool
         pool = Pool(processes=8)
 
@@ -83,6 +82,22 @@ class ScannerHttp:
         pool.close()
         print("Joining pool")
         pool.join()
+
+    @staticmethod
+    def scan_multithreaded(port=80, protocol="http", only_new=False):
+
+        if not only_new:
+            urls = Url.objects.all()  # scans ALL urls.
+        else:
+            # todo: only new urls, those that don't have an endpoint on the protocol+port.
+            # not without _any_ endpoint, given that there will soon be endpoints for it.
+            # this also re-verifies all domains that explicitly don't have an endpoint on this
+            # port+protocol, which can be a bit slow. (we're not saving it reversely).
+            # todo: this is not correct yet.
+            urls = Url.objects.all().exclude(endpoint__port=port, endpoint__protocol=protocol)
+            urls = Url.objects.all()
+
+        ScannerHttp.scan_url_list(urls, port, protocol)
 
     @staticmethod
     def success_callback(x):
