@@ -109,6 +109,11 @@ class Url(models.Model):
         blank=True,
         null=True)
 
+    uses_dns_wildcard = models.BooleanField(
+        default=False,
+        help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
+                  "something on this host.")
+
     class Meta:
         managed = True
         db_table = 'url'

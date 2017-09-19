@@ -13,6 +13,7 @@
 # Then we moved to selenium and phantomjs. The code had a beautiful case sensitivity troll :)
 # phantomjs has all kinds of tls things, and is extremely slow with real / existing sites.
 
+import logging
 import os
 import re
 from datetime import datetime
@@ -24,6 +25,8 @@ from PIL import Image
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Screenshot
+
+logger = logging.getLogger(__package__)
 
 
 class ScannerScreenshot:
@@ -49,7 +52,7 @@ class ScannerScreenshot:
         import subprocess
 
         now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
-        print("Chrome Headless : Making screenshot: %s, on %s" % (endpoint.uri_url(), now))
+        logger.debug("Chrome Headless : Making screenshot: %s, on %s" % (endpoint.uri_url(), now))
 
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '',
@@ -65,7 +68,7 @@ class ScannerScreenshot:
 
         # skip if there is already a latest image, just to speed things up.
         if skip_if_latest and os.path.exists(output_filepath_latest):
-            print("Skipped making screenshot, by request")
+            logger.debug("Skipped making screenshot, by request")
             return
 
         # since headless always creates the file "screenshot.png", just work in a
@@ -102,6 +105,7 @@ class ScannerScreenshot:
 
         # make copies of these images, so the latest are easily accessible.
         subprocess.call(['cp', output_filepath_resized, output_filepath_latest])
+        logger.info('Made screenshot of: %s' % endpoint.uri_url())
 
     @staticmethod
     # delivers transparent / empty pages all the time.
