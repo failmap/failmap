@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 
+from colorlog import ColoredFormatter
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Changed BASE_DIR so templates need to include the module and such. The idea
@@ -201,3 +203,48 @@ JET_THEMES = [
 #   fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
 # required for custom modules
 JET_APP_INDEX_DASHBOARD = 'failmap_admin.organizations.dashboard.CustomIndexDashboard'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',  # sys.stdout
+            'formatter': 'color',
+        },
+    },
+    'formatters': {
+        'debug': {
+            'format': '%(asctime)s\t%(levelname)-8s -- %(filename)-20s:%(lineno)-4s -- %(message)s'
+        },
+        'color': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(log_color)s%(asctime)s\t%(levelname)-8s -- '
+                      '%(filename)s:%(lineno)-4s -- %(message)s',
+            'log_colors': {
+                'DEBUG':    'green',
+                'INFO':     'white',
+                'WARNING':  'yellow',
+                'ERROR':    'red',
+                'CRITICAL': 'bold_red',
+            },
+        }
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console'],    # used when there is no logger defined or loaded.
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'failmap_admin.scanners': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'propagate': False,  # if you don't the root logger will also output.
+            # see: https://stackoverflow.com/questions/19561058/duplicate-output-in-simple-p...
+        },
+    },
+}

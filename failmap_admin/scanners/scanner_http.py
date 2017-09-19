@@ -24,6 +24,7 @@ HTTP: 80, 280, 591, 593, 2480, 4444, 4445, 4567, 5000, 5104, 5800, 5988, 7001, 8
 Likely: 80, 8080, 8008, 8888, 8088
 
 """
+import logging
 import socket
 from datetime import datetime
 
@@ -34,6 +35,8 @@ from requests.exceptions import ConnectionError
 from failmap_admin.organizations.models import Url
 
 from .models import Endpoint
+
+logger = logging.getLogger(__package__)
 
 
 # todo: separating finding IP adresses and endpoints.
@@ -48,14 +51,15 @@ class ScannerHttp:
 
     @staticmethod
     def scan_url_list_standard_ports(urls):
-        ScannerHttp.scan_url_list(urls, 443, 'http')
+        ScannerHttp.scan_url_list(urls, 443, 'https')
         ScannerHttp.scan_url_list(urls, 80, 'http')
         ScannerHttp.scan_url_list(urls, 8080, 'http')
-        ScannerHttp.scan_url_list(urls, 8443, 'http')
+        ScannerHttp.scan_url_list(urls, 8443, 'https')
+
         # ScannerHttp.scan_url_list(urls, 8088, 'http')
         # ScannerHttp.scan_url_list(urls, 8888, 'http')
         # ScannerHttp.scan_url_list(urls, 8008, 'http')
-        # ScannerHttp.scan_url_list(urls, 9443, 'http')
+        # ScannerHttp.scan_url_list(urls, 9443, 'https')
 
     @staticmethod
     def scan_url_list(urls, port=80, protocol="http"):
@@ -63,24 +67,24 @@ class ScannerHttp:
         pool = Pool(processes=8)
 
         if not ScannerHttp.has_internet_connection():
-            print("No internet connection! Try again later!")
+            logger.error("No internet connection! Try again later!")
             return
 
         if protocol not in ["http", "https"]:
-            print("Invalid protocol %s, options are: http, https" % protocol)
+            logger.error("Invalid protocol %s, options are: http, https" % protocol)
             return
 
         if port > 65535 or port < 0:
-            print("Invalid port number, must be between 0 and 65535. %s" % port)
+            logger.error("Invalid port number, must be between 0 and 65535. %s" % port)
             return
 
         for url in urls:
             pool.apply_async(ScannerHttp.scan_url, [url, port, protocol],
                              callback=ScannerHttp.success_callback,
                              error_callback=ScannerHttp.error_callback)
-        print("Closing pool")
+        logger.debug("Closing pool")
         pool.close()
-        print("Joining pool")
+        logger.debug("Joining pool")
         pool.join()
 
     @staticmethod
@@ -101,13 +105,13 @@ class ScannerHttp:
 
     @staticmethod
     def success_callback(x):
-        print("Success!")
+        logger.info("Success!")
 
     @staticmethod
     def error_callback(x):
-        print("Error callback!")
-        print(x)
-        print(vars(x))
+        logger.error("Error callback!")
+        logger.error(x)
+        logger.error(vars(x))
 
     # Simple: if there is a http response (status code), there is a http server.
     # There might be other protocols on standard ports.
@@ -122,12 +126,12 @@ class ScannerHttp:
     @staticmethod
     def scan_url(url, port=80, protocol="https"):
         domain = "%s://%s:%s" % (protocol, url.url, port)
-        print("Scanning http(s) server on: %s" % domain)
+        logger.debug("Scanning http(s) server on: %s" % domain)
 
         (ip4, ip6) = ScannerHttp.get_ips(url.url)
 #
         if not ip4 and not ip6:
-            print("%s: No IPv4 or IPv6 address found. Url not resolvable?" % url)
+            logger.debug("%s: No IPv4 or IPv6 address found. Url not resolvable?" % url)
             url.not_resolvable = True
             url.not_resolvable_since = datetime.now(pytz.utc)
             url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
@@ -145,25 +149,44 @@ class ScannerHttp:
 
         try:
             # 10 seconds network timeout, 10 seconds timeout waiting for server response
-            r = requests.get(domain, timeout=(10, 10))
+            # a redirect means a server, so don't follow: much faster also.
+            # todo: how to work with dropped connections?
+            # todo: perhaps use httplib?
+            r = requests.get(domain, timeout=(10, 10), allow_redirects=False)
 
             # 200, 418, who cares: http status code = http server and that is enough.
             if r.status_code:
-                print("%s: status: %s" % (url, r.status_code))
+                logger.debug("%s: status: %s" % (url, r.status_code))
+                if ip4:
+                    ScannerHttp.save_endpoint(url, port, protocol, ip4)
+                if ip6:
+                    ScannerHttp.save_endpoint(url, port, protocol, ip6)
+
+            else:
+                logger.debug("No status code? Now what?! %s" % url)
+        except (ConnectionRefusedError, ConnectionError) as Ex:
+            # ConnectionRefusedError: [Errno 61] Connection refused
+            # Some errors have our interests:
+            # BadStatusLine is an error, which signifies that the server gives an answer.
+            # Example: returning HTML, incompatible TLS (binary)
+            # CertificateError
+            # Example: wrong domain name for certificate
+            logger.debug("%s: NOPE! - %s" % (url, Ex))
+            strerror = Ex.args  # this can be multiple.  # zit in nested exception?
+            # logger.debug("Error message: %s" % strerror)
+            strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
+            if "BadStatusLine" in strerror or "CertificateError" in strerror:
+                logger.debug("Received BadStatusLine or CertificateError, which is an answer. "
+                             "Still creating endpoint.")
                 if ip4:
                     ScannerHttp.save_endpoint(url, port, protocol, ip4)
                 if ip6:
                     ScannerHttp.save_endpoint(url, port, protocol, ip6)
             else:
-                print("No status code? Now what?! %s" % url)
-        except (ConnectionRefusedError, ConnectionError) as Ex:
-            # ConnectionRefusedError: [Errno 61] Connection refused
-            # What type of errors do we get when there is no internets?
-            print("%s: NOPE! - %s" % (url, Ex))
-            if ip4:
-                ScannerHttp.kill_endpoint(url, port, protocol, ip4)
-            if ip6:
-                ScannerHttp.kill_endpoint(url, port, protocol, ip6)
+                if ip4:
+                    ScannerHttp.kill_endpoint(url, port, protocol, ip4)
+                if ip6:
+                    ScannerHttp.kill_endpoint(url, port, protocol, ip6)
 
     @staticmethod
     def resolves(url):
@@ -181,7 +204,7 @@ class ScannerHttp:
             ip4 = socket.gethostbyname(url)
         except Exception as ex:
             # when not known: [Errno 8] nodename nor servname provided, or not known
-            print("Get IPv4 error: %s" % ex)
+            logger.debug("Get IPv4 error: %s" % ex)
             pass
 
         try:
@@ -189,11 +212,11 @@ class ScannerHttp:
             ip6 = x[0][4][0]
         except Exception as ex:
             # when not known: [Errno 8nodename nor servname provided, or not known
-            print("Get IPv6 error: %s" % ex)
+            logger.debug("Get IPv6 error: %s" % ex)
             pass
 
-        print("%s has IPv4 address: %s" % (url, ip4))
-        print("%s has IPv6 address: %s" % (url, ip6))
+        logger.debug("%s has IPv4 address: %s" % (url, ip4))
+        logger.debug("%s has IPv6 address: %s" % (url, ip6))
         return ip4, ip6
 
     @staticmethod
@@ -209,7 +232,7 @@ class ScannerHttp:
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
             return True
         except Exception as ex:
-            print("No internet connection: %s" % ex)
+            logger.debug("No internet connection: %s" % ex)
             return False
 
     @staticmethod
@@ -225,6 +248,9 @@ class ScannerHttp:
             endpoint.discovered_on = datetime.now(pytz.utc)
             # endpoint.dossier = "Found using the http scanner."  #
             endpoint.save()
+            logger.info("Added endpoint added to database: %s" % endpoint)
+        else:
+            logger.debug("Endpoint based on parameters was already in database.")
 
         return
 

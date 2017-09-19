@@ -90,11 +90,11 @@ class UrlAdmin(admin.ModelAdmin):
     list_display = ('organization', 'url', 'is_dead_reason', 'not_resolvable', 'created_on')
     search_field = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
     list_filter = ('organization', 'url', 'is_dead', 'is_dead_since', 'is_dead_reason',
-                   'not_resolvable')
+                   'not_resolvable', 'uses_dns_wildcard')
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization')
+            'fields': ('url', 'organization', 'uses_dns_wildcard')
         }),
         ('Resolvability', {
             'fields': ('not_resolvable', 'not_resolvable_since', 'not_resolvable_reason'),

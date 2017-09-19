@@ -31,3 +31,6 @@ autopep8
 coverage
 pytest
 django-silk
+
+# logging
+colorlog

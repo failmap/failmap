@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
@@ -5,6 +7,8 @@ from failmap_admin.organizations.models import Organization
 from failmap_admin.scanners.managers import StateManager
 from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.scanner_http import ScannerHttp
+
+logger = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -34,11 +38,11 @@ class Command(BaseCommand):
                     added = s.organization_brute_knownsubdomains(organization)
                     ScannerHttp.scan_url_list_standard_ports(added)
             else:
-                print("Looking for organization: %s" % options['organization'][0])
+                logging.debug("Looking for organization: %s" % options['organization'][0])
                 try:
                     o = Organization.objects.get(name=options['organization'][0])
                     # s.dnsrecon_brute_threeletters(o)
                     added = s.organization_brute_knownsubdomains(o)
                     ScannerHttp.scan_url_list_standard_ports(added)
                 except ObjectDoesNotExist:
-                    print("Organization was not found.")
+                    logging.debug("Organization was not found.")
