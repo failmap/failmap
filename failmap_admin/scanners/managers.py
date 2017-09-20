@@ -45,7 +45,7 @@ class StateManager(models.Manager):
         print("Resuming from %s" % state)
         next = []
         previous = []
-        o = Organization.objects.all()
+        o = Organization.objects.all().order_by('name')
         for organization in o:
             if state <= organization.name:
                 next.append(organization)

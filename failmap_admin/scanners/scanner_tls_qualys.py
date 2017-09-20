@@ -6,6 +6,7 @@ import sys
 from datetime import date, datetime, timedelta
 from random import randint
 from time import sleep
+from typing import List
 
 import pytz
 import requests
@@ -162,28 +163,11 @@ class ScannerTlsQualys:
     # instead of using a custom colored log solution, we're using the standard log.
 
     def __init__(self):
-
-        ScannerTlsQualys.log = logging.getLogger('scanner_tls_qualys')
-        ScannerTlsQualys.log.handlers = []  # bad workaround:
-        # above workaround based on https://github.com/ipython/ipython/issues/8282
-        ScannerTlsQualys.log.setLevel(logging.DEBUG)
-
-        # http://stackoverflow.com/questions/14058453/
-        # making-python-loggers-output-all-messages-to-stdout-in-addition-to-log#14058475
-        console = logging.StreamHandler(sys.stdout)
-        console.setFormatter(logging.Formatter('%(asctime)s\t%(levelname)-8s -- '
-                                               '%(filename)s:%(lineno)-4s -- %(message)s'))
-        # lunix only solution.
-        logging.addLevelName(logging.WARNING,
-                             "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.WARNING))
-        logging.addLevelName(logging.ERROR,
-                             "\033[1;41m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
-
-        ScannerTlsQualys.log.addHandler(console)
+        ScannerTlsQualys.log = logging.getLogger(__package__)
         ScannerTlsQualys.log.debug("Logging initialized")
 
     @staticmethod
-    def scan(domains):
+    def scan(domains: List[str]):
         """
         Scans a list of domains. Skipping all that have been scanned in the past 24 hours and
         starting each scan about every 30 seconds.
@@ -223,13 +207,13 @@ class ScannerTlsQualys:
     @staticmethod
     def success_callback(x):
         ScannerTlsQualys.log.debug("Success!")
-        print("Success!")
 
     @staticmethod
     def error_callback(x):
-        print("Error callback!")
-        print(x)
-        print(vars(x))  # we're getting a statusDetails back... probably not handled by the code
+        ScannerTlsQualys.log.error("Error callback!")
+        ScannerTlsQualys.log.error(x)
+        ScannerTlsQualys.log.error(vars(x))
+        # we're getting a statusDetails back... probably not handled by the code
 
     # max N at the same time? how to?
     # what happens when there is no internet?
@@ -245,6 +229,7 @@ class ScannerTlsQualys:
         :param domain: string representing an url, without protocol or port.
         :return:
         """
+        ScannerTlsQualys.log.info("Starting scan on: %s" % domain)
 
         data = {'status': "NEW"}
 
@@ -272,8 +257,8 @@ class ScannerTlsQualys:
 
             else:
                 data['status'] = "FAILURE"  # stay in the loop
-                ScannerTlsQualys.log.debug("Unexpected result from API")
-                ScannerTlsQualys.log.debug(data)  # print for debugging purposes
+                ScannerTlsQualys.log.error("Unexpected result from API")
+                ScannerTlsQualys.log.error(data)  # print for debugging purposes
                 ScannerTlsQualys.scratch(domain, data)  # we always want to see what happened.
 
             # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
@@ -442,8 +427,8 @@ class ScannerTlsQualys:
                 ScannerTlsQualys.log.debug("There was already a scan on this endpoint.")
 
                 if scan.qualys_rating == rating and scan.qualys_rating_no_trust == rating_no_trust:
-                    ScannerTlsQualys.log.debug("Scan did not alter the rating, "
-                                               "updating scan date only.")
+                    ScannerTlsQualys.log.info("Scan on %s did not alter the rating, "
+                                              "updating scan date only." % failmap_endpoint)
                     scan.scan_moment = datetime.now(pytz.utc)
                     scan.scan_time = datetime.now(pytz.utc)
                     scan.scan_date = datetime.now(pytz.utc)
@@ -451,8 +436,9 @@ class ScannerTlsQualys:
                     scan.save()
 
                 else:
-                    ScannerTlsQualys.log.debug("Rating changed, "
-                                               "we're going to save the scan to retain history")
+                    ScannerTlsQualys.log.info("Rating changed on %s, "
+                                              "we're going to save the scan to retain history"
+                                              % failmap_endpoint)
                     scan = TlsQualysScan()
                     scan.endpoint = failmap_endpoint
                     scan.qualys_rating = rating
@@ -466,7 +452,8 @@ class ScannerTlsQualys:
 
             else:
                 # todo: don't like to have the same code twice.
-                ScannerTlsQualys.log.debug("This endpoint was never scanned, creating a new scan.")
+                ScannerTlsQualys.log.info("This endpoint on %s was never scanned, "
+                                          "creating a new scan." % failmap_endpoint)
                 scan = TlsQualysScan()
                 scan.endpoint = failmap_endpoint
                 scan.qualys_rating = rating

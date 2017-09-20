@@ -5,13 +5,13 @@ from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta  # stats
 from django.db import connection
-from django.db.models import Max
+from django.db.models import Count, Max
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from failmap_admin.map.determineratings import DetermineRatings
 
-from .models import Organization, OrganizationRating
+from .models import Organization, OrganizationRating, Url
 
 
 # Create your views here.
@@ -217,6 +217,52 @@ def stats(request, weeks_back=0):
         stats[stat] = measurement
 
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 5})
+
+
+def wanted_urls(request):
+    """
+    Creates a list of organizations that have very little to none domains, and where manual
+    harvesting is desired. Of course it's always desired, but this function focuses the community
+    to take a closer look.
+
+    :return:
+    """
+
+    organizations = Organization.objects.all().filter(url__is_dead=False, url__not_resolvable=False)
+    organizations = organizations.annotate(n_urls=Count('url')).order_by('n_urls')[0:25]
+
+    data = {
+        "metadata": {
+            "type": "WantedOrganizations",
+            "render_date": datetime.now(pytz.utc),
+            "data_from_time": datetime.now(pytz.utc),
+        },
+        "organizations": []
+    }
+
+    organization_data = {
+        "name": "",
+        "type": "",
+        "urls": "",
+        "top_level_urls": []
+    }
+    import copy
+    for organization in organizations:
+
+        od = copy.copy(organization_data)
+        od["name"] = organization.name
+        od["type"] = organization.type.name
+        od["urls"] = organization.n_urls
+
+        topleveldomains = Url.objects.all().filter(organization=organization,
+                                                   url__iregex="^[^.]*\.[^.]*$")
+        for topleveldomain in topleveldomains:
+            od["top_level_urls"] = []
+            od["top_level_urls"].append({"url": topleveldomain.url})
+
+        data["organizations"].append(od)
+
+    return JsonResponse(data, json_dumps_params={'indent': 2})
 
 
 def map_data(request, weeks_back=0):
