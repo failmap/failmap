@@ -172,17 +172,23 @@ class ScannerDns:
 
     # hundreds of words
     # todo: language matters, many of the NL subdomains don't make sense in other countries.
+    # todo: don't use the subdomains that are already known to exist.
     def organization_brute_knownsubdomains(self, organization):
         ScannerDns.update_wordlist_known_subdomains()
         urls = ScannerDns.topleveldomains(organization)
         wordlist = ScannerDns.wordlists["known_subdomains"]["path"]
         return ScannerDns.dnsrecon_brute(urls, wordlist)
 
+    def organization_standard_scan(self, organization):
+        urls = Url.objects.all().filter(organization=organization,
+                                        url__iregex="^[^.]*\.[^.]*$")
+        return ScannerDns.dnsrecon_default(urls)
+
     @staticmethod
     def dnsrecon_brute(urls, wordlist):
         imported_urls = []
         for url in urls:
-            logger.info("Checking DNS of toplevel domain: %s" % url.url)
+            logger.info("Bruting DNS of toplevel domain: %s" % url.url)
             logger.debug("Using wordlist: %s" % wordlist)
             file = "%s_data_brute.json" % url.url
             path = ScannerDns.working_directory + file
@@ -208,11 +214,39 @@ class ScannerDns:
 
         return imported_urls
 
-    # todo: move to Organization manager... nope, not anymore :)
+    @staticmethod
+    def dnsrecon_default(urls):
+        # todo: Expanding IP ranges found in DNS and TXT records for Reverse Look-up takes ages.
+        imported_urls = []
+        for url in urls:
+            logger.info("Scanning DNS of toplevel domain: %s" % url.url)
+            file = "%s_data_default.json" % url.url
+            path = ScannerDns.working_directory + file
+
+            logger.debug("DNS results will be stored in file: %s" % path)
+
+            # never continue with wildcard domains
+            p = subprocess.Popen(['python', ScannerDns.dnsrecon_path,
+                                  '--domain', url.url,
+                                  '-j', path], stdin=subprocess.PIPE)
+            p.stdin.write('n'.encode(encoding='utf-8'))
+            p.stdin.write('n'.encode(encoding='utf-8'))
+            p.stdin.write('n'.encode(encoding='utf-8'))
+            p.stdin.write('n'.encode(encoding='utf-8'))
+            p.stdin.write('n'.encode(encoding='utf-8'))
+            p.stdin.write('n'.encode(encoding='utf-8'))  # never brute a wildcard,
+            # The above input doens't always work it seems...
+            p.communicate()
+
+            imported_urls = imported_urls + ScannerDns.import_dnsrecon_report(url, path)
+
+        return imported_urls
+
     # This helps to determine at database level if the DNS uses wildcards, so it can be dealt
     # with in another way.
     @staticmethod
     def topleveldomains(organization):
+        # todo: move to manager, expand the queryset with the uses dns wildcard.
         topleveldomains = Url.objects.all().filter(organization=organization,
                                                    url__iregex="^[^.]*\.[^.]*$",
                                                    uses_dns_wildcard=False)
@@ -285,7 +319,12 @@ class ScannerDns:
             data = json.load(data_file)
             addedlist = []
             for record in data:
-                if "arguments" in record.keys():
+                # brutally ignore all kinds of info from other structures.
+                logger.debug("Record: %s" % record)
+                # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
+                bad = ["arguments", "ns_server", "mname", "Version", "exchange"]
+                my_list = list(record.keys())
+                if [e for e in bad if e in '\n'.join(my_list)]:
                     continue
 
                 if record["name"].endswith(url.url):

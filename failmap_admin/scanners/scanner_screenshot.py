@@ -71,6 +71,13 @@ class ScannerScreenshot:
             logger.debug("Skipped making screenshot, by request")
             return
 
+        # a list of domains that deliver hangs:
+        # http://email.heeze-leende.nl:80 -> downloads a binary, chrome hangs
+        if endpoint.uri_url() in ["http://email.heeze-leende.nl:80"]:
+            logger.debug("Special endpoint skipped, should be properly handled: %s",
+                         endpoint.uri_url())
+            return
+
         # since headless always creates the file "screenshot.png", just work in a
         # temporary dir:
         # timeout doesn't work, it just blocks the process and hangs it.

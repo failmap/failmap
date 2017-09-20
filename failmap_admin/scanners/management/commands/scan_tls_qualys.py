@@ -1,3 +1,5 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
@@ -5,6 +7,8 @@ from failmap_admin.map.determineratings import DetermineRatings
 from failmap_admin.scanners.managers import StateManager
 from failmap_admin.scanners.models import Url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys, TlsQualysScratchpad
+
+logger = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -36,72 +40,60 @@ class Command(BaseCommand):
 
         for organization in resume:
             StateManager.set_state("ScannerTlsQualys", organization.name)
-            urls = Command.scannable_organization_urls(organization)
-
-            if self.do_scan:
-                scanme = []
-                for url in urls:
-                    scanme.append(url.url)  # possible with a more pythonic way probably
-                s = ScannerTlsQualys()
-                s.scan(scanme)
-
-            if self.do_rate:
-                dr = DetermineRatings()
-                for url in urls:
-                    dr.rate_url(url=url)
-                dr.rate_organization(organization=organization)
-
-        print("Done, scanned all!")
+            Command.scan_new_urls()  # always try to scan new urls first, regardless of organization
+            Command.scan_organization(organization)
 
     @staticmethod
-    def scannable_organization_urls(organization):
+    def scan_organization(organization):
         """
 
         :return: list of url objects
         """
-        urls_to_scan = []
         # This scanner only scans urls with endpoints (because we inner join endpoint_is_dead)
 
-        # This scanner refuses to scan any urls that had a DNS / Not resolved error last time
-        # by looking at the scan logs. Looking at the scan logs is slow. Currently a single
-        # not resolved error does not kill a domain. Perhaps that it should be killed then.
-        # Today we're not trusting the DNS stuff that qualys does it seems.
-
-        # is_dead=False, endpoint__is_dead=False
+        # Using the HTTP scanner, it's very easy and quick to see if a url resolves.
+        # This is much faster than waiting 1.5 minutes for qualys to figure it out.
+        # So we're only scanning what we know works.
+        logger.info("Scanning organization: %s" % organization)
 
         urls = Url.objects.filter(organization=organization,
                                   is_dead=False,
-                                  not_resolvable=False)
-        for url in urls:
-            try:
-                # Refuse to scan urls that are not resolvable, make them not resolvable.
-                lastscan = TlsQualysScratchpad.objects.all().filter(domain=url.url).latest(
-                    field_name="when")
-                if "Unable to resolve domain name" not in lastscan.data:
-                    urls_to_scan.append(url)
-                else:
-                    url.make_unresolvable("Scratchpad stated unresolvable domain.",
-                                          lastscan.when)
-                    print("Skipping domain due to unable to resolve domain "
-                          "name in scratchpad: %s" % url)
-            except ObjectDoesNotExist:
-                # Especially if a last scan didn't exist, it should be scanned.
-                # There have been cases in the past where a failed scan was not saved.
-                print("Matching query didn't exist! :) - Also scanning domain: %s" % url.url)
-                urls_to_scan.append(url)
-                pass
+                                  not_resolvable=False,
+                                  endpoint__is_dead=False,
+                                  endpoint__protocol="https",
+                                  endpoint__port=443)
 
-        return urls_to_scan
+        if not urls:
+            logger.info("There are no alive https urls for this organization: %s" % organization)
+            return
+
+        s = ScannerTlsQualys()
+        s.scan([url.url for url in urls])
+
+        dr = DetermineRatings()
+        for url in urls:
+            dr.rate_url(url=url)
+        dr.rate_organization(organization=organization)
 
     @staticmethod
-    def scannable_new_urls():
+    def scan_new_urls():
         # find urls that don't have an qualys scan and are resolvable on https/443
         urls = Url.objects.filter(is_dead=False,
                                   not_resolvable=False,
-                                  endpoint__port=443).exclude(endpoint__tlsqualysscan__isnull=True)
+                                  endpoint__port=443,
+                                  ).exclude(endpoint__tlsqualysscan__isnull=False)
 
-        print("These are the new urls:")
+        logger.info("Good news! There are %s urls to scan!" % urls.count())
+
+        logger.debug("These are the new urls:")
         for url in urls:
-            print(url)
+            logger.debug(url)
 
-        raise NotImplemented
+        s = ScannerTlsQualys()
+        dr = DetermineRatings()
+        for url in urls:
+            s.scan([url.url])  # Scan here, speed up results on map.
+            dr.rate_url(url=url)
+            dr.rate_organization(organization=url.organization)
+
+        return urls
