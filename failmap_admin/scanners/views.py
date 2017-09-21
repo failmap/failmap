@@ -1,7 +1,7 @@
 from dal import autocomplete
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
+from django.template.loader import get_template
 from failmap_admin.organizations.models import Url
 
 from .forms import QualysScanForm
@@ -21,7 +21,7 @@ def tls(request):
 
     else:
         form = QualysScanForm
-        return render(request, 'index.html', {'form': form})
+        return render(request, 'scanners/index.html', {'form': form})
 
 
 class UrlAutocomplete(autocomplete.Select2QuerySetView):
