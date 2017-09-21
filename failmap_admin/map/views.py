@@ -4,12 +4,12 @@ from datetime import datetime
 
 import pytz
 from dateutil.relativedelta import relativedelta  # stats
-
 from django.db import connection
 from django.db.models import Count, Max
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import get_template
+
 from failmap_admin.map.determineratings import DetermineRatings
 
 from .models import Organization, OrganizationRating, Url

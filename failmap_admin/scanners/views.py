@@ -2,6 +2,7 @@ from dal import autocomplete
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
+
 from failmap_admin.organizations.models import Url
 
 from .forms import QualysScanForm
