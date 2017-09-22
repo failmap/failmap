@@ -35,7 +35,7 @@ class Command(BaseCommand):
             nargs='?',
             help="Specify a scan type with --scan_type type. Types available are:",
             choices=['brute_known_subdomains', 'brute_three_letters',
-                     'brute_dutch_basic', 'standard'],
+                     'brute_dutch_basic', 'standard', 'search_engines', 'certificate_transparency'],
             required=True,
             default="brute_known_subdomains"
         )
@@ -81,6 +81,14 @@ class Command(BaseCommand):
             scanfunction = "organization_brute_dutch"
         if "standard" in scan_type:
             scanfunction = "organization_standard_scan"
+        if "search_engines" in scan_type:
+            scanfunction = "organization_search_engines_scan"
+        if "certificate_transparency" in scan_type:
+            scanfunction = "organization_certificate_transparency"
 
+        logger.debug("Calling %s scan on: %s" % (scanfunction, organization))
         added = getattr(s, scanfunction)(organization)  # dynamically call function
-        ScannerHttp.scan_url_list_standard_ports(added)
+        logger.debug("Added: %s" % added)
+        if added:
+            logger.debug("Scanning urls on standard ports")
+            ScannerHttp.scan_url_list_standard_ports(added)

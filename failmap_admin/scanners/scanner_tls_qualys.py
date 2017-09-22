@@ -1,5 +1,6 @@
 # References:
 # https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+import ipaddress
 import json
 import logging
 import sys
@@ -18,13 +19,7 @@ from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScra
 # Todo: use celery for distributed scanning, multiple threads. (within reason)
 # Currently using a pool for scanning, which was way better than the fake queue solution.
 # Todo: invalidate certificate name mismatches and self-signed certificates.
-# done: prevent a domain being scanned by multiple of these scanners at the same time (pending)
-# This becomes an issue when there are more scanners. And that would be depending on what type of
-# scan... if a connection is made, how many and such.
 # done: when are dead domains rescanned, when are they really removed from the db? never.
-# done: should we set all domains entered here into pending, or only the one scanned now?
-# The pending state is confusing: especially when things go wrong during a scan. So better
-# ignore the pending stuff and just rescan.
 # todo: check for network availability. What happens now?
 
 """
@@ -323,6 +318,7 @@ class ScannerTlsQualys:
                                                     endpoint['grade']))
                     else:
                         ScannerTlsQualys.log.debug("%s = No TLS (0)" % domain)
+                        ScannerTlsQualys.log.debug("Message: %s" % endpoint['statusMessage'])  # new
 
             if data['status'] == "DNS" or data['status'] == "ERROR":
                 if 'statusMessage' in data.keys():
@@ -499,6 +495,10 @@ class ScannerTlsQualys:
 
     @staticmethod
     def failmap_endpoint_ratings_received(qualys_endpoint, domain):
+        # we only store compressed ipv6 addresses. Qualys returns a weird format: abcd:0:0:0:...
+        # so we're going to compress it here
+        qualys_endpoint['ipAddress'] = ipaddress.ip_address(qualys_endpoint['ipAddress']).compressed
+
         # Manage endpoint
         # Endpoint exists? If not, make it,
         endpoints = Endpoint.objects.all().filter(domain=domain,
@@ -570,6 +570,8 @@ class ScannerTlsQualys:
         ScannerTlsQualys.log.debug("Handing could not connect to server")
         # If this endpoint exists and is alive, mark it as dead: port 443 does not
         # do anything.
+        qualys_endpoint['ipAddress'] = ipaddress.ip_address(qualys_endpoint['ipAddress']).compressed
+
         alive_endpoints = Endpoint.objects.all().filter(
             domain=domain,
             ip=qualys_endpoint['ipAddress'],
@@ -657,6 +659,10 @@ class ScannerTlsQualys:
         :return: None
         """
         ScannerTlsQualys.log.debug("Cleaning endpoints for %s", domain)
+
+        # normalize ip's
+        for endpoint in endpoints:
+            endpoint['ipAddress'] = ipaddress.ip_address(endpoint['ipAddress']).compressed
 
         # list of addresses that we're NOT going to declare dead :)
         ip_addresses = []

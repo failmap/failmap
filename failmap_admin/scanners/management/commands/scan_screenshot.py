@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from time import sleep
 
 import pytz
 from django.core.management.base import BaseCommand
@@ -18,6 +19,12 @@ class Command(BaseCommand):
     help = 'Create a screenshot'
 
     def handle(self, *args, **options):
+        Command.make_new_screenshots()
+        logger.debug("Sleeping for half a day.")
+        sleep(43200)  # sleep half a day
+
+    @staticmethod
+    def make_new_screenshots():
         s = ScannerScreenshot()
 
         one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
@@ -25,8 +32,8 @@ class Command(BaseCommand):
         # never had a screenshot or has a screenshot older than a month
         eps = Endpoint.objects.all().filter(is_dead=False,
                                             url__not_resolvable=False).filter(
-                                            (Q(screenshot__isnull=True) |
-                                             Q(screenshot__created_on__lt=one_month_ago)))
+            (Q(screenshot__isnull=True) |
+             Q(screenshot__created_on__lt=one_month_ago)))  # this condition is incorrect.
 
         logger.debug("Found endpoints %s" % eps.count())
 
@@ -37,6 +44,8 @@ class Command(BaseCommand):
         # per minute. Which is pretty ok.
         # todo: have a timeout of max N seconds per screenshot. Chrome doesn't have that.
         # killing python process might result in a random chrome process staying alive.
-        # todo: make a screenshot maximal once per month.
+
+        # Warning: opening a browser might also mean it wants to play audio automatically(!)
+        # this can bring some nice surprises :)
         for ep in eps:
             s.make_screenshot_chrome_headless(ep)

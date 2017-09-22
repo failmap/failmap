@@ -9,7 +9,7 @@ urlpatterns = [
     url(r'^data/stats/(?P<weeks_back>[0-9]{0,2})', stats, name='stats'),
     url(r'^data/topfail/(?P<weeks_back>[0-9]{0,2})', topfail, name='top fail'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
-    url(r'^data/report/(?P<organization_id>[0-9]{0,200})/$', organization_report,
-        name='organization report'),
+    url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
+        organization_report, name='organization report'),
     url(r'^$', index, name='failmap'),
 ]

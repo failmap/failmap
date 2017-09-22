@@ -1,7 +1,8 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import Endpoint, Screenshot, State, TlsQualysScan, TlsQualysScratchpad
+from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
+                     TlsQualysScratchpad)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -75,8 +76,20 @@ class StateAdmin(admin.ModelAdmin):
     readonly_fields = ['since']
 
 
+class EndpointGenericScanAdmin(admin.ModelAdmin):
+    list_display = ('endpoint', 'type', 'domain', 'rating',
+                    'explanation', 'last_scan_moment', 'rating_determined_on')
+    search_fields = ('endpoint', 'type', 'domain', 'rating',
+                     'explanation', 'last_scan_moment', 'rating_determined_on')
+    list_filter = ('endpoint', 'type', 'domain', 'rating',
+                   'explanation', 'last_scan_moment', 'rating_determined_on')
+    fields = ('endpoint', 'type', 'domain', 'rating',
+              'explanation', 'last_scan_moment', 'rating_determined_on')
+
+
 admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
 admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(Screenshot, ScreenshotAdmin)
 admin.site.register(State, StateAdmin)
+admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)

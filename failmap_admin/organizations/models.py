@@ -29,14 +29,14 @@ class Organization(models.Model):
         on_delete=models.PROTECT,
         default=1)
     name = models.CharField(max_length=50)
-    twitter_handle = models.CharField(max_length=150,
-                                      help_text="Include the @ symbol. "
-                                                "Used in the top lists to let visitors tweet to the"
-                                                "organization to wake them up.",
-                                      null=True,
-                                      blank=True,
-                                      validators=[validate_twitter]
-                                      )
+    twitter_handle = models.CharField(
+        max_length=150,
+        help_text="Include the @ symbol. Used in the top lists to let visitors tweet to the"
+                  "organization to wake them up.",
+        null=True,
+        blank=True,
+        validators=[validate_twitter]
+    )
 
     def __unicode__(self):
         return u'%s  - %s in %s' % (self.name, self.type, self.country, )
@@ -67,7 +67,11 @@ class Coordinate(models.Model):
         blank=True,
         null=True,
         choices=GEOJSON_TYPES)
-    area = JSONField(max_length=10000)
+    area = JSONField(
+        max_length=10000,
+        help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to "
+                  "reduce the amount of data to transfer."
+    )
 
     class Meta:
         managed = True
@@ -77,7 +81,11 @@ class Coordinate(models.Model):
 #  No cascade?
 class Url(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
-    url = models.CharField(max_length=150)
+
+    url = models.CharField(
+        max_length=150,
+        help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
+    )
 
     created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 

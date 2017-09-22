@@ -1,3 +1,12 @@
+// Currently we're migrating to Vue.
+
+// We chose vue because of this:
+// https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
+// also: reacts patent clause and mandatory jsx syntax ... NO
+// The amount of components available for vue is limited. But we can mix it with traditional scripts
+// Javascript will not update the values when altering the data, javascript cannot observe that.
+
+
 //                              Y     X
 var map = L.map('map').setView([52.15, 5.8], 8);
 map.scrollWheelZoom.disable();
@@ -41,7 +50,7 @@ info.update = function (props) {
     if (props) {
         sometext += "<h4>" + props.OrganizationName +"</h4>";
         sometext += '<b>Score: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + ' points</span>';
-        domainsDebounced(props.OrganizationID);
+        domainsDebounced(props.OrganizationID, $("#history")[0].value);
     } else {
         sometext += "<h4>-</h4>";
         sometext += '<b>Score: </b><span>- points</span>';
@@ -89,8 +98,11 @@ function highlightFeature(e) {
     info.update(layer.feature.properties);
 }
 
-var domainsDebounced = debounce(function(x) {
-    $.getJSON('/data/report/' + x, function (data) {
+var domainsDebounced = debounce(function(organization, weeks_back) {
+    if (!weeks_back)
+        weeks_back = 0;
+
+    $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
         var thingsdata = JSON.parse(data.calculation);
         vueDomainlist.urls = thingsdata["organization"]["urls"];
     });
@@ -292,15 +304,8 @@ $( document ).ready(function() {
         data: { top: Array },
         methods: {
             showReport: function (OrganizationID) {
-                location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
-                location.hash = "#report";
-                $.getJSON('/data/report/' + OrganizationID, function (data) {
-                    thingsdata = JSON.parse(data.calculation);
-                    vueReport.urls = thingsdata["organization"]["urls"];
-                    vueReport.points = data.rating;
-                    vueReport.when = data.when;
-                    vueReport.name = data.name;
-                });
+                jumptoreport();
+                showReportData(OrganizationID, $("#history")[0].value)
             },
             humanize: function(date){
                 return new Date(date).humanTimeStamp()
@@ -327,6 +332,12 @@ $( document ).ready(function() {
     $("#history").on("change input", debounce(function() {
         loadmap(this.value);
         loadtopfail(this.value);
+
+        if (selected_organization > -1){
+            showReportData(selected_organization, this.value);
+            domainsDebounced(selected_organization, this.value);
+        }
+
         //loadstats(this.value); // todo: cache
         vueHistory.weeksback = this.value;
     }, 100));
@@ -336,24 +347,33 @@ $( document ).ready(function() {
 
 });
 
+selected_organization = -1;
 
-// we chose vue because of this:
-// https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
-// also: reacts patent clause and mandatory jsx syntax ... NO
-// The amount of components available for vue is limited. But we can mix it with traditional scripts
-// Javascript will not update the values when altering the data, javascript cannot observe that.
-function showreport(e){
-    location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
-    location.hash = "#report";
-    var layer = e.target;
-    $.getJSON('/data/report/' + layer.feature.properties['OrganizationID'], function(data) {
+function showReportData(OrganizationID, weeks_ago){
+    selected_organization = OrganizationID;
+
+    if (!weeks_ago) {
+        weeks_ago = 0;
+    }
+
+    $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
         thingsdata = JSON.parse(data.calculation);
         vueReport.urls = thingsdata["organization"]["urls"];
         vueReport.points = data.rating;
         vueReport.when = data.when;
         vueReport.name = data.name;
     });
+}
 
+function jumptoreport(){
+    location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
+    location.hash = "#report";
+}
+
+function showreport(e){
+    jumptoreport();
+    var layer = e.target;
+    showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
 }
 
 
