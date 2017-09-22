@@ -391,7 +391,8 @@ class DetermineRatings:
                 "TLS_Qualys\": {\n\
                     "explanation": "%s",\n\
                     "points": "%s",\n\
-                    "since": "%s"\n\
+                    "since": "%s",\n\
+                    "last_scan": "%s"\n\
                 }\n' \
             '}\n'
 
@@ -410,7 +411,7 @@ class DetermineRatings:
                 if scan.qualys_rating != '0':
                     starttls_json = (tlsratingtemplate %
                                      (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                      scan.rating_determined_on))
+                                      scan.rating_determined_on, scan.scan_moment))
 
                     # you can only add the comma if there are multiple items...
                     if endpoint_json:

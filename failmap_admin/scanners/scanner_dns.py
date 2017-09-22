@@ -18,6 +18,8 @@ Sometimes it detects it, sometimes it doesnt.
 import logging
 import subprocess
 
+import untangle
+
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_http import ScannerHttp
 
@@ -60,11 +62,6 @@ class ScannerDns:
 
     # todo: make a "tool" dir, or something so the harvester and such are always available.
     # todo: if ScannerHttp.has_internet_connection():
-    def manual_harvesting(self, url):
-        subdomains = ScannerDns.subdomains_harvester(url)
-
-        for subdomain in subdomains:
-            ScannerDns.add_subdomain(subdomain, url)
 
     @staticmethod
     # todo: move this to url logic / url manager.
@@ -74,7 +71,6 @@ class ScannerDns:
         if ScannerHttp.resolves(fulldomain):
             if not Url.objects.all().filter(url=fulldomain, organization=url.organization).exists():
                 logger.info("Added domain to database: %s" % fulldomain)
-                # naive adding, since we don't have an organization.
                 u = Url()
                 u.organization = url.organization
                 u.url = fulldomain
@@ -87,7 +83,140 @@ class ScannerDns:
         return
 
     @staticmethod
+    def organization_search_engines_scan(organization):
+        urls = Url.objects.all().filter(organization=organization,
+                                        url__iregex="^[^.]*\.[^.]*$")
+        # todo: what if the tld is dead / not resolvable cause the organization doesn't use it?
+        # is_dead = False, not_resolvable = False
+
+        if not urls:
+            logger.info("Organization %s has no urls to investigate." % organization)
+
+        addedlist = []
+        for url in urls:
+            addedlist = addedlist + ScannerDns.search_engines_scan(url)
+        return addedlist
+
+    @staticmethod
+    def organization_certificate_transparency(organization):
+        urls = Url.objects.all().filter(organization=organization,
+                                        url__iregex="^[^.]*\.[^.]*$")
+
+        if not urls:
+            logger.info("Organization %s has no urls to investigate." % organization)
+
+        addedlist = []
+        for url in urls:
+            addedlist = addedlist + ScannerDns.certificate_transparency(url)
+        return addedlist
+
+    @staticmethod
+    def search_engines_scan(url):
+        # Todo: sometimes the report contains subdomains for other organizations at top level domain
+        # Searching the internet for subdomains might result in overly long and incorrect lists.
+        # The only correct way is to curate domains by hand.
+        # So, we should also try to import those. So we have maximum result from our scan.
+        logger.info("Harvesting DNS of toplevel domain: %s" % url.url)
+        logger.warning("Search engines have strict rate limiting, do not use this function in an "
+                       "automated scan.")
+        # a bug in the harvester breaks the file at the first dot and uses that as the xml file,
+        # and the full filename as the html file.
+        file = ("%s_harvester_all" % url.url).replace(".", "_") + ".xml"
+        path = ScannerDns.working_directory + file
+
+        logger.debug("DNS results will be stored in file: %s" % path)
+        engine = "all"
+        subprocess.call(['python', ScannerDns.harvester_path,
+                         '-d', url.url,
+                         '-b', engine,
+                         '-s', '0',
+                         '-l', '100',
+                         '-f', path])
+
+        # read XML file, extract hosts + vhosts (both can contain the url).
+        # explicitly search for .toplevel.nl (with leading dot) to not find .blatoplevel.nl
+        subdomains = []
+        obj = untangle.parse(path)
+        if hasattr(obj.theHarvester, 'host'):
+            for host in obj.theHarvester.host:
+                hostname = host.hostname.cdata
+                logger.debug("Hostname: %s" % hostname)
+                if hostname.endswith("." + url.url):
+                    subdomains.append(hostname[0:len(hostname) - len(url.url) - 1])
+                    logger.debug("Subdomain: %s" % hostname[0:len(hostname) - len(url.url) - 1])
+
+        if hasattr(obj.theHarvester, 'vhost'):
+            for host in obj.theHarvester.vhost:
+                hostname = host.hostname.cdata
+                logger.debug("Hostname: %s" % hostname)
+                if hostname.endswith("." + url.url):
+                    subdomains.append(hostname[0:len(hostname) - len(url.url) - 1])
+                    logger.debug("Subdomain: %s" % hostname[0:len(hostname) - len(url.url) - 1])
+
+        subdomains = [x.lower() for x in subdomains]
+        subdomains = set(subdomains)  # only unique
+
+        logger.debug("Found subdomains: %s" % subdomains)
+
+        addedlist = []
+        for subdomain in subdomains:
+            added = ScannerDns.add_subdomain(subdomain, url)
+            if added:
+                addedlist.append(added)
+        return addedlist
+
+    @staticmethod
+    def certificate_transparency(url):
+        """
+        Checks the certificate transparency database for subdomains. Using a regex the subdomains
+        are extracted. This method is extremely fast and reliable: these certificates all exist.
+
+        Hooray for transparency :)
+
+        :param url:
+        :return:
+        """
+        import requests
+        import re
+
+        # https://crt.sh/?q=%25.zutphen.nl
+        crt_sh_url = "https://crt.sh/?q=%25." + str(url.url)
+        pattern = r"[^\s%>]*\." + str(url.url.replace(".", "\."))  # harder string formatting :)
+
+        response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
+        matches = re.findall(pattern, response.text)
+
+        subdomains = []
+        for match in matches:
+            # handle wildcards, sometimes subdomains have nice features.
+            # examples: *.apps.domain.tld.
+            # todo: perhaps store that it was a wildcard cert, for further inspection?
+            match = match.replace("*.", "")
+            if match != url.url:
+                subdomains.append(match[0:len(match) - len(url.url) - 1])  # wraps around
+
+        subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
+        subdomains = set(subdomains)
+
+        # 25 and '' are created due to the percentage and empty subdomains. Remove them
+        # wildcards (*) are also not allowed.
+        if '' in subdomains:
+            subdomains.remove('')
+        if '25' in subdomains:
+            subdomains.remove('25')
+
+        logger.debug("Found subdomains: %s" % subdomains)
+
+        addedlist = []
+        for subdomain in subdomains:
+            added = ScannerDns.add_subdomain(subdomain, url)
+            if added:
+                addedlist.append(added)
+        return addedlist
+
+    @staticmethod
     def subdomains_harvester(url):
+        # deprecated
         # todo: very ugly parsing, should be just reading the XML output.
         # python theHarvester.py -d zutphen.nl -b google -l 100
         engine = "google"
@@ -217,6 +346,11 @@ class ScannerDns:
     @staticmethod
     def dnsrecon_default(urls):
         # todo: Expanding IP ranges found in DNS and TXT records for Reverse Look-up takes ages.
+        # This is due to expansion of IPv6 addresses, which is extreme and sometimes impossible
+        # Since dnsrecon doesn't give the option to time-out or skip this expansion...
+        # so no std for us :'( - or timeout this method (and skipping meaningful results) or patch
+        # dnsrecon.
+        # This doesn't ask google, the harvester is a bit more smarter / advanced.
         imported_urls = []
         for url in urls:
             logger.info("Scanning DNS of toplevel domain: %s" % url.url)
@@ -227,6 +361,7 @@ class ScannerDns:
 
             # never continue with wildcard domains
             p = subprocess.Popen(['python', ScannerDns.dnsrecon_path,
+                                  '--type', '"rvl,srv,axfr,snoop,zonewalk"'
                                   '--domain', url.url,
                                   '-j', path], stdin=subprocess.PIPE)
             p.stdin.write('n'.encode(encoding='utf-8'))

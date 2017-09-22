@@ -97,7 +97,6 @@
                         </span>
                     </div>
                     <br />
-                    <p><small>{% endverbatim %}{% trans "This list displays only new data, not history." %}{% verbatim %}</small></p>
                 </div>
             </div>
             {% endverbatim %}
@@ -178,6 +177,7 @@
                                         <div v-for="(myrating, myratingkey) in rating">
                                             &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}<br />
                                                 {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
+                                                {% endverbatim %}{% trans "Last scan" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
                                             &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
                                         </div>
                                     </div>
@@ -228,24 +228,27 @@
 
                     <h2>Hoe compleet is dit?</h2>
                     <p>
-                        Antwoord: Er zijn meer dan 1800 domeinen getest van 350+ gemeenten. Er wordt getest
-                        op poort 443 (https). De geteste domeinen staan links op deze site vermeld. Er is
-                        alleen getest op *.gemeentenaam.tld, dus niet op doorverwijzingen. Sommige diensten
-                        zitten achter ip- en certificaatfiltering en zijn dus niet testbaar zonder de juiste
-                        voorwaarden. Sommige gemeenten accepteren DNS wildcards, hiervan zijn alleen www.~
-                        en ~ getest: dit is dus incompleet en kan voor deze gemeenten de schijn wekken dat
-                        alles in orde is.
+                        Antwoord: er zijn rond de 7000 domeinen van gemeenten gecontroleerd. Deze hebben ruim 20000
+                        verbindingen naar het internet. Op faalkaart wordt alleen een eerste indruk getoond
+                        van de veiligheid van de organisatie: er wordt dus alleen aan de oppervlakte, ofwel het
+                        laaghangende fruit gekeken.<br />
+                        Toch is er door vrijwilligers, automatische scanners en slimme truuks voor iedere organisatie
+                        een lijst met domeinen verzameld, dit helpt om een beter zicht te krijgen op wat de
+                        organisatie doet op het internet.<br />
+                        Omdat er alleen aan de oppervlakte wordt gekeken kan de schijn worden gewerkt dat een
+                        organisatie alles op orde heeft, terwijl dat in werkelijkheid niet zo is.<br />
                     </p>
 
                     <h2>Hoe komt de score tot stand?</h2>
                     <p>
-                        Sinds faalkaart 2.0 wordt de score anders opgebouwd: er wordt gerekend in punten.
+                        Antwoord: Sinds eind 2017 wordt de score anders opgebouwd: er wordt gerekend in punten.
                         Aan ieder beveiligingsprobleem worden punten toegekend.
                         <br />
-                        Alles onder de 100 punten wordt gezien als goed. Tussen de 100 en 399 punten is
-                        voldoende (oranje), alles daarboven is onvoldoende. Bij iedere verbinding naar
-                        het internet is er dus risico op meer punten: organisaties die erg veel kanalen
-                        naar het internet hebben, nemen dus meer risico en hebben meer te onderhouden.
+                        Zonder punten, of met weinig punten, wordt een organisatie groen weergegeven. Naarmate
+                        het puntenaantal oploopt wordt de organisatie oranje of zelfs rood.<br />
+                        De gedachte hierachter is dat organisaties die erg veel aan het internet hangen ook
+                        meer risico nemen. Natuurlijk wordt er naar ernst van de situatie punten gegeven:
+                        een ernstig probleem betekent dus ook dat de organisatie als rood wordt getoond.
                     </p>
 
                     <h2>Hoe komt de score tot stand?</h2>
@@ -412,10 +415,12 @@
 
             <div class="page-header">
                 <a name="footer" class="jumptonav"></a>
-                <h1>{% trans "Support Fail Map" %}</h1>
-                 <p>Failmap is open software by the <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a>.
-                        Support our mission to clean up the internet of dangerous failures: it helps protect your data and privacy as well.</p>
-                <p>{% trans "Your donations are welcome in time, support, money or in any other way." %}</p>
+                    <p><a href="https://github.com/failmap/" target="_blank">
+                          Fail map is open software</a> maintained by the
+                        <a href="https://internetcleanup.foundation" target="_blank">
+                            Internet Cleanup Foundation.</a>
+                        Support them to make the internet safer for everyone: your privacy may
+                        depend on it.</p>
             </div>
         </div>
     </body>

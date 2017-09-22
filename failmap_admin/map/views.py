@@ -37,8 +37,11 @@ def index(request):
 # todo: support weeks back, evenwhile the deleted urls and such from the past should still
 # be taken into account elsewhere (add deleted/dead urls to the report until the time they have
 # been killed... (do we know since when they exist?).../// hm.
-def organization_report(request, organization_id):
-    when = datetime.now(pytz.utc)
+def organization_report(request, organization_id, weeks_back=0):
+    if not weeks_back:
+        when = datetime.now(pytz.utc)
+    else:
+        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
     # getting the latest report.
     try:
@@ -58,7 +61,7 @@ def organization_report(request, organization_id):
         o = {}
 
     # why not have this serializable. This is so common...
-    return JsonResponse(o, json_dumps_params={'indent': 5})
+    return JsonResponse(o, json_dumps_params={'indent': 2})
 
 
 def string_to_delta(string_delta):

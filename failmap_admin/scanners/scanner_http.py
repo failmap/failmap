@@ -128,6 +128,7 @@ class ScannerHttp:
         domain = "%s://%s:%s" % (protocol, url.url, port)
         logger.debug("Scanning http(s) server on: %s" % domain)
 
+        # the ipv6 address returned here is already compressed.
         (ip4, ip6) = ScannerHttp.get_ips(url.url)
 #
         if not ip4 and not ip6:
@@ -171,11 +172,16 @@ class ScannerHttp:
             # Example: returning HTML, incompatible TLS (binary)
             # CertificateError
             # Example: wrong domain name for certificate
+            # certificate verify failed
+            # We don't care about certificate verification errors: it is a valid response.
+            # Nope: EOF occurred in violation of protocol
+            # Nope: also: fine, a response! :) - youll get an unexpected closed connection.
             logger.debug("%s: NOPE! - %s" % (url, Ex))
             strerror = Ex.args  # this can be multiple.  # zit in nested exception?
             # logger.debug("Error message: %s" % strerror)
             strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
-            if "BadStatusLine" in strerror or "CertificateError" in strerror:
+            if "BadStatusLine" in strerror or "CertificateError" in strerror or \
+                                              "certificate verify failed" in strerror:
                 logger.debug("Received BadStatusLine or CertificateError, which is an answer. "
                              "Still creating endpoint.")
                 if ip4:

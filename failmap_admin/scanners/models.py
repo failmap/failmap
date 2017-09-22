@@ -48,9 +48,19 @@ class Endpoint(models.Model):
     server_name = models.CharField(max_length=255,
                                    help_text="rdns, gift from the scan, deprecated",
                                    blank=True)  # a gift from the scan
-    ip = models.CharField(max_length=255)  # can be either IPv4, IPv6, maybe even a domain...
-    port = models.IntegerField(default=443)  # 1 to 65535
-    protocol = models.CharField(max_length=20)  # https://en.wikipedia.org/wiki/Transport_layer
+    ip = models.CharField(
+        max_length=255,
+        help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed "
+                  "representation: removing as many zeros as possible. For example:  "
+                  "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
+                  "IPv4: 127.000.000.001 = 127.0.0.1")
+    port = models.IntegerField(default=443,
+                               help_text="Ports range from 1 to 65535.")  # 1 to 65535
+    protocol = models.CharField(
+        max_length=20,
+        help_text="Mostly application layer protocols, such as HTTP, FTP,"
+                  "SSH and so on. For more, read here: "
+                  "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol")
 
     discovered_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
@@ -92,8 +102,8 @@ class TlsQualysScan(models.Model):
                                       null=True)
 
     # scan management
-    pending = models.BooleanField(default=0)  # scan in progress
-    pending_since = models.DateTimeField(null=True, blank=True)
+    # Deprecated: pending = models.BooleanField(default=0)  # scan in progress
+    # Deprecated: pending_since = models.DateTimeField(null=True, blank=True)
 
     # This is the last completed scan, we scan often, but the rating doesn't change that much
     # This is just so we can manage when to scan next and to say when we've last checked.
@@ -112,10 +122,71 @@ class TlsQualysScan(models.Model):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
-class Screenshot(models.Model):
+class EndpointGenericScan(models.Model):
+    """
+    This is a fact, a point in time.
+    """
+    type = models.CharField(
+        max_length=60,
+        db_index=True,
+        help_text="The type of scan that was performed. Instead of having different tables for each"
+                  "scan, this label separates the scans.")
     endpoint = models.ForeignKey(
         Endpoint,
-        on_delete=models.PROTECT, null=True, blank=True)
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True)
+    domain = models.CharField(
+        max_length=255,
+        help_text="Used when there is no known endpoint.")
+    rating = models.CharField(
+        max_length=3,
+        default=0,
+        help_text="Preferably an integer. Keep ratings over time consistent."
+    )
+    explanation = models.CharField(
+        max_length=255,
+        default=0,
+        help_text="Short explanation from the scanner on how the rating came to be."
+    )
+    last_scan_moment = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text="This gets updated when all the other fields stay the same. If one changes, a"
+                  "new scan will be saved, obsoleting the older ones."
+    )
+    rating_determined_on = models.DateTimeField(
+        help_text="This is when the current rating was first discovered. It may be obsoleted by"
+                  "another rating or explanation (which might have the same rating). This date "
+                  "cannot change once it's set."
+    )
+
+
+class EndpointGenericScanScratchpad(models.Model):
+    """
+    A debugging channel for generic scans.
+    You can easily truncate this log after 30 days.
+    """
+    type = models.CharField(
+        max_length=60,
+        db_index=True,
+        help_text="The type of scan that was performed. Instead of having different tables for each"
+                  "scan, this label separates the scans.")
+    domain = models.CharField(
+        max_length=255,
+        help_text="Used when there is no known Endpoint."
+    )
+    when = models.DateTimeField(
+        auto_now_add=True
+    )
+    data = models.TextField(
+        help_text="Whatever data to dump for debugging purposes."
+    )
+
+
+class Screenshot(models.Model):
+    endpoint = models.ForeignKey(
+        Endpoint, null=True, blank=True)
     domain = models.CharField(max_length=255, help_text="Used when there is no known URL.")
     filename = models.CharField(max_length=255)
     width_pixels = models.IntegerField(default=0)
