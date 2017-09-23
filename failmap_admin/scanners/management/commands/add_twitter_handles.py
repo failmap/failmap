@@ -21,7 +21,9 @@ class Command(BaseCommand):
     # https://docs.djangoproject.com/en/1.11/howto/custom-management-commands/
 
     def handle(self, *args, **options):
-        organisations = Organization.objects.all().filter(twitter_handle__isnull=True)
+        null = Organization.objects.all().filter(twitter_handle__isnull=True)
+        empty = Organization.objects.all().filter(twitter_handle="")
+        organisations = list(null) + list(empty)
 
         # todo: you can of course just ask duckduckgo
         try:
@@ -29,8 +31,9 @@ class Command(BaseCommand):
                 print("Twitter gemeente %s" % organisation.name)
                 twitter_handle = input("Type the twitter handle, including the @:")
                 print("U typed the following exploit: %s" % twitter_handle)
-                organisation.twitter_handle = twitter_handle
-                organisation.save()
+                if twitter_handle:
+                    organisation.twitter_handle = twitter_handle
+                    organisation.save()
         except KeyboardInterrupt:
             # a nice suprise when getting suicidal entering data...
             trollface = """

@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Upphovsrätt 2017 Google Inc. Med ensamrätt.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Du kan fylla i formulär snabbare i Chrome med hjälp av uppgifter från dina kontakter.";
+NSHumanReadableCopyright = "Upphovsrätt 2017 Google Inc. Med ensamrätt.";

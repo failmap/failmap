@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright 2017 Google Inc. 版權所有。";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "利用你的通訊錄詳細資料，快速在 Chrome 中填寫表單。";
+NSHumanReadableCopyright = "Copyright 2017 Google Inc. 版權所有。";

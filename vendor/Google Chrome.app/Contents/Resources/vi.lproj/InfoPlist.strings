@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Bản quyền 2017 Google Inc. Mọi quyền được bảo lưu.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Chi tiết từ danh bạ của bạn có thể giúp bạn điền vào biểu mẫu trong Chrome nhanh hơn.";
+NSHumanReadableCopyright = "Bản quyền 2017 Google Inc. Mọi quyền được bảo lưu.";

@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Hak cipta 2017 Google Inc. Semua hak dilindungi undang-undang.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Detail dari kontak dapat membantu Anda mengisi formulir lebih cepat di Chrome.";
+NSHumanReadableCopyright = "Hak cipta 2017 Google Inc. Semua hak dilindungi undang-undang.";

@@ -1,0 +1,15 @@
+Do not develop changes in included tools _within_ this project!
+Do so on the codebases of those tools.
+
+The tools in the vendor directory are carbon copies from Github and other sources, but that don't
+have a package in pip or another method this project uses.
+
+DNS scans: dnsrecon:
+https://github.com/darkoperator/dnsrecon
+
+DNS scans: theHarvester:
+https://github.com/laramies/theHarvester
+
+Screenshots: google Chrome (or Chromium):
+https://www.google.com/chrome/
+(will be moved when firefox headless can do this, or we program something using gtpy or whatever)

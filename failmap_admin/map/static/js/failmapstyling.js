@@ -277,7 +277,7 @@ $( document ).ready(function() {
 
             orangepercentage: function() {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["orange"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                    Math.floor(roundTo(this.data.data.now["orange"] / this.data.data.now["total_organizations"] * 100, 2)) + "%";
             },
 
             unknownpercentage: function() {
@@ -305,7 +305,8 @@ $( document ).ready(function() {
         methods: {
             showReport: function (OrganizationID) {
                 jumptoreport();
-                showReportData(OrganizationID, $("#history")[0].value)
+                showReportData(OrganizationID, $("#history")[0].value);
+                domainsDebounced(OrganizationID, $("#history")[0].value);
             },
             humanize: function(date){
                 return new Date(date).humanTimeStamp()

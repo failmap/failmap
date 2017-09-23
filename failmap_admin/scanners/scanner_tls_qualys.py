@@ -185,13 +185,18 @@ class ScannerTlsQualys:
         # results in there is not enough room after 30 minutes. So you need to start
         # scans slower. Event with 30 seconds it's too fast. So just do 60.
 
-        for domain in domains:
-            pool.apply_async(ScannerTlsQualys.scantask, [domain],
-                             callback=ScannerTlsQualys.success_callback,
-                             error_callback=ScannerTlsQualys.error_callback)
-            # ScannerTlsQualys.scantask(domain) # old sequential approach
-            ScannerTlsQualys.log.debug("Applying rate limiting, waiting max 70 seconds.")
-            sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
+        # todo: add keyboard interrupt handler.
+        # todo: figure out why it's not parallel anymore.
+        try:
+            for domain in domains:
+                pool.apply_async(ScannerTlsQualys.scantask, [domain],
+                                 callback=ScannerTlsQualys.success_callback,
+                                 error_callback=ScannerTlsQualys.error_callback)
+                # ScannerTlsQualys.scantask(domain) # old sequential approach
+                ScannerTlsQualys.log.debug("Applying rate limiting, waiting max 70 seconds.")
+                sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
+        except KeyboardInterrupt:
+            ScannerTlsQualys.log.info("Received keyboard interrupt, waiting for scan to end.")
 
         ScannerTlsQualys.log.debug("Closing pool")
         pool.close()

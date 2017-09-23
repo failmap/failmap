@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright 2017 Google Inc. Tots els drets reservats.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Disposar de detalls dels vostres contactes us pot ajudar a emplenar formularis amb més rapidesa a Chrome.";
+NSHumanReadableCopyright = "Copyright 2017 Google Inc. Tots els drets reservats.";

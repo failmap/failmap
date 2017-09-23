@@ -2,7 +2,9 @@ from django.contrib import admin
 from jet.admin import CompactInline
 
 from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
-                     TlsQualysScratchpad)
+                     TlsQualysScratchpad, Url)
+from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
+from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -38,18 +40,65 @@ class EndpointAdmin(admin.ModelAdmin):
     inlines = [TlsQualysScanAdminInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
 
+    actions = ['rate_url', 'scan_url']
+
+    def rate_url(self, request, queryset):
+
+        for endpoint in queryset:
+            dr = DetermineRatings()
+            dr.rate_url(url=endpoint.url)
+
+        self.message_user(request, "URL(s) have been rated")
+
+    def scan_url(self, request, queryset):
+
+        urls_to_scan = []
+        for endpoint in queryset:
+            urls_to_scan.append(endpoint.url.url)
+
+        s = ScannerTlsQualys()
+        s.scan(urls_to_scan)
+
+        self.message_user(request, "URL(s) have been scanned")
+
+    rate_url.short_description = "Rate (url)"
+    scan_url.short_description = "Scan (url)"
 
 class TlsQualysScanAdmin(admin.ModelAdmin):
-    list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                    'scan_date', 'rating_determined_on')
+    list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',
+                    'scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
                      'scan_date', 'rating_determined_on')
     list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                   'scan_date', 'rating_determined_on')
+                   'scan_date', 'rating_determined_on', 'qualys_message')
     fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
               'rating_determined_on')
 
     readonly_fields = ('scan_date', 'scan_time', 'scan_moment')
+
+    actions = ['rate_url', 'scan_url']
+
+    def rate_url(self, request, queryset):
+
+        for tlsqualysscan in queryset:
+            dr = DetermineRatings()
+            dr.rate_url(url=tlsqualysscan.endpoint.url)
+
+        self.message_user(request, "URL(s) have been rated")
+
+    def scan_url(self, request, queryset):
+
+        urls_to_scan = []
+        for tlsqualysscan in queryset:
+            urls_to_scan.append(tlsqualysscan.endpoint.url.url)
+
+        s = ScannerTlsQualys()
+        s.scan(urls_to_scan)
+
+        self.message_user(request, "URL(s) have been scanned")
+
+    rate_url.short_description = "Rate (url)"
+    scan_url.short_description = "Scan (url)"
 
 
 class TlsQualysScratchpadAdmin(admin.ModelAdmin):
@@ -62,7 +111,7 @@ class TlsQualysScratchpadAdmin(admin.ModelAdmin):
 
 class ScreenshotAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'domain', 'created_on', 'filename')
-    search_fields = ('endpoint', 'domain', 'created_on', 'filename')
+    search_fields = ('endpoint__url__url', 'domain', 'created_on', 'filename')
     list_filter = ('endpoint', 'domain', 'created_on', 'filename')
     fields = ('endpoint', 'domain', 'created_on', 'filename', 'width_pixels', 'height_pixels')
     readonly_fields = ['created_on']
@@ -79,7 +128,7 @@ class StateAdmin(admin.ModelAdmin):
 class EndpointGenericScanAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'type', 'domain', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on')
-    search_fields = ('endpoint', 'type', 'domain', 'rating',
+    search_fields = ('endpoint__url__url', 'type', 'domain', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = ('endpoint', 'type', 'domain', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')

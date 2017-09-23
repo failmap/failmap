@@ -30,6 +30,7 @@ from datetime import datetime
 
 import pytz
 import requests
+from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.organizations.models import Url
@@ -165,7 +166,9 @@ class ScannerHttp:
 
             else:
                 logger.debug("No status code? Now what?! %s" % url)
-        except (ConnectionRefusedError, ConnectionError) as Ex:
+        except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
+            logger.debug("%s: Timeout! - %s" % (url, Ex))
+        except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
             # ConnectionRefusedError: [Errno 61] Connection refused
             # Some errors have our interests:
             # BadStatusLine is an error, which signifies that the server gives an answer.

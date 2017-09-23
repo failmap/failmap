@@ -64,6 +64,9 @@ class ScannerPlainHttp:
             # 3: Due to SNI it's not possible where something is served.
 
             # !!! The only solution is to have a "curated" list of port 80 websites. !!!
+            # maybe compare an image of a non existing url with the random ones given here.
+            # if they are the same, then there is really no site. That should help clean
+            # non-existing wildcard domains.
 
             # Comparing with screenshots is simply not effective enough:
             # 1: Many HTTPS sites load HTTP resources, which don't show, and thus it's different.
@@ -77,13 +80,33 @@ class ScannerPlainHttp:
                 logger.debug("This url seems to have no https at all: %s" % url)
                 logger.debug("Checking if they exist, to be sure there is nothing.")
 
+                # It's not secure initially, do a last check. This might result in new
+                # endpoints, and therefore no scan record.
+                # todo: hm, you can't really check ipv6 redirects on an ipv4 box, now can you...
                 if not ScannerPlainHttp.verify_is_secure(url):
-                    logger.info("%s does not have a https site. Saving/updating scan." % url)
+
+                    logger.info("Checking if the URL redirects to a secure url: %s" % url)
+                    if ScannerPlainHttp.redirects_to_safety(url):
+                        logger.info("%s redirects to safety, saved by the bell." % url)
+                        for http_endpoint in http_endpoints:
+                            scan_manager.add_scan("plain_https", http_endpoint, 25,
+                                                  "Redirects to a secure site, while a secure "
+                                                  "counterpart on the standard port is missing.")
+
+                    else:
+                        logger.info("%s does not have a https site. Saving/updating scan." % url)
+                        for http_endpoint in http_endpoints:
+                            scan_manager.add_scan("plain_https", http_endpoint, 200,
+                                                  "Site does not redirect to secure url, and has no"
+                                                  "secure alternative on a standard port.")
+                else:
+                    # it is secure, and if there was a rating, then reduce it to 0
+                    # (with a new rating).
                     for http_endpoint in http_endpoints:
-                        scan_manager.add_scan("plain_https", http_endpoint, 200,
-                                              "No secure website found, "
-                                              "while an insecure website exists on the default "
-                                              "port.")
+                        if scan_manager.had_scan_with_points("plain_https", http_endpoint):
+                            scan_manager.add_scan("plain_https", http_endpoint, 0,
+                                                  "Has a secure equivalent, which wasn't so in the"
+                                                  "past.")
 
     @staticmethod
     def verify_is_secure(url):
@@ -96,8 +119,36 @@ class ScannerPlainHttp:
         endpoints = Endpoint.objects.all().filter(url=url, is_dead=False,
                                                   protocol="https", port=443)
         if endpoints:
+            logger.debug("Url does seem to be secure after all: %s" % url)
             return True
+        logger.debug("Url is still not secure: %s" % url)
         return False
+
+    # https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
+    @staticmethod
+    def redirects_to_safety(url):
+        import requests
+        from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
+        domain = "%s://%s:%s" % ("http", url.url, "80")
+        try:
+            response = requests.get(domain, timeout=(10, 10), allow_redirects=True)
+            if response.history:
+                logger.debug("Request was redirected, there is hope. Redirect path:")
+                for resp in response.history:
+                    logger.debug("%s: %s" % (resp.status_code, resp.url))
+                logger.debug("Final destination:")
+                logger.debug("%s: %s" % (response.status_code, response.url))
+                if response.url.startswith("https://"):
+                    logger.debug("Url starts with https, so it redirects to safety.")
+                    return True
+                logger.debug("Url is not redirecting to a safe url.")
+                return False
+            else:
+                logger.debug("Request was not redirected, so not going to a safe url.")
+                return False
+        except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError):
+            logger.debug("Request resulted into an error, it's not redirecting properly.")
+            return False
 
 
 class ScanManager:
@@ -125,6 +176,8 @@ class ScanManager:
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.save()
         else:
+            # make a new one, please don't update the existing one :)
+            gs = EndpointGenericScan()
             gs.explanation = message
             gs.rating = rating
             gs.endpoint = endpoint
@@ -132,3 +185,24 @@ class ScanManager:
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.rating_determined_on = datetime.now(pytz.utc)
             gs.save()
+
+    @staticmethod
+    def had_scan_with_points(scantype, endpoint):
+        """
+        Used for data deduplication. Don't save a scan that had zero points, but you can upgrade
+        to zero (or another rating)
+        :param scantype:
+        :param endpoint:
+        :return:
+        """
+        from .models import EndpointGenericScan
+
+        try:
+            gs = EndpointGenericScan.objects.all().filter(
+                type=scantype,
+                endpoint=endpoint,
+            ).latest('last_scan_moment')
+            if gs.rating:
+                return True
+        except ObjectDoesNotExist:
+            return False

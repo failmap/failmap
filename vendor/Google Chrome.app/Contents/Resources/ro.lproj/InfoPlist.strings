@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright 2017 Google Inc. Toate drepturile rezervate.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Detaliile din agendă vă pot ajuta să completați mai rapid formularele în Chrome.";
+NSHumanReadableCopyright = "Copyright 2017 Google Inc. Toate drepturile rezervate.";

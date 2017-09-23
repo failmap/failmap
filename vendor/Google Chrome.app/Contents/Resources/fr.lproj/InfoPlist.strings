@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright Google Inc. 2017. Tous droits réservés.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Les coordonnées de vos contacts peuvent vous aider à remplir les formulaires plus rapidement dans Chrome.";
+NSHumanReadableCopyright = "Copyright Google Inc. 2017. Tous droits réservés.";

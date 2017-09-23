@@ -1,4 +1,3 @@
-/vendor/
 /.idea/
 .DS_Store
 configuration.php
@@ -10,9 +9,10 @@ db.sqlite3
 .cache
 .coverage
 htmlcov
-failmap_admin/scanners/data/screenshots/*
-failmap_admin/map/static/images/screenshots/*
 trash.txt
 todo.txt
 error.log
 db_backup_*.sqlite3
+failmap_admin/map/static/images/screenshots/*
+failmap_admin/scanners/resources/output/dnsrecon/*
+failmap_admin/scanners/resources/output/theHarvester/*

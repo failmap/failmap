@@ -25,6 +25,7 @@ from PIL import Image
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Screenshot
+from django.conf import settings
 
 logger = logging.getLogger(__package__)
 
@@ -32,9 +33,11 @@ logger = logging.getLogger(__package__)
 class ScannerScreenshot:
     # todo: wait: https://bugzilla.mozilla.org/show_bug.cgi?id=1378010, FFX 57
     # todo: how to instruct the environment that there is a chrome present.
-    chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    working_directory = '../map/static/images/screenshots'
-    script_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)))
+    chrome = settings.TOOLS['chrome']['executable']['mac']
+
+    # deprecated
+    working_directory = '../map/static/images/screenshots'  # deprecated
+    script_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)))  # deprecated
 
     @staticmethod
     def make_screenshot(url):
@@ -57,13 +60,13 @@ class ScannerScreenshot:
         safe_filename = str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
         safe_filename_resized = str(re.sub(r'[^a-zA-Z0-9_]', '',
                                            endpoint.uri_url() + now)) + '_small.png'
-        sd = ScannerScreenshot.script_directory
-        wd = ScannerScreenshot.working_directory
 
-        tmp_dir = sd + "/" + wd + "/" + now
-        output_filepath = sd + "/" + wd + "/" + safe_filename
-        output_filepath_resized = sd + "/" + wd + "/" + safe_filename_resized
-        output_filepath_latest = sd + "/" + wd + "/" + \
+        xd = settings.TOOLS['chrome']['screenshot_output_dir']
+
+        tmp_dir =                   xd + now
+        output_filepath =           xd + safe_filename
+        output_filepath_resized =   xd + safe_filename_resized
+        output_filepath_latest =    xd + \
             str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + "_latest")) + '.png'
 
         # skip if there is already a latest image, just to speed things up.
