@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Telif Hakkı 2017 Google Inc. Tüm hakları saklıdır.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "Kişilerinizde kayıtlı bilgiler, Chrome'da formları daha hızlı bir şekilde doldurmanıza yardımcı olabilir.";
+NSHumanReadableCopyright = "Telif Hakkı 2017 Google Inc. Tüm hakları saklıdır.";

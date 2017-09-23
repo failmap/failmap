@@ -59,3 +59,8 @@ Be sure to active the environment before starting development every time:
 
     . venv/bin/activate
 
+# Thanks to
+This project is being maintained by the Internet Cleanup Foundation.
+Special thanks to the SIDN Fonds for believing in this method of improving privacy.
+
+Thanks to the many authors contributing to open software.

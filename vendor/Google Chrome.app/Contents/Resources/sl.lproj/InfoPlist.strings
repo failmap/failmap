@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright 2017 Google Inc. Vse pravice pridržane.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "S podatki iz stikov lahko hitreje izpolnjujete obrazce v Chromu.";
+NSHumanReadableCopyright = "Copyright 2017 Google Inc. Vse pravice pridržane.";

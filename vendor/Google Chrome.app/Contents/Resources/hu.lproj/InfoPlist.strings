@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Copyright 2017 Google Inc. Minden jog fenntartva.";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "A névjegyek részletei révén gyorsabban kitöltheti az űrlapokat a Chrome-ban.";
+NSHumanReadableCopyright = "Copyright 2017 Google Inc. Minden jog fenntartva.";

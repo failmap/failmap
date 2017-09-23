@@ -104,7 +104,6 @@ WSGI_APPLICATION = 'failmap_admin.wsgi.application'
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 # Since we don't use anything specific from a db engine, we move to sqllite.
-PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -246,5 +245,41 @@ LOGGING = {
             'propagate': False,  # if you don't the root logger will also output.
             # see: https://stackoverflow.com/questions/19561058/duplicate-output-in-simple-p...
         },
+        'failmap_admin.map': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'propagate': False,  # if you don't the root logger will also output.
+            # see: https://stackoverflow.com/questions/19561058/duplicate-output-in-simple-p...
+        },
     },
 }
+
+# add a slash at the end so we know it's a directory.
+# Don't want to do things to anything in /
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__)) + '/'
+VENDOR_DIR = os.path.abspath(os.path.dirname(__file__) + '/../vendor/') + '/'
+# print(PROJECT_DIR)
+# print(VENDOR_DIR)
+# todo: chrome works only for mac. Not yet for linux.
+TOOLS = {
+    'chrome': {
+        'executable': {
+            'mac': VENDOR_DIR + "Google Chrome.app/Contents/MacOS/Google Chrome",
+            'linux': "/dev/null",
+        },
+        'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
+    },
+    'theHarvester': {
+        'executable': VENDOR_DIR + "theHarvester/theHarvester.py",
+        'output_dir': PROJECT_DIR + "scanners/resources/output/theHarvester/"
+    },
+    'dnsrecon': {
+        'executable': VENDOR_DIR + "dnsrecon/dnsrecon.py",
+        'output_dir': PROJECT_DIR + "scanners/resources/output/dnsrecon/",
+        'wordlist_dir': PROJECT_DIR + "scanners/resources/wordlists/",
+    }
+}
+
+# print(TOOLS['chrome']['executable']['mac'])
+# print(TOOLS['chrome']['screenshot_output_dir'])
+# exit(-1)

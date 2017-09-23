@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, 版权所有2017 Google Inc. 保留所有权利。";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "通讯录中的详细信息有助于您在Chrome中更快速地填写表单。";
+NSHumanReadableCopyright = "版权所有2017 Google Inc. 保留所有权利。";

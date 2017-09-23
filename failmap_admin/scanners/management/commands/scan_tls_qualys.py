@@ -18,12 +18,33 @@ class Command(BaseCommand):
     # def add_arguments(self, parser):
     #    parser.add_argument('poll_id', nargs='+', type=int)
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--manual', '-o',
+            help="Give an url to scan via command line.",
+            nargs=1,
+            required=False,
+            default=False,
+            type=bool
+        )
+
     do_scan = True
     do_rate = True
 
     def handle(self, *args, **options):
-        while 1:
-            self.scan()
+        if options['manual']:
+            url = input("Type the url, without protocol:")
+            url = Url.objects.all().filter(url=url).first()
+
+            s = ScannerTlsQualys()
+            s.scan([url.url])
+
+            dr = DetermineRatings()
+            dr.rate_url(url=url)
+            dr.rate_organization(organization=url.organization)
+        else:
+            while 1:
+                self.scan()
 
     def scan(self):
         # todo: sort the organizations on the oldest scanned first, or never scanned first.
@@ -78,6 +99,7 @@ class Command(BaseCommand):
     @staticmethod
     def scan_new_urls():
         # find urls that don't have an qualys scan and are resolvable on https/443
+        # todo: perhaps find per organization, so there will be less ratings? (rebuilratings cleans)
         urls = Url.objects.filter(is_dead=False,
                                   not_resolvable=False,
                                   endpoint__port=443,
@@ -127,9 +149,31 @@ class Command(BaseCommand):
 
         s = ScannerTlsQualys()
         dr = DetermineRatings()
-        for url in urls:
-            s.scan([url.url])  # Scan here, speed up results on map.
-            dr.rate_url(url=url)
-            dr.rate_organization(organization=url.organization)
+
+        import math
+
+        # Scan the new urls per 30, which takes about 30 minutes.
+        # Why: so scans will still be multi threaded and the map updates frequently
+        #      and we have a little less ratings if multiple urls are from one organization
+        batch_size = 30
+        logger.debug("Scanning new urls in batches of: %s" % batch_size)
+        i = 0
+        iterations = int(math.ceil(len(urls) / batch_size))
+        while i < iterations:
+            logger.info("New batch %s: from %s to %s" % (i, i*batch_size, (i+1)*batch_size))
+            myurls = urls[i*batch_size:(i+1)*batch_size]
+            i = i + 1
+
+            # ah yes, give "real" urls.. .not url objects.
+            urlstrings = []
+            for url in myurls:
+                urlstrings.append(url.url)
+            s.scan(urlstrings)
+
+            for url in myurls:
+                dr.rate_url(url=url)
+
+            for url in myurls:
+                dr.rate_organization(organization=url.organization)
 
         return urls

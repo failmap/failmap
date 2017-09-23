@@ -1,0 +1,5 @@
+CFBundleDisplayName = "Google Chrome";
+CFBundleGetInfoString = "Google Chrome 61.0.3163.100, কপিরাইট 2017 Google Inc৷ সর্বস্বত্ব সংরক্ষিত৷";
+CFBundleName = "Chrome";
+NSContactsUsageDescription = "আপনার পরিচিতিগুলির বিশদ বিবরণ আপনাকে Chrome এ আরও দ্রুত ফর্মগুলি পূরণ করতে সাহায্য করতে পারে৷";
+NSHumanReadableCopyright = "কপিরাইট 2017 Google Inc৷ সর্বস্বত্ব সংরক্ষিত৷";

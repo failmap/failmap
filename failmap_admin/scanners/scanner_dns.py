@@ -22,6 +22,7 @@ import untangle
 
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_http import ScannerHttp
+from django.conf import settings
 
 logger = logging.getLogger(__package__)
 
@@ -30,33 +31,32 @@ logger = logging.getLogger(__package__)
 # the catch all is sometimes not detected by dnsrecon
 class ScannerDns:
 
-    working_directory = "/var/www/faalkaart/test/dnsrecon/output/"
-
-    harvester_path = "/var/www/faalkaart/test/theHarvester/theHarvester.py"
-    dnsrecon_path = "/var/www/faalkaart/test/dnsrecon/dnsrecon.py"
+    harvester_path = settings.TOOLS['theHarvester']['executable']
+    dnsrecon_path = settings.TOOLS['dnsrecon']['executable']
 
     # the length is used for checking wildcards, dnsrecon doesn't always does that right.
     # if the returned list of domains is about as long as the wordlist... then it's a wildcard
     # except if the wordlist is very small.
     wordlists = {
         'dutch_basic': {
-            'path': "/var/www/faalkaart/test/dnsrecon/wordlists/OpenTaal-210G-basis-gekeurd.txt",
+            'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "OpenTaal-210G-basis-gekeurd.txt",
             'length': 180000
         },
         # organizations _LOVE_ three letter acronyms! I mean TLA's! :)
         # Let's call the Anti Acronym Association of America.
         'three_letters': {
-            'path': "/var/www/faalkaart/test/dnsrecon/wordlists/threeletterwordlist.txt",
+            'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "threeletterwordlist.txt",
             'length': 18000
         },
         'known_subdomains': {
-            'path': "/var/www/faalkaart/test/dnsrecon/wordlists/knownsubdomains.txt",
+            'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "knownsubdomains.txt",
             'length': 200
         },
-        # the nonsense is list is used to determine wildcards, dnsrecon fails at this too often.
+        # We want to know if a domain uses wildcards, and also store it. So dnsrecon might be suited
+        # for this, it doesn't output if a url has wildcard support.
         'nonsense': {
-            'path': "/var/www/faalkaart/test/dnsrecon/wordlists/nonsense.txt",
-            'length': 5
+            'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "nonsense.txt",
+            'length': 2
         }
     }
 
@@ -122,7 +122,7 @@ class ScannerDns:
         # a bug in the harvester breaks the file at the first dot and uses that as the xml file,
         # and the full filename as the html file.
         file = ("%s_harvester_all" % url.url).replace(".", "_") + ".xml"
-        path = ScannerDns.working_directory + file
+        path = settings.TOOLS['theHarvester']['output_dir'] + file
 
         logger.debug("DNS results will be stored in file: %s" % path)
         engine = "all"
@@ -320,7 +320,7 @@ class ScannerDns:
             logger.info("Bruting DNS of toplevel domain: %s" % url.url)
             logger.debug("Using wordlist: %s" % wordlist)
             file = "%s_data_brute.json" % url.url
-            path = ScannerDns.working_directory + file
+            path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
             logger.debug("DNS results will be stored in file: %s" % path)
 
@@ -355,7 +355,7 @@ class ScannerDns:
         for url in urls:
             logger.info("Scanning DNS of toplevel domain: %s" % url.url)
             file = "%s_data_default.json" % url.url
-            path = ScannerDns.working_directory + file
+            path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
             logger.debug("DNS results will be stored in file: %s" % path)
 
@@ -407,7 +407,7 @@ class ScannerDns:
     def url_uses_wildcards(url):
         logger.debug("Checking for DNS wildcards on domain: %s" % url.url)
         file = "%s_data_wildcards.json" % url.url
-        path = ScannerDns.working_directory + file
+        path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
         logger.debug("DNS results will be stored in file: %s" % path)
 
