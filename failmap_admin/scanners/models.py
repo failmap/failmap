@@ -41,8 +41,7 @@ class Endpoint(models.Model):
                                                         "have been fixed manually in production"
                                                         "and the scanner is ready.")
     url = models.ForeignKey(
-        Url,
-        on_delete=models.PROTECT, null=True, blank=True)
+        Url, null=True, blank=True)
 
     # server information
     server_name = models.CharField(max_length=255,

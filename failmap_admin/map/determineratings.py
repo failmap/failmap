@@ -11,6 +11,7 @@ from failmap_admin.scanners.models import Endpoint, TlsQualysScan
 
 from .models import OrganizationRating, UrlRating
 import logging
+from failmap_admin.scanners.models import EndpointGenericScan
 
 logger = logging.getLogger(__package__)
 
@@ -73,6 +74,116 @@ class DetermineRatings:
             for url in urls:
                 DetermineRatings.rate_url(url, when)
 
+    @staticmethod
+    def rate_organizations_efficient(create_history=False):
+        os = Organization.objects.all().order_by('name')
+        if create_history:
+            for o in os:
+                times = DetermineRatings.significant_times(organization=o)
+                for time in times:
+                    DetermineRatings.rate_organization(o, time)
+        else:
+            for o in os:
+                DetermineRatings.rate_organization(o, datetime.now(pytz.utc))
+
+
+    @staticmethod
+    def rate_urls_efficient(create_history=False):
+
+        urls = Url.objects.filter(is_dead=False).order_by('url')
+
+        if create_history:
+            for url in urls:
+                times = DetermineRatings.significant_times(url=url)
+                for time in times:
+                    DetermineRatings.rate_url(url, time)
+        else:
+            for url in urls:
+                DetermineRatings.rate_url(url, datetime.now(pytz.utc))
+
+    @staticmethod
+    def significant_times(organization=None, url=None):
+        """
+        Searches for all significant point in times that something changed. The goal is to save
+        unneeded queries when rebuilding ratings. When you know when things changed, you know
+        at what moments you need to create reports.
+
+        Another benefit is not only less queries, but also more granularity for reporting: not just
+        per week, but known per day.
+
+        We want to know:
+        - When a rating was made, since only changes are saved, all those datapoints.
+        - - This implies when the url was alive (at least after a positive result).
+        - When a url was not resolvable (aka: is not in the report anymore)
+
+        :return:
+        """
+
+        if organization and url:
+            logger.info("Both URL and organization given, please supply one! %s %s" %
+                        (organization, url))
+            return []
+
+        urls = []
+        if organization:
+            logger.info("Getting all urls from organization: %s" % organization)
+            urls = Url.objects.filter(organization=organization)
+        if url:
+            logger.info("Getting all url: %s" % url)
+            urls = [url]
+
+        if not urls:
+            logger.info("Could not find urls from organization or url.")
+            return []
+
+        tls_qualys_scan_dates = []
+        try:
+            tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls)
+            tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
+            logger.debug("tls_qualys_scan_dates: %s" % tls_qualys_scan_dates)
+        except ObjectDoesNotExist:
+            # no tls scans
+            pass
+
+        generic_scan_dates = []
+        try:
+            generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url__in=urls)
+            generic_scan_dates = [x.rating_determined_on for x in generic_scans]
+            logger.debug("generic_scan_dates: %s" % generic_scan_dates)
+        except ObjectDoesNotExist:
+            # no generic scans
+            pass
+
+        non_resolvable_dates = []
+        try:
+            non_resolvable_urls = Url.objects.filter(not_resolvable=True,
+                                                     is_dead=False,
+                                                     url__in=urls)
+            non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
+            logger.debug("non_resolvable_dates: %s" % non_resolvable_dates)
+        except ObjectDoesNotExist:
+            # no non-resolvable urls
+            pass
+
+        datetimes = set(tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates)
+
+        # todo: reduce this to one moment per day only, otherwise there will be a report for
+        # todo: the order of this list should be chronological: otherwise ratings get overwritten?
+        # ^ it should be different every time. So, this doesn't matter.
+        # for every scan: that is highly inefficient.
+        logger.debug("Found amount of dates, optimizing: %s", len(datetimes))
+
+        # take the last moment of the date, so the scan will have happened at the correct time
+        datetimes2 = [x.replace(hour=23,minute=59,second=59, microsecond=999999) for x in datetimes]
+        datetimes2 = list(set(datetimes2))
+        datetimes2.sort()
+
+        logger.debug("Found amount of dates: %s", len(datetimes2))
+        # logger.debug("Relevant dates for organization/url: %s", datetimes2)
+
+        return datetimes2
+
+
     # also callable as admin action
     # this is 100% based on url ratings, just an aggregate of the last status.
     # make sure the URL ratings are up to date, they will check endpoints and such.
@@ -88,12 +199,16 @@ class DetermineRatings:
         total_rating = 0
         total_calculation = ""
 
-        urls = Url.objects.filter(organization=organization, is_dead=False)
+        # hij gaat alle urls ophalen, ookal zijn die lang niet meer levend op een bepaalde periode
+        # je moet de relevante urls voor deze periode bepalen, sommige zijn dood, anderen niet
+        # net als dat je endpoints bij urls bepaalt(!)
+        # urls = Url.objects.filter(organization=organization, is_dead=False)
+        urls = DetermineRatings.get_relevant_urls_at_timepoint(organization=organization,
+                                                               when=when)
 
         for url in urls:
             try:
-                urlratings = UrlRating.objects
-                urlratings = urlratings.filter(url=url, when__lte=when)
+                urlratings = UrlRating.objects.filter(url=url, when__lte=when)
                 urlratings = urlratings.values("rating", "calculation")
                 urlrating = urlratings.latest("when")  # kills the queryset, results 1
 
@@ -106,12 +221,14 @@ class DetermineRatings:
 
                 total_calculation += urlrating["calculation"]
             except UrlRating.DoesNotExist:
+                logger.warning("Url has no rating at this moment: %s %s" % (url, when))
                 pass
 
         try:
             last = OrganizationRating.objects.filter(
                 organization=organization, when__lte=when).latest('when')
         except OrganizationRating.DoesNotExist:
+            logger.debug("Could not find the last organization rating, creating a dummy one.")
             last = OrganizationRating()  # create an empty one
 
         # 2017 08 29 bugfix: you can have a rating of 0, eg when all urls are dead or perfect
@@ -130,59 +247,49 @@ class DetermineRatings:
         "rating": "%s",
         "urls": [%s]
         }
-    }"""
+    }""".strip()
 
         organization_json = (organizationratingtemplate % (organization.name, total_rating,
                                                            total_calculation))
         # print(organization_json)
+        # verify the JSON is correct
         parsed = json.loads(organization_json)
-        organization_json_checked = json.dumps(parsed, indent=4)
+        organization_json_checked = json.dumps(parsed)
         # print("%s %s" % (last.calculation, total_calculation))
-        if last.calculation != organization_json_checked:
+        if last.calculation != organization_json:
             logger.debug("The calculation (json) has changed, so we're saving this report, rating.")
             u = OrganizationRating()
             u.organization = organization
             u.rating = total_rating
             u.when = when
-            u.calculation = organization_json_checked
+            u.calculation = organization_json
             u.save()
         else:
-            logger.debug("The calculation is still the same, not creating a new OrganizationRating")
+            logger.warning("The calculation is still the same, not creating a new OrganizationRating")
 
     # also callable as admin action
     @staticmethod
     def rate_url(url, when=""):
 
-        # If there is no time slicing, then it's today.
         if not when:
             when = datetime.now(pytz.utc)
 
         explanation, rating = DetermineRatings.get_url_score_modular(url, when)
 
-        # avoid duplication. We think the explanation is the most unique identifier.
-        # therefore the order in which URLs are grabbed (if there are new ones) is important.
-        # it cannot be random, otherwise the explanation will be different every time.
-
         # it's very possible there is no rating yet
         # we do show the not_resolvable history.
-        # todo: possibly cachable, saving thousands of queries.
         try:
             last_url_rating = \
                 UrlRating.objects.filter(url=url,
                                          url__urlrating__when__lte=when,
                                          url__is_dead=False).latest("when")
         except ObjectDoesNotExist:
-            # todo, fix broad exception.
+            # make sure there is no exception later on.
             last_url_rating = UrlRating()  # todo: evaluate if this is a wise approach.
 
-        # possibly a bug: you're not getting the latest rating... you get the whole set and
-        # then get the first one (the oldest)... that's why some urls keep getting ratings.
-        # last_url_rating = UrlRating.objects.filter(url=url, url__urlrating__when__lte=when)[:1]
-        # if last_url_rating.exists():
-        #    last_url_rating = last_url_rating.get()
-        # else:
-        #    last_url_rating = UrlRating()  # create an empty one
-
+        # avoid duplication. We think the explanation is the most unique identifier.
+        # therefore the order in which URLs are grabbed (if there are new ones) is important.
+        # it cannot be random, otherwise the explanation will be different every time.
         if explanation and last_url_rating.calculation != explanation:
             u = UrlRating()
             u.url = url
@@ -190,6 +297,9 @@ class DetermineRatings:
             u.when = when
             u.calculation = explanation
             u.save()
+        else:
+            logger.warning("The calculation is still the same, not creating a new UrlRating")
+
 
     """
 from failmap_admin.map.determineratings import DetermineRatings
@@ -218,16 +328,17 @@ DetermineRatings.rate_organization(o)
             "points": "%s",
             "endpoints": [%s]
             }
-        }"""
+        }""".strip()
 
         endpoint_template = """
             {
             "%s:%s": {
                 "ip": "%s",
                 "port": "%s",
+                "protocol": "%s",
                 "ratings": [%s]
                 }
-            }"""
+            }""".strip()
 
         rating = 0
         endpoint_jsons = []
@@ -249,12 +360,14 @@ DetermineRatings.rate_organization(o)
                                                            endpoint.port,
                                                            endpoint.ip,
                                                            endpoint.port,
+                                                           endpoint.protocol,
                                                            ",".join(jsons))))
 
         # now prepare the url bit:
         if endpoint_jsons:
             url_json = url_rating_template % (url.url, rating, ",".join(endpoint_jsons))
             # logger.debug(url_json)
+            # verify correctness of json:
             parsed = json.loads(url_json)
             url_json = json.dumps(parsed)  # nice format
             return url_json, rating
@@ -265,7 +378,7 @@ DetermineRatings.rate_organization(o)
     # todo: can be abstracted.
     @staticmethod
     def get_report_from_scanner_http_plain(endpoint, when):
-        from failmap_admin.scanners.models import EndpointGenericScan
+        logger.debug("get_report_from_scanner_http_plain")
 
         if endpoint.protocol != "http":
             logger.debug("Endpoint is not on the right protocol. Nothing to find.")
@@ -279,12 +392,13 @@ DetermineRatings.rate_organization(o)
                     "since": "%s",
                     "last_scan": "%s"
                     }
-                }"""
+                }""".strip()
 
         try:
             scan = EndpointGenericScan.objects.filter(endpoint=endpoint,
                                                       last_scan_moment__lte=when,
-                                                      type="plain_https")
+                                                      type="plain_https",
+                                                      )
             scan = scan.latest('rating_determined_on')
 
             json = (rating_template % (scan.explanation,
@@ -292,6 +406,7 @@ DetermineRatings.rate_organization(o)
                                        scan.rating_determined_on,
                                        scan.last_scan_moment))
 
+            logger.debug("plain_https: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.rating))
             return scan.rating, json
         except ObjectDoesNotExist:
             logger.debug("No http plain scan on endpoint %s." % endpoint)
@@ -301,6 +416,7 @@ DetermineRatings.rate_organization(o)
 
     @staticmethod
     def get_report_from_scanner_tls_qualys(endpoint, when):
+        logger.debug("get_report_from_scanner_tls_qualys")
 
         if endpoint.port != 443 and endpoint.protocol != "https":
             logger.debug("Endpoint is not on the right port and protocol. Nothing to find.")
@@ -315,14 +431,24 @@ DetermineRatings.rate_organization(o)
             "A": "A, Good",
             "A+": "A+, Perfect",
             "T": "Chain of trust missing",
-            "0": "No TLS discovered, possibly another service available.",
+            "I": "Certificate not valid for domain name",  # Custom message
+            "0": "-",
         }
 
         # 0? that's port 443 without using TLS. That is extremely rare. In that case...
         # 0 is many cases a "not connect to server" error currently. But there is more.
-        # todo: when certificate mismatch, give 200 points: should be cleaned up.
-        ratings = {"T": 500, "F": 1000, "D": 400, "C": 200,
-                   "B": 100, "A-": 0, "A": 0, "A+": 0, "0": 0}
+        # Now checking messages returned from qualys. Certificate invalid for domain name now
+        # is awarded points.
+        ratings = {"T": 500,
+                   "F": 1000,
+                   "D": 400,
+                   "I": 200,
+                   "C": 200,
+                   "B": 100,
+                   "A-": 0,
+                   "A": 0,
+                   "A+": 0,
+                   "0": 0}
 
         tlsratingtemplate = """
                 {
@@ -332,14 +458,16 @@ DetermineRatings.rate_organization(o)
                     "since": "%s",
                     "last_scan": "%s"
                     }
-                }"""
+                }""".strip()
 
         try:
             scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
             scan = scan.latest('rating_determined_on')
 
-            # Ignore ratings with 0: then there was no TLS, and we don't know if there is
-            # a normal website on port 80.
+            # configuration errors
+            if scan.qualys_message == "Certificate not valid for domain name":
+                scan.qualys_rating = "I"
+
             if scan.qualys_rating != '0':
                 starttls_json = (tlsratingtemplate %
                                  (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
@@ -347,13 +475,52 @@ DetermineRatings.rate_organization(o)
 
                 rating = ratings[scan.qualys_rating]
 
+                logger.debug("TLS: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.qualys_rating))
                 return rating, starttls_json
+            else:
+                logger.debug("TLS: This tls scan resulted in no https. Not returning a score.")
+                return 0, ""
         except TlsQualysScan.DoesNotExist:
             # can happen that a rating simply isn't there yet. Perfectly possible.
             logger.debug("No tls qualys scan on endpoint %s." % endpoint)
             pass
 
         return 0, ""
+
+    @staticmethod
+    def get_relevant_urls_at_timepoint(organization, when):
+
+        urls = Url.objects.filter(organization=organization)
+
+        # urls alive at this moment, that are dead in the future (but not then)
+        not_resolving_urls = urls.filter(
+            created_on__lte=when,
+            not_resolvable=True,
+            not_resolvable_since__gte=when
+        )
+        logger.debug("Not resolvable urls:  %s" % not_resolving_urls.count())
+
+        dead_urls = urls.filter(
+            created_on__lte=when,
+            is_dead=True,
+            is_dead_since__gte=when
+        )
+        logger.debug("Dead urls:  %s" % dead_urls.count())
+
+        # urls that are still alive
+        existing_urls = urls.filter(
+            created_on__lte=when,
+            not_resolvable=False,
+            is_dead=False
+        ) # or is_dead=False,
+        logger.debug("Alive urls:  %s" % existing_urls.count())
+
+        url_list = list(not_resolving_urls) + list(dead_urls) + list(existing_urls)
+
+        for url in url_list:
+            print("relevant url on %s: %s" % (when, url))
+
+        return url_list
 
     @staticmethod
     # removed port=443, and protocol="https", since we want all types of scans to show.
@@ -380,6 +547,9 @@ DetermineRatings.rate_organization(o)
         logger.debug("Alive endpoints for this url: %s" % existing_endpoints.count())
 
         endpoint_list = list(dead_endpoints) + list(existing_endpoints)
+
+        for endpoint in endpoint_list:
+            print("relevant endpoint for %s: %s" % (when, endpoint))
 
         return endpoint_list
 

@@ -49,7 +49,7 @@ class UrlRating(models.Model):
         - Banners: C = 100 points
         - Headers: F = 1000 points
     """
-    url = models.ForeignKey(Url, on_delete=models.PROTECT,)
+    url = models.ForeignKey(Url)
     rating = models.IntegerField()
     when = models.DateTimeField(db_index=True)
     calculation = models.TextField()  # calculation of different scanners. There will be a loop

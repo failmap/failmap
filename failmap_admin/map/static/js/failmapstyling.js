@@ -64,9 +64,9 @@ info.addTo(map);
 
 // get color depending on population density value
 function getColor(d) {
-    return  d > 399 ? '#bd383c' :
-            d > 99  ? '#fc9645' :
-            d > -1  ? '#62fe69' :
+    return  d > 999 ? '#bd383c' :
+            d > 199  ? '#fc9645' :
+            d >= 0  ? '#62fe69' :
                       '#c1bcbb';
 }
 
@@ -103,7 +103,7 @@ var domainsDebounced = debounce(function(organization, weeks_back) {
         weeks_back = 0;
 
     $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
-        var thingsdata = JSON.parse(data.calculation);
+        var thingsdata = data.calculation;
         vueDomainlist.urls = thingsdata["organization"]["urls"];
     });
 }, 100);
@@ -245,6 +245,11 @@ $( document ).ready(function() {
                 if (points < 400) return "orange";
                 if (points > 399) return "red";
             },
+            colorizebg : function (points) {
+                if (points < 100) return "#dff9d7";
+                if (points < 400) return "#ffefd3";
+                if (points > 399) return "#fbeaea";
+            },
             idize: function (url){
                 url = url.toLowerCase();
                return url.replace(/[^0-9a-z]/gi, '')
@@ -358,7 +363,7 @@ function showReportData(OrganizationID, weeks_ago){
     }
 
     $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
-        thingsdata = JSON.parse(data.calculation);
+        thingsdata = data.calculation;
         vueReport.urls = thingsdata["organization"]["urls"];
         vueReport.points = data.rating;
         vueReport.when = data.when;
@@ -399,10 +404,10 @@ legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-    labels.push('<i style="background:' + getColor(0) + '"></i> Good');
-    labels.push('<i style="background:' + getColor(200) + '"></i> Average');
-    labels.push('<i style="background:' + getColor(400) + '"></i> Bad');
-    labels.push('<i style="background:' + getColor("-") + '"></i> Unknown');
+    labels.push('<i style="background:' + getColor(99) + '"></i> Good');
+    labels.push('<i style="background:' + getColor(999) + '"></i> Average');
+    labels.push('<i style="background:' + getColor(1000) + '"></i> Bad');
+    labels.push('<i style="background:' + getColor(-1) + '"></i> Unknown');
 
     div.innerHTML = labels.join('<br>');
     return div;

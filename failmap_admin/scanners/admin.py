@@ -27,12 +27,14 @@ class EndpointAdmin(admin.ModelAdmin):
     list_filter = ('server_name', 'ip', 'port', 'protocol', 'is_dead')
     fieldsets = (
         (None, {
-            'fields': ('url', 'domain', 'server_name', 'ip', 'port')
+            'fields': ('url', 'domain', 'server_name', 'ip', 'port', 'discovered_on')
         }),
         ('dead endpoint management', {
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
+
+    readonly_fields = ['discovered_on']
 
     def tls_scan_count(self, inst):
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()

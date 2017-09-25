@@ -157,38 +157,46 @@
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
                 <div v-if="name">
-                <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
-                <div>
-                    {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
-                    {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
-                    <br />
-                    {% trans "Score layout" %}: <br />
-                    {% verbatim %}
-                    <div v-for="url in urls">
-                        <div style="display:block" class="perurl">
-                            <a v-bind:href="'https://' + url.url.url" target="_blank"><div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/https' + idize(url.url.url) + '443_latest.png\');'" /></div></a>
-                            <div class="reportlist">
-                            <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                                {{ url.url.url }}</span>
-                            <div v-for="(endpoint, key) in url.url.endpoints">
-                                <div v-for="(myendpoint, mykey) in endpoint">
-                                    &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
-                                    <div v-for="(rating, key) in myendpoint.ratings">
-                                        <div v-for="(myrating, myratingkey) in rating">
-                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Result" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}<br />
-                                                {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
-                                                {% endverbatim %}{% trans "Last scan" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
-                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}
-                                        </div>
+                    <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
+                    <div>
+                        {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
+                        {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
+                        <br />
+                        {% verbatim %}
+                        <div v-for="url in urls" class="perurl" v-bind:style="'background-color: ' + colorizebg(url.url.points)">
+                            <div class="screenshotlist">
+                                <div v-for="(endpoint, key) in url.url.endpoints">
+                                    <div v-for="(myendpoint, mykey) in endpoint">
+                                        <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
+                                        <a v-bind:href="myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port" target="_blank"
+                                        v-bind:title="'Visit ' + myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port">
+                                            <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ myendpoint.protocol + idize(url.url.url) + myendpoint.port + '_latest.png\');'"></div>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
-                            <a :href="'https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest'" target="_blank">Second Opinion</a>
+                            <div class="reportlist">
+                                <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
+                                            {{ url.url.url }}</span>
+                                <div v-for="(endpoint, key) in url.url.endpoints">
+                                    <div v-for="(myendpoint, mykey) in endpoint">
+                                        &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
+                                        <div v-for="(rating, key) in myendpoint.ratings">
+                                            <div v-for="(myrating, myratingkey) in rating">
+                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Score" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}<br />
+                                                &nbsp; &nbsp; {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
+                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Last scan" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
+                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}<br />
+                                                <br />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a :href="'https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest'" target="_blank">Second Opinion</a>
                             </div>
                         </div>
+                        {% endverbatim %}
                     </div>
-                    {% endverbatim %}
-                </div>
                 </div>
             </div>
 
