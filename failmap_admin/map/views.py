@@ -52,16 +52,32 @@ def organization_report(request, organization_id, weeks_back=0):
                    'name',
                    'pk').order_by('-organizationrating__when')[:1].get()
 
+        report_json = """
+{
+    "rating": %s,
+    "when": "%s",
+    "name": "%s",
+    "id": %s,
+    "calculation": %s
+}
+    
+        """
+        report_json = report_json % (r['organizationrating__rating'],
+                                     r['organizationrating__when'],
+                                     r['name'],
+                                     r['pk'],
+                                     r['organizationrating__calculation'])
         o = {"rating": r['organizationrating__rating'],
              "calculation": r['organizationrating__calculation'],
              "when": r['organizationrating__when'],
              "name": r['name'],
              "id": r['pk']}
     except Organization.DoesNotExist as e:
-        o = {}
+        report_json = "{}"
 
+    x = json.loads(report_json)
     # why not have this serializable. This is so common...
-    return JsonResponse(o, json_dumps_params={'indent': 2})
+    return JsonResponse(x, json_dumps_params={'indent': 2}, safe=False)
 
 
 def string_to_delta(string_delta):

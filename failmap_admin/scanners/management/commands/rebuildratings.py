@@ -15,23 +15,11 @@ class Command(BaseCommand):
     # It has now been refactored into a command, so it's easier to work with.
 
     def handle(self, *args, **options):
-        print("Deleting ALL url ratings")
         UrlRating.objects.all().delete()
-        print("Deleting ALL organization ratings")
+        DetermineRatings.rate_urls_efficient(create_history=True)
+        DetermineRatings.rate_urls_efficient()  # this should not do anything anymore...
+
         OrganizationRating.objects.all().delete()
-
-        # This will create 52 weeks of N urls ratings. (2000 urls = 100.000 ratings)
-        # similar to organizations: 52 weeks of N organization (389 * 52 = 20.000 ratings)
-        # When the previous rating is the same as the current one, the rating will not be saved.
-        # So this is the real amount of data:
-        # urls: 11946 (saving 85% by deduplication)
-        # organizations: 2160 (saving 85% by deduplication)
-        dr = DetermineRatings()
-
-        # this makes a rating every 7 days, if there are new things to record.
-        dr.rate_urls(create_history=True)
-        dr.rate_organizations(create_history=True)
-
-        # add a rating for today
-        dr.rate_urls()
-        dr.rate_organizations()
+        DetermineRatings.rate_organizations_efficient(create_history=True)
+        print("Making the most recent organization rating, should not have any effect.")
+        DetermineRatings.rate_organizations_efficient()  # this should not do anything anymore...

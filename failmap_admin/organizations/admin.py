@@ -94,7 +94,7 @@ class UrlAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization', 'uses_dns_wildcard')
+            'fields': ('url', 'organization', 'uses_dns_wildcard', 'created_on')
         }),
         ('Resolvability', {
             'fields': ('not_resolvable', 'not_resolvable_since', 'not_resolvable_reason'),
@@ -103,6 +103,7 @@ class UrlAdmin(admin.ModelAdmin):
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
+    readonly_fields = ['created_on']
 
     def is_dead(self):
         if self.something == '1':
