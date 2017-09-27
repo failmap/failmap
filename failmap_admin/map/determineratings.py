@@ -148,6 +148,7 @@ class DetermineRatings:
         :return:
         """
 
+        # todo: all this validation adds to complexity.
         if organization and url:
             logger.info("Both URL and organization given, please supply one! %s %s" %
                         (organization, url))
@@ -214,19 +215,33 @@ class DetermineRatings:
         logger.debug("Found amount of dates, optimizing: %s", len(datetimes))
 
         # take the last moment of the date, so the scan will have happened at the correct time
-        datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999) for x in
+        datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc) for x in
                       datetimes]
         datetimes2 = list(set(datetimes2))
         datetimes2.sort()
 
-        logger.debug("Found amount of dates: %s", len(datetimes2))
-        # logger.debug("Relevant dates for organization/url: %s", datetimes2)
+        # if the last datetime2 is today, then just reduce it to NOW to cause less confusion in
+        # the dataset (don't place ratings in the future).
+        if datetimes2:
+            if datetimes2[len(datetimes2)-1] == datetime.now().replace(
+                    hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc):
+                datetimes2[len(datetimes2)-1] = datetime.now(pytz.utc)
+
+            logger.debug("Found amount of dates: %s", len(datetimes2))
+            # logger.debug("Relevant dates for organization/url: %s", datetimes2)
 
         return datetimes2
 
     # also callable as admin action
     # this is 100% based on url ratings, just an aggregate of the last status.
     # make sure the URL ratings are up to date, they will check endpoints and such.
+
+    @staticmethod
+    def rate_organizations(organizations, when=""):
+        # since a url can now have multiple organizations, you should rate each one separately
+        for organization in organizations.all():
+            DetermineRatings.rate_organization(organization, when)
+
     @staticmethod
     def rate_organization(organization, when=""):
 

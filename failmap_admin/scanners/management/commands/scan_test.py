@@ -27,7 +27,11 @@ class Command(BaseCommand):
         when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
         # when = datetime.now(pytz.utc)
 
-        organization = Organization.objects.filter(name="Enschede").get()
+        organization = Organization.objects.filter(name="Eemnes").get()
         DetermineRatings.clear_organization_and_urls(organization)
         DetermineRatings.rate_organization_urls_efficient(organization, create_history=True)
+        # ratings are always different since we now also save last scan date.
+        # only creates things for near midnight. Should check if today, and then save for now.
         DetermineRatings.rate_organization_efficient(organization, create_history=True)
+        # create one for NOW, not this night. This is a bug :)
+        DetermineRatings.rate_organization_efficient(organization)

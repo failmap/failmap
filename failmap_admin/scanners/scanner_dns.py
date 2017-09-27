@@ -69,10 +69,13 @@ class ScannerDns:
         fulldomain = subdomain + "." + url.url
         logger.debug("Trying to add subdomain to database: %s" % fulldomain)
         if ScannerHttp.resolves(fulldomain):
-            if not Url.objects.all().filter(url=fulldomain, organization=url.organization).exists():
+            # this doesn't add the subdomain to "missing" subsets of items (where one organization
+            # misses, for example).
+            if not Url.objects.all().filter(url=fulldomain, organization__in=url.organization.all()).exists():
                 logger.info("Added domain to database: %s" % fulldomain)
                 u = Url()
-                u.organization = url.organization
+                u.save()  # "<Url: >" needs to have a value for field "id" before this many-to-many relationship can be used.
+                u.organization = url.organization.all()
                 u.url = fulldomain
                 u.save()
                 return u
@@ -306,6 +309,12 @@ class ScannerDns:
     def organization_brute_knownsubdomains(self, organization):
         ScannerDns.update_wordlist_known_subdomains()
         urls = ScannerDns.topleveldomains(organization)
+        wordlist = ScannerDns.wordlists["known_subdomains"]["path"]
+        return ScannerDns.dnsrecon_brute(urls, wordlist)
+
+    @staticmethod
+    def brute_known_subdomains(urls):
+        ScannerDns.update_wordlist_known_subdomains()
         wordlist = ScannerDns.wordlists["known_subdomains"]["path"]
         return ScannerDns.dnsrecon_brute(urls, wordlist)
 
