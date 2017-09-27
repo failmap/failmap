@@ -417,7 +417,7 @@ class ScannerTlsQualys:
             # save scan for the endpoint
             # get the most recent scan of this endpoint, if any and work with that to save data.
             # data is saved when the rating didn't change, otherwise a new record is created.
-            scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint).\
+            scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint). \
                 order_by('-scan_moment').first()
 
             rating = qualys_endpoint['grade'] if 'grade' in qualys_endpoint.keys() else 0
@@ -474,7 +474,7 @@ class ScannerTlsQualys:
         status_message = qualys_endpoint['statusMessage']
 
         # todo: message: "Failed to communicate with the secure server"
-        ScannerTlsQualys.log.debug("Managing endpoint with message %s" % status_message)
+        ScannerTlsQualys.log.debug("Managing endpoint with message '%s'" % status_message)
 
         """
         IP address is from private address space (RFC 1918)
@@ -486,16 +486,17 @@ class ScannerTlsQualys:
         # Unable to connect to server? Declare endpoint dead.
         # The endpoint probably has another port / service than https/443
         if status_message == "Unable to connect to the server" or \
+           status_message == "Failed to communicate with the secure server" or \
+           status_message == "Unexpected failure" or \
            status_message == "IP address is from private address space (RFC 1918)":
-            return ScannerTlsQualys.\
+            return ScannerTlsQualys. \
                 endpoint_could_not_connect_to_server(qualys_endpoint, domain, status_message)
 
         # todo: handle No secure protocols supported correctly. It is a weird state (https, notls?)
         if status_message == "Ready" or \
            status_message == "Certificate not valid for domain name" or \
            status_message == "No secure protocols supported":
-
-            return ScannerTlsQualys.\
+            return ScannerTlsQualys. \
                 failmap_endpoint_ratings_received(qualys_endpoint, domain)
 
     @staticmethod
@@ -719,13 +720,16 @@ class ScannerTlsQualys:
                 url.is_dead_reason = "There are endpoints discovered via scanner tls qualys"
                 url.save()  # might be empty, which is fine...
 
-        # the reverse is not always true: while you can genericly revive domains if there is a
-        # working endpoint. This scanner can not kill the domain if there is no TLS.
-        # However, you can IF there are no other endpoints and there is no TLS endpoint.
-        # after scanning a few times. ... There are a few domains in limbo: those who have
-        # no endpoints, that have been scanned, but may be visited by other scanners...
-        # This scanner doesn't check if the domain is dead (or exists at al) the benefit is that
-        # you can still re-check a domain by scanning it. So make sure the list of domains to be
-        # scanned is good enough... So let's kill some urls...
+                # the reverse is not always true: while you can genericly revive domains if there is
+                # a
+                # working endpoint. This scanner can not kill the domain if there is no TLS.
+                # However, you can IF there are no other endpoints and there is no TLS endpoint.
+                # after scanning a few times. ... There are a few domains in limbo: those who have
+                # no endpoints, that have been scanned, but may be visited by other scanners...
+                # This scanner doesn't check if the domain is dead (or exists at al) the benefit is
+                # that
+                # you can still re-check a domain by scanning it. So make sure the list of domains
+                # to be
+                # scanned is good enough... So let's kill some urls...
 
-        # if an url has NO endpoints,
+                # if an url has NO endpoints,

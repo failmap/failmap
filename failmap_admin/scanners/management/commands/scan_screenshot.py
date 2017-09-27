@@ -35,11 +35,12 @@ class Command(BaseCommand):
 
         # never had a screenshot or only has screenshots older than a month
         no_screenshots = Endpoint.objects.all().filter(is_dead=False,
-                                            url__not_resolvable=False,
-                                            screenshot__isnull=True)
-        outdated_screenshots = Endpoint.objects.all().filter(is_dead=False,
-                                            url__not_resolvable=False,
-                                             screenshot__created_on__lt=one_month_ago)
+                                                       url__not_resolvable=False,
+                                                       screenshot__isnull=True)
+        outdated_screenshots = Endpoint.objects.all().filter(
+            is_dead=False,
+            url__not_resolvable=False,
+            screenshot__created_on__lt=one_month_ago)
         endpoints = list(no_screenshots) + list(outdated_screenshots)
 
         logger.debug("Found endpoints %s" % len(endpoints))

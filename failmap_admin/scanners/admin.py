@@ -1,10 +1,11 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
-                     TlsQualysScratchpad, Url)
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
+
+from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
+                     TlsQualysScratchpad, Url)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -20,7 +21,7 @@ class TlsQualysScanAdminInline(CompactInline):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('url', 'domain', 'discovered_on', 'ip', 'port', 'protocol', 'is_dead',
+    list_display = ('url', 'domain', 'discovered_on', 'ip', 'port', 'protocol', 'is_dead_since',
                     'tls_scan_count')
     search_fields = ('url__url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
@@ -65,6 +66,7 @@ class EndpointAdmin(admin.ModelAdmin):
 
     rate_url.short_description = "Rate (url)"
     scan_url.short_description = "Scan (url)"
+
 
 class TlsQualysScanAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',

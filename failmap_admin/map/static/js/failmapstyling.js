@@ -49,7 +49,10 @@ info.update = function (props) {
     var sometext = "";
     if (props) {
         sometext += "<h4>" + props.OrganizationName +"</h4>";
-        sometext += '<b>Score: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + ' points</span>';
+        if (props.Overall > 1)
+            sometext += '<b>Score: </b><span style="color: '+getColor(props.Overall)+'">' + props.Overall + ' points</span>';
+        else
+            sometext += '<b>Score: </b><span style="color: '+getColor(props.Overall)+'">- points</span>';
         domainsDebounced(props.OrganizationID, $("#history")[0].value);
     } else {
         sometext += "<h4>-</h4>";
@@ -65,7 +68,7 @@ info.addTo(map);
 // get color depending on population density value
 function getColor(d) {
     return  d > 999 ? '#bd383c' :
-            d > 199  ? '#fc9645' :
+            d > 199 ? '#fc9645' :
             d >= 0  ? '#62fe69' :
                       '#c1bcbb';
 }
@@ -281,8 +284,15 @@ $( document ).ready(function() {
             },
 
             orangepercentage: function() {
-                return (!this.data.data) ? "0%" :
-                    Math.floor(roundTo(this.data.data.now["orange"] / this.data.data.now["total_organizations"] * 100, 2)) + "%";
+                if (this.data.data) {
+                    var score = 100 -
+                        roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
+                        roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
+                        roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
+                    console.log(score);
+                    return roundTo(score,2) + "%";
+                }
+                return 0
             },
 
             unknownpercentage: function() {

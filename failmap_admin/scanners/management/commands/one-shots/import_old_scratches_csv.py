@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, Url, TlsQualysScratchpad
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Url
 
 logger = logging.getLogger(__package__)
 
@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     """
     You probably don't need to run this anymore...
-    
+
     Non resolvable, alsways 0 scans are just nonsense: the domain just doesn't exist and it creates
     false scores.
     """

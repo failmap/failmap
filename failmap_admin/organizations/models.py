@@ -80,7 +80,7 @@ class Coordinate(models.Model):
 
 #  No cascade?
 class Url(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+    organization = models.ForeignKey(Organization)  # on_delete=models.PROTECT
 
     url = models.CharField(
         max_length=150,

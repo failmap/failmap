@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         for organization in resume:
             StateManager.set_state("ScannerTlsQualys", organization.name)
-            Command.scan_new_urls()  # always try to scan new urls first, regardless of organization
+            # Command.scan_new_urls()  # always try to scan new urls first, regardless of org.
             Command.scan_organization(organization)
 
     @staticmethod

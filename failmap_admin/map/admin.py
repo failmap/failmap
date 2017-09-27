@@ -11,7 +11,6 @@ from .models import OrganizationRating, UrlRating
 
 # Register your models here.
 class OrganizationRatingAdmin(admin.ModelAdmin):
-
     def inspect_organization(self, obj):
         return format_html(
             '<a href="../../organizations/organization/{id}/change">inspect organization</a>',
@@ -28,7 +27,6 @@ class OrganizationRatingAdmin(admin.ModelAdmin):
 
 
 class UrlRatingAdmin(admin.ModelAdmin):
-
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
                            id=format(obj.url_id))

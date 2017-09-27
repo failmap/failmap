@@ -64,7 +64,8 @@ class Command(DumpDataCommand):
                 "organizations.Coordinate",
                 "organizations.Url",
                 "scanners.Endpoint",
-                "scanners.TlsQualysScan"
+                "scanners.TlsQualysScan",
+                "scanners.EndpointGenericScan"
             )
             # the rest:
             # about 160 megabyte for the database

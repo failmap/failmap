@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import datetime
 
 import pytz
@@ -7,11 +8,9 @@ from dateutil.relativedelta import relativedelta  # history
 from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan
+from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
 from .models import OrganizationRating, UrlRating
-import logging
-from failmap_admin.scanners.models import EndpointGenericScan
 
 logger = logging.getLogger(__package__)
 
@@ -24,6 +23,7 @@ class DetermineRatings:
         except if it results in the same rating as previous.
 
     """
+
     @staticmethod
     def get_weekly_intervals():
         # for the past year, create a rating every week for all organizations
@@ -56,7 +56,8 @@ class DetermineRatings:
 
     @staticmethod
     def rate_organizations(create_history=False):
-        times = DetermineRatings.get_weekly_intervals() if create_history else [datetime.now(pytz.utc)]
+        times = DetermineRatings.get_weekly_intervals() if create_history else [
+            datetime.now(pytz.utc)]
 
         os = Organization.objects.all()
         for when in times:
@@ -66,7 +67,8 @@ class DetermineRatings:
     @staticmethod
     def rate_urls(create_history=False):
 
-        times = DetermineRatings.get_weekly_intervals() if create_history else [datetime.now(pytz.utc)]
+        times = DetermineRatings.get_weekly_intervals() if create_history else [
+            datetime.now(pytz.utc)]
 
         urls = Url.objects.filter(is_dead=False)
 
@@ -86,6 +88,28 @@ class DetermineRatings:
             for o in os:
                 DetermineRatings.rate_organization(o, datetime.now(pytz.utc))
 
+    @staticmethod
+    def rate_organization_efficient(organization, create_history=False):
+        if create_history:
+            times = DetermineRatings.significant_times(organization=organization)
+            for time in times:
+                DetermineRatings.rate_organization(organization, time)
+        else:
+            DetermineRatings.rate_organization(organization, datetime.now(pytz.utc))
+
+    @staticmethod
+    def rate_organization_urls_efficient(organization, create_history=False):
+
+        urls = Url.objects.filter(is_dead=False, organization=organization).order_by('url')
+
+        if create_history:
+            for url in urls:
+                times = DetermineRatings.significant_times(url=url)
+                for time in times:
+                    DetermineRatings.rate_url(url, time)
+        else:
+            for url in urls:
+                DetermineRatings.rate_url(url, datetime.now(pytz.utc))
 
     @staticmethod
     def rate_urls_efficient(create_history=False):
@@ -100,6 +124,11 @@ class DetermineRatings:
         else:
             for url in urls:
                 DetermineRatings.rate_url(url, datetime.now(pytz.utc))
+
+    @staticmethod
+    def clear_organization_and_urls(organization):
+        UrlRating.objects.all().filter(url__organization=organization).delete()
+        OrganizationRating.objects.all().filter(organization=organization).delete()
 
     @staticmethod
     def significant_times(organization=None, url=None):
@@ -154,6 +183,16 @@ class DetermineRatings:
             # no generic scans
             pass
 
+        dead_scan_dates = []
+        try:
+            dead_scans = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
+            dead_scan_dates = [x.is_dead_since for x in dead_scans]
+            logger.debug("dead_scan_dates: %s" % dead_scan_dates)
+        except ObjectDoesNotExist:
+            # no generic scans
+            pass
+
+        # is this relevant? I think we can do without.
         non_resolvable_dates = []
         try:
             non_resolvable_urls = Url.objects.filter(not_resolvable=True,
@@ -165,7 +204,8 @@ class DetermineRatings:
             # no non-resolvable urls
             pass
 
-        datetimes = set(tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates)
+        datetimes = set(
+            tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates + dead_scan_dates)
 
         # todo: reduce this to one moment per day only, otherwise there will be a report for
         # todo: the order of this list should be chronological: otherwise ratings get overwritten?
@@ -174,7 +214,8 @@ class DetermineRatings:
         logger.debug("Found amount of dates, optimizing: %s", len(datetimes))
 
         # take the last moment of the date, so the scan will have happened at the correct time
-        datetimes2 = [x.replace(hour=23,minute=59,second=59, microsecond=999999) for x in datetimes]
+        datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999) for x in
+                      datetimes]
         datetimes2 = list(set(datetimes2))
         datetimes2.sort()
 
@@ -182,7 +223,6 @@ class DetermineRatings:
         # logger.debug("Relevant dates for organization/url: %s", datetimes2)
 
         return datetimes2
-
 
     # also callable as admin action
     # this is 100% based on url ratings, just an aggregate of the last status.
@@ -265,7 +305,8 @@ class DetermineRatings:
             u.calculation = organization_json
             u.save()
         else:
-            logger.warning("The calculation is still the same, not creating a new OrganizationRating")
+            logger.warning(
+                "The calculation is still the same, not creating a new OrganizationRating")
 
     # also callable as admin action
     @staticmethod
@@ -300,7 +341,6 @@ class DetermineRatings:
         else:
             logger.warning("The calculation is still the same, not creating a new UrlRating")
 
-
     """
 from failmap_admin.map.determineratings import DetermineRatings
 from failmap_admin.organizations.models import Url, Organization
@@ -318,6 +358,13 @@ DetermineRatings.rate_organization(o)
 
         logger.debug("Calculating url score for %s on %s" % (url.url, when))
 
+        """
+        A relevant endpoint is an endpoint that is still alive or was alive at the time.
+        Due to being alive (or at the time) it can get scores from various scanners more easily.
+
+        Afterwards we'll check if at this time there also where dead endpoints.
+        Dead endpoints add 0 points to the rating, but it can lower a rating.(?)
+        """
         endpoints = DetermineRatings.get_relevant_endpoints_at_timepoint(url, when)
 
         # general reporting json:
@@ -357,11 +404,27 @@ DetermineRatings.rate_organization(o)
 
             if jsons:
                 endpoint_jsons.append((endpoint_template % (endpoint.ip,
-                                                           endpoint.port,
-                                                           endpoint.ip,
-                                                           endpoint.port,
-                                                           endpoint.protocol,
-                                                           ",".join(jsons))))
+                                                            endpoint.port,
+                                                            endpoint.ip,
+                                                            endpoint.port,
+                                                            endpoint.protocol,
+                                                            ",".join(jsons))))
+
+        # Don't do this. While it's better somewhere, we now at generating check
+        # if there is still an endpoint that we should include. Perhaps at a rewrite
+        # add a "it's empty now" as latest rating. The reason for not doing this now
+        # is that it will have a zero rating, and all scans will end on a zero rating after cleanup
+        # and you will then report way too much endpoints. - hard to explain.
+        #
+        # Now there may be a set of two endpoints: one is dead, one is alive.
+        # We want to make sure that dead endpoints are included as the url rating
+        # given we want to get the latest state. A dead endpoint most likely will reduce
+        # the rating. If the endpoint was
+        # if False:
+        #     (scanner_dead_rating, scanner_dead_json) = \
+        #         DetermineRatings.get_report_from_scanner_dead(endpoint, when)
+        #     jsons.append(scanner_dead_json) if scanner_dead_json else ""
+        #     int(scanner_dead_rating)
 
         # now prepare the url bit:
         if endpoint_jsons:
@@ -374,6 +437,45 @@ DetermineRatings.rate_organization(o)
         else:
             # empty explanations don't get saved.
             return "", 0
+
+    @staticmethod
+    def get_report_from_scanner_dead(endpoint, when):
+        logger.debug("get_report_from_scanner_dead")
+        """
+        Endpoints also die. In that case, you do return a rating of 0 for that endpoint.
+
+        So that when you get the latest URL rating, you'll get 0 points, instead of some old
+        score. If the endpoint is dead, well: it has been cleaned up. Which is a good thing mostly.
+
+        Endpoints have the lifecycle: once dead, it stays dead. A new endpoint will be created when
+        a new scan is performed. The new endpoint may be exactly the same as the old one, including
+        IP and such. This might be a bit confusing.
+        """
+
+        rating_template = """
+                {
+                "dead": {
+                    "explanation": "%s",
+                    "points": 0,
+                    "since": "%s",
+                    "last_scan": "%s"
+                    }
+                }""".strip()
+
+        try:
+            scan = Endpoint.objects.filter(id=endpoint.id,
+                                           is_dead_since__lte=when,
+                                           )
+            scan = scan.latest('is_dead_since')
+
+            json = (rating_template % ("Endpoint was cleaned up.",
+                                       scan.is_dead_since, scan.is_dead_since))
+
+            logger.debug("Dead: On %s, Endpoint %s was dead." % (when, endpoint))
+            return 0, json
+        except ObjectDoesNotExist:
+            logger.debug("Endpoint is not dead: %s." % endpoint)
+            return 0, ""
 
     # todo: can be abstracted.
     @staticmethod
@@ -406,13 +508,12 @@ DetermineRatings.rate_organization(o)
                                        scan.rating_determined_on,
                                        scan.last_scan_moment))
 
-            logger.debug("plain_https: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.rating))
+            logger.debug("plain_https: On %s, Endpoint %s, Rated %s" %
+                         (when, endpoint, scan.rating))
             return scan.rating, json
         except ObjectDoesNotExist:
             logger.debug("No http plain scan on endpoint %s." % endpoint)
             return 0, ""
-
-
 
     @staticmethod
     def get_report_from_scanner_tls_qualys(endpoint, when):
@@ -475,7 +576,8 @@ DetermineRatings.rate_organization(o)
 
                 rating = ratings[scan.qualys_rating]
 
-                logger.debug("TLS: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.qualys_rating))
+                logger.debug(
+                    "TLS: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.qualys_rating))
                 return rating, starttls_json
             else:
                 logger.debug("TLS: This tls scan resulted in no https. Not returning a score.")
@@ -489,21 +591,28 @@ DetermineRatings.rate_organization(o)
 
     @staticmethod
     def get_relevant_urls_at_timepoint(organization, when):
+        """
+        It's possible that the url only has endpoints that are dead, but the URL resolves fine.
+
+        :param organization:
+        :param when:
+        :return:
+        """
 
         urls = Url.objects.filter(organization=organization)
 
-        # urls alive at this moment, that are dead in the future (but not then)
+        # urls alive at this moment, that are dead in the future
         not_resolving_urls = urls.filter(
             created_on__lte=when,
             not_resolvable=True,
-            not_resolvable_since__gte=when
+            not_resolvable_since__gte=when,
         )
         logger.debug("Not resolvable urls:  %s" % not_resolving_urls.count())
 
         dead_urls = urls.filter(
             created_on__lte=when,
             is_dead=True,
-            is_dead_since__gte=when
+            is_dead_since__gte=when,
         )
         logger.debug("Dead urls:  %s" % dead_urls.count())
 
@@ -511,16 +620,50 @@ DetermineRatings.rate_organization(o)
         existing_urls = urls.filter(
             created_on__lte=when,
             not_resolvable=False,
-            is_dead=False
-        ) # or is_dead=False,
+            is_dead=False,
+        )  # or is_dead=False,
         logger.debug("Alive urls:  %s" % existing_urls.count())
 
         url_list = list(not_resolving_urls) + list(dead_urls) + list(existing_urls)
-
+        url_list_with_relevant_endpoints = []
         for url in url_list:
-            print("relevant url on %s: %s" % (when, url))
+            # Check if they also had relevant endpoint. We do this separately to reduce the
+            # enormous complexity of history in queries. It's slower, but easier to understand.
+            has_endpoints = DetermineRatings.get_relevant_endpoints_at_timepoint(url=url, when=when)
+            if has_endpoints:
+                logger.debug(
+                    "The url %s is relevant on %s and has endpoints: " % (url, when))
+                url_list_with_relevant_endpoints.append(url)
+            else:
+                logger.debug("While the url %s was relevant on %s, "
+                             "it does not have any relevant endpoints" % (url, when))
 
-        return url_list
+        return url_list_with_relevant_endpoints
+
+    @staticmethod
+    def default_ratings():
+        """
+        Generate default ratings so all organizations are on the map (as being grey). This prevents
+        empty spots / holes.
+        :return:
+        """
+        when = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
+        organizations = Organization.objects.all().exclude(organizationrating__when=when)
+        for organization in organizations:
+            logger.info("Giving organization a default rating: %s" % organization)
+            r = OrganizationRating()
+            r.when = when
+            r.rating = -1
+            r.organization = organization
+            r.calculation = """
+{
+    "organization": {
+      "name": "%s",
+      "rating": "-1",
+      "urls": []
+}
+            """.strip() % organization.name
+            r.save()
 
     @staticmethod
     # removed port=443, and protocol="https", since we want all types of scans to show.
@@ -529,27 +672,27 @@ DetermineRatings.rate_organization(o)
         endpoints = Endpoint.objects.all()
 
         # all endpoints in the past given the timeframe, they can be dead.
-        dead_endpoints = endpoints.filter(
+        then_alive = endpoints.filter(
             url=url,
             discovered_on__lte=when,
             is_dead=True,
             is_dead_since__gte=when,
         )
-        logger.debug("Dead endpoints for this url:  %s" % dead_endpoints.count())
+        logger.debug("Then alive endpoints for this url:  %s" % then_alive.count())
 
         # all endpoints that are still alive on the timeperiod
-        existing_endpoints = endpoints.filter(
+        still_alive_endpoints = endpoints.filter(
             url=url,
             discovered_on__lte=when,
             is_dead=False,
         )
 
-        logger.debug("Alive endpoints for this url: %s" % existing_endpoints.count())
+        logger.debug("Alive endpoints for this url: %s" % still_alive_endpoints.count())
 
-        endpoint_list = list(dead_endpoints) + list(existing_endpoints)
+        endpoint_list = list(then_alive) + list(still_alive_endpoints)
 
         for endpoint in endpoint_list:
-            print("relevant endpoint for %s: %s" % (when, endpoint))
+            logger.debug("relevant endpoint for %s: %s" % (when, endpoint))
 
         return endpoint_list
 

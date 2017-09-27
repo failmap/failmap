@@ -20,12 +20,12 @@ from datetime import datetime
 from time import sleep
 
 import pytz
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from PIL import Image
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Screenshot
-from django.conf import settings
 
 logger = logging.getLogger(__package__)
 
@@ -63,11 +63,11 @@ class ScannerScreenshot:
 
         xd = settings.TOOLS['chrome']['screenshot_output_dir']
 
-        tmp_dir =                   xd + now
-        output_filepath =           xd + safe_filename
-        output_filepath_resized =   xd + safe_filename_resized
-        output_filepath_latest =    xd + \
-            str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + "_latest")) + '.png'
+        tmp_dir = xd + now
+        output_filepath = xd + safe_filename
+        output_filepath_resized = xd + safe_filename_resized
+        output_filepath_latest = xd + str(re.sub(r'[^a-zA-Z0-9_]', '',
+                                          endpoint.uri_url() + "_latest")) + '.png'
 
         # skip if there is already a latest image, just to speed things up.
         if skip_if_latest and os.path.exists(output_filepath_latest):
