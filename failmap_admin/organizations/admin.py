@@ -7,6 +7,9 @@ from jet.admin import CompactInline
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
+from failmap_admin.scanners.scanner_dns import ScannerDns
+from failmap_admin.scanners.scanner_http import ScannerHttp
+
 
 from .models import Coordinate, Organization, Url
 
@@ -87,14 +90,17 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class UrlAdmin(admin.ModelAdmin):
-    list_display = ('organization', 'url', 'is_dead_reason', 'not_resolvable', 'created_on')
+    list_display = ('url', 'is_dead_reason', 'not_resolvable', 'created_on')
     search_field = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
-    list_filter = ('organization', 'url', 'is_dead', 'is_dead_since', 'is_dead_reason',
-                   'not_resolvable', 'uses_dns_wildcard')
+    list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
+                   'not_resolvable', 'uses_dns_wildcard', 'organization')
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization', 'uses_dns_wildcard', 'created_on')
+            'fields': ('url', 'organization','created_on')
+        }),
+        ('DNS', {
+            'fields': ('uses_dns_wildcard', ),
         }),
         ('Resolvability', {
             'fields': ('not_resolvable', 'not_resolvable_since', 'not_resolvable_reason'),
@@ -115,7 +121,8 @@ class UrlAdmin(admin.ModelAdmin):
 
     inlines = [EndpointAdminInline, UrlRatingAdminInline]
 
-    actions = ['rate_url', 'scan_url', 'declare_dead', 'print_on_commandline']
+    actions = ['rate_url', 'dns_subdomains', 'dns_transparency', 'discover_http_endpoints',
+               'scan_url', 'declare_dead', 'print_on_commandline']
 
     def declare_dead(self, request, queryset):
 
@@ -144,15 +151,38 @@ class UrlAdmin(admin.ModelAdmin):
         s = ScannerTlsQualys()
         s.scan(urls_to_scan)
 
-        self.message_user(request, "URL(s) have been scanned")
+        self.message_user(request, "URL(s) have been scanned on TLS")
+
+    def discover_http_endpoints(self, request, queryset):
+        urls_to_scan = [url for url in queryset]
+        ScannerHttp.scan_url_list_standard_ports(urls_to_scan)
+
+        self.message_user(request, "URL(s) have been scanned for HTTP")
+
+    def dns_subdomains(self, request, queryset):
+        for url in queryset:
+            ScannerDns.brute_known_subdomains(url)
+
+        self.message_user(request, "URL(s) have been scanned on known subdomains.")
+
+    def dns_transparency(self, request, queryset):
+        s = ScannerDns()
+        for url in queryset:
+            s.certificate_transparency(url)
+
+        self.message_user(request, "URL(s) have been scanned on known subdomains.")
 
     def print_on_commandline(self, request, queryset):
         for url in queryset:
             print(url.url)
 
+    dns_subdomains.short_description = "Scan DNS (known subdomains)"
+    dns_transparency.short_description = "Scan DNS (certificate transparency)"
+    discover_http_endpoints.short_description = "Discover HTTP(S) endpoints"
+    scan_url.short_description = "Scan (tls qualys)"
     rate_url.short_description = "Rate"
-    scan_url.short_description = "Scan"
     declare_dead.short_description = "Declare dead"  # can still scan it
+    print_on_commandline.short_description = "(debug) Print on command line"
 
 
 class CoordinateAdmin(admin.ModelAdmin):

@@ -61,7 +61,7 @@ class Command(BaseCommand):
 
         for organization in resume:
             StateManager.set_state("ScannerTlsQualys", organization.name)
-            # Command.scan_new_urls()  # always try to scan new urls first, regardless of org.
+            Command.scan_new_urls()  # always try to scan new urls first, regardless of org.
             Command.scan_organization(organization)
 
     @staticmethod
@@ -104,6 +104,10 @@ class Command(BaseCommand):
                                   not_resolvable=False,
                                   endpoint__port=443,
                                   ).exclude(endpoint__tlsqualysscan__isnull=False)
+
+        if urls.count() > 0:
+            logger.info("There are no new urls.")
+            return
 
         logger.info("Good news! There are %s urls to scan!" % urls.count())
         pie = """
@@ -174,6 +178,6 @@ class Command(BaseCommand):
                 dr.rate_url(url=url)
 
             for url in myurls:
-                dr.rate_organization(organization=url.organization)
+                dr.rate_organizations(organizations=url.organization)
 
         return urls

@@ -77,10 +77,10 @@ class Coordinate(models.Model):
         managed = True
         db_table = 'coordinate'
 
-
-#  No cascade?
 class Url(models.Model):
-    organization = models.ForeignKey(Organization)  # on_delete=models.PROTECT
+    organization_old = models.ForeignKey(Organization, null=True)  # on_delete=models.PROTECT
+
+    organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
 
     url = models.CharField(
         max_length=150,
@@ -125,7 +125,7 @@ class Url(models.Model):
     class Meta:
         managed = True
         db_table = 'url'
-        unique_together = (('organization', 'url'),)
+        unique_together = (('organization_old', 'url'),)
 
     def __str__(self):
         if self.is_dead:
