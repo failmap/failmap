@@ -45,12 +45,12 @@ def organization_report(request, organization_id, weeks_back=0):
 
     # getting the latest report.
     try:
-        r = Organization.objects.filter(pk=organization_id, organizationrating__when__lt=when).\
-            values('organizationrating__rating',
-                   'organizationrating__calculation',
-                   'organizationrating__when',
-                   'name',
-                   'pk').order_by('-organizationrating__when')[:1].get()
+        r = Organization.objects.filter(pk=organization_id, organizationrating__when__lt=when). \
+                values('organizationrating__rating',
+                       'organizationrating__calculation',
+                       'organizationrating__when',
+                       'name',
+                       'pk').order_by('-organizationrating__when')[:1].get()
 
         report_json = """
 {
@@ -60,7 +60,6 @@ def organization_report(request, organization_id, weeks_back=0):
     "id": %s,
     "calculation": %s
 }
-    
         """
         report_json = report_json % (r['organizationrating__rating'],
                                      r['organizationrating__when'],
@@ -152,7 +151,7 @@ def topfail(request, weeks_back=0):
             "Points": i[0],
             "DataFrom": i[4]
         }
-        rank = rank+1
+        rank = rank + 1
 
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
@@ -285,7 +284,6 @@ def wanted_urls(request):
 
 
 def map_data(request, weeks_back=0):
-
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -394,7 +392,7 @@ def map_data(request, weeks_back=0):
     GROUP BY coordinate.area
     HAVING MAX(`when`)
     ORDER BY `when`
-    ''' % (when, ))
+    ''' % (when,))
 
     rows = cursor.fetchall()
 
@@ -418,7 +416,7 @@ def map_data(request, weeks_back=0):
                         json.loads(i[3]) if type(json.loads(i[3])) is list
                         else json.loads(json.loads(i[3]))  # hack :)
                 }
-            }
+        }
 
         data["features"].append(dataset)
 

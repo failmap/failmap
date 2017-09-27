@@ -30,7 +30,7 @@ from datetime import datetime
 
 import pytz
 import requests
-from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout
+from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.organizations.models import Url

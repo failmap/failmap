@@ -19,10 +19,10 @@ import logging
 import subprocess
 
 import untangle
+from django.conf import settings
 
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_http import ScannerHttp
-from django.conf import settings
 
 logger = logging.getLogger(__package__)
 
@@ -166,6 +166,7 @@ class ScannerDns:
         return addedlist
 
     @staticmethod
+    # todo: also include censys, google and let's encrypt( if has one )
     def certificate_transparency(url):
         """
         Checks the certificate transparency database for subdomains. Using a regex the subdomains

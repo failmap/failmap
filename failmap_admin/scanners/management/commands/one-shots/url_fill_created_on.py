@@ -32,8 +32,10 @@ class Command(BaseCommand):
 
             if not url.created_on:
                 try:
-                    oldest_endpoint = Endpoint.objects.all().filter(url=url).earliest('discovered_on')
-                    logger.debug("The oldest endpoint for url: %s is: %s" % (url, oldest_endpoint.discovered_on))
+                    oldest_endpoint = Endpoint.objects.all().filter(
+                        url=url).earliest('discovered_on')
+                    logger.debug("The oldest endpoint for url: %s is: %s" %
+                                 (url, oldest_endpoint.discovered_on))
                     url.created_on = oldest_endpoint.discovered_on
                     url.save()
                 except ObjectDoesNotExist:

@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, Url, TlsQualysScratchpad
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Url
 
 logger = logging.getLogger(__package__)
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     """
     You probably don't need to run this anymore...
-    
+
     Non resolvable, alsways 0 scans are just nonsense: the domain just doesn't exist and it creates
     false scores.
     """
@@ -29,12 +29,13 @@ class Command(BaseCommand):
         Command.figure_out_zero_reason()
         # non_presented_scans = TlsQualysScan.objects.all().filter(qualys_message__isnull=True,
         #                                                         qualys_rating="0")
-#
-        # for scan in non_presented_scans:
-        #     print(scan, scan.endpoint)
-        # return
-#
-#
+
+    #
+    # for scan in non_presented_scans:
+    #     print(scan, scan.endpoint)
+    # return
+    #
+    #
 
     # todo: read out certhostnames to find more domains :)
     # https://stackoverflow.com/questions/6578986/how-to-convert-json-data-into-a-python-object
@@ -55,14 +56,17 @@ class Command(BaseCommand):
 
                 # get the latest scratch:
                 try:
-                    scratch = TlsQualysScratchpad.objects.all().filter(domain=url.url,
-                                                                       when__lte=scan.scan_moment).latest("when")
+                    scratch = TlsQualysScratchpad.objects.all().filter(
+                        domain=url.url,
+                        when__lte=scan.scan_moment).latest("when")
 
                     # read status
                     import json
                     json = json.loads(scratch.data)
                     print("Endpoint: %s, Scan: %s" % (scan, scan.endpoint))
-                    print("Message from %s: %s" % (scratch.when, json["endpoints"][0]["statusMessage"]))
+                    print("Message from %s: %s" % (
+                        scratch.when,
+                        json["endpoints"][0]["statusMessage"]))
                     print(json["endpoints"][0]["statusMessage"])
 
                     # ready, probably for another endpoint. Or for something else... # there a six
@@ -80,13 +84,14 @@ class Command(BaseCommand):
                             qualys_message__isnull=False,
                             qualys_rating="0").earliest("rating_determined_on")
 
-                        print("The oldest known rating had message: %s" % oldest_rating_with_message.qualys_message)
+                        print(
+                            "The oldest known rating had message: %s" %
+                            oldest_rating_with_message.qualys_message)
                         print("Endpoint: %s, Scan: %s" % (scan, scan.endpoint))
                         print(scan.rating_determined_on)
                         i = i + 1
                         scan.qualys_message = oldest_rating_with_message.qualys_message
                         # scan.save()
-
 
                     except ObjectDoesNotExist:
                         print("Scan never had an early message as well. Now what?")
@@ -96,11 +101,7 @@ class Command(BaseCommand):
                         # the modern way.
                         scan.delete()
 
-
         print("There are %s zero rating without message." % i)
-
-
-
 
     @staticmethod
     # can't figure out why this happened: polutes database, clean it.
@@ -115,7 +116,6 @@ class Command(BaseCommand):
                 print(scan, scan.endpoint)
                 # scan.delete()
 
-
     @staticmethod
     def clean_always_zero_scans():
         """
@@ -126,7 +126,7 @@ class Command(BaseCommand):
         :return:
         """
         urls = Url.objects.all().filter()  # if resolvable: cert wrong for domain
-                                                                # name?
+        # name?
 
         for url in urls:
             # all normal scans
