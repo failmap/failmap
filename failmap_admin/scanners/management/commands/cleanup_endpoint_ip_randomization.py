@@ -73,7 +73,7 @@ opendata.arnhem.nl	2 december 2016 15:01	4 december 2016 15:50	1
             sites.almelo.nl
             pers.alkmaar.nl
         """
-        url = Url.objects.all().filter(url="pers.alkmaar.nl").get()
+        url = Url.objects.all().filter(url="mail.rhenen.nl").get()
         logger.debug("url %s" % url)
         endpoints = Endpoint.objects.all().filter(url=url,
                                                   protocol="https",

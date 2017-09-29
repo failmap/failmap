@@ -38,7 +38,7 @@ Todo: better separation of UI and data. The JS messes things up.
     height: 18px;
     float: left;
     margin-right: 8px;
-    opacity: 0.7;
+    /* opacity: 0.7; causes glitch after fullscreen was added. */
 }
 
 .leaflet-interactive{
@@ -134,4 +134,115 @@ body {
 .screenshotlist {
     width: 330px;
     float: left;
+}
+
+#lastrow {
+    background-color: lightgray;
+    padding-top: 20px;
+    border-top: 2px solid gray;
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin-top: 40px;
+}
+
+#lastrow .row {
+    width: 1170px;
+    margin: auto;
+}
+
+.Donate{
+    border: 1px solid silver;
+    padding: 4px;
+    width: 60px;
+    font-size: 18px;
+    display: block;
+    float: left;
+    margin-right: 5px;
+    text-align: center;
+}
+
+.Donate.a5 {
+    background-color: #B3C1C4;
+}
+
+.Donate.a5 a:link {
+    color: #828578;
+}
+
+
+.Donate.a10 {
+    background-color: #EFB8BF;
+}
+
+.Donate.a10 a:link {
+    color: #B65145;
+}
+
+
+.Donate.a20 {
+    background-color: #A9C7DE;
+}
+
+.Donate.a20 a:link {
+    color: #5F627F;
+}
+
+
+.Donate.a50 {
+    background-color: #FACA8E;
+}
+
+.Donate.a50 a:link {
+    color: #957C62;
+}
+
+.Donate.a100 {
+    background-color: #90C280;
+}
+
+.Donate.a100 a:link {
+    color: #616231;
+}
+
+.Donate.a200 {
+    background-color: #F8DD58;
+}
+
+.Donate.a200 a:link {
+    color: #938443;
+}
+
+.Donate.a500 {
+    background-color: #CDA1BE;
+}
+
+.Donate.a500 a:link {
+    color: #72475A;
+}
+
+.Donate.aother {
+    width: 200px;
+    background-color: pink;
+}
+
+.Donate.aother a:link, .Donate.aother a:visited  {
+    color: darkgray;
+}
+
+.donate-title {
+    background-color: darkgray;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding-left: 17px;
+    color: white;
+    margin-top: 11px;
+}
+
+.donate-content{
+    background-color: lightgray;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding-bottom: 15px;
+    padding-top: 9px;
 }

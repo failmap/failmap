@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
 from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.managers import StateManager
+from failmap_admin.scanners.state_manager import StateManager
 from failmap_admin.scanners.scanner_dns import ScannerDns
 
 logger = logging.getLogger(__package__)

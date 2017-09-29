@@ -25,6 +25,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from PIL import Image
 
 from failmap_admin.organizations.models import Url
+from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.models import Screenshot
 
 logger = logging.getLogger(__package__)
@@ -34,6 +35,7 @@ class ScannerScreenshot:
     # todo: wait: https://bugzilla.mozilla.org/show_bug.cgi?id=1378010, FFX 57
     # todo: how to instruct the environment that there is a chrome present.
     chrome = settings.TOOLS['chrome']['executable']['mac']
+    firefox = settings.TOOLS['firefox']['executable']['mac']
 
     # deprecated
     working_directory = '../map/static/images/screenshots'  # deprecated
@@ -41,7 +43,73 @@ class ScannerScreenshot:
 
     @staticmethod
     def make_screenshot(url):
-        return ScannerScreenshot.make_screenshot_phantomjs(url)
+        endpoints = Endpoint.objects.all().filter(url=url)
+        for endpoint in endpoints:
+            ScannerScreenshot.make_screenshot_chrome_headless(endpoint)
+
+    @staticmethod
+    # only one copy of firefox can be open at a time
+    # can't we keep it open?
+    # it's faster than chrome now, so why not use this.
+    # also cleaned up code.
+    # Firefox doesn't quit after making the screenshot.
+    # And you can't have multiple firefoxes open. So you need to quit it
+    # some way.
+    # filed bug:
+    # https://bugzilla.mozilla.org/show_bug.cgi?id=1403934
+    def make_screenshot_firefox_headless(endpoint, skip_if_latest=False):
+        import subprocess
+
+        now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
+        screenshot_image = settings.TOOLS['firefox']['screenshot_output_dir'] + \
+                           str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
+        screenshot_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + \
+                               str(re.sub(r'[^a-zA-Z0-9_]', '',
+                                          endpoint.uri_url() + now)) + '_small.png'
+        latest_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + \
+                           str(re.sub(r'[^a-zA-Z0-9_]', '',
+                                      endpoint.uri_url() + now)) + '_latest.png'
+
+        logger.debug("screenshot image: %s" % screenshot_image)
+        logger.debug("screenshot thumbnail: %s" % screenshot_thumbnail)
+        logger.debug("latest thumbnail: %s" % latest_thumbnail)
+
+        if skip_if_latest and os.path.exists(latest_thumbnail):
+            logger.debug("Skipped making screenshot, by request")
+            return
+
+        subprocess.call([ScannerScreenshot.firefox,
+                         '-screenshot',
+                         screenshot_image,
+                         endpoint.uri_url(),
+                         '--window-size=1920,3000',
+                         ])
+
+        ScannerScreenshot.save_screenshot(endpoint, screenshot_image)  # administration
+        ScannerScreenshot.thumbnail(screenshot_image, screenshot_thumbnail)
+
+        # make copies of these images, so the latest are easily accessible.
+        subprocess.call(['cp', screenshot_thumbnail, latest_thumbnail])
+
+    @staticmethod
+    def save_screenshot(endpoint, safe_filename):
+        scr = Screenshot()
+        scr.created_on = datetime.now(pytz.utc)
+        scr.domain = endpoint.uri_url()
+        scr.endpoint = endpoint
+        scr.filename = safe_filename
+        scr.width_pixels = 1920
+        scr.height_pixels = 3000
+        scr.save()
+
+    @staticmethod
+    def thumbnail(image_path, output_path):
+        # resizing a bit? a 320px wide version.
+        im = Image.open(image_path)
+        size = 320, 500
+        im.thumbnail(size, Image.ANTIALIAS)
+        im.save(output_path, "PNG")
+
 
     @staticmethod
     # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.

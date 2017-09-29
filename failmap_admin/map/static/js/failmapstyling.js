@@ -15,6 +15,8 @@ map.scrollWheelZoom.disable();
 // C the map looks fine without tiles. Paying 500 a month for max 1M visitors still sucks. Ideal case is local tiles.
 // and real open streetmaps.
 
+L.control.fullscreen().addTo(map);
+
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
     maxZoom: 18,
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -64,6 +66,21 @@ info.update = function (props) {
 
 info.addTo(map);
 
+var PointIcon = L.Icon.extend({
+    options: {
+        shadowUrl: '',
+        iconSize:     [16, 16],
+        shadowSize:   [0, 0],
+        iconAnchor:   [8, 8],
+        shadowAnchor: [0, 0],
+        popupAnchor:  [-3, -76]
+    }
+});
+
+var greenIcon = new PointIcon({iconUrl: 'static/images/green-dot.png'}),
+    redIcon = new PointIcon({iconUrl: 'static/images/red-dot.png'}),
+    orangeIcon = new PointIcon({iconUrl: 'static/images/orange-dot.png'}),
+    grayIcon = new PointIcon({iconUrl: 'static/images/gray-dot.png'});
 
 // get color depending on population density value
 function getColor(d) {
@@ -84,19 +101,33 @@ function style(feature) {
     };
 }
 
+function pointToLayer(geoJsonPoint, latlng){
+    if (geoJsonPoint.properties.Overall > 999)
+        return L.marker(latlng, {icon: redIcon});
+    if (geoJsonPoint.properties.Overall > 199)
+        return L.marker(latlng, {icon: orangeIcon});
+    if (geoJsonPoint.properties.Overall > 0)
+        return L.marker(latlng, {icon: greenIcon});
+    return L.marker(latlng, {icon: grayIcon});
+}
+
 function highlightFeature(e) {
     var layer = e.target;
 
-    layer.setStyle({
-        weight: 5,
-        color: '#ccc',
-        dashArray: '',
-        fillOpacity: 0.7
-    });
-
-    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-        layer.bringToFront();
+    // doesn't work for points, only for polygons and lines
+    if (typeof layer.setStyle === "function") {
+        layer.setStyle({
+            weight: 5,
+            color: '#ccc',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
+        }
     }
+
+
 
     info.update(layer.feature.properties);
 }
@@ -157,6 +188,7 @@ function loadmap(weeknumber){
 
         geojson = L.geoJson(json, {
             style: style,
+            pointToLayer: pointToLayer,
             onEachFeature: onEachFeature
         }).addTo(map);
 
@@ -172,6 +204,11 @@ function loadtopfail(weeknumber){
     });
 }
 
+function loadtopwin(weeknumber) {
+    $.getJSON('/data/topwin/' + weeknumber, function (data) {
+        vueTopwin.top = data;
+    });
+}
 
 function loadstats(weeknumber){
     $.getJSON('/data/stats/' + weeknumber, function(data) {
@@ -187,6 +224,7 @@ function update_hourly() {
     if (hourly){
         loadmap(0);
         loadtopfail(0);
+        loadtopwin(0);
         $("#history").val(0);
     }
     hourly = true; // first time don't run the code, so nothing surprising happens
@@ -289,7 +327,6 @@ $( document ).ready(function() {
                         roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
                         roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
                         roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
-                    console.log(score);
                     return roundTo(score,2) + "%";
                 }
                 return 0
@@ -329,6 +366,21 @@ $( document ).ready(function() {
         }
     });
 
+    window.vueTopwin = new Vue({
+        el: '#topwin',
+        data: { top: Array },
+        methods: {
+            showReport: function (OrganizationID) {
+                jumptoreport();
+                showReportData(OrganizationID, $("#history")[0].value);
+                domainsDebounced(OrganizationID, $("#history")[0].value);
+            },
+            humanize: function(date){
+                return new Date(date).humanTimeStamp()
+            }
+        }
+    });
+
     window.vueHistory = new Vue({
         el: '#historycontrol',
         data: {
@@ -348,6 +400,7 @@ $( document ).ready(function() {
     $("#history").on("change input", debounce(function() {
         loadmap(this.value);
         loadtopfail(this.value);
+        loadtopwin(this.value);
 
         if (selected_organization > -1){
             showReportData(selected_organization, this.value);
@@ -358,6 +411,7 @@ $( document ).ready(function() {
         vueHistory.weeksback = this.value;
     }, 100));
 
+    loadtopwin(0);
     loadtopfail(0);
     loadstats(0);
 
@@ -414,7 +468,7 @@ legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-    labels.push('<i style="background:' + getColor(99) + '"></i> Good');
+    labels.push('<i style="background:' + getColor(199) + '"></i> Good');
     labels.push('<i style="background:' + getColor(999) + '"></i> Average');
     labels.push('<i style="background:' + getColor(1000) + '"></i> Bad');
     labels.push('<i style="background:' + getColor(-1) + '"></i> Unknown');

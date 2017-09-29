@@ -269,6 +269,13 @@ TOOLS = {
         },
         'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
     },
+    'firefox': {
+        'executable': {
+            'mac': VENDOR_DIR + "Firefox.app/Contents/MacOS/firefox",
+            'linux': "/dev/null",
+        },
+        'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
+    },
     'theHarvester': {
         'executable': VENDOR_DIR + "theHarvester/theHarvester.py",
         'output_dir': PROJECT_DIR + "scanners/resources/output/theHarvester/"

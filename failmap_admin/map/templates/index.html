@@ -12,11 +12,13 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
 
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.min.js' %}"></script>
     </head>
 
     <body role="document">
@@ -56,24 +58,35 @@
                 <h1>{% trans "Fail Map" %}</h1>
                 <p>{% trans "Fail Map Introduction" %}</p>
                 <p>Stuur nieuwe subdomeinen in via twitter:
-                    <a href="https://twitter.com/faalkaart">@faalkaart</a>
+                    <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
                     of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
                 </p>
-                <p>
-                    <small>Update 28 augustus 2017: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.
-                        Heeft een organisatie geen punten, dan hebben we geen fouten kunnen vinden: precies wat het doel is!
-                        <br><br>
-                        In deze update is de kaartsoftware bijgewerkt: er wordt nu gebruik gemaakt van open streetmaps, beter kaartmateriaal,
-                        het django python framework, dynamische javascripts en betere caching. De site laadt niet alleen sneller,
-                        hij is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
-                        <br><br>
-                        Al het werk levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
-                        mogelijk om door de tijd heen te scrollen en er is nu een top 50 van meest falende organisaties.
-                        In plaats van afzonderlijke sites te kijken, wordt er nu per organisatie beoordeeld. Tenslotte hebben we alle sites
-                        die niet meteen TLS spreken aangemerkt als een "gemiddelde" fout: in de vorige versie van de kaart werd hier nog
-                        geen oordeel over gegeven. Het hebben van geen TLS is eigenlijk net zo erg als slechte TLS.
-                    </small>
-                </p>
+            </div>
+
+            <div id="donate">
+                <div class="page-header">
+                    <a name="donate" class="jumptonav"></a>
+                </div>
+                <div class="row donate-title">
+                    <h2>Bescherm jouw gegevens! Doneer nu!</h2>
+                </div>
+                <div class="row donate-content">
+                    <div class="col-md-12">
+                        <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt voor blijvende updates, onderhoud en nieuwe controles!</p>
+                        <p>Stichting Internet Cleanup Foundation helpt fouten op het internet op te ruimen. <a href="https://internetCleanup.foundation" target="_blank">Lees meer...</a></p>
+                        <p><b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b></p>
+                        <div class="donatebuttons">
+                            <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro; 5</a></span>
+                            <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro; 10</a></span>
+                            <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro; 20</a></span>
+                            <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro; 50</a></span>
+                            <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro; 100</a></span>
+                            <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro; 200</a></span>
+                            <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro; 500</a></span>
+                            <span class="Donate aother"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">Kies ander bedrag</a></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="page-header">
@@ -154,6 +167,32 @@
                 </div>
             </div>
 
+            <div id="donate">
+                <div class="page-header">
+                    <a name="donate" class="jumptonav"></a>
+                </div>
+                <div class="row donate-title">
+                    <h2>Bescherm jouw gegevens! Doneer nu!</h2>
+                </div>
+                <div class="row donate-content">
+                    <div class="col-md-12">
+                        <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt voor blijvende updates, onderhoud en nieuwe controles!</p>
+                        <p>Stichting Internet Cleanup Foundation helpt fouten op het internet op te ruimen. <a href="https://internetCleanup.foundation" target="_blank">Lees meer...</a></p>
+                        <p><b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b></p>
+                        <div class="donatebuttons">
+                            <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro; 5</a></span>
+                            <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro; 10</a></span>
+                            <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro; 20</a></span>
+                            <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro; 50</a></span>
+                            <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro; 100</a></span>
+                            <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro; 200</a></span>
+                            <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro; 500</a></span>
+                            <span class="Donate aother"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">Kies ander bedrag</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
                 <div v-if="name">
@@ -211,40 +250,48 @@
 
                     <h2>Waarom Faalkaart?</h2>
                     <p>
-                        Antwoord: Het is boeiend om te zien wat de status is van veiligheid van
-                        dataverbindingen van publieke diensten, daar wordt namelijk vaak gevoelige
-                        informatie verwerkt. De kaart heet Faalkaart omdat initieel werd aangenomen dat er
-                        nog veel te verbeteren viel en een tendentieuze naam eerder leidt tot actie dan een
-                        schattige naam. Dat bleek terecht: hoewel er meer op orde was dan aangenomen
-                        werden er in het eerste weekend toch meer dan 150 verbindingen extra versleuteld.<br />
+                        Antwoord: Er zijn veel instanties die gevoelige gegevens verwerken. Dit moet op een
+                        veilige manier gebeuren: als deze informatie op straat komt te liggen kan
+                        dit allerlei gevolgen hebben. Betrokken personen kunnen benadeeld worden of
+                        er kunnen mogelijk handelingen worden uitgevoerd die voor allerlei problemen zorgen.
+                        <br /><br />
+                        Faalkaart is een middel om inzicht te geven in basale beveiliging van
+                        organisaties. Met de kaart wordt aangegeven of een organisatie in staat
+                        is om het minimale niveau van informatiebeveiliging aan te kunnen. De
+                        basisbeveiliging is vaak tekenend voor de rest van de organisatie.
+                        <br /><br />
+                        Er is met opzet gekozen voor de naam "faalkaart": een meer tendentieuze naam
+                        leidt eerder tot actie en is makkelijk te begrijpen. Staat een organisatie
+                        rood op de kaart, dan moeten ze actie ondernemen.
                     </p>
 
                     <h2>Mijn gemeente/organisatie is rood, wat nu?</h2>
                     <p>
-                        Antwoord: Helaas zit er een gat in de muur: de organisatie zal actie moeten ondernemen
-                        om e.e.a. goed in te richten of een <a href="https://letsencrypt.org">nieuw
-                        certificaat te installeren</a>. Er wordt uitgegaan van de zwakste schakel: ergens
-                        een onvoldoende betekent een rode vlek op de kaart.
+                        Antwoord: Helaas zit er een gat in de muur. De organisatie zal actie moeten
+                        ondernemen om dit te dichten.<br /><br />
+                        Vaak heeft een organisatie meerdere websites of diensten op het internet. We
+                        tellen hiervan alle fouten bij elkaar op. Het kan dus zijn dat een organisatie
+                        rood op de kaart staat omdat er veel kleine foutjes zijn aangetroffen.<br /><br />
                     </p>
 
                     <h2>Mijn gemeente is groen, is alles goed?</h2>
                     <p>
-                        Antwoord: De kans dat een subdomein mist, en juist daar een gat in de muur zit, is
-                        aanwezig. Daarnaast wordt alleen gecontroleert op het laagste niveau van beveiliging:
-                        dit is toonaangevend voor de rest van de beveiliging van een organisatie.
+                        Antwoord: Faalkaart test alleen het laagste niveau van beveiliging, dit
+                        is toonaangevend voor de hele organisatie. <br /><br />
+                        Er bestaat een kans dat een website of dienst mist en juist daar een probleem
+                        zit. Nieuwe websites of diensten kunnen altijd worden gedeeld met Faalkaart,
+                        deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
                     </p>
 
                     <h2>Hoe compleet is dit?</h2>
                     <p>
-                        Antwoord: er zijn rond de 7000 domeinen van gemeenten gecontroleerd. Deze hebben ruim 20000
-                        verbindingen naar het internet. Op faalkaart wordt alleen een eerste indruk getoond
-                        van de veiligheid van de organisatie: er wordt dus alleen aan de oppervlakte, ofwel het
-                        laaghangende fruit gekeken.<br />
-                        Toch is er door vrijwilligers, automatische scanners en slimme truuks voor iedere organisatie
-                        een lijst met domeinen verzameld, dit helpt om een beter zicht te krijgen op wat de
-                        organisatie doet op het internet.<br />
-                        Omdat er alleen aan de oppervlakte wordt gekeken kan de schijn worden gewerkt dat een
-                        organisatie alles op orde heeft, terwijl dat in werkelijkheid niet zo is.<br />
+                        Antwoord: rond de 7.000 domeinen van gemeenten worden regelmatig gecontroleerd. Als deze domeinen
+                        hebben samen meer dan 20.000 verbindingen naar het internet.<br /><br />
+                        Op faalkaart wordt alleen de basale beveiliging gecontroleerd van organisaties.<br /><br />
+
+                        Er bestaat een kans dat een website of dienst mist en juist daar een probleem
+                        zit. Nieuwe websites of diensten kunnen altijd worden gedeeld met Faalkaart,
+                        deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
                     </p>
 
                     <h2>Hoe komt de score tot stand?</h2>
@@ -257,16 +304,6 @@
                         De gedachte hierachter is dat organisaties die erg veel aan het internet hangen ook
                         meer risico nemen. Natuurlijk wordt er naar ernst van de situatie punten gegeven:
                         een ernstig probleem betekent dus ook dat de organisatie als rood wordt getoond.
-                    </p>
-
-                    <h2>Hoe komt de score tot stand?</h2>
-                    <p>
-                        Antwoord: Er wordt verbinding gemaakt op poort 443. Als er een verbinding is, en er
-                        is een beveiligde verbinding bedoeld, dan wordt gecontroleerd hoe goed die
-                        verbinding is. Als er een beveiligde verbinding is, dan wordt deze geacht als nodig.
-                        Het is lastig om automatisch te bepalen of een domein wel of geen beveiligde
-                        verbinding vereist: publieke informatie moet ook bereikbaar zijn voor mensen die
-                        internetten via een aardappel.
                     </p>
 
                     <h2>Hoe moet SSL/TLS worden ingericht?</h2>
@@ -283,13 +320,14 @@
                         Antwoord: De kaart is gepresenteerd door sprekers op de
                         "<a href="http://inhethoofdvandehacker.nl/" target="_blank">in het hoofd van de hacker</a>"
                         conferentie van 16 maart 2016. Een volledig programma van de conferentie is terug
-                        te zien op de site van de conferentie.
+                        te zien op de site van de conferentie. In het eerste weekend na introductie
+                        zijn er meer dan 150 verbindingen extra versleuteld.
                     </p>
 
                     <h2>Hoe is dit tot stand gekomen?</h2>
                     <p>Antwoord: Dit project is tot stand gekomen door:</p>
                     <ul>
-                        <li>Idee, programmeer, hak en breekwerk door Elger Jonker</li>
+                        <li>Initiatiefnemer, programmeer, hak en breekwerk door Elger Jonker</li>
                         <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
                         <li>PR, ondersteuning: Twan van Someren</li>
                         <li>Server management en CI: Johan Bloemberg</li>
@@ -304,6 +342,21 @@
 
                     <h2>Wat is de historie van Faalkaart?</h2>
 
+                    <p>
+                        <small><b>28 augustus 2017</b>: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.
+                            Heeft een organisatie geen punten, dan hebben we geen fouten kunnen vinden: perfect! Er is nu dus ook een top win!
+                            <br><br>
+                            In deze update is de kaartsoftware bijgewerkt: er wordt nu gebruik gemaakt van open streetmaps, beter kaartmateriaal,
+                            het django python framework, dynamische javascripts en betere caching. De site laadt niet alleen sneller,
+                            hij is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
+                            <br><br>
+                            Al het werk levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
+                            mogelijk om door de tijd heen te scrollen en er is nu een top 50 van meest falende organisaties.
+                            In plaats van afzonderlijke sites te kijken, wordt er nu per organisatie beoordeeld. Tenslotte hebben we alle sites
+                            die niet meteen TLS spreken aangemerkt als een "gemiddelde" fout: in de vorige versie van de kaart werd hier nog
+                            geen oordeel over gegeven. Het ontbreken van TLS is net zo erg als slechte TLS.
+                        </small>
+                    </p>
                     <p>
                         <small><b>15 februari 2017</b>:
                             Inmiddels wordt er weer
@@ -390,45 +443,101 @@
                     </p>
                 </div>
 
-                <div class="col-md-6" id="topfail">
-                    <div class="page-header">
-                        <a name="topfail"  class="jumptonav"></a>
-                        <h1>{% trans "Top Fail" %}</h1>
+                <div class="col-md-6">
+                    <div id="topfail">
+                        <div class="page-header">
+                            <a name="topfail"  class="jumptonav"></a>
+                            <h1>{% trans "Top Fail" %}</h1>
+                        </div>
+                        <div>
+                            <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+                        </div>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>{% trans "Rank" %}</th>
+                                <th>{% trans "Organization" %}</th>
+                                <th>{% trans "Points" %}</th>
+                                <th>{% trans "Tweet" %}</th>
+                            </tr>
+                            </thead><tbody>
+                            {% verbatim %}
+                            <tr v-for='rank in top.ranking'>
+                                <td>{{ rank.Rank }}</td>
+                                <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
+                                <td>{{ rank.Points }}</td>
+                                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
+                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div>
-                        <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+
+                    <div id="topwin">
+                        <div class="page-header">
+                            <a name="topwin"  class="jumptonav"></a>
+                            <h1>{% trans "Top Win!" %}</h1>
+                        </div>
+                        <div>
+                            <p v-if="top.metadata">{% trans "This is the top win from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+                        </div>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>{% trans "Rank" %}</th>
+                                <th>{% trans "Organization" %}</th>
+                                <th>{% trans "Points" %}</th>
+                                <th>{% trans "Tweet" %}</th>
+                            </tr>
+                            </thead><tbody>
+                            {% verbatim %}
+                            <tr v-for='rank in top.ranking'>
+                                <td>{{ rank.Rank }}</td>
+                                <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
+                                <td>{{ rank.Points }}</td>
+                                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
+                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat als OK op Faalkaart! &hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
                     </div>
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>{% trans "Rank" %}</th>
-                            <th>{% trans "Organization" %}</th>
-                            <th>{% trans "Points" %}</th>
-                            <th>{% trans "Tweet" %}</th>
-                        </tr>
-                        </thead><tbody>
-                        {% verbatim %}
-                        <tr v-for='rank in top.ranking'>
-                            <td>{{ rank.Rank }}</td>
-                            <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
-                            <td>{{ rank.Points }}</td>
-                            <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                            <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
 
-            <div class="page-header">
-                <a name="footer" class="jumptonav"></a>
-                    <p><a href="https://github.com/failmap/" target="_blank">
-                          Fail map is open software</a> maintained by the
-                        <a href="https://internetcleanup.foundation" target="_blank">
-                            Internet Cleanup Foundation.</a>
-                        Support them to make the internet safer for everyone: your privacy may
-                        depend on it.</p>
+            <div id="lastrow">
+                <div class="row">
+                    <a name="footer" class="jumptonav"></a>
+
+                    <div class="col-md-3">
+                        <img src="{% static 'images/internet_cleanup_foundation_logo.png' %}" height="100"/><br />
+                        <b><a href="https://internetcleanup.foundation" target="_blank">InternetCleanup.Foundation</a></b>
+                        <p>Let's clean up the internet: our privacy depends on it!<br /><br />
+                        </p>
+                    </div>
+                    <div class="col-md-3">
+                        <img src="{% static 'images/github_logo.png' %}" height="100"/><br />
+                        <b><a href="https://github.com/failmap/" target="_blank">Fail Map</a></b>
+                        <p>Fail map is open software maintained by the Internet Cleanup Foundation.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <b>Bescherm je gegevens! Doneer nu!</b><br />
+                        <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt voor blijvende updates, onderhoud en nieuwe controles!</p>
+                        <p>
+                            <b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b>
+                        </p>
+                        <div class="donatebuttons">
+                            <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro; 5</a></span>
+                            <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro; 10</a></span>
+                            <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro; 20</a></span>
+                            <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro; 50</a></span>
+                            <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro; 100</a></span>
+                            <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro; 200</a></span>
+                            <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro; 500</a></span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </body>

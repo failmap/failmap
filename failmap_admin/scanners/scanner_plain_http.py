@@ -13,8 +13,9 @@ import pytz
 import untangle
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_http import ScannerHttp
+from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 
 from .models import Endpoint
 
@@ -33,7 +34,7 @@ class ScannerPlainHttp:
         :return:
         """
         # to save ratings
-        scan_manager = ScanManager
+
 
         # no urls that have endpoints on https that already exist.
         urls = Url.objects.all().filter(is_dead=False,
@@ -41,72 +42,77 @@ class ScannerPlainHttp:
 
         # todo: haven't got the queryset logic down to filter like below. Could be just one query.
         for url in urls:
-            logger.debug("Checking for http only sites on: %s" % url)
-            endpoints = Endpoint.objects.all().filter(url=url, is_dead=False)
+            ScannerPlainHttp.scan_url(url)
 
-            has_http = False
-            has_https = False
-            http_endpoints = []
+    @staticmethod
+    def scan_url(url):
+        scan_manager = EndpointScanManager
+        logger.debug("Checking for http only sites on: %s" % url)
+        endpoints = Endpoint.objects.all().filter(url=url, is_dead=False)
 
-            for endpoint in endpoints:
-                if endpoint.protocol == "http":
-                    has_http = True
-                    http_endpoints.append(endpoint)
-                if endpoint.protocol == "https":
-                    has_https = True
+        has_http = False
+        has_https = False
+        http_endpoints = []
 
-            # calculate the score
-            # Organizations with wildcards can have this problem a lot:
-            # 1: It's not possible to distinguish the default page with another page, wildcards
-            #    can help hide domains and services.
-            # 2: A wildcard TLS connection is an option: then it will be fine, and it can be also
-            #    run only on everything that is NOT another service on the server: also hiding stuff
-            # 3: Due to SNI it's not possible where something is served.
+        for endpoint in endpoints:
+            if endpoint.protocol == "http":
+                has_http = True
+                http_endpoints.append(endpoint)
+            if endpoint.protocol == "https":
+                has_https = True
 
-            # !!! The only solution is to have a "curated" list of port 80 websites. !!!
-            # maybe compare an image of a non existing url with the random ones given here.
-            # if they are the same, then there is really no site. That should help clean
-            # non-existing wildcard domains.
+        # calculate the score
+        # Organizations with wildcards can have this problem a lot:
+        # 1: It's not possible to distinguish the default page with another page, wildcards
+        #    can help hide domains and services.
+        # 2: A wildcard TLS connection is an option: then it will be fine, and it can be also
+        #    run only on everything that is NOT another service on the server: also hiding stuff
+        # 3: Due to SNI it's not possible where something is served.
 
-            # Comparing with screenshots is simply not effective enough:
-            # 1: Many HTTPS sites load HTTP resources, which don't show, and thus it's different.
-            # 2: There is no guarantee that a wildcard serves a blank page.
-            # 3: In the transition phase to default https (coming years), it's not possible to say
-            #    what should be the "leading" site.
+        # !!! The only solution is to have a "curated" list of port 80 websites. !!!
+        # maybe compare an image of a non existing url with the random ones given here.
+        # if they are the same, then there is really no site. That should help clean
+        # non-existing wildcard domains.
 
-            # Some organizations redirect the http site to a non-standard https port.
-            # occurs more than once... you still have to follow redirects?
-            if has_http and not has_https:
-                logger.debug("This url seems to have no https at all: %s" % url)
-                logger.debug("Checking if they exist, to be sure there is nothing.")
+        # Comparing with screenshots is simply not effective enough:
+        # 1: Many HTTPS sites load HTTP resources, which don't show, and thus it's different.
+        # 2: There is no guarantee that a wildcard serves a blank page.
+        # 3: In the transition phase to default https (coming years), it's not possible to say
+        #    what should be the "leading" site.
 
-                # It's not secure initially, do a last check. This might result in new
-                # endpoints, and therefore no scan record.
-                # todo: hm, you can't really check ipv6 redirects on an ipv4 box, now can you...
-                if not ScannerPlainHttp.verify_is_secure(url):
+        # Some organizations redirect the http site to a non-standard https port.
+        # occurs more than once... you still have to follow redirects?
+        if has_http and not has_https:
+            logger.debug("This url seems to have no https at all: %s" % url)
+            logger.debug("Checking if they exist, to be sure there is nothing.")
 
-                    logger.info("Checking if the URL redirects to a secure url: %s" % url)
-                    if ScannerPlainHttp.redirects_to_safety(url):
-                        logger.info("%s redirects to safety, saved by the bell." % url)
-                        for http_endpoint in http_endpoints:
-                            scan_manager.add_scan("plain_https", http_endpoint, 25,
-                                                  "Redirects to a secure site, while a secure "
-                                                  "counterpart on the standard port is missing.")
+            # It's not secure initially, do a last check. This might result in new
+            # endpoints, and therefore no scan record.
+            # todo: hm, you can't really check ipv6 redirects on an ipv4 box, now can you...
+            if not ScannerPlainHttp.verify_is_secure(url):
 
-                    else:
-                        logger.info("%s does not have a https site. Saving/updating scan." % url)
-                        for http_endpoint in http_endpoints:
-                            scan_manager.add_scan("plain_https", http_endpoint, 200,
-                                                  "Site does not redirect to secure url, and has no"
-                                                  "secure alternative on a standard port.")
-                else:
-                    # it is secure, and if there was a rating, then reduce it to 0
-                    # (with a new rating).
+                logger.info("Checking if the URL redirects to a secure url: %s" % url)
+                if ScannerPlainHttp.redirects_to_safety(url):
+                    logger.info("%s redirects to safety, saved by the bell." % url)
                     for http_endpoint in http_endpoints:
-                        if scan_manager.had_scan_with_points("plain_https", http_endpoint):
-                            scan_manager.add_scan("plain_https", http_endpoint, 0,
-                                                  "Has a secure equivalent, which wasn't so in the"
-                                                  "past.")
+                        scan_manager.add_scan("plain_https", http_endpoint, 25,
+                                              "Redirects to a secure site, while a secure "
+                                              "counterpart on the standard port is missing.")
+
+                else:
+                    logger.info("%s does not have a https site. Saving/updating scan." % url)
+                    for http_endpoint in http_endpoints:
+                        scan_manager.add_scan("plain_https", http_endpoint, 200,
+                                              "Site does not redirect to secure url, and has no"
+                                              "secure alternative on a standard port.")
+            else:
+                # it is secure, and if there was a rating, then reduce it to 0
+                # (with a new rating).
+                for http_endpoint in http_endpoints:
+                    if scan_manager.had_scan_with_points("plain_https", http_endpoint):
+                        scan_manager.add_scan("plain_https", http_endpoint, 0,
+                                              "Has a secure equivalent, which wasn't so in the"
+                                              "past.")
 
     @staticmethod
     def verify_is_secure(url):
@@ -148,61 +154,4 @@ class ScannerPlainHttp:
                 return False
         except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError):
             logger.debug("Request resulted into an error, it's not redirecting properly.")
-            return False
-
-
-class ScanManager:
-    """
-    Helps with data deduplication of scans. Helps storing scans in a more generic way.
-
-    :return:
-    """
-    @staticmethod
-    def add_scan(scantype, endpoint, rating, message):
-        from .models import EndpointGenericScan
-
-        # Check if the latest scan has the same rating or not:
-        try:
-            gs = EndpointGenericScan.objects.all().filter(
-                type=scantype,
-                endpoint=endpoint,
-            ).latest('last_scan_moment')
-        except ObjectDoesNotExist:
-            gs = EndpointGenericScan()
-
-        # last scan had exactly the same result, so don't create a new scan and just update the
-        # last scan date.
-        if gs.explanation == message and gs.rating == rating:
-            gs.last_scan_moment = datetime.now(pytz.utc)
-            gs.save()
-        else:
-            # make a new one, please don't update the existing one :)
-            gs = EndpointGenericScan()
-            gs.explanation = message
-            gs.rating = rating
-            gs.endpoint = endpoint
-            gs.type = scantype
-            gs.last_scan_moment = datetime.now(pytz.utc)
-            gs.rating_determined_on = datetime.now(pytz.utc)
-            gs.save()
-
-    @staticmethod
-    def had_scan_with_points(scantype, endpoint):
-        """
-        Used for data deduplication. Don't save a scan that had zero points, but you can upgrade
-        to zero (or another rating)
-        :param scantype:
-        :param endpoint:
-        :return:
-        """
-        from .models import EndpointGenericScan
-
-        try:
-            gs = EndpointGenericScan.objects.all().filter(
-                type=scantype,
-                endpoint=endpoint,
-            ).latest('last_scan_moment')
-            if gs.rating:
-                return True
-        except ObjectDoesNotExist:
             return False

@@ -54,7 +54,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
     fields = ('name', 'type', 'country', 'twitter_handle')
 
-    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]
+    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]  #
 
     actions = ['rate_organization', 'scan_organization']
 
