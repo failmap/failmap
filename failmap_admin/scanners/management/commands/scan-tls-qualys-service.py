@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
-from failmap_admin.scanners.managers import StateManager
+from failmap_admin.scanners.state_manager import StateManager
 from failmap_admin.scanners.models import Url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys, TlsQualysScratchpad
 
@@ -105,7 +105,7 @@ class Command(BaseCommand):
                                   endpoint__port=443,
                                   ).exclude(endpoint__tlsqualysscan__isnull=False)
 
-        if urls.count() > 0:
+        if urls.count() < 1:
             logger.info("There are no new urls.")
             return
 

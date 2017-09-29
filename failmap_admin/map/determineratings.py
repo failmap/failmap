@@ -532,6 +532,12 @@ DetermineRatings.rate_organization(o)
 
     @staticmethod
     def get_report_from_scanner_tls_qualys(endpoint, when):
+        """
+        Qualys gets multiple endpoints
+        :param endpoint:
+        :param when:
+        :return:
+        """
         logger.debug("get_report_from_scanner_tls_qualys")
 
         if endpoint.port != 443 and endpoint.protocol != "https":

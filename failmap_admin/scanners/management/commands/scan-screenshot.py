@@ -22,8 +22,8 @@ class Command(BaseCommand):
         try:
             while True:
                 Command.make_new_screenshots()
-                logger.debug("Sleeping for half a day.")
-                sleep(43200)  # sleep half a day
+                logger.debug("Sleeping 60 seconds.")
+                sleep(60)  # sleep half a day
         except KeyboardInterrupt:
             logger.debug("ALL DONE!")
 

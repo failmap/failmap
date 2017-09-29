@@ -159,6 +159,81 @@ def topfail(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
 
+def topwin(request, weeks_back=0):
+    # todo: still no django solution for the time dimension discovered, doing a manual query... :(
+    # todo: add the twitter handle to the database etc...
+    # at least it's fast.
+
+    # This gets the organizations until a certain score that is seen as bad.
+    # From that everything with > 0 points.
+
+    # Would we reverse this, you'd get the top best. But honestly, only those with 0 points are good
+    # enough.
+
+    if not weeks_back:
+        when = datetime.now(pytz.utc)
+    else:
+        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+    data = {
+        "metadata": {
+            "type": "toplist",
+            "render_date": datetime.now(pytz.utc),
+            "data_from_time": when,
+            "remark": "LOL",
+        },
+        "ranking":
+            [
+
+            ]
+    }
+
+    cursor = connection.cursor()
+
+    cursor.execute('''
+        SELECT
+            rating,
+            organization.name,
+            organizations_organizationtype.name,
+            organization.id,
+            `when`,
+            organization.twitter_handle
+        FROM map_organizationrating
+        INNER JOIN
+          organization on organization.id = map_organizationrating.organization_id
+        INNER JOIN
+          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+        INNER JOIN
+          coordinate ON coordinate.organization_id = organization.id
+        WHERE `when` <= '%s' AND rating == 0
+        AND `when` = (select MAX(`when`) FROM map_organizationrating or2
+              WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
+        GROUP BY organization.name
+        ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
+        LIMIT 20
+        ''' % (when, when))
+
+    rows = cursor.fetchall()
+
+    rank = 1
+    for i in rows:
+        dataset = {
+            "Rank": rank,
+            "OrganizationID": i[3],
+            "OrganizationType": i[2],
+            "OrganizationName": i[1],
+            "OrganizationTwitter": i[5],
+            "Points": i[0],
+            "DataFrom": i[4]
+        }
+        rank = rank + 1
+
+        # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
+        data["ranking"].append(dataset)
+
+    return JsonResponse(data, json_dumps_params={'indent': 5})
+
+
 def stats_determine_when(stat, weeks_back=0):
     if stat == 'now' or stat == 'earliest':
         when = datetime.now(pytz.utc)
@@ -211,13 +286,13 @@ def stats(request, weeks_back=0):
                 measurement["total_organizations"] += 1
                 measurement["total_score"] += rating.rating
 
-                if rating.rating < 100:
+                if rating.rating < 200:
                     measurement["green"] += 1
 
-                if 99 < rating.rating < 400:
+                if 199 < rating.rating < 1000:
                     measurement["orange"] += 1
 
-                if rating.rating > 399:
+                if rating.rating > 999:
                     measurement["red"] += 1
 
             except OrganizationRating.DoesNotExist:

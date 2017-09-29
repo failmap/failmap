@@ -122,6 +122,15 @@ class Url(models.Model):
         help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
                   "something on this host.")
 
+    onboarded = models.BooleanField(
+        default=False,
+        help_text="After adding a url, there is an onboarding process that runs a set of tests."
+                  "These tests are usually run very quickly to get a first glimpse of the url."
+                  "This test is run once.")
+
+    onboarded_on = models.DateTimeField(auto_now_add=True, blank=True, null=True,
+                                        help_text="The moment the onboard process finished.")
+
     class Meta:
         managed = True
         db_table = 'url'
@@ -138,6 +147,14 @@ class Url(models.Model):
         self.not_resolvable_reason = message
         self.not_resolvable_since = date
         self.save()
+
+    def is_top_level(self):
+        # count the number of dots. Should be one.
+        # allows your own extension on a lan. there are thousands of extensions today.
+        # so do the stupid thing: trust user input :)
+        if self.url.count(".") == 1:
+            return True
+        return False
 
 # are open ports based on IP adresses.
 # adresses might change (and thus an endpoint changes).
