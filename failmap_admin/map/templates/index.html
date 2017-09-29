@@ -121,9 +121,6 @@
                 </div>
 
                 <div class="progress">
-                    <div class="progress-bar progress-bar-info" :style="{width:unknownpercentage}">
-                        <span class='sr-only'>We didn't scan them then...</span>
-                    </div>
                     <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
                         <span class="sr-only">Oh, wow!</span>
                     </div>
@@ -133,6 +130,9 @@
                     <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
                         <span class='sr-only'>They have a lot to learn.</span>
                     </div>
+                    <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
+                        <span class='sr-only'>We didn't scan them then...</span>
+                    </div>
                 </div>
 
                 <div class="page-header">
@@ -140,12 +140,13 @@
                     <h1>{% trans "The Numbers" %}</h1>
                 </div>
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
+                        <h3>Organizations</h3>
                         <table class="table">
                             <thead>
                             <tr>
                                 <th width="20%">{% trans "When" %}</th>
-                                <th width="20%">{% trans "Organizations" %}</th>
+                                <th width="20%">{% trans "Number" %}</th>
                                 <th width="20%">{% trans "Good" %}</th>
                                 <th width="20%">{% trans "Average" %}</th>
                                 <th width="20%">{% trans "Bad" %}</th>
@@ -155,10 +156,35 @@
                                 {% verbatim %}
                                 <tr v-for="(x, key) in data.data">
                                     <td>{{ key }}</td>
-                                    <td>{{ x["total_organizations"] }}</td>
-                                    <td>{{ x["green"] }} <small>({{ x["green percentage"] }}%)</small></td>
-                                    <td>{{ x["orange"] }} <small>({{ x["orange percentage"] }}%)</small></td>
-                                    <td>{{ x["red"] }} <small>({{ x["red percentage"] }}%)</small></td>
+                                    <td>{{ x["included_organizations"] }}</td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, white ' + x['green percentage'] + '%, white 100%);'">{{ x["green"] }} <small>({{ x["green percentage"] }}%)</small></td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, white ' + x['orange percentage'] + '%, white 100%);'">{{ x["orange"] }} <small>({{ x["orange percentage"] }}%)</small></td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red percentage'] + '%, white ' + x['red percentage'] + '%, white 100%);'">{{ x["red"] }} <small>({{ x["red percentage"] }}%)</small></td>
+                                </tr>
+                                {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Internet addresses</h3>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th width="20%">{% trans "When" %}</th>
+                                <th width="20%">{% trans "Number" %}</th>
+                                <th width="20%">{% trans "Good" %}</th>
+                                <th width="20%">{% trans "Average" %}</th>
+                                <th width="20%">{% trans "Bad" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="data.data">
+                                {% verbatim %}
+                                <tr v-for="(x, key) in data.data">
+                                    <td>{{ key }}</td>
+                                    <td>{{ x["total_urls"] }}</td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, white ' + x['green url percentage'] + '%, white 100%);'">{{ x["green_urls"] }} <small>({{ x["green url percentage"] }}%)</small></td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, white ' + x['orange url percentage'] + '%, white 100%);'">{{ x["orange_urls"] }} <small>({{ x["orange url percentage"] }}%)</small></td>
+                                    <td v-bind:style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red url percentage'] + '%, white ' + x['red url percentage'] + '%, white 100%);'">{{ x["red_urls"] }} <small>({{ x["red url percentage"] }}%)</small></td>
                                 </tr>
                                 {% endverbatim %}
                             </tbody>

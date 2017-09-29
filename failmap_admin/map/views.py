@@ -258,11 +258,17 @@ def stats(request, weeks_back=0):
     # 389 organizations * 7 queries. i mean... come on... what's the solution already?
     # in the meantime: caching proxies all the way down.
 
+    # todo: there is no begin and end date on organizations yet. So your history might have
+    # done: then there are also no scans, so there will be no organization ratings.
+    # organizations will merge in the future, rarely to not ever die.
+
     os = Organization.objects.all()
 
-    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '1 month ago': 0, '2 months ago': 0,
-             '3 months ago': 0, '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
-             '12 months ago': 0}
+    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
+             '2 months ago': 0, '3 months ago': 0}
+    # reduce the numbers a bit, just scroll through time using the slider if you want to look back.
+    # ,  '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
+    #   '12 months ago': 0
 
     for stat in stats:
         # confusing decomposition to comply with mccabe
@@ -271,7 +277,9 @@ def stats(request, weeks_back=0):
         # Next to measurements in hard numbers, we also derive a conclusion in three categories:
         # red, orange and green. This is done to simplify the data, so it can be better understood.
         measurement = {'red': 0, 'orange': 0, 'green': 0,
-                       'total_organizations': 0, 'total_score': 0, 'no_rating': 0}
+                       'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
+                       'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
+                       'included_organizations': 0}
 
         for o in os:
             try:
@@ -295,17 +303,48 @@ def stats(request, weeks_back=0):
                 if rating.rating > 999:
                     measurement["red"] += 1
 
+                # count the urls, from the latest rating. Which is very dirty :)
+                # we're forced to load each item separately anyway, so why not read it?
+                x = json.loads(rating.calculation)
+                measurement["total_urls"] += len(x['organization']['urls'])
+
+                measurement["green_urls"] += sum(
+                    [int(l['url']['points']) < 200 for l in x['organization']['urls']])
+                measurement["orange_urls"] += sum(
+                    [199 < int(l['url']['points']) < 1000 for l in x['organization']['urls']])
+                measurement["red_urls"] += sum(
+                    [int(l['url']['points']) > 999 for l in x['organization']['urls']])
+
+                measurement["included_organizations"] += 1
+
             except OrganizationRating.DoesNotExist:
                 measurement["total_organizations"] += 1
                 measurement["total_score"] += 0
                 measurement["no_rating"] += 1
 
-        measurement["red percentage"] = round((measurement["red"] /
-                                               measurement["total_organizations"]) * 100)
-        measurement["orange percentage"] = round((measurement["orange"] /
-                                                  measurement["total_organizations"]) * 100)
-        measurement["green percentage"] = round((measurement["green"] /
-                                                 measurement["total_organizations"]) * 100)
+        if measurement["included_organizations"]:
+            measurement["red percentage"] = round((measurement["red"] /
+                                                   measurement["included_organizations"]) * 100)
+            measurement["orange percentage"] = round((measurement["orange"] /
+                                                      measurement["included_organizations"]) * 100)
+            measurement["green percentage"] = round((measurement["green"] /
+                                                     measurement["included_organizations"]) * 100)
+        else:
+            measurement["red percentage"] = 0
+            measurement["orange percentage"] = 0
+            measurement["green percentage"] = 0
+
+        if measurement["total_urls"]:
+            measurement["red url percentage"] = round((measurement["red_urls"] /
+                                                   measurement["total_urls"]) * 100)
+            measurement["orange url percentage"] = round((measurement["orange_urls"] /
+                                                      measurement["total_urls"]) * 100)
+            measurement["green url percentage"] = round((measurement["green_urls"] /
+                                                     measurement["total_urls"]) * 100)
+        else:
+            measurement["red url percentage"] = 0
+            measurement["orange url percentage"] = 0
+            measurement["green url percentage"] = 0
 
         stats[stat] = measurement
 
