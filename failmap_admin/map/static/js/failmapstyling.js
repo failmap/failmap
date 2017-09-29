@@ -407,7 +407,7 @@ $( document ).ready(function() {
             domainsDebounced(selected_organization, this.value);
         }
 
-        //loadstats(this.value); // todo: cache
+        loadstats(this.value); // todo: cache
         vueHistory.weeksback = this.value;
     }, 100));
 
