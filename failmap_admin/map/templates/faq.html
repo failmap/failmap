@@ -1,0 +1,226 @@
+{% load static %} {% load i18n %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="page-header">
+                        <a name="explanation" class="jumptonav"></a>
+                        <h1>{% trans "About Failmap" %}</h1>
+                    </div>
+
+                    <h2>Waarom Faalkaart?</h2>
+                    <p>
+                        Antwoord: Er zijn veel instanties die gevoelige gegevens verwerken. Dit moet op een
+                        veilige manier gebeuren: als deze informatie op straat komt te liggen kan
+                        dit allerlei gevolgen hebben. Betrokken personen kunnen benadeeld worden of
+                        er kunnen mogelijk handelingen worden uitgevoerd die voor allerlei problemen zorgen.
+                    </p><p>
+                        Faalkaart is een middel om inzicht te geven in basale beveiliging van
+                        organisaties. Met de kaart wordt aangegeven of een organisatie in staat
+                        is om het minimale niveau van informatiebeveiliging aan te kunnen. De
+                        basisbeveiliging is vaak tekenend voor de rest van de organisatie.
+                    </p><p>
+                        Er is met opzet gekozen voor de naam "faalkaart": een meer tendentieuze naam
+                        leidt eerder tot actie en is makkelijk te begrijpen. Staat een organisatie
+                        rood op de kaart, dan moeten ze actie ondernemen.
+                    </p>
+
+                    <h2>Mijn gemeente/organisatie is rood, wat nu?</h2>
+                    <p>
+                        Antwoord: Helaas zit er een gat in de muur. De organisatie zal actie moeten
+                        ondernemen om dit te dichten.
+                    </p><p>
+                        Vaak heeft een organisatie meerdere websites of diensten op het internet. We
+                        tellen hiervan alle fouten bij elkaar op. Het kan dus zijn dat een organisatie
+                        rood op de kaart staat omdat er veel kleine foutjes zijn aangetroffen.
+                    </p>
+
+                    <h2>Mijn gemeente is groen, is alles goed?</h2>
+                    <p>
+                        Antwoord: Faalkaart test alleen het laagste niveau van beveiliging, dit
+                        is toonaangevend voor de hele organisatie.
+                    </p><p>
+                        Er bestaat een kans dat een website of dienst mist en juist daar een probleem
+                        zit. Nieuwe websites of diensten kunnen altijd worden gedeeld met Faalkaart,
+                        deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
+                    </p>
+
+                    <h2>Hoe compleet is dit?</h2>
+                    <p>
+                        Antwoord: rond de 7.000 domeinen van gemeenten worden regelmatig gecontroleerd. Als deze domeinen
+                        hebben samen meer dan 20.000 verbindingen naar het internet.
+                    </p><p>
+                        Op faalkaart wordt alleen de basale beveiliging gecontroleerd van organisaties.
+                    </p><p>
+
+                        Er bestaat een kans dat een website of dienst mist en juist daar een probleem
+                        zit. Nieuwe websites of diensten kunnen altijd worden gedeeld met Faalkaart,
+                        deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
+                    </p>
+
+                    <h2>Hoe komt de score tot stand?</h2>
+                    <p>
+                        Antwoord: Sinds eind 2017 wordt de score anders opgebouwd: er wordt gerekend in punten.
+                        Aan ieder beveiligingsprobleem worden punten toegekend.
+                    </p><p>
+                        Zonder punten, of met weinig punten, wordt een organisatie groen weergegeven. Naarmate
+                        het puntenaantal oploopt wordt de organisatie oranje of zelfs rood.
+                    </p><p>
+                        De gedachte hierachter is dat organisaties die erg veel aan het internet hangen ook
+                        meer risico nemen. Natuurlijk wordt er naar ernst van de situatie punten gegeven:
+                        een ernstig probleem betekent dus ook dat de organisatie als rood wordt getoond.
+                    </p>
+
+                    <h2>De score is incorrect, wat moet ik doen?</h2>
+                    <p>
+                       Antwoord: het kan even duren voordat een wijziging in de beveiliging door
+                        faalkaart is gedetecteerd. Mocht er behoefte zijn om deze informatie sneller
+                        door te voeren, neem dan even contact op met info@faalkaart.nl. Let er op
+                        dat we de historie niet aanpassen: metingen blijven voor altijd zichtbaar.
+                    </p>
+                    <p>
+                        Het doel is dat de kaart alle informatie correct weergeeft. Mocht er desondanks
+                        iets verkeerd op de kaart staan, dan zullen we dit proberen recht te trekken.
+                        Neem contact op met info@faalkaart.nl om in contact te komen met een van de
+                        moderators.
+                    </p>
+
+                    <h2>Hoe moet SSL/TLS worden ingericht?</h2>
+                    <p>
+                        Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration">aantal goede handleidingen te vinden</a>.
+                        Toonaangevend advies komt van het <a href="https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html">Nationaal Cyber Security Centrum</a>.
+                        Een variant toegespitst op gemeenten, die ook ingaat op DNSSEC, staat op de site van
+                        <a href="https://www.ibdgemeenten.nl/3619-2/" target="_blank">IBD Gemeenten</a>.
+                        Lijsten met goede instellingen zijn te vinden op <a href="https://cipherli.st">Cipher List</a>.
+                    </p>
+
+                    <h2>Sinds wanneer bestaat deze kaart?</h2>
+                    <p>
+                        Antwoord: De kaart is gepresenteerd door sprekers op de
+                        "<a href="http://inhethoofdvandehacker.nl/" target="_blank">in het hoofd van de hacker</a>"
+                        conferentie van 16 maart 2016. Een volledig programma van de conferentie is terug
+                        te zien op de site van de conferentie. In het eerste weekend na introductie
+                        zijn er meer dan 150 verbindingen extra versleuteld.
+                    </p>
+
+                    <h2>Hoe is dit tot stand gekomen?</h2>
+                    <p>Antwoord: Dit project is tot stand gekomen door:</p>
+                    <ul>
+                        <li>Initiatiefnemer, programmeer, hak en breekwerk door Elger Jonker</li>
+                        <li>DNSSEC en nuttig ongevraagd advies: Eelko Neven</li>
+                        <li>PR, ondersteuning: Twan van Someren</li>
+                        <li>Server management en CI: Johan Bloemberg</li>
+                    </ul>
+
+                    <ul>
+                        <li>Financiële ondersteuning: <a href="https://www.sidnfonds.nl/" target="_blank">SIDN Fonds</a></li>
+                        <li>Actuele lijst gemeenten: <a href="https://www.200ok.nl/cms-gemeenten/" target="_blank">200ok</a> </li>
+                        <li>Polygonen en kaartdata: <a href="https://www.openstreetmap.org" target="_blank">Openstreetmap</a>, <a href="http://www.qgis.org/" target="_blank">QGIS</a> </li>
+                        <li>Beoordeling TLS: <a href="https://www.ssllabs.com/ssltest/" target="_blank">Qualys SSL labs</a></li>
+                        <li>DNS verkenning: <a href="https://github.com/darkoperator/dnsrecon" target="_blank">DNS Recon</a>, <a href="https://github.com/laramies/theHarvester" target="_blank">theHarvester</a></li>
+                        <li>Styling: <a href="http://getbootstrap.com/" target="_blank">Twitter Bootstrap</a> + creativity</li>
+                        <li>Website: <a href="https://www.djangoproject.com/" target="_blank">Django</a>, <a href="https://vuejs.org/" target="_blank">Vue</a></li>
+                        <li>Database: <a href="https://mariadb.org/" target="_blank">MariaDB</a> / <a href="https://sqlite.org/" target="_blank">sqlite</a></li>
+                    </ul>
+
+                    <h2>Wat is de historie van Faalkaart?</h2>
+
+                    <p>
+                        <small><b>28 augustus 2017</b>: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.
+                            Heeft een organisatie geen punten, dan hebben we geen fouten kunnen vinden: perfect! Er is nu dus ook een top win!
+                            <br><br>
+                            In deze update is de kaartsoftware bijgewerkt: er wordt nu gebruik gemaakt van open streetmaps, beter kaartmateriaal,
+                            het django python framework, dynamische javascripts en betere caching. De site laadt niet alleen sneller,
+                            hij is beter te onderhouden. Alle ontwikkeling van de faalkaart gebeurd inmiddels open source. Patches zijn welkom.
+                            <br><br>
+                            Al het werk levert ook wat nieuwe features op: deze site wordt automatisch ververst als je de site open laat staan, het is
+                            mogelijk om door de tijd heen te scrollen en er is nu een top 50 van meest falende organisaties.
+                            In plaats van afzonderlijke sites te kijken, wordt er nu per organisatie beoordeeld. Tenslotte hebben we alle sites
+                            die niet meteen TLS spreken aangemerkt als een "gemiddelde" fout: in de vorige versie van de kaart werd hier nog
+                            geen oordeel over gegeven. Het ontbreken van TLS is net zo erg als slechte TLS.
+                        </small>
+                    </p>
+                    <p>
+                        <small><b>15 februari 2017</b>:
+                            Inmiddels wordt er weer
+                            <a href="https://github.com/failmap" target="_blank">volop gewerkt</a> aan
+                            faalkaart. De kaart is bijgewerkt naar nieuwe, goed onderhoudbare, technieken.
+                            Inmiddels is er een
+                            <a href="https://internetcleanup.foundation" target="_blank">stichting opgericht</a>
+                            om de ontwikkeling van de kaart te stimuleren. Binnenkort wordt er gewerkt aan
+                            het beter scannen van e.e.a: er gaat meer en sneller gescand worden.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>7 augustus 2016</b>:
+                            Faalkaart heeft de steun gekregen van het SIDN fonds, we zullen het komende jaar
+                            de kaart uitbreiden en op veel meer controleren. We gaan de kaartrot oplossen en
+                            zorgen dat het makkelijk wordt om zelf de kaart te kunnen draaien
+                            (onafhankelijk). Ook is de chaching van de site ingevoerd, dus het voelt weer
+                            snel(ler) aan.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>9 juni 2016</b>:
+                            Door een nieuwe kwetsbaarheid zijn er 100+ domeinen in het rood beland, van 2%
+                            naar 9% kwetsbaar dus. Het aantal matige domeinen blijft gelukkig afnemen. Hoe
+                            lang zal het duren tot alles gepatched is? Wie patcht het laatst?
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>Extra update</b>:
+                            Faalkaart heeft een projectbijdrage gevraagd aan het SIDN
+                            fonds om er voor te zorgen dat dit middel breder en makkelijker kan worden
+                            ingezet. We gaan hierdoor vele honderdduizenden kwetsbaarheden aan de kaak te
+                            stellen en blijven motiveren om ze te verhelpen. De techneuten, hackers en nerds
+                            achter faalkaart staan te trappelen om het internet robuuster te maken. Half
+                            Juni weten we meer. Spannend!
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>Extra update 2</b>:
+                            We zien dat door de grote hoeveelheid data we caching
+                            moeten gaan toepassen en verder moeten optimaliseren. De bedoeling is om de
+                            kaart zo actueel mogelijk weer te geven. Tot dit opgelost is zal het iets langer
+                            duren voordat de kaart geladen is.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>8 april 2016</b>:
+                            Het aantal domeinen met een onvoldoende is gezakt naar 2%,
+                            was ooit 8%. Er zijn zojuist 1200 domeinen toegevoegd. Er is een team aan het
+                            ontstaan dat de faalkaart verder gaat uitbreiden en onderhouden. Vele handen
+                            maken licht werk. Dank aan gemeenten voor het insturen van subdomeinen. Dit is
+                            altijd welkom!
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>25 maart 2016</b>:
+                            De kaart wordt automatisch ververst. Onder de uitleg staat
+                            een overzicht met domeinen die onvoldoende scoren.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>18 maart 2016</b>:
+                            De kaart wordt zeer binnenkort automatisch bijgewerkt.
+                            Nieuw zijn statistieken met historie. De domeinenlijst is verbeterd en er is
+                            tekst toegevoegd over de totstandkoming van het cijfer. Binnenkort ook open
+                            source.
+                        </small>
+                    </p>
+                    <p>
+                        <small>
+                            <b>16 maart 2016</b>:
+                            De eerste serie van 1800 domeinen is geladen, dit wordt nog aangevuld en zal
+                            binnenkort opnieuw worden gecontroleerd. De testdatum is nu zichtbaar. De eerste
+                            verbeteringen schijnen een half uur na presentatie al te zijn doorgevoerd.
+                            Dat is stoer!
+                        </small>
+                    </p>
+                </div>
+            </div>
