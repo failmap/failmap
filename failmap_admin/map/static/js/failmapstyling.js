@@ -5,8 +5,200 @@
 // also: reacts patent clause and mandatory jsx syntax ... NO
 // The amount of components available for vue is limited. But we can mix it with traditional scripts
 // Javascript will not update the values when altering the data, javascript cannot observe that.
+var failmap = {
+    map: null,
+    geojson: "",
+    metadata: L.control(),
+    info: L.control(),
+    legend: L.control({position: 'bottomright'}),
+
+    initializemap: function() {
+        this.map = L.map('map').setView([52.15, 5.8], 8);
+        this.map.scrollWheelZoom.disable();
+
+        L.control.fullscreen().addTo(this.map);
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            id: 'mapbox.light'
+        }).addTo(this.map);
+
+        this.map.attributionControl.addAttribution('Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>');
+
+        this.metadata.onAdd = function(map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+
+        this.metadata.update = function(metadata) {
+            this._div.innerHTML = '' +  (metadata ?
+                    '<h4>' + new Date(metadata.data_from_time).humanTimeStamp() + '</h4>' : '<h4></h4>');
+        };
+
+        this.metadata.addTo(this.map);
+
+        this.add_info();
+        this.addlegend();
+    },
+
+    add_info: function(){
+        this.info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+
+        this.info.update = function (props) {
+            var sometext = "";
+            if (props) {
+                sometext += "<h4>" + props.OrganizationName +"</h4>";
+                if (props.Overall > 1)
+                    sometext += '<b>Score: </b><span style="color: '+failmap.getColor(props.Overall)+'">' + props.Overall + ' points</span>';
+                else
+                    sometext += '<b>Score: </b><span style="color: '+failmap.getColor(props.Overall)+'">- points</span>';
+                domainsDebounced(props.OrganizationID, $("#history")[0].value);
+            } else {
+                sometext += "<h4>-</h4>";
+                sometext += '<b>Score: </b><span>- points</span>';
+            }
+
+            this._div.innerHTML = sometext;
+        };
+
+        this.info.addTo(this.map);
+    },
+
+    addlegend: function(){
+        this.legend.onAdd = function (map) {
+
+            var div = L.DomUtil.create('div', 'info legend'), labels = [];
+
+            labels.push('<i style="background:' + failmap.getColor(199) + '"></i> Good');
+            labels.push('<i style="background:' + failmap.getColor(999) + '"></i> Average');
+            labels.push('<i style="background:' + failmap.getColor(1000) + '"></i> Bad');
+            labels.push('<i style="background:' + failmap.getColor(-1) + '"></i> Unknown');
+
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+
+        this.legend.addTo(this.map);
+    },
+
+     PointIcon: L.Icon.extend({
+        options: {
+            shadowUrl: '',
+            iconSize:     [16, 16],
+            shadowSize:   [0, 0],
+            iconAnchor:   [8, 8],
+            shadowAnchor: [0, 0],
+            popupAnchor:  [-3, -76]
+        }
+    }),
+
+    greenIcon: new L.Icon({iconUrl: 'static/images/green-dot.png'}),
+    redIcon: new L.Icon({iconUrl: 'static/images/red-dot.png'}),
+    orangeIcon: new L.Icon({iconUrl: 'static/images/orange-dot.png'}),
+    grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
+
+    // get color depending on population density value
+    getColor: function (d) {
+        return  d > 999 ? '#bd383c' :
+                d > 199 ? '#fc9645' :
+                d >= 0  ? '#62fe69' :
+                          '#c1bcbb';
+    },
+
+    style: function (feature) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: failmap.getColor(feature.properties.Overall)
+        };
+    },
+
+    pointToLayer: function(geoJsonPoint, latlng){
+        if (geoJsonPoint.properties.Overall > 999)
+            return L.marker(latlng, {icon: failmap.redIcon});
+        if (geoJsonPoint.properties.Overall > 199)
+            return L.marker(latlng, {icon: failmap.orangeIcon});
+        if (geoJsonPoint.properties.Overall > 0)
+            return L.marker(latlng, {icon: failmap.greenIcon});
+        return L.marker(latlng, {icon: failmap.grayIcon});
+    },
+
+    highlightFeature: function(e) {
+        var layer = e.target;
+
+        // doesn't work for points, only for polygons and lines
+        if (typeof layer.setStyle === "function") {
+            layer.setStyle({
+                weight: 5,
+                color: '#ccc',
+                dashArray: '',
+                fillOpacity: 0.7
+            });
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
+        }
+        failmap.info.update(layer.feature.properties);
+    },
+
+    onEachFeature: function (feature, layer) {
+        layer.on({
+            mouseover: failmap.highlightFeature,
+            mouseout: failmap.resetHighlight,
+            click: showreport
+        });
+    },
+
+    resetHighlight: function (e) {
+        failmap.geojson.resetStyle(e.target);
+        failmap.info.update();
+    },
+
+    zoomToFeature: function (e) {
+        this.map.fitBounds(e.target.getBounds());
+    },
+
+    gotoLink: function (e){
+        var layer = e.target;
+        location.hash = "#" + layer.feature.properties['OrganizationName'];
+    },
 
 
+    loadmap: function (weeknumber){
+        $.getJSON('/data/map/' + weeknumber, function (json) {
+            if (failmap.geojson) { // if there already was data present
+                failmap.geojson.clearLayers(); // prevent overlapping polygons
+                failmap.map.removeLayer(failmap.geojson);
+            }
+
+            failmap.geojson = L.geoJson(json, {
+                style: failmap.style,
+                pointToLayer: failmap.pointToLayer,
+                onEachFeature: failmap.onEachFeature
+            }).addTo(failmap.map); // only if singleton, its somewhat dirty.
+
+            // todo: add the date info on the map, or somewhere.
+            failmap.metadata.update(json.metadata);
+        });
+    }
+
+};
+
+failmap.initializemap();
+
+// failmap.loadmap(0);
+
+/*
 //                              Y     X
 var map = L.map('map').setView([52.15, 5.8], 8);
 map.scrollWheelZoom.disable();
@@ -27,6 +219,7 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 
 // control that shows state info on hover
 var metadata = L.control();
+
 metadata.onAdd = function (map) {
     this._div = L.DomUtil.create('div', 'info');
     this.update();
@@ -131,6 +324,7 @@ function highlightFeature(e) {
 
     info.update(layer.feature.properties);
 }
+*/
 
 var domainsDebounced = debounce(function(organization, weeks_back) {
     if (!weeks_back)
@@ -155,7 +349,7 @@ function debounce(func, wait, immediate) {
 	};
 }
 
-
+/*
 var geojson;
 
 function resetHighlight(e) {
@@ -172,13 +366,7 @@ function gotoLink(e){
     location.hash = "#" + layer.feature.properties['OrganizationName'];
 }
 
-// cache the requests on the client, so you can slide faster.
-// the cache is valid about a week...
-// only at weeknumber 0 we don't use cache, otherwise hourly updates don't work
-// caching doesnt really work: returned data is severly altered and copy by value is messy.
-// array.slice, but what if it's an object? then json things. Nope.
-// also checking a weeknumber by this is meh: weeknumber !== '0'
-// this is much simpler.
+
 function loadmap(weeknumber){
     $.getJSON('/data/map/' + weeknumber, function (json) {
         if (geojson) { // if there already was data present
@@ -196,7 +384,7 @@ function loadmap(weeknumber){
         metadata.update(json.metadata);
     });
 }
-
+*/
 
 function loadtopfail(weeknumber){
     $.getJSON('/data/topfail/' + weeknumber, function (data) {
@@ -216,6 +404,12 @@ function loadstats(weeknumber){
     });
 }
 
+function loadterrible_urls(weeknumber){
+    $.getJSON('/data/terrible_urls/' + weeknumber, function(data) {
+        vueTerribleurls.top = data;
+    });
+}
+
 
 
 // reloads the map and the top fail every hour, so you don't need to manually refresh anymore
@@ -225,6 +419,7 @@ function update_hourly() {
         loadmap(0);
         loadtopfail(0);
         loadtopwin(0);
+        loadstats(0);
         $("#history").val(0);
     }
     hourly = true; // first time don't run the code, so nothing surprising happens
@@ -261,7 +456,7 @@ function roundTo(n, digits) {
 // possibly just completely caching it on the client after a while... because.. why not.
 
 $( document ).ready(function() {
-    loadmap(0);
+    failmap.loadmap(0);
 
     // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
     // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
@@ -381,6 +576,21 @@ $( document ).ready(function() {
         }
     });
 
+    window.vueTerribleurls = new Vue({
+        el: '#terrible_urls',
+        data: { top: Array },
+        methods: {
+            showReport: function (OrganizationID) {
+                jumptoreport();
+                showReportData(OrganizationID, $("#history")[0].value);
+                domainsDebounced(OrganizationID, $("#history")[0].value);
+            },
+            humanize: function(date){
+                return new Date(date).humanTimeStamp()
+            }
+        }
+    });
+
     window.vueHistory = new Vue({
         el: '#historycontrol',
         data: {
@@ -398,9 +608,10 @@ $( document ).ready(function() {
 
     // move space and time ;)
     $("#history").on("change input", debounce(function() {
-        loadmap(this.value);
+        failmap.loadmap(this.value);
         loadtopfail(this.value);
         loadtopwin(this.value);
+        // loadterrible_urls(this.value);
 
         if (selected_organization > -1){
             showReportData(selected_organization, this.value);
@@ -409,12 +620,12 @@ $( document ).ready(function() {
 
         loadstats(this.value); // todo: cache
         vueHistory.weeksback = this.value;
-    }, 100));
+    }, 200));
 
     loadtopwin(0);
     loadtopfail(0);
     loadstats(0);
-
+    // loadterrible_urls(0);
 });
 
 selected_organization = -1;
@@ -446,7 +657,7 @@ function showreport(e){
     showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
 }
 
-
+/*
 
 
 function onEachFeature(feature, layer) {
@@ -478,3 +689,7 @@ legend.onAdd = function (map) {
 };
 
 legend.addTo(map);
+*/
+
+
+

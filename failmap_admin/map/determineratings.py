@@ -682,6 +682,7 @@ DetermineRatings.rate_organization(o)
       "name": "%s",
       "rating": "-1",
       "urls": []
+    }
 }
             """.strip() % organization.name
             r.save()

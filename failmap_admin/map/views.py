@@ -8,18 +8,22 @@ from django.db import connection
 from django.db.models import Count, Max
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.cache import cache_page
 
 from failmap_admin.map.determineratings import DetermineRatings
 
-from .models import Organization, OrganizationRating, Url
+from .models import Organization, OrganizationRating, Url, UrlRating
+
+cache_time = 24 * 60 * 60
 
 
-# Create your views here.
+@cache_page(cache_time)
 def index(request):
+    # todo: move to vue translations on client side. There are many javascript components that
+    # also need to be translated some way.
     """
-    The map is simply a few files that are merged by javascript on the client side.
-       We're not using the Django templating engine since it's a very poor way to develop a website.
-
+        The map is simply a few files that are merged by javascript on the client side.
+        Django templating is avoided as much as possible.
     :param request:
     :return:
     """
@@ -28,15 +32,10 @@ def index(request):
 
     # now return the rendered template, it takes the wrong one... from another thing.
     return render(request, 'map/templates/index.html',
-                  {"timestamp": datetime.now(pytz.utc),
-                   "today": datetime.now(pytz.utc).date(),
-                   "rendertime": "over 9000 seconds"})
+                  {"timestamp": datetime.now(pytz.utc)})
 
 
-# return a report for an organization.
-# todo: support weeks back, evenwhile the deleted urls and such from the past should still
-# be taken into account elsewhere (add deleted/dead urls to the report until the time they have
-# been killed... (do we know since when they exist?).../// hm.
+@cache_page(cache_time)
 def organization_report(request, organization_id, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -45,12 +44,13 @@ def organization_report(request, organization_id, weeks_back=0):
 
     # getting the latest report.
     try:
-        r = Organization.objects.filter(pk=organization_id, organizationrating__when__lt=when). \
+        r = Organization.objects.filter(pk=organization_id, organizationrating__when__lte=when). \
                 values('organizationrating__rating',
                        'organizationrating__calculation',
                        'organizationrating__when',
                        'name',
-                       'pk').order_by('-organizationrating__when')[:1].get()
+                       'pk').latest('organizationrating__when')
+        # latest replaced: order_by('-organizationrating__when')[:1].get()
 
         report_json = """
 {
@@ -66,16 +66,12 @@ def organization_report(request, organization_id, weeks_back=0):
                                      r['name'],
                                      r['pk'],
                                      r['organizationrating__calculation'])
-        o = {"rating": r['organizationrating__rating'],
-             "calculation": r['organizationrating__calculation'],
-             "when": r['organizationrating__when'],
-             "name": r['name'],
-             "id": r['pk']}
+        # print(report_json)
     except Organization.DoesNotExist as e:
         report_json = "{}"
 
     x = json.loads(report_json)
-    # why not have this serializable. This is so common...
+
     return JsonResponse(x, json_dumps_params={'indent': 2}, safe=False)
 
 
@@ -84,16 +80,87 @@ def string_to_delta(string_delta):
     return datetime.timedelta(**{unit: float(value)})
 
 
+@cache_page(cache_time)
+def terrible_urls(request, weeks_back=0):
+    # this would only work if the latest endpoint is actually correct.
+    # currently this goes wrong when the endpoints are dead but the url still resolves.
+    # then there should be an url rating of 0 (as no endpoints). But we don't save that yet.
+    # So this feature cannot work until the url ratings are actually correct.
+    if not weeks_back:
+        when = datetime.now(pytz.utc)
+    else:
+        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+    data = {
+        "metadata": {
+            "type": "urllist",
+            "render_date": datetime.now(pytz.utc),
+            "data_from_time": when,
+            "remark": "-",
+        },
+        "urls":
+            [
+
+            ]
+    }
+
+    cursor = connection.cursor()
+
+    cursor.execute('''
+        SELECT
+            rating,
+            organization.name,
+            organizations_organizationtype.name,
+            organization.id,
+            `when`,
+            organization.twitter_handle,
+            url.url
+        FROM map_urlrating
+        INNER JOIN
+          url on url.id = map_urlrating.url_id
+        LEFT OUTER JOIN
+          url_organization on url_organization.url_id = url.id
+        LEFT OUTER JOIN
+          organization on organization.id = url_organization.organization_id
+        INNER JOIN
+          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+        WHERE `when` <= '%s' AND url.not_resolvable == 0 and url.isdead == 0
+        AND `when` = (select MAX(`when`) FROM map_urlrating or2
+              WHERE or2.url_id = map_urlrating.url_id AND `when` <= '%s')
+        GROUP BY url.url
+        ORDER BY `rating` DESC, `organization`.`name` ASC
+        LIMIT 30
+        ''' % (when, when))
+
+    rows = cursor.fetchall()
+
+    rank = 1
+    for i in rows:
+        dataset = {
+            "Rank": rank,
+            "Url": i[6],
+            "OrganizationID": i[3],
+            "OrganizationType": i[2],
+            "OrganizationName": i[1],
+            "OrganizationTwitter": i[5],
+            "Points": i[0],
+            "DataFrom": i[4]
+        }
+        rank = rank + 1
+
+        # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
+        data["urls"].append(dataset)
+
+    return JsonResponse(data, json_dumps_params={'indent': 5})
+
+
+@cache_page(cache_time)
 def topfail(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
-    # todo: add the twitter handle to the database etc...
     # at least it's fast.
 
     # This gets the organizations until a certain score that is seen as bad.
     # From that everything with > 0 points.
-
-    # Would we reverse this, you'd get the top best. But honestly, only those with 0 points are good
-    # enough.
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -105,7 +172,7 @@ def topfail(request, weeks_back=0):
             "type": "toplist",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "LOL",
+            "remark": "Just fix it!",
         },
         "ranking":
             [
@@ -135,7 +202,7 @@ def topfail(request, weeks_back=0):
               WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
         GROUP BY organization.name
         ORDER BY `rating` DESC, `organization`.`name` ASC
-        LIMIT 50
+        LIMIT 30
         ''' % (when, when))
 
     rows = cursor.fetchall()
@@ -159,6 +226,7 @@ def topfail(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
 
+@cache_page(cache_time)
 def topwin(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
     # todo: add the twitter handle to the database etc...
@@ -180,7 +248,7 @@ def topwin(request, weeks_back=0):
             "type": "toplist",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "LOL",
+            "remark": "You're now working with competence!",
         },
         "ranking":
             [
@@ -210,7 +278,7 @@ def topwin(request, weeks_back=0):
               WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
         GROUP BY organization.name
         ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
-        LIMIT 20
+        LIMIT 30
         ''' % (when, when))
 
     rows = cursor.fetchall()
@@ -249,14 +317,11 @@ def stats_determine_when(stat, weeks_back=0):
     return when
 
 
+@cache_page(cache_time)  # 24 hours.
 def stats(request, weeks_back=0):
-    # todo: The problem is not to have an earlier rating, but selecting the latest one from the
-    # earlier ratings. This happens now in two steps.
-    # another time dimension slicing problem. This problem just has to be solved by the community.
-    # this results in hundreds of queries, where just a few would suffice normally. This is
-    # becoming a problem. - this is now extremely slow, and i know exactly why (not grouping, etc).
-    # 389 organizations * 7 queries. i mean... come on... what's the solution already?
-    # in the meantime: caching proxies all the way down.
+    # todo: 390 * 7 queries. Still missing the django time dimension type queries.
+    # Info: the number of urls can be slightly inflated since some organizations share urls
+    # and they are rated PER organization.
 
     # todo: there is no begin and end date on organizations yet. So your history might have
     # done: then there are also no scans, so there will be no organization ratings.
@@ -285,10 +350,10 @@ def stats(request, weeks_back=0):
             try:
 
                 if stat == 'earliest':
-                    rating = OrganizationRating.objects.filter(organization=o)
+                    rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
                     rating = rating.earliest('when')
                 else:
-                    rating = OrganizationRating.objects.filter(organization=o, when__lte=when)
+                    rating = OrganizationRating.objects.filter(organization=o, when__lte=when, rating__gt=-1)
                     rating = rating.latest('when')
 
                 measurement["total_organizations"] += 1
@@ -351,6 +416,7 @@ def stats(request, weeks_back=0):
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 5})
 
 
+@cache_page(cache_time)
 def wanted_urls(request):
     """
     Creates a list of organizations that have very little to none domains, and where manual
@@ -397,6 +463,7 @@ def wanted_urls(request):
     return JsonResponse(data, json_dumps_params={'indent': 2})
 
 
+@cache_page(cache_time)
 def map_data(request, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)

@@ -20,6 +20,7 @@ class Command(BaseCommand):
         DetermineRatings.rate_urls_efficient()  # this should not do anything anymore...
 
         OrganizationRating.objects.all().delete()
+        DetermineRatings.default_ratings()
         DetermineRatings.rate_organizations_efficient(create_history=True)
         print("Making the most recent organization rating, should not have any effect.")
         DetermineRatings.rate_organizations_efficient()  # this should not do anything anymore...
