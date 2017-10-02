@@ -215,12 +215,13 @@ LOGGING = {
     },
     'formatters': {
         'debug': {
-            'format': '%(asctime)s\t%(levelname)-8s -- %(filename)-20s:%(lineno)-4s -- %(message)s'
+            'format': '%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - %(funcName)20s() - %(message)s',
         },
         'color': {
             '()': 'colorlog.ColoredFormatter',
-            'format': '%(log_color)s%(asctime)s\t%(levelname)-8s -- '
-                      '%(filename)s:%(lineno)-4s -- %(message)s',
+            'format': '%(log_color)s%(asctime)s\t%(levelname)-8s - '
+                      '%(filename)s:%(lineno)-4s - %(funcName)40s() - %(message)s',
+            'datefmt': '%Y%-m-%d %H:%M',
             'log_colors': {
                 'DEBUG':    'green',
                 'INFO':     'white',

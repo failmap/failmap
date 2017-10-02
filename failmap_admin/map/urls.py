@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^data/topfail/(?P<weeks_back>[0-9]{0,2})', topfail, name='top fail'),
     url(r'^data/topwin/(?P<weeks_back>[0-9]{0,2})', topwin, name='top win'),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
-    # url(r'^data/terrible_urls/(?P<weeks_back>[0-9]{0,2})', terrible_urls, name='terrible urls'),
+    url(r'^data/terrible_urls/(?P<weeks_back>[0-9]{0,2})', terrible_urls, name='terrible urls'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),

@@ -17,7 +17,7 @@ from .models import Organization, OrganizationRating, Url, UrlRating
 cache_time = 24 * 60 * 60
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def index(request):
     # todo: move to vue translations on client side. There are many javascript components that
     # also need to be translated some way.
@@ -35,7 +35,7 @@ def index(request):
                   {"timestamp": datetime.now(pytz.utc)})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def organization_report(request, organization_id, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -80,7 +80,7 @@ def string_to_delta(string_delta):
     return datetime.timedelta(**{unit: float(value)})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def terrible_urls(request, weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
     # currently this goes wrong when the endpoints are dead but the url still resolves.
@@ -114,7 +114,9 @@ def terrible_urls(request, weeks_back=0):
             organization.id,
             `when`,
             organization.twitter_handle,
-            url.url
+            url.url,
+            url.isdead,
+            url.not_resolvable
         FROM map_urlrating
         INNER JOIN
           url on url.id = map_urlrating.url_id
@@ -124,12 +126,13 @@ def terrible_urls(request, weeks_back=0):
           organization on organization.id = url_organization.organization_id
         INNER JOIN
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-        WHERE `when` <= '%s' AND url.not_resolvable == 0 and url.isdead == 0
+        WHERE `when` <= '%s'
         AND `when` = (select MAX(`when`) FROM map_urlrating or2
               WHERE or2.url_id = map_urlrating.url_id AND `when` <= '%s')
         GROUP BY url.url
+        HAVING(`rating`) > 999
         ORDER BY `rating` DESC, `organization`.`name` ASC
-        LIMIT 30
+        
         ''' % (when, when))
 
     rows = cursor.fetchall()
@@ -154,7 +157,7 @@ def terrible_urls(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def topfail(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
     # at least it's fast.
@@ -226,7 +229,7 @@ def topfail(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 5})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def topwin(request, weeks_back=0):
     # todo: still no django solution for the time dimension discovered, doing a manual query... :(
     # todo: add the twitter handle to the database etc...
@@ -317,7 +320,7 @@ def stats_determine_when(stat, weeks_back=0):
     return when
 
 
-@cache_page(cache_time)  # 24 hours.
+# @cache_page(cache_time)  # 24 hours.
 def stats(request, weeks_back=0):
     # todo: 390 * 7 queries. Still missing the django time dimension type queries.
     # Info: the number of urls can be slightly inflated since some organizations share urls
@@ -369,6 +372,8 @@ def stats(request, weeks_back=0):
                     measurement["red"] += 1
 
                 # count the urls, from the latest rating. Which is very dirty :)
+                # it will double the urls that are shared between organizations.
+                # that is not really bad, it distorts a little.
                 # we're forced to load each item separately anyway, so why not read it?
                 x = json.loads(rating.calculation)
                 measurement["total_urls"] += len(x['organization']['urls'])
@@ -416,7 +421,7 @@ def stats(request, weeks_back=0):
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 5})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def wanted_urls(request):
     """
     Creates a list of organizations that have very little to none domains, and where manual
@@ -463,7 +468,7 @@ def wanted_urls(request):
     return JsonResponse(data, json_dumps_params={'indent': 2})
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def map_data(request, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)

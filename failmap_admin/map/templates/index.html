@@ -63,31 +63,9 @@
                 </p>
             </div>
 
-            <div id="donate">
-                <div class="page-header">
-                    <a name="donate" class="jumptonav"></a>
-                </div>
-                <div class="row donate-title">
-                    <h2>Bescherm jouw gegevens! Doneer nu!</h2>
-                </div>
-                <div class="row donate-content">
-                    <div class="col-md-12">
-                        <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt voor blijvende updates, onderhoud en nieuwe controles!</p>
-                        <p>Stichting Internet Cleanup Foundation helpt fouten op het internet op te ruimen. <a href="https://internetCleanup.foundation" target="_blank">Lees meer...</a></p>
-                        <p><b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b></p>
-                        <div class="donatebuttons">
-                            <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro; 5</a></span>
-                            <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro; 10</a></span>
-                            <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro; 20</a></span>
-                            <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro; 50</a></span>
-                            <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro; 100</a></span>
-                            <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro; 200</a></span>
-                            <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro; 500</a></span>
-                            <span class="Donate aother"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">Kies ander bedrag</a></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "target_audience.html" %}
+
+            {% include "donation_row.html" %}
 
             <div class="page-header">
                 <a name="map" class="jumptonav"></a>
@@ -95,11 +73,9 @@
                 <p>{% trans "The Map Introduction" %}</p>
 
                 <div id='map'></div>
-                <script type="text/javascript" src="{% static 'js/failmapstyling.js' %}?t={{ timestamp }}"></script>
+                <script type="text/javascript" src="{% static 'js/script.js' %}?t={{ timestamp }}"></script>
             </div>
 
-            <!-- todo: dynamic whitespace stays visible, even when the list is rendered elsewhere.
-             patches are welcome! -->
             {% verbatim %}
             <div id="domainlistcontainer">
                 <div id="domainlist" v-if="urls">
@@ -133,7 +109,7 @@
                     <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
                         <span class='sr-only'>We didn't scan them then...</span>
                     </div>
-                </div>
+                </div>git 
 
                 <div class="page-header">
                     <a name="numbers" class="jumptonav"></a>
@@ -193,31 +169,7 @@
                 </div>
             </div>
 
-            <div id="donate">
-                <div class="page-header">
-                    <a name="donate" class="jumptonav"></a>
-                </div>
-                <div class="row donate-title">
-                    <h2>Bescherm jouw gegevens! Doneer nu!</h2>
-                </div>
-                <div class="row donate-content">
-                    <div class="col-md-12">
-                        <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt voor blijvende updates, onderhoud en nieuwe controles!</p>
-                        <p>Stichting Internet Cleanup Foundation helpt fouten op het internet op te ruimen. <a href="https://internetCleanup.foundation" target="_blank">Lees meer...</a></p>
-                        <p><b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b></p>
-                        <div class="donatebuttons">
-                            <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro; 5</a></span>
-                            <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro; 10</a></span>
-                            <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro; 20</a></span>
-                            <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro; 50</a></span>
-                            <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro; 100</a></span>
-                            <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro; 200</a></span>
-                            <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro; 500</a></span>
-                            <span class="Donate aother"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">Kies ander bedrag</a></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% include "donation_row.html" %}
 
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
@@ -268,73 +220,14 @@
             <br style="clear: both">
 
             <div class="row">
-                <div class="col-md-6">
-                    <div id="topfail">
-                        <div class="page-header">
-                            <a name="topfail"  class="jumptonav"></a>
-                            <h1>{% trans "Top Fail" %}</h1>
-                        </div>
-                        <div>
-                            <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
-                        </div>
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>{% trans "Rank" %}</th>
-                                <th>{% trans "Organization" %}</th>
-                                <th>{% trans "Points" %}</th>
-                                <th>{% trans "Tweet" %}</th>
-                            </tr>
-                            </thead><tbody>
-                            {% verbatim %}
-                            <tr v-for='rank in top.ranking'>
-                                <td>{{ rank.Rank }}</td>
-                                <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
-                                <td>{{ rank.Points }}</td>
-                                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div id="topwin">
-                        <div class="page-header">
-                            <a name="topwin"  class="jumptonav"></a>
-                            <h1>{% trans "Top Win!" %}</h1>
-                        </div>
-                        <div>
-                            <p v-if="top.metadata">{% trans "This is the top win from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
-                        </div>
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>{% trans "Rank" %}</th>
-                                <th>{% trans "Organization" %}</th>
-                                <th>{% trans "Points" %}</th>
-                                <th>{% trans "Tweet" %}</th>
-                            </tr>
-                            </thead><tbody>
-                            {% verbatim %}
-                            <tr v-for='rank in top.ranking'>
-                                <td>{{ rank.Rank }}</td>
-                                <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
-                                <td>{{ rank.Points }}</td>
-                                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat als OK op Faalkaart! &hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                {% include "topfail.html" %}
+                {% include "topwin.html" %}
             </div>
 
-            {% include "target_audience.html" %}
-
-            {% include "faq.html" %}
+            <div class="row">
+                {% include "terrible_urls.html" %}
+                {% include "faq.html" %}
+            </div>
 
             <div id="lastrow">
                 <div class="row">

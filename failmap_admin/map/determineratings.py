@@ -252,32 +252,32 @@ class DetermineRatings:
         logger.debug("rating on: %s, Organization %s" % (when, organization))
 
         total_rating = 0
-        total_calculation = ""
 
-        # hij gaat alle urls ophalen, ookal zijn die lang niet meer levend op een bepaalde periode
-        # je moet de relevante urls voor deze periode bepalen, sommige zijn dood, anderen niet
-        # net als dat je endpoints bij urls bepaalt(!)
-        # urls = Url.objects.filter(organization=organization, is_dead=False)
+        # todo: closing off urls, after no relevant endpoints, but still resolvable.
         urls = DetermineRatings.get_relevant_urls_at_timepoint(organization=organization,
                                                                when=when)
-
+        all_url_ratings = []
+        calculation_json = []
         for url in urls:
             try:
                 urlratings = UrlRating.objects.filter(url=url, when__lte=when)
                 urlratings = urlratings.values("rating", "calculation")
                 urlrating = urlratings.latest("when")  # kills the queryset, results 1
-
-                # some urls are never rated
-                total_rating += urlrating["rating"]
-
-                # when there are multiple urls, add the mandatory comma....
-                if total_calculation:
-                    total_calculation += ","
-
-                total_calculation += urlrating["calculation"]
+                all_url_ratings.append(urlrating)
             except UrlRating.DoesNotExist:
                 logger.warning("Url has no rating at this moment: %s %s" % (url, when))
                 pass
+
+        # sort all_url_ratings on rating desc.
+        # https://stackoverflow.com/questions/403421/
+        all_url_ratings.sort(key=lambda x: x['rating'], reverse=True)
+
+        for urlrating in all_url_ratings:
+            total_rating += urlrating["rating"]
+            calculation_json.append(urlrating["calculation"])
+
+
+
 
         try:
             last = OrganizationRating.objects.filter(
@@ -286,15 +286,10 @@ class DetermineRatings:
             logger.debug("Could not find the last organization rating, creating a dummy one.")
             last = OrganizationRating()  # create an empty one
 
-        # 2017 08 29 bugfix: you can have a rating of 0, eg when all urls are dead or perfect
-        # yes, a calculation can go to 0 when all urls are dead.
-        # so checking for total_calculation here doesn't make sense.
-        # if the rating is different, then save it.
+        # A rating of 0 is desired.
+        # rated on will add a new organizationrating every time. It's very useful for debugging
+        # and showing when ratings happened.
 
-        #                     "rated on": "%s",\n\ -> removed due to it's always
-        # changing the calculation. ... do we want the "when" field to be auto updated? Or should
-        # the "when" field be read as a "since" field... and the rating didn't change since then?
-        # It's the last bit: so "when" should be "since".
         organizationratingtemplate = """
     {
     "organization": {
@@ -305,7 +300,7 @@ class DetermineRatings:
     }""".strip()
 
         organization_json = (organizationratingtemplate % (organization.name, total_rating,
-                                                           total_calculation))
+                                                           ",".join(calculation_json)))
         # print(organization_json)
         # verify the JSON is correct
         parsed = json.loads(organization_json)
@@ -330,6 +325,7 @@ class DetermineRatings:
         if not when:
             when = datetime.now(pytz.utc)
 
+        # contains since, last scan, rating, reason rating was given.
         explanation, rating = DetermineRatings.get_url_score_modular(url, when)
 
         # it's very possible there is no rating yet
@@ -424,7 +420,14 @@ DetermineRatings.rate_organization(o)
                                                             endpoint.port,
                                                             endpoint.protocol,
                                                             ",".join(jsons))))
+            else:
+                logger.debug('No tls or http rating at this moment. Not saving. %s %s' %
+                               (url, when))
 
+        if not endpoints:
+            logger.error('No relevant endpoints at this time, probably didnt exist yet. %s %s' %
+                         (url, when))
+            DetermineRatings.close_url_rating(url, when)
         # Don't do this. While it's better somewhere, we now at generating check
         # if there is still an endpoint that we should include. Perhaps at a rewrite
         # add a "it's empty now" as latest rating. The reason for not doing this now
@@ -452,6 +455,49 @@ DetermineRatings.rate_organization(o)
         else:
             # empty explanations don't get saved.
             return "", 0
+
+
+    @staticmethod
+    def close_url_rating(url, when):
+        logger.debug('Trying to close off the latest rating')
+        """
+        This creates url ratings for urls that have a rating, but where all endpoints went dead.
+
+        Where the "get relevant endpoints" returns no endpoints anymore, and there has been a
+        rating before. This function creates a rating with 0 points for the url. Things have
+        apparently been cleaned up.
+
+        This will be called a lot. Perhaps cache the results?
+        :return:
+        """
+
+        # if did have score in past (we asume that there was a check if there where endpoints before)
+            # create 0 rating.
+
+        default_calculation = """
+        {"url": 
+            {
+            "url": "%s", 
+            "points": "0",
+            "endpoints": []
+            }
+        }""" % url.url
+
+        try:
+            urlratings = UrlRating.objects.filter(url=url, when__lte=when)
+            urlrating = urlratings.latest("when")
+            if urlrating.calculation != default_calculation:
+                logger.debug('Added an empty zero rating. The url has probably been cleaned up.')
+                x = UrlRating()
+                x.calculation = default_calculation
+                x.when = when
+                x.url = url
+                x.rating = 0
+                x.save()
+            else:
+                logger.debug('This was already cleaned up.')
+        except ObjectDoesNotExist:
+            logger.debug('There where no prior ratings, so cannot close this url.')
 
     @staticmethod
     def get_report_from_scanner_dead(endpoint, when):
@@ -512,8 +558,10 @@ DetermineRatings.rate_organization(o)
                 }""".strip()
 
         try:
+            # also here: the last scan moment increases with every scan. When you have a set of
+            # relevant dates (when scans where made) ....
             scan = EndpointGenericScan.objects.filter(endpoint=endpoint,
-                                                      last_scan_moment__lte=when,
+                                                      rating_determined_on__lte=when,
                                                       type="plain_https",
                                                       )
             scan = scan.latest('rating_determined_on')
@@ -552,8 +600,8 @@ DetermineRatings.rate_organization(o)
             "A-": "A-, Good",
             "A": "A, Good",
             "A+": "A+, Perfect",
-            "T": "Chain of trust missing",
-            "I": "Certificate not valid for domain name",  # Custom message
+            "T": "Chain of trust missing. ",
+            "I": "Certificate not valid for domain name.",  # Custom message
             "0": "-",
         }
 
@@ -561,7 +609,7 @@ DetermineRatings.rate_organization(o)
         # 0 is many cases a "not connect to server" error currently. But there is more.
         # Now checking messages returned from qualys. Certificate invalid for domain name now
         # is awarded points.
-        ratings = {"T": 500,
+        ratings = {"T": 200,
                    "F": 1000,
                    "D": 400,
                    "I": 200,
@@ -583,7 +631,11 @@ DetermineRatings.rate_organization(o)
                 }""".strip()
 
         try:
-            scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
+            # the last scan moment always increases. If you would select on scan_moment,
+            # the scan moment can be way in the future. It should be the date the rating is
+            # determined on.
+            # scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
+            scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when)
             scan = scan.latest('rating_determined_on')
 
             # configuration errors
@@ -591,11 +643,18 @@ DetermineRatings.rate_organization(o)
                 scan.qualys_rating = "I"
 
             if scan.qualys_rating != '0':
-                starttls_json = (tlsratingtemplate %
-                                 (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                  scan.rating_determined_on, scan.scan_moment))
+                if scan.qualys_rating == "T":
+                    rating = ratings[scan.qualys_rating] + ratings[scan.qualys_rating_no_trust]
+                    explanation = explanations[scan.qualys_rating] + " And for the certificate itself: " + explanations[scan.qualys_rating_no_trust]
+                    starttls_json = (tlsratingtemplate %
+                                     (explanation, rating,
+                                      scan.rating_determined_on, scan.scan_moment))
+                else:
+                    starttls_json = (tlsratingtemplate %
+                                     (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
+                                      scan.rating_determined_on, scan.scan_moment))
 
-                rating = ratings[scan.qualys_rating]
+                    rating = ratings[scan.qualys_rating]
 
                 logger.debug(
                     "TLS: On %s, Endpoint %s, Rated %s" % (when, endpoint, scan.qualys_rating))
