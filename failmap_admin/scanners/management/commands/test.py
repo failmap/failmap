@@ -27,7 +27,7 @@ class Command(BaseCommand):
         when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
         # when = datetime.now(pytz.utc)
 
-        organization = Organization.objects.filter(name="Eemnes").get()
+        organization = Organization.objects.filter(name="Harderwijk").get()
         DetermineRatings.clear_organization_and_urls(organization)
         DetermineRatings.rate_organization_urls_efficient(organization, create_history=True)
         # ratings are always different since we now also save last scan date.
