@@ -64,33 +64,33 @@ class Command(BaseCommand):
             self.place_domain(missing_domain)
 
     def place_domain(self, missing_domain):
-            extract = tldextract.extract(missing_domain)
-            domainandtld = extract.domain + '.' + extract.suffix
+        extract = tldextract.extract(missing_domain)
+        domainandtld = extract.domain + '.' + extract.suffix
 
-            try:
-                organization = Organization.objects.all().filter(url__url=domainandtld).first()
-                print("%s belongs to %s" % (missing_domain, organization))
+        try:
+            organization = Organization.objects.all().filter(url__url=domainandtld).first()
+            print("%s belongs to %s" % (missing_domain, organization))
 
-                if organization:
-                    first_scan = TlsQualysScan.objects.all().filter(
-                        endpoint__domain=missing_domain).earliest("rating_determined_on")
-                    last_scan = TlsQualysScan.objects.all().filter(
-                        endpoint__domain=missing_domain).latest("rating_determined_on")
+            if organization:
+                first_scan = TlsQualysScan.objects.all().filter(
+                    endpoint__domain=missing_domain).earliest("rating_determined_on")
+                last_scan = TlsQualysScan.objects.all().filter(
+                    endpoint__domain=missing_domain).latest("rating_determined_on")
 
-                    url = Url()
-                    url.created_on = first_scan.rating_determined_on
-                    url.is_dead = True
-                    url.is_dead_reason = "Found dead endpoint, but missing URL. Added dead url."
-                    url.is_dead_since = last_scan.rating_determined_on  # this is incorrect...
-                    url.organization = organization
-                    url.url = missing_domain
-                    url.save()
-                else:
-                    print("No organization found for this url, try something else %s"
-                          % missing_domain)
+                url = Url()
+                url.created_on = first_scan.rating_determined_on
+                url.is_dead = True
+                url.is_dead_reason = "Found dead endpoint, but missing URL. Added dead url."
+                url.is_dead_since = last_scan.rating_determined_on  # this is incorrect...
+                url.organization = organization
+                url.url = missing_domain
+                url.save()
+            else:
+                print("No organization found for this url, try something else %s"
+                      % missing_domain)
 
-            except ObjectDoesNotExist:
-                print("Some weird error")
+        except ObjectDoesNotExist:
+            print("Some weird error")
 
         # The rest is all specialized work and needs to be added by hand.
         # We're going to do that to the dataset we're now testing on.

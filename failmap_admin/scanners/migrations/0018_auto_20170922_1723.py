@@ -16,16 +16,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='endpoint',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='scanners.Endpoint'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='scanners.Endpoint'),
         ),
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='rating_determined_on',
-            field=models.DateTimeField(help_text="This is when the current rating was first discovered. It may be obsoleted byanother rating or explanation (which might have the same rating). This date cannot change once it's set."),
+            field=models.DateTimeField(
+                help_text="This is when the current rating was first discovered. It may be obsoleted byanother rating or explanation (which might have the same rating). This date cannot change once it's set."),
         ),
         migrations.AlterField(
             model_name='screenshot',
             name='endpoint',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint'),
         ),
     ]

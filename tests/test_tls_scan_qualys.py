@@ -81,7 +81,6 @@ def qualys_error_scan(url, request): return generate_mock("www.faalkaart.nl", "C
 # todo: als je een ander domein teruggeeft dan je opgeeft, dan gaat ie allerlei endpoints killen
 # we are silently expecting that qualys will mirror the host
 def qualys_mirror(url, request):
-
     """
     Request object looks like this:
     {'method': 'GET', 'url':

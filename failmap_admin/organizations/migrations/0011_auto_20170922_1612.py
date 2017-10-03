@@ -16,11 +16,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='coordinate',
             name='area',
-            field=jsonfield.fields.JSONField(default=dict, help_text='GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer.', max_length=10000),
+            field=jsonfield.fields.JSONField(
+                default=dict, help_text='GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to reduce the amount of data to transfer.', max_length=10000),
         ),
         migrations.AlterField(
             model_name='url',
             name='url',
-            field=models.CharField(help_text='Lowercase url name. For example: mydomain.tld or subdomain.domain.tld', max_length=150),
+            field=models.CharField(
+                help_text='Lowercase url name. For example: mydomain.tld or subdomain.domain.tld', max_length=150),
         ),
     ]

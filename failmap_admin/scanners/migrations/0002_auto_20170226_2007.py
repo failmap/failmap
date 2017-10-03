@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Endpoint',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('domain', models.CharField(max_length=255)),
                 ('server_name', models.CharField(max_length=255)),
                 ('ip', models.CharField(max_length=255)),
@@ -30,7 +31,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TlsQualysScan',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('qualys_rating', models.CharField(default=0, max_length=3)),
                 ('qualys_rating_no_trust', models.CharField(default=0, max_length=3)),
                 ('pending', models.BooleanField(default=1)),
@@ -38,7 +40,8 @@ class Migration(migrations.Migration):
                 ('scan_date', models.DateField(auto_now_add=True)),
                 ('scan_time', models.TimeField(auto_now_add=True)),
                 ('scan_moment', models.DateTimeField(auto_now_add=True)),
-                ('endpoint', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint')),
+                ('endpoint', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='scanners.Endpoint')),
             ],
             options={
                 'db_table': 'scanner_tls_qualys',
@@ -48,7 +51,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TlsQualysScratchpad',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('domain', models.CharField(max_length=255)),
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('data', models.TextField()),

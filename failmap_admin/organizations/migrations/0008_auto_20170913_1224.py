@@ -15,12 +15,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='url',
             name='not_resolvable',
-            field=models.BooleanField(default=False, help_text='Url is not resolvable (anymore) and will not be picked up by scanners anymore.When the url is not resolvable, ratings from the past will still be shown(?)#'),
+            field=models.BooleanField(
+                default=False, help_text='Url is not resolvable (anymore) and will not be picked up by scanners anymore.When the url is not resolvable, ratings from the past will still be shown(?)#'),
         ),
         migrations.AddField(
             model_name='url',
             name='not_resolvable_reason',
-            field=models.CharField(blank=True, help_text='A scanner might find this not resolvable, some details about that are placed here.', max_length=255, null=True),
+            field=models.CharField(
+                blank=True, help_text='A scanner might find this not resolvable, some details about that are placed here.', max_length=255, null=True),
         ),
         migrations.AddField(
             model_name='url',

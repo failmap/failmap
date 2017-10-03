@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpoint',
             name='domain',
-            field=models.CharField(help_text='This is a legacy field, used by the scanner. Will be obsoleted after the incorrectly migrated domainshave been fixed manually in productionand the scanner is ready.', max_length=255),
+            field=models.CharField(
+                help_text='This is a legacy field, used by the scanner. Will be obsoleted after the incorrectly migrated domainshave been fixed manually in productionand the scanner is ready.', max_length=255),
         ),
         migrations.AlterField(
             model_name='endpoint',

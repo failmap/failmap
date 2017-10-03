@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='State',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('scanner', models.CharField(max_length=255, unique=True)),
                 ('value', models.CharField(max_length=255)),
                 ('since', models.DateTimeField(auto_now_add=True)),

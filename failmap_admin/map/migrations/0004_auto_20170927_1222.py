@@ -16,6 +16,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='urlrating',
             name='url',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='organizations.Url'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to='organizations.Url'),
         ),
     ]

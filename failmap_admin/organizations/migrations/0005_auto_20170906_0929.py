@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='organization',
             name='twitter_handle',
-            field=models.CharField(blank=True, help_text='Used in the top lists to let visitors tweet to theorganization to wake them up.', max_length=150, null=True),
+            field=models.CharField(
+                blank=True, help_text='Used in the top lists to let visitors tweet to theorganization to wake them up.', max_length=150, null=True),
         ),
     ]

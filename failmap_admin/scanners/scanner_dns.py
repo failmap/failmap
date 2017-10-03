@@ -71,10 +71,13 @@ class ScannerDns:
         if ScannerHttp.resolves(fulldomain):
             # this doesn't add the subdomain to "missing" subsets of items (where one organization
             # misses, for example).
-            if not Url.objects.all().filter(url=fulldomain, organization__in=url.organization.all()).exists():
+            if not Url.objects.all().filter(url=fulldomain,
+                                            organization__in=url.organization.all()).exists():
                 logger.info("Added domain to database: %s" % fulldomain)
                 u = Url()
-                u.save()  # "<Url: >" needs to have a value for field "id" before this many-to-many relationship can be used.
+                # "<Url: >" needs to have a value for field "id" before this many-to-many
+                # relationship can be used.
+                u.save()
                 u.organization = url.organization.all()
                 u.url = fulldomain
                 u.save()
@@ -239,7 +242,8 @@ class ScannerDns:
             # print("Found hostname: %s" % hostname)
             if "." + url in hostname:
                 subdomain_with_ip = hostname[0:hostname.find("." + url)]
-                subdomain = subdomain_with_ip[subdomain_with_ip.find(':')+1:len(subdomain_with_ip)]
+                subdomain = subdomain_with_ip[subdomain_with_ip.find(
+                    ':') + 1:len(subdomain_with_ip)]
                 subdomains.append(subdomain)
                 logger.info("Found subdomain %s" % subdomain)
 
@@ -253,7 +257,7 @@ class ScannerDns:
         for url in urls:
             positions = [pos for pos, char in enumerate(url.url) if char == '.']
             if len(positions) > 1:
-                prefixes.append(url.url[0:positions[len(positions)-2]])
+                prefixes.append(url.url[0:positions[len(positions) - 2]])
         # print(set(prefixes))
         unique_prefixes = set(prefixes)
 
@@ -473,7 +477,7 @@ class ScannerDns:
                     continue
 
                 if record["name"].endswith(url.url):
-                    subdomain = record["name"][0:len(record["name"])-len(url.url)-1]
+                    subdomain = record["name"][0:len(record["name"]) - len(url.url) - 1]
                     # print(subdomain.lower())
                     added = ScannerDns.add_subdomain(subdomain.lower(), url)
                     if added:

@@ -1,8 +1,8 @@
 # urls for scanners, maybe in their own url files
 from django.conf.urls import url
 
-from failmap_admin.map.views import (index, map_data, organization_report, stats, topfail,
-                                     wanted_urls, topwin, terrible_urls)
+from failmap_admin.map.views import (index, map_data, organization_report, stats, terrible_urls,
+                                     topfail, topwin, wanted_urls)
 
 urlpatterns = [
     url(r'^data/map/(?P<weeks_back>[0-9]{0,2})', map_data, name='map data'),

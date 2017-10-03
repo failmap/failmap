@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpoint',
             name='server_name',
-            field=models.CharField(blank=True, help_text='rdns, gift from the scan, deprecated', max_length=255),
+            field=models.CharField(
+                blank=True, help_text='rdns, gift from the scan, deprecated', max_length=255),
         ),
         migrations.AlterField(
             model_name='tlsqualysscan',

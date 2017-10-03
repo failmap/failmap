@@ -30,7 +30,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ScansSsllabs',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('url', models.CharField(max_length=255)),
                 ('servernaam', models.CharField(max_length=255)),
                 ('ipadres', models.CharField(max_length=255)),
@@ -43,7 +44,8 @@ class Migration(migrations.Migration):
                 ('rawdata', models.TextField(db_column='rawData')),
                 ('isdead', models.IntegerField(db_column='isDead', default=False)),
                 ('isdeadsince', models.DateTimeField(blank=True, db_column='isDeadSince', null=True)),
-                ('isdeadreason', models.CharField(blank=True, db_column='isDeadReason', max_length=255, null=True)),
+                ('isdeadreason', models.CharField(blank=True,
+                                                  db_column='isDeadReason', max_length=255, null=True)),
             ],
             options={
                 'managed': True,

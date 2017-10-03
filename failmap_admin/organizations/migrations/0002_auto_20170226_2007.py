@@ -21,11 +21,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='coordinate',
             name='geojsontype',
-            field=models.CharField(blank=True, choices=[('MultiPolygon', 'MultiPolygon'), ('MultiLineString', 'MultiLineString'), ('MultiPoint', 'MultiPoint'), ('Polygon', 'Polygon'), ('LineString', 'LineString'), ('Point', 'Point')], db_column='geoJsonType', max_length=20, null=True),
+            field=models.CharField(blank=True, choices=[('MultiPolygon', 'MultiPolygon'), ('MultiLineString', 'MultiLineString'), ('MultiPoint', 'MultiPoint'), (
+                'Polygon', 'Polygon'), ('LineString', 'LineString'), ('Point', 'Point')], db_column='geoJsonType', max_length=20, null=True),
         ),
         migrations.AlterField(
             model_name='url',
             name='isdead',
-            field=models.BooleanField(db_column='isDead', default=False, help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
+            field=models.BooleanField(db_column='isDead', default=False,
+                                      help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
         ),
     ]

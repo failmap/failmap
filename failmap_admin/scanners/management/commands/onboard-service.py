@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from time import sleep
 
 import pytz
 from django.core.management.base import BaseCommand
@@ -7,9 +8,8 @@ from django.core.management.base import BaseCommand
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.scanner_http import ScannerHttp
-from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
 from failmap_admin.scanners.scanner_plain_http import ScannerPlainHttp
-from time import sleep
+from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
 
 logger = logging.getLogger(__package__)
 

@@ -11,15 +11,15 @@ docutils
 # scanners
 requests
 pytz
-# celery  # distribution, not yet used
-# cefpython3==57.0  # Screenshots
+celery  # distribution, not yet used
+# cefpython3==57.0  # Screenshots, not reliable
 Pillow  # screenshots
 python-resize-image  # screenshots
-selenium  # screenshots # unused, todo: remove
+# selenium  # screenshots # too slow
 untangle  # dns scans https://github.com/stchris/untangle
 
 # manual scans
-django-autocomplete-light
+# django-autocomplete-light # moved to admin interface
 
 # tests (of scanners)
 httmock
@@ -35,3 +35,6 @@ django-silk
 
 # logging
 colorlog
+
+# determine ratings, faster (it's not coded that efficiently)
+# django-cachalot - Is not more efficient.

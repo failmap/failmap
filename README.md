@@ -27,8 +27,7 @@ To run code quality checks and unit tests run:
 
 To make life easier you can use `autopep8`/`isort` before running `tox` to automatically fix most style issues:
 
-    autopep8 -ri failmap_admin tests
-    isort -rc failmap_admin tests
+    tox -e autofix
 
 To run only a specific test use:
 
