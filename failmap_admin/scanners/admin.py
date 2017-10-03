@@ -5,7 +5,7 @@ from failmap_admin.map.determineratings import DetermineRatings, OrganizationRat
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
-                     TlsQualysScratchpad, Url)
+                     TlsQualysScratchpad, Url, EndpointGenericScanScratchpad)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -139,6 +139,12 @@ class EndpointGenericScanAdmin(admin.ModelAdmin):
     fields = ('endpoint', 'type', 'domain', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
 
+class EndpointGenericScanScratchpadAdmin(admin.ModelAdmin):
+    list_display = ('type', 'domain', 'when', 'data')
+    search_fields = ('type', 'domain', 'when', 'data')
+    list_filter = ('type', 'domain', 'when', 'data')
+    fields = ('type', 'domain', 'when', 'data')
+
 
 admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
 admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
@@ -146,3 +152,4 @@ admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(Screenshot, ScreenshotAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)
+admin.site.register(EndpointGenericScanScratchpad, EndpointGenericScanScratchpadAdmin)

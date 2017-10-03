@@ -14,8 +14,8 @@ import untangle
 from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.scanner_http import ScannerHttp
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap_admin.scanners.scanner_http import ScannerHttp
 
 from .models import Endpoint
 
@@ -34,7 +34,6 @@ class ScannerPlainHttp:
         :return:
         """
         # to save ratings
-
 
         # no urls that have endpoints on https that already exist.
         urls = Url.objects.all().filter(is_dead=False,

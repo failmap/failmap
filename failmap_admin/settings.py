@@ -53,8 +53,10 @@ INSTALLED_APPS = [
     'django_countries',
     'django.contrib.admindocs',
     'django.contrib.humanize',
-    'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
-    'dal_select2',  # django-autocomplete-light
+    # Dal removed, since we use the admin site for custom commands.
+    # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
+    # 'dal_select2',  # django-autocomplete-light
+    # 'cachalot',  # query cache, is not faster.
     # 'silk'  # works great for debugging.
     # debug_toolbar',  # debugging and optimization, seems mostly useless in json apps, don't use
 ]
@@ -106,8 +108,11 @@ WSGI_APPLICATION = 'failmap_admin.wsgi.application'
 # Since we don't use anything specific from a db engine, we move to sqllite.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE', 'sqlite3'),
+        'NAME': os.environ.get('DB_NAME', 'db.sqlite3'),
+        'USER': os.environ.get('DB_USER', ''),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', ''),
     },
 }
 
@@ -215,7 +220,8 @@ LOGGING = {
     },
     'formatters': {
         'debug': {
-            'format': '%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - %(funcName)20s() - %(message)s',
+            'format': '%(asctime)s\t%(levelname)-8s - %(filename)-20s:%(lineno)-4s - '
+                      '%(funcName)20s() - %(message)s',
         },
         'color': {
             '()': 'colorlog.ColoredFormatter',

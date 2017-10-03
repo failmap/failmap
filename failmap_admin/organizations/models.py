@@ -77,6 +77,7 @@ class Coordinate(models.Model):
         managed = True
         db_table = 'coordinate'
 
+
 class Url(models.Model):
     organization_old = models.ForeignKey(Organization, null=True)  # on_delete=models.PROTECT
 

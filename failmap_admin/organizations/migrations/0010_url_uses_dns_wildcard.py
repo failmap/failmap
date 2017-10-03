@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='url',
             name='uses_dns_wildcard',
-            field=models.BooleanField(default=False, help_text='When true, this domain uses a DNS wildcard and any subdomain will resolve to something on this host.'),
+            field=models.BooleanField(
+                default=False, help_text='When true, this domain uses a DNS wildcard and any subdomain will resolve to something on this host.'),
         ),
     ]

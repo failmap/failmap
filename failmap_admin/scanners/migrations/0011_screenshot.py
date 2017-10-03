@@ -17,13 +17,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Screenshot',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('domain', models.CharField(help_text='Used when there is no known URL.', max_length=255)),
                 ('filename', models.CharField(max_length=255)),
                 ('width_pixels', models.IntegerField(default=0)),
                 ('height_pixels', models.IntegerField(default=0)),
                 ('created_on', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('url', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='organizations.Url')),
+                ('url', models.ForeignKey(blank=True, null=True,
+                                          on_delete=django.db.models.deletion.PROTECT, to='organizations.Url')),
             ],
         ),
     ]

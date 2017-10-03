@@ -6,10 +6,9 @@ from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.scanner_http import ScannerHttp
-
+from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import Coordinate, Organization, Url
 
@@ -97,7 +96,7 @@ class UrlAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization','created_on')
+            'fields': ('url', 'organization', 'created_on')
         }),
         ('DNS', {
             'fields': ('uses_dns_wildcard', ),

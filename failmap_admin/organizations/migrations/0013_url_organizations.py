@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='url',
             name='organizations',
-            field=models.ManyToManyField(related_name='u_many_o_upgrade', to='organizations.Organization'),
+            field=models.ManyToManyField(related_name='u_many_o_upgrade',
+                                         to='organizations.Organization'),
         ),
     ]

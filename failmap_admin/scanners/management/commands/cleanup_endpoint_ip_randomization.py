@@ -86,7 +86,7 @@ opendata.arnhem.nl	2 december 2016 15:01	4 december 2016 15:50	1
                     endpoint.is_dead_since = Endpoint.objects.all().filter(
                         url=url,
                         discovered_on__gt=endpoint.discovered_on).earliest('discovered_on').\
-                            discovered_on
+                        discovered_on
                     logger.debug('With date: %s' % endpoint.is_dead_since)
                     endpoint.save()
                 except ObjectDoesNotExist:

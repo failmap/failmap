@@ -25,8 +25,6 @@ urlpatterns = [
                                     'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', admin.site.urls),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/manual/', include('failmap_admin.scanners.urls')),
-    url(r'^scanners/', include('failmap_admin.scanners.urls')),
     url(r'^', include('failmap_admin.map.urls')),
 ]
 

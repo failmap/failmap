@@ -85,6 +85,12 @@ class Endpoint(models.Model):
     def uri_ip(self):
         return "%s://%s:%s" % (self.protocol, self.ip, self.port)
 
+    # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
+    def is_ipv4(self):
+        return not ":" in self.ip
+
+    def is_ipv6(self):
+        return ":" in self.ip
 
 class TlsQualysScan(models.Model):
     """

@@ -63,9 +63,9 @@
                 </p>
             </div>
 
-            {% include "target_audience.html" %}
+            {% include "map/target_audience.html" %}
 
-            {% include "donation_row.html" %}
+            {% include "map/donation_row.html" %}
 
             <div class="page-header">
                 <a name="map" class="jumptonav"></a>
@@ -109,7 +109,7 @@
                     <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
                         <span class='sr-only'>We didn't scan them then...</span>
                     </div>
-                </div>git 
+                </div>
 
                 <div class="page-header">
                     <a name="numbers" class="jumptonav"></a>
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            {% include "donation_row.html" %}
+            {% include "map/donation_row.html" %}
 
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
@@ -193,23 +193,23 @@
                                 </div>
                             </div>
                             <div class="reportlist">
+                                <span v-html="total_awarded_points(url.url.points)"> </span>
                                 <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                                            {{ url.url.url }}</span>
+                                            {{ url.url.url }}</span><br />
                                 <div v-for="(endpoint, key) in url.url.endpoints">
-                                    <div v-for="(myendpoint, mykey) in endpoint">
+                                    <div v-for="(myendpoint, mykey) in endpoint"><br />
                                         &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
                                         <div v-for="(rating, key) in myendpoint.ratings">
+                                            <h3>&nbsp; {{ create_header(rating) }}</h3>
                                             <div v-for="(myrating, myratingkey) in rating">
-                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Score" %}{% verbatim %}: {{ myrating.points }} {% endverbatim %}{% trans "points" %}{% verbatim %}<br />
-                                                &nbsp; &nbsp; {% endverbatim %}{% trans "since" %}{% verbatim %}: {{ humanize(myrating.since) }} <br />
-                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Last scan" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
-                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Explanation" %}{% verbatim %}: {{ myrating.explanation }}<br />
+                                                &nbsp; &nbsp; <span v-html="awarded_points(myrating.points)"></span> {{ myrating.explanation }}<br />
+                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(myrating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
+                                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
                                                 <br />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <a :href="'https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest'" target="_blank">Second Opinion</a>
                             </div>
                         </div>
                         {% endverbatim %}
@@ -220,13 +220,13 @@
             <br style="clear: both">
 
             <div class="row">
-                {% include "topfail.html" %}
-                {% include "topwin.html" %}
+                {% include "map/topfail.html" %}
+                {% include "map/topwin.html" %}
             </div>
 
             <div class="row">
-                {% include "terrible_urls.html" %}
-                {% include "faq.html" %}
+                {% include "map/terrible_urls.html" %}
+                {% include "map/faq.html" %}
             </div>
 
             <div id="lastrow">

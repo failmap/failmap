@@ -5,9 +5,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.state_manager import StateManager
 from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.scanner_http import ScannerHttp
+from failmap_admin.scanners.state_manager import StateManager
 
 logger = logging.getLogger(__package__)
 

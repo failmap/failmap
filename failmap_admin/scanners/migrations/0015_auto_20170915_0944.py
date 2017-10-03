@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='screenshot',
             name='endpoint',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='scanners.Endpoint'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='scanners.Endpoint'),
         ),
     ]

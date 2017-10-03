@@ -92,7 +92,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='endpoint',
             name='url',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='organizations.Url'),
+            field=models.ForeignKey(
+                blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='organizations.Url'),
         ),
 
         migrations.RunPython(forward, backward),

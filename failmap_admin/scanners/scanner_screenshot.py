@@ -25,8 +25,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from PIL import Image
 
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.models import Screenshot
+from failmap_admin.scanners.models import Endpoint, Screenshot
 
 logger = logging.getLogger(__package__)
 
@@ -62,13 +61,13 @@ class ScannerScreenshot:
 
         now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
         screenshot_image = settings.TOOLS['firefox']['screenshot_output_dir'] + \
-                           str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
+            str(re.sub(r'[^a-zA-Z0-9_]', '', endpoint.uri_url() + now)) + '.png'
         screenshot_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + \
-                               str(re.sub(r'[^a-zA-Z0-9_]', '',
-                                          endpoint.uri_url() + now)) + '_small.png'
+            str(re.sub(r'[^a-zA-Z0-9_]', '',
+                       endpoint.uri_url() + now)) + '_small.png'
         latest_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + \
-                           str(re.sub(r'[^a-zA-Z0-9_]', '',
-                                      endpoint.uri_url() + now)) + '_latest.png'
+            str(re.sub(r'[^a-zA-Z0-9_]', '',
+                       endpoint.uri_url() + now)) + '_latest.png'
 
         logger.debug("screenshot image: %s" % screenshot_image)
         logger.debug("screenshot thumbnail: %s" % screenshot_thumbnail)
@@ -110,7 +109,6 @@ class ScannerScreenshot:
         im.thumbnail(size, Image.ANTIALIAS)
         im.save(output_path, "PNG")
 
-
     @staticmethod
     # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.
     # Affects all threads (and the main thread) since they all belong to the same process.
@@ -135,7 +133,7 @@ class ScannerScreenshot:
         output_filepath = xd + safe_filename
         output_filepath_resized = xd + safe_filename_resized
         output_filepath_latest = xd + str(re.sub(r'[^a-zA-Z0-9_]', '',
-                                          endpoint.uri_url() + "_latest")) + '.png'
+                                                 endpoint.uri_url() + "_latest")) + '.png'
 
         # skip if there is already a latest image, just to speed things up.
         if skip_if_latest and os.path.exists(output_filepath_latest):

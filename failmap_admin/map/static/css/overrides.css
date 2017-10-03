@@ -129,6 +129,7 @@ body {
 
 .reportlist {
     display: table;
+    padding-bottom: 15px;
 }
 
 .screenshotlist {
@@ -245,4 +246,54 @@ body {
     border-bottom-right-radius: 10px;
     padding-bottom: 15px;
     padding-top: 9px;
+}
+
+.reportlist h3 {
+    font-size: 17px;
+}
+
+.awarded_points_orange {
+    border: 1px solid darkorange;
+    background-color: orange;
+    padding: 0px 3px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.awarded_points_red {
+    border: 1px solid darkred;
+    background-color: red;
+    padding: 0px 3px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.awarded_points_green {
+    border: 1px solid green;
+    background-color: lightgreen;
+    padding: 0px 3px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+
+.total_awarded_points_orange {
+    border: 2px solid darkorange;
+    background-color: orange;
+    padding: 1px 4px;
+    font-weight: bold;
+}
+
+.total_awarded_points_red {
+    border: 2px solid darkred;
+    background-color: red;
+    padding: 1px 4px;
+    font-weight: bold;
+}
+
+.total_awarded_points_green {
+    border: 2px solid green;
+    background-color: lightgreen;
+    padding: 1px 4px;
+    font-weight: bold;
 }

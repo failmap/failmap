@@ -215,17 +215,17 @@ class DetermineRatings:
         logger.debug("Found amount of dates, optimizing: %s", len(datetimes))
 
         # take the last moment of the date, so the scan will have happened at the correct time
-        datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc) for x in
-                      datetimes]
+        datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+                      for x in datetimes]
         datetimes2 = list(set(datetimes2))
         datetimes2.sort()
 
         # if the last datetime2 is today, then just reduce it to NOW to cause less confusion in
         # the dataset (don't place ratings in the future).
         if datetimes2:
-            if datetimes2[len(datetimes2)-1] == datetime.now().replace(
+            if datetimes2[len(datetimes2) - 1] == datetime.now().replace(
                     hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc):
-                datetimes2[len(datetimes2)-1] = datetime.now(pytz.utc)
+                datetimes2[len(datetimes2) - 1] = datetime.now(pytz.utc)
 
             logger.debug("Found amount of dates: %s", len(datetimes2))
             # logger.debug("Relevant dates for organization/url: %s", datetimes2)
@@ -275,9 +275,6 @@ class DetermineRatings:
         for urlrating in all_url_ratings:
             total_rating += urlrating["rating"]
             calculation_json.append(urlrating["calculation"])
-
-
-
 
         try:
             last = OrganizationRating.objects.filter(
@@ -378,6 +375,16 @@ DetermineRatings.rate_organization(o)
         """
         endpoints = DetermineRatings.get_relevant_endpoints_at_timepoint(url, when)
 
+        # sometimes you'll get a series of ipv6 and ipv4 endpoints. These are often used for load
+        # balancing. Many SIP domains have 6 ipv6 endpoints, and amsterdam uses 2xipv4 and 2xipv6.
+        # For an end-user it doesn't really matter that there are a gazillion ip addresses behin
+        # the loadbalancer. It can either enter through ipv4 or ipv6 (due dns resolution).
+        # therefore: we'll only rate maximum 1 ipv4 and one ipv6 endpoint. The rest will be added
+        # to the report, but will not be given a rating.
+        # It would be strange if one address has different content than the other, while possible.
+        had_ipv4 = False
+        had_ipv6 = False
+
         # general reporting json:
         url_rating_template = """
         {
@@ -398,20 +405,41 @@ DetermineRatings.rate_organization(o)
                 }
             }""".strip()
 
+
         rating = 0
         endpoint_jsons = []
         for endpoint in endpoints:
+
+            # todo: add some empty rating, to still show the endpoint in the report.
+            # this only works when all endpoints are equally rated, which has always been the case
+            if had_ipv4 and endpoint.is_ipv4():
+                continue
+
+            if had_ipv6 and endpoint.is_ipv6():
+                continue
+
+            if endpoint.is_ipv6():
+                had_ipv6 = True
+            else:
+                had_ipv4 = True
+
             (scanner_tls_qualys_rating, scanner_tls_qualys_json) = \
                 DetermineRatings.get_report_from_scanner_tls_qualys(endpoint, when)
 
             (scanner_http_plain_rating, scanner_http_plain_json) = \
                 DetermineRatings.get_report_from_scanner_http_plain(endpoint, when)
 
+            (scanner_security_headers_rating, scanner_security_headers_json) = \
+                DetermineRatings.get_report_from_scanner_security_headers(endpoint, when)
+
             jsons = []
             jsons.append(scanner_tls_qualys_json) if scanner_tls_qualys_json else ""
             jsons.append(scanner_http_plain_json) if scanner_http_plain_json else ""
+            jsons.append(scanner_security_headers_json) if scanner_security_headers_json else ""
 
-            rating += int(scanner_tls_qualys_rating) + int(scanner_http_plain_rating)
+            rating += int(scanner_tls_qualys_rating) + \
+                      int(scanner_http_plain_rating) + \
+                      int(scanner_security_headers_rating)
 
             if jsons:
                 endpoint_jsons.append((endpoint_template % (endpoint.ip,
@@ -422,7 +450,7 @@ DetermineRatings.rate_organization(o)
                                                             ",".join(jsons))))
             else:
                 logger.debug('No tls or http rating at this moment. Not saving. %s %s' %
-                               (url, when))
+                             (url, when))
 
         if not endpoints:
             logger.error('No relevant endpoints at this time, probably didnt exist yet. %s %s' %
@@ -456,7 +484,6 @@ DetermineRatings.rate_organization(o)
             # empty explanations don't get saved.
             return "", 0
 
-
     @staticmethod
     def close_url_rating(url, when):
         logger.debug('Trying to close off the latest rating')
@@ -471,13 +498,13 @@ DetermineRatings.rate_organization(o)
         :return:
         """
 
-        # if did have score in past (we asume that there was a check if there where endpoints before)
-            # create 0 rating.
+        # if did have score in past (we assume there was a check if there where endpoints before)
+        # create 0 rating.
 
         default_calculation = """
-        {"url": 
+        {"url":
             {
-            "url": "%s", 
+            "url": "%s",
             "points": "0",
             "endpoints": []
             }
@@ -538,7 +565,102 @@ DetermineRatings.rate_organization(o)
             logger.debug("Endpoint is not dead: %s." % endpoint)
             return 0, ""
 
-    # todo: can be abstracted.
+    @staticmethod
+    def get_report_from_scanner_security_headers(endpoint, when):
+        security_headers_scores = {
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+            # prevents reflected xss
+            'X-XSS-Protection': 100,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+            # prevents clickjacking
+            'X-Frame-Options': 200,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+            # forces the content-type to be leading for defining a type of file (not the browser guess)
+            # The browser guess could execute the file, for example with the wrong plugin.
+            # Basically the server admin should fix the browser, instead of the other way around.
+            'X-Content-Type-Options': 25,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+            # Will be the browser default. Forces https, even if http resources are available.
+            #
+            # The preload list is idiotic: it should contain any site in the world.
+            # A whopping 1 municipality in NL uses the preload list (eg knows if it's existence).
+            # preload list is obscure and a dirty fix for a structural problem.
+            #
+            # Another weird thing is: the default / recommendation for hsts is off. Many sites, esp. in
+            # governments have a once-a-year cycle for doing something requires. So HSTS should be
+            # longer than a year, like one year and three months. Some site punish long hsts times.
+            'Strict-Transport-Security': 200,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Public-Key-Pins
+            # Has the potential to make your site unreachable if not properly (automatically) maintained
+            # The backup cert strategy is also incredibly complex. Creating the right hash is also hard.
+            # So if you don't use this. There should be another way to link the content of the site to
+            # the transport.
+            # header likely to be killed like p3p
+            'Public-Key-Pins': 0,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+            # Very complex header to specify what resources can be loaded from where. Especially useful
+            # when loading in third party content such as horrible ads. Prevents against xss
+            'Content-Security-Policy': 50,
+
+            # Flash, PDF and other exploit prone things can be embedded. Should never happen:
+            # the content should always be none(?).
+            # if not set to none, it is 200 points for allowing flash and pdf to be embedded at all :)
+            'X-Permitted-Cross-Domain-Policies': 25,
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+            # largely unsupported
+            # What referrer should be allowed to access the resource. Security on referrer headers? No.
+            'Referrer-Policy': 0
+        }
+
+        logger.debug("get_report_from_scanner_http_plain")
+
+        rating_template = """
+                    {
+                    "security_headers_strict_transport_security": {
+                        "explanation": "%s",
+                        "points": "%s",
+                        "since": "%s",
+                        "last_scan": "%s"
+                        }
+                    }""".strip()
+
+        try:
+            # also here: the last scan moment increases with every scan. When you have a set of
+            # relevant dates (when scans where made) ....
+            scan = EndpointGenericScan.objects.filter(endpoint=endpoint,
+                                                      rating_determined_on__lte=when,
+                                                      type="Strict-Transport-Security",
+                                                      )
+            scan = scan.latest('rating_determined_on')
+
+            # don't need to add things that are OK to the report. It might be in the future.
+            if scan.rating == "True":
+                json = (rating_template % ("Strict-Transport-Security header present.",
+                                           0,
+                                           scan.rating_determined_on,
+                                           scan.last_scan_moment))
+                rating = 0
+
+            else:
+                json = (rating_template % ("Missing Strict-Transport-Security header.",
+                                           security_headers_scores[scan.type],
+                                           scan.rating_determined_on,
+                                           scan.last_scan_moment))
+                rating = security_headers_scores[scan.type]
+
+            logger.debug("security_headers: On %s, Endpoint %s, Rated %s" %
+                         (when, endpoint, scan.rating))
+            return rating, json
+        except ObjectDoesNotExist:
+            logger.debug("No security_headers on endpoint %s." % endpoint)
+            return 0, ""
+
     @staticmethod
     def get_report_from_scanner_http_plain(endpoint, when):
         logger.debug("get_report_from_scanner_http_plain")
@@ -593,14 +715,14 @@ DetermineRatings.rate_organization(o)
             return 0, ""
 
         explanations = {
-            "F": "F - Failing TLS",
-            "D": "D",
-            "C": "C",
-            "B": "B",
-            "A-": "A-, Good",
-            "A": "A, Good",
-            "A+": "A+, Perfect",
-            "T": "Chain of trust missing. ",
+            "F": "Broken Transport Security, rated F",
+            "D": "Nearly broken Transport Security, rated D",
+            "C": "Less than optimal Transport Security, rated C.",
+            "B": "Less than optimal Transport Security, rated B.",
+            "A-": "Good Transport Security, rated A-.",
+            "A": "Good Transport Security, rated A.",
+            "A+": "Perfect Transport Security, rated A+.",
+            "T": "Chain of trust missing, could not establish trust. ",
             "I": "Certificate not valid for domain name.",  # Custom message
             "0": "-",
         }
@@ -645,7 +767,9 @@ DetermineRatings.rate_organization(o)
             if scan.qualys_rating != '0':
                 if scan.qualys_rating == "T":
                     rating = ratings[scan.qualys_rating] + ratings[scan.qualys_rating_no_trust]
-                    explanation = explanations[scan.qualys_rating] + " And for the certificate itself: " + explanations[scan.qualys_rating_no_trust]
+                    explanation = explanations[scan.qualys_rating] + \
+                        " And for the certificate itself: " + \
+                        explanations[scan.qualys_rating_no_trust]
                     starttls_json = (tlsratingtemplate %
                                      (explanation, rating,
                                       scan.rating_determined_on, scan.scan_moment))

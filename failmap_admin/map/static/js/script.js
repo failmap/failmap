@@ -334,12 +334,12 @@ $(document).ready(function () {
         },
         methods: {
             colorize: function (points) {
-                if (points < 100) return "green";
+                if (points < 199) return "green";
                 if (points < 400) return "orange";
                 if (points > 399) return "red";
             },
             colorizebg: function (points) {
-                if (points < 100) return "#dff9d7";
+                if (points < 199) return "#dff9d7";
                 if (points < 400) return "#ffefd3";
                 if (points > 399) return "#fbeaea";
             },
@@ -353,6 +353,32 @@ $(document).ready(function () {
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
+            },
+            create_header: function(rating){
+                keyz = Object.keys(rating);
+                if (keyz[0] === "security_headers_strict_transport_security")
+                    return "Strict Transport Security Header (HSTS)";
+                if (keyz[0] === "tls_qualys")
+                    return "Transport Layer Security (TLS)";
+                if (keyz[0] === "http_plain")
+                    return "Missing transport security (TLS)";
+            },
+            second_opinion_links: function(rating, url){
+                keyz = Object.keys(rating);
+                if (keyz[0] === "security_headers_strict_transport_security")
+                    return '<a href="https://securityheaders.io/?q=' + url.url.url + '\" target=\"_blank\">Second Opinion (securityheaders.io)</a>';
+                if (keyz[0] === "tls_qualys")
+                    return '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest\" target=\"_blank\">Second Opinion (Qualys)</a>';
+            },
+            total_awarded_points: function(points) {
+                if (points === "0")
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            },
+            awarded_points: function(points) {
+                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + points + '</span>'
             }
         }
     });
@@ -396,7 +422,7 @@ $(document).ready(function () {
         data: {urls: Array},
         methods: {
             colorize: function (points) {
-                if (points < 100) return "green";
+                if (points < 199) return "green";
                 if (points < 400) return "orange";
                 if (points > 399) return "red";
             }

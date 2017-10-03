@@ -4,9 +4,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
-from failmap_admin.scanners.state_manager import StateManager
 from failmap_admin.scanners.models import Url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys, TlsQualysScratchpad
+from failmap_admin.scanners.state_manager import StateManager
 
 logger = logging.getLogger(__package__)
 
@@ -164,8 +164,8 @@ class Command(BaseCommand):
         i = 0
         iterations = int(math.ceil(len(urls) / batch_size))
         while i < iterations:
-            logger.info("New batch %s: from %s to %s" % (i, i*batch_size, (i+1)*batch_size))
-            myurls = urls[i*batch_size:(i+1)*batch_size]
+            logger.info("New batch %s: from %s to %s" % (i, i * batch_size, (i + 1) * batch_size))
+            myurls = urls[i * batch_size:(i + 1) * batch_size]
             i = i + 1
 
             # ah yes, give "real" urls.. .not url objects.

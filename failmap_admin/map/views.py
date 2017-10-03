@@ -8,6 +8,7 @@ from django.db import connection
 from django.db.models import Count, Max
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
 
 from failmap_admin.map.determineratings import DetermineRatings
@@ -27,11 +28,8 @@ def index(request):
     :param request:
     :return:
     """
-    # today, used for refreshing data. / client side caching on a daily basis.
-    # timestamp
 
-    # now return the rendered template, it takes the wrong one... from another thing.
-    return render(request, 'map/templates/index.html',
+    return render(request, 'map/index.html',
                   {"timestamp": datetime.now(pytz.utc)})
 
 
@@ -45,11 +43,11 @@ def organization_report(request, organization_id, weeks_back=0):
     # getting the latest report.
     try:
         r = Organization.objects.filter(pk=organization_id, organizationrating__when__lte=when). \
-                values('organizationrating__rating',
-                       'organizationrating__calculation',
-                       'organizationrating__when',
-                       'name',
-                       'pk').latest('organizationrating__when')
+            values('organizationrating__rating',
+                   'organizationrating__calculation',
+                   'organizationrating__when',
+                   'name',
+                   'pk').latest('organizationrating__when')
         # latest replaced: order_by('-organizationrating__when')[:1].get()
 
         report_json = """
@@ -101,7 +99,7 @@ def terrible_urls(request, weeks_back=0):
         "urls":
             [
 
-            ]
+        ]
     }
 
     cursor = connection.cursor()
@@ -132,7 +130,6 @@ def terrible_urls(request, weeks_back=0):
         GROUP BY url.url
         HAVING(`rating`) > 999
         ORDER BY `rating` DESC, `organization`.`name` ASC
-        
         ''' % (when, when))
 
     rows = cursor.fetchall()
@@ -180,7 +177,7 @@ def topfail(request, weeks_back=0):
         "ranking":
             [
 
-            ]
+        ]
     }
 
     cursor = connection.cursor()
@@ -256,7 +253,7 @@ def topwin(request, weeks_back=0):
         "ranking":
             [
 
-            ]
+        ]
     }
 
     cursor = connection.cursor()
@@ -356,7 +353,8 @@ def stats(request, weeks_back=0):
                     rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
                     rating = rating.earliest('when')
                 else:
-                    rating = OrganizationRating.objects.filter(organization=o, when__lte=when, rating__gt=-1)
+                    rating = OrganizationRating.objects.filter(
+                        organization=o, when__lte=when, rating__gt=-1)
                     rating = rating.latest('when')
 
                 measurement["total_organizations"] += 1
@@ -406,11 +404,11 @@ def stats(request, weeks_back=0):
 
         if measurement["total_urls"]:
             measurement["red url percentage"] = round((measurement["red_urls"] /
-                                                   measurement["total_urls"]) * 100)
+                                                       measurement["total_urls"]) * 100)
             measurement["orange url percentage"] = round((measurement["orange_urls"] /
-                                                      measurement["total_urls"]) * 100)
+                                                          measurement["total_urls"]) * 100)
             measurement["green url percentage"] = round((measurement["green_urls"] /
-                                                     measurement["total_urls"]) * 100)
+                                                         measurement["total_urls"]) * 100)
         else:
             measurement["red url percentage"] = 0
             measurement["orange url percentage"] = 0
@@ -531,11 +529,11 @@ def map_data(request, weeks_back=0):
             {
                 "type": "name",
                 "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
-            },
+        },
         "features":
             [
 
-            ]
+        ]
     }
 
     # todo: add comment to point to github repo
