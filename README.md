@@ -7,7 +7,8 @@
 
 # Quickstart
 
-It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project dependencies isolated and managed.
+It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project
+dependencies isolated and managed.
 
     pip3 install -e .
     failmap-admin migrate
@@ -17,6 +18,15 @@ It is advised to work within a Python virtualenv or use `direnv` (see below) to 
     failmap-admin rebuild-ratings
 
 Now login at: http://127.0.0.1:8000/admin/
+
+# Scanning services (beta)
+
+These two services can run continuously. Onboarding handles all new urls, while the tls scanner
+slowly gets results from qualys.
+
+    failmap-admin onboard-service
+    failmap-admin scan-tls-qualys-service
+    
 
 # Code quality / Testing
 
@@ -49,7 +59,8 @@ Pytest allows to drop into Python debugger when a tests fails. To enable run:
 
 # Direnv / Virtualenv
 
-This project has [direnv](https://direnv.net/) configuration to automatically manage the Python virtual environment. Install direnv and run `direnv allow` to enable.
+This project has [direnv](https://direnv.net/) configuration to automatically manage the Python
+virtual environment. Install direnv and run `direnv allow` to enable.
 
 Alternatively you can manually create a virtualenv using:
 
