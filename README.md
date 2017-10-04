@@ -14,6 +14,7 @@ It is advised to work within a Python virtualenv or use `direnv` (see below) to 
     failmap-admin loaddata testdata
     failmap-admin createsuperuser
     failmap-admin runserver
+    failmap-admin rebuild-ratings
 
 Now login at: http://127.0.0.1:8000/admin/
 
