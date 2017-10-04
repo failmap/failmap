@@ -6,10 +6,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
+from failmap_admin.scanners.models import Endpoint
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.state_manager import StateManager
-from failmap_admin.scanners.scanner_security_headers import ScannerSecurityHeaders
+from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
 
 logger = logging.getLogger(__package__)
 
@@ -18,14 +19,38 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        Command.develop_determineratings()
+        Command.develop_celery()
+        # Command.develop_celery_advanced()
+        Command.develop_celery_test_async_tasks()
+
+    @staticmethod
+    def develop_celery_test_async_tasks():
+        scan_all_urls_celery()
+
+    @staticmethod
+    def develop_celery_advanced():
+        url = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
+        http_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='http')
+        https_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='https')
+        endpoints = list(http_endpoints) + list(https_endpoints)
+        eps = []
+        for endpoint in endpoints:
+            if endpoint.is_ipv4():
+                eps.append(endpoint)
+
+        # for endpoint in eps:
+        #     dispatch_scan_security_headers(endpoint)
+
+    @staticmethod
+    def develop_celery():
+        from celery_test import add
+        add.delay(1,2)
 
     @staticmethod
     def develop_security_headers_scanner():
-        s = ScannerSecurityHeaders()
         u = Url.objects.all().filter(url='zoeken.haarlemmermeer.nl').get()
         u = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
-        s.scan_headers(u)
+        scan_headers(u)
 
 
     @staticmethod

@@ -297,3 +297,13 @@ TOOLS = {
 # print(TOOLS['chrome']['executable']['mac'])
 # print(TOOLS['chrome']['screenshot_output_dir'])
 # exit(-1)
+
+
+# Celery 4.0 settings
+# Pickle can work, but you need to use certificates to communicate (to verify the right origin)
+# It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
+# even serialize dicts.
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html
+CELERY_accept_content = ['pickle', 'yaml']
+CELERY_task_serializer = 'pickle'
+CELERY_result_serializer = 'pickle'

@@ -1,0 +1,2289 @@
+- model: organizations.organizationtype
+  pk: 1
+  fields: {name: municipality}
+- model: organizations.organization
+  pk: 1
+  fields: {country: NL, type: 1, name: Aa en Hunze}
+- model: organizations.organization
+  pk: 2
+  fields: {country: NL, type: 1, name: Aalburg}
+- model: organizations.organization
+  pk: 3
+  fields: {country: NL, type: 1, name: Aalsmeer}
+- model: organizations.organization
+  pk: 4
+  fields: {country: NL, type: 1, name: Aalten}
+- model: organizations.organization
+  pk: 5
+  fields: {country: NL, type: 1, name: Achtkarspelen}
+- model: organizations.organization
+  pk: 6
+  fields: {country: NL, type: 1, name: Alblasserdam}
+- model: organizations.organization
+  pk: 7
+  fields: {country: NL, type: 1, name: Albrandswaard}
+- model: organizations.organization
+  pk: 8
+  fields: {country: NL, type: 1, name: Alkmaar}
+- model: organizations.organization
+  pk: 9
+  fields: {country: NL, type: 1, name: Almelo}
+- model: organizations.organization
+  pk: 10
+  fields: {country: NL, type: 1, name: Almere}
+- model: organizations.organization
+  pk: 11
+  fields: {country: NL, type: 1, name: Alphen aan den Rijn}
+- model: organizations.organization
+  pk: 12
+  fields: {country: NL, type: 1, name: Alphen-Chaam}
+- model: organizations.organization
+  pk: 13
+  fields: {country: NL, type: 1, name: Ameland}
+- model: organizations.organization
+  pk: 14
+  fields: {country: NL, type: 1, name: Amersfoort}
+- model: organizations.organization
+  pk: 15
+  fields: {country: NL, type: 1, name: Amstelveen}
+- model: organizations.organization
+  pk: 16
+  fields: {country: NL, type: 1, name: Amsterdam}
+- model: organizations.organization
+  pk: 17
+  fields: {country: NL, type: 1, name: Apeldoorn}
+- model: organizations.organization
+  pk: 18
+  fields: {country: NL, type: 1, name: Appingedam}
+- model: organizations.organization
+  pk: 19
+  fields: {country: NL, type: 1, name: Arnhem}
+- model: organizations.organization
+  pk: 20
+  fields: {country: NL, type: 1, name: Assen}
+- model: organizations.organization
+  pk: 21
+  fields: {country: NL, type: 1, name: Asten}
+- model: organizations.organization
+  pk: 22
+  fields: {country: NL, type: 1, name: Baarle-Nassau}
+- model: organizations.organization
+  pk: 23
+  fields: {country: NL, type: 1, name: Baarn}
+- model: organizations.organization
+  pk: 24
+  fields: {country: NL, type: 1, name: Barendrecht}
+- model: organizations.organization
+  pk: 25
+  fields: {country: NL, type: 1, name: Barneveld}
+- model: organizations.organization
+  pk: 26
+  fields: {country: NL, type: 1, name: Bedum}
+- model: organizations.organization
+  pk: 27
+  fields: {country: NL, type: 1, name: Beek}
+- model: organizations.organization
+  pk: 28
+  fields: {country: NL, type: 1, name: Beemster}
+- model: organizations.organization
+  pk: 29
+  fields: {country: NL, type: 1, name: Beesel}
+- model: organizations.organization
+  pk: 30
+  fields: {country: NL, type: 1, name: Bellingwedde}
+- model: organizations.organization
+  pk: 31
+  fields: {country: NL, type: 1, name: Berg en Dal}
+- model: organizations.organization
+  pk: 32
+  fields: {country: NL, type: 1, name: Bergeijk}
+- model: organizations.organization
+  pk: 33
+  fields: {country: NL, type: 1, name: Bergen (Limburg)}
+- model: organizations.organization
+  pk: 34
+  fields: {country: NL, type: 1, name: Bergen (Noord-Holland)}
+- model: organizations.organization
+  pk: 35
+  fields: {country: NL, type: 1, name: Bergen op Zoom}
+- model: organizations.organization
+  pk: 36
+  fields: {country: NL, type: 1, name: Berkelland}
+- model: organizations.organization
+  pk: 37
+  fields: {country: NL, type: 1, name: Bernheze}
+- model: organizations.organization
+  pk: 38
+  fields: {country: NL, type: 1, name: Best}
+- model: organizations.organization
+  pk: 39
+  fields: {country: NL, type: 1, name: Beuningen}
+- model: organizations.organization
+  pk: 40
+  fields: {country: NL, type: 1, name: Beverwijk}
+- model: organizations.organization
+  pk: 41
+  fields: {country: NL, type: 1, name: Binnenmaas}
+- model: organizations.organization
+  pk: 42
+  fields: {country: NL, type: 1, name: Bladel}
+- model: organizations.organization
+  pk: 43
+  fields: {country: NL, type: 1, name: Blaricum}
+- model: organizations.organization
+  pk: 44
+  fields: {country: NL, type: 1, name: Bloemendaal}
+- model: organizations.organization
+  pk: 45
+  fields: {country: NL, type: 1, name: Bodegraven-Reeuwijk}
+- model: organizations.organization
+  pk: 46
+  fields: {country: NL, type: 1, name: Boekel}
+- model: organizations.organization
+  pk: 47
+  fields: {country: NL, type: 1, name: Borger-Odoorn}
+- model: organizations.organization
+  pk: 48
+  fields: {country: NL, type: 1, name: Borne}
+- model: organizations.organization
+  pk: 49
+  fields: {country: NL, type: 1, name: Borsele}
+- model: organizations.organization
+  pk: 50
+  fields: {country: NL, type: 1, name: Boxmeer}
+- model: organizations.organization
+  pk: 51
+  fields: {country: NL, type: 1, name: Boxtel}
+- model: organizations.organization
+  pk: 52
+  fields: {country: NL, type: 1, name: Breda}
+- model: organizations.organization
+  pk: 53
+  fields: {country: NL, type: 1, name: Brielle}
+- model: organizations.organization
+  pk: 54
+  fields: {country: NL, type: 1, name: Bronckhorst}
+- model: organizations.organization
+  pk: 55
+  fields: {country: NL, type: 1, name: Brummen}
+- model: organizations.organization
+  pk: 56
+  fields: {country: NL, type: 1, name: Brunssum}
+- model: organizations.organization
+  pk: 57
+  fields: {country: NL, type: 1, name: Bunnik}
+- model: organizations.organization
+  pk: 58
+  fields: {country: NL, type: 1, name: Bunschoten}
+- model: organizations.organization
+  pk: 59
+  fields: {country: NL, type: 1, name: Buren}
+
+- model: organizations.url
+  pk: 1
+  fields: {organization: 1, url: aaenhunze.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 2
+  fields: {organization: 1, url: sip.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 3
+  fields: {organization: 1, url: webmail.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 4
+  fields: {organization: 1, url: www.aaenhunze.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 5
+  fields: {organization: 2, url: aalburg.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 6
+  fields: {organization: 2, url: intranet.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 7
+  fields: {organization: 2, url: secure.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 8
+  fields: {organization: 2, url: www.aalburg.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 9
+  fields: {organization: 3, url: aalsmeer.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 10
+  fields: {organization: 3, url: webmail.aalsmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 11
+  fields: {organization: 3, url: www.aalsmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 12
+  fields: {organization: 4, url: aalten.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 13
+  fields: {organization: 4, url: intranet.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 14
+  fields: {organization: 4, url: mail.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 15
+  fields: {organization: 4, url: secure.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 16
+  fields: {organization: 4, url: webmail.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 17
+  fields: {organization: 4, url: www.aalten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 18
+  fields: {organization: 5, url: achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 19
+  fields: {organization: 5, url: mail.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 20
+  fields: {organization: 5, url: portaal.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 21
+  fields: {organization: 5, url: secure.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 22
+  fields: {organization: 5, url: www.achtkarspelen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 23
+  fields: {organization: 6, url: alblasserdam.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 24
+  fields: {organization: 6, url: webmail.alblasserdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 25
+  fields: {organization: 6, url: www.alblasserdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 26
+  fields: {organization: 7, url: albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 27
+  fields: {organization: 7, url: intranet.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 28
+  fields: {organization: 7, url: mail.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 29
+  fields: {organization: 7, url: portaal.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 30
+  fields: {organization: 7, url: raad.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 31
+  fields: {organization: 7, url: secure.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 32
+  fields: {organization: 7, url: www.albrandswaard.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 33
+  fields: {organization: 8, url: alkmaar.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 34
+  fields: {organization: 8, url: graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 35
+  fields: {organization: 8, url: intranet.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 36
+  fields: {organization: 8, url: intranet.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 37
+  fields: {organization: 8, url: mail.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 38
+  fields: {organization: 8, url: pers.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 39
+  fields: {organization: 8, url: raad.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 40
+  fields: {organization: 8, url: schermer.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 41
+  fields: {organization: 8, url: secure.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 42
+  fields: {organization: 8, url: secure.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 43
+  fields: {organization: 8, url: sip.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 44
+  fields: {organization: 8, url: telewerken.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 45
+  fields: {organization: 8, url: webmail.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 46
+  fields: {organization: 8, url: webmail.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 47
+  fields: {organization: 8, url: www.alkmaar.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 48
+  fields: {organization: 8, url: www.graftderijp.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 49
+  fields: {organization: 8, url: www.schermer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 50
+  fields: {organization: 9, url: almelo.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 51
+  fields: {organization: 9, url: intranet.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 52
+  fields: {organization: 9, url: mail.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 53
+  fields: {organization: 9, url: portaal.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 54
+  fields: {organization: 9, url: resetww.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 55
+  fields: {organization: 9, url: ris.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 56
+  fields: {organization: 9, url: secure.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 57
+  fields: {organization: 9, url: sip.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 58
+  fields: {organization: 9, url: sites.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 59
+  fields: {organization: 9, url: subsidie.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 60
+  fields: {organization: 9, url: webmail.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 61
+  fields: {organization: 9, url: www.almelo.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 62
+  fields: {organization: 10, url: almere.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 63
+  fields: {organization: 10, url: mail.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 64
+  fields: {organization: 10, url: owa.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 65
+  fields: {organization: 10, url: webmail.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 66
+  fields: {organization: 10, url: www.almere.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 67
+  fields: {organization: 11, url: alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 68
+  fields: {organization: 11, url: intranet.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 69
+  fields: {organization: 11, url: mail.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 70
+  fields: {organization: 11, url: sip.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 71
+  fields: {organization: 11, url: www.alphenaandenrijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 72
+  fields: {organization: 12, url: alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 73
+  fields: {organization: 12, url: intranet.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 74
+  fields: {organization: 12, url: secure.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 75
+  fields: {organization: 12, url: www.alphen-chaam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 76
+  fields: {organization: 13, url: ameland.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 77
+  fields: {organization: 13, url: mail.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 78
+  fields: {organization: 13, url: secure.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 79
+  fields: {organization: 13, url: www.ameland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 80
+  fields: {organization: 14, url: amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 81
+  fields: {organization: 14, url: mail.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 82
+  fields: {organization: 14, url: mail2.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 83
+  fields: {organization: 14, url: sip.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 84
+  fields: {organization: 14, url: webmail.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 85
+  fields: {organization: 14, url: www.amersfoort.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 86
+  fields: {organization: 15, url: amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 87
+  fields: {organization: 15, url: raad.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 88
+  fields: {organization: 15, url: webmail.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 89
+  fields: {organization: 15, url: www.amstelveen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 90
+  fields: {organization: 16, url: amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 91
+  fields: {organization: 16, url: intranet.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 92
+  fields: {organization: 16, url: mail.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 93
+  fields: {organization: 16, url: portaal.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 94
+  fields: {organization: 16, url: ris.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 95
+  fields: {organization: 16, url: telewerken.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 96
+  fields: {organization: 16, url: webmail.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 97
+  fields: {organization: 16, url: www.amsterdam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 98
+  fields: {organization: 17, url: apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 99
+  fields: {organization: 17, url: gis.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 100
+  fields: {organization: 17, url: intranet.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 101
+  fields: {organization: 17, url: mail2.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 102
+  fields: {organization: 17, url: webmail.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 103
+  fields: {organization: 17, url: www.apeldoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 104
+  fields: {organization: 18, url: afspreken.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 105
+  fields: {organization: 18, url: appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 106
+  fields: {organization: 18, url: castmanage3.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 107
+  fields: {organization: 18, url: cijfers.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 108
+  fields: {organization: 18, url: gis.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 109
+  fields: {organization: 18, url: gwpprod.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 110
+  fields: {organization: 18, url: intranet.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 111
+  fields: {organization: 18, url: mail.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 112
+  fields: {organization: 18, url: mail2.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 113
+  fields: {organization: 18, url: openbareruimte.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 114
+  fields: {organization: 18, url: owa.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 115
+  fields: {organization: 18, url: pers.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 116
+  fields: {organization: 18, url: portaal.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 117
+  fields: {organization: 18, url: raad.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 118
+  fields: {organization: 18, url: resetww.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 119
+  fields: {organization: 18, url: ris.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 120
+  fields: {organization: 18, url: ropubliceer.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 121
+  fields: {organization: 18, url: secure.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 122
+  fields: {organization: 18, url: sip.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 123
+  fields: {organization: 18, url: sites.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 124
+  fields: {organization: 18, url: subsidie.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 125
+  fields: {organization: 18, url: telewerken.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 126
+  fields: {organization: 18, url: webmail.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 127
+  fields: {organization: 18, url: www.appingedam.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 128
+  fields: {organization: 19, url: arnhem.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 129
+  fields: {organization: 19, url: mail.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 130
+  fields: {organization: 19, url: sip.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 131
+  fields: {organization: 19, url: www.arnhem.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 132
+  fields: {organization: 20, url: assen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 133
+  fields: {organization: 20, url: www.assen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 134
+  fields: {organization: 21, url: asten.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 135
+  fields: {organization: 21, url: mail.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 136
+  fields: {organization: 21, url: raad.asten.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 137
+  fields: {organization: 21, url: webmail.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 138
+  fields: {organization: 21, url: www.asten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 139
+  fields: {organization: 22, url: baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 140
+  fields: {organization: 22, url: intranet.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 141
+  fields: {organization: 22, url: secure.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 142
+  fields: {organization: 22, url: www.baarle-nassau.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 143
+  fields: {organization: 23, url: baarn.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 144
+  fields: {organization: 23, url: intranet.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 145
+  fields: {organization: 23, url: secure.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 146
+  fields: {organization: 23, url: telewerken.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 147
+  fields: {organization: 23, url: webmail.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 148
+  fields: {organization: 23, url: www.baarn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 149
+  fields: {organization: 24, url: barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 150
+  fields: {organization: 24, url: intranet.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 151
+  fields: {organization: 24, url: loket.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 152
+  fields: {organization: 24, url: mail.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 153
+  fields: {organization: 24, url: secure.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 154
+  fields: {organization: 24, url: simsite.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 155
+  fields: {organization: 24, url: webmail.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 156
+  fields: {organization: 24, url: www.barendrecht.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 157
+  fields: {organization: 25, url: barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 158
+  fields: {organization: 25, url: extranet.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 159
+  fields: {organization: 25, url: gis.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 160
+  fields: {organization: 25, url: intranet.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 161
+  fields: {organization: 25, url: kaart.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 162
+  fields: {organization: 25, url: secure.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 163
+  fields: {organization: 25, url: www.barneveld.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 164
+  fields: {organization: 26, url: bedum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 165
+  fields: {organization: 26, url: intranet.bedum.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 166
+  fields: {organization: 26, url: mail.bedum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 167
+  fields: {organization: 26, url: webmail.bedum.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 168
+  fields: {organization: 26, url: www.bedum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 169
+  fields: {organization: 27, url: gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 170
+  fields: {organization: 27, url: mail.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 171
+  fields: {organization: 27, url: secure.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 172
+  fields: {organization: 27, url: webmail.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 173
+  fields: {organization: 27, url: www.gemeentebeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 174
+  fields: {organization: 28, url: beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 175
+  fields: {organization: 28, url: gemeentebestuur.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 176
+  fields: {organization: 28, url: intranet.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 177
+  fields: {organization: 28, url: mail.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 178
+  fields: {organization: 28, url: portaal.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 179
+  fields: {organization: 28, url: secure.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 180
+  fields: {organization: 28, url: webmail.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 181
+  fields: {organization: 28, url: www.beemster.net, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 182
+  fields: {organization: 29, url: beesel.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 183
+  fields: {organization: 29, url: webmail.beesel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 184
+  fields: {organization: 29, url: www.beesel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 185
+  fields: {organization: 30, url: bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 186
+  fields: {organization: 30, url: intranet.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 187
+  fields: {organization: 30, url: mail.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 188
+  fields: {organization: 30, url: webmail.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 189
+  fields: {organization: 30, url: www.bellingwedde.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 190
+  fields: {organization: 31, url: groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 191
+  fields: {organization: 31, url: intranet.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 192
+  fields: {organization: 31, url: mail.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 193
+  fields: {organization: 31, url: mail.millingenaanderijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 194
+  fields: {organization: 31, url: mail.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 195
+  fields: {organization: 31, url: millingenaanderijn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 196
+  fields: {organization: 31, url: ruimtelijkeplannen.millingenaanderijn.nl, is_dead: false,
+    is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 197
+  fields: {organization: 31, url: ruimtelijkeplannen.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 198
+  fields: {organization: 31, url: secure.groesbeek.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 199
+  fields: {organization: 31, url: ubbergen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 200
+  fields: {organization: 31, url: webmail.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 201
+  fields: {organization: 31, url: webmail.millingenaanderijn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 202
+  fields: {organization: 31, url: webmail.ubbergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 203
+  fields: {organization: 31, url: www.groesbeek.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 204
+  fields: {organization: 31, url: www.millingenaanderijn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 205
+  fields: {organization: 31, url: www.ubbergen.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 206
+  fields: {organization: 32, url: bergeijk.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 207
+  fields: {organization: 32, url: mail.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 208
+  fields: {organization: 32, url: secure.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 209
+  fields: {organization: 32, url: www.bergeijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 210
+  fields: {organization: 33, url: bergen.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 211
+  fields: {organization: 33, url: intranet.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 212
+  fields: {organization: 33, url: telewerken.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 213
+  fields: {organization: 33, url: webmail.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 214
+  fields: {organization: 33, url: www.bergen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 215
+  fields: {organization: 34, url: bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 216
+  fields: {organization: 34, url: intranet.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 217
+  fields: {organization: 34, url: webmail.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 218
+  fields: {organization: 34, url: www.bergen-nh.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 219
+  fields: {organization: 35, url: bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 220
+  fields: {organization: 35, url: mail.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 221
+  fields: {organization: 35, url: secure.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 222
+  fields: {organization: 35, url: telewerken.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 223
+  fields: {organization: 35, url: webmail.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 224
+  fields: {organization: 35, url: www.bergenopzoom.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 225
+  fields: {organization: 36, url: gemeenteberkelland.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 226
+  fields: {organization: 36, url: mail.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 227
+  fields: {organization: 36, url: webmail.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 228
+  fields: {organization: 36, url: www.gemeenteberkelland.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 229
+  fields: {organization: 37, url: bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 230
+  fields: {organization: 37, url: intranet.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 231
+  fields: {organization: 37, url: mail.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 232
+  fields: {organization: 37, url: www.bernheze.org, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 233
+  fields: {organization: 38, url: gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 234
+  fields: {organization: 38, url: mail.gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 235
+  fields: {organization: 38, url: webmail.gemeentebest.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 236
+  fields: {organization: 38, url: www.gemeentebest.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 237
+  fields: {organization: 39, url: beuningen.nl, is_dead: true, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 238
+  fields: {organization: 39, url: sip.beuningen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 239
+  fields: {organization: 39, url: www.beuningen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 240
+  fields: {organization: 40, url: beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 241
+  fields: {organization: 40, url: intranet.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 242
+  fields: {organization: 40, url: secure.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 243
+  fields: {organization: 40, url: telewerken.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 244
+  fields: {organization: 40, url: webmail.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 245
+  fields: {organization: 40, url: www.beverwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 246
+  fields: {organization: 41, url: binnenmaas.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 247
+  fields: {organization: 41, url: secure.binnenmaas.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 248
+  fields: {organization: 41, url: www.binnenmaas.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 249
+  fields: {organization: 42, url: afspraken.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 250
+  fields: {organization: 42, url: bladel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 251
+  fields: {organization: 42, url: secure.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 252
+  fields: {organization: 42, url: www.bladel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 253
+  fields: {organization: 43, url: blaricum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 254
+  fields: {organization: 43, url: www.blaricum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 255
+  fields: {organization: 44, url: bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 256
+  fields: {organization: 44, url: kpn190.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 257
+  fields: {organization: 44, url: mail.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 258
+  fields: {organization: 44, url: mail2.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 259
+  fields: {organization: 44, url: secure.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 260
+  fields: {organization: 44, url: webmail.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 261
+  fields: {organization: 44, url: www.bloemendaal.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 262
+  fields: {organization: 45, url: bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 263
+  fields: {organization: 45, url: intranet.bodegraven-reeuwijk.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 264
+  fields: {organization: 45, url: mx10.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 265
+  fields: {organization: 45, url: secure.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 266
+  fields: {organization: 45, url: webmail.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 267
+  fields: {organization: 45, url: www.bodegraven-reeuwijk.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 268
+  fields: {organization: 46, url: boekel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 269
+  fields: {organization: 46, url: intranet.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 270
+  fields: {organization: 46, url: secure.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 271
+  fields: {organization: 46, url: sip.boekel.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 272
+  fields: {organization: 46, url: webmail.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 273
+  fields: {organization: 46, url: www.boekel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 274
+  fields: {organization: 47, url: borger-odoorn.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 275
+  fields: {organization: 47, url: www.borger-odoorn.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 276
+  fields: {organization: 48, url: borne.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 277
+  fields: {organization: 48, url: dacceptatieloket.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 278
+  fields: {organization: 48, url: dloket.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 279
+  fields: {organization: 48, url: gemeente.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 280
+  fields: {organization: 48, url: gemeenteraad.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 281
+  fields: {organization: 48, url: mail.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 282
+  fields: {organization: 48, url: ruimtelijkeplannen.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 283
+  fields: {organization: 48, url: webmail.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 284
+  fields: {organization: 48, url: www.borne.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 285
+  fields: {organization: 49, url: borsele.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 286
+  fields: {organization: 49, url: intranet.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 287
+  fields: {organization: 49, url: mail.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 288
+  fields: {organization: 49, url: secure.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 289
+  fields: {organization: 49, url: webmail.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 290
+  fields: {organization: 49, url: www.borsele.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 291
+  fields: {organization: 50, url: boxmeer.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 292
+  fields: {organization: 50, url: ris.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 293
+  fields: {organization: 50, url: secure.boxmeer.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 294
+  fields: {organization: 50, url: thuiswerken.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 295
+  fields: {organization: 50, url: toerisme.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 296
+  fields: {organization: 50, url: verkiezingen.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 297
+  fields: {organization: 50, url: www.boxmeer.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 298
+  fields: {organization: 51, url: boxtel.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 299
+  fields: {organization: 51, url: www.boxtel.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 300
+  fields: {organization: 52, url: breda.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 301
+  fields: {organization: 52, url: gis.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 302
+  fields: {organization: 52, url: intranet.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 303
+  fields: {organization: 52, url: secure.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 304
+  fields: {organization: 52, url: sip.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 305
+  fields: {organization: 52, url: webmail.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 306
+  fields: {organization: 52, url: www.breda.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 307
+  fields: {organization: 53, url: brielle.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 308
+  fields: {organization: 53, url: intranet.brielle.nl, is_dead: true, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 309
+  fields: {organization: 53, url: mail.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 310
+  fields: {organization: 53, url: secure.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 311
+  fields: {organization: 53, url: webmail.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 312
+  fields: {organization: 53, url: www.brielle.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 313
+  fields: {organization: 54, url: bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 314
+  fields: {organization: 54, url: intranet.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 315
+  fields: {organization: 54, url: secure.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 316
+  fields: {organization: 54, url: webmail.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 317
+  fields: {organization: 54, url: www.bronckhorst.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 318
+  fields: {organization: 55, url: brummen.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 319
+  fields: {organization: 55, url: mail.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 320
+  fields: {organization: 55, url: portaal.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 321
+  fields: {organization: 55, url: raad.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 322
+  fields: {organization: 55, url: www.brummen.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 323
+  fields: {organization: 56, url: brunssum.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 324
+  fields: {organization: 56, url: intranet.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 325
+  fields: {organization: 56, url: sip.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 326
+  fields: {organization: 56, url: webmail.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 327
+  fields: {organization: 56, url: www.brunssum.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 328
+  fields: {organization: 57, url: bunnik.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 329
+  fields: {organization: 57, url: telewerken.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 330
+  fields: {organization: 57, url: webmail.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 331
+  fields: {organization: 57, url: www.bunnik.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 332
+  fields: {organization: 58, url: bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 333
+  fields: {organization: 58, url: intranet.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 334
+  fields: {organization: 58, url: secure.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 335
+  fields: {organization: 58, url: sip.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 336
+  fields: {organization: 58, url: webmail.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 337
+  fields: {organization: 58, url: www.bunschoten.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 338
+  fields: {organization: 59, url: buren.nl, is_dead: false, is_dead_since: null, is_dead_reason: ''}
+- model: organizations.url
+  pk: 339
+  fields: {organization: 59, url: intranet.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 340
+  fields: {organization: 59, url: raad.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 341
+  fields: {organization: 59, url: secure.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 342
+  fields: {organization: 59, url: webmail.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+- model: organizations.url
+  pk: 343
+  fields: {organization: 59, url: www.buren.nl, is_dead: false, is_dead_since: null,
+    is_dead_reason: ''}
+
+- model: organizations.coordinate
+  pk: 799
+  fields: {organization: 2, geojsontype: MultiPolygon, area: '[ [ [ [ 5.073128812010745,
+      51.76700155110909 ], [ 5.022253470563241, 51.770278918465451 ], [ 5.024911188943955,
+      51.751420289284283 ], [ 4.990584345247847, 51.751965377297545 ], [ 5.000385379351157,
+      51.737131088298199 ], [ 4.988634770655128, 51.716867488005747 ], [ 5.054238510675921,
+      51.711903807195789 ], [ 5.128057630402388, 51.737608612381422 ], [ 5.142714862157644,
+      51.755212555050527 ], [ 5.137576993370828, 51.772908998502061 ], [ 5.094435809400525,
+      51.787595291452668 ], [ 5.073128812010745, 51.76700155110909 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 800
+  fields: {organization: 3, geojsontype: MultiPolygon, area: '[ [ [ [ 4.744136419801878,
+      52.27012157847647 ], [ 4.681001752885025, 52.239022045954918 ], [ 4.67030015362347,
+      52.230796388903485 ], [ 4.676701391691386, 52.225927555264619 ], [ 4.724158675287399,
+      52.232369305891936 ], [ 4.723299489321621, 52.216356707900431 ], [ 4.773267907559751,
+      52.241029549311442 ], [ 4.768472155299175, 52.247934290527233 ], [ 4.795090975987098,
+      52.260258374056072 ], [ 4.82379194043878, 52.289807164960557 ], [ 4.809880180650003,
+      52.305774463332511 ], [ 4.77991171474098, 52.283127613486968 ], [ 4.744136419801878,
+      52.27012157847647 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 801
+  fields: {organization: 4, geojsontype: MultiPolygon, area: '[ [ [ [ 6.476066977633909,
+      51.901972679459668 ], [ 6.484250519779317, 51.878848747610682 ], [ 6.464334969825157,
+      51.855661731129246 ], [ 6.472506942473401, 51.853824608715811 ], [ 6.544150304931908,
+      51.88461114450697 ], [ 6.560603828791394, 51.88221859288106 ], [ 6.668731187003163,
+      51.913863134179863 ], [ 6.65897142330643, 51.929044085076278 ], [ 6.632009378328101,
+      51.937818541644255 ], [ 6.633931793174253, 51.965673460952729 ], [ 6.559200412617168,
+      51.97437039428015 ], [ 6.527273162927225, 51.966027886380971 ], [ 6.532825538101586,
+      51.962351363727628 ], [ 6.504785537042377, 51.945982692180372 ], [ 6.476066977633909,
+      51.901972679459668 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 802
+  fields: {organization: 5, geojsontype: MultiPolygon, area: '[ [ [ [ 6.082732092243859,
+      53.197862374981362 ], [ 6.114596563516561, 53.175981273070029 ], [ 6.105012362397815,
+      53.151803758338922 ], [ 6.11879679932339, 53.145744673593612 ], [ 6.148123928230615,
+      53.157828059398518 ], [ 6.151992057481365, 53.150830241330226 ], [ 6.176754294704709,
+      53.159503012248635 ], [ 6.199610146252163, 53.198331806374412 ], [ 6.22994637083968,
+      53.217711990280122 ], [ 6.214257157569596, 53.234166574981515 ], [ 6.232164012139769,
+      53.256866015973991 ], [ 6.189220388156108, 53.269893427373283 ], [ 6.179488434264522,
+      53.259058270309581 ], [ 6.141054248038603, 53.264382682961042 ], [ 6.0213317046538,
+      53.242529551761557 ], [ 6.027244627032796, 53.230133796300919 ], [ 6.086286579605679,
+      53.215022698509145 ], [ 6.082732092243859, 53.197862374981362 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 803
+  fields: {organization: 6, geojsontype: MultiPolygon, area: '[ [ [ [ 4.635546714807616,
+      51.869722717401331 ], [ 4.672602184247369, 51.838646617476662 ], [ 4.700241914145055,
+      51.87970973007004 ], [ 4.672914153692024, 51.874791776393955 ], [ 4.626388310123379,
+      51.880656862885765 ], [ 4.635546714807616, 51.869722717401331 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 804
+  fields: {organization: 7, geojsontype: MultiPolygon, area: '[ [ [ [ 4.423746298601368,
+      51.840077023928849 ], [ 4.452967856435753, 51.831863682497229 ], [ 4.489095819319724,
+      51.835399624855462 ], [ 4.49012822618023, 51.851317718941068 ], [ 4.480399449483873,
+      51.862326187230359 ], [ 4.392848189865014, 51.871801904774316 ], [ 4.383664613298081,
+      51.842114299218132 ], [ 4.423746298601368, 51.840077023928849 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 805
+  fields: {organization: 8, geojsontype: MultiPolygon, area: '[ [ [ [ 4.756480865478098,
+      52.591569800760247 ], [ 4.744732686793705, 52.567357696870275 ], [ 4.781629021835691,
+      52.55709919402122 ], [ 4.777819292594632, 52.531860912530668 ], [ 4.790251509573491,
+      52.519242748402732 ], [ 4.824452976787756, 52.533834720615886 ], [ 4.816986775064202,
+      52.535650504689386 ], [ 4.824458023721749, 52.542687365564518 ], [ 4.842284795532403,
+      52.54348951726665 ], [ 4.898778812855685, 52.601595689223032 ], [ 4.926918440313828,
+      52.606695918866983 ], [ 4.883989605551859, 52.61313652732909 ], [ 4.88478665097542,
+      52.631276103910082 ], [ 4.842641389538629, 52.645964374227837 ], [ 4.83022073050538,
+      52.63267766925803 ], [ 4.785286212385809, 52.638111660320625 ], [ 4.800502856517686,
+      52.660242339112166 ], [ 4.773664755802608, 52.64835164722345 ], [ 4.779023891122145,
+      52.67648215083333 ], [ 4.747857077142533, 52.682439026700216 ], [ 4.749013055168735,
+      52.665971700115279 ], [ 4.712818190220741, 52.646206731285041 ], [ 4.708282576380891,
+      52.630848575418518 ], [ 4.739447596752146, 52.613865672359765 ], [ 4.737468968134359,
+      52.593857998249618 ], [ 4.756480865478098, 52.591569800760247 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 806
+  fields: {organization: 9, geojsontype: MultiPolygon, area: '[ [ [ [ 6.612136685683106,
+      52.365553414800146 ], [ 6.61427773195694, 52.356434882906541 ], [ 6.59770127278667,
+      52.342898213213445 ], [ 6.619015188269288, 52.326148243876787 ], [ 6.604770019128523,
+      52.312228701395838 ], [ 6.631784774635972, 52.301781284637251 ], [ 6.626059872586946,
+      52.289976448843916 ], [ 6.636708564144225, 52.290736242873358 ], [ 6.705899403029741,
+      52.317957379795445 ], [ 6.69493971789623, 52.326825088294662 ], [ 6.721013143190504,
+      52.340124783401322 ], [ 6.709738508433238, 52.343433377230959 ], [ 6.719696956110012,
+      52.361289950067864 ], [ 6.698633490942566, 52.39374037951206 ], [ 6.67612081309236,
+      52.396153871609819 ], [ 6.66417457513035, 52.389514991448237 ], [ 6.651758829396401,
+      52.398726646326047 ], [ 6.598858507363921, 52.383658017116751 ], [ 6.612136685683106,
+      52.365553414800146 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 807
+  fields: {organization: 10, geojsontype: MultiPolygon, area: '[ [ [ [ 5.190657119778296,
+      52.322703502717545 ], [ 5.229326779968711, 52.325259958859405 ], [ 5.281141627457321,
+      52.316770432587113 ], [ 5.315174707883843, 52.302388762163254 ], [ 5.333501266980089,
+      52.31427120463011 ], [ 5.348610525223467, 52.309163094148126 ], [ 5.379211781944137,
+      52.31399545895497 ], [ 5.301239659823662, 52.381982836458832 ], [ 5.349514971584788,
+      52.401465979784881 ], [ 5.268469305416811, 52.427026924677307 ], [ 5.074616351950992,
+      52.583683600249991 ], [ 5.060428138349503, 52.5789361292357 ], [ 5.100721612727586,
+      52.508040592931998 ], [ 5.151023783089286, 52.466360030109321 ], [ 5.185482807821735,
+      52.415644483416045 ], [ 5.13733104853973, 52.415552760237816 ], [ 5.079165033486909,
+      52.388650887019544 ], [ 5.079291707126426, 52.370406374532131 ], [ 5.146142354882647,
+      52.31967325132424 ], [ 5.190657119778296, 52.322703502717545 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 808
+  fields: {organization: 11, geojsontype: MultiPolygon, area: '[ [ [ [ 4.560126290785021,
+      52.131906188041711 ], [ 4.550730403750411, 52.13838345643186 ], [ 4.535325668638986,
+      52.120431229961696 ], [ 4.530098248340643, 52.080080168047793 ], [ 4.565039689741855,
+      52.058568087742167 ], [ 4.607423975647089, 52.065525687410769 ], [ 4.606902265095655,
+      52.077045377965639 ], [ 4.636847819943652, 52.073734402636283 ], [ 4.638222197438084,
+      52.064826667061915 ], [ 4.677251476792636, 52.065517740026188 ], [ 4.681975638552903,
+      52.059101459295817 ], [ 4.685299243516782, 52.069394996638124 ], [ 4.71302854879293,
+      52.076927342326947 ], [ 4.704726038543997, 52.095242660408154 ], [ 4.740227085208755,
+      52.104646837048854 ], [ 4.760073191261375, 52.131017648908625 ], [ 4.741841407526925,
+      52.162674564456097 ], [ 4.70379614528569, 52.144618762158004 ], [ 4.705668047836977,
+      52.152152726979963 ], [ 4.681213064255624, 52.167504607595731 ], [ 4.57148196844091,
+      52.153107883310589 ], [ 4.560126290785021, 52.131906188041711 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 809
+  fields: {organization: 12, geojsontype: MultiPolygon, area: '[ [ [ [ 4.892556742970553,
+      51.477788167025963 ], [ 4.944668457872536, 51.456792774940226 ], [ 5.010467709397414,
+      51.458246138840074 ], [ 5.0166749508387, 51.475227758134906 ], [ 4.987991300300607,
+      51.483043315629217 ], [ 5.000369219427687, 51.49186696594677 ], [ 4.986745935037559,
+      51.495326659740115 ], [ 4.99241642363322, 51.512298704295688 ], [ 4.977595209846203,
+      51.521649891463802 ], [ 4.96257084471126, 51.525865905545693 ], [ 4.956644327331396,
+      51.518680199067404 ], [ 4.911061824512819, 51.510080865451329 ], [ 4.866229615462931,
+      51.538069368454629 ], [ 4.82958385019332, 51.527940673965219 ], [ 4.862981178677036,
+      51.557272828927552 ], [ 4.748908465246998, 51.518961432277074 ], [ 4.76002968431389,
+      51.502374290910694 ], [ 4.813811524315037, 51.495351764383862 ], [ 4.82115008973205,
+      51.483072861209038 ], [ 4.892556742970553, 51.477788167025963 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 810
+  fields: {organization: 13, geojsontype: MultiPolygon, area: '[ [ [ [ 5.702880543886085,
+      53.394913186110507 ], [ 5.747975779734256, 53.394786415943017 ], [ 5.777875797141012,
+      53.376722815500109 ], [ 5.792901118283551, 53.37667307699212 ], [ 5.823133764913438,
+      53.394537591085168 ], [ 5.958773625259847, 53.420925214976428 ], [ 5.959012816546596,
+      53.438894241945654 ], [ 6.004411142784461, 53.456640239235384 ], [ 6.004928511925521,
+      53.49257746219125 ], [ 5.935564149298068, 53.482140115428884 ], [ 5.703442561492401,
+      53.471283619480324 ], [ 5.613209200693943, 53.493948559078731 ], [ 5.552855805089632,
+      53.471584855441201 ], [ 5.582911816999275, 53.458062576132669 ], [ 5.612830791133921,
+      53.422070718692211 ], [ 5.612289358405201, 53.318743069642345 ], [ 5.702682729763786,
+      53.367958414581501 ], [ 5.702880543886085, 53.394913186110507 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 811
+  fields: {organization: 14, geojsontype: MultiPolygon, area: '[ [ [ [ 5.349895195530339,
+      52.175604965031326 ], [ 5.33127298333882, 52.126631361824167 ], [ 5.310917949279763,
+      52.108383350900247 ], [ 5.355638625188126, 52.136832718885309 ], [ 5.398069923480001,
+      52.133546790764413 ], [ 5.423605468035185, 52.157638311801612 ], [ 5.442198479453838,
+      52.161504877680834 ], [ 5.459342164278, 52.152912145483512 ], [ 5.483760880014869,
+      52.153982190245586 ], [ 5.472438789258197, 52.162853026512551 ], [ 5.479927885470881,
+      52.16581338067558 ], [ 5.439871608583866, 52.171194911761276 ], [ 5.441038946007439,
+      52.205689857028403 ], [ 5.40966597612851, 52.21857961128601 ], [ 5.407219857001801,
+      52.213403063388014 ], [ 5.395515610927736, 52.219156695962475 ], [ 5.392733491541203,
+      52.205531300858027 ], [ 5.330548188224928, 52.214730461782558 ], [ 5.330694222413183,
+      52.203387871285358 ], [ 5.31428176872498, 52.203019382624305 ], [ 5.310248805671818,
+      52.191952766311239 ], [ 5.349895195530339, 52.175604965031326 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 812
+  fields: {organization: 15, geojsontype: MultiPolygon, area: '[ [ [ [ 4.899136150749638,
+      52.2985367985005 ], [ 4.907811485806545, 52.307002860860337 ], [ 4.902537991558389,
+      52.32132591091856 ], [ 4.856759724662553, 52.321417126996018 ], [ 4.855919865263613,
+      52.330320283308943 ], [ 4.818747055085513, 52.32556373527526 ], [ 4.809880180650003,
+      52.305774463332511 ], [ 4.823863627494067, 52.28993333709402 ], [ 4.794704544319853,
+      52.260678871922508 ], [ 4.854646365673391, 52.241972643184148 ], [ 4.882346406121225,
+      52.264042753232623 ], [ 4.87890611675285, 52.279244513944072 ], [ 4.899136150749638,
+      52.2985367985005 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 813
+  fields: {organization: 16, geojsontype: MultiPolygon, area: '[ [ [ [ 4.940428588601651,
+      52.319407874218484 ], [ 4.929478747605857, 52.307412251897752 ], [ 4.955245567789365,
+      52.278307740804827 ], [ 5.021543196834538, 52.302456848478712 ], [ 5.016139708229654,
+      52.324513936570227 ], [ 4.997867210780457, 52.313975509964159 ], [ 4.983357836415564,
+      52.330742951430928 ], [ 4.952673027416694, 52.322644136644087 ], [ 4.947660966809248,
+      52.32813512188325 ], [ 4.940428588601651, 52.319407874218484 ] ] ], [ [ [ 4.825784138866068,
+      52.421011287664378 ], [ 4.739212253398252, 52.431067122445363 ], [ 4.728753279075828,
+      52.40071179127375 ], [ 4.757816529452559, 52.396663518870305 ], [ 4.755690231847825,
+      52.356153198781819 ], [ 4.818424473463993, 52.325553197070192 ], [ 4.855919865263613,
+      52.330320283308943 ], [ 4.856759724662553, 52.321417126996018 ], [ 4.912368753101812,
+      52.318247010948568 ], [ 4.912927176433935, 52.330508587763859 ], [ 4.949555099813867,
+      52.33837918766794 ], [ 4.969593164184062, 52.356103459542609 ], [ 5.010136499769385,
+      52.342245702531137 ], [ 5.039050834935733, 52.354575500668112 ], [ 5.037683180763863,
+      52.375404842773428 ], [ 5.079165033486909, 52.388650887019544 ], [ 5.065413749665328,
+      52.417239737182307 ], [ 5.030045885157798, 52.415646490418723 ], [ 4.982629592554265,
+      52.426764505461932 ], [ 4.952770099707951, 52.42367493791771 ], [ 4.930710155005965,
+      52.411611539348961 ], [ 4.866685053753915, 52.430670973080503 ], [ 4.856075215396961,
+      52.416666098827214 ], [ 4.825784138866068, 52.421011287664378 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 814
+  fields: {organization: 17, geojsontype: MultiPolygon, area: '[ [ [ [ 5.845755642106692,
+      52.151610919066449 ], [ 5.859547973785044, 52.148752196800082 ], [ 5.864749470454277,
+      52.125550958385361 ], [ 5.88344699095586, 52.106337983280383 ], [ 5.951460165583016,
+      52.099901966821285 ], [ 5.945641551199316, 52.07808833595611 ], [ 5.955923813770204,
+      52.073338287092156 ], [ 5.990484082167097, 52.079161494766851 ], [ 6.008925190178453,
+      52.074041152428926 ], [ 6.034050350289848, 52.095720396854865 ], [ 6.040586553769463,
+      52.114568656443652 ], [ 6.078484167313452, 52.138881402868257 ], [ 6.049533594019896,
+      52.18428510128502 ], [ 6.058252114990013, 52.196172086854311 ], [ 6.046909357182319,
+      52.221366780582649 ], [ 6.033426321012181, 52.22408385090197 ], [ 6.026510533154674,
+      52.242906523957956 ], [ 6.037573626089262, 52.261523230245935 ], [ 6.030288010677329,
+      52.276330388928862 ], [ 5.988980932446418, 52.274094284942379 ], [ 5.985737508782133,
+      52.285669251911628 ], [ 5.973892351232269, 52.273208464603137 ], [ 5.936208624417005,
+      52.274423197322385 ], [ 5.860889406212705, 52.255802730324895 ], [ 5.850815650616433,
+      52.268695378210282 ], [ 5.821422520307722, 52.272671856889303 ], [ 5.74922887819501,
+      52.268268460568329 ], [ 5.761454610140383, 52.248304301495359 ], [ 5.72638368552693,
+      52.242505231308655 ], [ 5.74302527542476, 52.223491824042263 ], [ 5.727436083907834,
+      52.219295505242094 ], [ 5.730763205256778, 52.208599247114229 ], [ 5.750582863559252,
+      52.193727763163899 ], [ 5.796267203589761, 52.196337516170637 ], [ 5.811925045867874,
+      52.184876445349559 ], [ 5.801955699035252, 52.177362005334963 ], [ 5.80983844428483,
+      52.151412575329374 ], [ 5.845755642106692, 52.151610919066449 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 815
+  fields: {organization: 18, geojsontype: MultiPolygon, area: '[ [ [ [ 6.813466490919883,
+      53.324725073813468 ], [ 6.803330869586344, 53.315921356033009 ], [ 6.816644219296363,
+      53.295184587847899 ], [ 6.845811839848469, 53.290125015274796 ], [ 6.851160836616779,
+      53.297042559532684 ], [ 6.887370291476526, 53.297880980139574 ], [ 6.88541207569525,
+      53.345130030800611 ], [ 6.836202526796981, 53.345148996293695 ], [ 6.838150527882816,
+      53.329426139016739 ], [ 6.813466490919883, 53.324725073813468 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 816
+  fields: {organization: 19, geojsontype: MultiPolygon, area: '[ [ [ [ 5.87086045236363,
+      51.975117196354169 ], [ 5.859114792124471, 51.969538236595376 ], [ 5.835347418483664,
+      51.973559120491501 ], [ 5.829656792491487, 51.945510158380877 ], [ 5.901863173011257,
+      51.933468332291575 ], [ 5.932280958489437, 51.959712110148928 ], [ 5.955231823516124,
+      51.94875445952399 ], [ 5.955463063853846, 51.967017759217022 ], [ 5.990340685561899,
+      51.974403264453173 ], [ 5.959200278393369, 51.989641343616221 ], [ 5.941402750050375,
+      52.01148729764494 ], [ 5.937094392144834, 52.048530270326538 ], [ 5.955923813770204,
+      52.073338287092156 ], [ 5.946105858156684, 52.077888392585116 ], [ 5.898121763705187,
+      52.063365661221567 ], [ 5.899397377193122, 52.049958672098782 ], [ 5.837915725081015,
+      52.046632809307191 ], [ 5.808338474443734, 52.018762044504953 ], [ 5.802957425076176,
+      52.004058450971925 ], [ 5.86374593631226, 51.995891246753771 ], [ 5.87086045236363,
+      51.975117196354169 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 817
+  fields: {organization: 20, geojsontype: MultiPolygon, area: '[ [ [ [ 6.513037877847673,
+      53.010557733458967 ], [ 6.488217737360127, 53.005405711174227 ], [ 6.499003456901467,
+      52.99021687719285 ], [ 6.483950252611996, 52.950175220791571 ], [ 6.496975523361111,
+      52.951564744231185 ], [ 6.53590777486831, 52.932593399793802 ], [ 6.542995599383526,
+      52.955334307550473 ], [ 6.562835060875902, 52.94715116589969 ], [ 6.596037847341166,
+      52.972657820259712 ], [ 6.611390297160621, 53.005079756367387 ], [ 6.632235026081239,
+      53.017104901639925 ], [ 6.631225672669223, 53.026102445454818 ], [ 6.603010439211618,
+      53.033087883344102 ], [ 6.60110237291503, 53.06191934195386 ], [ 6.574869609767613,
+      53.054579670289186 ], [ 6.55521494346382, 53.058610510240534 ], [ 6.547306827778393,
+      53.035069997278001 ], [ 6.525147584726708, 53.046273742339615 ], [ 6.505137034640274,
+      53.04635454712303 ], [ 6.495526824312618, 53.030896794361489 ], [ 6.513037877847673,
+      53.010557733458967 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 818
+  fields: {organization: 21, geojsontype: MultiPolygon, area: '[ [ [ [ 5.724934922646056,
+      51.397259010908336 ], [ 5.770455342515423, 51.333801086367181 ], [ 5.870353089294337,
+      51.352530712611177 ], [ 5.856584660578836, 51.353764556411235 ], [ 5.854103171742043,
+      51.376426411225033 ], [ 5.831879806723385, 51.399587651495331 ], [ 5.78787839251635,
+      51.412646147476622 ], [ 5.753057365322682, 51.435079741907401 ], [ 5.693978600296195,
+      51.439241152555475 ], [ 5.703807896198572, 51.411143032908541 ], [ 5.724934922646056,
+      51.397259010908336 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 819
+  fields: {organization: 22, geojsontype: MultiPolygon, area: '[ [ [ [ 4.924101624620866,
+      51.441827547285044 ], [ 4.921510210444263, 51.439246437897097 ], [ 4.922317173557755,
+      51.437685603658075 ], [ 4.924720324714113, 51.438971562239836 ], [ 4.924101624620866,
+      51.441827547285044 ] ] ], [ [ [ 4.932157417887153, 51.438839000430804 ], [ 4.93239007233791,
+      51.440026428572004 ], [ 4.930636782068361, 51.439884750431027 ], [ 4.930921112015368,
+      51.438780240351313 ], [ 4.932157417887153, 51.438839000430804 ] ] ], [ [ [ 4.871488919612591,
+      51.412411159654781 ], [ 4.870094283836155, 51.412440940788088 ], [ 4.869749425120044,
+      51.411162995173711 ], [ 4.87237604987935, 51.411498216182075 ], [ 4.871488919612591,
+      51.412411159654781 ] ] ], [ [ [ 4.932021634540453, 51.435153063554374 ], [ 4.932733550217754,
+      51.434427745609035 ], [ 4.932684446484769, 51.436468011705173 ], [ 4.931332795402045,
+      51.436444761685806 ], [ 4.932021634540453, 51.435153063554374 ] ] ], [ [ [ 4.935385767020959,
+      51.432361632390936 ], [ 4.935503965281526, 51.43349467864406 ], [ 4.934109706782084,
+      51.433426351630104 ], [ 4.934181875542324, 51.431952468694263 ], [ 4.935385767020959,
+      51.432361632390936 ] ] ], [ [ [ 4.935413397467811, 51.436829171937895 ], [ 4.935462954590887,
+      51.436182170416444 ], [ 4.936799597379761, 51.43626823624291 ], [ 4.936484974211801,
+      51.437543430520805 ], [ 4.935413397467811, 51.436829171937895 ] ] ], [ [ [ 4.931302235208769,
+      51.436624418278107 ], [ 4.931627613738296, 51.437165016923061 ], [ 4.930692912871956,
+      51.437152375352447 ], [ 4.930912952390934, 51.436721773579706 ], [ 4.931302235208769,
+      51.436624418278107 ] ] ], [ [ [ 4.980000401814149, 51.46060676228749 ], [ 4.94190296114878,
+      51.457096865462759 ], [ 4.891299751431381, 51.478214297554025 ], [ 4.841880344237881,
+      51.480735542129757 ], [ 4.836113180791182, 51.461247637868482 ], [ 4.844024743384974,
+      51.459064477899176 ], [ 4.823361954318552, 51.448620325896869 ], [ 4.828159925545871,
+      51.422207168407311 ], [ 4.83971945808808, 51.419799041345506 ], [ 4.836486662322527,
+      51.417257953834735 ], [ 4.786657857292481, 51.432715664246793 ], [ 4.766569555900834,
+      51.430489156307338 ], [ 4.768887191331183, 51.418645093373726 ], [ 4.789327436759816,
+      51.408989703486654 ], [ 4.899997536008919, 51.414673056979233 ], [ 4.920954969162879,
+      51.393688904825851 ], [ 5.005072909054793, 51.444412888963896 ], [ 5.010467709397414,
+      51.458246138840074 ], [ 4.980000401814149, 51.46060676228749 ] ], [ [ 4.91821668130646,
+      51.44343101956725 ], [ 4.918153690111153, 51.443961105741764 ], [ 4.918872404472276,
+      51.444008936079946 ], [ 4.918518639345403, 51.443441221407824 ], [ 4.91821668130646,
+      51.44343101956725 ] ], [ [ 4.836438754351632, 51.448601870593514 ], [ 4.836671409495493,
+      51.448396224798998 ], [ 4.83622972006916, 51.44804357535255 ], [ 4.835749913742718,
+      51.448463785085174 ], [ 4.836438754351632, 51.448601870593514 ] ], [ [ 4.940625424203483,
+      51.455321194798621 ], [ 4.940708752193801, 51.455627132194735 ], [ 4.942093791469532,
+      51.455236915353588 ], [ 4.940625424203483, 51.455321194798621 ] ], [ [ 4.9398598745271,
+      51.439506984706973 ], [ 4.939756728949823, 51.43975827547893 ], [ 4.941437252702913,
+      51.439989426486477 ], [ 4.941526007316419, 51.439738079297861 ], [ 4.9398598745271,
+      51.439506984706973 ] ], [ [ 4.940982631906003, 51.445291075493579 ], [ 4.942116508521092,
+      51.445547091187457 ], [ 4.942321921514459, 51.445134390097266 ], [ 4.941188054003311,
+      51.444878376403935 ], [ 4.940982631906003, 51.445291075493579 ] ], [ [ 4.948757628199414,
+      51.454992472094979 ], [ 4.94959095517398, 51.455112453292223 ], [ 4.949344685289284,
+      51.453790179201306 ], [ 4.949028437732077, 51.453762026149718 ], [ 4.948757628199414,
+      51.454992472094979 ] ], [ [ 4.874835227615595, 51.416506840828553 ], [ 4.875314538579299,
+      51.416068491834871 ], [ 4.873639485831704, 51.415458877017507 ], [ 4.873389956164833,
+      51.415916209184552 ], [ 4.874835227615595, 51.416506840828553 ] ], [ [ 4.927399115210521,
+      51.448591171713396 ], [ 4.928158079567194, 51.448935733362333 ], [ 4.929130104143545,
+      51.448121572075237 ], [ 4.928399372481431, 51.447831060466008 ], [ 4.927399115210521,
+      51.448591171713396 ] ], [ [ 4.940228111781796, 51.443023013216411 ], [ 4.940283248242467,
+      51.441800748792069 ], [ 4.939722139598277, 51.441816576271606 ], [ 4.939215364170586,
+      51.443621379117793 ], [ 4.940228111781796, 51.443023013216411 ] ], [ [ 4.944845933417906,
+      51.453332766774352 ], [ 4.944935131678116, 51.453036474954203 ], [ 4.94282365780274,
+      51.452686881783215 ], [ 4.942774274222364, 51.453324897406965 ], [ 4.944845933417906,
+      51.453332766774352 ] ], [ [ 4.866070320116271, 51.413627538369923 ], [ 4.86699601047889,
+      51.414386733472945 ], [ 4.867813754051658, 51.413266771467896 ], [ 4.866319807891144,
+      51.413179210280084 ], [ 4.866070320116271, 51.413627538369923 ] ], [ [ 4.838746988148857,
+      51.41817647811601 ], [ 4.840392059046164, 51.418858365532103 ], [ 4.841366833442352,
+      51.417892133583535 ], [ 4.840854603782454, 51.417449281444057 ], [ 4.838746988148857,
+      51.41817647811601 ] ], [ [ 4.941020388887095, 51.438495693910781 ], [ 4.940753504808222,
+      51.439312653351955 ], [ 4.943118319003409, 51.440166622556752 ], [ 4.942232323755909,
+      51.438104814408945 ], [ 4.941020388887095, 51.438495693910781 ] ], [ [ 4.930490359667965,
+      51.448756118243793 ], [ 4.929489575167854, 51.44957017802173 ], [ 4.930732543777367,
+      51.450428980966748 ], [ 4.931808665069499, 51.449273630467694 ], [ 4.930490359667965,
+      51.448756118243793 ] ], [ [ 4.931944310659921, 51.447215726246235 ], [ 4.93150863902998,
+      51.447627510502635 ], [ 4.933257126404886, 51.448281517099929 ], [ 4.93407144039453,
+      51.44740377985304 ], [ 4.931944310659921, 51.447215726246235 ] ], [ [ 4.926698724482335,
+      51.445298511209408 ], [ 4.925724529046125, 51.444908144962412 ], [ 4.924170756240209,
+      51.446349187291908 ], [ 4.9255054900224, 51.44665110526153 ], [ 4.926698724482335,
+      51.445298511209408 ] ], [ [ 4.93996503311035, 51.436118612514377 ], [ 4.942190942612139,
+      51.436450718723989 ], [ 4.942750485358499, 51.435113520941989 ], [ 4.941000606487129,
+      51.43463942568993 ], [ 4.93996503311035, 51.436118612514377 ] ], [ [ 4.889333919367764,
+      51.424974177412558 ], [ 4.89159333381144, 51.424786042949442 ], [ 4.891437808342202,
+      51.423221326116007 ], [ 4.889364881053067, 51.423455197422726 ], [ 4.889333919367764,
+      51.424974177412558 ] ], [ [ 4.946420909136477, 51.44519488658554 ], [ 4.949208374286828,
+      51.44551998809456 ], [ 4.949873597514478, 51.443652815375238 ], [ 4.943961817298702,
+      51.443648490739456 ], [ 4.946420909136477, 51.44519488658554 ] ], [ [ 4.935714901115184,
+      51.409288643381856 ], [ 4.936400659150988, 51.405345207177618 ], [ 4.928498398083304,
+      51.405116643952475 ], [ 4.927259678030443, 51.408239874232898 ], [ 4.935714901115184,
+      51.409288643381856 ] ], [ [ 4.933261304118776, 51.449306255531198 ], [ 4.949433596123932,
+      51.453520849286491 ], [ 4.952760596250647, 51.451636647022042 ], [ 4.940365090223984,
+      51.445189836140052 ], [ 4.933261304118776, 51.449306255531198 ] ], [ [ 4.93996503311035,
+      51.436118612514377 ], [ 4.93614786434515, 51.429461198498387 ], [ 4.91500642518199,
+      51.435355115667974 ], [ 4.921203407096191, 51.436899135440306 ], [ 4.91926027162855,
+      51.446859941661771 ], [ 4.928305777163103, 51.4385542541173 ], [ 4.935549185171108,
+      51.446348830352775 ], [ 4.93996503311035, 51.436118612514377 ] ] ], [ [ [ 4.941646584747239,
+      51.44947339826404 ], [ 4.941575215710349, 51.447945032051301 ], [ 4.942207523748298,
+      51.449484527001026 ], [ 4.941646584747239, 51.44947339826404 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 820
+  fields: {organization: 23, geojsontype: MultiPolygon, area: '[ [ [ [ 5.306484465493527,
+      52.219444097164526 ], [ 5.224734441970793, 52.225193134978625 ], [ 5.212076176094049,
+      52.176370901236751 ], [ 5.221001681900791, 52.178262270962357 ], [ 5.223885130169514,
+      52.165377619040463 ], [ 5.308515670499989, 52.204471720554942 ], [ 5.330694222413183,
+      52.203387871285358 ], [ 5.33578519999732, 52.228565112835341 ], [ 5.308262483773998,
+      52.23183950044173 ], [ 5.314759556865394, 52.224105146141163 ], [ 5.306484465493527,
+      52.219444097164526 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 821
+  fields: {organization: 24, geojsontype: MultiPolygon, area: '[ [ [ [ 4.49012822618023,
+      51.851317718941068 ], [ 4.489095819319724, 51.835399624855462 ], [ 4.525475519044939,
+      51.829856576844428 ], [ 4.553605055260157, 51.829897920958352 ], [ 4.571353766686856,
+      51.848000098638131 ], [ 4.549389598991008, 51.874029603354728 ], [ 4.479919074277744,
+      51.865270803843764 ], [ 4.49012822618023, 51.851317718941068 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 822
+  fields: {organization: 25, geojsontype: MultiPolygon, area: '[ [ [ [ 5.478872754707852,
+      52.164466019116993 ], [ 5.481342502395688, 52.150496828803824 ], [ 5.514073637415533,
+      52.135923606757999 ], [ 5.494693236817533, 52.124698938961764 ], [ 5.50770420943415,
+      52.113900752891503 ], [ 5.486451174239365, 52.115358670754951 ], [ 5.525167874513721,
+      52.100750100162493 ], [ 5.546307176992844, 52.102440141685541 ], [ 5.561897320976747,
+      52.121679349655174 ], [ 5.717280831397585, 52.136446392639371 ], [ 5.720348446207342,
+      52.146261662028898 ], [ 5.80983844428483, 52.151412575329374 ], [ 5.801955699035252,
+      52.177362005334963 ], [ 5.811925045867874, 52.184876445349559 ], [ 5.792031526582393,
+      52.196990270407646 ], [ 5.750582863559252, 52.193727763163899 ], [ 5.730763205256778,
+      52.208599247114229 ], [ 5.727436083907834, 52.219295505242094 ], [ 5.74302527542476,
+      52.223491824042263 ], [ 5.72638368552693, 52.242505231308655 ], [ 5.683647668100676,
+      52.240615984158268 ], [ 5.681262773792086, 52.225342593617903 ], [ 5.633265282484518,
+      52.208168757603268 ], [ 5.625648128681725, 52.192725226337195 ], [ 5.577672589998684,
+      52.194798786742616 ], [ 5.57792818974971, 52.186178983012034 ], [ 5.564530377157227,
+      52.185337054684915 ], [ 5.568886821478963, 52.177906411816942 ], [ 5.54892105509176,
+      52.175320009230795 ], [ 5.53080166923176, 52.191539664769266 ], [ 5.501033324680104,
+      52.188624144846678 ], [ 5.485605405548347, 52.181978013927782 ], [ 5.478872754707852,
+      52.164466019116993 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 823
+  fields: {organization: 26, geojsontype: MultiPolygon, area: '[ [ [ [ 6.587259956978061,
+      53.255666083816529 ], [ 6.636017579444845, 53.251394553555627 ], [ 6.625848916590941,
+      53.26620158157187 ], [ 6.654059621465866, 53.308646201096039 ], [ 6.619866969780587,
+      53.314429461391988 ], [ 6.610198255832105, 53.3301102126429 ], [ 6.592627234156129,
+      53.335715282196524 ], [ 6.604691308077533, 53.340805646565286 ], [ 6.576196224645929,
+      53.347425954892486 ], [ 6.54955358810585, 53.264412222330634 ], [ 6.588695359308078,
+      53.262553208463082 ], [ 6.587259956978061, 53.255666083816529 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 824
+  fields: {organization: 27, geojsontype: MultiPolygon, area: '[ [ [ [ 5.832102285346658,
+      50.947419115429504 ], [ 5.811882369173217, 50.955144611301471 ], [ 5.779948624155074,
+      50.945342620296564 ], [ 5.755792388798565, 50.899462003232692 ], [ 5.774682964698783,
+      50.911283549378233 ], [ 5.84150470811995, 50.919606876397566 ], [ 5.856926131384893,
+      50.944004136818798 ], [ 5.832102285346658, 50.947419115429504 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 825
+  fields: {organization: 28, geojsontype: MultiPolygon, area: '[ [ [ [ 4.863007668648882,
+      52.568594671703934 ], [ 4.833909586490607, 52.538957072218217 ], [ 4.837566646009483,
+      52.530543849714334 ], [ 4.928786837903019, 52.510817361889259 ], [ 4.954098190208838,
+      52.516349816137399 ], [ 4.976501649683687, 52.561150470273326 ], [ 4.997171169603616,
+      52.575159401403432 ], [ 4.979920322257367, 52.586991649461126 ], [ 4.954754556779807,
+      52.580207215524474 ], [ 4.948845430132268, 52.598789169550948 ], [ 4.959326327733953,
+      52.604713995316281 ], [ 4.9507157305201, 52.614110266214794 ], [ 4.901082056992105,
+      52.602881322402993 ], [ 4.863007668648882, 52.568594671703934 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 826
+  fields: {organization: 29, geojsontype: MultiPolygon, area: '[ [ [ [ 6.041619965470095,
+      51.281858899188911 ], [ 6.027457670247628, 51.267447445337524 ], [ 6.00551509487924,
+      51.261759272357395 ], [ 6.027466798251914, 51.245559193550648 ], [ 6.052143740956505,
+      51.252477080984619 ], [ 6.072665100047128, 51.242559892994279 ], [ 6.124495447656009,
+      51.274729312295968 ], [ 6.114463844814959, 51.289174943471416 ], [ 6.084714490823725,
+      51.297456184920343 ], [ 6.041619965470095, 51.281858899188911 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 827
+  fields: {organization: 30, geojsontype: MultiPolygon, area: '[ [ [ [ 7.086419564697437,
+      53.059094952565893 ], [ 7.10233046166575, 53.061177819427691 ], [ 7.130367780468008,
+      53.038968100253221 ], [ 7.204250082632717, 53.055575074209472 ], [ 7.202789350884894,
+      53.113407668977437 ], [ 7.182894786106507, 53.121760673849209 ], [ 7.179392482039601,
+      53.134980202803234 ], [ 7.189247094525588, 53.154884038856707 ], [ 7.173963492587546,
+      53.147931700352878 ], [ 7.145303592662484, 53.160776475551977 ], [ 7.105651131227566,
+      53.143942651734193 ], [ 7.081244046205244, 53.144011564138211 ], [ 7.025909844142723,
+      53.11245319983616 ], [ 7.042663660625727, 53.101752318990513 ], [ 7.015450436035411,
+      53.07177452133412 ], [ 7.086419564697437, 53.059094952565893 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 828
+  fields: {organization: 31, geojsontype: MultiPolygon, area: '[ [ [ [ 5.985759789271293,
+      51.867760615814412 ], [ 5.963058330759918, 51.854697005819226 ], [ 5.934957430609241,
+      51.872637720108102 ], [ 5.914472345157801, 51.87422359574844 ], [ 5.881589230935029,
+      51.859104273404853 ], [ 5.880301874074989, 51.844952844021371 ], [ 5.90834663182076,
+      51.82929950943597 ], [ 5.880413318831748, 51.82068344154041 ], [ 5.887971702861265,
+      51.7829894706096 ], [ 5.935229272525749, 51.741133896812478 ], [ 5.992071972361495,
+      51.770247102558557 ], [ 5.982366938215163, 51.77369448066105 ], [ 5.990233897482828,
+      51.783397941324743 ], [ 5.97454583488051, 51.785059578038059 ], [ 5.979058906704616,
+      51.797647890156867 ], [ 5.947974322483018, 51.811373393043773 ], [ 5.95815217477505,
+      51.816933153981459 ], [ 5.945480311935345, 51.824265883702317 ], [ 5.962976053864976,
+      51.836918093233386 ], [ 5.994424402285255, 51.830916994482521 ], [ 6.035664427736831,
+      51.842642155480881 ], [ 6.063491807240244, 51.865450952916028 ], [ 6.012189825510435,
+      51.881671962441743 ], [ 5.985759789271293, 51.867760615814412 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 829
+  fields: {organization: 32, geojsontype: MultiPolygon, area: '[ [ [ [ 5.346981835657094,
+      51.347656693432867 ], [ 5.34711993139267, 51.337454537507526 ], [ 5.324007743363964,
+      51.332905015369924 ], [ 5.316675725295325, 51.323390736844168 ], [ 5.263405891650269,
+      51.319283456195343 ], [ 5.243971095790785, 51.309391555266352 ], [ 5.225973796440265,
+      51.268262447234868 ], [ 5.237917771031831, 51.261357016779549 ], [ 5.263117769856354,
+      51.266797821707641 ], [ 5.336482464432999, 51.263068560745204 ], [ 5.346141896387235,
+      51.27576447661724 ], [ 5.417415530246504, 51.262284567663094 ], [ 5.387802379584552,
+      51.285236812130037 ], [ 5.397206681497342, 51.290620629250782 ], [ 5.397670931978671,
+      51.314323897010475 ], [ 5.412863791476265, 51.320514756949557 ], [ 5.425795810886167,
+      51.311989848825583 ], [ 5.433926244328733, 51.324319404119336 ], [ 5.421182946613283,
+      51.338409177506655 ], [ 5.421805564240789, 51.383406510308347 ], [ 5.39653730377813,
+      51.380840538573814 ], [ 5.352454179432628, 51.361824668886022 ], [ 5.346981835657094,
+      51.347656693432867 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 830
+  fields: {organization: 33, geojsontype: MultiPolygon, area: '[ [ [ [ 6.039583904167407,
+      51.5821093754993 ], [ 6.046266616894961, 51.559437971662021 ], [ 6.079275641127373,
+      51.547112120686158 ], [ 6.111058693572201, 51.546703770634373 ], [ 6.119728115150576,
+      51.531809010531617 ], [ 6.169186593604483, 51.503083138927224 ], [ 6.213360920578292,
+      51.507821734918544 ], [ 6.157039604905593, 51.566572017736206 ], [ 6.091417454657118,
+      51.60584479116585 ], [ 6.118094564134755, 51.655973733496367 ], [ 6.031946806898245,
+      51.67616549544482 ], [ 6.02428138973017, 51.669816469240835 ], [ 6.031759990172567,
+      51.663051930498057 ], [ 5.976613426310689, 51.643783203197771 ], [ 6.020211418670184,
+      51.621712696015486 ], [ 6.039583904167407, 51.5821093754993 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 831
+  fields: {organization: 34, geojsontype: MultiPolygon, area: '[ [ [ [ 4.607638637012423,
+      52.640611665332223 ], [ 4.594067836192956, 52.575479558154946 ], [ 4.610371012212754,
+      52.573699924652601 ], [ 4.672580182591148, 52.59090604258914 ], [ 4.685642499071785,
+      52.619509896156949 ], [ 4.714754277638714, 52.624908785298608 ], [ 4.712818190220741,
+      52.646206731285041 ], [ 4.752444746872862, 52.67094201247069 ], [ 4.692399810153058,
+      52.731198062364157 ], [ 4.634477843678013, 52.758328662442395 ], [ 4.607638637012423,
+      52.640611665332223 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 832
+  fields: {organization: 35, geojsontype: MultiPolygon, area: '[ [ [ [ 4.224901155087034,
+      51.496494430470626 ], [ 4.26543126561409, 51.439682334616926 ], [ 4.293704074895654,
+      51.445308421636021 ], [ 4.299103229990338, 51.46679851435173 ], [ 4.311162064255119,
+      51.46017729753045 ], [ 4.327961515438037, 51.464241335826621 ], [ 4.366972141942758,
+      51.456723248958042 ], [ 4.361637459976903, 51.476371988944983 ], [ 4.372799815677888,
+      51.487724064095765 ], [ 4.351452702119301, 51.500103641576473 ], [ 4.351599461608656,
+      51.517696925670421 ], [ 4.30681016026697, 51.543513032027789 ], [ 4.317974763132815,
+      51.551211662284807 ], [ 4.267627764978887, 51.568008688260953 ], [ 4.252011905957316,
+      51.570662757860021 ], [ 4.242973414451686, 51.562978627743618 ], [ 4.219477671277472,
+      51.512531403880153 ], [ 4.224901155087034, 51.496494430470626 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 833
+  fields: {organization: 36, geojsontype: MultiPolygon, area: '[ [ [ [ 6.555347340552415,
+      52.177251197008054 ], [ 6.492406647472436, 52.177372242280669 ], [ 6.483781312680858,
+      52.157201357917643 ], [ 6.461371222642494, 52.15208633847945 ], [ 6.491993575061582,
+      52.125286825107366 ], [ 6.479154544025982, 52.101307754587793 ], [ 6.444881860898999,
+      52.106195607330179 ], [ 6.401927944481786, 52.087211806301113 ], [ 6.415069529510114,
+      52.051439777525843 ], [ 6.438216107190873, 52.025105127659366 ], [ 6.464947959304499,
+      52.0206026741009 ], [ 6.508710891832209, 52.044265898317242 ], [ 6.538993565497059,
+      52.025195727556572 ], [ 6.571713960000158, 52.030435114602177 ], [ 6.596239820264729,
+      52.042815235336143 ], [ 6.613082455775511, 52.068043871965621 ], [ 6.630615618757154,
+      52.06441728355923 ], [ 6.63571297599805, 52.055275479991806 ], [ 6.64683240230359,
+      52.065413510410764 ], [ 6.658972540249116, 52.063044765110732 ], [ 6.661796584972316,
+      52.051598156989954 ], [ 6.687976740992577, 52.044363264055562 ], [ 6.69466764928041,
+      52.069800172235347 ], [ 6.735465648700458, 52.074634776586933 ], [ 6.750925245554757,
+      52.085037015283731 ], [ 6.744501553215454, 52.093093544096284 ], [ 6.755264811767059,
+      52.095243303252012 ], [ 6.760570811701983, 52.118778017144493 ], [ 6.716266499315845,
+      52.118270173404333 ], [ 6.662402925924703, 52.130164350166446 ], [ 6.674392753854213,
+      52.142771373529889 ], [ 6.671340988361539, 52.165681428902388 ], [ 6.630544753695648,
+      52.173597226402329 ], [ 6.612143897451946, 52.163164969930186 ], [ 6.590417970828843,
+      52.182462759320018 ], [ 6.555347340552415, 52.177251197008054 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 834
+  fields: {organization: 37, geojsontype: MultiPolygon, area: '[ [ [ [ 5.482907205744777,
+      51.701452246409787 ], [ 5.469851019163901, 51.689138982336345 ], [ 5.458763398345861,
+      51.69203160528928 ], [ 5.445031572925211, 51.664246751221739 ], [ 5.432586729715924,
+      51.664171358420425 ], [ 5.423385755412673, 51.653783846570548 ], [ 5.497205318796692,
+      51.626682126836698 ], [ 5.504855055264249, 51.636076698375469 ], [ 5.524396324782329,
+      51.630437544897909 ], [ 5.542233145914519, 51.634540992312438 ], [ 5.570294725253002,
+      51.651434842220581 ], [ 5.562233715147733, 51.663150265317419 ], [ 5.600592067774603,
+      51.696568841556342 ], [ 5.588988475636765, 51.724984089699859 ], [ 5.533910448648157,
+      51.740607132409018 ], [ 5.507364129097597, 51.737752099332688 ], [ 5.474237413429086,
+      51.728963753154922 ], [ 5.484552913670644, 51.713297708103298 ], [ 5.499662891340166,
+      51.709005639109435 ], [ 5.482907205744777, 51.701452246409787 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 835
+  fields: {organization: 38, geojsontype: MultiPolygon, area: '[ [ [ [ 5.372021819005755,
+      51.543570692701785 ], [ 5.356913676286686, 51.544718316553741 ], [ 5.368595848254072,
+      51.531489503781287 ], [ 5.355454256238325, 51.528906956048218 ], [ 5.350744564375167,
+      51.507557594844542 ], [ 5.361296616265149, 51.492881948248012 ], [ 5.389907842299157,
+      51.487563472043661 ], [ 5.391187794975221, 51.471752393534146 ], [ 5.396371820272324,
+      51.484704743882816 ], [ 5.44256797258557, 51.493923251707571 ], [ 5.447502391456629,
+      51.512068864786833 ], [ 5.405366661330666, 51.548352159916789 ], [ 5.372021819005755,
+      51.543570692701785 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 836
+  fields: {organization: 39, geojsontype: MultiPolygon, area: '[ [ [ [ 5.717626270018073,
+      51.839519436861828 ], [ 5.764781656222823, 51.832276292850445 ], [ 5.775083839791672,
+      51.84425122953656 ], [ 5.787215158608615, 51.840929721311312 ], [ 5.807327227978378,
+      51.851843304647311 ], [ 5.817377659870881, 51.849496864877715 ], [ 5.825697066844498,
+      51.866211530227808 ], [ 5.685016096555392, 51.895649200506632 ], [ 5.667847009317486,
+      51.865931090028553 ], [ 5.681667488108716, 51.856863915050582 ], [ 5.678109546660615,
+      51.84314753091531 ], [ 5.717626270018073, 51.839519436861828 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 837
+  fields: {organization: 40, geojsontype: MultiPolygon, area: '[ [ [ [ 4.583180691527447,
+      52.488900294670593 ], [ 4.653326463446366, 52.477158772890249 ], [ 4.674841555481018,
+      52.455521778475457 ], [ 4.707987950137551, 52.48619345375333 ], [ 4.666055119198604,
+      52.501746188469291 ], [ 4.604314640919096, 52.494389358078443 ], [ 4.571498189592877,
+      52.502032486331956 ], [ 4.566309755422228, 52.492748323999848 ], [ 4.583180691527447,
+      52.488900294670593 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 838
+  fields: {organization: 41, geojsontype: MultiPolygon, area: '[ [ [ [ 4.429337905785162,
+      51.79889966119044 ], [ 4.423698273305825, 51.786682454710487 ], [ 4.437159202022924,
+      51.781362939514523 ], [ 4.465986745510778, 51.788334581822987 ], [ 4.474155653427298,
+      51.776452211228765 ], [ 4.486688014249248, 51.777277209712082 ], [ 4.5153626179388,
+      51.787165880310972 ], [ 4.546067217547844, 51.773601222507587 ], [ 4.570612861855203,
+      51.771976940216227 ], [ 4.571261555225711, 51.763343208317579 ], [ 4.611959180747851,
+      51.760464276585203 ], [ 4.591832659437063, 51.748500213320817 ], [ 4.626581332441275,
+      51.728254357935427 ], [ 4.621226097878722, 51.800803772684738 ], [ 4.570282812106231,
+      51.811021934065245 ], [ 4.551570260483097, 51.830881205492211 ], [ 4.4500887474034,
+      51.832173319904115 ], [ 4.452157787160756, 51.812171590452017 ], [ 4.430498194629735,
+      51.810495846673533 ], [ 4.429337905785162, 51.79889966119044 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 839
+  fields: {organization: 42, geojsontype: MultiPolygon, area: '[ [ [ [ 5.223737741701277,
+      51.425094810076942 ], [ 5.209214624339912, 51.436498209117353 ], [ 5.191020147263592,
+      51.43022190724394 ], [ 5.200962191342928, 51.3900676357867 ], [ 5.196983609035877,
+      51.379463509117947 ], [ 5.183196612581985, 51.375781798103588 ], [ 5.197469769038787,
+      51.362700314729857 ], [ 5.200261087050706, 51.322659965226983 ], [ 5.241114661533728,
+      51.305666667352185 ], [ 5.259454194531128, 51.311476962871268 ], [ 5.285975418013982,
+      51.336338886795744 ], [ 5.279770781945968, 51.37532642811847 ], [ 5.289235158289923,
+      51.388907709641579 ], [ 5.310868189130965, 51.390712604921248 ], [ 5.313655739781113,
+      51.399442423690701 ], [ 5.302849027502964, 51.407533939563379 ], [ 5.281901314543871,
+      51.404370888177311 ], [ 5.237701800413347, 51.428556196008572 ], [ 5.223737741701277,
+      51.425094810076942 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 840
+  fields: {organization: 43, geojsontype: MultiPolygon, area: '[ [ [ [ 5.229829368505771,
+      52.278587486456125 ], [ 5.210887761512754, 52.277347427889694 ], [ 5.203823328901547,
+      52.267117605691531 ], [ 5.225512659817637, 52.272910396428763 ], [ 5.244075873585435,
+      52.254662183149229 ], [ 5.26598422012298, 52.28192854556108 ], [ 5.305837482907237,
+      52.277324974476173 ], [ 5.335464954659948, 52.290221020697587 ], [ 5.305459517806318,
+      52.307631267295186 ], [ 5.229829368505771, 52.278587486456125 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 841
+  fields: {organization: 44, geojsontype: MultiPolygon, area: '[ [ [ [ 4.59018210466035,
+      52.328352190645809 ], [ 4.607326770784383, 52.367042826229927 ], [ 4.600525869951968,
+      52.382924436526743 ], [ 4.62160426379744, 52.387978976407503 ], [ 4.631645029024526,
+      52.411663548196408 ], [ 4.621465877077601, 52.42490017610227 ], [ 4.544064107028886,
+      52.439303537567987 ], [ 4.526050342438749, 52.405163739740395 ], [ 4.59165796507767,
+      52.391718283893177 ], [ 4.547323195871502, 52.313998329012861 ], [ 4.563703703235511,
+      52.309295904318645 ], [ 4.5832767272194, 52.318391661825743 ], [ 4.611682836455654,
+      52.313557007520707 ], [ 4.611385223627829, 52.322201531374127 ], [ 4.59018210466035,
+      52.328352190645809 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 842
+  fields: {organization: 45, geojsontype: MultiPolygon, area: '[ [ [ [ 4.71302854879293,
+      52.076927342326947 ], [ 4.685299243516782, 52.069394996638124 ], [ 4.681975638552903,
+      52.059101459295817 ], [ 4.677251476792636, 52.065517740026188 ], [ 4.660555159774418,
+      52.062692468813495 ], [ 4.679797458773134, 52.052068482732409 ], [ 4.677316104655732,
+      52.04397299877234 ], [ 4.71626380409953, 52.03822404992723 ], [ 4.719849175154929,
+      52.026487634662878 ], [ 4.74369928030827, 52.022611584438351 ], [ 4.750991309496964,
+      52.013896545852134 ], [ 4.778775080240199, 52.014618669483703 ], [ 4.8099378157829,
+      52.026766011241349 ], [ 4.806707541234719, 52.033167783050118 ], [ 4.829496574518425,
+      52.049816340673686 ], [ 4.873204146370604, 52.068746621299645 ], [ 4.829809680421646,
+      52.066823598456274 ], [ 4.825381064319247, 52.107087749554438 ], [ 4.792086925697118,
+      52.122285227750702 ], [ 4.704726038543997, 52.095242660408154 ], [ 4.71302854879293,
+      52.076927342326947 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 843
+  fields: {organization: 46, geojsontype: MultiPolygon, area: '[ [ [ [ 5.645104375067428,
+      51.601236357387535 ], [ 5.651359713887674, 51.58236427023283 ], [ 5.758610259329777,
+      51.593946618017206 ], [ 5.750484627797122, 51.622681870633976 ], [ 5.681528422069977,
+      51.62905993473661 ], [ 5.62657292406216, 51.623396708649317 ], [ 5.645104375067428,
+      51.601236357387535 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 844
+  fields: {organization: 47, geojsontype: MultiPolygon, area: '[ [ [ [ 6.751799470705452,
+      52.864020357607217 ], [ 6.849803785461608, 52.804635451943618 ], [ 6.869017105785386,
+      52.819300130772035 ], [ 6.949919245876734, 52.848799342327126 ], [ 6.961448536250452,
+      52.864286869453501 ], [ 7.014793328616704, 52.872990433363768 ], [ 7.045568230390193,
+      52.915907216665865 ], [ 7.015974658874396, 52.92457459296002 ], [ 6.935683718699416,
+      52.993356359862226 ], [ 6.84191695969378, 52.97864436949267 ], [ 6.727718015775298,
+      52.954716473380998 ], [ 6.728481301518858, 52.906022992475975 ], [ 6.737492947340873,
+      52.874905368988443 ], [ 6.751799470705452, 52.864020357607217 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 845
+  fields: {organization: 48, geojsontype: MultiPolygon, area: '[ [ [ [ 6.705899403029741,
+      52.317957379795445 ], [ 6.689475475715463, 52.309591179391447 ], [ 6.742767135362612,
+      52.283122361622191 ], [ 6.801372398921491, 52.308728062280217 ], [ 6.802129611122135,
+      52.31454378921994 ], [ 6.773841659216354, 52.318914924443924 ], [ 6.759036753122464,
+      52.332058424441492 ], [ 6.720840167615034, 52.341205376190537 ], [ 6.69493971789623,
+      52.326825088294662 ], [ 6.705899403029741, 52.317957379795445 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 846
+  fields: {organization: 49, geojsontype: MultiPolygon, area: '[ [ [ [ 3.703641902858428,
+      51.482265944489939 ], [ 3.695676522320003, 51.471110664643369 ], [ 3.717425109320343,
+      51.469607829545168 ], [ 3.696398833382452, 51.445849305463682 ], [ 3.718056482472683,
+      51.427650160753366 ], [ 3.710427197076101, 51.423935602102986 ], [ 3.736603315460413,
+      51.411111301629724 ], [ 3.738033986811091, 51.394607411358301 ], [ 3.775527207536552,
+      51.39217403607536 ], [ 3.808229273511353, 51.355743955013047 ], [ 3.92447746751238,
+      51.37804622321751 ], [ 3.963213017213687, 51.4220099772228 ], [ 3.908922774254507,
+      51.467974295510089 ], [ 3.912879948777395, 51.479117920545924 ], [ 3.810463307103483,
+      51.483128463380758 ], [ 3.7737418270046, 51.497478410875509 ], [ 3.705530580954633,
+      51.502458404812181 ], [ 3.703641902858428, 51.482265944489939 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 847
+  fields: {organization: 50, geojsontype: MultiPolygon, area: '[ [ [ [ 5.949713762480733,
+      51.607870815029962 ], [ 5.877240843219791, 51.578165728099478 ], [ 5.870886311576176,
+      51.562641701393382 ], [ 5.906660606922546, 51.552034200364091 ], [ 5.935444228507271,
+      51.553601544190052 ], [ 6.004246956498368, 51.57024727772145 ], [ 6.031672832321854,
+      51.552337293007469 ], [ 6.048127176075837, 51.558465654403079 ], [ 6.022584261609392,
+      51.618949259111993 ], [ 5.966625259248662, 51.650179140942335 ], [ 5.95593809693817,
+      51.708127748694764 ], [ 5.933782983120959, 51.716143264521733 ], [ 5.895349403073191,
+      51.681449405924923 ], [ 5.861027514835576, 51.670896895508555 ], [ 5.855791129197076,
+      51.662207984248219 ], [ 5.875564288123886, 51.652913753454435 ], [ 5.871668184769996,
+      51.643977238708111 ], [ 5.896480429291743, 51.644483082660066 ], [ 5.925763977656383,
+      51.632154260129916 ], [ 5.949713762480733, 51.607870815029962 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 848
+  fields: {organization: 51, geojsontype: MultiPolygon, area: '[ [ [ [ 5.383679867316406,
+      51.598258194455362 ], [ 5.335858435413111, 51.603136825383196 ], [ 5.343995014801739,
+      51.622986842194607 ], [ 5.317738467741952, 51.634632382491056 ], [ 5.310186398471539,
+      51.633243430054264 ], [ 5.316494242638792, 51.617364632835496 ], [ 5.293436510631945,
+      51.60279596713012 ], [ 5.262973510244559, 51.599963182737334 ], [ 5.246178944793215,
+      51.579477144610415 ], [ 5.268896153395518, 51.553722997876697 ], [ 5.382790160309401,
+      51.54349068285012 ], [ 5.404227697917372, 51.548289412767666 ], [ 5.405199124431125,
+      51.562023850342705 ], [ 5.403863073451677, 51.575866482557529 ], [ 5.391572384574409,
+      51.575912548358573 ], [ 5.381444095235988, 51.587597659950987 ], [ 5.389596838147356,
+      51.589674127126919 ], [ 5.383679867316406, 51.598258194455362 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 849
+  fields: {organization: 52, geojsontype: MultiPolygon, area: '[ [ [ [ 4.686024127769207,
+      51.587644599605831 ], [ 4.694181070172458, 51.544852243727263 ], [ 4.703996248699137,
+      51.549799984680909 ], [ 4.725105195224753, 51.532896551043478 ], [ 4.741463818350399,
+      51.532862252223588 ], [ 4.73400061674108, 51.485548236421771 ], [ 4.76002968431389,
+      51.502374290910694 ], [ 4.748908465246998, 51.518961432277074 ], [ 4.867317807343911,
+      51.558865227533268 ], [ 4.871680189221383, 51.567109253647793 ], [ 4.864244147973061,
+      51.579085199438829 ], [ 4.842623778503751, 51.585826958505535 ], [ 4.83407042554078,
+      51.597409277021853 ], [ 4.842682833281411, 51.616982209891091 ], [ 4.819025424717526,
+      51.631305637976681 ], [ 4.78750563232339, 51.637044989378168 ], [ 4.765685769283298,
+      51.62913789156179 ], [ 4.736917610055458, 51.643066998045242 ], [ 4.665064915693795,
+      51.634322077141732 ], [ 4.660818825342917, 51.609944977245647 ], [ 4.686024127769207,
+      51.587644599605831 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 850
+  fields: {organization: 53, geojsontype: MultiPolygon, area: '[ [ [ [ 4.229221710967066,
+      51.885242428033671 ], [ 4.215907858076979, 51.898935652592264 ], [ 4.144885679879414,
+      51.931412132096931 ], [ 4.15338435235907, 51.922170913808372 ], [ 4.135346075780272,
+      51.906383935588984 ], [ 4.160346729128483, 51.88334770153152 ], [ 4.160152665999286,
+      51.86703029125475 ], [ 4.164995353845362, 51.867826895915336 ], [ 4.186309693228617,
+      51.862455532307493 ], [ 4.175622644985051, 51.855486999458641 ], [ 4.182894488498198,
+      51.850096389301321 ], [ 4.239383217495941, 51.872982179617246 ], [ 4.229221710967066,
+      51.885242428033671 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 851
+  fields: {organization: 54, geojsontype: MultiPolygon, area: '[ [ [ [ 6.175534404826287,
+      52.039373107869778 ], [ 6.177297400512158, 52.020341666036011 ], [ 6.153946576245596,
+      52.003525871348934 ], [ 6.164310101289843, 51.998990586506324 ], [ 6.160522927958913,
+      51.979519448605416 ], [ 6.229805177543718, 51.976203073921461 ], [ 6.222413676583918,
+      51.984147781973526 ], [ 6.232309146809484, 51.988589367572402 ], [ 6.24969694310491,
+      51.975951003815489 ], [ 6.250716588352415, 51.987332095979866 ], [ 6.270468311116016,
+      51.983419193801176 ], [ 6.291893133333807, 51.993341608791035 ], [ 6.295638187207214,
+      51.988458875564056 ], [ 6.319126061465107, 51.994261584749289 ], [ 6.335659721721538,
+      51.98564411098198 ], [ 6.32751803699488, 51.975750005223162 ], [ 6.370029506357484,
+      51.976247346990789 ], [ 6.365601478664109, 51.969425852700745 ], [ 6.384648907000938,
+      51.96800739612948 ], [ 6.38087705105016, 51.977738212999057 ], [ 6.402490610135479,
+      51.982164853707957 ], [ 6.41610067855794, 51.972608331036781 ], [ 6.447790351269075,
+      51.969755978451886 ], [ 6.475771125740784, 51.988134223714219 ], [ 6.46005499473704,
+      51.995155086163663 ], [ 6.462191406505692, 52.02169755438122 ], [ 6.437192092427352,
+      52.025554717607996 ], [ 6.432675586561, 52.040561198824008 ], [ 6.415069529510114,
+      52.051439777525843 ], [ 6.400537572004334, 52.083808090393063 ], [ 6.423996100760232,
+      52.096907181435519 ], [ 6.391535838301672, 52.113053226767541 ], [ 6.392535564019422,
+      52.131525220656258 ], [ 6.368793100038976, 52.123851338110335 ], [ 6.357714772454733,
+      52.135529282552127 ], [ 6.328312942837427, 52.13770916263033 ], [ 6.277480870594604,
+      52.121727027293851 ], [ 6.2698490092675, 52.111645453813523 ], [ 6.233875710588758,
+      52.113122822650226 ], [ 6.22209031600357, 52.106681315545671 ], [ 6.221697584905291,
+      52.088779150071389 ], [ 6.217897885373881, 52.097884318271205 ], [ 6.17657170177145,
+      52.090753011046019 ], [ 6.168160517323626, 52.076202924381668 ], [ 6.110819265066795,
+      52.042035812921995 ], [ 6.126123580458337, 52.034048908683744 ], [ 6.149942106658398,
+      52.042058478452127 ], [ 6.175534404826287, 52.039373107869778 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 852
+  fields: {organization: 55, geojsontype: MultiPolygon, area: '[ [ [ [ 6.076099082292221,
+      52.087500419521461 ], [ 6.137474924902821, 52.059180630150145 ], [ 6.168338057203715,
+      52.076345561587345 ], [ 6.17657170177145, 52.090753011046019 ], [ 6.215317410011157,
+      52.094882372931963 ], [ 6.215359491655599, 52.108966923496105 ], [ 6.187430960815608,
+      52.116170812230642 ], [ 6.173395951849034, 52.144974005234893 ], [ 6.140404518855865,
+      52.148290321495743 ], [ 6.146263885010031, 52.157762342837131 ], [ 6.179325378008698,
+      52.152259794472648 ], [ 6.184672887564598, 52.1612210454592 ], [ 6.142488550483011,
+      52.159197738701231 ], [ 6.075961614261251, 52.14391159947143 ], [ 6.035811307538674,
+      52.109462747745866 ], [ 6.006091133682705, 52.066353122795029 ], [ 6.076099082292221,
+      52.087500419521461 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 853
+  fields: {organization: 56, geojsontype: MultiPolygon, area: '[ [ [ [ 5.952505370790333,
+      50.952781537700062 ], [ 5.9284646593158, 50.936608437433968 ], [ 5.941865143955146,
+      50.927088606655659 ], [ 5.959888630941212, 50.934200991226376 ], [ 6.011692042869379,
+      50.926436246342746 ], [ 6.01613220402821, 50.93080783005162 ], [ 6.016856343364436,
+      50.952638213749445 ], [ 6.006049384064962, 50.957532570639401 ], [ 5.965860927900138,
+      50.962414667426081 ], [ 5.952505370790333, 50.952781537700062 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 854
+  fields: {organization: 57, geojsontype: MultiPolygon, area: '[ [ [ [ 5.191549691317171,
+      52.043037395042944 ], [ 5.201989720583449, 52.017474051322282 ], [ 5.224029768860531,
+      52.013704653186217 ], [ 5.243188821346889, 51.998791319028307 ], [ 5.277492846030478,
+      52.000059632121022 ], [ 5.279913784281161, 52.010721804815468 ], [ 5.249495569502375,
+      52.040989157148907 ], [ 5.247429112553787, 52.058648327349061 ], [ 5.21913768024195,
+      52.059752881550807 ], [ 5.225024455791095, 52.064920283592336 ], [ 5.200402063253825,
+      52.076864944430611 ], [ 5.160721218231024, 52.080561403103395 ], [ 5.153026468318219,
+      52.056754904371942 ], [ 5.160738045044115, 52.04551686073075 ], [ 5.191549691317171,
+      52.043037395042944 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 855
+  fields: {organization: 58, geojsontype: MultiPolygon, area: '[ [ [ [ 5.331571612101107,
+      52.27414021974424 ], [ 5.322064677968455, 52.262747898781868 ], [ 5.32862198874605,
+      52.255363381175293 ], [ 5.310682137114904, 52.246329419551216 ], [ 5.312271559897187,
+      52.232830765444682 ], [ 5.33578519999732, 52.228565112835341 ], [ 5.330548188224928,
+      52.214730461782558 ], [ 5.392733491541203, 52.205531300858027 ], [ 5.404644369501966,
+      52.249633324720087 ], [ 5.339556903326026, 52.287733138900144 ], [ 5.331571612101107,
+      52.27414021974424 ] ] ] ]'}
+- model: organizations.coordinate
+  pk: 856
+  fields: {organization: 59, geojsontype: MultiPolygon, area: '[ [ [ [ 5.438051616420147,
+      51.985673568253766 ], [ 5.387071857116479, 51.969829482910924 ], [ 5.35403829370996,
+      51.969977652686772 ], [ 5.323441484151584, 51.955098606367351 ], [ 5.270374758607284,
+      51.965430324045535 ], [ 5.24191963680843, 51.945516715926686 ], [ 5.25517017895853,
+      51.935384606817422 ], [ 5.285514430504183, 51.930228514919413 ], [ 5.273617777847449,
+      51.920078890225575 ], [ 5.294896047617248, 51.900053663779772 ], [ 5.323360645845903,
+      51.889007963250094 ], [ 5.315515749594198, 51.880401650504062 ], [ 5.335498328547088,
+      51.881634527427323 ], [ 5.341664574373334, 51.873484681970339 ], [ 5.435114161528044,
+      51.92067206963528 ], [ 5.49089922370096, 51.924743642261674 ], [ 5.489823115696016,
+      51.918246080322305 ], [ 5.50528929554056, 51.92393009083014 ], [ 5.556835385386273,
+      51.919211005098269 ], [ 5.55414412008343, 51.934270195201819 ], [ 5.533511268026055,
+      51.943303931230716 ], [ 5.571870027396404, 51.941533129775181 ], [ 5.586614365832564,
+      51.950829830911886 ], [ 5.486217733241047, 51.983827211476594 ], [ 5.438051616420147,
+      51.985673568253766 ] ] ] ]'}

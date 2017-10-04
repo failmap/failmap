@@ -378,7 +378,11 @@ $(document).ready(function () {
                 return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
             },
             awarded_points: function(points) {
-                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + points + '</span>'
+                if (points === "0")
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
             }
         }
     });
