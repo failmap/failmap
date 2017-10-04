@@ -1,5 +1,0 @@
-CFBundleDisplayName = "Google Chrome";
-CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Autortiesības 2017 Google Inc. Visas tiesības paturētas.";
-CFBundleName = "Chrome";
-NSContactsUsageDescription = "Izmantojot datus no savas kontaktinformācijas, pārlūkā Chrome varat ērtāk aizpildīt veidlapas.";
-NSHumanReadableCopyright = "Autortiesības 2017 Google Inc. Visas tiesības paturētas.";

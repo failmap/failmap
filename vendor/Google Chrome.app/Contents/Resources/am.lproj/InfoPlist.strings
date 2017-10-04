@@ -1,5 +1,0 @@
-CFBundleDisplayName = "Google Chrome";
-CFBundleGetInfoString = "Google Chrome 61.0.3163.100, የቅጂ መብት 2017 Google Inc.። ሁሉም መብቶች የተጠበቁ ናቸው።";
-CFBundleName = "Chrome";
-NSContactsUsageDescription = "የእውቂያዎችዎ ዝርዝሮች በChrome ውስጥ ቅጾችን በበለጠ ፍጥነት እንዲሞሉ ያግዘዎታል።";
-NSHumanReadableCopyright = "የቅጂ መብት 2017 Google Inc.። ሁሉም መብቶች የተጠበቁ ናቸው።";

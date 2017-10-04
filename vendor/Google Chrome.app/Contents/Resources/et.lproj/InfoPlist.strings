@@ -1,5 +1,0 @@
-CFBundleDisplayName = "Google Chrome";
-CFBundleGetInfoString = "Google Chrome 61.0.3163.100, Autoriõigus 2017 Google Inc. Kõik õigused on kaitstud.";
-CFBundleName = "Chrome";
-NSContactsUsageDescription = "Kontaktide üksikasjad aitavad Chrome'is kiiremini vorme täita.";
-NSHumanReadableCopyright = "Autoriõigus 2017 Google Inc. Kõik õigused on kaitstud.";
