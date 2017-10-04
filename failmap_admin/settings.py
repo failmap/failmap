@@ -178,6 +178,9 @@ LOCALE_PATHS = ['locale']
 
 STATIC_URL = '/static/'
 
+# Absolute path to aggregate to and serve static file from.
+STATIC_ROOT = '/srv/failmap_admin/static/'
+
 TEST_RUNNER = 'failmap_admin.testrunner.PytestTestRunner'
 
 # From the Jet documentation, a different color for a different season.
