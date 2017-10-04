@@ -61,6 +61,13 @@ INSTALLED_APPS = [
     # debug_toolbar',  # debugging and optimization, seems mostly useless in json apps, don't use
 ]
 
+try:
+    import django_uwsgi
+    INSTALLED_APPS += ['django_uwsgi', ]
+except ImportError:
+    # only configure uwsgi app if installed (ie: production environment)
+    pass
+
 MIDDLEWARE_CLASSES = [
     # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
