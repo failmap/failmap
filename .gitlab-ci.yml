@@ -11,7 +11,7 @@ test:
   script:
   - tox
 
-codequality:
+codeclimate:
   image: docker:latest
   variables:
     DOCKER_DRIVER: overlay
