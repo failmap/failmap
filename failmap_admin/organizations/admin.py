@@ -6,8 +6,8 @@ from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_dns import ScannerDns
-from failmap_admin.scanners.scanner_http import ScannerHttp
+from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
+from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import Coordinate, Organization, Url
@@ -154,20 +154,19 @@ class UrlAdmin(admin.ModelAdmin):
 
     def discover_http_endpoints(self, request, queryset):
         urls_to_scan = [url for url in queryset]
-        ScannerHttp.scan_url_list_standard_ports(urls_to_scan)
+        scan_url_list_standard_ports(urls_to_scan)
 
         self.message_user(request, "URL(s) have been scanned for HTTP")
 
     def dns_subdomains(self, request, queryset):
         for url in queryset:
-            ScannerDns.brute_known_subdomains(url)
+            brute_known_subdomains(url)
 
         self.message_user(request, "URL(s) have been scanned on known subdomains.")
 
     def dns_transparency(self, request, queryset):
-        s = ScannerDns()
         for url in queryset:
-            s.certificate_transparency(url)
+            certificate_transparency(url)
 
         self.message_user(request, "URL(s) have been scanned on known subdomains.")
 
