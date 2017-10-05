@@ -1,4 +1,4 @@
-codeclimate:
+codequality:
   image: docker:latest
   variables:
     DOCKER_DRIVER: overlay
