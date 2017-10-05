@@ -26,7 +26,7 @@ slowly gets results from qualys.
 
     failmap-admin onboard-service
     failmap-admin scan-tls-qualys-service
-    
+
 
 # Code quality / Testing
 
