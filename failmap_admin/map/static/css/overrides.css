@@ -258,6 +258,7 @@ body {
     padding: 0px 3px;
     font-weight: bold;
     font-size: 11px;
+    border-radius: 4px;
 }
 
 .awarded_points_red {
@@ -266,6 +267,7 @@ body {
     padding: 0px 3px;
     font-weight: bold;
     font-size: 11px;
+    border-radius: 4px;
 }
 
 .awarded_points_green {
@@ -274,6 +276,7 @@ body {
     padding: 0px 3px;
     font-weight: bold;
     font-size: 11px;
+    border-radius: 4px;
 }
 
 
@@ -282,6 +285,9 @@ body {
     background-color: orange;
     padding: 1px 4px;
     font-weight: bold;
+    border-radius: 6px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .total_awarded_points_red {
@@ -289,6 +295,9 @@ body {
     background-color: red;
     padding: 1px 4px;
     font-weight: bold;
+    border-radius: 6px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 
 .total_awarded_points_green {
@@ -296,4 +305,7 @@ body {
     background-color: lightgreen;
     padding: 1px 4px;
     font-weight: bold;
+    border-radius: 6px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
