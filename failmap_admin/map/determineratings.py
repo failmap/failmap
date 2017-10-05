@@ -208,7 +208,8 @@ class DetermineRatings:
         datetimes = set(
             tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates + dead_scan_dates)
 
-        # todo: reduce this to one moment per day only, otherwise there will be a report for
+        # reduce this to one moment per day only, otherwise there will be a report for every change
+        # which is highly inefficient.
         # todo: the order of this list should be chronological: otherwise ratings get overwritten?
         # ^ it should be different every time. So, this doesn't matter.
         # for every scan: that is highly inefficient.

@@ -21,12 +21,12 @@ Now login at: http://127.0.0.1:8000/admin/
 
 # Scanning services (beta)
 
-These two services can run continuously. Onboarding handles all new urls, while the tls scanner
-slowly gets results from qualys.
+Onboarding handles all new urls with an initial (fast) scan. The tls scanner slowly gets results
+from qualys. Screenshot service makes many gigabytes of screenshots.
 
     failmap-admin onboard-service
     failmap-admin scan-tls-qualys-service
-
+    failmap-admin screenshot-service
 
 # Code quality / Testing
 
