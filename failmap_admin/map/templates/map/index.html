@@ -180,7 +180,7 @@
                         {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
                         <br />
                         {% verbatim %}
-                        <div v-for="url in urls" class="perurl" v-bind:style="'background-color: ' + colorizebg(url.url.points)">
+                        <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.url.points) + ', white);'">
                             <div class="screenshotlist">
                                 <div v-for="(endpoint, key) in url.url.endpoints">
                                     <div v-for="(myendpoint, mykey) in endpoint">
