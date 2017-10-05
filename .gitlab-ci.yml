@@ -1,13 +1,13 @@
 image: python:3.4
 
-cache:
-  paths:
-  - ~/.cache/pip/
-
-before_script:
-  - pip install tox
-
 test:
+  cache:
+    paths:
+    - ~/.cache/pip/
+
+  before_script:
+    - pip install tox
+
   script:
   - tox
 
