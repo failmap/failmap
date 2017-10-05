@@ -8,7 +8,7 @@ from django.db.models import Q
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
+from failmap_admin.scanners.scanner_screenshot import screenshot_endpoint
 
 logger = logging.getLogger(__package__)
 
@@ -22,15 +22,14 @@ class Command(BaseCommand):
         try:
             while True:
                 Command.make_new_screenshots()
-                logger.debug("Sleeping 60 seconds.")
-                sleep(60)  # sleep half a day
+                logger.info("Waiting for more endpoints to create screenshots. "
+                             "Sleeping for 60 seconds.")
+                sleep(60)
         except KeyboardInterrupt:
             logger.debug("ALL DONE!")
 
     @staticmethod
     def make_new_screenshots():
-        s = ScannerScreenshot()
-
         one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
 
         # never had a screenshot or only has screenshots older than a month
@@ -43,7 +42,8 @@ class Command(BaseCommand):
             screenshot__created_on__lt=one_month_ago)
         endpoints = list(no_screenshots) + list(outdated_screenshots)
 
-        logger.debug("Found endpoints %s" % len(endpoints))
+        if len(endpoints):
+            logger.info("Trying to make %s screenshot!" % len(endpoints))
 
         # Chrome headless, albeit single threaded, is pretty reliable and fast for existing
         # domains. This code is also the most updated. Waiting for firefox with screenshot
@@ -55,5 +55,9 @@ class Command(BaseCommand):
 
         # Warning: opening a browser might also mean it wants to play audio automatically(!)
         # this can bring some nice surprises :)
-        for ep in endpoints:
-            s.make_screenshot_chrome_headless(ep)
+        for endpoint in endpoints:
+            try:
+                screenshot_endpoint(endpoint)
+            except TimeoutError:
+                logger.warning('Took too long to make screenshot of: %s' % endpoint)
+                pass

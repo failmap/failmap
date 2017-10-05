@@ -271,15 +271,15 @@ VENDOR_DIR = os.path.abspath(os.path.dirname(__file__) + '/../vendor/') + '/'
 TOOLS = {
     'chrome': {
         'executable': {
-            'mac': VENDOR_DIR + "Google Chrome.app/Contents/MacOS/Google Chrome",
-            'linux': "/dev/null",
+            'Darwin': VENDOR_DIR + "Google Chrome.app/Contents/MacOS/Google Chrome",
+            'Linux': "/dev/null",
         },
         'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
     },
     'firefox': {
         'executable': {
-            'mac': VENDOR_DIR + "Firefox.app/Contents/MacOS/firefox",
-            'linux': "/dev/null",
+            'Darwin': VENDOR_DIR + "Firefox.app/Contents/MacOS/firefox",
+            'Linux': "/dev/null",
         },
         'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
     },
