@@ -1,12 +1,19 @@
-codequality:
-  image: docker:latest
-  variables:
-    DOCKER_DRIVER: overlay
-  services:
-    - docker:dind
+image: python:3.4
+
+cache:
+  paths:
+  - ~/.cache/pip/
+
+before_script:
+  - pip install tox
+
+test:
   script:
-    - docker pull codeclimate/codeclimate
-    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate init
-    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
-  artifacts:
-    paths: [codeclimate.json]
+    # build docker image and push to registry
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/admin:staging
+    - docker tag registry.gitlab.com/failmap/admin:staging registry.gitlab.com/failmap/admin:latest
+    - docker push registry.gitlab.com/failmap/admin:latest
+
+  only:
+      - master
