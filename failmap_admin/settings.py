@@ -139,8 +139,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
-# .tox/py34/bin/failmap-admin testserver --settings failmap_admin.settings testdata
-# testserver does not work, runserver does. Not clear what goes wrong.
 # Go to admin: language_code = language_code.replace('_', '-').lower()
 # AttributeError: 'NoneType' object has no attribute 'replace'
 # while settings are loaded and Django uses LANGUAGE_CODE as default. What overrides this?
@@ -148,18 +146,25 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # http://stackoverflow.com/questions/1832709/django-how-to-make-translation-work
 # shoddy documentation on dashes and underscores... different than the "ll" suggestion.
-# LANGUAGE_CODE = 'en-gb'  # The official EU language, ohai England, how are you doing?
-LANGUAGE_CODE = 'nl-nl'
+# LANGUAGE_CODE = 'en-gb'
+LANGUAGES = (
+    ('en', 'English'),
+    ('nl', 'Dutch'),
+)
+
+LANGUAGE_CODE = 'nl'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
+# https://docs.djangoproject.com/en/1.11/topics/i18n/translation/#how-django-discovers-translations
+# In all cases the name of the directory containing the translation is expected to be named using
+# locale name notation. E.g. de, pt_BR, es_AR, etc.
 LOCALE_PATHS = ['locale']
+
 
 
 # Static files (CSS, JavaScript, Images)

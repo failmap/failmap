@@ -1,0 +1,212 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-10-05 10:45+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: failmap_admin/map/templates/map/faq.html:5
+msgid "About Failmap"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:7
+msgid "Site Title"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:30
+msgid "Toggle navigation"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:35
+#: failmap_admin/map/templates/map/index.html:58
+msgid "Fail Map"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:39
+msgid "Map"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:40
+msgid "Bar"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:41
+msgid "Numbers"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:42
+#: failmap_admin/map/templates/map/topfail.html:6
+msgid "Top Fail"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:43
+msgid "Explanation"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:46
+msgid "Data slider"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:59
+msgid "Fail Map Introduction"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:72
+msgid "The Map"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:73
+msgid "The Map Introduction"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:82
+msgid "Domains"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:96
+msgid "The Bar"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:97
+msgid "The Bar Explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:117
+msgid "The Numbers"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:118
+msgid "The Numbers Explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:122
+msgid "Organizations"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:123
+msgid "Organizations Explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:127
+#: failmap_admin/map/templates/map/index.html:153
+msgid "When"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:128
+#: failmap_admin/map/templates/map/index.html:154
+msgid "Number"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:129
+#: failmap_admin/map/templates/map/index.html:155
+msgid "Good"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:130
+#: failmap_admin/map/templates/map/index.html:156
+msgid "Average"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:131
+#: failmap_admin/map/templates/map/index.html:157
+msgid "Bad"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:148
+msgid "Internet addresses"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:149
+msgid "Internet addresses Explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:183
+msgid "Data from"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:184
+#: failmap_admin/map/templates/map/topfail.html:16
+#: failmap_admin/map/templates/map/topwin.html:16
+msgid "Points"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:184
+msgid "congratulations"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:205
+msgid "Address"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:210
+msgid "Since"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:210
+msgid "Last check"
+msgstr ""
+
+#: failmap_admin/map/templates/map/target_audience.html:4
+msgid "Voor burgers"
+msgstr ""
+
+#: failmap_admin/map/templates/map/target_audience.html:11
+msgid "Voor organisaties"
+msgstr ""
+
+#: failmap_admin/map/templates/map/target_audience.html:18
+msgid "Voor ontwikkelaars"
+msgstr ""
+
+#: failmap_admin/map/templates/map/terrible_urls.html:6
+msgid "Terrible Addresses"
+msgstr ""
+
+#: failmap_admin/map/templates/map/terrible_urls.html:9
+msgid "These are the worst addresses on: "
+msgstr ""
+
+#: failmap_admin/map/templates/map/terrible_urls.html:14
+#: failmap_admin/map/templates/map/topfail.html:14
+#: failmap_admin/map/templates/map/topwin.html:14
+msgid "Rank"
+msgstr ""
+
+#: failmap_admin/map/templates/map/terrible_urls.html:15
+#: failmap_admin/map/templates/map/topfail.html:15
+#: failmap_admin/map/templates/map/topwin.html:15
+msgid "Organization"
+msgstr ""
+
+#: failmap_admin/map/templates/map/terrible_urls.html:16
+msgid "Url"
+msgstr ""
+
+#: failmap_admin/map/templates/map/topfail.html:9
+msgid "This is the top fail from"
+msgstr ""
+
+#: failmap_admin/map/templates/map/topfail.html:17
+#: failmap_admin/map/templates/map/topwin.html:17
+msgid "Tweet"
+msgstr ""
+
+#: failmap_admin/map/templates/map/topwin.html:6
+msgid "Top Win!"
+msgstr ""
+
+#: failmap_admin/map/templates/map/topwin.html:9
+msgid "This is the top win from"
+msgstr ""
