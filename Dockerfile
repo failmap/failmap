@@ -2,11 +2,11 @@
 FROM python:3 as build
 
 COPY requirements*.txt /
-RUN pip install -r requirements.txt
-RUN pip install -r requirements.deploy.txt
 
 COPY . /source/
 RUN virtualenv /pyenv
+RUN /pyenv/bin/pip install -r requirements.txt
+RUN /pyenv/bin/pip install -r requirements.deploy.txt
 RUN /pyenv/bin/pip install /source/
 
 # switch to lightweight base image for distribution
