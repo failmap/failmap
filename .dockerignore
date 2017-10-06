@@ -1,2 +1,4 @@
 # ignore git, caches and such
 .*
+# don't invalidate cache when Dockerfile changes
+Dockerfile
