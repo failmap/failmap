@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="example.com" sniname="example.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIGODCCBSCgAwIBAgIQWeKDo7vOAUnw8q1aQtsW8TANBgkqhkiG9w0BAQsFADB+
+MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xHzAd
+BgNVBAsTFlN5bWFudGVjIFRydXN0IE5ldHdvcmsxLzAtBgNVBAMTJlN5bWFudGVj
+IENsYXNzIDMgU2VjdXJlIFNlcnZlciBDQSAtIEc0MB4XDTE3MDExMDAwMDAwMFoX
+DTE4MDExMDIzNTk1OVowga8xCzAJBgNVBAYTAlVTMR0wGwYDVQQIDBREaXN0cmlj
+dCBPZiBDb2x1bWJpYTETMBEGA1UEBwwKV2FzaGluZ3RvbjEuMCwGA1UECgwlVGhl
+IEV4ZWN1dGl2ZSBPZmZpY2Ugb2YgdGhlIFByZXNpZGVudDEhMB8GA1UECwwYT2Zm
+aWNlIG9mIEFkbWluaXN0cmF0aW9uMRkwFwYDVQQDDBAqLndoaXRlaG91c2UuZ292
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvFnx9/V3YsAEiHsRa38r
+OMTRqpx8babtReNMCo6vgbLV1A3cJjuT8zoWp/YiTseRewj44LfzZ7PDU32CG6QI
+H66i3LgyD4dTCXu7EiIeEhX+9LTCOhoKyqz+vzYp4oxs8sIKE+ZEOkYkqslk4Amp
+3xOtaYwANgwU5sZ4dUUssQB0tUebmdcYPuoxGqbfT9ZH7chWa7yyGHSOBpzRUe5X
+gXRP68Dd5K/fmLUJ7XyWVXVsnzsdN/f1MIcV+dMknLeppajuz3Rz65yOCI72wEn9
+phgNbX+mNymlDzqIO9NyTOuPwOTdQxeTPy+xW2JGJsD3CRe1fvYzPdunNl323RQo
+8QIDAQABo4ICfjCCAnowKwYDVR0RBCQwIoIQKi53aGl0ZWhvdXNlLmdvdoIOd2hp
+dGVob3VzZS5nb3YwCQYDVR0TBAIwADAOBgNVHQ8BAf8EBAMCBaAwYQYDVR0gBFow
+WDBWBgZngQwBAgIwTDAjBggrBgEFBQcCARYXaHR0cHM6Ly9kLnN5bWNiLmNvbS9j
+cHMwJQYIKwYBBQUHAgIwGQwXaHR0cHM6Ly9kLnN5bWNiLmNvbS9ycGEwKwYDVR0f
+BCQwIjAgoB6gHIYaaHR0cDovL3NzLnN5bWNiLmNvbS9zcy5jcmwwHQYDVR0lBBYw
+FAYIKwYBBQUHAwEGCCsGAQUFBwMCMB8GA1UdIwQYMBaAFF9gz2GQVd+EQxSKYCqy
+9Xr0QxjvMFcGCCsGAQUFBwEBBEswSTAfBggrBgEFBQcwAYYTaHR0cDovL3NzLnN5
+bWNkLmNvbTAmBggrBgEFBQcwAoYaaHR0cDovL3NzLnN5bWNiLmNvbS9zcy5jcnQw
+ggEFBgorBgEEAdZ5AgQCBIH2BIHzAPEAdwDd6x0reg1PpiCLga2BaHB+Lo6dAdVc
+iI09EcTNtuy+zAAAAVmJICVhAAAEAwBIMEYCIQD67hK1d5VD+Dt+uzR/vN5rkUfc
++R/JX4q/qBDk9zqG0wIhAIRvQAnoARtBeY20wVdJ5D5g/yJ+x7B5jcFz647linZS
+AHYApLkJkLQYWBSHuxOizGdwCjw1mAT5G9+443fNDsgN3BAAAAFZiSAqQwAABAMA
+RzBFAiBfBNr9ca8wyPWmQ7ZUmVtzTUPpIe/A08gcbBrI+39cxwIhAKmAdnZbb0cC
+ip6hJ0GjJe8vIxN7uSRSEmVGsEV3xUKBMA0GCSqGSIb3DQEBCwUAA4IBAQBmQj+p
+s2uqyfbHdIAWzrjX3t+fh2AJueIu0kzXsTw7VOr8/26BHBq+KraH10T7zk86zjxd
+C9z/e8dhxj7cbJEP1jammjw33W7Zv/6M8CzXCW0nruW6sxe64hIGZTGY0AgnKseD
+XTI+++l9c+N6lll/2oCoTdX+6ZmcYfKeHMUnxKPSiQceYh/wH1y/P2IFMtp5TPt3
+cMzEm/eUKDyA4ZbEmxnOPT4KB26Ht4b39+bTjtsZBS4d/xB+/tLKDZi2Mh8psKHR
+jE7LhjjZfDXqk7echSVtdltWlWH6QARajADlvw50kAa20/yKes1DSLs2G60Fp8dV
+bTOCnjyETJs/bGFE
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>59:e2:83:a3:bb:ce:01:49:f0:f2:ad:5a:42:db:16:f1</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=Symantec Corporation/OU=Symantec Trust Network/CN=Symantec Class 3 Secure Server CA - G4]]></issuer>
+   <not-valid-before>Jan 10 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Jan 10 23:59:59 2018 GMT</not-valid-after>
+   <subject><![CDATA[/C=US/ST=District Of Columbia/L=Washington/O=The Executive Office of the President/OU=Office of Administration/CN=*.whitehouse.gov]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:bc:59:f1:f7:f5:77:62:c0:04:88:7b:11:6b:7f:
+        2b:38:c4:d1:aa:9c:7c:6d:a6:ed:45:e3:4c:0a:8e:
+        af:81:b2:d5:d4:0d:dc:26:3b:93:f3:3a:16:a7:f6:
+        22:4e:c7:91:7b:08:f8:e0:b7:f3:67:b3:c3:53:7d:
+        82:1b:a4:08:1f:ae:a2:dc:b8:32:0f:87:53:09:7b:
+        bb:12:22:1e:12:15:fe:f4:b4:c2:3a:1a:0a:ca:ac:
+        fe:bf:36:29:e2:8c:6c:f2:c2:0a:13:e6:44:3a:46:
+        24:aa:c9:64:e0:09:a9:df:13:ad:69:8c:00:36:0c:
+        14:e6:c6:78:75:45:2c:b1:00:74:b5:47:9b:99:d7:
+        18:3e:ea:31:1a:a6:df:4f:d6:47:ed:c8:56:6b:bc:
+        b2:18:74:8e:06:9c:d1:51:ee:57:81:74:4f:eb:c0:
+        dd:e4:af:df:98:b5:09:ed:7c:96:55:75:6c:9f:3b:
+        1d:37:f7:f5:30:87:15:f9:d3:24:9c:b7:a9:a5:a8:
+        ee:cf:74:73:eb:9c:8e:08:8e:f6:c0:49:fd:a6:18:
+        0d:6d:7f:a6:37:29:a5:0f:3a:88:3b:d3:72:4c:eb:
+        8f:c0:e4:dd:43:17:93:3f:2f:b1:5b:62:46:26:c0:
+        f7:09:17:b5:7e:f6:33:3d:db:a7:36:5d:f6:dd:14:
+        28:f1
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:*.whitehouse.gov, DNS:whitehouse.gov]]></extension>
+    <extension name="X509v3 Basic Constraints"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.23.140.1.2.2
+  CPS: https://d.symcb.com/cps
+  User Notice:
+    Explicit Text: https://d.symcb.com/rpa
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://ss.symcb.com/ss.crl
+]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:5F:60:CF:61:90:55:DF:84:43:14:8A:60:2A:B2:F5:7A:F4:43:18:EF
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://ss.symcd.com
+CA Issuers - URI:http://ss.symcb.com/ss.crt
+]]></extension>
+    <extension name="CT Precertificate SCTs"><![CDATA[Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : DD:EB:1D:2B:7A:0D:4F:A6:20:8B:81:AD:81:68:70:7E:
+                2E:8E:9D:01:D5:5C:88:8D:3D:11:C4:CD:B6:EC:BE:CC
+    Timestamp : Jan 10 16:05:02.433 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:46:02:21:00:FA:EE:12:B5:77:95:43:F8:3B:7E:BB:
+                34:7F:BC:DE:6B:91:47:DC:F9:1F:C9:5F:8A:BF:A8:10:
+                E4:F7:3A:86:D3:02:21:00:84:6F:40:09:E8:01:1B:41:
+                79:8D:B4:C1:57:49:E4:3E:60:FF:22:7E:C7:B0:79:8D:
+                C1:73:EB:8E:E5:8A:76:52
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : A4:B9:09:90:B4:18:58:14:87:BB:13:A2:CC:67:70:0A:
+                3C:35:98:04:F9:1B:DF:B8:E3:77:CD:0E:C8:0D:DC:10
+    Timestamp : Jan 10 16:05:03.683 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:20:5F:04:DA:FD:71:AF:30:C8:F5:A6:43:B6:
+                54:99:5B:73:4D:43:E9:21:EF:C0:D3:C8:1C:6C:1A:C8:
+                FB:7F:5C:C7:02:21:00:A9:80:76:76:5B:6F:47:02:8A:
+                9E:A1:27:41:A3:25:EF:2F:23:13:7B:B9:24:52:12:65:
+                46:B0:45:77:C5:42:81]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[*.example.com]]></subject>
+   <altnames><![CDATA[DNS:*.example.com, DNS:example.com]]></altnames>
+   <issuer><![CDATA[Symantec Class 3 Secure Server CA - G4]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Jan 10 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Jan 10 23:59:59 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+  <CVE_2016_2107>True</CVE_2016_2107>
+  <CVE_2016_9244>True</CVE_2016_9244>
+ </ssltest>
+</document>

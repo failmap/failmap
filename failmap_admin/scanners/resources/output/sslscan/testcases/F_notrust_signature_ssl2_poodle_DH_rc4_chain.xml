@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="mail.lakyadler.cz" sniname="mail.lakyadler.cz" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="preferred" sslversion="SSLv3" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="preferred" sslversion="SSLv2" bits="128" cipher="RC4-MD5" id="0x10080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="112" cipher="DES-CBC3-MD5" id="0x700C0" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIF2TCCBMGgAwIBAgIKXZQkXQAAAAAADTANBgkqhkiG9w0BAQUFADAfMR0wGwYD
+VQQDExRsYWt5YWRsZXItU0JTMjAxMS1DQTAeFw0xNjA1MjMwNjQxMzBaFw0xODA1
+MjMwNjQxMzBaMHIxCzAJBgNVBAYTAkNaMQ0wCwYDVQQIEwRCcm5vMQ0wCwYDVQQH
+EwRCcm5vMRwwGgYDVQQKExNBZGxlciBDZXNrbywgcy5yLm8uMQswCQYDVQQLEwJJ
+VDEaMBgGA1UEAxMRbWFpbC5sYWt5YWRsZXIuY3owggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC7pROLiDA6fy3arn8MwptuIGyhSFCXUB9aDyk7aGHCAMu8
+dE3RfYjxswgIszChB1M/yYDXAHrTPCpKkO+TaJfhCm9QZbAgCsFjQZ4OIaQzbh1y
+t9rWGsoENYtQpG1hrV4jE6RBzQuuk2VLdQlzWDQApVyN+Re5oLFE5Sgn8pGje4JW
+oS0QPRxllIt53SP+4MAKql6KHwvFu6JuEDaO67OeoQ2GaelQ3hosHC/mga4sd0Lt
+xa+VQ1gpZyJJhEQ7evScdi0tc/rBpd8a2ho64egO6k3bEQI942YvLGo27qRY6TDd
++J6Yl4eZLyhPY6z7QgkNUNpcJD2HeTwBbYfbsiyxAgMBAAGjggLCMIICvjALBgNV
+HQ8EBAMCBaAwHQYDVR0OBBYEFDYZwJCWkkot8U96WyIEAFgv65ZKMIGQBgNVHREE
+gYgwgYWCEW1haWwubGFreWFkbGVyLmN6gg1tYWlsLmFkbGVyLnNrghdzYnMyMDEx
+Lmxha3lhZGxlci5sb2NhbIIZYXV0b2Rpc2NvdmVyLmxha3lhZGxlci5jeoIVYXV0
+b2Rpc2NvdmVyLmFkbGVyLnNrgghhZGxlci5za4IMbGFreWFkbGVyLmN6MB8GA1Ud
+IwQYMBaAFGSnmrfK0i9qXQY+F2RC5iMwSGluMIHWBgNVHR8Egc4wgcswgciggcWg
+gcKGgb9sZGFwOi8vL0NOPWxha3lhZGxlci1TQlMyMDExLUNBLENOPVNCUzIwMTEs
+Q049Q0RQLENOPVB1YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENO
+PUNvbmZpZ3VyYXRpb24sREM9bGFreWFkbGVyLERDPWxvY2FsP2NlcnRpZmljYXRl
+UmV2b2NhdGlvbkxpc3Q/YmFzZT9vYmplY3RDbGFzcz1jUkxEaXN0cmlidXRpb25Q
+b2ludDCBygYIKwYBBQUHAQEEgb0wgbowgbcGCCsGAQUFBzAChoGqbGRhcDovLy9D
+Tj1sYWt5YWRsZXItU0JTMjAxMS1DQSxDTj1BSUEsQ049UHVibGljJTIwS2V5JTIw
+U2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmlndXJhdGlvbixEQz1sYWt5YWRs
+ZXIsREM9bG9jYWw/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29iamVjdENsYXNzPWNlcnRp
+ZmljYXRpb25BdXRob3JpdHkwIQYJKwYBBAGCNxQCBBQeEgBXAGUAYgBTAGUAcgB2
+AGUAcjATBgNVHSUEDDAKBggrBgEFBQcDATANBgkqhkiG9w0BAQUFAAOCAQEAHVaA
+lnNs63IRm8ZPbll1Mwjiwnl/fgDXUBUjVdCZ0T5s7DcFsYB0sRQ41cEmXqo+YO4p
+YoBVhce5Xz/mZ4V+tghvJewRn3z0dnZzBfncZ2wU4k+4Euv9HD7cxM+tI5JycwJh
+OdrVW4VG8XijJfL/foY6oC82bUfRyTashTbrvoJla55VLjLomYCV6eZ9gwd4pkXH
+bYMAIGHAyNZ+Sn7u4y/iFfzkZjTrQ0iKOk+kwpjeaOnaxNd6kMnhrZSOVzpThUiN
+/fOI54vXyeJAiBuOKuaykvXE/ZAM+4FFTgNIE5SXs76Rdr1VaaSQtkjVihg/OGcL
+YOAoag/+ISq4S6X1ag==
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>5d:94:24:5d:00:00:00:00:00:0d</serial>
+   <signature-algorithm>sha1WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/CN=lakyadler-SBS2011-CA]]></issuer>
+   <not-valid-before>May 23 06:41:30 2016 GMT</not-valid-before>
+   <not-valid-after>May 23 06:41:30 2018 GMT</not-valid-after>
+   <subject><![CDATA[/C=CZ/ST=Brno/L=Brno/O=Adler Cesko, s.r.o./OU=IT/CN=mail.lakyadler.cz]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:bb:a5:13:8b:88:30:3a:7f:2d:da:ae:7f:0c:c2:
+        9b:6e:20:6c:a1:48:50:97:50:1f:5a:0f:29:3b:68:
+        61:c2:00:cb:bc:74:4d:d1:7d:88:f1:b3:08:08:b3:
+        30:a1:07:53:3f:c9:80:d7:00:7a:d3:3c:2a:4a:90:
+        ef:93:68:97:e1:0a:6f:50:65:b0:20:0a:c1:63:41:
+        9e:0e:21:a4:33:6e:1d:72:b7:da:d6:1a:ca:04:35:
+        8b:50:a4:6d:61:ad:5e:23:13:a4:41:cd:0b:ae:93:
+        65:4b:75:09:73:58:34:00:a5:5c:8d:f9:17:b9:a0:
+        b1:44:e5:28:27:f2:91:a3:7b:82:56:a1:2d:10:3d:
+        1c:65:94:8b:79:dd:23:fe:e0:c0:0a:aa:5e:8a:1f:
+        0b:c5:bb:a2:6e:10:36:8e:eb:b3:9e:a1:0d:86:69:
+        e9:50:de:1a:2c:1c:2f:e6:81:ae:2c:77:42:ed:c5:
+        af:95:43:58:29:67:22:49:84:44:3b:7a:f4:9c:76:
+        2d:2d:73:fa:c1:a5:df:1a:da:1a:3a:e1:e8:0e:ea:
+        4d:db:11:02:3d:e3:66:2f:2c:6a:36:ee:a4:58:e9:
+        30:dd:f8:9e:98:97:87:99:2f:28:4f:63:ac:fb:42:
+        09:0d:50:da:5c:24:3d:87:79:3c:01:6d:87:db:b2:
+        2c:b1
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Key Usage"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[36:19:C0:90:96:92:4A:2D:F1:4F:7A:5B:22:04:00:58:2F:EB:96:4A]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:mail.lakyadler.cz, DNS:mail.adler.sk, DNS:sbs2011.lakyadler.local, DNS:autodiscover.lakyadler.cz, DNS:autodiscover.adler.sk, DNS:adler.sk, DNS:lakyadler.cz]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:64:A7:9A:B7:CA:D2:2F:6A:5D:06:3E:17:64:42:E6:23:30:48:69:6E
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:ldap:///CN=lakyadler-SBS2011-CA,CN=SBS2011,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=lakyadler,DC=local?certificateRevocationList?base?objectClass=cRLDistributionPoint
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[CA Issuers - URI:ldap:///CN=lakyadler-SBS2011-CA,CN=AIA,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=lakyadler,DC=local?cACertificate?base?objectClass=certificationAuthority
+]]></extension>
+    <extension name="1.3.6.1.4.1.311.20.2"><![CDATA[...W.e.b.S.e.r.v.e.r]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha1WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[mail.lakyadler.cz]]></subject>
+   <altnames><![CDATA[DNS:mail.lakyadler.cz, DNS:mail.adler.sk, DNS:sbs2011.lakyadler.local, DNS:autodiscover.lakyadler.cz, DNS:autodiscover.adler.sk, DNS:adler.sk, DNS:lakyadler.cz]]></altnames>
+   <issuer><![CDATA[lakyadler-SBS2011-CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>May 23 06:41:30 2016 GMT</not-valid-before>
+   <not-valid-after>May 23 06:41:30 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="trouw.familievermeylen.nl" sniname="trouw.familievermeylen.nl" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIFpjCCBI6gAwIBAgISA6jH8pRma/59m2c6VzAnItbnMA0GCSqGSIb3DQEBCwUA
+MEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD
+ExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xNzEwMDYwODMyMjlaFw0x
+ODAxMDQwODMyMjlaMCQxIjAgBgNVBAMTGXRyb3V3LmZhbWlsaWV2ZXJtZXlsZW4u
+bmwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDc+sU280T5LRA+FhsG
+RmNWh6KUPZiAcjDCHcu8b58bwQSiWqIIo6AzpM6CUIZoZwDwpE/e7GRHjV72JVm3
+K/A+e2Wdy77pdHdxqlQN8WNlzRJCHbF9mWzJUvLM8qdMOC6YuK0xGIDXr4plJY3q
+2L311bBVCULU9SKB9lrFGXAhh+zhUFgJKO3yKiImkZyxdkUDkpUADLd+arwggKMT
+Vx8TzWjSAImpXh5nAdGTXDJdiiLNUQ40OxJDzOFIc2JiS5/cn3Lr0u+wGwQh46aY
+GLTRL00gCxeRZ3yYRy+CjqhuyddZGYuBKID9IPqK819zQvzJYVdpQH23d3cuYzlv
+9mb7AgMBAAGjggKqMIICpjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYB
+BQUHAwEGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFPUvcv/d5BIp
+bzVLrM0HkFMG4IDDMB8GA1UdIwQYMBaAFKhKamMEfd265tE5t6ZFZe/zqOyhMG8G
+CCsGAQUFBwEBBGMwYTAuBggrBgEFBQcwAYYiaHR0cDovL29jc3AuaW50LXgzLmxl
+dHNlbmNyeXB0Lm9yZzAvBggrBgEFBQcwAoYjaHR0cDovL2NlcnQuaW50LXgzLmxl
+dHNlbmNyeXB0Lm9yZy8wgbQGA1UdEQSBrDCBqYIfY291Y2hwb3RhdG8uZmFtaWxp
+ZXZlcm1leWxlbi5ubIIaZGVsdWdlLmZhbWlsaWV2ZXJtZXlsZW4ubmyCGHBsZXgu
+ZmFtaWxpZXZlcm1leWxlbi5ubIIcc2lja3JhZ2UuZmFtaWxpZXZlcm1leWxlbi5u
+bIIZdHJvdXcuZmFtaWxpZXZlcm1leWxlbi5ubIIXd3d3LmZhbWlsaWV2ZXJtZXls
+ZW4ubmwwgf4GA1UdIASB9jCB8zAIBgZngQwBAgEwgeYGCysGAQQBgt8TAQEBMIHW
+MCYGCCsGAQUFBwIBFhpodHRwOi8vY3BzLmxldHNlbmNyeXB0Lm9yZzCBqwYIKwYB
+BQUHAgIwgZ4MgZtUaGlzIENlcnRpZmljYXRlIG1heSBvbmx5IGJlIHJlbGllZCB1
+cG9uIGJ5IFJlbHlpbmcgUGFydGllcyBhbmQgb25seSBpbiBhY2NvcmRhbmNlIHdp
+dGggdGhlIENlcnRpZmljYXRlIFBvbGljeSBmb3VuZCBhdCBodHRwczovL2xldHNl
+bmNyeXB0Lm9yZy9yZXBvc2l0b3J5LzANBgkqhkiG9w0BAQsFAAOCAQEATnPBBG/j
+o6MYFds72RgKs8FjIIsqPvA9aW46cogzC/brPWAdPAhcZIgaGdt6QWM9Cp/Bmfh/
+cWu/9WmSpSvyssujeMhqVluKEdR3Wxcc/dv9riWCQYAnW2/C2GUaLN/xIovD4Prg
+F/8xPbEMTqX+XSEW4Xf3fsrO4qFFn8hdGcAqNcfmgqUBdoB1iiZMWlEe5MhH69kf
+CB3VcjDMPd4a6QlvDSZozyFeeRGRRurGpptgzwX/ZAoIw3bgDt+7e73ATPXAFt46
+kbVmX54VYCTbRu6OPA7/u+OJ2FQiaVB9K3rwtvDs5EGVNDgMWYDfSffoHzHx6Yzp
+fvggY59BQNeuAg==
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>03:a8:c7:f2:94:66:6b:fe:7d:9b:67:3a:57:30:27:22:d6:e7</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3]]></issuer>
+   <not-valid-before>Oct  6 08:32:29 2017 GMT</not-valid-before>
+   <not-valid-after>Jan  4 08:32:29 2018 GMT</not-valid-after>
+   <subject><![CDATA[/CN=trouw.familievermeylen.nl]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:dc:fa:c5:36:f3:44:f9:2d:10:3e:16:1b:06:46:
+        63:56:87:a2:94:3d:98:80:72:30:c2:1d:cb:bc:6f:
+        9f:1b:c1:04:a2:5a:a2:08:a3:a0:33:a4:ce:82:50:
+        86:68:67:00:f0:a4:4f:de:ec:64:47:8d:5e:f6:25:
+        59:b7:2b:f0:3e:7b:65:9d:cb:be:e9:74:77:71:aa:
+        54:0d:f1:63:65:cd:12:42:1d:b1:7d:99:6c:c9:52:
+        f2:cc:f2:a7:4c:38:2e:98:b8:ad:31:18:80:d7:af:
+        8a:65:25:8d:ea:d8:bd:f5:d5:b0:55:09:42:d4:f5:
+        22:81:f6:5a:c5:19:70:21:87:ec:e1:50:58:09:28:
+        ed:f2:2a:22:26:91:9c:b1:76:45:03:92:95:00:0c:
+        b7:7e:6a:bc:20:80:a3:13:57:1f:13:cd:68:d2:00:
+        89:a9:5e:1e:67:01:d1:93:5c:32:5d:8a:22:cd:51:
+        0e:34:3b:12:43:cc:e1:48:73:62:62:4b:9f:dc:9f:
+        72:eb:d2:ef:b0:1b:04:21:e3:a6:98:18:b4:d1:2f:
+        4d:20:0b:17:91:67:7c:98:47:2f:82:8e:a8:6e:c9:
+        d7:59:19:8b:81:28:80:fd:20:fa:8a:f3:5f:73:42:
+        fc:c9:61:57:69:40:7d:b7:77:77:2e:63:39:6f:f6:
+        66:fb
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[F5:2F:72:FF:DD:E4:12:29:6F:35:4B:AC:CD:07:90:53:06:E0:80:C3]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:A8:4A:6A:63:04:7D:DD:BA:E6:D1:39:B7:A6:45:65:EF:F3:A8:EC:A1
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://ocsp.int-x3.letsencrypt.org
+CA Issuers - URI:http://cert.int-x3.letsencrypt.org/
+]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:couchpotato.familievermeylen.nl, DNS:deluge.familievermeylen.nl, DNS:plex.familievermeylen.nl, DNS:sickrage.familievermeylen.nl, DNS:trouw.familievermeylen.nl, DNS:www.familievermeylen.nl]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.23.140.1.2.1
+Policy: 1.3.6.1.4.1.44947.1.1.1
+  CPS: http://cps.letsencrypt.org
+  User Notice:
+    Explicit Text: This Certificate may only be relied upon by Relying Parties and only in accordance with the Certificate Policy found at https://letsencrypt.org/repository/
+]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[trouw.familievermeylen.nl]]></subject>
+   <altnames><![CDATA[DNS:couchpotato.familievermeylen.nl, DNS:deluge.familievermeylen.nl, DNS:plex.familievermeylen.nl, DNS:sickrage.familievermeylen.nl, DNS:trouw.familievermeylen.nl, DNS:www.familievermeylen.nl]]></altnames>
+   <issuer><![CDATA[Let's Encrypt Authority X3]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Oct  6 08:32:29 2017 GMT</not-valid-before>
+   <not-valid-after>Jan  4 08:32:29 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

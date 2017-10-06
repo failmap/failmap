@@ -296,11 +296,29 @@ TOOLS = {
         'executable': VENDOR_DIR + "dnsrecon/dnsrecon.py",
         'output_dir': PROJECT_DIR + "scanners/resources/output/dnsrecon/",
         'wordlist_dir': PROJECT_DIR + "scanners/resources/wordlists/",
+    },
+    'sslscan': {
+        'executable': {
+            'Darwin': 'sslscan',
+            'Linux': 'sslscan',
+        },
+        'report_output_dir': PROJECT_DIR + "scanners/resources/output/sslscan/",
+    },
+    'openssl': {
+        'executable': {
+            'Darwin': 'openssl',
+            'Linux': 'openssl',
+        },
+    },
+    'TLS': {
+        'cve_2016_2107': VENDOR_DIR + 'CVE-2016-2107-padding-oracle/main.go',
+        'cve_2016_9244': VENDOR_DIR + 'CVE-2016-9244-ticketbleed/ticketbleed.go',
+        'cert_chain_resolver': {
+            'Darwin': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-darwin',
+            'Linux': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-linux',
+        }
     }
 }
-
-# print(TOOLS['chrome']['executable']['mac'])
-# print(TOOLS['chrome']['screenshot_output_dir'])
 # exit(-1)
 
 

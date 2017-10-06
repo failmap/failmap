@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="drhesse.de" sniname="drhesse.de" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIDoDCCAogCCQDX8HGc7WeZdDANBgkqhkiG9w0BAQUFADCBkTELMAkGA1UEBhMC
+REUxDzANBgNVBAgTBkJheWVybjERMA8GA1UEBxMITXVlbmNoZW4xEzARBgNVBAoT
+CmlzcGdhdGV3YXkxIDAeBgNVBAMTF3dlYnNlcnZlci5pc3BnYXRld2F5LmRlMScw
+JQYJKoZIhvcNAQkBFhhob3N0bWFzdGVyQGlzcGdhdGV3YXkuZGUwHhcNMTAxMDEx
+MTQyODMyWhcNMjAxMDA4MTQyODMyWjCBkTELMAkGA1UEBhMCREUxDzANBgNVBAgT
+BkJheWVybjERMA8GA1UEBxMITXVlbmNoZW4xEzARBgNVBAoTCmlzcGdhdGV3YXkx
+IDAeBgNVBAMTF3dlYnNlcnZlci5pc3BnYXRld2F5LmRlMScwJQYJKoZIhvcNAQkB
+Fhhob3N0bWFzdGVyQGlzcGdhdGV3YXkuZGUwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQChveSWaljNcz7FkicSthK7xlIv65AXoMGGyxfUugtwBX0tiwGq
+2UxppkeHd7T1FgJf6LhwyBpQIGZe2e2IldDWUzyGSlPBf6ExCUsvwG5yHa1AJEFW
+G7zugYeSaVsE4uwqn8TQcZNkbvhQ5LkmBEQgvYHe3bZzid9a1/j4l2+meY+Higx0
+IZXhEUUMPfSe0GtQWa5wcBGsRvnIABH7Smc7C00AwEL4TYawBtyToyhduymC2pRd
+uZxIwodKA0ZXoiUpfqpnojTBZcEOM6X3kNZxBcuiJqKV/Oq5HelKsGajpeD6yfAE
+unsBZmyfjlVFOaBA37fkApI/BpJoVJWFGZJfAgMBAAEwDQYJKoZIhvcNAQEFBQAD
+ggEBAIZYTQgWGXMqJ3v8Cn5VR8d4dcr8/q2ggBTVifmRI3Mfb40iIA90lhFST+Ww
+NFlL0+Cwu07Y+k1qusB8jb04J+9NhqhidB0l8+YMSLYKZOWXEGpkUpT1nZCP+pqN
++qOaUAhEuslAO+0sW5pG+tzzpsmeSIoa3UcToZjf1ov/mLSGZKxy6Zb2HSgMv4J5
+fw1ATpLLzJfID5ioXrJwzKk+VGQrxNg8EIltTm0FQKM5oy9sqSgBbUvGHk29NNqz
+EoRzb1KmLCDxF3jhs+X71dcIq38m5KBDoOArs6JyeXsGC6ahCtWgXOQLAa1ldPmg
+uRQMstmakyuXcg1iax1W/GBj9iE=
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>0</version>
+   <serial>d7:f0:71:9c:ed:67:99:74</serial>
+   <signature-algorithm>sha1WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=DE/ST=Bayern/L=Muenchen/O=ispgateway/CN=webserver.ispgateway.de/emailAddress=hostmaster@ispgateway.de]]></issuer>
+   <not-valid-before>Oct 11 14:28:32 2010 GMT</not-valid-before>
+   <not-valid-after>Oct  8 14:28:32 2020 GMT</not-valid-after>
+   <subject><![CDATA[/C=DE/ST=Bayern/L=Muenchen/O=ispgateway/CN=webserver.ispgateway.de/emailAddress=hostmaster@ispgateway.de]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:a1:bd:e4:96:6a:58:cd:73:3e:c5:92:27:12:b6:
+        12:bb:c6:52:2f:eb:90:17:a0:c1:86:cb:17:d4:ba:
+        0b:70:05:7d:2d:8b:01:aa:d9:4c:69:a6:47:87:77:
+        b4:f5:16:02:5f:e8:b8:70:c8:1a:50:20:66:5e:d9:
+        ed:88:95:d0:d6:53:3c:86:4a:53:c1:7f:a1:31:09:
+        4b:2f:c0:6e:72:1d:ad:40:24:41:56:1b:bc:ee:81:
+        87:92:69:5b:04:e2:ec:2a:9f:c4:d0:71:93:64:6e:
+        f8:50:e4:b9:26:04:44:20:bd:81:de:dd:b6:73:89:
+        df:5a:d7:f8:f8:97:6f:a6:79:8f:87:8a:0c:74:21:
+        95:e1:11:45:0c:3d:f4:9e:d0:6b:50:59:ae:70:70:
+        11:ac:46:f9:c8:00:11:fb:4a:67:3b:0b:4d:00:c0:
+        42:f8:4d:86:b0:06:dc:93:a3:28:5d:bb:29:82:da:
+        94:5d:b9:9c:48:c2:87:4a:03:46:57:a2:25:29:7e:
+        aa:67:a2:34:c1:65:c1:0e:33:a5:f7:90:d6:71:05:
+        cb:a2:26:a2:95:fc:ea:b9:1d:e9:4a:b0:66:a3:a5:
+        e0:fa:c9:f0:04:ba:7b:01:66:6c:9f:8e:55:45:39:
+        a0:40:df:b7:e4:02:92:3f:06:92:68:54:95:85:19:
+        92:5f
+    Exponent: 65537 (0x10001)
+   </pk>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha1WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[webserver.ispgateway.de]]></subject>
+   <issuer><![CDATA[webserver.ispgateway.de]]></issuer>
+   <self-signed>true</self-signed>
+   <not-valid-before>Oct 11 14:28:32 2010 GMT</not-valid-before>
+   <not-valid-after>Oct  8 14:28:32 2020 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

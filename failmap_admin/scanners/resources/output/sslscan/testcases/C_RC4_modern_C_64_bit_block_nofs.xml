@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="my.eir.ie" sniname="my.eir.ie" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIGIDCCBQigAwIBAgIQItAPFlgv7gCNfGu0fEAwxjANBgkqhkiG9w0BAQsFADBD
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMdGhhd3RlLCBJbmMuMR0wGwYDVQQDExR0
+aGF3dGUgU0hBMjU2IFNTTCBDQTAeFw0xNzA4MDkwMDAwMDBaFw0xOTA4MDkyMzU5
+NTlaMF4xCzAJBgNVBAYTAklFMRIwEAYDVQQIDAlDbyBEdWJsaW4xDzANBgNVBAcM
+BkR1YmxpbjEXMBUGA1UECgwORWlyY29tIExpbWl0ZWQxETAPBgNVBAMMCCouZWly
+LmllMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxERDTvbI0HUYcQ0k
+BExtmZF4KKaYAFpWQyQ2DmlCovdsd4VSQr/pHsjkXjocM+dyAKwYpc+Oli9id+Tn
+Bv+ZETMa709TAISvePhivGef5fcYVhEUPLUHTrdkY5vBX818b+sE9vULXrnUopk+
+sv4/YlQ00GYaMWbWhJNymZivEpKRrfVC185/2C6Yv8XgHubqo839nkxVImiRkZi9
+C6sMiFaIgzC+O5uM/L6E7mo1cIaDWgWHA2OlSPUyNG0B57xowN2Je2nrtTkH6lyF
+9cGYKeCbtfUrsdk5jI6lTpZH34G2TWn8c7VhganBmw95h4wUu0z9tKed/JegAoSX
+RtbOFwIDAQABo4IC8zCCAu8wGwYDVR0RBBQwEoIIKi5laXIuaWWCBmVpci5pZTAJ
+BgNVHRMEAjAAMG4GA1UdIARnMGUwYwYGZ4EMAQICMFkwJgYIKwYBBQUHAgEWGmh0
+dHBzOi8vd3d3LnRoYXd0ZS5jb20vY3BzMC8GCCsGAQUFBwICMCMMIWh0dHBzOi8v
+d3d3LnRoYXd0ZS5jb20vcmVwb3NpdG9yeTAOBgNVHQ8BAf8EBAMCBaAwHwYDVR0j
+BBgwFoAUK5o1rgEYODDhcHoF4BF2o869kBQwKwYDVR0fBCQwIjAgoB6gHIYaaHR0
+cDovL3RnLnN5bWNiLmNvbS90Zy5jcmwwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsG
+AQUFBwMCMFcGCCsGAQUFBwEBBEswSTAfBggrBgEFBQcwAYYTaHR0cDovL3RnLnN5
+bWNkLmNvbTAmBggrBgEFBQcwAoYaaHR0cDovL3RnLnN5bWNiLmNvbS90Zy5jcnQw
+ggF9BgorBgEEAdZ5AgQCBIIBbQSCAWkBZwB2AN3rHSt6DU+mIIuBrYFocH4ujp0B
+1VyIjT0RxM227L7MAAABXcer1aMAAAQDAEcwRQIhAMMFUYfR5/5ud8Ws0vHnhvPy
+UAhFbaEjBSzfLcwjK8jZAiAtfYKSeNG9CYTAlMUZ2FfEMGy0SppD5fznqcON+PjR
+ogB1AKS5CZC0GFgUh7sTosxncAo8NZgE+RvfuON3zQ7IDdwQAAABXcer1dwAAAQD
+AEYwRAIgRlIwPzI988ZSogx2/1nJ/rpe9IvHzfTfWDlz8x87XnUCIA2M+3Fk1Uyw
+oIshhNPvGY49dfLMiNywQ4esQujnl7yIAHYA7ku9t3XOYLrhQmkfq+GeZqMPfl+w
+ctiDAMR7iXqo/csAAAFdx6vXoAAABAMARzBFAiEAzRqSuBAf82XO3fNhTPv4MNxx
+IWAkWfw4R9CnRJheyLMCIDeDTPbm2nfNpXh3+3oaVjErusIEPIF+8G/84hkfUh0d
+MA0GCSqGSIb3DQEBCwUAA4IBAQCGrfLzKq36CrnwtL62s3fiM6IYiu9KuRZI8AVW
+9vWVMWU4qfzefYA3jVoJ67ieOfjf6eKX4eSmiYEeeffCsc6gYxhhToVCJpmrx4vM
+SwzlMPE6bMt16uGEk4XU0ehyu0UQroWUyyMT0oEDn922UgUxSFRjZSpGLMU+4b6l
+mEvJ8g2xGMjF0iEyc9gdWzJ+RQUsr9ZcxlpbCoYyNYEZIXLkx+p4HiGjme3lYnH4
+l3aS+WK07ndD/gaBZBOkb54zM8thRkWBB7v4TA6oeZO612dmwtch5Vz5seA0Ut4C
+XBLs6e+Fo/b8PtZrt76vnFuRLxsvlqxYr+SMrLSFMQQ7cN3l
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>22:d0:0f:16:58:2f:ee:00:8d:7c:6b:b4:7c:40:30:c6</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=thawte, Inc./CN=thawte SHA256 SSL CA]]></issuer>
+   <not-valid-before>Aug  9 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Aug  9 23:59:59 2019 GMT</not-valid-after>
+   <subject><![CDATA[/C=IE/ST=Co Dublin/L=Dublin/O=Eircom Limited/CN=*.eir.ie]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:c4:44:43:4e:f6:c8:d0:75:18:71:0d:24:04:4c:
+        6d:99:91:78:28:a6:98:00:5a:56:43:24:36:0e:69:
+        42:a2:f7:6c:77:85:52:42:bf:e9:1e:c8:e4:5e:3a:
+        1c:33:e7:72:00:ac:18:a5:cf:8e:96:2f:62:77:e4:
+        e7:06:ff:99:11:33:1a:ef:4f:53:00:84:af:78:f8:
+        62:bc:67:9f:e5:f7:18:56:11:14:3c:b5:07:4e:b7:
+        64:63:9b:c1:5f:cd:7c:6f:eb:04:f6:f5:0b:5e:b9:
+        d4:a2:99:3e:b2:fe:3f:62:54:34:d0:66:1a:31:66:
+        d6:84:93:72:99:98:af:12:92:91:ad:f5:42:d7:ce:
+        7f:d8:2e:98:bf:c5:e0:1e:e6:ea:a3:cd:fd:9e:4c:
+        55:22:68:91:91:98:bd:0b:ab:0c:88:56:88:83:30:
+        be:3b:9b:8c:fc:be:84:ee:6a:35:70:86:83:5a:05:
+        87:03:63:a5:48:f5:32:34:6d:01:e7:bc:68:c0:dd:
+        89:7b:69:eb:b5:39:07:ea:5c:85:f5:c1:98:29:e0:
+        9b:b5:f5:2b:b1:d9:39:8c:8e:a5:4e:96:47:df:81:
+        b6:4d:69:fc:73:b5:61:81:a9:c1:9b:0f:79:87:8c:
+        14:bb:4c:fd:b4:a7:9d:fc:97:a0:02:84:97:46:d6:
+        ce:17
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:*.eir.ie, DNS:eir.ie]]></extension>
+    <extension name="X509v3 Basic Constraints"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.23.140.1.2.2
+  CPS: https://www.thawte.com/cps
+  User Notice:
+    Explicit Text: https://www.thawte.com/repository
+]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:2B:9A:35:AE:01:18:38:30:E1:70:7A:05:E0:11:76:A3:CE:BD:90:14
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://tg.symcb.com/tg.crl
+]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://tg.symcd.com
+CA Issuers - URI:http://tg.symcb.com/tg.crt
+]]></extension>
+    <extension name="CT Precertificate SCTs"><![CDATA[Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : DD:EB:1D:2B:7A:0D:4F:A6:20:8B:81:AD:81:68:70:7E:
+                2E:8E:9D:01:D5:5C:88:8D:3D:11:C4:CD:B6:EC:BE:CC
+    Timestamp : Aug  9 15:45:13.635 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:21:00:C3:05:51:87:D1:E7:FE:6E:77:C5:AC:
+                D2:F1:E7:86:F3:F2:50:08:45:6D:A1:23:05:2C:DF:2D:
+                CC:23:2B:C8:D9:02:20:2D:7D:82:92:78:D1:BD:09:84:
+                C0:94:C5:19:D8:57:C4:30:6C:B4:4A:9A:43:E5:FC:E7:
+                A9:C3:8D:F8:F8:D1:A2
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : A4:B9:09:90:B4:18:58:14:87:BB:13:A2:CC:67:70:0A:
+                3C:35:98:04:F9:1B:DF:B8:E3:77:CD:0E:C8:0D:DC:10
+    Timestamp : Aug  9 15:45:13.692 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:44:02:20:46:52:30:3F:32:3D:F3:C6:52:A2:0C:76:
+                FF:59:C9:FE:BA:5E:F4:8B:C7:CD:F4:DF:58:39:73:F3:
+                1F:3B:5E:75:02:20:0D:8C:FB:71:64:D5:4C:B0:A0:8B:
+                21:84:D3:EF:19:8E:3D:75:F2:CC:88:DC:B0:43:87:AC:
+                42:E8:E7:97:BC:88
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : EE:4B:BD:B7:75:CE:60:BA:E1:42:69:1F:AB:E1:9E:66:
+                A3:0F:7E:5F:B0:72:D8:83:00:C4:7B:89:7A:A8:FD:CB
+    Timestamp : Aug  9 15:45:14.144 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:21:00:CD:1A:92:B8:10:1F:F3:65:CE:DD:F3:
+                61:4C:FB:F8:30:DC:71:21:60:24:59:FC:38:47:D0:A7:
+                44:98:5E:C8:B3:02:20:37:83:4C:F6:E6:DA:77:CD:A5:
+                78:77:FB:7A:1A:56:31:2B:BA:C2:04:3C:81:7E:F0:6F:
+                FC:E2:19:1F:52:1D:1D]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[*.eir.ie]]></subject>
+   <altnames><![CDATA[DNS:*.eir.ie, DNS:eir.ie]]></altnames>
+   <issuer><![CDATA[thawte SHA256 SSL CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Aug  9 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Aug  9 23:59:59 2019 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>
