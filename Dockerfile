@@ -15,7 +15,9 @@ RUN /pyenv/bin/pip install /source/
 FROM python:3-slim
 
 # install dependencies (remove cache to prevent inclusion in layer)
-RUN apt-get update && apt-get install -yqq libxml2 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+  apt-get install -yqq libxml2 libmysqlclient18 && \
+  rm -rf /var/lib/apt/lists/*
 
 # install build application
 COPY --from=build /pyenv /pyenv
