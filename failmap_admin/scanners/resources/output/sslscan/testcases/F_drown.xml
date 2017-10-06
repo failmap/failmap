@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="ise.de" sniname="ise.de" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIFozCCBIugAwIBAgIQFmsPhQmJoy8WdR36zYU1gDANBgkqhkiG9w0BAQsFADCB
+ljELMAkGA1UEBhMCR0IxGzAZBgNVBAgTEkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4G
+A1UEBxMHU2FsZm9yZDEaMBgGA1UEChMRQ09NT0RPIENBIExpbWl0ZWQxPDA6BgNV
+BAMTM0NPTU9ETyBSU0EgT3JnYW5pemF0aW9uIFZhbGlkYXRpb24gU2VjdXJlIFNl
+cnZlciBDQTAeFw0xNTA0MjQwMDAwMDBaFw0xNzExMDMyMzU5NTlaMIGlMQswCQYD
+VQQGEwJERTEOMAwGA1UEERMFMjYxMjIxFjAUBgNVBAgTDU5pZWRlcnNhY2hzZW4x
+EjAQBgNVBAcTCU9sZGVuYnVyZzEWMBQGA1UECRMNS2Fpc2Vyc3RyLiAxNDERMA8G
+A1UEChMIaXNlIEdtYkgxHDAaBgNVBAsTE1ByZW1pdW1TU0wgV2lsZGNhcmQxETAP
+BgNVBAMUCCouaXNlLmRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+wb0Qx//UVTCEwXlK2QirTsCmCNg6fts8wux/X4l0FiiNDeVxZj+7TxwH3qyswGnU
+cuMh3PfwhIMKYgnxr95Qq/WzGY5auJsMttUOATHjq0uH92A23PzP65UxzF48o5mV
+0lLiKQXDJRfaqg0zqMcdTWSNHcBNafwFw6iB9AC6FDGOjGKgBGc3QCmWXtDN2YdK
+BosYBjRHPAc6G2XoSjaac7tEd+4Iz6VRt7vvS0me4t4W/g/7ZOq+jzfHGwbuGxIP
+an3JF+WxZT9nmEktQ6hcqr2CjZO4KbUlQ7HZA8lUtF59HcXNrNwW4H849Jxr2ML/
+4s6H14hyHQ34gJlBPFqsGwIDAQABo4IB2jCCAdYwHwYDVR0jBBgwFoAUmvMr2s+t
+T7YvuypISCoStxtCwSQwHQYDVR0OBBYEFK68vFzgvaZDhtb3LL6cOHUMvL4yMA4G
+A1UdDwEB/wQEAwIFoDAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMB
+BggrBgEFBQcDAjBQBgNVHSAESTBHMDsGDCsGAQQBsjEBAgEDBDArMCkGCCsGAQUF
+BwIBFh1odHRwczovL3NlY3VyZS5jb21vZG8uY29tL0NQUzAIBgZngQwBAgIwWgYD
+VR0fBFMwUTBPoE2gS4ZJaHR0cDovL2NybC5jb21vZG9jYS5jb20vQ09NT0RPUlNB
+T3JnYW5pemF0aW9uVmFsaWRhdGlvblNlY3VyZVNlcnZlckNBLmNybDCBiwYIKwYB
+BQUHAQEEfzB9MFUGCCsGAQUFBzAChklodHRwOi8vY3J0LmNvbW9kb2NhLmNvbS9D
+T01PRE9SU0FPcmdhbml6YXRpb25WYWxpZGF0aW9uU2VjdXJlU2VydmVyQ0EuY3J0
+MCQGCCsGAQUFBzABhhhodHRwOi8vb2NzcC5jb21vZG9jYS5jb20wGwYDVR0RBBQw
+EoIIKi5pc2UuZGWCBmlzZS5kZTANBgkqhkiG9w0BAQsFAAOCAQEAo4OoGBslF11f
+X+76r+jJlMuXS3tNY7gg4wHHVtBHkZA+gSHoIKmymmsv0tPXm6pmH3JErYTiykxu
+B3bhDjCePqRvYmL/gl7rU6LDuUSw1bPLkqC20F9zLasyRyecTQMXBdc0/5wQtbrh
+mvLuJAC4liGEFpu4tCiNSsdTsdA6pDksGzKkWN410holT65rP2B3huM2qUuxza+8
+RodaxCHS8u+4wYwLzOaS0TinTBuzpsFgH0KatsK6Q4OTkDUdlnoYLOcWl+33Z+jO
+OE1uNPvXlCo/o5b9n196sWITvsskD9NfEmQmEc+EBz98577gz5LqHElKTIrCbCz0
+Ck98waUMuw==
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>16:6b:0f:85:09:89:a3:2f:16:75:1d:fa:cd:85:35:80</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA Organization Validation Secure Server CA]]></issuer>
+   <not-valid-before>Apr 24 00:00:00 2015 GMT</not-valid-before>
+   <not-valid-after>Nov  3 23:59:59 2017 GMT</not-valid-after>
+   <subject><![CDATA[/C=DE/postalCode=26122/ST=Niedersachsen/L=Oldenburg/street=Kaiserstr. 14/O=ise GmbH/OU=PremiumSSL Wildcard/CN=*.ise.de]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:c1:bd:10:c7:ff:d4:55:30:84:c1:79:4a:d9:08:
+        ab:4e:c0:a6:08:d8:3a:7e:db:3c:c2:ec:7f:5f:89:
+        74:16:28:8d:0d:e5:71:66:3f:bb:4f:1c:07:de:ac:
+        ac:c0:69:d4:72:e3:21:dc:f7:f0:84:83:0a:62:09:
+        f1:af:de:50:ab:f5:b3:19:8e:5a:b8:9b:0c:b6:d5:
+        0e:01:31:e3:ab:4b:87:f7:60:36:dc:fc:cf:eb:95:
+        31:cc:5e:3c:a3:99:95:d2:52:e2:29:05:c3:25:17:
+        da:aa:0d:33:a8:c7:1d:4d:64:8d:1d:c0:4d:69:fc:
+        05:c3:a8:81:f4:00:ba:14:31:8e:8c:62:a0:04:67:
+        37:40:29:96:5e:d0:cd:d9:87:4a:06:8b:18:06:34:
+        47:3c:07:3a:1b:65:e8:4a:36:9a:73:bb:44:77:ee:
+        08:cf:a5:51:b7:bb:ef:4b:49:9e:e2:de:16:fe:0f:
+        fb:64:ea:be:8f:37:c7:1b:06:ee:1b:12:0f:6a:7d:
+        c9:17:e5:b1:65:3f:67:98:49:2d:43:a8:5c:aa:bd:
+        82:8d:93:b8:29:b5:25:43:b1:d9:03:c9:54:b4:5e:
+        7d:1d:c5:cd:ac:dc:16:e0:7f:38:f4:9c:6b:d8:c2:
+        ff:e2:ce:87:d7:88:72:1d:0d:f8:80:99:41:3c:5a:
+        ac:1b
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:9A:F3:2B:DA:CF:AD:4F:B6:2F:BB:2A:48:48:2A:12:B7:1B:42:C1:24
+]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[AE:BC:BC:5C:E0:BD:A6:43:86:D6:F7:2C:BE:9C:38:75:0C:BC:BE:32]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 1.3.6.1.4.1.6449.1.2.1.3.4
+  CPS: https://secure.comodo.com/CPS
+Policy: 2.23.140.1.2.2
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://crl.comodoca.com/COMODORSAOrganizationValidationSecureServerCA.crl
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[CA Issuers - URI:http://crt.comodoca.com/COMODORSAOrganizationValidationSecureServerCA.crt
+OCSP - URI:http://ocsp.comodoca.com
+]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:*.ise.de, DNS:ise.de]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[*.ise.de]]></subject>
+   <altnames><![CDATA[DNS:*.ise.de, DNS:ise.de]]></altnames>
+   <issuer><![CDATA[COMODO RSA Organization Validation Secure Server CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Apr 24 00:00:00 2015 GMT</not-valid-before>
+   <not-valid-after>Nov  3 23:59:59 2017 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

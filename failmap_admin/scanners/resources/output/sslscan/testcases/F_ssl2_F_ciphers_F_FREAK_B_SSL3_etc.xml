@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="klic.koningenhartman.com" sniname="klic.koningenhartman.com" port="443">
+  <renegotiation supported="0" secure="0" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="DES-CBC-SHA" id="0x9" />
+  <cipher status="preferred" sslversion="SSLv3" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="SSLv3" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="SSLv3" bits="56" cipher="DES-CBC-SHA" id="0x9" />
+  <cipher status="preferred" sslversion="SSLv2" bits="128" cipher="RC2-CBC-MD5" id="0x30080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="128" cipher="RC4-MD5" id="0x10080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="112" cipher="DES-CBC3-MD5" id="0x700C0" />
+  <cipher status="accepted" sslversion="SSLv2" bits="56" cipher="DES-CBC-MD5" id="0x60040" />
+  <cipher status="accepted" sslversion="SSLv2" bits="40" cipher="EXP-RC2-CBC-MD5" id="0x40080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="40" cipher="EXP-RC4-MD5" id="0x20080" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIGoDCCBIigAwIBAgIQW+AmPIH50eL2OFvGG+b8fDANBgkqhkiG9w0BAQsFADBm
+MQswCQYDVQQGEwJOTDEgMB4GA1UECgwXS1BOIENvcnBvcmF0ZSBNYXJrZXQgQlYx
+NTAzBgNVBAMMLEtQTiBDb3Jwb3JhdGUgTWFya2V0IENTUCBPcmdhbmlzYXRpZSBD
+QSAtIEcyMB4XDTE1MDkxMTAwMDAwMFoXDTE4MDkxMDIzNTk1OVowgbYxCzAJBgNV
+BAYTAk5MMRAwDgYDVQQIDAdVdHJlY2h0MRMwEQYDVQQHDApWZWVuZW5kYWFsMTAw
+LgYDVQQKDCdLb25pbmcgZW4gSGFydG1hbiBOZXR3b3JrIFNlcnZpY2VzIEIuVi4x
+DDAKBgNVBAsMA0lDVDEdMBsGA1UEBRMUMDAwMDAwMDMzMDA3NTk2MTAwMDAxITAf
+BgNVBAMMGGtsaWMua29uaW5nZW5oYXJ0bWFuLmNvbTCCASIwDQYJKoZIhvcNAQEB
+BQADggEPADCCAQoCggEBAOs/dqMQF/XtH8TGIjKLk4wJXpIAewtSBNWaaHDZZhYf
+TttfrA8Hgzv84d59NnyFkmqmm2C8d9FNIrx7fAF0S08Cc7wwamAAHE/jszl8+XbS
+HhK+deH8RsJhkcfQr+zqSJi+1Y05UeuIe5GHfdl2sBbDygoHE9n7lnHSfxlK50HE
+nmOZWyXlwBqe8nYrH/392LaiVufbrqRerqrH+fUQgvaBg5FLhy7tIzktvOzj9Vgi
+MqxuIUAM0jDIclolwJOF/isnjnAzYYnZFn5u1UmrbNAtDp+qIT4qcVcIUhreFY8H
+MKuhLH1J9ZWgLkknoDOAqK7jmZTWdzcXlYQ+NexbKM0CAwEAAaOCAfcwggHzMAwG
+A1UdEwEB/wQCMAAwYgYDVR0fBFswWTBXoFWgU4ZRaHR0cDovL2NlcnQubWFuYWdl
+ZHBraS5jb20vY3JsL0tQTkNvcnBvcmF0ZU1hcmtldENTUE9yZ2FuaXNhdGllQ0FH
+Mi9MYXRlc3RDUkwuY3JsMA4GA1UdDwEB/wQEAwIDqDCBpwYDVR0gBIGfMIGcMIGZ
+BgpghBABh2sBAgUGMIGKMDcGCCsGAQUFBwIBFitodHRwczovL2NlcnRpZmljYWF0
+Lmtwbi5jb20vcGtpb3ZlcmhlaWQvY3BzME8GCCsGAQUFBwICMEMaQU9wIGRpdCBj
+ZXJ0aWZpY2FhdCBpcyBoZXQgQ1BTIFBLSW92ZXJoZWlkIHZhbiBLUE4gdmFuIHRv
+ZXBhc3NpbmcuMB8GA1UdIwQYMBaAFCbQZRPx7npvYQgo3k2YBxJIeLTvMB0GA1Ud
+DgQWBBRr+5YQhQWZv2Eo4gJBNXpe6rsjdzAnBgNVHSUEIDAeBggrBgEFBQcDAgYI
+KwYBBQUHAwEGCCsGAQUFBwMEMCMGA1UdEQQcMBqCGGtsaWMua29uaW5nZW5oYXJ0
+bWFuLmNvbTA3BggrBgEFBQcBAQQrMCkwJwYIKwYBBQUHMAGGG2h0dHA6Ly9vY3Nw
+My5tYW5hZ2VkcGtpLmNvbTANBgkqhkiG9w0BAQsFAAOCAgEAyV6+8XWaF3IPOCKg
+uuydOySZxJOJ72ewljdeV+Br2Q9L4psDD6f9GpJAA1EYPldGYiQfVZvJTS1X/CpK
+1G01JwvCxI3cQ5jrbmWtkspduw3UQLR1RxwrLSQ+sQpqZ8oqzm6NMm1pNctpTbhF
+wL8n/u8ETeonAhwnadt5rcrgZqRecjkIzcr5VyT90s/288ZKgcds/m/RNvYvUHUK
+kLni2+oSBu03ElW8OSxhRCmFFi4zhIbOaQR2U9mpSZh47yMoKDc9GGW3Cvty+At9
+Yrw1azQ0Jz8yxT/a4yXnF+g5gcYDGkJ6vXkgj7/WEdDNEDuRBTFTCCs1tAI73r+W
+bVPgRizyQcpdZN4vUKcBj2+ok1jmTYrpbCwBoc77zf4ACQ2kqGA1AtOcnEXCzU+k
+6zQvPu2e/6giicFlrb66ZMLmDyIGsjlzJkpKGM2YxoAYoKdfhDWHqeAIM68FZUoa
+p0koB43IBja4naZxbwnozK5Kaw5Sstp/+rHblZTro+4VMREPxXOH12GIgi7+QgQo
+0zoKrG4c0I4azuIz7R9aX3hnxVYEiQ05MENXIlOp+zXsqTr5w4H4122midt+HjJg
+vgIT1QqFqV56nVTrcDAuQc5SsBSxXafcbUXC++gIQvrfXZqUP/yMgkF5QNv7+V+q
+Ua9yjAYmGJm0BJcvYxwsbsikTkk=
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>5b:e0:26:3c:81:f9:d1:e2:f6:38:5b:c6:1b:e6:fc:7c</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=NL/O=KPN Corporate Market BV/CN=KPN Corporate Market CSP Organisatie CA - G2]]></issuer>
+   <not-valid-before>Sep 11 00:00:00 2015 GMT</not-valid-before>
+   <not-valid-after>Sep 10 23:59:59 2018 GMT</not-valid-after>
+   <subject><![CDATA[/C=NL/ST=Utrecht/L=Veenendaal/O=Koning en Hartman Network Services B.V./OU=ICT/serialNumber=00000003300759610000/CN=klic.koningenhartman.com]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:eb:3f:76:a3:10:17:f5:ed:1f:c4:c6:22:32:8b:
+        93:8c:09:5e:92:00:7b:0b:52:04:d5:9a:68:70:d9:
+        66:16:1f:4e:db:5f:ac:0f:07:83:3b:fc:e1:de:7d:
+        36:7c:85:92:6a:a6:9b:60:bc:77:d1:4d:22:bc:7b:
+        7c:01:74:4b:4f:02:73:bc:30:6a:60:00:1c:4f:e3:
+        b3:39:7c:f9:76:d2:1e:12:be:75:e1:fc:46:c2:61:
+        91:c7:d0:af:ec:ea:48:98:be:d5:8d:39:51:eb:88:
+        7b:91:87:7d:d9:76:b0:16:c3:ca:0a:07:13:d9:fb:
+        96:71:d2:7f:19:4a:e7:41:c4:9e:63:99:5b:25:e5:
+        c0:1a:9e:f2:76:2b:1f:fd:fd:d8:b6:a2:56:e7:db:
+        ae:a4:5e:ae:aa:c7:f9:f5:10:82:f6:81:83:91:4b:
+        87:2e:ed:23:39:2d:bc:ec:e3:f5:58:22:32:ac:6e:
+        21:40:0c:d2:30:c8:72:5a:25:c0:93:85:fe:2b:27:
+        8e:70:33:61:89:d9:16:7e:6e:d5:49:ab:6c:d0:2d:
+        0e:9f:aa:21:3e:2a:71:57:08:52:1a:de:15:8f:07:
+        30:ab:a1:2c:7d:49:f5:95:a0:2e:49:27:a0:33:80:
+        a8:ae:e3:99:94:d6:77:37:17:95:84:3e:35:ec:5b:
+        28:cd
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://cert.managedpki.com/crl/KPNCorporateMarketCSPOrganisatieCAG2/LatestCRL.crl
+]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment, Key Agreement]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.16.528.1.1003.1.2.5.6
+  CPS: https://certificaat.kpn.com/pkioverheid/cps
+  User Notice:
+    Explicit Text: Op dit certificaat is het CPS PKIoverheid van KPN van toepassing.
+]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:26:D0:65:13:F1:EE:7A:6F:61:08:28:DE:4D:98:07:12:48:78:B4:EF
+]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[6B:FB:96:10:85:05:99:BF:61:28:E2:02:41:35:7A:5E:EA:BB:23:77]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Client Authentication, TLS Web Server Authentication, E-mail Protection]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:klic.koningenhartman.com]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://ocsp3.managedpki.com
+]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[klic.koningenhartman.com]]></subject>
+   <altnames><![CDATA[DNS:klic.koningenhartman.com]]></altnames>
+   <issuer><![CDATA[KPN Corporate Market CSP Organisatie CA - G2]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Sep 11 00:00:00 2015 GMT</not-valid-before>
+   <not-valid-after>Sep 10 23:59:59 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

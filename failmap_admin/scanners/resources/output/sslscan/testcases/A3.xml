@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="example.com" sniname="example.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIG3zCCBcegAwIBAgIQD+3c+ckem9j17iY+HvovoDANBgkqhkiG9w0BAQsFADBH
+MQswCQYDVQQGEwJVUzEWMBQGA1UEChMNR2VvVHJ1c3QgSW5jLjEgMB4GA1UEAxMX
+R2VvVHJ1c3QgRVYgU1NMIENBIC0gRzQwHhcNMTYwNzE1MDAwMDAwWhcNMTgwOTEz
+MjM1OTU5WjCB0zETMBEGCysGAQQBgjc8AgEDEwJJVDEaMBgGCysGAQQBgjc8AgEC
+EwlGcm9zaW5vbmUxHTAbBgNVBA8TFFByaXZhdGUgT3JnYW5pemF0aW9uMRIwEAYD
+VQQFEwlGUi0xMjYyMzMxCzAJBgNVBAYTAklUMRIwEAYDVQQIDAlGcm9zaW5vbmUx
+EjAQBgNVBAcMCUZyb3Npbm9uZTETMBEGA1UECgwKU2Vld2ViIFNybDELMAkGA1UE
+CwwCSVQxFjAUBgNVBAMMDXd3dy5zZWV3ZWIuaXQwggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC1RQluNi/JaJVBZ1mkjLZJe2y9Q8cWDMMLGEyOR9WSaKpp
+k/Ybx+uEON+bdz+JVJ9KEh80luCDAQEH1+bjC1BV5FBLRDqyCkyrofI8icTmZGnA
+39HdoZ16wBbWFpMI9bSTkg9uNmGansgZLtBSTGO6n0vl9TeNs/53ss3jZLtQu1qF
+5T+KM1z+km+hf/UnvGkzXlEX4vcpefKl1kyzNUlmIxjpIImmoEg31iVrvJlaZghC
+hhQO7a4wnVCHAI4MahIiXYkcALL9U0cqEjVTCyzN3OwXC4hX+WFtMsd+57nM+z2W
+LSluZDSe4CtLdevUulwsHHvbjjxV+XsU73i/KPOxAgMBAAGjggM4MIIDNDAjBgNV
+HREEHDAagg13d3cuc2Vld2ViLml0gglzZWV3ZWIuaXQwCQYDVR0TBAIwADAOBgNV
+HQ8BAf8EBAMCBaAwKwYDVR0fBCQwIjAgoB6gHIYaaHR0cDovL2dtLnN5bWNiLmNv
+bS9nbS5jcmwwgakGA1UdIASBoTCBnjCBkgYJKwYBBAHwIgEGMIGEMD8GCCsGAQUF
+BwIBFjNodHRwczovL3d3dy5nZW90cnVzdC5jb20vcmVzb3VyY2VzL3JlcG9zaXRv
+cnkvbGVnYWwwQQYIKwYBBQUHAgIwNQwzaHR0cHM6Ly93d3cuZ2VvdHJ1c3QuY29t
+L3Jlc291cmNlcy9yZXBvc2l0b3J5L2xlZ2FsMAcGBWeBDAEBMB0GA1UdJQQWMBQG
+CCsGAQUFBwMBBggrBgEFBQcDAjAfBgNVHSMEGDAWgBTez1xQt64CHxUXqhboDbUo
+nWpa8zBXBggrBgEFBQcBAQRLMEkwHwYIKwYBBQUHMAGGE2h0dHA6Ly9nbS5zeW1j
+ZC5jb20wJgYIKwYBBQUHMAKGGmh0dHA6Ly9nbS5zeW1jYi5jb20vZ20uY3J0MIIB
+fgYKKwYBBAHWeQIEAgSCAW4EggFqAWgAdgDd6x0reg1PpiCLga2BaHB+Lo6dAdVc
+iI09EcTNtuy+zAAAAVXuLWhLAAAEAwBHMEUCICRQ4dGOQWKuj8FoPWKJwONoiqSr
+/7acDUZb16wijPUhAiEA0dgfALeyetx2h5/u1IYO7Au9VQwxOMKWkM+FOC+DxokA
+dgCkuQmQtBhYFIe7E6LMZ3AKPDWYBPkb37jjd80OyA3cEAAAAVXuLWiHAAAEAwBH
+MEUCIQCbKYD2Y5MoZu2aoQMLi1fIfv49PEz0+u5nuqmFf4X6owIgCulL8OUIXr5u
+TRqHBoFUD6Q7T+lH9ohuuntilmKpF00AdgBo9pj4H2SCvjqM7rkoHUz8cVFdZ5PU
+RNEKZ6y7T0/7xAAAAVXuLWh8AAAEAwBHMEUCICxaUBNpsdqzX1vSwVHEdvCqPVT/
+ycCkD3xtG7UNgX7lAiEAjFvu0gJmAPxYMB0MjNdssoBrnz6Mjj7jhgW8oQK3THow
+DQYJKoZIhvcNAQELBQADggEBAF0vvxylZmHcYiAn4/lii5A5r3IwZpv5ec5PH+pS
+dd6MeoO7tAphtve+CDhK8ycyMx0prWAp2SIy5iloUtpCggdZgJkvZN/CVolp4P72
+zS9Cm1/kT6LHyvPyWx6ozJQc+f3r/iV3eMsky5aTZGdD3JWogA7dkIL+A6CStFcS
+DNgmWWk/5o4uAmegXCr/g4N36Wz0Ggj4Kf8ild8Sdpl56vKwqosGGr+iGdECJnV3
+YX6PyS4jmHrudmikz+N9LGt4ucuBRK438gSsJRX0OEmxFTyxYnQKgRJiWXA12Qto
+LDJsUWYFSkK+QZG1cEXBu632FFMrIaSwHqwJeAoqEoPHPmM=
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>0f:ed:dc:f9:c9:1e:9b:d8:f5:ee:26:3e:1e:fa:2f:a0</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=GeoTrust Inc./CN=GeoTrust EV SSL CA - G4]]></issuer>
+   <not-valid-before>Jul 15 00:00:00 2016 GMT</not-valid-before>
+   <not-valid-after>Sep 13 23:59:59 2018 GMT</not-valid-after>
+   <subject><![CDATA[/jurisdictionC=IT/jurisdictionST=Frosinone/businessCategory=Private Organization/serialNumber=FR-126233/C=IT/ST=Frosinone/L=Frosinone/O=Seeweb Srl/OU=IT/CN=www.seeweb.it]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:b5:45:09:6e:36:2f:c9:68:95:41:67:59:a4:8c:
+        b6:49:7b:6c:bd:43:c7:16:0c:c3:0b:18:4c:8e:47:
+        d5:92:68:aa:69:93:f6:1b:c7:eb:84:38:df:9b:77:
+        3f:89:54:9f:4a:12:1f:34:96:e0:83:01:01:07:d7:
+        e6:e3:0b:50:55:e4:50:4b:44:3a:b2:0a:4c:ab:a1:
+        f2:3c:89:c4:e6:64:69:c0:df:d1:dd:a1:9d:7a:c0:
+        16:d6:16:93:08:f5:b4:93:92:0f:6e:36:61:9a:9e:
+        c8:19:2e:d0:52:4c:63:ba:9f:4b:e5:f5:37:8d:b3:
+        fe:77:b2:cd:e3:64:bb:50:bb:5a:85:e5:3f:8a:33:
+        5c:fe:92:6f:a1:7f:f5:27:bc:69:33:5e:51:17:e2:
+        f7:29:79:f2:a5:d6:4c:b3:35:49:66:23:18:e9:20:
+        89:a6:a0:48:37:d6:25:6b:bc:99:5a:66:08:42:86:
+        14:0e:ed:ae:30:9d:50:87:00:8e:0c:6a:12:22:5d:
+        89:1c:00:b2:fd:53:47:2a:12:35:53:0b:2c:cd:dc:
+        ec:17:0b:88:57:f9:61:6d:32:c7:7e:e7:b9:cc:fb:
+        3d:96:2d:29:6e:64:34:9e:e0:2b:4b:75:eb:d4:ba:
+        5c:2c:1c:7b:db:8e:3c:55:f9:7b:14:ef:78:bf:28:
+        f3:b1
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:www.seeweb.it, DNS:seeweb.it]]></extension>
+    <extension name="X509v3 Basic Constraints"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://gm.symcb.com/gm.crl
+]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 1.3.6.1.4.1.14370.1.6
+  CPS: https://www.geotrust.com/resources/repository/legal
+  User Notice:
+    Explicit Text: https://www.geotrust.com/resources/repository/legal
+Policy: 2.23.140.1.1
+]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:DE:CF:5C:50:B7:AE:02:1F:15:17:AA:16:E8:0D:B5:28:9D:6A:5A:F3
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://gm.symcd.com
+CA Issuers - URI:http://gm.symcb.com/gm.crt
+]]></extension>
+    <extension name="CT Precertificate SCTs"><![CDATA[Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : DD:EB:1D:2B:7A:0D:4F:A6:20:8B:81:AD:81:68:70:7E:
+                2E:8E:9D:01:D5:5C:88:8D:3D:11:C4:CD:B6:EC:BE:CC
+    Timestamp : Jul 15 10:50:01.163 2016 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:20:24:50:E1:D1:8E:41:62:AE:8F:C1:68:3D:
+                62:89:C0:E3:68:8A:A4:AB:FF:B6:9C:0D:46:5B:D7:AC:
+                22:8C:F5:21:02:21:00:D1:D8:1F:00:B7:B2:7A:DC:76:
+                87:9F:EE:D4:86:0E:EC:0B:BD:55:0C:31:38:C2:96:90:
+                CF:85:38:2F:83:C6:89
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : A4:B9:09:90:B4:18:58:14:87:BB:13:A2:CC:67:70:0A:
+                3C:35:98:04:F9:1B:DF:B8:E3:77:CD:0E:C8:0D:DC:10
+    Timestamp : Jul 15 10:50:01.223 2016 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:21:00:9B:29:80:F6:63:93:28:66:ED:9A:A1:
+                03:0B:8B:57:C8:7E:FE:3D:3C:4C:F4:FA:EE:67:BA:A9:
+                85:7F:85:FA:A3:02:20:0A:E9:4B:F0:E5:08:5E:BE:6E:
+                4D:1A:87:06:81:54:0F:A4:3B:4F:E9:47:F6:88:6E:BA:
+                7B:62:96:62:A9:17:4D
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : 68:F6:98:F8:1F:64:82:BE:3A:8C:EE:B9:28:1D:4C:FC:
+                71:51:5D:67:93:D4:44:D1:0A:67:AC:BB:4F:4F:FB:C4
+    Timestamp : Jul 15 10:50:01.212 2016 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:20:2C:5A:50:13:69:B1:DA:B3:5F:5B:D2:C1:
+                51:C4:76:F0:AA:3D:54:FF:C9:C0:A4:0F:7C:6D:1B:B5:
+                0D:81:7E:E5:02:21:00:8C:5B:EE:D2:02:66:00:FC:58:
+                30:1D:0C:8C:D7:6C:B2:80:6B:9F:3E:8C:8E:3E:E3:86:
+                05:BC:A1:02:B7:4C:7A]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[example.com]]></subject>
+   <altnames><![CDATA[DNS:example.com, DNS:example.com]]></altnames>
+   <issuer><![CDATA[GeoTrust EV SSL CA - G4]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Jul 15 00:00:00 2016 GMT</not-valid-before>
+   <not-valid-after>Sep 13 23:59:59 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

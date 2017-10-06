@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="www.edulinkone.com" sniname="www.edulinkone.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIGBzCCBO+gAwIBAgISA4apXlPS4bJGearkOY91KbRNMA0GCSqGSIb3DQEBCwUA
+MEoxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MSMwIQYDVQQD
+ExpMZXQncyBFbmNyeXB0IEF1dGhvcml0eSBYMzAeFw0xNzA5MTQyMjI2MDBaFw0x
+NzEyMTMyMjI2MDBaMB0xGzAZBgNVBAMTEnd3dy5lZHVsaW5rb25lLmNvbTCCAiIw
+DQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBAKaigL2J2R+cV++pA6dI3UlsmSoe
+A7APToV/uY3cjstjWkgYcEYsiseL7VAlD0A1F5B31QDeovmcmFyDhFoSwDOZND6/
+wYMf/8KnuvJkD6l/zhT8+C1ikkSbGs8XJZZPboAwN5FoWjsNAeB+KAr/XHd0R13Z
+RUt7Yb1nvsmlzESXJQTYXDMLjdno76dWOBnZlh2x9iL4IwqkgUkchrPCXLSkaKtD
+c9pCyE9OUvW7Nb/SGv+S42mA3EYwjMaSS039zyhlp5CGIW1Mb57cRLBJU4Bi57gR
+uFx/V4b2bo0Dt+FvRF7a0DIAd0lbv3HBgvCbSQmWWOekfDPZV7yLXTWiugLUh6i5
+1u/GQt73enaTO6uE0oOW1UOpECbePC9B5BOupEGz6V7+/s1cqFzi9yQeif/Qu2U6
+q+g4xhn7UrhGMpZTii51aaYqT1+qYAUUKU8cLu+8Lt9oiplj5GqhFjflxMyEjMLX
+irTQtLeimEA/NDSI7gC4sFWPZCRA6GQn0gyDLBxu+WtPRbggbYlFhX7xpbYroudo
+KOKmjo+qr6K/rpNyT3ldszYwV+/VxXS2pntThZO3KtPO9EuLYxdbjtLdvsBl6XKJ
+S0RiFrME+jS4Msbvmg8Jy7Fa+WxGeceo7orSoyuJ2b6ovPjW/JsyxyKrj7/4o9nq
+3pr2YCCmR6UGUUOxAgMBAAGjggISMIICDjAOBgNVHQ8BAf8EBAMCBaAwHQYDVR0l
+BBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYE
+FDSzOS3L689Yg8Hagd/GlNdwyJRIMB8GA1UdIwQYMBaAFKhKamMEfd265tE5t6ZF
+Ze/zqOyhMG8GCCsGAQUFBwEBBGMwYTAuBggrBgEFBQcwAYYiaHR0cDovL29jc3Au
+aW50LXgzLmxldHNlbmNyeXB0Lm9yZzAvBggrBgEFBQcwAoYjaHR0cDovL2NlcnQu
+aW50LXgzLmxldHNlbmNyeXB0Lm9yZy8wHQYDVR0RBBYwFIISd3d3LmVkdWxpbmtv
+bmUuY29tMIH+BgNVHSAEgfYwgfMwCAYGZ4EMAQIBMIHmBgsrBgEEAYLfEwEBATCB
+1jAmBggrBgEFBQcCARYaaHR0cDovL2Nwcy5sZXRzZW5jcnlwdC5vcmcwgasGCCsG
+AQUFBwICMIGeDIGbVGhpcyBDZXJ0aWZpY2F0ZSBtYXkgb25seSBiZSByZWxpZWQg
+dXBvbiBieSBSZWx5aW5nIFBhcnRpZXMgYW5kIG9ubHkgaW4gYWNjb3JkYW5jZSB3
+aXRoIHRoZSBDZXJ0aWZpY2F0ZSBQb2xpY3kgZm91bmQgYXQgaHR0cHM6Ly9sZXRz
+ZW5jcnlwdC5vcmcvcmVwb3NpdG9yeS8wDQYJKoZIhvcNAQELBQADggEBAIg/xcy+
+bAN8SjjfeRV+tNRA8PP0ArOPl4mZJN9e5FNVPV1U2MgbnUqD8jq/vy6/MfnySvyB
+WPs+WRkky8fp1iinhjSakHC0yAtqBivdyMi6AV4zHzFtArnTB01tQOwnKsbdvH7f
+MBbsfTEC2Mtn8CYp1D8oXBHIx0hH/WHsbxrZ6GNUWlL9/1JJI0KTma4PSnxMyI5k
+sUhpyndpRDiMgQLOG8i2Q+4KQnUinHw/MxhoFNwamaS/uDFbNJDAU/TdP+fXjUph
+Njd5W1jX8XpT38e5V1WBFnaG030ce5U7U5xKM5PUtVASUlzZuAMD2BLTaiSphtHA
+uLyfd6EHPaviZuE=
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>03:86:a9:5e:53:d2:e1:b2:46:79:aa:e4:39:8f:75:29:b4:4d</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3]]></issuer>
+   <not-valid-before>Sep 14 22:26:00 2017 GMT</not-valid-before>
+   <not-valid-after>Dec 13 22:26:00 2017 GMT</not-valid-after>
+   <subject><![CDATA[/CN=www.edulinkone.com]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="4096">
+    Public-Key: (4096 bit)
+    Modulus:
+        00:a6:a2:80:bd:89:d9:1f:9c:57:ef:a9:03:a7:48:
+        dd:49:6c:99:2a:1e:03:b0:0f:4e:85:7f:b9:8d:dc:
+        8e:cb:63:5a:48:18:70:46:2c:8a:c7:8b:ed:50:25:
+        0f:40:35:17:90:77:d5:00:de:a2:f9:9c:98:5c:83:
+        84:5a:12:c0:33:99:34:3e:bf:c1:83:1f:ff:c2:a7:
+        ba:f2:64:0f:a9:7f:ce:14:fc:f8:2d:62:92:44:9b:
+        1a:cf:17:25:96:4f:6e:80:30:37:91:68:5a:3b:0d:
+        01:e0:7e:28:0a:ff:5c:77:74:47:5d:d9:45:4b:7b:
+        61:bd:67:be:c9:a5:cc:44:97:25:04:d8:5c:33:0b:
+        8d:d9:e8:ef:a7:56:38:19:d9:96:1d:b1:f6:22:f8:
+        23:0a:a4:81:49:1c:86:b3:c2:5c:b4:a4:68:ab:43:
+        73:da:42:c8:4f:4e:52:f5:bb:35:bf:d2:1a:ff:92:
+        e3:69:80:dc:46:30:8c:c6:92:4b:4d:fd:cf:28:65:
+        a7:90:86:21:6d:4c:6f:9e:dc:44:b0:49:53:80:62:
+        e7:b8:11:b8:5c:7f:57:86:f6:6e:8d:03:b7:e1:6f:
+        44:5e:da:d0:32:00:77:49:5b:bf:71:c1:82:f0:9b:
+        49:09:96:58:e7:a4:7c:33:d9:57:bc:8b:5d:35:a2:
+        ba:02:d4:87:a8:b9:d6:ef:c6:42:de:f7:7a:76:93:
+        3b:ab:84:d2:83:96:d5:43:a9:10:26:de:3c:2f:41:
+        e4:13:ae:a4:41:b3:e9:5e:fe:fe:cd:5c:a8:5c:e2:
+        f7:24:1e:89:ff:d0:bb:65:3a:ab:e8:38:c6:19:fb:
+        52:b8:46:32:96:53:8a:2e:75:69:a6:2a:4f:5f:aa:
+        60:05:14:29:4f:1c:2e:ef:bc:2e:df:68:8a:99:63:
+        e4:6a:a1:16:37:e5:c4:cc:84:8c:c2:d7:8a:b4:d0:
+        b4:b7:a2:98:40:3f:34:34:88:ee:00:b8:b0:55:8f:
+        64:24:40:e8:64:27:d2:0c:83:2c:1c:6e:f9:6b:4f:
+        45:b8:20:6d:89:45:85:7e:f1:a5:b6:2b:a2:e7:68:
+        28:e2:a6:8e:8f:aa:af:a2:bf:ae:93:72:4f:79:5d:
+        b3:36:30:57:ef:d5:c5:74:b6:a6:7b:53:85:93:b7:
+        2a:d3:ce:f4:4b:8b:63:17:5b:8e:d2:dd:be:c0:65:
+        e9:72:89:4b:44:62:16:b3:04:fa:34:b8:32:c6:ef:
+        9a:0f:09:cb:b1:5a:f9:6c:46:79:c7:a8:ee:8a:d2:
+        a3:2b:89:d9:be:a8:bc:f8:d6:fc:9b:32:c7:22:ab:
+        8f:bf:f8:a3:d9:ea:de:9a:f6:60:20:a6:47:a5:06:
+        51:43:b1
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[34:B3:39:2D:CB:EB:CF:58:83:C1:DA:81:DF:C6:94:D7:70:C8:94:48]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:A8:4A:6A:63:04:7D:DD:BA:E6:D1:39:B7:A6:45:65:EF:F3:A8:EC:A1
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://ocsp.int-x3.letsencrypt.org
+CA Issuers - URI:http://cert.int-x3.letsencrypt.org/
+]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:www.edulinkone.com]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.23.140.1.2.1
+Policy: 1.3.6.1.4.1.44947.1.1.1
+  CPS: http://cps.letsencrypt.org
+  User Notice:
+    Explicit Text: This Certificate may only be relied upon by Relying Parties and only in accordance with the Certificate Policy found at https://letsencrypt.org/repository/
+]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="4096" />
+   <subject><![CDATA[www.edulinkone.com]]></subject>
+   <altnames><![CDATA[DNS:www.edulinkone.com]]></altnames>
+   <issuer><![CDATA[Let's Encrypt Authority X3]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Sep 14 22:26:00 2017 GMT</not-valid-before>
+   <not-valid-after>Dec 13 22:26:00 2017 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="www.pubalibankbd.com" sniname="www.pubalibankbd.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="1024" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIG5jCCBc6gAwIBAgIQb9HzZ8m7mIUcOx0amsuBajANBgkqhkiG9w0BAQsFADB3
+MQswCQYDVQQGEwJVUzEdMBsGA1UEChMUU3ltYW50ZWMgQ29ycG9yYXRpb24xHzAd
+BgNVBAsTFlN5bWFudGVjIFRydXN0IE5ldHdvcmsxKDAmBgNVBAMTH1N5bWFudGVj
+IENsYXNzIDMgRVYgU1NMIENBIC0gRzMwHhcNMTcwMjA5MDAwMDAwWhcNMTkwMzEx
+MjM1OTU5WjCB1zETMBEGCysGAQQBgjc8AgEDEwJCRDEdMBsGA1UEDxMUUHJpdmF0
+ZSBPcmdhbml6YXRpb24xEDAOBgNVBAUTB0MtMTA4ODExCzAJBgNVBAYTAkJEMQ4w
+DAYDVQQIDAVEaGFrYTEOMAwGA1UEBwwFRGhha2ExGTAXBgNVBAoMEFB1YmFsaSBC
+YW5rIEx0ZC4xKDAmBgNVBAsMH0luZm9ybWF0aW9uIFRlY2hub2xvZ3kgRGl2aXNp
+b24xHTAbBgNVBAMMFHd3dy5wdWJhbGliYW5rYmQuY29tMIIBIjANBgkqhkiG9w0B
+AQEFAAOCAQ8AMIIBCgKCAQEAywG816V9JOyJu3LrkRUG2BAtiQDwHbMDd4nGFnpZ
+gaSaHaalIfNw+YRLVFLHN+oIKWtrIBL01M9elcSKxf9iLmQQdw8jCpaafSpcX7oA
+sBb9lt/Oig32wuvVdMQ2BOahUQIyoPn7O0HHoUBZbjgAlRfvxMdMMIXyCc1cCXWR
+uOM1QwXCRwavg+cxxHc8EvFWLoM2zwTOG58TILdMvsfkUqI1bl5O927s1fx8nnGt
+dANvJu30VHNsspWf0C/rgrknNHV/9sWch+3c+oXBKstr3i6puYR3842xEf4ioyqB
+lY0JNJyLcO72SlXg2sI8v57cP7PdEwgGZnFDsGJkdP+vWQIDAQABo4IDCzCCAwcw
+MQYDVR0RBCowKIIUd3d3LnB1YmFsaWJhbmtiZC5jb22CEHB1YmFsaWJhbmtiZC5j
+b20wCQYDVR0TBAIwADAOBgNVHQ8BAf8EBAMCBaAwbwYDVR0gBGgwZjBbBgtghkgB
+hvhFAQcXBjBMMCMGCCsGAQUFBwIBFhdodHRwczovL2Quc3ltY2IuY29tL2NwczAl
+BggrBgEFBQcCAjAZDBdodHRwczovL2Quc3ltY2IuY29tL3JwYTAHBgVngQwBATAr
+BgNVHR8EJDAiMCCgHqAchhpodHRwOi8vc3Iuc3ltY2IuY29tL3NyLmNybDAdBgNV
+HSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwHwYDVR0jBBgwFoAUAVmr5906C1mm
+ZGPWzyAHV9WR52owVwYIKwYBBQUHAQEESzBJMB8GCCsGAQUFBzABhhNodHRwOi8v
+c3Iuc3ltY2QuY29tMCYGCCsGAQUFBzAChhpodHRwOi8vc3Iuc3ltY2IuY29tL3Ny
+LmNydDCCAX4GCisGAQQB1nkCBAIEggFuBIIBagFoAHUA3esdK3oNT6Ygi4GtgWhw
+fi6OnQHVXIiNPRHEzbbsvswAAAFaIVUDlgAABAMARjBEAiBk+dBMprXKaw99sgvn
+inRgtX0Ted+HRtrEqoALduTjGwIgGFx7noGl0O8olY5BY1GBILIJaOdnqIxhSY10
+zYPzHFsAdgCkuQmQtBhYFIe7E6LMZ3AKPDWYBPkb37jjd80OyA3cEAAAAVohVQPI
+AAAEAwBHMEUCIA+Dk/XEs1xKQ+T60yQNpMYrnNiAtyokzjserm7RXC9HAiEAhhPf
+UL6pOvNXGvrecXw8EuGMu5y14CbVH5xBO3qes2sAdwDuS723dc5guuFCaR+r4Z5m
+ow9+X7By2IMAxHuJeqj9ywAAAVohVQWTAAAEAwBIMEYCIQDvU73ERl3kJ2kIHe1d
+TlYcE4uPzNKZyWQorgZGOuIGrwIhAPy9kVMSb3G8n4U7aQ7RUVjm/GIkZYeFuG8A
++dtYTMI8MA0GCSqGSIb3DQEBCwUAA4IBAQDDxGO+jsOnFGs2dGGYhXRaanrptWfH
+ZkKrAh2Wfsq8If5mgZnjOCBwSXEAchFtFCW2N5gpvr5w6zRBIToXNJKu+iMCo7Bq
+VrobuMP77RzXrPm4oxZvoT16T4Vq/5CENgyoUvaORBnkhkElQn3TwWH5oiK2ol+I
+vMgzDsaIE9JWewTG6hOA0qQEkSIsDRfiDvo/LyZSI42MPjkXG281LuE2FyxvpeLo
+TY0d0DUr1PusA48/s0G2Jcu12wH2ngNx0jkFBcCdSBrQN22y5n4bquhHdaR/JnEP
+/TaIp8decYpNoMg9n3mJgtkDotql4CIGsWMe6f0AShPeIovrE/KaCyWQ
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>6f:d1:f3:67:c9:bb:98:85:1c:3b:1d:1a:9a:cb:81:6a</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/O=Symantec Corporation/OU=Symantec Trust Network/CN=Symantec Class 3 EV SSL CA - G3]]></issuer>
+   <not-valid-before>Feb  9 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Mar 11 23:59:59 2019 GMT</not-valid-after>
+   <subject><![CDATA[/jurisdictionC=BD/businessCategory=Private Organization/serialNumber=C-10881/C=BD/ST=Dhaka/L=Dhaka/O=Pubali Bank Ltd./OU=Information Technology Division/CN=www.pubalibankbd.com]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:cb:01:bc:d7:a5:7d:24:ec:89:bb:72:eb:91:15:
+        06:d8:10:2d:89:00:f0:1d:b3:03:77:89:c6:16:7a:
+        59:81:a4:9a:1d:a6:a5:21:f3:70:f9:84:4b:54:52:
+        c7:37:ea:08:29:6b:6b:20:12:f4:d4:cf:5e:95:c4:
+        8a:c5:ff:62:2e:64:10:77:0f:23:0a:96:9a:7d:2a:
+        5c:5f:ba:00:b0:16:fd:96:df:ce:8a:0d:f6:c2:eb:
+        d5:74:c4:36:04:e6:a1:51:02:32:a0:f9:fb:3b:41:
+        c7:a1:40:59:6e:38:00:95:17:ef:c4:c7:4c:30:85:
+        f2:09:cd:5c:09:75:91:b8:e3:35:43:05:c2:47:06:
+        af:83:e7:31:c4:77:3c:12:f1:56:2e:83:36:cf:04:
+        ce:1b:9f:13:20:b7:4c:be:c7:e4:52:a2:35:6e:5e:
+        4e:f7:6e:ec:d5:fc:7c:9e:71:ad:74:03:6f:26:ed:
+        f4:54:73:6c:b2:95:9f:d0:2f:eb:82:b9:27:34:75:
+        7f:f6:c5:9c:87:ed:dc:fa:85:c1:2a:cb:6b:de:2e:
+        a9:b9:84:77:f3:8d:b1:11:fe:22:a3:2a:81:95:8d:
+        09:34:9c:8b:70:ee:f6:4a:55:e0:da:c2:3c:bf:9e:
+        dc:3f:b3:dd:13:08:06:66:71:43:b0:62:64:74:ff:
+        af:59
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:www.pubalibankbd.com, DNS:pubalibankbd.com]]></extension>
+    <extension name="X509v3 Basic Constraints"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.16.840.1.113733.1.7.23.6
+  CPS: https://d.symcb.com/cps
+  User Notice:
+    Explicit Text: https://d.symcb.com/rpa
+Policy: 2.23.140.1.1
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://sr.symcb.com/sr.crl
+]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:01:59:AB:E7:DD:3A:0B:59:A6:64:63:D6:CF:20:07:57:D5:91:E7:6A
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://sr.symcd.com
+CA Issuers - URI:http://sr.symcb.com/sr.crt
+]]></extension>
+    <extension name="CT Precertificate SCTs"><![CDATA[Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : DD:EB:1D:2B:7A:0D:4F:A6:20:8B:81:AD:81:68:70:7E:
+                2E:8E:9D:01:D5:5C:88:8D:3D:11:C4:CD:B6:EC:BE:CC
+    Timestamp : Feb  9 05:25:04.022 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:44:02:20:64:F9:D0:4C:A6:B5:CA:6B:0F:7D:B2:0B:
+                E7:8A:74:60:B5:7D:13:79:DF:87:46:DA:C4:AA:80:0B:
+                76:E4:E3:1B:02:20:18:5C:7B:9E:81:A5:D0:EF:28:95:
+                8E:41:63:51:81:20:B2:09:68:E7:67:A8:8C:61:49:8D:
+                74:CD:83:F3:1C:5B
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : A4:B9:09:90:B4:18:58:14:87:BB:13:A2:CC:67:70:0A:
+                3C:35:98:04:F9:1B:DF:B8:E3:77:CD:0E:C8:0D:DC:10
+    Timestamp : Feb  9 05:25:04.072 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:45:02:20:0F:83:93:F5:C4:B3:5C:4A:43:E4:FA:D3:
+                24:0D:A4:C6:2B:9C:D8:80:B7:2A:24:CE:3B:1E:AE:6E:
+                D1:5C:2F:47:02:21:00:86:13:DF:50:BE:A9:3A:F3:57:
+                1A:FA:DE:71:7C:3C:12:E1:8C:BB:9C:B5:E0:26:D5:1F:
+                9C:41:3B:7A:9E:B3:6B
+Signed Certificate Timestamp:
+    Version   : v1(0)
+    Log ID    : EE:4B:BD:B7:75:CE:60:BA:E1:42:69:1F:AB:E1:9E:66:
+                A3:0F:7E:5F:B0:72:D8:83:00:C4:7B:89:7A:A8:FD:CB
+    Timestamp : Feb  9 05:25:04.531 2017 GMT
+    Extensions: none
+    Signature : ecdsa-with-SHA256
+                30:46:02:21:00:EF:53:BD:C4:46:5D:E4:27:69:08:1D:
+                ED:5D:4E:56:1C:13:8B:8F:CC:D2:99:C9:64:28:AE:06:
+                46:3A:E2:06:AF:02:21:00:FC:BD:91:53:12:6F:71:BC:
+                9F:85:3B:69:0E:D1:51:58:E6:FC:62:24:65:87:85:B8:
+                6F:00:F9:DB:58:4C:C2:3C]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[www.pubalibankbd.com]]></subject>
+   <altnames><![CDATA[DNS:www.pubalibankbd.com, DNS:pubalibankbd.com]]></altnames>
+   <issuer><![CDATA[Symantec Class 3 EV SSL CA - G3]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Feb  9 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Mar 11 23:59:59 2019 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

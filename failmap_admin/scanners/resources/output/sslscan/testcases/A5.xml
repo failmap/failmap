@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="www.matrixewebservices.com" sniname="www.matrixewebservices.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="4096" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIGjjCCBXagAwIBAgIJAICzPqxXegCBMA0GCSqGSIb3DQEBCwUAMIG0MQswCQYD
+VQQGEwJVUzEQMA4GA1UECBMHQXJpem9uYTETMBEGA1UEBxMKU2NvdHRzZGFsZTEa
+MBgGA1UEChMRR29EYWRkeS5jb20sIEluYy4xLTArBgNVBAsTJGh0dHA6Ly9jZXJ0
+cy5nb2RhZGR5LmNvbS9yZXBvc2l0b3J5LzEzMDEGA1UEAxMqR28gRGFkZHkgU2Vj
+dXJlIENlcnRpZmljYXRlIEF1dGhvcml0eSAtIEcyMB4XDTE3MDQxMjAyNDkwMFoX
+DTE4MDQxMTIzNDgwMFowSDEhMB8GA1UECxMYRG9tYWluIENvbnRyb2wgVmFsaWRh
+dGVkMSMwIQYDVQQDExp3d3cubWF0cml4ZXdlYnNlcnZpY2VzLmNvbTCCAiIwDQYJ
+KoZIhvcNAQEBBQADggIPADCCAgoCggIBAOWv4se6uzECk/Ia3UmhfY1g7sQcrkfl
+8VGMr/n8xqsohK4hP4EMZM2l5PQkKh+mL3F4Rz85/Z7OEg55KGf0S9luCbgwgeue
+gYsEiSi9mSWFYVuHWyco/Y554mOlu+mHgwLsRE5ZotcvLAu/8KABbpmn8BdAqvQA
+p94DW2UQRdXWFrc1AYBZTfEGliLn+b6S9aVVAJvTKYeYYTINhHDBc6Ys9rjqZhKb
+UpakgtrU0ZDro2v1Ng2nrYttlwb+LwZ5fopinCplSmAYBLPxAacWKqmrWUvo/I/Z
+GOujRzBVtfr6zOKyJqVwbhig8WR9VM88rZ1fEm/mieLwdyrJNG2RLfc9xj0CI9qw
++k8VcQRiaAs0j27bmSB9pGNuyZ1tvgWC/Cid0mtybgnkXXfzlXQO9lpf5IFe31am
+qK+peXFmoetD4Bbd6LRnk7ItuDg4zfLcZf10kGs/TQ5pjwN1C0my/ByU8OCz6/1w
+ztFN2ZU+FSrHtqrjY23JOdsjfi7Tlyj1Mp/5Nh4cTXFHAju6GgUcoFskGCG8dYQW
+glUgNW+VIblhG8Sze0n9LQ5iNmU3qXc5b3dC0NFmflB2ECzB7+ibjBRLEjrxvwUc
+TBnlSixfsnreT+TCOj+zQnU14FJf4fCoRsGXbEqMeOwpWsvsoS2OPC8mbqjcdYPv
+fIn2wprF/dBHAgMBAAGjggIMMIICCDAMBgNVHRMBAf8EAjAAMB0GA1UdJQQWMBQG
+CCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwNwYDVR0fBDAwLjAs
+oCqgKIYmaHR0cDovL2NybC5nb2RhZGR5LmNvbS9nZGlnMnMxLTQ3My5jcmwwXQYD
+VR0gBFYwVDBIBgtghkgBhv1tAQcXATA5MDcGCCsGAQUFBwIBFitodHRwOi8vY2Vy
+dGlmaWNhdGVzLmdvZGFkZHkuY29tL3JlcG9zaXRvcnkvMAgGBmeBDAECATB2Bggr
+BgEFBQcBAQRqMGgwJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmdvZGFkZHkuY29t
+LzBABggrBgEFBQcwAoY0aHR0cDovL2NlcnRpZmljYXRlcy5nb2RhZGR5LmNvbS9y
+ZXBvc2l0b3J5L2dkaWcyLmNydDAfBgNVHSMEGDAWgBRAwr0njsw0gzCiM9f7bLPw
+tCyAzjB5BgNVHREEcjBwghp3d3cubWF0cml4ZXdlYnNlcnZpY2VzLmNvbYIWbWF0
+cml4ZXdlYnNlcnZpY2VzLmNvbYIbd3d3Lm1hdHJpeGVzZXJ2aWNlc2RlbW8uY29t
+gh13d3cubWF0cml4ZXdlYnNlcnZpY2VzdWF0LmNvbTAdBgNVHQ4EFgQUzWwhJcBq
+qCkZgGgtTxHboB3VWbYwDQYJKoZIhvcNAQELBQADggEBACaggAvBYjcihOYZ3WkO
+jnWqR3DkiV9+MuijefqG1KlbYcXs5hjbB9bPDgjknvvh1rH36gq+SElxTJZ0+Qbq
+mFzRQD5u6Ngn+EN/WH6x7KSAbEFZK2BgCcQlLdkmOZHPxd2aVnbMZyvs6lNiiZjT
+ynqi+hjh8qq29LD4vs5ZrH/l5Qw1XreGbWwiMIOgXLxmKquREB7sWH2APzV2uCwT
+QiB3ew8VQVnBxS/hbTsZPnixtSz/xXb9aSrhV49BCn1CAHJ/2OMS41XgKOrhFI14
+mNw0MAQ8KT8bW6yxpv0rwTPY18pry8Qhxu/88jhwwydSKKSN+WXt2FdFHlgDz35P
+l5k=
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>80:b3:3e:ac:57:7a:00:81</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./OU=http://certs.godaddy.com/repository//CN=Go Daddy Secure Certificate Authority - G2]]></issuer>
+   <not-valid-before>Apr 12 02:49:00 2017 GMT</not-valid-before>
+   <not-valid-after>Apr 11 23:48:00 2018 GMT</not-valid-after>
+   <subject><![CDATA[/OU=Domain Control Validated/CN=www.matrixewebservices.com]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="4096">
+    Public-Key: (4096 bit)
+    Modulus:
+        00:e5:af:e2:c7:ba:bb:31:02:93:f2:1a:dd:49:a1:
+        7d:8d:60:ee:c4:1c:ae:47:e5:f1:51:8c:af:f9:fc:
+        c6:ab:28:84:ae:21:3f:81:0c:64:cd:a5:e4:f4:24:
+        2a:1f:a6:2f:71:78:47:3f:39:fd:9e:ce:12:0e:79:
+        28:67:f4:4b:d9:6e:09:b8:30:81:eb:9e:81:8b:04:
+        89:28:bd:99:25:85:61:5b:87:5b:27:28:fd:8e:79:
+        e2:63:a5:bb:e9:87:83:02:ec:44:4e:59:a2:d7:2f:
+        2c:0b:bf:f0:a0:01:6e:99:a7:f0:17:40:aa:f4:00:
+        a7:de:03:5b:65:10:45:d5:d6:16:b7:35:01:80:59:
+        4d:f1:06:96:22:e7:f9:be:92:f5:a5:55:00:9b:d3:
+        29:87:98:61:32:0d:84:70:c1:73:a6:2c:f6:b8:ea:
+        66:12:9b:52:96:a4:82:da:d4:d1:90:eb:a3:6b:f5:
+        36:0d:a7:ad:8b:6d:97:06:fe:2f:06:79:7e:8a:62:
+        9c:2a:65:4a:60:18:04:b3:f1:01:a7:16:2a:a9:ab:
+        59:4b:e8:fc:8f:d9:18:eb:a3:47:30:55:b5:fa:fa:
+        cc:e2:b2:26:a5:70:6e:18:a0:f1:64:7d:54:cf:3c:
+        ad:9d:5f:12:6f:e6:89:e2:f0:77:2a:c9:34:6d:91:
+        2d:f7:3d:c6:3d:02:23:da:b0:fa:4f:15:71:04:62:
+        68:0b:34:8f:6e:db:99:20:7d:a4:63:6e:c9:9d:6d:
+        be:05:82:fc:28:9d:d2:6b:72:6e:09:e4:5d:77:f3:
+        95:74:0e:f6:5a:5f:e4:81:5e:df:56:a6:a8:af:a9:
+        79:71:66:a1:eb:43:e0:16:dd:e8:b4:67:93:b2:2d:
+        b8:38:38:cd:f2:dc:65:fd:74:90:6b:3f:4d:0e:69:
+        8f:03:75:0b:49:b2:fc:1c:94:f0:e0:b3:eb:fd:70:
+        ce:d1:4d:d9:95:3e:15:2a:c7:b6:aa:e3:63:6d:c9:
+        39:db:23:7e:2e:d3:97:28:f5:32:9f:f9:36:1e:1c:
+        4d:71:47:02:3b:ba:1a:05:1c:a0:5b:24:18:21:bc:
+        75:84:16:82:55:20:35:6f:95:21:b9:61:1b:c4:b3:
+        7b:49:fd:2d:0e:62:36:65:37:a9:77:39:6f:77:42:
+        d0:d1:66:7e:50:76:10:2c:c1:ef:e8:9b:8c:14:4b:
+        12:3a:f1:bf:05:1c:4c:19:e5:4a:2c:5f:b2:7a:de:
+        4f:e4:c2:3a:3f:b3:42:75:35:e0:52:5f:e1:f0:a8:
+        46:c1:97:6c:4a:8c:78:ec:29:5a:cb:ec:a1:2d:8e:
+        3c:2f:26:6e:a8:dc:75:83:ef:7c:89:f6:c2:9a:c5:
+        fd:d0:47
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://crl.godaddy.com/gdig2s1-473.crl
+]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 2.16.840.1.114413.1.7.23.1
+  CPS: http://certificates.godaddy.com/repository/
+Policy: 2.23.140.1.2.1
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[OCSP - URI:http://ocsp.godaddy.com/
+CA Issuers - URI:http://certificates.godaddy.com/repository/gdig2.crt
+]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:40:C2:BD:27:8E:CC:34:83:30:A2:33:D7:FB:6C:B3:F0:B4:2C:80:CE
+]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:www.matrixewebservices.com, DNS:matrixewebservices.com, DNS:www.matrixeservicesdemo.com, DNS:www.matrixewebservicesuat.com]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[CD:6C:21:25:C0:6A:A8:29:19:80:68:2D:4F:11:DB:A0:1D:D5:59:B6]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="4096" />
+   <subject><![CDATA[www.matrixewebservices.com]]></subject>
+   <altnames><![CDATA[DNS:www.matrixewebservices.com, DNS:matrixewebservices.com, DNS:www.matrixeservicesdemo.com, DNS:www.matrixewebservicesuat.com]]></altnames>
+   <issuer><![CDATA[Go Daddy Secure Certificate Authority - G2]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Apr 12 02:49:00 2017 GMT</not-valid-before>
+   <not-valid-after>Apr 11 23:48:00 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

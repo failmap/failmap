@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="aktarlokman.com" sniname="aktarlokman.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="SEED-SHA" id="0x96" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="IDEA-CBC-SHA" id="0x7" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-RC4-SHA" id="0xC011" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="SEED-SHA" id="0x96" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="IDEA-CBC-SHA" id="0x7" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-RC4-SHA" id="0xC011" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="SEED-SHA" id="0x96" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="IDEA-CBC-SHA" id="0x7" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-RC4-SHA" id="0xC011" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIFUjCCBDqgAwIBAgIRANLjAR30+BzZqpcyFalMancwDQYJKoZIhvcNAQELBQAw
+gZAxCzAJBgNVBAYTAkdCMRswGQYDVQQIExJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAO
+BgNVBAcTB1NhbGZvcmQxGjAYBgNVBAoTEUNPTU9ETyBDQSBMaW1pdGVkMTYwNAYD
+VQQDEy1DT01PRE8gUlNBIERvbWFpbiBWYWxpZGF0aW9uIFNlY3VyZSBTZXJ2ZXIg
+Q0EwHhcNMTcxMDA2MDAwMDAwWhcNMTgxMDA2MjM1OTU5WjBTMSEwHwYDVQQLExhE
+b21haW4gQ29udHJvbCBWYWxpZGF0ZWQxFDASBgNVBAsTC1Bvc2l0aXZlU1NMMRgw
+FgYDVQQDEw9ha3Rhcmxva21hbi5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+ggEKAoIBAQC5GWaa6L3MdUnwHb2pXPVYU7b+PGT+9pPWsSNnATnn7PLbxO0lzi65
+ryOV7aVoZDGCPRmOe9eJr2FTzI4u3+UXiCbTdckrFNt6m/GO7/thqkkGkbVgWfwx
+mwc2Qku2JHFNZX1wTUdzb4xdBhJi5SW00Ek69HxH/KbnJ3vAxZgkeV3tnVIvIW98
+34RAviY3JLjebnL7/Js9GR/DJASprRNhImtQLNN2QyzPsEaXbGmBIPryCf/5LbsO
+JK0W4M6IeE0S+IIDodSW6qQ2hKvRFlyKSXiKujRsJvK9qRDzITfvz6yLbVZA1GS4
+Wj9dWRsr2fo8BGE6Hot14pqJE8MW9BIpAgMBAAGjggHhMIIB3TAfBgNVHSMEGDAW
+gBSQr2o6lFoL2JDqElZz30O0Oija5zAdBgNVHQ4EFgQUtsANCodz1+6ldLoIrrEC
+AwDOzMMwDgYDVR0PAQH/BAQDAgWgMAwGA1UdEwEB/wQCMAAwHQYDVR0lBBYwFAYI
+KwYBBQUHAwEGCCsGAQUFBwMCME8GA1UdIARIMEYwOgYLKwYBBAGyMQECAgcwKzAp
+BggrBgEFBQcCARYdaHR0cHM6Ly9zZWN1cmUuY29tb2RvLmNvbS9DUFMwCAYGZ4EM
+AQIBMFQGA1UdHwRNMEswSaBHoEWGQ2h0dHA6Ly9jcmwuY29tb2RvY2EuY29tL0NP
+TU9ET1JTQURvbWFpblZhbGlkYXRpb25TZWN1cmVTZXJ2ZXJDQS5jcmwwgYUGCCsG
+AQUFBwEBBHkwdzBPBggrBgEFBQcwAoZDaHR0cDovL2NydC5jb21vZG9jYS5jb20v
+Q09NT0RPUlNBRG9tYWluVmFsaWRhdGlvblNlY3VyZVNlcnZlckNBLmNydDAkBggr
+BgEFBQcwAYYYaHR0cDovL29jc3AuY29tb2RvY2EuY29tMC8GA1UdEQQoMCaCD2Fr
+dGFybG9rbWFuLmNvbYITd3d3LmFrdGFybG9rbWFuLmNvbTANBgkqhkiG9w0BAQsF
+AAOCAQEAP6cQtqPBKeuazo2a4mqY02K6WKASOBf5rB6LlZ/zl6Qv709y3V7UTcls
+uijXZ0KBdK8VRsntVd19XHv+z2TjXXG8K5YQ7h2dslIDQa7inRDo/l7eIfAJyMUm
+mSqh7OZ2lM19eZCPQMScSLAaBXTVL4YVgCLrrfkEBw8hplVP71a6ZaazHNxkJPwi
+7b+pelFf4PdJ25tcls2oIRxRKnkn83dggGIvhVs3VATpa92oZj8ky8o8Lzwqjt5r
+w498SIDgrT2QwrDGiTAPsXRzUWssm6HTay+OmQzFLTLynBW+ykUAHxG3gsBp2Sl+
+CVZ3nTdMHVMXMQ8iwl52y7ZV4Eo4HA==
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>d2:e3:01:1d:f4:f8:1c:d9:aa:97:32:15:a9:4c:6a:77</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA Domain Validation Secure Server CA]]></issuer>
+   <not-valid-before>Oct  6 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Oct  6 23:59:59 2018 GMT</not-valid-after>
+   <subject><![CDATA[/OU=Domain Control Validated/OU=PositiveSSL/CN=aktarlokman.com]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:b9:19:66:9a:e8:bd:cc:75:49:f0:1d:bd:a9:5c:
+        f5:58:53:b6:fe:3c:64:fe:f6:93:d6:b1:23:67:01:
+        39:e7:ec:f2:db:c4:ed:25:ce:2e:b9:af:23:95:ed:
+        a5:68:64:31:82:3d:19:8e:7b:d7:89:af:61:53:cc:
+        8e:2e:df:e5:17:88:26:d3:75:c9:2b:14:db:7a:9b:
+        f1:8e:ef:fb:61:aa:49:06:91:b5:60:59:fc:31:9b:
+        07:36:42:4b:b6:24:71:4d:65:7d:70:4d:47:73:6f:
+        8c:5d:06:12:62:e5:25:b4:d0:49:3a:f4:7c:47:fc:
+        a6:e7:27:7b:c0:c5:98:24:79:5d:ed:9d:52:2f:21:
+        6f:7c:df:84:40:be:26:37:24:b8:de:6e:72:fb:fc:
+        9b:3d:19:1f:c3:24:04:a9:ad:13:61:22:6b:50:2c:
+        d3:76:43:2c:cf:b0:46:97:6c:69:81:20:fa:f2:09:
+        ff:f9:2d:bb:0e:24:ad:16:e0:ce:88:78:4d:12:f8:
+        82:03:a1:d4:96:ea:a4:36:84:ab:d1:16:5c:8a:49:
+        78:8a:ba:34:6c:26:f2:bd:a9:10:f3:21:37:ef:cf:
+        ac:8b:6d:56:40:d4:64:b8:5a:3f:5d:59:1b:2b:d9:
+        fa:3c:04:61:3a:1e:8b:75:e2:9a:89:13:c3:16:f4:
+        12:29
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:90:AF:6A:3A:94:5A:0B:D8:90:EA:12:56:73:DF:43:B4:3A:28:DA:E7
+]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[B6:C0:0D:0A:87:73:D7:EE:A5:74:BA:08:AE:B1:02:03:00:CE:CC:C3]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Basic Constraints" level="critical"><![CDATA[CA:FALSE]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 1.3.6.1.4.1.6449.1.2.2.7
+  CPS: https://secure.comodo.com/CPS
+Policy: 2.23.140.1.2.1
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://crl.comodoca.com/COMODORSADomainValidationSecureServerCA.crl
+]]></extension>
+    <extension name="Authority Information Access"><![CDATA[CA Issuers - URI:http://crt.comodoca.com/COMODORSADomainValidationSecureServerCA.crt
+OCSP - URI:http://ocsp.comodoca.com
+]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:aktarlokman.com, DNS:www.aktarlokman.com]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[aktarlokman.com]]></subject>
+   <altnames><![CDATA[DNS:aktarlokman.com, DNS:www.aktarlokman.com]]></altnames>
+   <issuer><![CDATA[COMODO RSA Domain Validation Secure Server CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Oct  6 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Oct  6 23:59:59 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

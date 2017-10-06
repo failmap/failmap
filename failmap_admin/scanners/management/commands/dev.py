@@ -8,7 +8,6 @@ from django.core.management.base import BaseCommand
 from failmap_admin.map.determineratings import DetermineRatings
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.scanner_dns import ScannerDns
 from failmap_admin.scanners.state_manager import StateManager
 from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
 
@@ -19,9 +18,30 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        Command.develop_celery()
+        Command.test_sslscan_real()
+        # Command.test_determine_grade()
+        # Command.develop_sslscan()
+        # Command.develop_celery()
         # Command.develop_celery_advanced()
-        Command.develop_celery_test_async_tasks()
+        # Command.develop_celery_test_async_tasks()
+
+    @staticmethod
+    def develop_sslscan():
+        from failmap_admin.scanners.scanner_tls import scan_url
+        url = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
+        scan_url(url)
+        url = Url.objects.all().filter(url='www.amersfoort.nl').get()
+        scan_url(url)
+
+    @staticmethod
+    def test_determine_grade():
+        from failmap_admin.scanners.scanner_tls import test_determine_grade
+        test_determine_grade()
+
+    @staticmethod
+    def test_sslscan_real():
+        from failmap_admin.scanners.scanner_tls import test_real
+        test_real('johnkr.com', 443)
 
     @staticmethod
     def develop_celery_test_async_tasks():

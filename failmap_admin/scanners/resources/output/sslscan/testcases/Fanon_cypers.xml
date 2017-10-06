@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="example.com" sniname="example.com" port="443">
+  <renegotiation supported="1" secure="0" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="ADH-AES256-SHA" id="0x3A" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ADH-AES128-SHA" id="0x34" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ADH-RC4-MD5" id="0x18" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="ADH-DES-CBC3-SHA" id="0x1B" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="EDH-RSA-DES-CBC-SHA" id="0x15" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="ADH-DES-CBC-SHA" id="0x1A" dhebits="1024" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="56" cipher="DES-CBC-SHA" id="0x9" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-EDH-RSA-DES-CBC-SHA" id="0x14" dhebits="512" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-ADH-DES-CBC-SHA" id="0x19" dhebits="512" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-DES-CBC-SHA" id="0x8" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-RC2-CBC-MD5" id="0x6" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-ADH-RC4-MD5" id="0x17" dhebits="512" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="40" cipher="EXP-RC4-MD5" id="0x3" />
+  <cipher status="preferred" sslversion="SSLv3" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="256" cipher="ADH-AES256-SHA" id="0x3A" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="ADH-AES128-SHA" id="0x34" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="ADH-RC4-MD5" id="0x18" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="RC4-SHA" id="0x5" />
+  <cipher status="accepted" sslversion="SSLv3" bits="128" cipher="RC4-MD5" id="0x4" />
+  <cipher status="accepted" sslversion="SSLv3" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="112" cipher="ADH-DES-CBC3-SHA" id="0x1B" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="SSLv3" bits="56" cipher="EDH-RSA-DES-CBC-SHA" id="0x15" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="56" cipher="ADH-DES-CBC-SHA" id="0x1A" dhebits="1024" />
+  <cipher status="accepted" sslversion="SSLv3" bits="56" cipher="DES-CBC-SHA" id="0x9" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-EDH-RSA-DES-CBC-SHA" id="0x14" dhebits="512" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-ADH-DES-CBC-SHA" id="0x19" dhebits="512" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-DES-CBC-SHA" id="0x8" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-RC2-CBC-MD5" id="0x6" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-ADH-RC4-MD5" id="0x17" dhebits="512" />
+  <cipher status="accepted" sslversion="SSLv3" bits="40" cipher="EXP-RC4-MD5" id="0x3" />
+  <cipher status="preferred" sslversion="SSLv2" bits="128" cipher="RC2-CBC-MD5" id="0x30080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="128" cipher="RC4-MD5" id="0x10080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="112" cipher="DES-CBC3-MD5" id="0x700C0" />
+  <cipher status="accepted" sslversion="SSLv2" bits="56" cipher="DES-CBC-MD5" id="0x60040" />
+  <cipher status="accepted" sslversion="SSLv2" bits="40" cipher="EXP-RC2-CBC-MD5" id="0x40080" />
+  <cipher status="accepted" sslversion="SSLv2" bits="40" cipher="EXP-RC4-MD5" id="0x20080" />
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[example.com]]></subject>
+   <altnames><![CDATA[DNS:example.com, DNS:example.com]]></altnames>
+   <issuer><![CDATA[COMODO RSA Domain Validation Secure Server CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Oct  5 00:00:00 2017 GMT</not-valid-before>
+   <not-valid-after>Oct  5 23:59:59 2018 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>

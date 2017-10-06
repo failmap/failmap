@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="1.11.10-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="example.com" sniname="example.com" port="443">
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x9F" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x9E" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA256" id="0x6B" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA256" id="0x67" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x9D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x9C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x3D" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x3C" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-AES256-SHA" id="0x39" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-AES128-SHA" id="0x33" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="ECDHE-RSA-DES-CBC3-SHA" id="0xC012" curve="P-256" ecdhebits="256" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="EDH-RSA-DES-CBC3-SHA" id="0x16" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x35" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x2F" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0xA" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="DHE-RSA-CAMELLIA256-SHA" id="0x88" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="CAMELLIA256-SHA" id="0x84" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="DHE-RSA-CAMELLIA128-SHA" id="0x45" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="CAMELLIA128-SHA" id="0x41" />
+  <certificate>
+   <certificate-blob>
+-----BEGIN CERTIFICATE-----
+MIIF1TCCBL2gAwIBAgIQY6K68g3mXkMwDwq1grLbLjANBgkqhkiG9w0BAQsFADBg
+MQswCQYDVQQGEwJUVzEjMCEGA1UECgwaQ2h1bmdod2EgVGVsZWNvbSBDby4sIEx0
+ZC4xLDAqBgNVBAsMI1B1YmxpYyBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eSAtIEcy
+MB4XDTE2MTExODA2MTExNVoXDTE5MTExODE1NTk1OVowPTELMAkGA1UEBhMCVFcx
+EjAQBgNVBAoMCeaWh+WMlumDqDEaMBgGA1UEAwwRaW1lZGlhLmN1bHR1cmUudHcw
+ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDWd4KTB7AIiRMa1R1ETSxz
+isDoBb50DVqAhxzEvSMv3Crr30FbrLaZbvHlz8zxHStJ2U6EufcsY3IKvaHJz58n
+ImYQWVegZtAxVrsiw+mXmcPEK+suL6zy+F6reObKgQJM1qBL0ndP3hXtzyG3PBTV
+noKfy++qy3uEzZDO6yBNmk907FYywpdshxab/LH1d2R6TpEduNtepMXpShHQaNGk
+Xy5BffuCv7pmYYK5mQUh0vJMbvxEWC3VZBAzMEE3PQKlLbg6bWjevmX/tQiQdIqf
+YZIqYlgB61s4CSMInmAZW4/cYgUlaD591u5ZDVsh7cbiZPvbjN4R86Yw9gP7ALRd
+AgMBAAGjggKsMIICqDCBkwYIKwYBBQUHAQEEgYYwgYMwSQYIKwYBBQUHMAKGPWh0
+dHA6Ly9yZXBvc2l0b3J5LnB1YmxpY2NhLmhpbmV0Lm5ldC9jZXJ0cy9Jc3N1ZWRU
+b1RoaXNDQS5wN2IwNgYIKwYBBQUHMAGGKmh0dHA6Ly9vY3NwLnB1YmxpY2NhLmhp
+bmV0Lm5ldC9PQ1NQL29jc3BHMjAiBgNVHSAEGzAZMA0GCysGAQQBgbcjZAADMAgG
+BmeBDAECAjAfBgNVHSMEGDAWgBTLg31lFa+pyfOoqfRkfHlSBXRAYTCBmwYDVR0f
+BIGTMIGQMEmgR6BFhkNodHRwOi8vcmVwb3NpdG9yeS5wdWJsaWNjYS5oaW5ldC5u
+ZXQvY3JsL1B1YkNBRzIvMTAwLTEvY29tcGxldGUuY3JsMEOgQaA/hj1odHRwOi8v
+cmVwb3NpdG9yeS5wdWJsaWNjYS5oaW5ldC5uZXQvY3JsL1B1YkNBRzIvY29tcGxl
+dGUuY3JsMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8E
+BAMCBaAwgZAGA1UdEQSBiDCBhYIRaW1lZGlhLmN1bHR1cmUudHeCFWNtcy5pbWVk
+aWEuY3VsdHVyZS50d4IVYXBpLmltZWRpYS5jdWx0dXJlLnR3ghV2b2QuaW1lZGlh
+LmN1bHR1cmUudHeCFmxpdmUuaW1lZGlhLmN1bHR1cmUudHeCE2NoaWxkcmVuLm1v
+Yy5nb3YudHcwHQYDVR0OBBYEFD3sqTt5O+qSHv2IvRQE2+LM+fz3MEwGA1UdCQRF
+MEMwDwYIYIZ2AWQCgUgxAwIBZDAPBghghnYBZAKBSTEDAgFsMB8GCGCGdgFkAoFK
+MRMMEWltZWRpYS5jdWx0dXJlLnR3MA0GCSqGSIb3DQEBCwUAA4IBAQC+xux97Sji
+Py9sIIMA4rpSeKHc8/iGSW3XVHovX63VLBHSvAgvYCjoW+LQhh8One0DvonFjbpG
+KCnC+Vg1eOYecWMNP4kCR0O7eaeT9yuM9tOlqxviMpNsy++ZBJWwHD6taEoX9E/p
+8Ppedhb6CgYqGhm6d+iCYS6Uc9UpTpChw5qhdfuoTAyh4Ec2zePZlqXyxK5Qh0EY
+GwyLNWReryP0o3mrZw5f+3Wu1JhCrz1uSp/sqjYzl09qJ7Ba92CFNhCk2ADRmRu0
+hPMFN8MjTJnd/+J8n2qyATelOtXb6FQ1nhX3tidxgxYmA2t8F8TQo1ZsFO1/oc2M
+VWXxw73CeCYr
+-----END CERTIFICATE-----
+   </certificate-blob>
+   <version>2</version>
+   <serial>63:a2:ba:f2:0d:e6:5e:43:30:0f:0a:b5:82:b2:db:2e</serial>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <issuer><![CDATA[/C=TW/O=Chunghwa Telecom Co., Ltd./OU=Public Certification Authority - G2]]></issuer>
+   <not-valid-before>Nov 18 06:11:15 2016 GMT</not-valid-before>
+   <not-valid-after>Nov 18 15:59:59 2019 GMT</not-valid-after>
+   <subject><![CDATA[/C=TW/O=\xE6\x96\x87\xE5\x8C\x96\xE9\x83\xA8/CN=imedia.culture.tw]]></subject>
+   <pk-algorithm>rsaEncryption</pk-algorithm>
+   <pk error="false" type="RSA" bits="2048">
+    Public-Key: (2048 bit)
+    Modulus:
+        00:d6:77:82:93:07:b0:08:89:13:1a:d5:1d:44:4d:
+        2c:73:8a:c0:e8:05:be:74:0d:5a:80:87:1c:c4:bd:
+        23:2f:dc:2a:eb:df:41:5b:ac:b6:99:6e:f1:e5:cf:
+        cc:f1:1d:2b:49:d9:4e:84:b9:f7:2c:63:72:0a:bd:
+        a1:c9:cf:9f:27:22:66:10:59:57:a0:66:d0:31:56:
+        bb:22:c3:e9:97:99:c3:c4:2b:eb:2e:2f:ac:f2:f8:
+        5e:ab:78:e6:ca:81:02:4c:d6:a0:4b:d2:77:4f:de:
+        15:ed:cf:21:b7:3c:14:d5:9e:82:9f:cb:ef:aa:cb:
+        7b:84:cd:90:ce:eb:20:4d:9a:4f:74:ec:56:32:c2:
+        97:6c:87:16:9b:fc:b1:f5:77:64:7a:4e:91:1d:b8:
+        db:5e:a4:c5:e9:4a:11:d0:68:d1:a4:5f:2e:41:7d:
+        fb:82:bf:ba:66:61:82:b9:99:05:21:d2:f2:4c:6e:
+        fc:44:58:2d:d5:64:10:33:30:41:37:3d:02:a5:2d:
+        b8:3a:6d:68:de:be:65:ff:b5:08:90:74:8a:9f:61:
+        92:2a:62:58:01:eb:5b:38:09:23:08:9e:60:19:5b:
+        8f:dc:62:05:25:68:3e:7d:d6:ee:59:0d:5b:21:ed:
+        c6:e2:64:fb:db:8c:de:11:f3:a6:30:f6:03:fb:00:
+        b4:5d
+    Exponent: 65537 (0x10001)
+   </pk>
+   <X509v3-Extensions>
+    <extension name="Authority Information Access"><![CDATA[CA Issuers - URI:http://repository.publicca.hinet.net/certs/IssuedToThisCA.p7b
+OCSP - URI:http://ocsp.publicca.hinet.net/OCSP/ocspG2
+]]></extension>
+    <extension name="X509v3 Certificate Policies"><![CDATA[Policy: 1.3.6.1.4.1.23459.100.0.3
+Policy: 2.23.140.1.2.2
+]]></extension>
+    <extension name="X509v3 Authority Key Identifier"><![CDATA[keyid:CB:83:7D:65:15:AF:A9:C9:F3:A8:A9:F4:64:7C:79:52:05:74:40:61
+]]></extension>
+    <extension name="X509v3 CRL Distribution Points"><![CDATA[
+Full Name:
+  URI:http://repository.publicca.hinet.net/crl/PubCAG2/100-1/complete.crl
+
+Full Name:
+  URI:http://repository.publicca.hinet.net/crl/PubCAG2/complete.crl
+]]></extension>
+    <extension name="X509v3 Extended Key Usage"><![CDATA[TLS Web Server Authentication, TLS Web Client Authentication]]></extension>
+    <extension name="X509v3 Key Usage" level="critical"><![CDATA[Digital Signature, Key Encipherment]]></extension>
+    <extension name="X509v3 Subject Alternative Name"><![CDATA[DNS:imedia.culture.tw, DNS:cms.imedia.culture.tw, DNS:api.imedia.culture.tw, DNS:vod.imedia.culture.tw, DNS:live.imedia.culture.tw, DNS:children.moc.gov.tw]]></extension>
+    <extension name="X509v3 Subject Key Identifier"><![CDATA[3D:EC:A9:3B:79:3B:EA:92:1E:FD:88:BD:14:04:DB:E2:CC:F9:FC:F7]]></extension>
+    <extension name="X509v3 Subject Directory Attributes"><![CDATA[0C0...`.v.d..H1...d0...`.v.d..I1...l0...`.v.d..J1...imedia.culture.tw]]></extension>
+   </X509v3-Extensions>
+  </certificate>
+  <certificate>
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[example.com]]></subject>
+   <altnames><![CDATA[DNS:example.com, DNS:cms.example.com, DNS:api.example.com, DNS:vod.example.com, DNS:live.example.com, DNS:children.example.com]]></altnames>
+   <issuer><![CDATA[/C=TW/O=Chunghwa Telecom Co., Ltd./OU=Public Certification Authority - G2]]></issuer>
+   <not-valid-before>Nov 18 06:11:15 2016 GMT</not-valid-before>
+   <not-valid-after>Nov 18 15:59:59 2019 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </ssltest>
+</document>
