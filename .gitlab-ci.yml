@@ -40,8 +40,9 @@ build:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build -t registry.gitlab.com/failmap/admin .
     - docker push registry.gitlab.com/failmap/admin:latest
-  only:
-    - master
+  # temporary to develop build pipeline
+  #  only:
+  #  - master
 
 
 # provide codequality context for merge requests
