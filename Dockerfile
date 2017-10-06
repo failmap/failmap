@@ -1,3 +1,4 @@
+# use full image for build (compile) dependencies
 FROM python:3 as build
 
 COPY requirements*.txt /
@@ -5,15 +6,13 @@ RUN pip install -r requirements.txt
 RUN pip install -r requirements.deploy.txt
 
 COPY . /source/
-WORKDIR /source/
-RUN python setup.py sdist
+RUN virtualenv /pyenv
+RUN /pyenv/bin/pip install /source/
 
 # switch to lightweight base image for distribution
-FROM python:3-alpine
-COPY --from=build /root/.cache /root/.cache
-COPY --from=build /source/dist/* /
-
-RUN pip install /failmap-admin-*.tar.gz
+FROM python:3-slim
+COPY --from=build /pyenv /pyenv
+RUN ln -s /pyenv/bin/failmap-admin /usr/local/bin/
 
 WORKDIR /
 
@@ -23,7 +22,7 @@ ENV UWSGI_UID root
 ENV UWSGI_MODULE failmap_admin.wsgi
 ENV UWSGI_STATIC_MAP /static=/srv/failmap_admin/static
 
-RUN /usr/local/bin/failmap-admin collectstatic
+RUN /pyenv/bin/failmap-admin collectstatic
 
 ENTRYPOINT [ "/usr/local/bin/failmap-admin" ]
 
