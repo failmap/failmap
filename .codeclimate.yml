@@ -26,3 +26,4 @@ ratings:
 exclude_paths:
   - "failmap_admin/fail/migrations/*"
   - "manage.py"
+  - ".*"
