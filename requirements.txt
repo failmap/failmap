@@ -28,7 +28,6 @@ colorama
 
 # dev. tools
 tox
-autopep8
 coverage
 pytest
 django-silk

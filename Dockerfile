@@ -4,7 +4,9 @@ FROM python:3 as build
 COPY requirements*.txt /
 
 COPY . /source/
+RUN pip install virtualenv
 RUN virtualenv /pyenv
+
 RUN /pyenv/bin/pip install -r requirements.txt
 RUN /pyenv/bin/pip install -r requirements.deploy.txt
 RUN /pyenv/bin/pip install /source/
