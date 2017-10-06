@@ -108,6 +108,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'failmap_admin.wsgi.application'
 
+# Assume traffic is proxied from frontend loadbalancers
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
