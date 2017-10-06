@@ -14,7 +14,10 @@ RUN /pyenv/bin/pip install /source/
 # switch to lightweight base image for distribution
 FROM python:3-slim
 COPY --from=build /pyenv /pyenv
+
+# expose relevant executables
 RUN ln -s /pyenv/bin/failmap-admin /usr/local/bin/
+RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 
 WORKDIR /
 
