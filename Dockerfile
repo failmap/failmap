@@ -7,10 +7,10 @@ RUN pip install -r requirements.deploy.txt
 COPY . /source/
 WORKDIR /source/
 RUN python setup.py sdist
-RUN ls
-RUN ls dist
 
+# switch to lightweight base image for distribution
 FROM python:3-alpine
+COPY --from=build /root/.cache /root/.cache
 COPY --from=build /source/dist/* /
 
 RUN pip install /failmap-admin-*.tar.gz
