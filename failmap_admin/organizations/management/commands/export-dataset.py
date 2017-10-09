@@ -1,5 +1,7 @@
 import logging
 from datetime import datetime
+from failmap_admin import settings
+from django.db import connection
 
 import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
@@ -46,6 +48,35 @@ class Command(DumpDataCommand):
         :param options:
         :return:
         """
+
+        # first check if there are reference issues. If there are, then we can't export. They must be fixed, otherwise
+        # we can't loaddata at a later stage without terrible hacks.
+
+        # this only works for ssqlite.
+        if "sqlite" in settings.DATABASES["default"]["ENGINE"]:
+            # http://www.sqlite.org/pragma.html#pragma_foreign_key_check
+            logger.info('Checking for foreign key issues, and generating possible SQL to remediate issues.')
+
+            cursor = connection.cursor()
+            cursor.execute('''PRAGMA foreign_key_check;''')
+            rows = cursor.fetchall()
+            if rows:
+                logger.error("There are incomplete foreign keys. See information above to fix this. "
+                             "Cannot create export. Please fix these issues manually and try again.")
+
+            for row in rows:
+                logger.info("%25s %6s %25s %6s" % (row[0], row[1], row[2], row[3]))
+
+            logger.error("Here are some extremely crude SQL statements that might help fix the problem.")
+            for row in rows:
+                logger.info("DELETE FROM %s WHERE id = \"%s\";" % (row[0], row[1]))
+
+            if rows:
+                return
+        else:
+            logger.warning("This export might have incorrect integrity: no foreign key check for this engine was "
+                           "implemented. Loaddata might not accept this import. Perform a key check manually.")
+            return
 
         filename = "failmap_dataset_%s.yaml" % datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S")
 
