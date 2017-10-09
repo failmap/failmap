@@ -4,7 +4,7 @@ import pytz  # admin functions
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
+from failmap_admin.map.determineratings import OrganizationRating, UrlRating, rate_url, rate_organization
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
@@ -60,8 +60,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     def rate_organization(self, request, queryset):
 
         for organization in queryset:
-            dr = DetermineRatings()
-            dr.rate_organization(organization=organization)
+            rate_organization(organization=organization)
 
         self.message_user(request, "Organization(s) have been rated")
 
@@ -136,8 +135,7 @@ class UrlAdmin(admin.ModelAdmin):
     def rate_url(self, request, queryset):
 
         for url in queryset:
-            dr = DetermineRatings()
-            dr.rate_url(url=url)
+            rate_url(url=url)
 
         self.message_user(request, "URL(s) have been rated")
 

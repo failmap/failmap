@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import DetermineRatings
+from failmap_admin.map.determineratings import rate_urls_efficient, default_ratings, rate_organizations_efficient
 from failmap_admin.map.models import OrganizationRating, UrlRating
 
 
@@ -16,11 +16,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         UrlRating.objects.all().delete()
-        DetermineRatings.rate_urls_efficient(create_history=True)
-        DetermineRatings.rate_urls_efficient()  # this should not do anything anymore...
+        rate_urls_efficient(create_history=True)
+        rate_urls_efficient()  # this should not do anything anymore...
 
         OrganizationRating.objects.all().delete()
-        DetermineRatings.default_ratings()
-        DetermineRatings.rate_organizations_efficient(create_history=True)
+        default_ratings()
+        rate_organizations_efficient(create_history=True)
         print("Making the most recent organization rating, should not have any effect.")
-        DetermineRatings.rate_organizations_efficient()  # this should not do anything anymore...
+        rate_organizations_efficient()  # this should not do anything anymore...

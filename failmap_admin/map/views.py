@@ -11,8 +11,6 @@ from django.shortcuts import render
 from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
 
-from failmap_admin.map.determineratings import DetermineRatings
-
 from .models import Organization, OrganizationRating, Url, UrlRating
 
 cache_time = 24 * 60 * 60
