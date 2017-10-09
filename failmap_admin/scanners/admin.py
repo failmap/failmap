@@ -1,7 +1,7 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import DetermineRatings, OrganizationRating, UrlRating
+from failmap_admin.map.determineratings import OrganizationRating, UrlRating, rate_url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
@@ -48,8 +48,7 @@ class EndpointAdmin(admin.ModelAdmin):
     def rate_url(self, request, queryset):
 
         for endpoint in queryset:
-            dr = DetermineRatings()
-            dr.rate_url(url=endpoint.url)
+            rate_url(url=endpoint.url)
 
         self.message_user(request, "URL(s) have been rated")
 
@@ -85,8 +84,7 @@ class TlsQualysScanAdmin(admin.ModelAdmin):
     def rate_url(self, request, queryset):
 
         for tlsqualysscan in queryset:
-            dr = DetermineRatings()
-            dr.rate_url(url=tlsqualysscan.endpoint.url)
+            rate_url(url=tlsqualysscan.endpoint.url)
 
         self.message_user(request, "URL(s) have been rated")
 

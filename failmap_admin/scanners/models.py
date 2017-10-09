@@ -166,6 +166,8 @@ class EndpointGenericScan(models.Model):
                   "cannot change once it's set."
     )
 
+    def __str__(self):
+        return "%s: %s rated %s on %s" % (self.rating_determined_on, self.type, self.rating, self.endpoint)
 
 class EndpointGenericScanScratchpad(models.Model):
     """
