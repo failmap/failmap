@@ -51,7 +51,7 @@ dependencies isolated and managed. (todo: how)
     pip3 install -e .
     failmap-admin migrate
     failmap-admin createsuperuser
-    failmap-admin loaddata testdata  # slow, get a coffee
+    failmap-admin load-dataset testdata  # slow, get a coffee
     failmap-admin rebuild-ratings  # slow, also a tea
     failmap-admin runserver
 
