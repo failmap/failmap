@@ -87,10 +87,11 @@ class Endpoint(models.Model):
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
-        return not ":" in self.ip
+        return ":" not in self.ip
 
     def is_ipv6(self):
         return ":" in self.ip
+
 
 class TlsQualysScan(models.Model):
     """
@@ -168,6 +169,7 @@ class EndpointGenericScan(models.Model):
 
     def __str__(self):
         return "%s: %s rated %s on %s" % (self.rating_determined_on, self.type, self.rating, self.endpoint)
+
 
 class EndpointGenericScanScratchpad(models.Model):
     """

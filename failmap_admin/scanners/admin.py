@@ -4,8 +4,8 @@ from jet.admin import CompactInline
 from failmap_admin.map.determineratings import OrganizationRating, UrlRating, rate_url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
-from .models import (Endpoint, EndpointGenericScan, Screenshot, State, TlsQualysScan,
-                     TlsQualysScratchpad, Url, EndpointGenericScanScratchpad)
+from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
+                     State, TlsQualysScan, TlsQualysScratchpad, Url)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -136,6 +136,7 @@ class EndpointGenericScanAdmin(admin.ModelAdmin):
                    'explanation', 'last_scan_moment', 'rating_determined_on')
     fields = ('endpoint', 'type', 'domain', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
+
 
 class EndpointGenericScanScratchpadAdmin(admin.ModelAdmin):
     list_display = ('type', 'domain', 'when', 'data')

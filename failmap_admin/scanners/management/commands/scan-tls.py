@@ -23,7 +23,6 @@ class Command(BaseCommand):
             nargs=1,
         )
 
-
     def handle(self, *args, **options):
 
         if options['url']:

@@ -1,8 +1,9 @@
 # Some help to translate the django part.
 # This tries to help you avoid remembering the "messages" mess from Django.
 import logging
-from django.core.management.base import BaseCommand
+
 from django.core.management import call_command
+from django.core.management.base import BaseCommand
 
 logger = logging.getLogger(__package__)
 

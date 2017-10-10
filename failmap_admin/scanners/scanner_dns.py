@@ -24,7 +24,6 @@ from django.conf import settings
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_http import resolves
 
-
 logger = logging.getLogger(__package__)
 
 
@@ -65,6 +64,8 @@ wordlists = {
 # todo: if ScannerHttp.has_internet_connection():
 
 # todo: move this to url logic / url manager. The resolves bit is somewhat in the way. Refactor
+
+
 def add_subdomain(subdomain, url):
     fulldomain = subdomain + "." + url.url
     logger.debug("Trying to add subdomain to database: %s" % fulldomain)
@@ -88,6 +89,7 @@ def add_subdomain(subdomain, url):
         logger.debug("Subdomain did not resolve: %s" % fulldomain)
     return
 
+
 def organization_search_engines_scan(organization):
     urls = Url.objects.all().filter(organization=organization,
                                     url__iregex="^[^.]*\.[^.]*$")
@@ -102,6 +104,7 @@ def organization_search_engines_scan(organization):
         addedlist = addedlist + search_engines_scan(url)
     return addedlist
 
+
 def organization_certificate_transparency(organization):
     urls = Url.objects.all().filter(organization=organization,
                                     url__iregex="^[^.]*\.[^.]*$")
@@ -113,6 +116,7 @@ def organization_certificate_transparency(organization):
     for url in urls:
         addedlist = addedlist + certificate_transparency(url)
     return addedlist
+
 
 def search_engines_scan(url):
     # Todo: sometimes the report contains subdomains for other organizations at top level domain
@@ -169,6 +173,8 @@ def search_engines_scan(url):
     return addedlist
 
 # todo: also include censys, google and let's encrypt( if has one )
+
+
 def certificate_transparency(url):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
@@ -217,6 +223,7 @@ def certificate_transparency(url):
             addedlist.append(added)
     return addedlist
 
+
 def subdomains_harvester(url):
     # deprecated
     # todo: very ugly parsing, should be just reading the XML output.
@@ -244,6 +251,7 @@ def subdomains_harvester(url):
 
     return subdomains
 
+
 def update_wordlist_known_subdomains():
     # todo: per branche wordlists, more to the point
     prefixes = []
@@ -260,6 +268,7 @@ def update_wordlist_known_subdomains():
             text_file.write(unique_prefix + '\n')
 
     return unique_prefixes
+
 
 def make_threeletterwordlist():
     import itertools
@@ -279,6 +288,8 @@ def make_threeletterwordlist():
 
 # the chance of getting one or both domains back as existing is one in gazillions.
 # but for the astronomically small chance there is another factor of gazillions.
+
+
 def create_nonsense():
     import random
     import string
@@ -290,10 +301,12 @@ def create_nonsense():
         for word in words:
             text_file.write(word + '\n')
 
+
 def organization_brute_dutch(self, organization):
     urls = topleveldomains(organization)
     wordlist = wordlists["dutch_basic"]["path"]
     return dnsrecon_brute(urls, wordlist)
+
 
 def organization_brute_threeletters(self, organization):
     urls = topleveldomains(organization)
@@ -303,21 +316,26 @@ def organization_brute_threeletters(self, organization):
 # hundreds of words
 # todo: language matters, many of the NL subdomains don't make sense in other countries.
 # todo: don't use the subdomains that are already known to exist.
+
+
 def organization_brute_knownsubdomains(self, organization):
     update_wordlist_known_subdomains()
     urls = topleveldomains(organization)
     wordlist = wordlists["known_subdomains"]["path"]
     return dnsrecon_brute(urls, wordlist)
 
+
 def brute_known_subdomains(urls):
     update_wordlist_known_subdomains()
     wordlist = wordlists["known_subdomains"]["path"]
     return dnsrecon_brute(urls, wordlist)
 
+
 def organization_standard_scan(self, organization):
     urls = Url.objects.all().filter(organization=organization,
                                     url__iregex="^[^.]*\.[^.]*$")
     return dnsrecon_default(urls)
+
 
 def dnsrecon_brute(urls, wordlist):
     imported_urls = []
@@ -347,6 +365,7 @@ def dnsrecon_brute(urls, wordlist):
         imported_urls = imported_urls + import_dnsrecon_report(url, path)
 
     return imported_urls
+
 
 def dnsrecon_default(urls):
     # todo: Expanding IP ranges found in DNS and TXT records for Reverse Look-up takes ages.
@@ -383,6 +402,8 @@ def dnsrecon_default(urls):
 
 # This helps to determine at database level if the DNS uses wildcards, so it can be dealt
 # with in another way.
+
+
 def topleveldomains(organization):
     # todo: move to manager, expand the queryset with the uses dns wildcard.
     topleveldomains = Url.objects.all().filter(organization=organization,
@@ -405,6 +426,7 @@ def topleveldomains(organization):
         logger.info("No top level domain available without wildcards.")
 
     return non_wildcard_toplevel_domains
+
 
 def url_uses_wildcards(url):
     logger.debug("Checking for DNS wildcards on domain: %s" % url.url)
@@ -435,6 +457,7 @@ def url_uses_wildcards(url):
 
     return wildcard
 
+
 def dnsrecon_google(url):
     raise NotImplemented
     # todo: make this new manual scan.
@@ -448,6 +471,8 @@ def dnsrecon_google(url):
     return
 
 # todo: also perform basic endpoint scans for new subdomains
+
+
 def import_dnsrecon_report(url, path):
     # note: the order of the records in the report matters(!)
 

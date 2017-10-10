@@ -15,6 +15,7 @@
 
 import logging
 import os
+import platform
 import re
 from datetime import datetime
 from time import sleep
@@ -26,11 +27,9 @@ from PIL import Image
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint, Screenshot
-import platform
 from failmap_admin.scanners.timeout import timeout
 
 logger = logging.getLogger(__package__)
-
 
 
 # todo: wait: https://bugzilla.mozilla.org/show_bug.cgi?id=1378010, FFX 57
@@ -41,6 +40,7 @@ firefox = settings.TOOLS['firefox']['executable'][platform.system()]
 # deprecated
 working_directory = '../map/static/images/screenshots'  # deprecated
 script_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)))  # deprecated
+
 
 @timeout(30, 'Took too long to make screenshot')
 def screenshot_url(url):

@@ -48,6 +48,7 @@ def scan(self):
         scan_url(url, 80, "http")
     return
 
+
 def scan_url_list_standard_ports(urls):
     scan_url_list(urls, 443, 'https')
     scan_url_list(urls, 80, 'http')
@@ -58,6 +59,7 @@ def scan_url_list_standard_ports(urls):
     # ScannerHttp.scan_url_list(urls, 8888, 'http')
     # ScannerHttp.scan_url_list(urls, 8008, 'http')
     # ScannerHttp.scan_url_list(urls, 9443, 'https')
+
 
 def scan_url_list(urls, port=80, protocol="http"):
     from multiprocessing import Pool
@@ -120,6 +122,8 @@ def error_callback(x):
 # We don't make endpoints for servers that don't exist: as opposed to qualys, since that
 # scanner is slow. (perhaps we should in that case?)
 # todo: option to not find IP's, only use existing ip's of endpoints / urls.
+
+
 def scan_url(url, port=80, protocol="https"):
     domain = "%s://%s:%s" % (protocol, url.url, port)
     logger.debug("Scanning http(s) server on: %s" % domain)
@@ -223,6 +227,7 @@ def get_ips(url):
     logger.debug("%s has IPv6 address: %s" % (url, ip6))
     return ip4, ip6
 
+
 def has_internet_connection(host="8.8.8.8", port=53, timeout=10):
     """
     https://stackoverflow.com/questions/3764291/checking-network-connection#3764660
@@ -257,12 +262,14 @@ def save_endpoint(url, port, protocol, ip):
 
     return
 
+
 def endpoint_exists(url, port, protocol, ip):
     return Endpoint.objects.all().filter(url=url,
                                          port=port,
                                          ip=ip,
                                          protocol=protocol,
                                          is_dead=False).count()
+
 
 def kill_endpoint(url, port, protocol, ip):
 
