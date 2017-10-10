@@ -30,11 +30,18 @@ Download and install git and python3 to get started.
 
 In a directory of your choosing:
 
-    sudo easy_install pip
-    git clone https://github.com/failmap/admin/
+    git clone --recursive https://github.com/failmap/admin/
     cd admin
-    # if you need a specific branch, for example "mapwebsite"
-    # git checkout mapwebsite
+
+If you need a specific branch, for example "mapwebsite"
+
+    git checkout mapwebsite
+
+This repository uses [submodules](https://git-scm.com/docs/git-submodule) to pull in external
+dependencies. If you have not cloned the repository with `--recursive` or you need to restore
+the submodules to the expected state run:
+
+    git submodule update
 
 # Quickstart
 
