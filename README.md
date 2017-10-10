@@ -102,6 +102,7 @@ Alternatively you can manually create a virtualenv using:
 Be sure to active the environment before starting development every time:
 
     . venv/bin/activate
+    export DEBUG=1
 
 # Thanks to
 This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
