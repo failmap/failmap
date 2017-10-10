@@ -344,10 +344,12 @@ def rate_timeline(timeline, url):
                     if "tls_qualys_scan" in previous_ratings[endpoint.id].keys():
                         these_ratings['tls_qualys_scan'] = previous_ratings[endpoint.id]['tls_qualys_scan']
 
-            if "Strict-Transport-Security" not in these_ratings.keys():
-                if endpoint.id in previous_ratings.keys():
-                    if "Strict-Transport-Security" in previous_ratings[endpoint.id].keys():
-                        these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
+            if all([
+                "Strict-Transport-Security" not in these_ratings.keys(),
+                endpoint.id in previous_ratings.keys(),
+                "Strict-Transport-Security" in previous_ratings[endpoint.id].keys()
+            ]):
+                these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
 
             if "plain_https" not in these_ratings.keys():
                 if endpoint.id in previous_ratings.keys():
