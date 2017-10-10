@@ -41,6 +41,7 @@ def scan_all_urls():
     for url in urls:
         scan_url(url)
 
+
 def scan_url(url):
     scan_manager = EndpointScanManager
     logger.debug("Checking for http only sites on: %s" % url)
@@ -110,6 +111,7 @@ def scan_url(url):
                                           "Has a secure equivalent, which wasn't so in the"
                                           "past.")
 
+
 def verify_is_secure(url):
     # i've seen qualys saying there is no TLS, while there is!
     # This _might_ revive an endpoint.
@@ -126,6 +128,8 @@ def verify_is_secure(url):
     return False
 
 # https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
+
+
 def redirects_to_safety(url):
     import requests
     from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError

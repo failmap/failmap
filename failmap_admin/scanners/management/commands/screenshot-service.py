@@ -23,7 +23,7 @@ class Command(BaseCommand):
             while True:
                 Command.make_new_screenshots()
                 logger.info("Waiting for more endpoints to create screenshots. "
-                             "Sleeping for 60 seconds.")
+                            "Sleeping for 60 seconds.")
                 sleep(60)
         except KeyboardInterrupt:
             logger.debug("ALL DONE!")

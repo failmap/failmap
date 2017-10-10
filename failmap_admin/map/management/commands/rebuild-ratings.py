@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import rate_urls_efficient, default_ratings, rate_organizations_efficient
+from failmap_admin.map.determineratings import (default_ratings, rate_organizations_efficient,
+                                                rate_urls_efficient)
 from failmap_admin.map.models import OrganizationRating, UrlRating
 
 

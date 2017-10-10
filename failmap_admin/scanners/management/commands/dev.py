@@ -5,12 +5,13 @@ import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import timeline, rate_organization_urls_efficient, \
-    clear_organization_and_urls, rate_organization_efficient
-from failmap_admin.scanners.models import Endpoint
+from failmap_admin.map.determineratings import (clear_organization_and_urls,
+                                                rate_organization_efficient,
+                                                rate_organization_urls_efficient, timeline)
 from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.state_manager import StateManager
+from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
+from failmap_admin.scanners.state_manager import StateManager
 
 logger = logging.getLogger(__package__)
 
@@ -20,7 +21,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         develop_timeline()
-        develop_determineratings()
+        # develop_determineratings()
         # Command.test_sslscan_real()
         # Command.test_determine_grade()
         # Command.develop_sslscan()
@@ -35,7 +36,9 @@ def develop_timeline():
     # for url in urls:
     #     timeline(url=url)
 
-    url = Url.objects.all().filter(url='www.amersfoort.nl').get()
+    # amersfoort = 100 ok! :)
+    # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
+    url = Url.objects.all().filter(url='sip.arnhem.nl').get()
     timeline(url=url)
 
 
@@ -77,7 +80,7 @@ def develop_celery_advanced():
 
 def develop_celery():
     from celery_test import add
-    add.delay(1,2)
+    add.delay(1, 2)
 
 
 def develop_security_headers_scanner():

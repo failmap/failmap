@@ -1,9 +1,10 @@
 # https://stackoverflow.com/questions/2281850/timeout-function-if-it-takes-too-long-to-finish
 # without the duplicate timeout error class
-from functools import wraps
 import errno
 import os
 import signal
+from functools import wraps
+
 
 def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
     def decorator(func):

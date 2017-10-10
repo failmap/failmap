@@ -4,16 +4,15 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 """
 import logging
 from datetime import datetime
-from celery import Celery
-from celery.task import task
 
 import pytz
 
+from celery import Celery
+from celery.task import task
+from celery_test import app
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import EndpointGenericScanScratchpad
-from celery_test import app
-
 
 from .models import Endpoint
 
@@ -70,7 +69,7 @@ def scan_headers(url):
     https_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='https')
     endpoints = list(http_endpoints) + list(https_endpoints)
     for endpoint in endpoints:
-        if endpoint.is_ipv4():
+        if not endpoint.is_ipv6():
             eps.append(endpoint)
 
     for endpoint in eps:
@@ -87,6 +86,7 @@ def scan_headers(url):
             analyze_headers(headers, endpoint)
         else:
             logger.debug('No headers found, probably an error.')
+
 
 def scan_header_celery(url):
     # from .tasks import dispatch_scan_security_headers
@@ -105,10 +105,12 @@ def scan_header_celery(url):
     https_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='https')
     endpoints = list(http_endpoints) + list(https_endpoints)
     for endpoint in endpoints:
-        if endpoint.is_ipv4():
+        if not endpoint.is_ipv6():
             dispatch_scan_security_headers(endpoint, 'IPv4')
-        else:
-            dispatch_scan_security_headers(endpoint, 'IPv6')
+        # ipv6 not supported yet.
+        # else:
+            # dispatch_scan_security_headers(endpoint, 'IPv6')
+
 
 def dispatch_scan_security_headers(endpoint, queue):
     # from .tasks import get_headers_celery
@@ -123,6 +125,7 @@ def dispatch_scan_security_headers(endpoint, queue):
     # First check if the route exists. (slow?)
 
     task.apply_async()
+
 
 @app.task
 def analyze_headers(headers, endpoint):
@@ -144,6 +147,7 @@ def analyze_headers(headers, endpoint):
     if endpoint.protocol == "https":
         generic_check(endpoint, headers, 'Strict-Transport-Security')
 
+
 def generic_check(endpoint, headers, header):
     if header in headers.keys():  # this is case insensitive
         logger.debug('Has %s' % header)
@@ -157,6 +161,7 @@ def generic_check(endpoint, headers, header):
                                      endpoint,
                                      'False',
                                      "Security Header not present: %s" % header)
+
 
 @app.task
 def get_headers(uri_url):

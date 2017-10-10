@@ -4,7 +4,8 @@ import pytz  # admin functions
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import OrganizationRating, UrlRating, rate_url, rate_organization
+from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
+                                                rate_url)
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports

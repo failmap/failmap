@@ -247,7 +247,7 @@ def timeline(organization=None, url=None):
         timeline[time.date()]["endpoints"] = []
         timeline[time.date()]["ratings"] = []
 
-    print(timeline)
+    # print(timeline)
 
     for scan_date in tls_qualys_scan_dates:
         # print(tls_qualys_scans)
@@ -258,7 +258,7 @@ def timeline(organization=None, url=None):
         timeline[scan_date]["tls_qualys_scan"]["ratings"] = ratings
         endpoints = [x.endpoint for x in ratings]
         timeline[scan_date]["tls_qualys_scan"]["endpoints"] = endpoints
-        timeline[scan_date]["endpoints" ]+= list(endpoints)
+        timeline[scan_date]["endpoints"] += list(endpoints)
         timeline[scan_date]["ratings"] += list(ratings)
 
     for scan_date in generic_scan_dates:
@@ -283,8 +283,8 @@ def timeline(organization=None, url=None):
         timeline[scan_date]["dead"] = True
 
     # unique endpoints only.
-    for scan_date in dead_scan_dates:
-        timeline[scan_date]["endpoints"] = set(timeline[scan_date]["endpoints"])
+    for time in datetimes2:
+        timeline[time.date()]["endpoints"] = set(timeline[time.date()]["endpoints"])
 
     show_timeline_console(timeline)
     rate_timeline(timeline, urls[0])
@@ -299,8 +299,10 @@ def rate_timeline(timeline, url):
     for moment in timeline:
         scores = []
 
-        # todo: if an endpoint is dead or url is not resolvable, empty the ratings of the these items. They are not
-        # relevant anymore for the report: the stuff has been cleaned up / changed. The json will then be empty.
+        # todo: if an endpoint is dead or url is not resolvable, empty the ratings of
+        # the these items. They are not
+        # relevant anymore for the report: the stuff has been cleaned up / changed. The json
+        # will then be empty.
 
         # reverse the relation: so we know all ratings per endpoint.
         endpoint_ratings = {}
@@ -316,22 +318,41 @@ def rate_timeline(timeline, url):
         # also include all endpoints from the past time, which we do until the endpoints are dead.
         relevant_endpoints = set(timeline[moment]["endpoints"] + previous_endpoints)
 
+        # print(relevant_endpoints)
+        # print(endpoint_ratings)
+
         for endpoint in relevant_endpoints:
 
-            # bug?
-            if endpoint.id not in endpoint_ratings.keys():
-                continue
+            # todo: remove endpoints that died / changed over time from endpoint list
 
             jsons = []
             these_ratings = {}
-            for rating in endpoint_ratings[endpoint.id]:
-                if type(rating) == TlsQualysScan:
-                    these_ratings['tls_qualys_scan'] = rating
+            if endpoint.id in endpoint_ratings.keys():
+                for rating in endpoint_ratings[endpoint.id]:
+                    if type(rating) == TlsQualysScan:
+                        these_ratings['tls_qualys_scan'] = rating
+                    if type(rating) == EndpointGenericScan:
+                        if rating.type == 'Strict-Transport-Security':
+                            these_ratings['Strict-Transport-Security'] = rating
+                    if type(rating) == EndpointGenericScan:
+                        if rating.type == 'plain_https':
+                            these_ratings['plain_https'] = rating
 
-            # continue a rating from the past, until it has a new rating or the endpoint is dead.
-            if endpoint.id in previous_ratings.keys():
-                if "tls_qualys_scan" not in these_ratings.keys() and "tls_qualys_scan" in previous_ratings[endpoint.id].keys():
-                    these_ratings['tls_qualys_scan'] = previous_ratings[endpoint.id]['tls_qualys_scan']
+            # enrich the ratings with previous ratings, without overwriting them.
+            if "tls_qualys_scan" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "tls_qualys_scan" in previous_ratings[endpoint.id].keys():
+                        these_ratings['tls_qualys_scan'] = previous_ratings[endpoint.id]['tls_qualys_scan']
+
+            if "Strict-Transport-Security" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "Strict-Transport-Security" in previous_ratings[endpoint.id].keys():
+                        these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
+
+            if "plain_https" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "plain_https" in previous_ratings[endpoint.id].keys():
+                        these_ratings['plain_https'] = previous_ratings[endpoint.id]['plain_https']
 
             # propagate the ratings to the next iteration.
             previous_ratings[endpoint.id] = {}
@@ -340,6 +361,16 @@ def rate_timeline(timeline, url):
             # build the json:
             if 'tls_qualys_scan' in these_ratings.keys():
                 score, json = tls_qualys_rating_based_on_scan(these_ratings['tls_qualys_scan'])
+                jsons.append(json)
+                scores.append(score)
+
+            if 'Strict-Transport-Security' in these_ratings.keys():
+                score, json = security_headers_rating_based_on_scan(these_ratings['Strict-Transport-Security'])
+                jsons.append(json)
+                scores.append(score)
+
+            if 'plain_https' in these_ratings.keys():
+                score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
                 jsons.append(json)
                 scores.append(score)
 
@@ -359,7 +390,7 @@ def rate_timeline(timeline, url):
                                                        endpoint.port,
                                                        endpoint.protocol, ",".join(jsons)))
 
-        previous_endpoints += timeline[moment]["endpoints"]
+        previous_endpoints += relevant_endpoints
         url_rating_template = """
     {
     "url": {
@@ -369,11 +400,9 @@ def rate_timeline(timeline, url):
         }
     }""".strip()
 
-
-
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
 
-        print("This moment would make this url_rating: %s " % url_rating_json)
+        print("On %s this would be the url_rating: %s " % (moment, url_rating_json))
 
 
 def show_timeline_console(timeline):
@@ -383,16 +412,16 @@ def show_timeline_console(timeline):
         # for ep in timeline[moment]['endpoints']:
         #     ep["ratings"] = {}
 
-        print ("|")
-        print ("|- %s: %s" % (moment, timeline[moment].keys()))
+        print("|")
+        print("|- %s: %s" % (moment, timeline[moment].keys()))
         # print ("|  |")
         if 'tls_qualys_scan' in timeline[moment].keys():
-            print ("|  |- tls_qualys_scan")
+            print("|  |- tls_qualys_scan")
             for item in timeline[moment]['tls_qualys_scan']['endpoints']:
-                print ("|  |  |- Endpoint %s" % item)
+                print("|  |  |- Endpoint %s" % item)
             for item in timeline[moment]['tls_qualys_scan']['ratings']:
                 score, json = tls_qualys_rating_based_on_scan(item)
-                print ("|  |  |- %s points: %s" % (score, item))
+                print("|  |  |- %s points: %s" % (score, item))
 
         # These are all generic scans, left here to debug your timeline.
         # if 'generic_scan' in timeline[time].keys():
@@ -400,17 +429,17 @@ def show_timeline_console(timeline):
         #     for item in timeline[time]['generic_scan']['ratings']:
         #         print ("|  |  |- %s" % item)
 
-
         # generic scans have a lot of subtypes.
         if 'generic_scan' in timeline[moment].keys():
-            print ("|  |- generic_scan")
+            print("|  |- generic_scan")
             for item in timeline[moment]['generic_scan']['ratings']:
                 if item.type == "plain_https":
                     score, json = http_plain_rating_based_on_scan(item)
-                    print ("|  |  |- %s points: %s" % (score, item))
+                    print("|  |  |- %s points: %s" % (score, item))
                 if item.type == "Strict-Transport-Security":
                     score, json = security_headers_rating_based_on_scan(item)
-                    print ("|  |  |- %s points: %s" % (score, item))
+                    print("|  |  |- %s points: %s" % (score, item))
+
 
 def significant_times(organization=None, url=None):
     """
@@ -720,8 +749,8 @@ def get_url_score_modular(url, when=""):
         jsons.append(scanner_security_headers_json) if scanner_security_headers_json else ""
 
         rating += int(scanner_tls_qualys_rating) + \
-                  int(scanner_http_plain_rating) + \
-                  int(scanner_security_headers_rating)
+            int(scanner_http_plain_rating) + \
+            int(scanner_security_headers_rating)
 
         if jsons:
             endpoint_jsons.append((endpoint_template % (endpoint.ip,
@@ -1071,8 +1100,8 @@ def tls_qualys_rating_based_on_scan(scan):
         if scan.qualys_rating == "T":
             rating = ratings[scan.qualys_rating] + ratings[scan.qualys_rating_no_trust]
             explanation = explanations[scan.qualys_rating] + \
-                          " And for the certificate itself: " + \
-                          explanations[scan.qualys_rating_no_trust]
+                " And for the certificate itself: " + \
+                explanations[scan.qualys_rating_no_trust]
             starttls_json = (tlsratingtemplate %
                              (explanation, rating,
                               scan.rating_determined_on, scan.scan_moment))

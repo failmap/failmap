@@ -1,3 +1,20 @@
+import logging
+import platform
+import re
+import subprocess
+from datetime import datetime
+
+import pytz
+import untangle
+from django.conf import settings
+
+from celery_test import app
+from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap_admin.scanners.models import Endpoint
+from failmap_admin.scanners.timeout import timeout
+
+logger = logging.getLogger(__package__)
+
 # uses sslscan to determine the quality of a tls connection. It's way faster than others and for
 # the basis it results the same sanity checks. What sslscan misses is a "general" rating. This will
 # be provided here.
@@ -96,19 +113,6 @@ Lucky 13: Todo.
 What we should have used: https://www.owasp.org/index.php/O-Saft ... nah
 
 """
-import logging
-import platform
-from django.conf import settings
-logger = logging.getLogger(__package__)
-from celery_test import app
-import re
-from datetime import datetime
-import pytz
-import subprocess
-from failmap_admin.scanners.models import Endpoint
-import untangle
-from failmap_admin.scanners.timeout import timeout
-from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 
 
 sslscan = settings.TOOLS['sslscan']['executable'][platform.system()]
@@ -177,9 +181,11 @@ def scan_real_url(url, port=443):
 
     return out
 
+
 @app.task
 def scan_endpoint(endpoint, IPv6=False):
     return scan_real_url(endpoint.url.url, endpoint.port)
+
 
 def test_determine_grade():
     # sslscan --show-certificate --xml=A7.xml support.url:443 1>/dev/null &
@@ -216,6 +222,7 @@ def test_real(url='faalkaart.nl', port=443):
     report = scan_real_url(url, port)
     rating, trust_rating = determine_grade(report, url)
     debug_grade(rating, trust_rating)
+
 
 @app.task
 def determine_grade(report, url):
@@ -255,14 +262,13 @@ def determine_grade(report, url):
     # you want to have the last one.
     # are chains missing if there is less than 2?
     if obj.document.ssltest.certificate[1]:
-        certificate = obj.document.ssltest.certificate[len(obj.document.ssltest.certificate)-1]
+        certificate = obj.document.ssltest.certificate[len(obj.document.ssltest.certificate) - 1]
     else:
         # ratings.append(['B', "Chain of trust missing."]) -> you never see the full list.
         certificate = obj.document.ssltest.certificate
 
     if hasattr(certificate, "self_signed") and certificate.self_signed.cdata == 'true':
         trust_rating.append(['False', "Certificate is self signed."])
-
 
     if certificate.expired.cdata == 'true':
         trust_rating.append(['False', "Certificate expired."])
@@ -284,7 +290,7 @@ def determine_grade(report, url):
 
     for testurl in testurls:
         # can be a wildcard certificate with one of the valid urls in altnames.
-        if url == certificate.subject.cdata or ':'+testurl in altnames:
+        if url == certificate.subject.cdata or ':' + testurl in altnames:
             name_or_wildcard_found = True
 
     if not name_or_wildcard_found:
@@ -295,13 +301,11 @@ def determine_grade(report, url):
         if heartbleed['vulnerable'] == '1':
             ratings.append(['F', "Vulnerable to heartbleed on %s." % heartbleed['sslversion']])
 
-
     # Insecure renegotiation
-    if  obj.document.ssltest.renegotiation['supported'] == '1' and \
-        obj.document.ssltest.renegotiation['secure'] == '0':
+    if obj.document.ssltest.renegotiation['supported'] == '1' and \
+            obj.document.ssltest.renegotiation['secure'] == '0':
         ratings.append(['F', "Server does not support secure session renegotiation, "
                              "a Man In The Middle attack is possible."])
-
 
     # check for sslv2.
     for cipher in obj.document.ssltest.cipher:
@@ -333,8 +337,6 @@ def determine_grade(report, url):
     # todo: rating still unclear for compression enabled
     if obj.document.ssltest.compression['supported'] == '1':
         ratings.append(['C', "Vulnerable to CRIME attack, due to compression used."])
-
-
 
     # cipher checks
     ciphers = obj.document.ssltest.cipher
@@ -409,7 +411,9 @@ def determine_grade(report, url):
         if cipher['sslversion'] in ['TLSv1.2', 'TLSv1.1', 'TLSv1.0']:
             for low_bit_thing in low_bit_things:
                 if low_bit_thing in cipher['cipher']:
-                    ratings.append(['C', 'Using old 64-bit block cipher(s) (3DES / DES / RC2 / IDEA) with modern protocols.'])
+                    ratings.append(
+                        ['C', 'Using old 64-bit block cipher(s) (3DES / DES / RC2 / IDEA) '
+                              'with modern protocols.'])
                     break
 
     # Check for padding oracle vulnerability
@@ -417,7 +421,6 @@ def determine_grade(report, url):
     if hasattr(obj.document.ssltest, "CVE_2016_2107"):
         if obj.document.ssltest.CVE_2016_2107.cdata == 'True':
             ratings.append(['F', 'Vulnerable to CVE_2016-2107 (padding oracle).'])
-
 
     # Check for ticketbleed vulnerability
     # <CVE-2016_9244>False</CVE-2016_9244>
@@ -428,17 +431,21 @@ def determine_grade(report, url):
     # Check for POODLE (CVE-2014-3566)
     # SSLv3 + CBC ciphersuites
     # https://nmap.org/nsedoc/scripts/ssl-poodle.html
+    # this is incorrect? Or has this to do with the discovered software / server?
+    # windows is not vulnerable?
     for cipher in ciphers:
         if cipher['sslversion'] in ['SSLv3'] and "CBC" in cipher['cipher']:
-            ratings.append(['C', 'Vulnerable to CVE_2014_3566 (POOODLE) on SSLv3. Remove CBC ciphers.'])
+            ratings.append(
+                ['C', 'Vulnerable to CVE_2014_3566 (POOODLE) on SSLv3. Remove CBC ciphers.'])
+            break
 
-    # Poodle on TLS v1
+    # Poodle on TLS v1 (this is incorrect...) todo: other scan. Can have CBC, but specific thing?
     for cipher in ciphers:
         if cipher['sslversion'] in ['TLSv1.0'] and "CBC" in cipher['cipher']:
-            ratings.append(['F', 'Vulnerable to CVE_2014_3566 (POOODLE) on TLS. Remove CBC ciphers.'])
-
+            ratings.append(
+                ['F', 'Vulnerable to CVE_2014_3566 (POOODLE) on TLS. Remove CBC ciphers.'])
+            break
     # the preferred cipher is relevant. If preferred cipher is weak... i mean...
-
 
     # we don't check for HSTS, HPKP, that is done in the headers scanner. So this will not give
     # an a+. But just an A. - We can check in the header database if they use HPKP + HSTS.
@@ -449,6 +456,7 @@ def determine_grade(report, url):
     # DES
 
     return ratings, trust_rating
+
 
 def debug_grade(ratings, trust_ratings):
     lowest_rating = 'A'
@@ -470,6 +478,7 @@ def debug_grade(ratings, trust_ratings):
     logger.debug('')
     logger.debug('Rating: %s' % lowest_rating)
     logger.debug('')
+
 
 @app.task
 def store_grade(ratings, trust_ratings, endpoint):
@@ -534,7 +543,8 @@ def test_cve_2016_9244(url, port):
 def cert_chain_is_complete(url, port):
     """
     Download cert:
-    openssl s_client -showcerts -connect microsoft.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM >microsoft.pem
+    openssl s_client -showcerts -connect microsoft.com:443 </dev/null 2>/dev/null|openssl x509
+    -outform PEM >microsoft.pem
     ./cert-chain-resolver microsoft.pem
     :param url:
     :param port:
