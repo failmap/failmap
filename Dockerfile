@@ -36,6 +36,8 @@ ENV UWSGI_STATIC_MAP /static=/srv/failmap-admin/static
 
 RUN /pyenv/bin/failmap-admin collectstatic
 
+EXPOSE 8000
+
 ENTRYPOINT [ "/usr/local/bin/failmap-admin" ]
 
 CMD [ "help" ]
