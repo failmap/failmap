@@ -6,8 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, Url
-from failmap_admin.scanners.models import EndpointGenericScan
+from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, Url
 
 logger = logging.getLogger(__package__)
 
