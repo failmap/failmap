@@ -191,6 +191,7 @@ def timeline(organization=None, url=None):
         pass
 
     dead_scan_dates = []
+    dead_scans = []
     try:
         dead_scans = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
         dead_scan_dates = [x.is_dead_since for x in dead_scans]
@@ -246,6 +247,7 @@ def timeline(organization=None, url=None):
         timeline[time.date()] = {}
         timeline[time.date()]["endpoints"] = []
         timeline[time.date()]["ratings"] = []
+        timeline[time.date()]["dead_endpoints"] = []
 
     # print(timeline)
 
@@ -258,7 +260,10 @@ def timeline(organization=None, url=None):
         timeline[scan_date]["tls_qualys_scan"]["ratings"] = ratings
         endpoints = [x.endpoint for x in ratings]
         timeline[scan_date]["tls_qualys_scan"]["endpoints"] = endpoints
-        timeline[scan_date]["endpoints"] += list(endpoints)
+        for endpoint in endpoints:
+            if endpoint not in timeline[scan_date]["endpoints"]:
+                timeline[scan_date]["endpoints"].append(endpoint)
+        # timeline[scan_date]["endpoints"] += list(endpoints)
         timeline[scan_date]["ratings"] += list(ratings)
 
     for scan_date in generic_scan_dates:
@@ -281,10 +286,15 @@ def timeline(organization=None, url=None):
     for scan_date in dead_scan_dates:
         scan_date = scan_date.date()
         timeline[scan_date]["dead"] = True
+        # figure out what endpoints died this moment
+        for ep in dead_scans:
+            if ep.is_dead_since.date() == scan_date:
+                if ep not in timeline[scan_date]["dead_endpoints"]:
+                    timeline[scan_date]["dead_endpoints"].append(ep)
 
     # unique endpoints only.
     for time in datetimes2:
-        timeline[time.date()]["endpoints"] = set(timeline[time.date()]["endpoints"])
+        timeline[time.date()]["endpoints"] = list(set(timeline[time.date()]["endpoints"]))
 
     show_timeline_console(timeline)
     rate_timeline(timeline, urls[0])
@@ -321,6 +331,17 @@ def rate_timeline(timeline, url):
         # print(relevant_endpoints)
         # print(endpoint_ratings)
 
+        # remove dead endpoints
+        # we don't need to remove the previous ratings, unless we want to save memory (Nah :))
+        if "dead_endpoints" in timeline[moment].keys():
+            for dead_endpoint in timeline[moment]["dead_endpoints"]:
+                # endpoints can die this moment
+                if dead_endpoint in relevant_endpoints:
+                    relevant_endpoints.remove(dead_endpoint)
+                # remove the endpoint from the past
+                if dead_endpoint in previous_endpoints:
+                    previous_endpoints.remove(dead_endpoint)
+
         for endpoint in relevant_endpoints:
 
             # todo: remove endpoints that died / changed over time from endpoint list
@@ -344,12 +365,10 @@ def rate_timeline(timeline, url):
                     if "tls_qualys_scan" in previous_ratings[endpoint.id].keys():
                         these_ratings['tls_qualys_scan'] = previous_ratings[endpoint.id]['tls_qualys_scan']
 
-            if all([
-                "Strict-Transport-Security" not in these_ratings.keys(),
-                endpoint.id in previous_ratings.keys(),
-                "Strict-Transport-Security" in previous_ratings[endpoint.id].keys()
-            ]):
-                these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
+            if "Strict-Transport-Security" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "Strict-Transport-Security" in previous_ratings[endpoint.id].keys():
+                        these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
 
             if "plain_https" not in these_ratings.keys():
                 if endpoint.id in previous_ratings.keys():
@@ -442,6 +461,10 @@ def show_timeline_console(timeline):
                     score, json = security_headers_rating_based_on_scan(item)
                     print("|  |  |- %s points: %s" % (score, item))
 
+        if 'dead_endpoints' in timeline[moment].keys():
+            print("|  |- dead endpoints")
+            for endpoint in timeline[moment]['dead_endpoints']:
+                print("|  |  |- %s" % endpoint)
 
 def significant_times(organization=None, url=None):
     """
@@ -1023,7 +1046,7 @@ def http_plain_rating_based_on_scan(scan):
                                scan.rating,
                                scan.rating_determined_on,
                                scan.last_scan_moment))
-    return scan.rating, json
+    return int(scan.rating), json
 
 
 def get_report_from_scanner_tls_qualys(endpoint, when):

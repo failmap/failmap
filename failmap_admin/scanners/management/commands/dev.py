@@ -32,9 +32,11 @@ class Command(BaseCommand):
 
 def develop_timeline():
     # organization = Organization.objects.filter(name="Zutphen").get()
-    # urls = Url.objects.all().filter(organization=organization)
-    # for url in urls:
-    #     timeline(url=url)
+    organizations = Organization.objects.all().order_by('name')
+    for organization in organizations:
+        urls = Url.objects.all().filter(organization=organization)
+        for url in urls:
+            timeline(url=url)
 
     # amersfoort = 100 ok! :)
     # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
