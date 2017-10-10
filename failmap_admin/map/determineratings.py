@@ -126,7 +126,14 @@ def clear_organization_and_urls(organization):
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
 
-def timeline(organization=None, url=None):
+def show_timeline_console(url):
+    show_timeline_console(timeline(url))
+
+def rerate_url_with_timeline(url):
+    UrlRating.objects.all().filter(url=url).delete()
+    rate_timeline(timeline(url), url)
+
+def timeline(url):
     """
     Searches for all significant point in times that something changed. The goal is to save
     unneeded queries when rebuilding ratings. When you know when things changed, you know
@@ -154,38 +161,20 @@ def timeline(organization=None, url=None):
     :return:
     """
 
-    # todo: all this validation adds to complexity.
-    if organization and url:
-        logger.info("Both URL and organization given, please supply one! %s %s" %
-                    (organization, url))
-        return []
-
-    urls = []
-    if organization:
-        logger.info("Getting all urls from organization: %s" % organization)
-        urls = Url.objects.filter(organization=organization)
-    if url:
-        logger.info("Getting all url: %s" % url)
-        urls = [url]
-
-    if not urls:
-        logger.info("Could not find urls from organization or url.")
-        return []
-
     tls_qualys_scan_dates = []
     try:
-        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls)
+        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url=url)
         tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
-        logger.debug("tls_qualys_scan_dates: %s" % tls_qualys_scan_dates)
+        # logger.debug("tls_qualys_scan_dates: %s" % tls_qualys_scan_dates)
     except ObjectDoesNotExist:
         # no tls scans
         pass
 
     generic_scan_dates = []
     try:
-        generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url__in=urls)
+        generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url=url)
         generic_scan_dates = [x.rating_determined_on for x in generic_scans]
-        logger.debug("generic_scan_dates: %s" % generic_scan_dates)
+        # logger.debug("generic_scan_dates: %s" % generic_scan_dates)
     except ObjectDoesNotExist:
         # no generic scans
         pass
@@ -193,9 +182,9 @@ def timeline(organization=None, url=None):
     dead_scan_dates = []
     dead_scans = []
     try:
-        dead_scans = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
+        dead_scans = Endpoint.objects.all().filter(url=url, is_dead=True)
         dead_scan_dates = [x.is_dead_since for x in dead_scans]
-        logger.debug("dead_scan_dates: %s" % dead_scan_dates)
+        # logger.debug("dead_scan_dates: %s" % dead_scan_dates)
     except ObjectDoesNotExist:
         # no generic scans
         pass
@@ -205,7 +194,7 @@ def timeline(organization=None, url=None):
     try:
         non_resolvable_urls = Url.objects.filter(not_resolvable=True,
                                                  is_dead=False,
-                                                 url__in=urls)
+                                                 url=url)
         non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
         logger.debug("non_resolvable_dates: %s" % non_resolvable_dates)
     except ObjectDoesNotExist:
@@ -217,10 +206,9 @@ def timeline(organization=None, url=None):
 
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient.
-    # todo: the order of this list should be chronological: otherwise ratings get overwritten?
     # ^ it should be different every time. So, this doesn't matter.
     # for every scan: that is highly inefficient.
-    logger.debug("Found amount of dates, optimizing: %s", len(datetimes))
+    # logger.debug("Amount of dates: %s. Optimizing...", len(datetimes))
 
     # take the last moment of the date, so the scan will have happened at the correct time
     datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
@@ -251,6 +239,11 @@ def timeline(organization=None, url=None):
 
     # print(timeline)
 
+    # todo: clean dataset and remove useless ratings that won't die.
+    # sometimes there have been scans on dead endpoints. This is a problem in the database.
+    # this code is correct with retrieving those endpoints again.
+    # we could save a list of dead endpoints, but the catch is that an endpoint can start living
+    # again over time. The scans with only dead endpoints should not be made.
     for scan_date in tls_qualys_scan_dates:
         # print(tls_qualys_scans)
         scan_date = scan_date.date()
@@ -296,20 +289,21 @@ def timeline(organization=None, url=None):
     for time in datetimes2:
         timeline[time.date()]["endpoints"] = list(set(timeline[time.date()]["endpoints"]))
 
-    show_timeline_console(timeline)
-    rate_timeline(timeline, urls[0])
+    return timeline
 
 
 def rate_timeline(timeline, url):
-    print("Timeline for %s" % url)
+    logger.info("Rebuilding ratings for for %s" % url)
+
+    # will be filled with dates and
+    url_rating_jsons = {}
 
     previous_ratings = {}
-
     previous_endpoints = []
     for moment in timeline:
         scores = []
 
-        # todo: if an endpoint is dead or url is not resolvable, empty the ratings of
+        # todo: non resolvable ratings.
         # the these items. They are not
         # relevant anymore for the report: the stuff has been cleaned up / changed. The json
         # will then be empty.
@@ -342,9 +336,26 @@ def rate_timeline(timeline, url):
                 if dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
-        for endpoint in relevant_endpoints:
+        # only rate one ipv4 and one ipv6 endpoint: dns either translates to ipv6 or v4.
+        # only qualys resolves multiple ipv6 addresses: a normal browser will land on any but just
+        # one of them.
+        timeline[moment]['had_ipv4'] = False
+        timeline[moment]['had_ipv6'] = False
 
-            # todo: remove endpoints that died / changed over time from endpoint list
+        for endpoint in relevant_endpoints:
+            # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
+            # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
+
+            if timeline[moment]['had_ipv4'] and endpoint.is_ipv4():
+                continue
+
+            if timeline[moment]['had_ipv6'] and endpoint.is_ipv6():
+                continue
+
+            if endpoint.is_ipv6():
+                timeline[moment]['had_ipv6'] = True
+            else:
+                timeline[moment]['had_ipv4'] = True
 
             jsons = []
             these_ratings = {}
@@ -422,8 +433,20 @@ def rate_timeline(timeline, url):
     }""".strip()
 
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
+        logger.debug("On %s this would score: %s " % (moment, sum(scores)))
 
-        print("On %s this would be the url_rating: %s " % (moment, url_rating_json))
+        save_url_rating(url, moment, sum(scores), url_rating_json)
+
+
+def save_url_rating(url, date, score, json):
+    u = UrlRating()
+    u.url = url
+    u.when = datetime(year=date.year, month=date.month, day=date.day,
+                      hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+    u.rating = score
+    u.calculation = json
+    u.save()
+
 
 
 def show_timeline_console(timeline):
@@ -1264,6 +1287,7 @@ def get_relevant_endpoints_at_timepoint(url, when):
 # because the scanner should check that.
 
 def get_url_score(url, when):
+    raise DeprecationWarning
     print("Calculating score for %s on %s" % (url.url, when))
 
     explanation = ""

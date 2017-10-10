@@ -169,11 +169,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 
-# Disable timezones when using sqlite as it causes (really) a lot of warnings about timezones during fixture import.
-if 'sqlite' in DATABASES['default']['ENGINE']:
-    USE_TZ = False
-else:
-    USE_TZ = True
+# Loaddata will show a massive amount of warnings, therefore use load-dataset. load-dataset will
+# do exactly the same as loaddata, but will overwrite below flag preventing warnings.
+USE_TZ = True
+
 
 # https://docs.djangoproject.com/en/1.11/topics/i18n/translation/#how-django-discovers-translations
 # In all cases the name of the directory containing the translation is expected to be named using
