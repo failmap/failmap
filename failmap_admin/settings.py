@@ -24,12 +24,12 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'ditisgeengeheimvriendachtjedatditeenwachtwoordwas'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'ditisgeengeheimvriendachtjedatditeenwachtwoordwas')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 INTERNAL_IPS = [
     '127.0.0.1'
@@ -60,6 +60,13 @@ INSTALLED_APPS = [
     # 'silk'  # works great for debugging.
     # debug_toolbar',  # debugging and optimization, seems mostly useless in json apps, don't use
 ]
+
+try:
+    import django_uwsgi
+    INSTALLED_APPS += ['django_uwsgi', ]
+except ImportError:
+    # only configure uwsgi app if installed (ie: production environment)
+    pass
 
 MIDDLEWARE_CLASSES = [
     # 'silk.middleware.SilkyMiddleware',
@@ -101,6 +108,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'failmap_admin.wsgi.application'
 
+# Assume traffic is proxied from frontend loadbalancers
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -170,6 +180,9 @@ LOCALE_PATHS = ['locale']
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Absolute path to aggregate to and serve static file from.
+STATIC_ROOT = '/srv/failmap_admin/static/'
 
 TEST_RUNNER = 'failmap_admin.testrunner.PytestTestRunner'
 

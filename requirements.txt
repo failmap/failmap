@@ -7,6 +7,7 @@ pyyaml
 tldextract
 docutils
 # django-nested-admin (doesn't work with Django Jet).
+typing
 
 # scanners
 requests
@@ -28,7 +29,6 @@ colorama
 
 # dev. tools
 tox
-autopep8
 coverage
 pytest
 django-silk

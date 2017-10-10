@@ -2,7 +2,7 @@
 
 # Support fail map
 We keep organizations on their toes to protect everyone's data. Do you like this? Your donation insures continuous support, updates,
-and new features. 
+and new features.
 
 The Internet Cleanup Foundation helps cleaning up bad stuff on the web.
 
@@ -23,12 +23,13 @@ Download and install git and python3 to get started.
 
 - [git](https://git-scm.com/downloads)
 - [python3](https://www.python.org/downloads/)
+- tox `pip install tox`
 
 
 # Obtaining the software
 
 In a directory of your choosing:
- 
+
     sudo easy_install pip
     git clone https://github.com/failmap/admin/
     cd admin
@@ -43,11 +44,11 @@ dependencies isolated and managed. (todo: how)
     pip3 install -e .
     failmap-admin migrate
     failmap-admin createsuperuser
-    failmap-admin loaddata testdata  # slow, get a coffee   
+    failmap-admin loaddata testdata  # slow, get a coffee
     failmap-admin rebuild-ratings  # slow, also a tea
     failmap-admin runserver
 
-Now visit the [website](http://127.0.0.1:8000/) and/or the 
+Now visit the [website](http://127.0.0.1:8000/) and/or the
 [administrative interface ](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
 
 

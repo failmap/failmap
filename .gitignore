@@ -18,3 +18,7 @@ failmap_admin/scanners/resources/output/dnsrecon/*
 failmap_admin/scanners/resources/output/theHarvester/*
 dist/
 build/
+.eslintignore
+.eslintrc.yml
+code.json
+codeclimate.json

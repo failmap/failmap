@@ -1,5 +1,0 @@
-CFBundleDisplayName = "Google Chrome";
-CFBundleGetInfoString = "Google Chrome 61.0.3163.100, © Google Inc, 2017. Все права защищены.";
-CFBundleName = "Chrome";
-NSContactsUsageDescription = "Данные из вашего списка контактов будут отображаться в подсказках, и вы сможете быстрее заполнять формы в Chrome.";
-NSHumanReadableCopyright = "© Google Inc, 2017. Все права защищены.";

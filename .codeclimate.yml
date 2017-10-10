@@ -1,5 +1,29 @@
-languages:
-  Python: true
+engines:
+  # Python
+  pep8:
+    enabled: true
+  radon:
+    enabled: true
+  # Shell
+  shellcheck:
+    enabled: true
+  # Web
+  eslint:
+    enabled: true
+  # Misc.
+  duplication:
+    enabled: true
+  markdownlint:
+    enabled: true
+
+ratings:
+  paths:
+    - "**.py"
+    - "**.sh"
+    - "**.js"
+    - "**.md"
+
 exclude_paths:
   - "failmap_admin/fail/migrations/*"
   - "manage.py"
+  - ".*"
