@@ -1,0 +1,7 @@
+# tools/dependencies required for development or running tests
+autopep8
+isort
+pylama
+pytest-cov
+pytest-django
+django-coverage

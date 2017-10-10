@@ -6,9 +6,9 @@ import logging
 from datetime import datetime
 
 import pytz
-
 from celery import Celery
 from celery.task import task
+
 from celery_test import app
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
@@ -181,7 +181,8 @@ def get_headers(uri_url):
         # requests.exceptions.ChunkedEncodingError
         # the exceptions throw even more exceptions,
         # like requests.exceptions.ChunkedEncodingError
-        # requests.exceptions.ChunkedEncodingError: ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+        # requests.exceptions.ChunkedEncodingError: ('Connection broken: IncompleteRead(0 bytes read)', \
+        #        IncompleteRead(0 bytes read))
         # if ConnectTimeout:
         #     logger.error("Connection timeout %s" % ConnectTimeout.strerror)
         # if HTTPError:

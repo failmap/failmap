@@ -254,7 +254,7 @@ def determine_grade(report, url):
     try:
         logger.debug('untangle.parse("%s")' % report)
         obj = untangle.parse(report)
-    except:
+    except Exception:
         logger.error('Something wrong with report file: %s' % report)
         return
 
