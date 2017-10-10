@@ -32,7 +32,10 @@ WORKDIR /
 ENV UWSGI_GID root
 ENV UWSGI_UID root
 ENV UWSGI_MODULE failmap_admin.wsgi
-ENV UWSGI_STATIC_MAP /static=/srv/failmap_admin/static
+ENV UWSGI_STATIC_MAP /static=/srv/failmap-admin/static
+
+# expose static files
+VOLUME /srv/failmap-admin/
 
 RUN /pyenv/bin/failmap-admin collectstatic
 

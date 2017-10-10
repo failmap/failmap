@@ -187,7 +187,7 @@ LOCALE_PATHS = ['locale']
 STATIC_URL = '/static/'
 
 # Absolute path to aggregate to and serve static file from.
-STATIC_ROOT = '/srv/failmap_admin/static/'
+STATIC_ROOT = '/srv/failmap-admin/static/'
 
 TEST_RUNNER = 'failmap_admin.testrunner.PytestTestRunner'
 
