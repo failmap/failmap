@@ -23,7 +23,10 @@ http://nonexistingdomain.nl
 
     o = Organization(name="Arnhem", country="Netherlands")
     o.save()
-    Url(organization=o, url="arnhem.nl").save()
+    x = Url(url="arnhem.nl")
+    x.save()
+    x.organization.add(o)
+    x.save()
 
     smartaddurl = SmartAddUrl()
     smartaddurl.add(urls)
