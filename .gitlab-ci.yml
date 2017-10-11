@@ -69,7 +69,7 @@ build:
   script:
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build -t registry.gitlab.com/failmap/admin .
+    - docker build -t registry.gitlab.com/failmap/admin:build .
     - docker push registry.gitlab.com/failmap/admin:build
   # temporary to develop build pipeline
   #  only:
