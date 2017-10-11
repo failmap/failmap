@@ -2,8 +2,8 @@ stages:
   - test
   - build
 
-# validate code quality and functional testing
-test:
+# functional testing
+test: &test_template
   stage: test
 
   image: python:3.4
@@ -19,14 +19,13 @@ test:
     - pip install tox
 
   script:
-    # build docker image and push to registry
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:staging
-    - docker tag registry.gitlab.com/failmap/admin:staging registry.gitlab.com/failmap/admin:latest
-    - docker push registry.gitlab.com/failmap/admin:latest
+    - tox -e py34
 
-  only:
-      - master
+# code quality checks
+check:
+  <<: *test_template
+  script:
+    - tox -e check
 
 # create distributable release
 build:
