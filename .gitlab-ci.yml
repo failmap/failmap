@@ -1,6 +1,8 @@
 stages:
   - test
   - build
+  - staging
+  - production
 
 # functional testing
 test: &test_template
@@ -67,8 +69,8 @@ build:
   script:
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build -t registry.gitlab.com/failmap/admin .
-    - docker push registry.gitlab.com/failmap/admin:latest
+    - docker build -t registry.gitlab.com/failmap/admin:build .
+    - docker push registry.gitlab.com/failmap/admin:build
   # temporary to develop build pipeline
   #  only:
   #  - master
@@ -91,3 +93,31 @@ codequality:
     - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
   artifacts:
     paths: [codeclimate.json]
+
+staging:
+  stage: staging
+
+  image: docker:git
+  services:
+  - docker:dind
+  script:
+    # build docker image and push to registry
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/admin:build
+
+    # here is where I would put my staging integration tests, if I had one!!!
+
+    - docker push registry.gitlab.com/failmap/admin:staging
+
+production:
+  stage: production
+
+  image: docker:git
+  services:
+  - docker:dind
+  script:
+    # build docker image and push to registry
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/admin:staging
+    - docker push registry.gitlab.com/failmap/admin:latest
+
