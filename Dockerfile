@@ -16,7 +16,7 @@ FROM python:3-slim
 
 # install dependencies (remove cache to prevent inclusion in layer)
 RUN apt-get update && \
-  apt-get install -yqq libxml2 libmysqlclient18 && \
+  apt-get install -yqq libxml2 libmysqlclient18 mysql-client && \
   rm -rf /var/lib/apt/lists/*
 
 # install build application
