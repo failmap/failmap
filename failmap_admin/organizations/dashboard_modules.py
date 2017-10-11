@@ -98,8 +98,10 @@ class SmartAddUrl(DashboardModule):
                 completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
                 o = Url.objects.get(url=domainandtld)
-                newurl = Url(organization_id=o.organization_id, url=completedomain)
+                newurl = Url(url=completedomain)
                 newurl.save()
+                # newurl.organization = o.organization.all()
+                # newurl.save()
 
                 self.addresults.append(AddResult(completedomain, 0, 'Domain Added'))
 

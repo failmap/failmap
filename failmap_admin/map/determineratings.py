@@ -125,9 +125,11 @@ def clear_organization_and_urls(organization):
     UrlRating.objects.all().filter(url__organization=organization).delete()
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
+
 def rerate_url_with_timeline(url):
     UrlRating.objects.all().filter(url=url).delete()
     rate_timeline(timeline(url), url)
+
 
 def timeline(url):
     """
@@ -452,7 +454,6 @@ def save_url_rating(url, date, score, json):
     u.save()
 
 
-
 def show_timeline_console(timeline, url):
     print("")
     print(url.url)
@@ -498,6 +499,7 @@ def show_timeline_console(timeline, url):
             print("|  |- url became not resolvable")
 
     print("")
+
 
 def significant_times(organization=None, url=None):
     """

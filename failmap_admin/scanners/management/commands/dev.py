@@ -7,9 +7,9 @@ from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import (clear_organization_and_urls,
                                                 rate_organization_efficient,
-                                                rate_organization_urls_efficient, timeline,
-                                                show_timeline_console, rerate_url_with_timeline,
-                                                rerate_url_with_timeline)
+                                                rate_organization_urls_efficient,
+                                                rerate_url_with_timeline, show_timeline_console,
+                                                timeline)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers

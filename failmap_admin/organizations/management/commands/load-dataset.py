@@ -1,4 +1,5 @@
 import logging
+import warnings
 from datetime import datetime
 
 import pytz
@@ -16,6 +17,14 @@ class Command(LoadDataCommand):
 
     def handle(self, *app_labels, **options):
 
+        # suppressing warnings about naive datetimes:
+        # given the USE_TZ feature doesn't work correctly here.
+        warnings.filterwarnings(
+            'ignore', r"DateTimeField .* received a naive datetime",
+            RuntimeWarning, r'django\.db\.models\.fields',
+        )
+
+        # Setting USE_TZ to false during import weirdly DOES NOT suppress the yaml errors.
         settings.USE_TZ = False
 
         super(Command, self).handle(*app_labels, **options)
