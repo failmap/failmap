@@ -2,8 +2,8 @@ stages:
   - test
   - build
 
-# validate code quality and functional testing
-test:
+# functional testing
+test: &test_template
   stage: test
 
   image: python:3.4
@@ -19,7 +19,13 @@ test:
     - pip install tox
 
   script:
-  - tox
+    - tox -e py34
+
+# code quality checks
+check:
+  <<: *test_template
+  script:
+    - tox -e check
 
 # create distributable release
 build:
