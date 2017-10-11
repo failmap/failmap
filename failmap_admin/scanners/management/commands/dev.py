@@ -5,9 +5,9 @@ import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import (clear_organization_and_urls,
+from failmap_admin.map.determineratings import (
                                                 rate_organization_efficient,
-                                                rate_organization_urls_efficient,
+
                                                 rerate_url_with_timeline, show_timeline_console,
                                                 timeline)
 from failmap_admin.organizations.models import Organization, Url
@@ -44,7 +44,8 @@ def develop_timeline():
     if True:
         # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
         # url = Url.objects.all().filter(url='sip.arnhem.nl').get()
-        url = Url.objects.all().filter(url='formulieren.hengelo.nl').get()
+        # url = Url.objects.all().filter(url='formulieren.hengelo.nl').get()
+        url = Url.objects.all().filter(url='mijnoverzicht.alphenaandenrijn.nl').get()
         data = timeline(url=url)
         show_timeline_console(data, url)
         rerate_url_with_timeline(url)

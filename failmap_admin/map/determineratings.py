@@ -163,7 +163,7 @@ def timeline(url):
     try:
         non_resolvable_urls = Url.objects.filter(not_resolvable=True, url=url)
         non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
-        logger.debug("non_resolvable_dates: %s" % non_resolvable_dates)
+        # logger.debug("non_resolvable_dates: %s" % non_resolvable_dates)
     except ObjectDoesNotExist:
         # no non-resolvable urls
         pass
@@ -320,23 +320,26 @@ def rate_timeline(timeline, url):
         # only rate one ipv4 and one ipv6 endpoint: dns either translates to ipv6 or v4.
         # only qualys resolves multiple ipv6 addresses: a normal browser will land on any but just
         # one of them.
-        timeline[moment]['had_ipv4'] = False
-        timeline[moment]['had_ipv6'] = False
+        timeline[moment]['had_ipv4'] = {}
+        timeline[moment]['had_ipv6'] = {}
+        for endpoint in relevant_endpoints:
+            timeline[moment]['had_ipv4'][endpoint.id] = False
+            timeline[moment]['had_ipv6'][endpoint.id] = False
 
         for endpoint in relevant_endpoints:
             # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
             # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
 
-            if timeline[moment]['had_ipv4'] and endpoint.is_ipv4():
+            if timeline[moment]['had_ipv4'][endpoint.id] and endpoint.is_ipv4():
                 continue
 
-            if timeline[moment]['had_ipv6'] and endpoint.is_ipv6():
+            if timeline[moment]['had_ipv6'][endpoint.id] and endpoint.is_ipv6():
                 continue
 
             if endpoint.is_ipv6():
-                timeline[moment]['had_ipv6'] = True
+                timeline[moment]['had_ipv6'][endpoint.id] = True
             else:
-                timeline[moment]['had_ipv4'] = True
+                timeline[moment]['had_ipv4'][endpoint.id] = True
 
             jsons = []
             these_ratings = {}
@@ -416,6 +419,7 @@ def rate_timeline(timeline, url):
 
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
+        # logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
 
         save_url_rating(url, moment, sum(scores), url_rating_json)
 
