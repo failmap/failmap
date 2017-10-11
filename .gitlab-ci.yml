@@ -22,7 +22,7 @@ test: &test_template
     - tox -e py34
 
 # functional testing using mysql database instead of sqlite
-test_mysql:
+test_mysql: &test_mysql_template
   <<: *test_template
   services:
     - mysql:latest
@@ -45,6 +45,17 @@ check:
   <<: *test_template
   script:
     - tox -e check
+
+dataset:
+  <<: *test_template
+  script:
+    - tox -e datasets
+
+dataset_mysql:
+  <<: *test_mysql_template
+  script:
+    - tox -e datasets
+
 
 # create distributable release
 build:
