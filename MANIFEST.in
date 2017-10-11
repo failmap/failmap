@@ -2,3 +2,4 @@ include requirements.txt
 recursive-include failmap_admin/*/templates *.html
 recursive-include failmap_admin/*/static *
 recursive-include failmap_admin/*/fixtures *.yaml *.json
+recursive-include failmap_admin/*/locale *.mo *.po
