@@ -315,7 +315,7 @@ def stats_determine_when(stat, weeks_back=0):
     return when
 
 
-# @cache_page(cache_time)  # 24 hours.
+@cache_page(cache_time)
 def stats(request, weeks_back=0):
     # todo: 390 * 7 queries. Still missing the django time dimension type queries.
     # Info: the number of urls can be slightly inflated since some organizations share urls
