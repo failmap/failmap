@@ -320,26 +320,39 @@ def rate_timeline(timeline, url):
         # only rate one ipv4 and one ipv6 endpoint: dns either translates to ipv6 or v4.
         # only qualys resolves multiple ipv6 addresses: a normal browser will land on any but just
         # one of them.
-        timeline[moment]['had_ipv4'] = {}
-        timeline[moment]['had_ipv6'] = {}
-        for endpoint in relevant_endpoints:
-            timeline[moment]['had_ipv4'][endpoint.id] = False
-            timeline[moment]['had_ipv6'][endpoint.id] = False
+        # timeline[moment]['had_ipv4'] = {}
+        # timeline[moment]['had_ipv6'] = {}
+        # for endpoint in relevant_endpoints:
+        #     timeline[moment]['had_ipv4'][endpoint.id] = False
+        #     timeline[moment]['had_ipv6'][endpoint.id] = False
 
         for endpoint in relevant_endpoints:
             # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
             # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
 
-            if timeline[moment]['had_ipv4'][endpoint.id] and endpoint.is_ipv4():
-                continue
+            # you can only have one ipv4 and one ipv6 endpoint per url at one moment.
+            # (you CAN in fact have more, but we don't punish failovers with the same rating
+            # multiple times)
+            # if endpoint.is_ipv4():
+            #     if 'ipv4_endpoint' not in timeline[moment].keys():
+            #         timeline[moment]['ipv4_endpoint'] = endpoint
+            #     if endpoint != timeline[moment]['ipv4_endpoint']:
+            #         continue
+            # else:
+            #     if 'ipv6_endpoint' not in timeline[moment].keys():
+            #         timeline[moment]['ipv6_endpoint'] = endpoint
+            #     if endpoint != timeline[moment]['ipv6_endpoint']:
+            #         continue
 
-            if timeline[moment]['had_ipv6'][endpoint.id] and endpoint.is_ipv6():
-                continue
+            # if timeline[moment]['had_ipv4'][endpoint.id] and endpoint.is_ipv4():
+            #     continue
+            # if timeline[moment]['had_ipv6'][endpoint.id] and endpoint.is_ipv6():
+            #     continue
 
-            if endpoint.is_ipv6():
-                timeline[moment]['had_ipv6'][endpoint.id] = True
-            else:
-                timeline[moment]['had_ipv4'][endpoint.id] = True
+            # if endpoint.is_ipv6():
+            #     timeline[moment]['had_ipv6'][endpoint.id] = True
+            # else:
+            #     timeline[moment]['had_ipv4'][endpoint.id] = True
 
             jsons = []
             these_ratings = {}
@@ -350,6 +363,15 @@ def rate_timeline(timeline, url):
                     if type(rating) == EndpointGenericScan:
                         if rating.type == 'Strict-Transport-Security':
                             these_ratings['Strict-Transport-Security'] = rating
+                    if type(rating) == EndpointGenericScan:
+                        if rating.type == 'X-Content-Type-Options':
+                            these_ratings['X-Content-Type-Options'] = rating
+                    if type(rating) == EndpointGenericScan:
+                        if rating.type == 'X-Frame-Options':
+                            these_ratings['X-Frame-Options'] = rating
+                    if type(rating) == EndpointGenericScan:
+                        if rating.type == 'X-XSS-Protection':
+                            these_ratings['X-XSS-Protection'] = rating
                     if type(rating) == EndpointGenericScan:
                         if rating.type == 'plain_https':
                             these_ratings['plain_https'] = rating
@@ -365,6 +387,24 @@ def rate_timeline(timeline, url):
                     if "Strict-Transport-Security" in previous_ratings[endpoint.id].keys():
                         these_ratings['Strict-Transport-Security'] = \
                             previous_ratings[endpoint.id]['Strict-Transport-Security']
+
+            if "X-Content-Type-Options" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "X-Content-Type-Options" in previous_ratings[endpoint.id].keys():
+                        these_ratings['X-Content-Type-Options'] = \
+                            previous_ratings[endpoint.id]['X-Content-Type-Options']
+
+            if "X-Frame-Options" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "X-Frame-Options" in previous_ratings[endpoint.id].keys():
+                        these_ratings['X-Frame-Options'] = \
+                            previous_ratings[endpoint.id]['X-Frame-Options']
+
+            if "X-XSS-Protection" not in these_ratings.keys():
+                if endpoint.id in previous_ratings.keys():
+                    if "X-XSS-Protection" in previous_ratings[endpoint.id].keys():
+                        these_ratings['X-XSS-Protection'] = \
+                            previous_ratings[endpoint.id]['X-XSS-Protection']
 
             if "plain_https" not in these_ratings.keys():
                 if endpoint.id in previous_ratings.keys():
@@ -382,7 +422,26 @@ def rate_timeline(timeline, url):
                 scores.append(score)
 
             if 'Strict-Transport-Security' in these_ratings.keys():
-                score, json = security_headers_rating_based_on_scan(these_ratings['Strict-Transport-Security'])
+                score, json = security_headers_rating_based_on_scan(
+                    these_ratings['Strict-Transport-Security'], 'Strict-Transport-Security')
+                jsons.append(json)
+                scores.append(score)
+
+            if 'X-Content-Type-Options' in these_ratings.keys():
+                score, json = security_headers_rating_based_on_scan(
+                    these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
+                jsons.append(json)
+                scores.append(score)
+
+            if 'X-Frame-Options' in these_ratings.keys():
+                score, json = security_headers_rating_based_on_scan(
+                    these_ratings['X-Frame-Options'], 'X-Frame-Options')
+                jsons.append(json)
+                scores.append(score)
+
+            if 'X-XSS-Protection' in these_ratings.keys():
+                score, json = security_headers_rating_based_on_scan(
+                    these_ratings['X-XSS-Protection'], 'X-XSS-Protection')
                 jsons.append(json)
                 scores.append(score)
 
@@ -419,7 +478,7 @@ def rate_timeline(timeline, url):
 
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
-        # logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
+        logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
 
         save_url_rating(url, moment, sum(scores), url_rating_json)
 
@@ -917,7 +976,7 @@ def get_report_from_scanner_dead(endpoint, when):
         return 0, ""
 
 
-def security_headers_rating_based_on_scan(scan):
+def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Security'):
     security_headers_scores = {
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
         # prevents reflected xss
@@ -971,7 +1030,7 @@ def security_headers_rating_based_on_scan(scan):
 
     rating_template = """
                         {
-                        "security_headers_strict_transport_security": {
+                        "security_headers_%s": {
                             "explanation": "%s",
                             "points": "%s",
                             "since": "%s",
@@ -981,17 +1040,21 @@ def security_headers_rating_based_on_scan(scan):
 
     # don't need to add things that are OK to the report. It might be in the future.
     if scan.rating == "True":
-        json = (rating_template % ("Strict-Transport-Security header present.",
-                                   0,
-                                   scan.rating_determined_on,
-                                   scan.last_scan_moment))
+        json = (rating_template % (
+            header.lower().replace("-","_"),
+            header + " header present.",
+            0,
+            scan.rating_determined_on,
+            scan.last_scan_moment))
         rating = 0
 
     else:
-        json = (rating_template % ("Missing Strict-Transport-Security header.",
-                                   security_headers_scores[scan.type],
-                                   scan.rating_determined_on,
-                                   scan.last_scan_moment))
+        json = (rating_template % (
+            header.lower().replace("-", "_"),
+            "Missing " + header + " header.",
+            security_headers_scores[scan.type],
+            scan.rating_determined_on,
+            scan.last_scan_moment))
         rating = security_headers_scores[scan.type]
 
     return rating, json
