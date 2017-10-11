@@ -21,6 +21,25 @@ test: &test_template
   script:
     - tox -e py34
 
+# functional testing using mysql database instead of sqlite
+test_mysql:
+  <<: *test_template
+  services:
+    - mysql:latest
+  variables:
+    # configuration for docker mysql service
+    MYSQL_ROOT_PASSWORD: failmap
+    MYSQL_DATABASE: failmap
+    MYSQL_USER: failmap
+    MYSQL_PASSWORD: failmap
+    # configuration for django
+    DB_HOST: mysql
+    DB_ENGINE: mysql
+    DB_NAME: failmap
+    DB_NAME: failmap
+    DB_USER: failmap
+    DB_PASSWORD: failmap
+
 # code quality checks
 check:
   <<: *test_template
