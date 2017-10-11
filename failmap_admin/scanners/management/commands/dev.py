@@ -44,8 +44,15 @@ def develop_timeline():
     if True:
         # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
         # url = Url.objects.all().filter(url='sip.arnhem.nl').get()
+
+        # is deleted over time. has to receive a final empty rating.
         # url = Url.objects.all().filter(url='formulieren.hengelo.nl').get()
+
+        # had empty ratings, while relevant
         url = Url.objects.all().filter(url='mijnoverzicht.alphenaandenrijn.nl').get()
+
+        # has ratings on a ton of redundant endpoints.
+        # url = Url.objects.all().filter(url='webmail.zaltbommel.nl').get()
         data = timeline(url=url)
         show_timeline_console(data, url)
         rerate_url_with_timeline(url)
