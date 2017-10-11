@@ -104,6 +104,7 @@ staging:
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/failmap/admin:build
+    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:staging
 
     # here is where I would put my staging integration tests, if I had one!!!
 
@@ -119,5 +120,6 @@ production:
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/failmap/admin:staging
+    - docker tag registry.gitlab.com/failmap/admin:staging registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
