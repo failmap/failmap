@@ -63,17 +63,6 @@ def rate_organizations(create_history=False):
             rate_organization(o, when)
 
 
-def rate_urls(create_history=False):
-    times = get_weekly_intervals() if create_history else [
-        datetime.now(pytz.utc)]
-
-    urls = Url.objects.filter(is_dead=False)
-
-    for when in times:
-        for url in urls:
-            rate_url(url, when)
-
-
 def rate_organizations_efficient(create_history=False):
     os = Organization.objects.all().order_by('name')
     if create_history:
@@ -94,42 +83,24 @@ def rate_organization_efficient(organization, create_history=False):
     else:
         rate_organization(organization, datetime.now(pytz.utc))
 
-
-def rate_organization_urls_efficient(organization, create_history=False):
-    urls = Url.objects.filter(is_dead=False, organization=organization).order_by('url')
-
-    if create_history:
-        for url in urls:
-            times = significant_times(url=url)
-            for time in times:
-                rate_url(url, time)
-    else:
-        for url in urls:
-            rate_url(url, datetime.now(pytz.utc))
-
-
-def rate_urls_efficient(create_history=False):
-    urls = Url.objects.filter(is_dead=False).order_by('url')
-
-    if create_history:
-        for url in urls:
-            times = significant_times(url=url)
-            for time in times:
-                rate_url(url, time)
-    else:
-        for url in urls:
-            rate_url(url, datetime.now(pytz.utc))
-
-
-def clear_organization_and_urls(organization):
+def rerate_existing_urls_of_organization(organization):
     UrlRating.objects.all().filter(url__organization=organization).delete()
-    OrganizationRating.objects.all().filter(organization=organization).delete()
+    urls = Url.objects.filter(is_dead=False, organization=organization).order_by('url')
+    for url in urls:
+        rerate_url_with_timeline(url)
 
+def rerate_existing_urls():
+    UrlRating.objects.all().delete()
+    urls = Url.objects.filter(is_dead=False).order_by('url')
+    for url in urls:
+        rate_timeline(timeline(url), url)
+
+def clear_all_organization_ratings():
+    OrganizationRating.objects.all().delete()
 
 def rerate_url_with_timeline(url):
     UrlRating.objects.all().filter(url=url).delete()
     rate_timeline(timeline(url), url)
-
 
 def timeline(url):
     """
@@ -245,7 +216,9 @@ def timeline(url):
         scan_date = scan_date.date()
         timeline[scan_date]["tls_qualys_scan"] = {}
         timeline[scan_date]["tls_qualys_scan"]["scanned"] = True
-        ratings = list(tls_qualys_scans.filter(rating_determined_on__date=scan_date))
+        # prevent a query, below query could be rewritten, which is faster
+        # ratings = list(tls_qualys_scans.filter(rating_determined_on__date=scan_date))
+        ratings = [x for x in tls_qualys_scans if x.rating_determined_on.date() == scan_date]
         timeline[scan_date]["tls_qualys_scan"]["ratings"] = ratings
         endpoints = [x.endpoint for x in ratings]
         timeline[scan_date]["tls_qualys_scan"]["endpoints"] = endpoints
@@ -259,7 +232,9 @@ def timeline(url):
         scan_date = scan_date.date()
         timeline[scan_date]["generic_scan"] = {}
         timeline[scan_date]["generic_scan"]["scanned"] = True
-        ratings = generic_scans.filter(rating_determined_on__date=scan_date)
+        # prevent a query, below query could be rewritten, which is faster
+        # ratings = generic_scans.filter(rating_determined_on__date=scan_date)
+        ratings = [x for x in generic_scans if x.rating_determined_on.date() == scan_date]
         timeline[scan_date]["generic_scan"]["ratings"] = list(ratings)
         endpoints = [x.endpoint for x in ratings]
         timeline[scan_date]["generic_scan"]["endpoints"] = endpoints
@@ -440,7 +415,7 @@ def rate_timeline(timeline, url):
     }""".strip()
 
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
-        logger.debug("On %s this would score: %s " % (moment, sum(scores)))
+        logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
 
         save_url_rating(url, moment, sum(scores), url_rating_json)
 

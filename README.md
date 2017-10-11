@@ -17,58 +17,99 @@ Donate to this project safely, easily and quickly by clicking on an amount below
 <a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro;500</a>
 <a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">&euro;other</a>
 
-# Requirements
+# System requirements
+Linux or MacOS capable of running Python3 and git.
 
-Download and install git and python3 to get started.
+# Software Requirements
 
-- [git](https://git-scm.com/downloads)
-- [python3](https://www.python.org/downloads/)
-- tox `pip install tox`
+Download and install git and python3 to get started:
+
+- [git](https://git-scm.com/downloads) (download and install)
+- [python3](https://www.python.org/downloads/) (download and install)
+
+
+After installation of above tools, all following steps use the command line:
+
+    sudo easy_install pip  # installs pip, a python package manager, with the command pip3
 
 
 # Obtaining the software
 
 In a directory of your choosing:
 
-    git clone --recursive https://github.com/failmap/admin/
-    cd admin
+    git clone --recursive https://github.com/failmap/admin/  # downloads the software
+    cd admin  # enter the directory of the downloaded software
+
+# Quickstart
+
+Below commands result in a failmap installation that is suitable for testing and development. It is
+capable of handling thousands of urls and still be modestly responsive.
+
+If you need a faster, more robust installation, please contact us.
+
+    pip3 install -e .  # downloads requirements needed to run this software
+    failmap-admin migrate  # creates the database
+    failmap-admin createsuperuser  # create a user to view the admin interface
+    failmap-admin load-dataset testdata  # loads a series of sample data into the database
+    failmap-admin rebuild-ratings  # calculate the scores that should be displayed on the map
+    failmap-admin runserver  # finally starts the server
+
+Now visit the [map website](http://127.0.0.1:8000/) and/or the
+[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
+
+# Scanning services (beta)
+
+These services help fill the database with accurate up to date information. Run each one of them in
+a separate command line window and keep them running.
+
+    failmap-admin onboard-service  # handles all new urls with an initial (fast) scan
+    failmap-admin scan-tls-qualys-service  # slowly gets results from qualys
+    failmap-admin screenshot-service  # makes many gigabytes of screenshots
+
+# Using the software
+
+## The map website
+
+The website is the site intended for humans. There are some controls on the website, such as the
+time slider, twitter links and the possibilities to inspect organizations by clicking on them.
+
+Using the map website should be straightforward.
+
+## The admin website
+
+Use the admin website to perform standard [data-operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete),
+run a series of actions on the data and read documentation of the internal workings of the failmap software.
+
+The admin website is split up in four key parts:
+1. Authentication and Authorization
+This stores information about who can enter the admin interface and what they can do.
+
+2. Map
+Contains all information that is presented to normal humans.
+This information is automatically filled based on the scans that have been performed over time.
+
+3. Organizations
+Lists of organizations, coordinates and internet adresses.
+
+4. Scanners
+Lists of endpoints and assorted scans on these endpoints.
+
+
+# Troubleshooting getting started
 
 If you need a specific branch, for example "mapwebsite"
 
     git checkout mapwebsite
 
-This repository uses [submodules](https://git-scm.com/docs/git-submodule) to pull in external
-dependencies. If you have not cloned the repository with `--recursive` or you need to restore
-the submodules to the expected state run:
+This repository uses [submodules](https://git-scm.com/docs/git-submodule) to pull in
+external dependencies. If you have not cloned the repository with `--recursive` or you need to
+restore the submodules to the expected state run:
 
     git submodule update
 
-# Quickstart
+# Development
 
-It is advised to work within a Python virtualenv or use `direnv` (see below) to keep project
-dependencies isolated and managed. (todo: how)
-
-    pip3 install -e .
-    failmap-admin migrate
-    failmap-admin createsuperuser
-    failmap-admin load-dataset testdata  # slow, get a coffee
-    failmap-admin rebuild-ratings  # slow, also a tea
-    failmap-admin runserver
-
-Now visit the [website](http://127.0.0.1:8000/) and/or the
-[administrative interface ](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
-
-
-# Scanning services (beta)
-
-Onboarding handles all new urls with an initial (fast) scan. The tls scanner slowly gets results
-from qualys. Screenshot service makes many gigabytes of screenshots.
-
-    failmap-admin onboard-service
-    failmap-admin scan-tls-qualys-service
-    failmap-admin screenshot-service
-
-# Code quality / Testing
+## Code quality / Testing
 
 This project sticks to default pycodestyle/pyflakes configuration to maintain code quality.
 
@@ -97,7 +138,7 @@ Pytest allows to drop into Python debugger when a tests fails. To enable run:
 
     tox -- --pdb
 
-# Direnv / Virtualenv
+## Direnv / Virtualenv
 
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python
 virtual environment. Install direnv and run `direnv allow` to enable.
