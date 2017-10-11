@@ -5,9 +5,7 @@ import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import (
-                                                rate_organization_efficient,
-
+from failmap_admin.map.determineratings import (rate_organization_efficient,
                                                 rerate_url_with_timeline, show_timeline_console,
                                                 timeline)
 from failmap_admin.organizations.models import Organization, Url

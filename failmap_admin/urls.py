@@ -13,20 +13,28 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
 
-urlpatterns = [
+admin_urls = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     url(r'^jet/dashboard/', include('jet.dashboard.urls',
                                     'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', admin.site.urls),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+]
+frontend_urls = [
     url(r'^', include('failmap_admin.map.urls')),
 ]
+
+urlpatterns = frontend_urls.copy()
+
+if settings.APPNAME == 'failmap-admin':
+    urlpatterns += admin_urls
 
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]

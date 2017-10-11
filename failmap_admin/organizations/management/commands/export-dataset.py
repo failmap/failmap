@@ -63,8 +63,8 @@ class Command(DumpDataCommand):
                 return
         else:
             logger.error("This export might have incorrect integrity: no foreign key check for "
-                           "this engine was implemented. Loaddata might not accept this import. "
-                           "Perform a key check manually and then alter this code to continue.")
+                         "this engine was implemented. Loaddata might not accept this import. "
+                         "Perform a key check manually and then alter this code to continue.")
             return
 
         filename = "failmap_dataset_%s.yaml" % datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S")
