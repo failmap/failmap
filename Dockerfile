@@ -22,9 +22,8 @@ RUN apt-get update && \
 # install build application
 COPY --from=build /pyenv /pyenv
 
-# expose relevant executables
+# expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap-admin /usr/local/bin/
-RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 
 WORKDIR /
 
