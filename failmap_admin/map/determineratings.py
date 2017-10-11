@@ -83,11 +83,13 @@ def rate_organization_efficient(organization, create_history=False):
     else:
         rate_organization(organization, datetime.now(pytz.utc))
 
+
 def rerate_existing_urls_of_organization(organization):
     UrlRating.objects.all().filter(url__organization=organization).delete()
     urls = Url.objects.filter(is_dead=False, organization=organization).order_by('url')
     for url in urls:
         rerate_url_with_timeline(url)
+
 
 def rerate_existing_urls():
     UrlRating.objects.all().delete()
@@ -95,12 +97,15 @@ def rerate_existing_urls():
     for url in urls:
         rate_timeline(timeline(url), url)
 
+
 def clear_all_organization_ratings():
     OrganizationRating.objects.all().delete()
+
 
 def rerate_url_with_timeline(url):
     UrlRating.objects.all().filter(url=url).delete()
     rate_timeline(timeline(url), url)
+
 
 def timeline(url):
     """

@@ -1,6 +1,6 @@
 # from failmap_admin.organizations.dashboard_modules import SmartAddUrl
 # from failmap_admin.organizations.models import Organization, Url
-# 
+#
 #
 # def test_adding_urls(db):
 #     """When given a bunch of URLs all valid ones should be added."""

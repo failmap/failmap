@@ -13,6 +13,11 @@ import os
 
 from colorlog import ColoredFormatter
 
+# this application can run in 2 modes: admin and frontend
+# admin exposes all routes and uses no caching. It should be restricted in access
+# frontend only exposes the visitor facing routes and serves with cache headers
+APPNAME = os.environ.get('SERVICE_NAME', 'failmap-admin')
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Changed BASE_DIR so templates need to include the module and such. The idea
