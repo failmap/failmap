@@ -24,6 +24,8 @@ COPY --from=build /pyenv /pyenv
 
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap-admin /usr/local/bin/
+RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
+RUN ln -s /pyenv/bin/celery /usr/local/bin/
 
 WORKDIR /
 
