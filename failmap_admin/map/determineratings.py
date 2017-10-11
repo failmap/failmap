@@ -385,7 +385,8 @@ def rate_timeline(timeline, url):
             if "Strict-Transport-Security" not in these_ratings.keys():
                 if endpoint.id in previous_ratings.keys():
                     if "Strict-Transport-Security" in previous_ratings[endpoint.id].keys():
-                        these_ratings['Strict-Transport-Security'] = previous_ratings[endpoint.id]['Strict-Transport-Security']
+                        these_ratings['Strict-Transport-Security'] = \
+                            previous_ratings[endpoint.id]['Strict-Transport-Security']
 
             if "plain_https" not in these_ratings.keys():
                 if endpoint.id in previous_ratings.keys():
