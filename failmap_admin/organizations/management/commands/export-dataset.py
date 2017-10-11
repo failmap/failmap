@@ -36,6 +36,8 @@ class Command(DumpDataCommand):
         - States                No          Just start somewhere
         - TLS Qualys Scans      Yes         Needed for rebuild ratings
         - TLS Qualys Scratchpa  No          This is mainly for debugging (todo: check scan tls qual)
+        - Generic Scans         Yes
+        - Generic Scans scratch No
 
         Auth:
         - Users                 No          Create this yourself
