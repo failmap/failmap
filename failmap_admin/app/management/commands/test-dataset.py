@@ -26,5 +26,6 @@ class Command(BaseCommand):
         call_command('migrate', '-v0')
         print('+ Flusing old data')
         call_command('flush', '--no-input')
-        print('+ Importing fixture')
+        print('+ Importing fixture ' + argv[2])
         call_command('load-dataset', argv[2])
+        print('Done')
