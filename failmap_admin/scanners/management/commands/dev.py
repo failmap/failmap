@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from failmap_admin.map.determineratings import (clear_organization_and_urls,
                                                 rate_organization_efficient,
                                                 rate_organization_urls_efficient, timeline,
+                                                show_timeline_console, rerate_url_with_timeline,
                                                 rerate_url_with_timeline)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
@@ -33,17 +34,20 @@ class Command(BaseCommand):
 
 def develop_timeline():
     # organization = Organization.objects.filter(name="Zutphen").get()
-    if True:
+    if False:
         organizations = Organization.objects.all().order_by('name')
         for organization in organizations:
             urls = Url.objects.all().filter(organization=organization)
             for url in urls:
                 rerate_url_with_timeline(url=url)
 
-    # amersfoort = 100 ok! :)
-    # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
-    # url = Url.objects.all().filter(url='sip.arnhem.nl').get()
-    # timeline(url=url)
+    if True:
+        # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
+        # url = Url.objects.all().filter(url='sip.arnhem.nl').get()
+        url = Url.objects.all().filter(url='formulieren.hengelo.nl').get()
+        data = timeline(url=url)
+        show_timeline_console(data, url)
+        rerate_url_with_timeline(url)
 
 
 def develop_sslscan():

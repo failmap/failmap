@@ -125,10 +125,6 @@ def clear_organization_and_urls(organization):
     UrlRating.objects.all().filter(url__organization=organization).delete()
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
-
-def show_timeline_console(url):
-    show_timeline_console(timeline(url))
-
 def rerate_url_with_timeline(url):
     UrlRating.objects.all().filter(url=url).delete()
     rate_timeline(timeline(url), url)
@@ -192,9 +188,7 @@ def timeline(url):
     # is this relevant? I think we can do without.
     non_resolvable_dates = []
     try:
-        non_resolvable_urls = Url.objects.filter(not_resolvable=True,
-                                                 is_dead=False,
-                                                 url=url)
+        non_resolvable_urls = Url.objects.filter(not_resolvable=True, url=url)
         non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
         logger.debug("non_resolvable_dates: %s" % non_resolvable_dates)
     except ObjectDoesNotExist:
@@ -303,10 +297,20 @@ def rate_timeline(timeline, url):
     for moment in timeline:
         scores = []
 
-        # todo: non resolvable ratings.
-        # the these items. They are not
-        # relevant anymore for the report: the stuff has been cleaned up / changed. The json
-        # will then be empty.
+        if 'not_resolvable' in timeline[moment].keys():
+            logger.debug('Url became non-resolvable. Adding an empty rating to lower the score of'
+                         'this domain if it had a score. It has been cleaned up. (hooray)')
+            # this is the end for the domain.
+            default_calculation = """
+            {"url":
+                {
+                "url": "%s",
+                "points": "0",
+                "endpoints": []
+                }
+            }""" % url.url
+            save_url_rating(url, moment, 0, default_calculation)
+            return
 
         # reverse the relation: so we know all ratings per endpoint.
         endpoint_ratings = {}
@@ -449,13 +453,14 @@ def save_url_rating(url, date, score, json):
 
 
 
-def show_timeline_console(timeline):
+def show_timeline_console(timeline, url):
+    print("")
+    print(url.url)
     for moment in timeline:
         scores = []
         # prepare endpoints to contain ratings
         # for ep in timeline[moment]['endpoints']:
         #     ep["ratings"] = {}
-
         print("|")
         print("|- %s: %s" % (moment, timeline[moment].keys()))
         # print ("|  |")
@@ -484,10 +489,15 @@ def show_timeline_console(timeline):
                     score, json = security_headers_rating_based_on_scan(item)
                     print("|  |  |- %s points: %s" % (score, item))
 
-        if 'dead_endpoints' in timeline[moment].keys():
+        if 'dead' in timeline[moment].keys():
             print("|  |- dead endpoints")
             for endpoint in timeline[moment]['dead_endpoints']:
                 print("|  |  |- %s" % endpoint)
+
+        if 'not_resolvable' in timeline[moment].keys():
+            print("|  |- url became not resolvable")
+
+    print("")
 
 def significant_times(organization=None, url=None):
     """
