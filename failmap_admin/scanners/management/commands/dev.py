@@ -47,10 +47,11 @@ def develop_timeline():
         # url = Url.objects.all().filter(url='formulieren.hengelo.nl').get()
 
         # had empty ratings, while relevant
-        url = Url.objects.all().filter(url='mijnoverzicht.alphenaandenrijn.nl').get()
+        # url = Url.objects.all().filter(url='mijnoverzicht.alphenaandenrijn.nl').get()
 
         # has ratings on a ton of redundant endpoints.
-        # url = Url.objects.all().filter(url='webmail.zaltbommel.nl').get()
+        url = Url.objects.all().filter(url='webmail.zaltbommel.nl').get()
+        url = Url.objects.all().filter(url='aaenhunze.nl').get()
         data = timeline(url=url)
         show_timeline_console(data, url)
         rerate_url_with_timeline(url)
