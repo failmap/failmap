@@ -121,14 +121,21 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-# Since we don't use anything specific from a db engine, we move to sqllite.
+db_engine = os.environ.get('DB_ENGINE', 'sqlite3')
+database_options = {
+    'mysql': {
+        'init_command': "SET sql_mode='STRICT_ALL_TABLES'; SET collation_connection='utf8_general_ci'; ",
+    }
+}
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE', 'sqlite3'),
+        'ENGINE': 'django.db.backends.' + db_engine,
         'NAME': os.environ.get('DB_NAME', 'db.sqlite3'),
         'USER': os.environ.get('DB_USER', ''),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
         'HOST': os.environ.get('DB_HOST', ''),
+        'OPTIONS': database_options.get(db_engine, {}),
     },
 }
 
