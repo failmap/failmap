@@ -187,11 +187,12 @@
                         <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.url.points) + ', white);'">
                             <div class="screenshotlist">
                                 <div v-for="(endpoint, key) in url.url.endpoints">
-                                    <div v-for="(myendpoint, mykey) in endpoint">
+                                    <div v-for="(myendpoint, mykey) in endpoint" class="servicelink">
                                         <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
                                         <a v-bind:href="myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port" target="_blank"
                                         v-bind:title="'Visit ' + myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port">
                                             <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ myendpoint.protocol + idize(url.url.url) + myendpoint.port + '_latest.png\');'"></div>
+                                            <span v-html="'Bezoek adres van type: ' + myendpoint.protocol + '/' + myendpoint.port"> </span>
                                         </a>
                                     </div>
                                 </div>
