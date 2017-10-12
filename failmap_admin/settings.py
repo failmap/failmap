@@ -124,7 +124,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 db_engine = os.environ.get('DB_ENGINE', 'sqlite3')
 database_options = {
     'mysql': {
-        'init_command': "SET sql_mode='STRICT_ALL_TABLES'; SET collation_connection='utf8_general_ci'; ",
+        'init_command': (
+            "SET sql_mode='STRICT_ALL_TABLES';"
+        ),
     }
 }
 
