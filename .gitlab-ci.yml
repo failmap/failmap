@@ -41,13 +41,6 @@ test_mysql: &test_mysql_template
     DB_NAME: failmap
     DB_USER: failmap
     DB_PASSWORD: failmap
-  before_script:
-    - apt-get update -qq
-    - apt-get install -yqq mysql-client
-    # reflect production charset and collate
-    - mysql -uroot -p$MYSQL_ROOT_PASSWORD -hmysql -e "ALTER DATABASE failmap DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;"
-    # default before script
-    - pip install tox
 
 # code quality checks
 check:
