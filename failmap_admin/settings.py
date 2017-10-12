@@ -133,7 +133,7 @@ database_options = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.' + db_engine,
-        'NAME': os.environ.get('DB_NAME', 'db.sqlite3'),
+        'NAME': os.environ.get('DB_NAME', os.environ.get('DEFAULT_DB_NAME', 'db.sqlite3')),
         'USER': os.environ.get('DB_USER', ''),
         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
         'HOST': os.environ.get('DB_HOST', ''),

@@ -45,7 +45,7 @@ test_mysql: &test_mysql_template
     - apt-get update -qq
     - apt-get install -yqq mysql-client
     # reflect production charset and collate
-    - mysql -uroot -p$MYSQL_ROOT_PASSWORD -hmysql -e "ALTER DATABASE failmap CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+    - mysql -uroot -p$MYSQL_ROOT_PASSWORD -hmysql -e "ALTER DATABASE failmap DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci;"
     # default before script
     - pip install tox
 
