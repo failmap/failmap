@@ -121,26 +121,32 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-db_engine = os.environ.get('DB_ENGINE', 'sqlite3')
-database_options = {
-    'mysql': {
-        'init_command': (
-            "SET sql_mode='STRICT_ALL_TABLES';"
-        ),
+DATABASES_SETTINGS = {
+    # persisten local database used during development (runserver)
+    'dev': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.environ.get('DB_NAME', 'db.sqlite3'),
+    },
+    # sqlite memory database for running tests without
+    'test': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.environ.get('DB_NAME', 'db.sqlite3'),
+    },
+    # for production get database settings from environment (eg: docker)
+    'production': {
+        'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE', 'mysql'),
+        'NAME': os.environ.get('DB_NAME', 'failmap'),
+        'USER': os.environ.get('DB_USER', 'failmap'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'failmap'),
+        'HOST': os.environ.get('DB_HOST', 'mysql'),
+        'OPTIONS':   {
+            'init_command': "SET sql_mode='STRICT_ALL_TABLES';",
+        }
     }
 }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.' + db_engine,
-        'NAME': os.environ.get('DB_NAME', os.environ.get('DEFAULT_DB_NAME', 'db.sqlite3')),
-        'USER': os.environ.get('DB_USER', ''),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', ''),
-        'OPTIONS': database_options.get(db_engine, {}),
-    },
-}
-
+# allow database to be selected through environment variables
+DATABASE = os.environ.get('DJANGO_DATABASE', 'dev')
+DATABASES = {'default': DATABASES_SETTINGS[DATABASE]}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
