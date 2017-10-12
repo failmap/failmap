@@ -34,13 +34,9 @@ test_mysql: &test_mysql_template
     MYSQL_DATABASE: failmap
     MYSQL_USER: failmap
     MYSQL_PASSWORD: failmap
-    # configuration for django
-    DB_HOST: mysql
-    DB_ENGINE: mysql
-    DB_NAME: failmap
-    DB_NAME: failmap
-    DB_USER: failmap
-    DB_PASSWORD: failmap
+    # select mysql database settings, all settings default to 'failmap'
+    # so they don't need to be passed explicitly
+    DJANGO_DATABASE: production
 
 # code quality checks
 check:
