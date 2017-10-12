@@ -357,18 +357,32 @@ $(document).ready(function () {
             create_header: function(rating){
                 keyz = Object.keys(rating);
                 if (keyz[0] === "security_headers_strict_transport_security")
-                    return "Strict Transport Security Header (HSTS)";
+                    return "Strict-Transport-Security Header (HSTS)";
                 if (keyz[0] === "tls_qualys")
                     return "Transport Layer Security (TLS)";
                 if (keyz[0] === "http_plain")
                     return "Missing transport security (TLS)";
+                if (keyz[0] === "security_headers_x_xss_protection")
+                    return "X-XSS-Protection Header";
+                if (keyz[0] === "security_headers_x_frame_options")
+                    return "X-Frame-Options Header (clickjacking)";
+                if (keyz[0] === "security_headers_x_content_type_options")
+                    return "X-Content-Type-Options";
             },
             second_opinion_links: function(rating, url){
                 keyz = Object.keys(rating);
                 if (keyz[0] === "security_headers_strict_transport_security")
-                    return '<a href="https://securityheaders.io/?q=' + url.url.url + '\" target=\"_blank\">Second Opinion (securityheaders.io)</a>';
+                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
+                        '<a href="https://securityheaders.io/?q=' + url.url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
                 if (keyz[0] === "tls_qualys")
-                    return '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest\" target=\"_blank\">Second Opinion (Qualys)</a>';
+                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
+                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                if (keyz[0] === "security_headers_x_xss_protection")
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
+                if (keyz[0] === "security_headers_x_frame_options")
+                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">Documentation (wikipedia)</a>';
+                if (keyz[0] === "security_headers_x_content_type_options")
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
             },
             total_awarded_points: function(points) {
                 if (points === "0")
