@@ -103,6 +103,9 @@ def scan_header_celery(url):
     eps = []
     http_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='http')
     https_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='https')
+    # todo: don't scan per endpoint, but scan per URL. Multiple endp[oints with everything the
+    # same except IP doesn't really add anything as the ratings will be the same every time.
+
     endpoints = list(http_endpoints) + list(https_endpoints)
     for endpoint in endpoints:
         if not endpoint.is_ipv6():

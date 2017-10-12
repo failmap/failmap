@@ -209,6 +209,10 @@ def timeline(url):
         timeline[time.date()]["ratings"] = []
         timeline[time.date()]["dead_endpoints"] = []
 
+        # only have one ipv4 and opne ipv6 endpoint per moment.
+        # this is the one from generic scans, which immediately resolves.
+        timeline[time.date()]['had_ipv4'] = {}
+        timeline[time.date()]['had_ipv6'] = {}
     # print(timeline)
 
     # todo: clean dataset and remove useless ratings that won't die.
@@ -216,23 +220,6 @@ def timeline(url):
     # this code is correct with retrieving those endpoints again.
     # we could save a list of dead endpoints, but the catch is that an endpoint can start living
     # again over time. The scans with only dead endpoints should not be made.
-    for scan_date in tls_qualys_scan_dates:
-        # print(tls_qualys_scans)
-        scan_date = scan_date.date()
-        timeline[scan_date]["tls_qualys_scan"] = {}
-        timeline[scan_date]["tls_qualys_scan"]["scanned"] = True
-        # prevent a query, below query could be rewritten, which is faster
-        # ratings = list(tls_qualys_scans.filter(rating_determined_on__date=scan_date))
-        ratings = [x for x in tls_qualys_scans if x.rating_determined_on.date() == scan_date]
-        timeline[scan_date]["tls_qualys_scan"]["ratings"] = ratings
-        endpoints = [x.endpoint for x in ratings]
-        timeline[scan_date]["tls_qualys_scan"]["endpoints"] = endpoints
-        for endpoint in endpoints:
-            if endpoint not in timeline[scan_date]["endpoints"]:
-                timeline[scan_date]["endpoints"].append(endpoint)
-        # timeline[scan_date]["endpoints"] += list(endpoints)
-        timeline[scan_date]["ratings"] += list(ratings)
-
     for scan_date in generic_scan_dates:
         scan_date = scan_date.date()
         timeline[scan_date]["generic_scan"] = {}
@@ -246,6 +233,31 @@ def timeline(url):
         for endpoint in endpoints:
             if endpoint not in timeline[scan_date]["endpoints"]:
                 timeline[scan_date]["endpoints"].append(endpoint)
+        timeline[scan_date]["ratings"] += list(ratings)
+
+
+
+    for scan_date in tls_qualys_scan_dates:
+        scan_date = scan_date.date()
+
+        timeline[scan_date]["tls_qualys_scan"] = {}
+        timeline[scan_date]["tls_qualys_scan"]["scanned"] = True
+        # prevent a query, below query could be rewritten, which is faster
+        # ratings = list(tls_qualys_scans.filter(rating_determined_on__date=scan_date))
+        ratings = [x for x in tls_qualys_scans if x.rating_determined_on.date() == scan_date]
+        timeline[scan_date]["tls_qualys_scan"]["ratings"] = ratings
+        endpoints = [x.endpoint for x in ratings]
+        timeline[scan_date]["tls_qualys_scan"]["endpoints"] = endpoints
+
+        # qualys can deliver multiple IPv4 and IPv6 endpoints. This distorts the scores.
+        # What we can do is have only one endpoint for either ipv4 or ipv6.
+        # so we first try to match op these endpoints. If it appears there are no matches
+        # then you add an ipv4 and 6 endpoint from this set, so no ratings go lost. Some hosts
+        # Change IP every five minutes.
+        for endpoint in endpoints:
+            if endpoint not in timeline[scan_date]["endpoints"]:
+                timeline[scan_date]["endpoints"].append(endpoint)
+        # timeline[scan_date]["endpoints"] += list(endpoints)
         timeline[scan_date]["ratings"] += list(ratings)
 
     for scan_date in non_resolvable_dates:
@@ -278,6 +290,7 @@ def rate_timeline(timeline, url):
     previous_endpoints = []
     for moment in timeline:
         scores = []
+        given_ratings = {}
 
         if 'not_resolvable' in timeline[moment].keys():
             logger.debug('Url became non-resolvable. Adding an empty rating to lower the score of'
@@ -295,6 +308,7 @@ def rate_timeline(timeline, url):
             return
 
         # reverse the relation: so we know all ratings per endpoint.
+        # It is not really relevant what endpoints _really_ exist.
         endpoint_ratings = {}
         for rating in timeline[moment]['ratings']:
             endpoint_ratings[rating.endpoint.id] = []
@@ -325,39 +339,15 @@ def rate_timeline(timeline, url):
         # only rate one ipv4 and one ipv6 endpoint: dns either translates to ipv6 or v4.
         # only qualys resolves multiple ipv6 addresses: a normal browser will land on any but just
         # one of them.
-        # timeline[moment]['had_ipv4'] = {}
-        # timeline[moment]['had_ipv6'] = {}
-        # for endpoint in relevant_endpoints:
-        #     timeline[moment]['had_ipv4'][endpoint.id] = False
-        #     timeline[moment]['had_ipv6'][endpoint.id] = False
+
+        #
+        # ratings are duplicated in the database, on multiple endpoints. Should we drop all those
+        # extra endpoints (aka: ignore the IP adresses?)
+
 
         for endpoint in relevant_endpoints:
             # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
             # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
-
-            # you can only have one ipv4 and one ipv6 endpoint per url at one moment.
-            # (you CAN in fact have more, but we don't punish failovers with the same rating
-            # multiple times)
-            # if endpoint.is_ipv4():
-            #     if 'ipv4_endpoint' not in timeline[moment].keys():
-            #         timeline[moment]['ipv4_endpoint'] = endpoint
-            #     if endpoint != timeline[moment]['ipv4_endpoint']:
-            #         continue
-            # else:
-            #     if 'ipv6_endpoint' not in timeline[moment].keys():
-            #         timeline[moment]['ipv6_endpoint'] = endpoint
-            #     if endpoint != timeline[moment]['ipv6_endpoint']:
-            #         continue
-
-            # if timeline[moment]['had_ipv4'][endpoint.id] and endpoint.is_ipv4():
-            #     continue
-            # if timeline[moment]['had_ipv6'][endpoint.id] and endpoint.is_ipv6():
-            #     continue
-
-            # if endpoint.is_ipv6():
-            #     timeline[moment]['had_ipv6'][endpoint.id] = True
-            # else:
-            #     timeline[moment]['had_ipv4'][endpoint.id] = True
 
             jsons = []
             these_ratings = {}
@@ -421,39 +411,119 @@ def rate_timeline(timeline, url):
             previous_ratings[endpoint.id] = these_ratings
 
             # build the json:
+            #
+            # a scan/rating can only happen one time per port on a moment, regardless of endpoint.
+            #
+            # it is saved multiple times to the database, due to qualys finding multiple IP
+            # adresses. In turn other scanners think these endpoints also are reachable, when they
+            # in fact are not (behind a load balancer, or whatever).
+            #
+            # I've no clue how qualys can think they can reach the website over a different IP
+            # forefully.
+            # EG: webmail.zaltbommel.nl (microsoft hosted(!)) has eight endpoints: 4 on v4 and v6
+            #
+            # To fix this, confusingly, give only one rating to the endpoint. And then add a
+            # "repeated" message, so you know a rating is repeated, and didn't get extra points.
+            label = str(moment)+str(endpoint.is_ipv6())+str(endpoint.port)
+            if label not in given_ratings:
+                given_ratings[label] = []
+
+
+            message = "Repeated finding, not giving a score again. It seems this " \
+            " website has multiple IP adresses, which is common in failover and loadbalancing " \
+            " scenarios. Please fix the aforementioned issue to get rid of this message."
+
+            repetition_message = """{
+                "%s": {
+                        "explanation": "%s",
+                        "points": "0",
+                        "since": "%s",
+                        "last_scan": "%s"
+                        }
+                    }
+            """
+
             if 'tls_qualys_scan' in these_ratings.keys():
-                score, json = tls_qualys_rating_based_on_scan(these_ratings['tls_qualys_scan'])
-                jsons.append(json)
-                scores.append(score)
+                if 'tls_qualys_scan' not in given_ratings[label]:
+                    score, json = tls_qualys_rating_based_on_scan(these_ratings['tls_qualys_scan'])
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('tls_qualys_scan')
+                else:
+                    jsons.append(repetition_message % (
+                        'tls_qualys',
+                        message,
+                        these_ratings['tls_qualys_scan'].rating_determined_on,
+                        these_ratings['tls_qualys_scan'].scan_moment,))
 
             if 'Strict-Transport-Security' in these_ratings.keys():
-                score, json = security_headers_rating_based_on_scan(
-                    these_ratings['Strict-Transport-Security'], 'Strict-Transport-Security')
-                jsons.append(json)
-                scores.append(score)
+                if 'Strict-Transport-Security' not in given_ratings[label]:
+                    score, json = security_headers_rating_based_on_scan(
+                        these_ratings['Strict-Transport-Security'], 'Strict-Transport-Security')
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('Strict-Transport-Security')
+                else:
+                    jsons.append(repetition_message % (
+                        'security_headers_strict_transport_security',
+                        message,
+                        these_ratings['Strict-Transport-Security'].rating_determined_on,
+                        these_ratings['Strict-Transport-Security'].last_scan_moment,))
 
             if 'X-Content-Type-Options' in these_ratings.keys():
-                score, json = security_headers_rating_based_on_scan(
-                    these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
-                jsons.append(json)
-                scores.append(score)
+                if 'X-Content-Type-Options' not in given_ratings[label]:
+                    score, json = security_headers_rating_based_on_scan(
+                        these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('X-Content-Type-Options')
+                else:
+                    jsons.append(repetition_message % (
+                        'security_headers_x_content_type_options',
+                        message,
+                        these_ratings['X-Content-Type-Options'].rating_determined_on,
+                        these_ratings['X-Content-Type-Options'].last_scan_moment,))
 
             if 'X-Frame-Options' in these_ratings.keys():
-                score, json = security_headers_rating_based_on_scan(
-                    these_ratings['X-Frame-Options'], 'X-Frame-Options')
-                jsons.append(json)
-                scores.append(score)
+                if 'X-Frame-Options' not in given_ratings[label]:
+                    score, json = security_headers_rating_based_on_scan(
+                        these_ratings['X-Frame-Options'], 'X-Frame-Options')
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('X-Frame-Options')
+                else:
+                    jsons.append(repetition_message % (
+                        'security_headers_x_frame_options',
+                        message,
+                        these_ratings['X-Frame-Options'].rating_determined_on,
+                        these_ratings['X-Frame-Options'].last_scan_moment,))
 
             if 'X-XSS-Protection' in these_ratings.keys():
-                score, json = security_headers_rating_based_on_scan(
-                    these_ratings['X-XSS-Protection'], 'X-XSS-Protection')
-                jsons.append(json)
-                scores.append(score)
+                if 'X-XSS-Protection' not in given_ratings[label]:
+                    score, json = security_headers_rating_based_on_scan(
+                        these_ratings['X-XSS-Protection'], 'X-XSS-Protection')
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('X-XSS-Protection')
+                else:
+                    jsons.append(repetition_message % (
+                        'security_headers_x_xss_protection',
+                        message,
+                        these_ratings['X-XSS-Protection'].rating_determined_on,
+                        these_ratings['X-XSS-Protection'].last_scan_moment,))
 
             if 'plain_https' in these_ratings.keys():
-                score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
-                jsons.append(json)
-                scores.append(score)
+                if 'plain_https' not in given_ratings[label]:
+                    score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('plain_https')
+                else:
+                    jsons.append(repetition_message % (
+                        'plain_https',
+                        message,
+                        these_ratings['plain_https'].rating_determined_on,
+                        these_ratings['plain_https'].last_scan_moment,))
 
             endpoint_template = """
         {
@@ -483,7 +553,10 @@ def rate_timeline(timeline, url):
 
         url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
-        logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
+        # logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
+        # logger.debug("Url rating json: %s", url_rating_json)
+        # import json as blaat
+        # parsed = blaat.loads(url_rating_json)
 
         save_url_rating(url, moment, sum(scores), url_rating_json)
 
@@ -530,8 +603,21 @@ def show_timeline_console(timeline, url):
                 if item.type == "plain_https":
                     score, json = http_plain_rating_based_on_scan(item)
                     print("|  |  |- %s points: %s" % (score, item))
+            for item in timeline[moment]['generic_scan']['ratings']:
                 if item.type == "Strict-Transport-Security":
-                    score, json = security_headers_rating_based_on_scan(item)
+                    score, json = security_headers_rating_based_on_scan(item, "Strict-Transport-Security")
+                    print("|  |  |- %s points: %s" % (score, item))
+            for item in timeline[moment]['generic_scan']['ratings']:
+                if item.type == "X-Frame-Options":
+                    score, json = security_headers_rating_based_on_scan(item, "X-Frame-Options")
+                    print("|  |  |- %s points: %s" % (score, item))
+            for item in timeline[moment]['generic_scan']['ratings']:
+                if item.type == "X-Content-Type-Options":
+                    score, json = security_headers_rating_based_on_scan(item, "X-Content-Type-Options")
+                    print("|  |  |- %s points: %s" % (score, item))
+            for item in timeline[moment]['generic_scan']['ratings']:
+                if item.type == "X-XSS-Protection":
+                    score, json = security_headers_rating_based_on_scan(item, "X-XSS-Protection")
                     print("|  |  |- %s points: %s" % (score, item))
 
         if 'dead' in timeline[moment].keys():
@@ -715,7 +801,7 @@ def rate_organization(organization, when=""):
                                                        ",".join(calculation_json)))
     # print(organization_json)
     # verify the JSON is correct
-    parsed = json.loads(organization_json)
+    # parsed = json.loads(organization_json)
     # organization_json_checked = json.dumps(parsed)
     # print("%s %s" % (last.calculation, total_calculation))
     if last.calculation != organization_json:
@@ -892,8 +978,8 @@ def get_url_score_modular(url, when=""):
         url_json = url_rating_template % (url.url, rating, ",".join(endpoint_jsons))
         # logger.debug(url_json)
         # verify correctness of json:
-        parsed = json.loads(url_json)
-        url_json = json.dumps(parsed)  # nice format
+        # parsed = json.loads(url_json)
+        # url_json = json.dumps(parsed)  # nice format
         return url_json, rating
     else:
         # empty explanations don't get saved.
@@ -1034,14 +1120,14 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     }
 
     rating_template = """
-                        {
-                        "security_headers_%s": {
-                            "explanation": "%s",
-                            "points": "%s",
-                            "since": "%s",
-                            "last_scan": "%s"
-                            }
-                        }""".strip()
+                {
+                "security_headers_%s": {
+                    "explanation": "%s",
+                    "points": "%s",
+                    "since": "%s",
+                    "last_scan": "%s"
+                    }
+                }""".strip()
 
     # don't need to add things that are OK to the report. It might be in the future.
     if scan.rating == "True":
@@ -1065,6 +1151,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     return rating, json
 
 
+# todo: this should take multiple generic scans on headers.
+# todo: this misses in score rating modular
 def get_report_from_scanner_security_headers(endpoint, when):
     try:
         # also here: the last scan moment increases with every scan. When you have a set of
@@ -1192,13 +1280,13 @@ def tls_qualys_rating_based_on_scan(scan):
 
     tlsratingtemplate = """
             {
-            "tls_qualys": {
-                "explanation": "%s",
-                "points": "%s",
-                "since": "%s",
-                "last_scan": "%s"
-                }
-            }""".strip()
+                "tls_qualys": {
+                    "explanation": "%s",
+                    "points": "%s",
+                    "since": "%s",
+                    "last_scan": "%s"
+                    }
+                }""".strip()
 
     # configuration errors
     if scan.qualys_message == "Certificate not valid for domain name":

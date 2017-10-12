@@ -75,9 +75,9 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s = %s | %s/%s" % (self.domain,  self.ip, self.protocol, self.port)
+            return "✝ %s = %s | %s/%s [%s]" % (self.domain,  self.ip, self.protocol, self.port, self.id)
         else:
-            return "%s = %s | %s/%s" % (self.domain, self.ip, self.protocol, self.port)
+            return "%s = %s | %s/%s [%s]" % (self.domain, self.ip, self.protocol, self.port, self.id)
 
     def uri_url(self):
         return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
