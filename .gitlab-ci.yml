@@ -27,7 +27,7 @@ test: &test_template
 test_mysql: &test_mysql_template
   <<: *test_template
   services:
-    - mysql:latest
+    - mysql:5.5
   variables:
     # configuration for docker mysql service
     MYSQL_ROOT_PASSWORD: failmap
