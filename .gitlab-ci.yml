@@ -42,6 +42,7 @@ test_mysql: &test_mysql_template
     DB_USER: failmap
     DB_PASSWORD: failmap
   before_script:
+    - apt-get update -q
     - apt-get install -yqq mysql-client
     # reflect production charset and collate
     - mysql -e "ALTER DATABASE failmap CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
