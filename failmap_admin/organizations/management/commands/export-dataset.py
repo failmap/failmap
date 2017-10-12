@@ -114,8 +114,9 @@ def sqlite_has_correct_referential_integrity():
     for row in rows:
         logger.info("%25s %6s %25s %6s" % (row[0], row[1], row[2], row[3]))
 
-    logger.error(
-        "Here are some extremely crude SQL statements that might help fix the problem.")
+    if rows:
+        logger.error(
+            "Here are some extremely crude SQL statements that might help fix the problem.")
     for row in rows:
         logger.info("DELETE FROM %s WHERE id = \"%s\";" % (row[0], row[1]))
 
