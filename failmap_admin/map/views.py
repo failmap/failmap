@@ -30,13 +30,17 @@ def index(request):
     return render(request, 'map/index.html',
                   {"timestamp": datetime.now(pytz.utc)})
 
+
 def robots_txt(request):
     return render(request, 'map/robots.txt', content_type="text/plain")
+
 
 def security_txt(request):
     return render(request, 'map/security.txt', content_type="text/plain")
 
 # @cache_page(cache_time)
+
+
 def organization_report(request, organization_id, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
