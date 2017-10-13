@@ -1,6 +1,5 @@
 /.idea/
 .DS_Store
-configuration.php
 db.sqlite3
 *.py[co]
 .tox
@@ -9,8 +8,6 @@ db.sqlite3
 .cache
 .coverage
 htmlcov
-trash.txt
-todo.txt
 error.log
 db_backup_*.sqlite3
 failmap_admin/map/static/images/screenshots/*

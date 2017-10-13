@@ -28,9 +28,16 @@ class OrganizationRating(models.Model):
     scanner to explain why something is the way it is (over time).
     """
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT,)
-    rating = models.IntegerField()
+    rating = models.IntegerField(
+        help_text="Amount of points scored by the organization based on a sum of all URL ratings at"
+                  " this moment. Rating -1 is used as a default first rating, which are displayed "
+                  "in gray on the map. All next ratings are between 0 (perfect) and 2147483647."
+    )
     when = models.DateTimeField(db_index=True)
-    calculation = models.TextField()  # calculations of the independent urls... and perhaps others?
+    calculation = models.TextField(
+        help_text="Contains JSON with a calculation of all scanners at this moment, for all urls "
+                  "of this organization. This can be a lot."
+    )  # calculations of the independent urls... and perhaps others?
 
     class Meta:
         managed = True
@@ -43,18 +50,21 @@ class OrganizationRating(models.Model):
 class UrlRating(models.Model):
     """
         Aggregrates the results of many scanners to determine a rating for a URL.
-
-        For example: organization.nl has a the following results:
-        - TLS: A = 0 points
-        - Banners: C = 100 points
-        - Headers: F = 1000 points
     """
     url = models.ForeignKey(Url)
-    rating = models.IntegerField()
+    rating = models.IntegerField(
+        help_text="Amount of points scored after rating the URL. Ratings are usually positive, yet "
+                  "this is not a positive integerfield because we might use -1 as an 'unknown' "
+                  "default value for when there are no ratings at all. Ratings can go from 0 "
+                  "up to 2147483647."
+    )
     when = models.DateTimeField(db_index=True)
-    calculation = models.TextField()  # calculation of different scanners. There will be a loop
-    # somewhere that just figures out the rating on different time periods per scanner.
-    # This does not need to contain ALL aggegrated data, but it can as it's calculated.
+    calculation = models.TextField(
+        help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "
+                  "be spread out over multiple endpoints, which might look a bit confusing. Yet it "
+                  "is perfectly possible as some urls change their IP every five minutes and "
+                  "scans are spread out over days."
+    )
 
     class Meta:
         managed = True
