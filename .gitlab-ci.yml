@@ -37,12 +37,8 @@ test_mysql: &test_mysql_template
     # select mysql database settings, all settings default to 'failmap'
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
-
-  before_script:
-    # install stuff like mysql-client
-    - pip install -rrequirements.deploy.txt
-    # default before script
-    - pip install tox
+    # add mysqlclient to tox environment
+    TOX_EXTRA_DEPS: -rrequirements.deploy.txt
 
 # code quality checks
 check:
