@@ -146,9 +146,9 @@ class EndpointGenericScan(models.Model):
         max_length=255,
         help_text="Used when there is no known endpoint.")
     rating = models.CharField(
-        max_length=3,
+        max_length=6,
         default=0,
-        help_text="Preferably an integer. Keep ratings over time consistent."
+        help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent."
     )
     explanation = models.CharField(
         max_length=255,

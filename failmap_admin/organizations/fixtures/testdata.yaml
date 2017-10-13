@@ -22640,6 +22640,12 @@
     scan_moment: !!timestamp '2017-09-29 14:42:43.738030+00:00', rating_determined_on: !!timestamp '2017-09-29
       14:42:43.737449+00:00'}
 - model: scanners.tlsqualysscan
+  pk: 16156
+  fields: {endpoint: 1159, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
+      not valid for domain name, scan_date: 2017-10-11, scan_time: '09:58:29.707843',
+    scan_moment: !!timestamp '2017-10-11 09:58:29.708075+00:00', rating_determined_on: !!timestamp '2017-10-11
+      09:58:29.707117+00:00'}
+- model: scanners.tlsqualysscan
   pk: 1269
   fields: {endpoint: 1160, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2016-05-18, scan_time: '09:04:01', scan_moment: !!timestamp '2016-05-18
