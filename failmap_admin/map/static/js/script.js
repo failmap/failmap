@@ -45,7 +45,8 @@ function debounce(func, wait, immediate) {
 var failmap = {
     map: null,
     geojson: "",
-    metadata: L.control(),
+    internetadresses: L.control(),
+    dataslider: L.control(),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
 
@@ -54,6 +55,7 @@ var failmap = {
         this.map.scrollWheelZoom.disable();
 
         L.control.fullscreen().addTo(this.map);
+
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -62,22 +64,11 @@ var failmap = {
             id: 'mapbox.light'
         }).addTo(this.map);
 
-        this.map.attributionControl.addAttribution('Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>');
+        this.map.attributionControl.addAttribution('Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>');
 
-        this.metadata.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-
-        this.metadata.update = function (metadata) {
-            this._div.innerHTML = '' + (metadata ?
-                '<h4>' + new Date(metadata.data_from_time).humanTimeStamp() + '</h4>' : '<h4></h4>');
-        };
-
-        this.metadata.addTo(this.map);
-
+        this.add_dataslider();
         this.add_info();
+        this.add_internetadresses();
         this.addlegend();
     },
 
@@ -97,15 +88,44 @@ var failmap = {
                 else
                     sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">- points</span>';
                 domainsDebounced(props.OrganizationID, $("#history")[0].value);
-            } else {
-                sometext += "<h4>-</h4>";
-                sometext += '<b>Score: </b><span>- points</span>';
+                this._div.innerHTML = sometext;
             }
-
-            this._div.innerHTML = sometext;
         };
 
         this.info.addTo(this.map);
+    },
+
+    add_dataslider: function () {
+        this.dataslider.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            dataslider_control = " <div id=\"historycontrol\">" +
+            "    <h4>{{ visibleweek }}</h4>" +
+            "    <input id='history' type='range' value='0' min='0' max='52' step='1'/>" +
+            "    <input id='previous_week' type='button' onclick='previous_week()' value='&lt;&lt;&lt;'/>" +
+            "    <input id='next_week' type='button' onclick='next_week()' value='&gt;&gt;&gt;'/>" +
+            "</div>";
+
+            this._div.innerHTML = dataslider_control;
+            return this._div;
+        };
+        this.dataslider.addTo(this.map);
+    },
+
+    add_internetadresses: function () {
+        this.internetadresses.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
+                "                    <div v-for=\"url in urls\">\n" +
+                "                        <span v-bind:class=\"colorize(url.url.points)\">\n" +
+                "                            {{ url.url.url }}\n" +
+                "                        </span>\n" +
+                "                    </div>\n" +
+                "                    <br />\n" +
+                "                </div>";
+            return this._div;
+        };
+
+        this.internetadresses.addTo(this.map);
     },
 
     addlegend: function () {
@@ -224,14 +244,29 @@ var failmap = {
                 onEachFeature: failmap.onEachFeature
             }).addTo(failmap.map); // only if singleton, its somewhat dirty.
 
-            // todo: add the date info on the map, or somewhere.
-            failmap.metadata.update(json.metadata);
         });
     }
 
 };
 
 failmap.initializemap();
+
+function next_week(){
+    h = $("#history");
+    if (h[0].value > 0) {
+        h[0].value -= 1;
+        h.change()
+    }
+}
+
+function previous_week(){
+    // caused 1, 11, 111 :) lol
+    h = $("#history");
+    if (h[0].value < 52) {
+        h[0].value = parseInt(h[0].value) + 1.0;
+        h.change()
+    }
+}
 
 var domainsDebounced = debounce(function (organization, weeks_back) {
     if (!weeks_back)
@@ -508,7 +543,7 @@ $(document).ready(function () {
     });
 
     // move space and time ;)
-    $("#history").on("change input", debounce(function () {
+    $("#history").on("change", debounce(function () {
         failmap.loadmap(this.value);
         loadtopfail(this.value);
         loadtopwin(this.value);
