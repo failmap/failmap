@@ -152,11 +152,28 @@ body {
     right: 0;
     position: absolute;
     margin-top: 40px;
+    padding-bottom: 20px;
 }
 
-#lastrow .row {
-    width: 1170px;
-    margin: auto;
+@media (min-width: 768px){
+    #lastrow .row {
+        width: 750px;
+        margin: auto;
+    }
+}
+
+@media (min-width: 992px){
+    #lastrow .row {
+        width: 970px;
+        margin: auto;
+    }
+}
+
+@media (min-width: 1200px) {
+    #lastrow .row {
+        width: 1170px;
+        margin: auto;
+    }
 }
 
 .Donate{
@@ -315,4 +332,37 @@ body {
     border-radius: 6px;
     margin-right: 5px;
     margin-left: 5px;
+}
+
+.fail_logo{
+    background-color: black;
+    padding: 5px;
+    border: 3px inset;
+}
+
+.fail_logo img {
+    width: 100%;
+}
+
+.sidn_logo img {
+    margin-left: -6px; /* todo: remove margin of the logo image. */
+    width: 100%;
+    padding-bottom: 11px;
+}
+
+.git_logo {
+    padding: 10px;
+    padding-bottom: 17px;
+}
+
+.git_logo img{
+    height: 70px;
+}
+.logo {
+    width: 100%;
+    text-align: center;
+}
+
+.logoandtext {
+    font-size: 12px;
 }
