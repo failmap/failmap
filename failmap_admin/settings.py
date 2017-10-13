@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+from collections import defaultdict
 
 from colorlog import ColoredFormatter
 
@@ -147,6 +148,9 @@ DATABASES_SETTINGS = {
 # allow database to be selected through environment variables
 DATABASE = os.environ.get('DJANGO_DATABASE', 'dev')
 DATABASES = {'default': DATABASES_SETTINGS[DATABASE]}
+# avoid uncertainty about applied database settings
+print('database settings: {ENGINE}, {NAME}, {USER}, {HOST}'.format_map(
+    defaultdict(str, **DATABASES['default'])))
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
