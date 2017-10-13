@@ -366,3 +366,38 @@ body {
 .logoandtext {
     font-size: 12px;
 }
+
+.fullscreenlayout {
+    /* Hide it initially, also when fullscreen closes. */
+    /* display: none; */
+
+    /* Go all out */
+    position: fixed;
+    left: 60px;
+    right: 300px;
+    bottom: 25px;
+    top: 10px;
+    overflow-y: scroll;
+    overflow-x: auto;
+
+    /* emulate the maps info boxes */
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 1px;
+    padding: 14px;
+
+}
+
+/* a yolo layouted button, just to make sure it can close. */
+.closebutton {
+    float: right;
+    border: 1px solid silver;
+    border-radius: 50px;
+    padding: 31px;
+    position: fixed;
+    top: 40px;
+    right: 329px;
+    font-size: 30px;
+    color: silver;
+    font-family: consolas;
+}

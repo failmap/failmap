@@ -48,6 +48,7 @@ var failmap = {
     internetadresses: L.control(),
     dataslider: L.control(),
     info: L.control(),
+    fullscreenreport: L.control(),
     legend: L.control({position: 'bottomright'}),
 
     initializemap: function () {
@@ -55,6 +56,16 @@ var failmap = {
         this.map.scrollWheelZoom.disable();
 
         L.control.fullscreen().addTo(this.map);
+
+        console.log(this.map.isFullscreen());
+
+        this.map.on('fullscreenchange', function () {
+            if (failmap.map.isFullscreen()) {
+                console.log('entered fullscreen');
+            } else {
+                hide_fullscreenreport();
+            }
+        });
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
             maxZoom: 18,
@@ -69,6 +80,7 @@ var failmap = {
         this.add_dataslider();
         this.add_info();
         this.add_internetadresses();
+        this.add_fullscreenreport();
         this.addlegend();
     },
 
@@ -126,6 +138,59 @@ var failmap = {
         };
 
         this.internetadresses.addTo(this.map);
+    },
+
+    add_fullscreenreport: function () {
+        this.fullscreenreport.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'fullscreenmap');
+            this._div.innerHTML = '<div class="page-header" id="fullscreenreport" v-if="visible">\n' +
+                '                <div v-if="name" class="fullscreenlayout">\n' +
+                '                    <h1>{{ name }}</h1>\n' +
+                '                    <p class="closebutton" onclick="hide_fullscreenreport()">X</p>\n' +
+                '                    <div>\n' +
+                '                        Gegevens van: {{ humanize(when) }}<br />\n' +
+                '                        Score: {{ points }}, congratulations!<br />\n' +
+                '                        <br />\n' +
+                '                        <div v-for="url in urls" class="perurl" v-bind:style="\'background: linear-gradient(\' + colorizebg(url.url.points) + \', rgba(255, 255, 255,.5));\'">\n' +
+                '                            <div class="screenshotlist">\n' +
+                '                                <div v-for="(endpoint, key) in url.url.endpoints">\n' +
+                '                                    <div v-for="(myendpoint, mykey) in endpoint" class="servicelink">\n' +
+                '                                        <!-- There is no support for different ip\'s/ipv6 in endpoint, only for protocols. -->\n' +
+                '                                        <a v-bind:href="myendpoint.protocol + \'://\' + url.url.url + \':\' + myendpoint.port" target="_blank"\n' +
+                '                                        v-bind:title="\'Visit \' + myendpoint.protocol + \'://\' + url.url.url + \':\' + myendpoint.port">\n' +
+                '                                            <div class="imagediv" v-bind:style="\'background-image: url(\\\'/static/images/screenshots/\'+ myendpoint.protocol + idize(url.url.url) + myendpoint.port + \'_latest.png\\\');\'"></div>\n' +
+                '                                            <span v-html="\'Bezoek adres van type: \' + myendpoint.protocol + \'/\' + myendpoint.port"> </span>\n' +
+                '                                        </a>\n' +
+                '                                    </div>\n' +
+                '                                </div>\n' +
+                '                            </div>\n' +
+                '                            <div class="reportlist">\n' +
+                '                                <span v-html="total_awarded_points(url.url.points)"> </span>\n' +
+                '                                <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >\n' +
+                '                                            {{ url.url.url }}</span><br />\n' +
+                '                                <div v-for="(endpoint, key) in url.url.endpoints">\n' +
+                '                                    <div v-for="(myendpoint, mykey) in endpoint"><br />\n' +
+                '                                        &nbsp; Adres: {{ myendpoint.ip }}:{{ myendpoint.port }}\n' +
+                '                                        <div v-for="(rating, key) in myendpoint.ratings">\n' +
+                '                                            <h3>&nbsp; {{ create_header(rating) }}</h3>\n' +
+                '                                            <div v-for="(myrating, myratingkey) in rating">\n' +
+                '                                                &nbsp; &nbsp; <span v-html="awarded_points(myrating.points)"></span> {{ myrating.explanation }}<br />\n' +
+                '                                                &nbsp; &nbsp; Sinds: {{ humanize(myrating.since) }}, Last Check: {{ humanize(myrating.last_scan) }} <br />\n' +
+                '                                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>\n' +
+                '                                                <br />\n' +
+                '                                            </div>\n' +
+                '                                        </div>\n' +
+                '                                    </div>\n' +
+                '                                </div>\n' +
+                '                            </div>\n' +
+                '                        </div>\n' +
+                '                    </div>\n' +
+                '                </div>\n' +
+                '            </div>';
+            return this._div;
+        };
+
+        this.fullscreenreport.addTo(this.map);
     },
 
     addlegend: function () {
@@ -212,7 +277,7 @@ var failmap = {
         layer.on({
             mouseover: failmap.highlightFeature,
             mouseout: failmap.resetHighlight,
-            click: showreport
+            click: failmap.showreport
         });
     },
 
@@ -245,11 +310,31 @@ var failmap = {
             }).addTo(failmap.map); // only if singleton, its somewhat dirty.
 
         });
+    },
+
+    showreport: function(e) {
+        if (failmap.map.isFullscreen()){
+            console.log("FULL");
+            var layer = e.target;
+            showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
+            show_fullscreenreport();
+        } else {
+            jumptoreport();
+            var layer = e.target;
+            showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
+        }
     }
+
 
 };
 
-failmap.initializemap();
+function hide_fullscreenreport(){
+    vueFullScreenReport.hide()
+}
+
+function show_fullscreenreport(){
+    vueFullScreenReport.show()
+}
 
 function next_week(){
     h = $("#history");
@@ -332,6 +417,10 @@ function showReportData(OrganizationID, weeks_ago) {
         vueReport.points = data.rating;
         vueReport.when = data.when;
         vueReport.name = data.name;
+        vueFullScreenReport.urls = data.calculation["organization"]["urls"];
+        vueFullScreenReport.points = data.rating;
+        vueFullScreenReport.when = data.when;
+        vueFullScreenReport.name = data.name;
     });
 }
 
@@ -340,14 +429,9 @@ function jumptoreport() {
     location.hash = "#report";
 }
 
-function showreport(e) {
-    jumptoreport();
-    var layer = e.target;
-    showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
-}
-
 
 $(document).ready(function () {
+    failmap.initializemap();
     failmap.loadmap(0);
 
     // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
@@ -368,6 +452,93 @@ $(document).ready(function () {
             // therefore we explicitly do this elsewhere
         },
         methods: {
+            colorize: function (points) {
+                if (points < 199) return "green";
+                if (points < 1000) return "orange";
+                if (points > 999) return "red";
+            },
+            colorizebg: function (points) {
+                if (points < 199) return "#dff9d7";
+                if (points < 1000) return "#ffefd3";
+                if (points > 999) return "#fbeaea";
+            },
+            idize: function (url) {
+                url = url.toLowerCase();
+                return url.replace(/[^0-9a-z]/gi, '')
+            },
+            idizetag: function (url) {
+                url = url.toLowerCase();
+                return "#" + url.replace(/[^0-9a-z]/gi, '')
+            },
+            humanize: function (date) {
+                return new Date(date).humanTimeStamp()
+            },
+            create_header: function(rating){
+                if (rating.rating.type === "security_headers_strict_transport_security")
+                    return "Strict-Transport-Security Header (HSTS)";
+                if (rating.rating.type === "tls_qualys")
+                    return "Transport Layer Security (TLS)";
+                if (rating.rating.type === "http_plain")
+                    return "Missing transport security (TLS)";
+                if (rating.rating.type === "security_headers_x_xss_protection")
+                    return "X-XSS-Protection Header";
+                if (rating.rating.type === "security_headers_x_frame_options")
+                    return "X-Frame-Options Header (clickjacking)";
+                if (rating.rating.type === "security_headers_x_content_type_options")
+                    return "X-Content-Type-Options";
+            },
+            second_opinion_links: function(rating, url){
+                if (rating.rating.type === "security_headers_strict_transport_security")
+                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
+                        '<a href="https://securityheaders.io/?q=' + url.url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
+                if (rating.rating.type === "tls_qualys")
+                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
+                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                if (rating.rating.type === "security_headers_x_xss_protection")
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
+                if (rating.rating.type === "security_headers_x_frame_options")
+                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">Documentation (wikipedia)</a>';
+                if (rating.rating.type === "security_headers_x_content_type_options")
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
+            },
+            total_awarded_points: function(points) {
+                if (points === "0")
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            },
+            awarded_points: function(points) {
+                if (points === "0")
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
+            }
+        }
+    });
+
+    window.vueFullScreenReport = new Vue({
+        el: '#fullscreenreport',
+        data: {
+            calculation: '',
+            rating: 0,
+            when: 0,
+            name: "",
+            urls: Array,
+            visible: false
+        },
+        filters: {
+            // you cannot run filters in rawHtml, so this doesn't work.
+            // therefore we explicitly do this elsewhere
+        },
+        methods: {
+            show: function(){
+              this.visible = true;
+            },
+            hide: function(){
+              this.visible = false;
+            },
             colorize: function (points) {
                 if (points < 199) return "green";
                 if (points < 1000) return "orange";
