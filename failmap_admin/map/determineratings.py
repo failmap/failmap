@@ -816,7 +816,8 @@ def rate_organization(organization, when=""):
 
 
 # also callable as admin action
-
+# this is incomplete, use the timeline variant -> it's better with endpoints over time.
+# but this will give the correct score, possibly on the wrong endpoints.
 def rate_url(url, when=""):
     if not when:
         when = datetime.now(pytz.utc)
@@ -928,17 +929,28 @@ def get_url_score_modular(url, when=""):
         (scanner_http_plain_rating, scanner_http_plain_json) = \
             get_report_from_scanner_http_plain(endpoint, when)
 
-        (scanner_security_headers_rating, scanner_security_headers_json) = \
-            get_report_from_scanner_security_headers(endpoint, when)
+        (r1, j1) = get_report_from_scanner_security_headers(endpoint, when,
+                                                          'Strict-Transport-Security')
+
+        (r2, j2) = get_report_from_scanner_security_headers(endpoint, when,
+                                                          'X-Content-Type-Options')
+
+        (r3, j3) = get_report_from_scanner_security_headers(endpoint, when,
+                                                          'X-Frame-Options')
+
+        (r4, j4) = get_report_from_scanner_security_headers(endpoint, when,
+                                                          'X-XSS-Protection')
 
         jsons = []
         jsons.append(scanner_tls_qualys_json) if scanner_tls_qualys_json else ""
         jsons.append(scanner_http_plain_json) if scanner_http_plain_json else ""
-        jsons.append(scanner_security_headers_json) if scanner_security_headers_json else ""
+        jsons.append(j1) if j1 else ""
+        jsons.append(j2) if j2 else ""
+        jsons.append(j3) if j3 else ""
+        jsons.append(j4) if j4 else ""
 
-        rating += int(scanner_tls_qualys_rating) + \
-            int(scanner_http_plain_rating) + \
-            int(scanner_security_headers_rating)
+        rating += int(scanner_tls_qualys_rating) + int(scanner_http_plain_rating) + \
+                  int(r1) + int(r2) + int(r3) + int(r4)
 
         if jsons:
             endpoint_jsons.append((endpoint_template % (endpoint.ip,
@@ -1151,17 +1163,17 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
 
 # todo: this should take multiple generic scans on headers.
 # todo: this misses in score rating modular
-def get_report_from_scanner_security_headers(endpoint, when):
+def get_report_from_scanner_security_headers(endpoint, when, header):
     try:
         # also here: the last scan moment increases with every scan. When you have a set of
         # relevant dates (when scans where made) ....
         scan = EndpointGenericScan.objects.filter(endpoint=endpoint,
                                                   rating_determined_on__lte=when,
-                                                  type="Strict-Transport-Security",
+                                                  type=header,
                                                   )
         scan = scan.latest('rating_determined_on')
 
-        rating, json = security_headers_rating_based_on_scan(scan)
+        rating, json = security_headers_rating_based_on_scan(scan, header)
 
         logger.debug("security_headers: On %s, Endpoint %s, Rated %s" %
                      (when, endpoint, rating))
