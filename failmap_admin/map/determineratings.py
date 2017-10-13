@@ -235,8 +235,6 @@ def timeline(url):
                 timeline[scan_date]["endpoints"].append(endpoint)
         timeline[scan_date]["ratings"] += list(ratings)
 
-
-
     for scan_date in tls_qualys_scan_dates:
         scan_date = scan_date.date()
 
@@ -344,7 +342,6 @@ def rate_timeline(timeline, url):
         # ratings are duplicated in the database, on multiple endpoints. Should we drop all those
         # extra endpoints (aka: ignore the IP adresses?)
 
-
         for endpoint in relevant_endpoints:
             # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
             # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
@@ -424,14 +421,14 @@ def rate_timeline(timeline, url):
             #
             # To fix this, confusingly, give only one rating to the endpoint. And then add a
             # "repeated" message, so you know a rating is repeated, and didn't get extra points.
-            label = str(moment)+str(endpoint.is_ipv6())+str(endpoint.port)
+            label = str(moment) + str(endpoint.is_ipv6()) + str(endpoint.port)
             if label not in given_ratings:
                 given_ratings[label] = []
 
-
             message = "Repeated finding, not giving a score again. It seems this " \
-            " website has multiple IP adresses, which is common in failover and loadbalancing " \
-            " scenarios. Please fix the aforementioned issue to get rid of this message."
+                " website has multiple IP adresses, which is common in failover and load-" \
+                "balancing scenarios. Please fix the aforementioned issue to get rid of this " \
+                "message."
 
             repetition_message = """{
                 "%s": {
@@ -739,10 +736,11 @@ def significant_times(organization=None, url=None):
 # make sure the URL ratings are up to date, they will check endpoints and such.
 
 
-def rate_organizations(organizations, when=""):
-    # since a url can now have multiple organizations, you should rate each one separately
-    for organization in organizations.all():
-        rate_organization(organization, when)
+# probably not used anymore
+# def rate_organizations(organizations, when=""):
+#     # since a url can now have multiple organizations, you should rate each one separately
+#     for organization in organizations.all():
+#         rate_organization(organization, when)
 
 
 def rate_organization(organization, when=""):
@@ -1132,7 +1130,7 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     # don't need to add things that are OK to the report. It might be in the future.
     if scan.rating == "True":
         json = (rating_template % (
-            header.lower().replace("-","_"),
+            header.lower().replace("-", "_"),
             header + " header present.",
             0,
             scan.rating_determined_on,
