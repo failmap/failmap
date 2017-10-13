@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import sys
+import warnings
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -19,6 +20,12 @@ class Command(BaseCommand):
         # (development) or mysql (production) databases. Since for sqlite a
         # memory database is used a migration needs to be performed first. For
         # mysql a flush is required to ensure no previous data is present.
+
+        # suppress pyyaml warnings (which doesn't support timezoned datetimes)
+        warnings.filterwarnings(
+            'ignore', r"DateTimeField .* received a naive datetime",
+            RuntimeWarning, r'django\.db\.models\.fields',
+        )
 
         print('+ Running migrations')
         # run migrate quietly as testing/debugging migrations is not priority
