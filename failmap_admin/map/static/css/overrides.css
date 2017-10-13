@@ -8,6 +8,16 @@ Todo: better separation of UI and data. The JS messes things up.
 
 /* Some leaflet user styling to make it more attractive */
 
+#history {
+    margin-bottom: 10px;
+    outline: none;
+    direction: rtl;
+}
+
+#next_week {
+    float: right;
+}
+
 #map {
     height: 900px;
 }
@@ -62,23 +72,15 @@ Todo: better separation of UI and data. The JS messes things up.
 }
 
 #domainlist {
-    position: relative;
-    top: -810px;
-    left: 850px;
-    z-index: 400;
-    width: 280px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 264px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 650px;
 }
 
 #domainlist h4 {
     color: #777;
     margin: 0 0 5px;
-}
-
-#domainlistcontainer {
-    height: 0;
 }
 
 /* bootstrap fixed menu terribleness... always overlaps content. */
