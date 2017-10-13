@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
+from failmap_admin.map.models import OrganizationRating
 
 from failmap_admin.map.determineratings import (rate_organization_efficient,
                                                 rerate_url_with_timeline, show_timeline_console,
@@ -51,10 +52,14 @@ def develop_timeline():
 
         # has ratings on a ton of redundant endpoints.
         url = Url.objects.all().filter(url='webmail.zaltbommel.nl').get()
-        url = Url.objects.all().filter(url='aaenhunze.nl').get()
+        url = Url.objects.all().filter(url='geo.aaenhunze.nl').get()
         data = timeline(url=url)
         show_timeline_console(data, url)
         rerate_url_with_timeline(url)
+
+        OrganizationRating.objects.all().delete()
+        for organization in url.organization.all():
+            rate_organization_efficient(organization=organization, create_history=True)
 
 
 def develop_sslscan():

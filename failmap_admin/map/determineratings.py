@@ -1,4 +1,4 @@
-import json
+import json as xjson
 import logging
 from datetime import datetime
 
@@ -431,7 +431,8 @@ def rate_timeline(timeline, url):
                 "message."
 
             repetition_message = """{
-                "%s": {
+                "rating": {
+                        "type": "%s",
                         "explanation": "%s",
                         "points": "0",
                         "since": "%s",
@@ -467,20 +468,6 @@ def rate_timeline(timeline, url):
                         these_ratings['Strict-Transport-Security'].rating_determined_on,
                         these_ratings['Strict-Transport-Security'].last_scan_moment,))
 
-            if 'X-Content-Type-Options' in these_ratings.keys():
-                if 'X-Content-Type-Options' not in given_ratings[label]:
-                    score, json = security_headers_rating_based_on_scan(
-                        these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
-                    jsons.append(json)
-                    scores.append(score)
-                    given_ratings[label].append('X-Content-Type-Options')
-                else:
-                    jsons.append(repetition_message % (
-                        'security_headers_x_content_type_options',
-                        message,
-                        these_ratings['X-Content-Type-Options'].rating_determined_on,
-                        these_ratings['X-Content-Type-Options'].last_scan_moment,))
-
             if 'X-Frame-Options' in these_ratings.keys():
                 if 'X-Frame-Options' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
@@ -509,6 +496,20 @@ def rate_timeline(timeline, url):
                         these_ratings['X-XSS-Protection'].rating_determined_on,
                         these_ratings['X-XSS-Protection'].last_scan_moment,))
 
+            if 'X-Content-Type-Options' in these_ratings.keys():
+                if 'X-Content-Type-Options' not in given_ratings[label]:
+                    score, json = security_headers_rating_based_on_scan(
+                        these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
+                    jsons.append(json)
+                    scores.append(score)
+                    given_ratings[label].append('X-Content-Type-Options')
+                else:
+                    jsons.append(repetition_message % (
+                        'security_headers_x_content_type_options',
+                        message,
+                        these_ratings['X-Content-Type-Options'].rating_determined_on,
+                        these_ratings['X-Content-Type-Options'].last_scan_moment,))
+
             if 'plain_https' in these_ratings.keys():
                 if 'plain_https' not in given_ratings[label]:
                     score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
@@ -532,11 +533,24 @@ def rate_timeline(timeline, url):
             }
         }""".strip()
 
+            # this makes the whole operation a bit slower, but more readable, which matters.
+            unsorted = xjson.loads("[" + ",".join(jsons) + "]")
+            l = sorted(unsorted, key=lambda k: int(k["rating"].get("points", 0)), reverse=True)
+            l = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
+            if l[0:1] == "[":
+                l = l[1:len(l)-1]  # we add [] somewhere else already.
+
+            # there is difference between these objects, it seems.
+            print("l")
+            print(l)
+            # print("z")
+            # print(",".join(jsons))
+
             endpoint_jsons.append(endpoint_template % (endpoint.ip,
                                                        endpoint.port,
                                                        endpoint.ip,
                                                        endpoint.port,
-                                                       endpoint.protocol, ",".join(jsons)))
+                                                       endpoint.protocol, l))
 
         previous_endpoints += relevant_endpoints
         url_rating_template = """
@@ -1131,7 +1145,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
 
     rating_template = """
                 {
-                "security_headers_%s": {
+                "rating": {
+                    "type": "security_headers_%s",
                     "explanation": "%s",
                     "points": "%s",
                     "since": "%s",
@@ -1212,7 +1227,8 @@ def get_report_from_scanner_http_plain(endpoint, when):
 def http_plain_rating_based_on_scan(scan):
     rating_template = """
                     {
-                    "http_plain": {
+                    "rating": {
+                        "type": "http_plain",
                         "explanation": "%s",
                         "points": "%s",
                         "since": "%s",
@@ -1290,7 +1306,8 @@ def tls_qualys_rating_based_on_scan(scan):
 
     tlsratingtemplate = """
             {
-                "tls_qualys": {
+                "rating": {
+                    "type": "tls_qualys",
                     "explanation": "%s",
                     "points": "%s",
                     "since": "%s",
@@ -1391,11 +1408,11 @@ def default_ratings():
         r.organization = organization
         r.calculation = """
 {
-"organization": {
-  "name": "%s",
-  "rating": "-1",
-  "urls": []
-}
+    "organization": {
+      "name": "%s",
+      "rating": "-1",
+      "urls": []
+    }
 }
         """.strip() % organization.name
         r.save()
@@ -1429,145 +1446,3 @@ def get_relevant_endpoints_at_timepoint(url, when):
         logger.debug("relevant endpoint for %s: %s" % (when, endpoint))
 
     return endpoint_list
-
-
-# todo: more modular approach
-# Know what scanners exist.
-# Ask each scanner the newest result for a certain date
-# add a weight to it
-# store it as a url rating
-# we do this per hour, only update the last rating if there is an update
-# and we do this for at most the last hour. (and we can go back in time to fill the db
-# and get those sweet rating improvements.
-# does not add information when there is nothing to find for this url.
-#
-# Extra: this does not check if all endpoints are dead (and thus the url)... it shouldn't
-# because the scanner should check that.
-
-def get_url_score(url, when):
-    raise DeprecationWarning
-    print("Calculating score for %s on %s" % (url.url, when))
-
-    explanation = ""
-    rating = 0
-
-    # This is done in a few simple and readable steps.
-
-    endpoints = Endpoint.objects.all()
-
-    # all endpoints in the past given the timeframe
-    dead_endpoints = endpoints.filter(
-        url=url,
-        discovered_on__lte=when,
-        is_dead=True,
-        is_dead_since__gte=when,
-        port=443,
-        protocol="https"
-    )
-    print("Dead endpoints for this url:  %s" % dead_endpoints.count())
-
-    # all endpoints that are still alive on the timeperiod
-    existing_endpoints = endpoints.filter(
-        url=url,
-        discovered_on__lte=when,
-        is_dead=False,
-        port=443,
-        protocol="https"
-    )
-
-    print("Alive endpoints for this url: %s" % existing_endpoints.count())
-
-    # higly inefficient merging of results :)
-    endpoint_list = list(dead_endpoints) + list(existing_endpoints)
-
-    explanations = {
-        "F": "F - Failing TLS",
-        "D": "D",
-        "C": "C",
-        "B": "B",
-        "A-": "A-, Good",
-        "A": "A, Good",
-        "A+": "A+, Perfect",
-        "T": "Chain of trust missing",
-        "0": "No TLS discovered, possibly another service available.",
-    }
-
-    # 0? that's port 443 without using TLS. That is extremely rare. In that case...
-    # 0 is many cases a "not connect to server" error currently.
-    # todo: remove 0 ratings from the report. They are useless.
-    # todo: check for existing endpoint for a date range.
-    ratings = {"T": 500, "F": 1000, "D": 400, "C": 200,
-               "B": 100, "A-": 0, "A": 0, "A+": 0, "0": 0}
-
-    urlratingtemplate = \
-        '{\n\
-            "url": {\n\
-                "url": "%s",\n\
-                "points": "%s",\n\
-                "endpoints": [%s]\n\
-                \n\
-            }\n\
-        }\n'
-
-    endpointtemplate = \
-        '{\n\
-            "%s:%s": {\n\
-                "ip": "%s",\n\
-                "port": "%s",\n\
-                "ratings": [%s]\n\
-                \n\
-            }\n\
-        }\n'
-
-    tlsratingtemplate = \
-        '{\n\
-            "TLS_Qualys\": {\n\
-                "explanation": "%s",\n\
-                "points": "%s",\n\
-                "since": "%s",\n\
-                "last_scan": "%s"\n\
-            }\n' \
-        '}\n'
-
-    starttls_json = ""
-    endpoint_json = ""
-
-    # todo: refactor to request a number of points in a more generic way.
-    # an endpoint at most has 1 TLS rating.
-    for endpoint in endpoint_list:
-        try:
-            scan = TlsQualysScan.objects.filter(endpoint=endpoint, scan_moment__lte=when)
-            scan = scan.latest('rating_determined_on')
-
-            # Ignore ratings with 0: then there was no TLS, and we don't know if there is
-            # a normal website on port 80.
-            if scan.qualys_rating != '0':
-                starttls_json = (tlsratingtemplate %
-                                 (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                                  scan.rating_determined_on, scan.scan_moment))
-
-                # you can only add the comma if there are multiple items...
-                if endpoint_json:
-                    endpoint_json += ", "
-
-                endpoint_json += (endpointtemplate % (endpoint.ip, endpoint.port,
-                                                      endpoint.ip, endpoint.port,
-                                                      starttls_json))
-
-                rating += ratings[scan.qualys_rating]
-        except TlsQualysScan.DoesNotExist:
-            # can happen that a rating simply isn't there yet. Perfectly possible.
-            print("No scan on endpoint %s." % endpoint)
-            pass
-
-    # if there is not a single endpoint that has data... then well... don't return
-    # an explanation and make sure this is not saved.
-    if endpoint_json:
-        url_json = urlratingtemplate % (url.url, rating, endpoint_json)
-        # print(url_json)
-        parsed = json.loads(url_json)
-        url_json = json.dumps(parsed, indent=4)  # nice format
-        return url_json, rating
-    else:
-        # empty explanations don't get saved.
-        return "", 0
