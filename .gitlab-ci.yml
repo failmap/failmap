@@ -38,6 +38,12 @@ test_mysql: &test_mysql_template
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
 
+  before_script:
+    # install stuff like mysql-client
+    - pip install -rrequirements.deploy.txt
+    # default before script
+    - pip install tox
+
 # code quality checks
 check:
   <<: *test_template
