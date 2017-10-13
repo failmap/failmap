@@ -335,13 +335,13 @@ $(document).ready(function () {
         methods: {
             colorize: function (points) {
                 if (points < 199) return "green";
-                if (points < 400) return "orange";
-                if (points > 399) return "red";
+                if (points < 1000) return "orange";
+                if (points > 999) return "red";
             },
             colorizebg: function (points) {
                 if (points < 199) return "#dff9d7";
-                if (points < 400) return "#ffefd3";
-                if (points > 399) return "#fbeaea";
+                if (points < 1000) return "#ffefd3";
+                if (points > 999) return "#fbeaea";
             },
             idize: function (url) {
                 url = url.toLowerCase();
@@ -441,8 +441,8 @@ $(document).ready(function () {
         methods: {
             colorize: function (points) {
                 if (points < 199) return "green";
-                if (points < 400) return "orange";
-                if (points > 399) return "red";
+                if (points < 1000) return "orange";
+                if (points > 999) return "red";
             }
         }
     });
