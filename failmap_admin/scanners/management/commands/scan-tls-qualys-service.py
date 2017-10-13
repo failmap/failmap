@@ -3,7 +3,9 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import rate_url, rate_organization_efficient
+from failmap_admin.map.determineratings import rate_url, rate_organization_efficient, \
+    rerate_url_with_timeline, rate_organizations
+
 from failmap_admin.scanners.models import Url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys, TlsQualysScratchpad
 from failmap_admin.scanners.state_manager import StateManager
@@ -39,8 +41,7 @@ class Command(BaseCommand):
             s = ScannerTlsQualys()
             s.scan([url.url])
 
-
-            rate_url(url=url)
+            rerate_url_with_timeline(url=url)
             rate_organization_efficient(organization=url.organization)
         else:
             while 1:
@@ -92,7 +93,7 @@ class Command(BaseCommand):
         s.scan([url.url for url in urls])
 
         for url in urls:
-            rate_url(url=url)
+            rerate_url_with_timeline(url=url)
         rate_organization_efficient(organization=organization)
 
     @staticmethod
@@ -151,7 +152,6 @@ class Command(BaseCommand):
             logger.debug(url)
 
         s = ScannerTlsQualys()
-        dr = DetermineRatings()
 
         import math
 
@@ -174,9 +174,9 @@ class Command(BaseCommand):
             s.scan(urlstrings)
 
             for url in myurls:
-                dr.rate_url(url=url)
+                rerate_url_with_timeline(url=url)
 
             for url in myurls:
-                dr.rate_organizations(organizations=url.organization)
+                rate_organization_efficient(organization=url.organization)
 
         return urls
