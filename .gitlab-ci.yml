@@ -40,6 +40,25 @@ test_mysql: &test_mysql_template
     # add mysqlclient to tox environment
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
 
+# functional testing using postgres database instead of sqlite
+test_postgres: &test_postgres_template
+  <<: *test_template
+  services:
+    # current version in debian jessie
+    - postgres:9.4
+  variables:
+    # configuration for docker mysql service
+    POSTGRES_DB: failmap
+    POSTGRES_USER: failmap
+    POSTGRES_PASSWORD: failmap
+    # select mysql database settings, all settings default to 'failmap'
+    # so they don't need to be passed explicitly
+    DJANGO_DATABASE: production
+    DB_ENGINE: postgresql_psycopg2
+    DB_HOST: postgres
+    # add mysqlclient to tox environment
+    TOX_EXTRA_DEPS: -rrequirements.deploy.txt
+
 # code quality checks
 check:
   <<: *test_template
@@ -53,6 +72,11 @@ dataset:
 
 dataset_mysql:
   <<: *test_mysql_template
+  script:
+    - tox -e datasets
+
+dataset_postgres:
+  <<: *test_postgres_template
   script:
     - tox -e datasets
 
