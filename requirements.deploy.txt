@@ -1,3 +1,6 @@
+# database clients
 mysqlclient
+psycopg2
+# wsgi server
 django-uwsgi
 uwsgi
