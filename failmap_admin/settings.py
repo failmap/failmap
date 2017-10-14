@@ -121,7 +121,10 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+DATABASE_OPTIONS = {
+    'mysql': {'init_command': "SET sql_mode='STRICT_ALL_TABLES';"},
 
+}
 DATABASES_SETTINGS = {
     # persisten local database used during development (runserver)
     'dev': {
@@ -140,9 +143,7 @@ DATABASES_SETTINGS = {
         'USER': os.environ.get('DB_USER', 'failmap'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'failmap'),
         'HOST': os.environ.get('DB_HOST', 'mysql'),
-        'OPTIONS':   {
-            'init_command': "SET sql_mode='STRICT_ALL_TABLES';",
-        }
+        'OPTIONS': DATABASE_OPTIONS.get(os.environ.get('DB_ENGINE', 'mysql'), {})
     }
 }
 # allow database to be selected through environment variables
