@@ -213,7 +213,10 @@ LOCALE_PATHS = ['locale']
 STATIC_URL = '/static/'
 
 # Absolute path to aggregate to and serve static file from.
-STATIC_ROOT = '/srv/failmap-admin/static/'
+if DEBUG:
+    STATIC_ROOT = 'static'
+else:
+    STATIC_ROOT = '/srv/failmap-admin/static/'
 
 TEST_RUNNER = 'failmap_admin.testrunner.PytestTestRunner'
 
@@ -376,21 +379,15 @@ CELERY_result_serializer = 'pickle'
 
 
 # Compression
+# Django-compressor is used to compress css and js files in production
+# During development this is disabled as it does not provide any feature there
+# Django-compressor configuration defaults take care of this.
 # https://django-compressor.readthedocs.io/en/latest/usage/
-# undocumented setting...
+# which plugins to use to find static files
 STATICFILES_FINDERS = (
+    # default static files finders
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # other finders..
     'compressor.finders.CompressorFinder',
 )
-# Uses static root, which doesn't help in development environments.
-# Maybe set direnv to something else.
-if DEBUG:
-    COMPRESS_OFFLINE = False  # failmap-admin compress
-    COMPRESS_ENABLED = False
-    COMPRESS_ROOT = "./failmap_admin/map/static/"
-else:
-    COMPRESS_ROOT = STATIC_ROOT
-    COMPRESS_OFFLINE = True  # failmap-admin compress
-    COMPRESS_ENABLED = True
