@@ -111,33 +111,67 @@ def terrible_urls(request, weeks_back=0):
 
     cursor = connection.cursor()
 
-    cursor.execute('''
-        SELECT
-            rating,
-            organization.name,
-            organizations_organizationtype.name,
-            organization.id,
-            `when`,
-            organization.twitter_handle,
-            url.url,
-            url.isdead,
-            url.not_resolvable
-        FROM map_urlrating
-        INNER JOIN
-          url on url.id = map_urlrating.url_id
-        LEFT OUTER JOIN
-          url_organization on url_organization.url_id = url.id
-        LEFT OUTER JOIN
-          organization on organization.id = url_organization.organization_id
-        INNER JOIN
-          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-        WHERE `when` <= '%s'
-        AND `when` = (select MAX(`when`) FROM map_urlrating or2
-              WHERE or2.url_id = map_urlrating.url_id AND `when` <= '%s')
-        GROUP BY url.url
-        HAVING(`rating`) > 999
-        ORDER BY `rating` DESC, `organization`.`name` ASC
-        ''' % (when, when))
+    # 0.5 seconds
+    # sql_old = '''
+    #     SELECT
+    #         rating,
+    #         organization.name,
+    #         organizations_organizationtype.name,
+    #         organization.id,
+    #         `when`,
+    #         organization.twitter_handle,
+    #         url.url,
+    #         url.isdead,
+    #         url.not_resolvable
+    #     FROM map_urlrating
+    #     INNER JOIN
+    #       url on url.id = map_urlrating.url_id
+    #     LEFT OUTER JOIN
+    #       url_organization on url_organization.url_id = url.id
+    #     LEFT OUTER JOIN
+    #       organization on organization.id = url_organization.organization_id
+    #     INNER JOIN
+    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #     WHERE `when` <= '%s'
+    #     AND `when` = (select MAX(`when`) FROM map_urlrating or2
+    #           WHERE or2.url_id = map_urlrating.url_id AND `when` <= '%s')
+    #     GROUP BY url.url
+    #     HAVING(`rating`) > 999
+    #     ORDER BY `rating` DESC, `organization`.`name` ASC
+    #     ''' % (when, when)
+
+    # 0.3 seconds, to 0.00
+    sql = '''
+            SELECT
+                rating,
+                organization.name,
+                organizations_organizationtype.name,
+                organization.id,
+                `when`,
+                organization.twitter_handle,
+                url.url,
+                url.isdead,
+                url.not_resolvable
+            FROM map_urlrating
+            INNER JOIN
+              url on url.id = map_urlrating.url_id
+            LEFT OUTER JOIN
+              url_organization on url_organization.url_id = url.id
+            LEFT OUTER JOIN
+              organization on organization.id = url_organization.organization_id
+            INNER JOIN
+              organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+            INNER JOIN
+              (SELECT MAX(id) as id2 FROM map_urlrating or2 
+              WHERE `when` <= '%s' GROUP BY url_id) as x
+              ON x.id2 = map_urlrating.id
+            GROUP BY url.url
+            HAVING(`rating`) > 999
+            ORDER BY `rating` DESC, `organization`.`name` ASC
+            LIMIT 50
+            ''' % (when, )
+    # print(sql)
+    cursor.execute(sql)
 
     rows = cursor.fetchall()
 
@@ -158,7 +192,7 @@ def terrible_urls(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["urls"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 5})
+    return JsonResponse(data, json_dumps_params={'indent': 4})
 
 
 # @cache_page(cache_time)
@@ -189,29 +223,63 @@ def topfail(request, weeks_back=0):
 
     cursor = connection.cursor()
 
-    cursor.execute('''
-        SELECT
-            rating,
-            organization.name,
-            organizations_organizationtype.name,
-            organization.id,
-            `when`,
-            organization.twitter_handle
-        FROM map_organizationrating
-        INNER JOIN
-          organization on organization.id = map_organizationrating.organization_id
-        INNER JOIN
-          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-        INNER JOIN
-          coordinate ON coordinate.organization_id = organization.id
-        WHERE `when` <= '%s' AND rating > 0
-        AND `when` = (select MAX(`when`) FROM map_organizationrating or2
-              WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
-        GROUP BY organization.name
-        ORDER BY `rating` DESC, `organization`.`name` ASC
-        LIMIT 30
-        ''' % (when, when))
+    """        INNER JOIN
+          (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+          WHERE `when` <= '%s' GROUP BY organization_id) as x
+          ON x.id2 = map_organizationrating.id
+    """
 
+    # 0.5 seconds
+    # sql = '''
+    #         SELECT
+    #             rating,
+    #             organization.name,
+    #             organizations_organizationtype.name,
+    #             organization.id,
+    #             `when`,
+    #             organization.twitter_handle
+    #         FROM map_organizationrating
+    #         INNER JOIN
+    #           organization on organization.id = map_organizationrating.organization_id
+    #         INNER JOIN
+    #           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #         INNER JOIN
+    #           coordinate ON coordinate.organization_id = organization.id
+    #         WHERE `when` <= '%s' AND rating > 0
+    #         AND `when` = (select MAX(`when`) FROM map_organizationrating or2
+    #               WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
+    #         GROUP BY organization.name
+    #         ORDER BY `rating` DESC, `organization`.`name` ASC
+    #         LIMIT 30
+    #         ''' % (when, when)
+
+    # 0.00 seconds :)
+    sql = '''
+            SELECT
+                rating,
+                organization.name,
+                organizations_organizationtype.name,
+                organization.id,
+                `when`,
+                organization.twitter_handle
+            FROM map_organizationrating
+            INNER JOIN
+              organization on organization.id = map_organizationrating.organization_id
+            INNER JOIN
+              organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+            INNER JOIN
+              coordinate ON coordinate.organization_id = organization.id
+            INNER JOIN
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              ON x.id2 = map_organizationrating.id
+            GROUP BY organization.name
+            HAVING rating > 0
+            ORDER BY `rating` DESC, `organization`.`name` ASC
+            LIMIT 30
+            ''' % (when,)
+    cursor.execute(sql)
+    # print(sql)
     rows = cursor.fetchall()
 
     rank = 1
@@ -230,7 +298,7 @@ def topfail(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 5})
+    return JsonResponse(data, json_dumps_params={'indent': 4})
 
 
 # @cache_page(cache_time)
@@ -265,28 +333,55 @@ def topwin(request, weeks_back=0):
 
     cursor = connection.cursor()
 
-    cursor.execute('''
-        SELECT
-            rating,
-            organization.name,
-            organizations_organizationtype.name,
-            organization.id,
-            `when`,
-            organization.twitter_handle
-        FROM map_organizationrating
-        INNER JOIN
-          organization on organization.id = map_organizationrating.organization_id
-        INNER JOIN
-          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-        INNER JOIN
-          coordinate ON coordinate.organization_id = organization.id
-        WHERE `when` <= '%s' AND rating = 0
-        AND `when` = (select MAX(`when`) FROM map_organizationrating or2
-              WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
-        GROUP BY organization.name
-        ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
-        LIMIT 30
-        ''' % (when, when))
+    # 0.50 sec
+    # sql = '''
+    #     SELECT
+    #         rating,
+    #         organization.name,
+    #         organizations_organizationtype.name,
+    #         organization.id,
+    #         `when`,
+    #         organization.twitter_handle
+    #     FROM map_organizationrating
+    #     INNER JOIN
+    #       organization on organization.id = map_organizationrating.organization_id
+    #     INNER JOIN
+    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #     INNER JOIN
+    #       coordinate ON coordinate.organization_id = organization.id
+    #     WHERE `when` <= '%s' AND rating = 0
+    #     AND `when` = (select MAX(`when`) FROM map_organizationrating or2
+    #           WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
+    #     GROUP BY organization.name
+    #     ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
+    #     LIMIT 30
+    #     ''' % (when, when)
+
+    sql = '''
+            SELECT
+                rating,
+                organization.name,
+                organizations_organizationtype.name,
+                organization.id,
+                `when`,
+                organization.twitter_handle
+            FROM map_organizationrating
+            INNER JOIN
+              organization on organization.id = map_organizationrating.organization_id
+            INNER JOIN
+              organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+            INNER JOIN
+              coordinate ON coordinate.organization_id = organization.id
+          INNER JOIN
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              ON x.id2 = map_organizationrating.id
+            GROUP BY organization.name
+            HAVING rating = 0
+            ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
+            LIMIT 30
+            ''' % (when,)
+    cursor.execute(sql)
 
     rows = cursor.fetchall()
 
@@ -306,7 +401,7 @@ def topwin(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 5})
+    return JsonResponse(data, json_dumps_params={'indent': 4})
 
 
 def stats_determine_when(stat, weeks_back=0):
@@ -353,6 +448,7 @@ def stats(request, weeks_back=0):
                        'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
                        'included_organizations': 0}
 
+        # todo: this can now be rewritten to be faster.
         for o in os:
             try:
 
@@ -423,7 +519,7 @@ def stats(request, weeks_back=0):
 
         stats[stat] = measurement
 
-    return JsonResponse({"data": stats}, json_dumps_params={'indent': 5})
+    return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
 
 
 # @cache_page(cache_time)
@@ -561,29 +657,120 @@ def map_data(request, weeks_back=0):
     # This query works in SQLite, probably also MySQL and Postgres (we'll see that in staging)
     # you can get older ratings via  WHERE `when` < '2017-03-17 16:27:00'
 
-    # todo: give this another shot in django. Perhaps it works?
     cursor = connection.cursor()
 
-    cursor.execute('''
-    SELECT
-        rating,
-        organization.name,
-        organizations_organizationtype.name,
-        coordinate.area,
-        coordinate.geoJsonType,
-        organization.id
-    FROM map_organizationrating
-    INNER JOIN
-      organization on organization.id = map_organizationrating.organization_id
-    INNER JOIN
-      organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    INNER JOIN
-      coordinate ON coordinate.organization_id = organization.id
-    WHERE `when` <= '%s'
-    GROUP BY coordinate.area
-    HAVING MAX(`when`)
-    ORDER BY `when`
-    ''' % (when,))
+    """
+    A simple MySQL query like select * from x JOIN, Where, group by and having doesn't work:
+    mysql has a different way of grouping: it first groups and THEN does having. While sqllite first
+    does having THEn grouping. That is why in mysql all ratings where -1, because the grouping kills
+    off all other records in the HAVING.
+    
+    The only way to fix that is using a subquery, unfortunately.
+    
+    Old query: select ... from . inner joins... where when <= x, group by area, having max when
+    which is about 1000x slower. (new one takes about a second).
+    
+    So instead of a subquery, we ask for the latest ratings and join on this:
+    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating GROUP BY organization_id;
+    
+    IN or SELECT:
+    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating WHERE `when` <= '2017-08-14 18:21:36.984601+00:00' GROUP BY organization_id;
+    """
+
+    # original query, doesn't work in mysql due to ordering of having and group. works in sqlite
+    # was extremely fast
+    # sql = '''
+    #  SELECT
+    #         rating,
+    #         organization.name,
+    #         organizations_organizationtype.name,
+    #         coordinate.area,
+    #         coordinate.geoJsonType,
+    #         organization.id
+    #     FROM map_organizationrating
+    #     INNER JOIN
+    #       organization on organization.id = map_organizationrating.organization_id
+    #     INNER JOIN
+    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #     INNER JOIN
+    #       coordinate ON coordinate.organization_id = organization.id
+    #     WHERE `when` <= '%s'
+    #     GROUP BY coordinate.area
+    #     HAVING MAX(`when`)
+    #     ORDER BY `when` ASC'''  % (when, )
+
+    # takes about half a second, to 0.7 seconds
+    # sql = '''
+    #     SELECT
+    #         rating,
+    #         organization.name,
+    #         organizations_organizationtype.name,
+    #         coordinate.area,
+    #         coordinate.geoJsonType,
+    #         organization.id
+    #     FROM map_organizationrating
+    #     INNER JOIN
+    #       organization on organization.id = map_organizationrating.organization_id
+    #     INNER JOIN
+    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #     INNER JOIN
+    #       coordinate ON coordinate.organization_id = organization.id
+    #     WHERE `when` = (select MAX(`when`) FROM map_organizationrating or2
+    #           WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '2017-08-14 18:21:36.984601+00:00')
+    #     GROUP BY coordinate.area
+    #     ORDER BY `when` ASC
+    #     ''' % (when, )
+
+    # takes 389 rows in set, 3 warnings (2 min 4.54 sec) LOL
+    # sql = '''
+    #     SELECT
+    #         rating,
+    #         organization.name,
+    #         organizations_organizationtype.name,
+    #         coordinate.area,
+    #         coordinate.geoJsonType,
+    #         organization.id
+    #     FROM map_organizationrating
+    #     INNER JOIN
+    #       organization on organization.id = map_organizationrating.organization_id
+    #     INNER JOIN
+    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+    #     INNER JOIN
+    #       coordinate ON coordinate.organization_id = organization.id
+    #     WHERE map_organizationrating.id IN (
+    #       SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating
+    #       WHERE `when` <= '%s' GROUP BY organization_id)
+    #     GROUP BY coordinate.area
+    #     ORDER BY `when` ASC
+    #     ''' % (when, )
+
+    # instant answer, 0.16 sec answer (mainly because of the WHEN <= date subquery.
+    # This could be added to a standerd django query manager, with an extra join. It's fast.
+    # sometimes 0.01 second :) And also works in sqlite. Hooray.
+    sql = '''
+        SELECT
+            rating,
+            organization.name,
+            organizations_organizationtype.name,
+            coordinate.area,
+            coordinate.geoJsonType,
+            organization.id
+        FROM map_organizationrating
+        INNER JOIN
+          organization on organization.id = map_organizationrating.organization_id
+        INNER JOIN
+          organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+        INNER JOIN
+          coordinate ON coordinate.organization_id = organization.id
+        INNER JOIN
+          (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+          WHERE `when` <= '%s' GROUP BY organization_id) as x
+          ON x.id2 = map_organizationrating.id
+        GROUP BY coordinate.area
+        ORDER BY `when` ASC
+        ''' % (when, )
+    # print(sql)
+    cursor.execute(sql)
 
     rows = cursor.fetchall()
 
@@ -611,4 +798,4 @@ def map_data(request, weeks_back=0):
 
         data["features"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 5})
+    return JsonResponse(data, json_dumps_params={'indent': 4})

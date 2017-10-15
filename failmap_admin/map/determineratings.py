@@ -541,8 +541,8 @@ def rate_timeline(timeline, url):
                 l = l[1:len(l)-1]  # we add [] somewhere else already.
 
             # there is difference between these objects, it seems.
-            print("l")
-            print(l)
+            # print("l")
+            # print(l)
             # print("z")
             # print(",".join(jsons))
 
