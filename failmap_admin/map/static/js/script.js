@@ -46,98 +46,42 @@ var failmap = {
     map: null,
     geojson: "",
     internetadresses: L.control(),
+    fullscreenreport: L.control(),
     dataslider: L.control(),
     info: L.control(),
-    fullscreenreport: L.control(),
     legend: L.control({position: 'bottomright'}),
 
     initializemap: function () {
         this.map = L.map('map').setView([52.15, 5.8], 8);
         this.map.scrollWheelZoom.disable();
 
+        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
+            'Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            id: 'mapbox.light',
+            accessToken: 'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
+        }).addTo(this.map);
+
         L.control.fullscreen().addTo(this.map);
 
-        console.log(this.map.isFullscreen());
+        // console.log(this.map.isFullscreen());
 
         this.map.on('fullscreenchange', function () {
             if (failmap.map.isFullscreen()) {
                 console.log('entered fullscreen');
             } else {
-                hide_fullscreenreport();
+                vueFullScreenReport.hide();
             }
         });
-
-        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw', {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-            id: 'mapbox.light'
-        }).addTo(this.map);
-
-        this.map.attributionControl.addAttribution('Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>');
 
         this.add_dataslider();
         this.add_info();
         this.add_internetadresses();
-        this.add_fullscreenreport();
         this.addlegend();
-    },
-
-    add_info: function () {
-        this.info.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this.update();
-            return this._div;
-        };
-
-        this.info.update = function (props) {
-            var sometext = "";
-            if (props) {
-                sometext += "<h4>" + props.OrganizationName + "</h4>";
-                if (props.Overall > 1)
-                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">' + props.Overall + ' points</span>';
-                else
-                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">- points</span>';
-                domainsDebounced(props.OrganizationID, $("#history")[0].value);
-                this._div.innerHTML = sometext;
-            }
-        };
-
-        this.info.addTo(this.map);
-    },
-
-    add_dataslider: function () {
-        this.dataslider.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            dataslider_control = " <div id=\"historycontrol\">" +
-            "    <h4>{{ visibleweek }}</h4>" +
-            "    <input id='history' type='range' value='0' min='0' max='52' step='1'/>" +
-            "    <input id='previous_week' type='button' onclick='previous_week()' value='&lt;&lt;&lt;'/>" +
-            "    <input id='next_week' type='button' onclick='next_week()' value='&gt;&gt;&gt;'/>" +
-            "</div>";
-
-            this._div.innerHTML = dataslider_control;
-            return this._div;
-        };
-        this.dataslider.addTo(this.map);
-    },
-
-    add_internetadresses: function () {
-        this.internetadresses.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
-                "                    <div v-for=\"url in urls\">\n" +
-                "                        <span v-bind:class=\"colorize(url.url.points)\">\n" +
-                "                            {{ url.url.url }}\n" +
-                "                        </span>\n" +
-                "                    </div>\n" +
-                "                    <br />\n" +
-                "                </div>";
-            return this._div;
-        };
-
-        this.internetadresses.addTo(this.map);
+        this.add_fullscreenreport();
     },
 
     add_fullscreenreport: function () {
@@ -146,7 +90,7 @@ var failmap = {
             this._div.innerHTML = '<div class="page-header" id="fullscreenreport" v-if="visible">\n' +
                 '                <div v-if="name" class="fullscreenlayout">\n' +
                 '                    <h1>{{ name }}</h1>\n' +
-                '                    <p class="closebutton" onclick="hide_fullscreenreport()">X</p>\n' +
+                '                    <p class="closebutton" onclick="vueFullScreenReport.hide()">X</p>\n' +
                 '                    <div>\n' +
                 '                        Gegevens van: {{ humanize(when) }}<br />\n' +
                 '                        Score: {{ points }}, congratulations!<br />\n' +
@@ -191,6 +135,62 @@ var failmap = {
         };
 
         this.fullscreenreport.addTo(this.map);
+    },
+
+    add_info: function () {
+        this.info.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this.update();
+            return this._div;
+        };
+
+        this.info.update = function (props) {
+            var sometext = "";
+            if (props) {
+                sometext += "<h4>" + props.OrganizationName + "</h4>";
+                if (props.Overall > 1)
+                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">' + props.Overall + ' points</span>';
+                else
+                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">- points</span>';
+                vueDomainlist.load(props.OrganizationID, vueMap.week);
+                this._div.innerHTML = sometext;
+            }
+        };
+
+        this.info.addTo(this.map);
+    },
+
+    add_dataslider: function () {
+        this.dataslider.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            dataslider_control = " <div id=\"historycontrol\">" +
+            "    <h4>{{ visibleweek }}<span v-if='loading'> (loading...)</span></h4>" +
+            "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
+            "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
+            "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +
+            "</div>";
+
+            this._div.innerHTML = dataslider_control;
+            return this._div;
+        };
+        this.dataslider.addTo(this.map);
+    },
+
+    add_internetadresses: function () {
+        this.internetadresses.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
+                "                    <div v-for=\"url in urls\">\n" +
+                "                        <span v-bind:class=\"colorize(url.url.points)\">\n" +
+                "                            {{ url.url.url }}\n" +
+                "                        </span>\n" +
+                "                    </div>\n" +
+                "                    <br />\n" +
+                "                </div>";
+            return this._div;
+        };
+
+        this.internetadresses.addTo(this.map);
     },
 
     addlegend: function () {
@@ -295,8 +295,8 @@ var failmap = {
         location.hash = "#" + layer.feature.properties['OrganizationName'];
     },
 
-
     loadmap: function (weeknumber) {
+        vueMap.loading = true;
         $.getJSON('/data/map/' + weeknumber, function (json) {
             if (failmap.geojson) { // if there already was data present
                 failmap.geojson.clearLayers(); // prevent overlapping polygons
@@ -308,135 +308,105 @@ var failmap = {
                 pointToLayer: failmap.pointToLayer,
                 onEachFeature: failmap.onEachFeature
             }).addTo(failmap.map); // only if singleton, its somewhat dirty.
-
+            vueMap.loading = false;
         });
     },
 
     showreport: function(e) {
         if (failmap.map.isFullscreen()){
-            console.log("FULL");
-            var layer = e.target;
-            showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
-            show_fullscreenreport();
+            // var layer = e.target;
+            vueFullScreenReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
+            vueFullScreenReport.show();
+
+            // Load the report for when you leave fullscreen
+            // perhaps this should be in the leave fullscreen event handler
+            vueReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
         } else {
-            jumptoreport();
-            var layer = e.target;
-            showReportData(layer.feature.properties['OrganizationID'], $("#history")[0].value);
+            vueReport.show_in_browser();
+            vueReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
         }
     }
-
-
 };
-
-function hide_fullscreenreport(){
-    vueFullScreenReport.hide()
-}
-
-function show_fullscreenreport(){
-    vueFullScreenReport.show()
-}
-
-function next_week(){
-    h = $("#history");
-    if (h[0].value > 0) {
-        h[0].value -= 1;
-        h.change()
-    }
-}
-
-function previous_week(){
-    // caused 1, 11, 111 :) lol
-    h = $("#history");
-    if (h[0].value < 52) {
-        h[0].value = parseInt(h[0].value) + 1.0;
-        h.change()
-    }
-}
-
-var domainsDebounced = debounce(function (organization, weeks_back) {
-    if (!weeks_back)
-        weeks_back = 0;
-
-    $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
-        vueDomainlist.urls = data.calculation["organization"]["urls"];
-    });
-}, 100);
-
-function loadtopfail(weeknumber) {
-    $.getJSON('/data/topfail/' + weeknumber, function (data) {
-        vueTopfail.top = data;
-    });
-}
-
-function loadtopwin(weeknumber) {
-    $.getJSON('/data/topwin/' + weeknumber, function (data) {
-        vueTopwin.top = data;
-    });
-}
-
-function loadstats(weeknumber) {
-    $.getJSON('/data/stats/' + weeknumber, function (data) {
-        vueStatistics.data = data;
-    });
-}
-
-function loadterrible_urls(weeknumber) {
-    $.getJSON('/data/terrible_urls/' + weeknumber, function (data) {
-        vueTerribleurls.top = data;
-    });
-}
-
-
-// reloads the map and the top fail every hour, so you don't need to manually refresh anymore
-var hourly = false;
-
-function update_hourly() {
-    if (hourly) {
-        failmap.loadmap(0);
-        loadtopfail(0);
-        loadtopwin(0);
-        loadstats(0);
-        $("#history").val(0);
-    }
-    hourly = true; // first time don't run the code, so nothing surprising happens
-    setTimeout(update_hourly, 60 * 60 * 1000);
-}
-
-
-selected_organization = -1;
-
-function showReportData(OrganizationID, weeks_ago) {
-    selected_organization = OrganizationID;
-
-    if (!weeks_ago) {
-        weeks_ago = 0;
-    }
-
-    $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
-        vueReport.urls = data.calculation["organization"]["urls"];
-        vueReport.points = data.rating;
-        vueReport.when = data.when;
-        vueReport.name = data.name;
-        vueFullScreenReport.urls = data.calculation["organization"]["urls"];
-        vueFullScreenReport.points = data.rating;
-        vueFullScreenReport.when = data.when;
-        vueFullScreenReport.name = data.name;
-    });
-}
-
-function jumptoreport() {
-    location.hash = "#yolo"; // you can only jump once to an anchor, unless you use a dummy
-    location.hash = "#report";
-}
-
 
 $(document).ready(function () {
     failmap.initializemap();
-    failmap.loadmap(0);
 
-    // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
-    // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
-    update_hourly();
+    // there are some issues with having the map in a Vue. Somehow the map doesn't
+    // render. So we're currently not using that feature over there.
+    // It's also hard, since then we have to have themap, historycontrol, fullscreenreport, domainlist
+    // it's just too much in single vue.
+    // also: the fullscreen report only loads from something ON the map.
+    // and all of this for a loading indicator per vue :))
+    // knowing fullscreen here would be nice...
+    window.vueMap = new Vue({
+        el: '#historycontrol',
+        data: {
+            // # historyslider
+            weeksback: 0,
+            loading: false,
+            week: 0,
+            selected_organization: -1,
+        },
+        computed: {
+            visibleweek: function () {
+                x = new Date();
+                x.setDate(x.getDate() - this.weeksback * 7);
+                return x.humanTimeStamp();
+            }
+        },
+        methods: {
+            load: function(week){
+                failmap.loadmap(week);
+            },
+            // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
+            // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
+            update_hourly: function(){
+                setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
+            },
+            hourly_update: function() {
+                vueMap.load(0);
+                vueTopfail.load(0);
+                vueTopwin.load(0);
+                vueStatistics.load(0);
+                vueMap.week = 0;
+                setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
+            },
+            next_week: function(){
+                if (this.week > 0) {
+                    this.week -= 1;
+                    this.show_week();
+                }
+            },
+            previous_week: function (){
+                // caused 1, 11, 111 :) lol
+                if (this.week < 52) {
+                    this.week += 1;
+                    this.show_week();
+                }
+            },
+            show_week: debounce(function (e) {
+                if (e)
+                    this.week = e.target.value;
+
+                // doesn't really work, as everything async.
+                vueMap.load(this.week);
+                vueTopfail.load(this.week);
+                vueTopwin.load(this.week);
+                vueTerribleurls.load(this.week);
+
+                if (vueMap.selected_organization > -1) {
+                    // todo: requests the "report" page 3x.
+                    // due to asyncronous it's hard to just "copy" results.
+                    vueReport.load(vueMap.selected_organization, this.week);
+                    vueFullScreenReport.load(vueMap.selected_organization, this.week);
+                    vueDomainlist.load(vueMap.selected_organization, this.week);
+                }
+
+                vueStatistics.load(this.week);
+                vueMap.weeksback = this.week;
+            }, 1000)
+        }
+    });
 
     window.vueReport = new Vue({
         el: '#report',
@@ -514,6 +484,24 @@ $(document).ready(function () {
                 else
                     marker = points;
                 return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
+            },
+            load: function(OrganizationID, weeks_ago){
+
+                if (!weeks_ago) {
+                    weeks_ago = 0;
+                }
+
+                $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                    vueReport.urls = data.calculation["organization"]["urls"];
+                    vueReport.points = data.rating;
+                    vueReport.when = data.when;
+                    vueReport.name = data.name;
+                });
+            },
+            show_in_browser: function(){
+                // you can only jump once to an anchor, unless you use a dummy
+                location.hash = "#loading";
+                location.hash = "#report";
             }
         }
     });
@@ -601,6 +589,20 @@ $(document).ready(function () {
                 else
                     marker = points;
                 return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
+            },
+            load: function(OrganizationID, weeks_ago){
+                vueMap.selected_organization = OrganizationID;
+
+                if (!weeks_ago) {
+                    weeks_ago = 0;
+                }
+
+                $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                    vueFullScreenReport.urls = data.calculation["organization"]["urls"];
+                    vueFullScreenReport.points = data.rating;
+                    vueFullScreenReport.when = data.when;
+                    vueFullScreenReport.name = data.name;
+                });
             }
         }
     });
@@ -631,10 +633,16 @@ $(document).ready(function () {
                 }
                 return 0
             },
-
             unknownpercentage: function () {
                 return (!this.data.data) ? "0%" :
                     roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+            }
+        },
+        methods: {
+            load: function(weeknumber) {
+                $.getJSON('/data/stats/' + weeknumber, function (data) {
+                    vueStatistics.data = data;
+                });
             }
         }
     });
@@ -647,21 +655,35 @@ $(document).ready(function () {
                 if (points < 199) return "green";
                 if (points < 1000) return "orange";
                 if (points > 999) return "red";
-            }
+            },
+            load: debounce(function (organization, weeks_back) {
+                if (!weeks_back)
+                    weeks_back = 0;
+
+                $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
+                    vueDomainlist.urls = data.calculation["organization"]["urls"];
+                });
+            }, 100)
         }
     });
+
 
     window.vueTopfail = new Vue({
         el: '#topfail',
         data: {top: Array},
         methods: {
             showReport: function (OrganizationID) {
-                jumptoreport();
-                showReportData(OrganizationID, $("#history")[0].value);
-                domainsDebounced(OrganizationID, $("#history")[0].value);
+                vueReport.show_in_browser();
+                vueReport.load(OrganizationID, vueMap.week);
+                vueDomainlist.load(OrganizationID, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
+            },
+            load: function(weeknumber) {
+                $.getJSON('/data/topfail/' + weeknumber, function (data) {
+                    vueTopfail.top = data;
+                });
             }
         }
     });
@@ -671,12 +693,17 @@ $(document).ready(function () {
         data: {top: Array},
         methods: {
             showReport: function (OrganizationID) {
-                jumptoreport();
-                showReportData(OrganizationID, $("#history")[0].value);
-                domainsDebounced(OrganizationID, $("#history")[0].value);
+                vueReport.show_in_browser();
+                vueReport.load(OrganizationID, vueMap.week);
+                vueDomainlist.load(OrganizationID, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
+            },
+            load: function (weeknumber) {
+                $.getJSON('/data/topwin/' + weeknumber, function (data) {
+                    vueTopwin.top = data;
+                });
             }
         }
     });
@@ -686,50 +713,26 @@ $(document).ready(function () {
         data: {top: Array},
         methods: {
             showReport: function (OrganizationID) {
-                jumptoreport();
-                showReportData(OrganizationID, $("#history")[0].value);
-                domainsDebounced(OrganizationID, $("#history")[0].value);
+                vueReport.show_in_browser();
+                vueReport.load(OrganizationID, vueMap.week);
+                vueDomainlist.load(OrganizationID, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
+            },
+            load: function(weeknumber) {
+                $.getJSON('/data/terrible_urls/' + weeknumber, function (data) {
+                    vueTerribleurls.top = data;
+                });
             }
         }
     });
 
-    window.vueHistory = new Vue({
-        el: '#historycontrol',
-        data: {
-            weeksback: 0
-
-        },
-        computed: {
-            visibleweek: function () {
-                x = new Date();
-                x.setDate(x.getDate() - this.weeksback * 7);
-                return x.humanTimeStamp();
-            }
-        }
-    });
-
-    // move space and time ;)
-    $("#history").on("change", debounce(function () {
-        failmap.loadmap(this.value);
-        loadtopfail(this.value);
-        loadtopwin(this.value);
-        loadterrible_urls(this.value);
-
-        if (selected_organization > -1) {
-            showReportData(selected_organization, this.value);
-            domainsDebounced(selected_organization, this.value);
-        }
-
-        loadstats(this.value); // todo: cache
-        vueHistory.weeksback = this.value;
-    }, 200));
-
-    loadtopwin(0);
-    loadtopfail(0);
-    loadstats(0);
-    loadterrible_urls(0);
+    // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
+    vueMap.load(0);
+    vueTopwin.load(0);
+    vueTopfail.load(0);
+    vueStatistics.load(0);
+    vueTerribleurls.load(0);
 });
 

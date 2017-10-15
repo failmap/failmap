@@ -27,8 +27,7 @@ def index(request):
     :return:
     """
 
-    return render(request, 'map/index.html',
-                  {"timestamp": datetime.now(pytz.utc)})
+    return render(request, 'map/index.html')
 
 
 def robots_txt(request):
@@ -84,8 +83,8 @@ def string_to_delta(string_delta):
     value, unit, _ = string_delta.split()
     return datetime.timedelta(**{unit: float(value)})
 
-
-# @cache_page(cache_time)
+# slow in sqlite, seemingly fast in mysql
+@cache_page(cache_time)
 def terrible_urls(request, weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
     # currently this goes wrong when the endpoints are dead but the url still resolves.
