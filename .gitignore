@@ -20,3 +20,4 @@ build/
 .eslintrc.yml
 code.json
 codeclimate.json
+static/
