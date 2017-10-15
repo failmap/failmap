@@ -390,3 +390,5 @@ STATICFILES_FINDERS = (
 # Maybe set direnv to something else.
 if DEBUG:
     COMPRESS_ROOT = "./failmap_admin/map/static/"
+else:
+    COMPRESS_ROOT = STATIC_ROOT
