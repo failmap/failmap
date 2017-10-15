@@ -36,5 +36,7 @@ django-silk
 # logging
 colorlog
 
-# determine ratings, faster (it's not coded that efficiently)
 # django-cachalot - Is not more efficient.
+
+# website
+django_compressor
