@@ -377,9 +377,7 @@ CELERY_result_serializer = 'pickle'
 
 # Compression
 # https://django-compressor.readthedocs.io/en/latest/usage/
-COMPRESS_OFFLINE = True
-COMPRESS_ENABLED = True
-# undocumented feature.
+# undocumented setting...
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -389,6 +387,10 @@ STATICFILES_FINDERS = (
 # Uses static root, which doesn't help in development environments.
 # Maybe set direnv to something else.
 if DEBUG:
+    COMPRESS_OFFLINE = False  # failmap-admin compress
+    COMPRESS_ENABLED = False
     COMPRESS_ROOT = "./failmap_admin/map/static/"
 else:
     COMPRESS_ROOT = STATIC_ROOT
+    COMPRESS_OFFLINE = True  # failmap-admin compress
+    COMPRESS_ENABLED = True
