@@ -1,24 +1,23 @@
-<!DOCTYPE html>{% load static %} {% load i18n %}
-{# todo: de rest vertalen naar Brits als basistaal #}
+<!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %}
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
         <title>{% trans "Site Title" %}</title>
-
         <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/>
-
+        {% compress css %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.css' %}" />
         <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
-
+        {% endcompress %}
+        {% compress js %}
         <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.min.js' %}"></script>
+        {% endcompress %}
     </head>
 
     <body role="document">

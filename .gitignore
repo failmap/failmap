@@ -10,6 +10,7 @@ db.sqlite3
 htmlcov
 error.log
 db_backup_*.sqlite3
+failmap_admin/map/static/CACHE/*
 failmap_admin/map/static/images/screenshots/*
 failmap_admin/scanners/resources/output/dnsrecon/*
 failmap_admin/scanners/resources/output/theHarvester/*

@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django.contrib.admindocs',
     'django.contrib.humanize',
+    'compressor',
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light
@@ -372,3 +373,20 @@ TOOLS = {
 CELERY_accept_content = ['pickle', 'yaml']
 CELERY_task_serializer = 'pickle'
 CELERY_result_serializer = 'pickle'
+
+
+# Compression
+# https://django-compressor.readthedocs.io/en/latest/usage/
+COMPRESS_OFFLINE = True
+COMPRESS_ENABLED = True
+# undocumented feature.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # other finders..
+    'compressor.finders.CompressorFinder',
+)
+# Uses static root, which doesn't help in development environments.
+# Maybe set direnv to something else.
+if DEBUG:
+    COMPRESS_ROOT = "./failmap_admin/map/static/"

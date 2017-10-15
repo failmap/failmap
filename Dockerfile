@@ -35,6 +35,9 @@ ENV UWSGI_UID root
 ENV UWSGI_MODULE failmap_admin.wsgi
 ENV UWSGI_STATIC_MAP /static=/srv/failmap-admin/static
 
+# Compress JS/CSS before serving, using django-compressor
+RUN /pyenv/bin/failmap-admin compress
+
 RUN /pyenv/bin/failmap-admin collectstatic
 
 EXPOSE 8000
