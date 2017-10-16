@@ -22,10 +22,11 @@ Linux or MacOS capable of running Python3 and git.
 
 # Software Requirements
 
-Download and install git and python3 to get started:
+Download and install below system requirements to get started:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3](https://www.python.org/downloads/) (download and install)
+- [direnv](https://direnv.net/) (download and install, the follow setup instructions)
 
 
 After installation of above tools, all following steps use the command line:
@@ -39,6 +40,7 @@ In a directory of your choosing:
 
     git clone --recursive https://github.com/failmap/admin/  # downloads the software
     cd admin  # enter the directory of the downloaded software
+    direnv allow  # sets Debug to true in this folder. Do not change the settings.py file.
 
 # Quickstart
 

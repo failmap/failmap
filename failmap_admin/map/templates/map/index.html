@@ -36,9 +36,9 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="#map">{% trans "Map" %}</a></li>
-                        <li><a href="#bar">{% trans "Bar" %}</a></li>
+                        <li><a href="#intro">{% trans "Introduction" %}</a></li>
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
+                        <li><a href="#bar">{% trans "Bar" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
@@ -46,9 +46,12 @@
             </div>
         </nav>
 
+        <div id='map'></div>
+
         <div class="container theme-showcase" role="main">
 
             <div class="jumbotron">
+                <a name="intro" class="jumptonav"></a>
                 <h1>{% trans "Fail Map" %}</h1>
                 <p>{% trans "Fail Map Introduction" %}</p>
                 <p>Stuur nieuwe subdomeinen in via twitter:
@@ -60,14 +63,6 @@
             {% include "map/target_audience.html" %}
 
             {% include "map/donation_row.html" %}
-
-            <div class="page-header">
-                <a name="map" class="jumptonav"></a>
-                <h1>{% trans "The Map" %}</h1>
-                <p>{% trans "The Map Introduction" %}</p>
-
-                <div id='map'></div>
-            </div>
 
             <div id="statistics">
                 <div class="page-header">

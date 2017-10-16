@@ -47,6 +47,7 @@ var failmap = {
     geojson: "",
     internetadresses: L.control(),
     fullscreenreport: L.control(),
+    fullscreenhint: L.control(),
     dataslider: L.control(),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
@@ -77,6 +78,7 @@ var failmap = {
             }
         });
 
+        this.add_fullscreen_hint();
         this.add_dataslider();
         this.add_info();
         this.add_internetadresses();
@@ -158,6 +160,19 @@ var failmap = {
         };
 
         this.info.addTo(this.map);
+    },
+
+    add_fullscreen_hint: function () {
+        this.fullscreenhint.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            html = " <div id=\"fullscreen\">" +
+            "   <span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
+            "</div>";
+
+            this._div.innerHTML = html;
+            return this._div;
+        };
+        this.fullscreenhint.addTo(this.map);
     },
 
     add_dataslider: function () {
@@ -664,6 +679,23 @@ $(document).ready(function () {
                     vueDomainlist.urls = data.calculation["organization"]["urls"];
                 });
             }, 100)
+        }
+    });
+
+    window.vueFullscreen = new Vue({
+        el: '#fullscreen',
+        data: {
+            fullscreen: "View Full Screen"
+        },
+        methods: {
+            toggleFullScreen: function () {
+                failmap.map.toggleFullscreen(failmap.map.options)
+                if (vueFullscreen.fullscreen == "View Full Screen"){
+                    vueFullscreen.fullscreen = "Exit Full Screen"
+                } else {
+                    vueFullscreen.fullscreen = "View Full Screen"
+                }
+            }
         }
     });
 

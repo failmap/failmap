@@ -85,19 +85,19 @@ Todo: better separation of UI and data. The JS messes things up.
 
 /* bootstrap fixed menu terribleness... always overlaps content. */
 body {
-  padding-top: 70px;
+  padding-top: 50px;
 }
 
 @media screen and (max-width: 768px) {
-    body { padding-top: 0px; }
+    body { padding-top: 50px; }
 }
 
 /* https://github.com/twbs/bootstrap/issues/1768 */
 .jumptonav {
     display: block;
     content: " ";
-    margin-top: -75px;
-    height: 75px;
+    margin-top: -55px;
+    height: 55px;
     visibility: hidden;
 }
 
@@ -400,4 +400,10 @@ body {
     font-size: 30px;
     color: silver;
     font-family: consolas;
+}
+
+.navbar-default {
+    background-image: linear-gradient(to bottom,rgba(255,255,255,0.9) 0,rgba(255,255,255,0.8) 100%) !important;
+    backdrop-filter: blur(10px);
+    background-color: transparent !important;
 }

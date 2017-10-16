@@ -21,3 +21,4 @@ build/
 code.json
 codeclimate.json
 static/
+.direnv
