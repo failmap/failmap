@@ -444,7 +444,7 @@ def rate_timeline(timeline, url):
             if 'tls_qualys_scan' in these_ratings.keys():
                 if 'tls_qualys_scan' not in given_ratings[label]:
                     score, json = tls_qualys_rating_based_on_scan(these_ratings['tls_qualys_scan'])
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('tls_qualys_scan')
                 else:
@@ -458,7 +458,7 @@ def rate_timeline(timeline, url):
                 if 'Strict-Transport-Security' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['Strict-Transport-Security'], 'Strict-Transport-Security')
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('Strict-Transport-Security')
                 else:
@@ -472,7 +472,7 @@ def rate_timeline(timeline, url):
                 if 'X-Frame-Options' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-Frame-Options'], 'X-Frame-Options')
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('X-Frame-Options')
                 else:
@@ -486,7 +486,7 @@ def rate_timeline(timeline, url):
                 if 'X-XSS-Protection' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-XSS-Protection'], 'X-XSS-Protection')
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('X-XSS-Protection')
                 else:
@@ -500,7 +500,7 @@ def rate_timeline(timeline, url):
                 if 'X-Content-Type-Options' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('X-Content-Type-Options')
                 else:
@@ -513,7 +513,7 @@ def rate_timeline(timeline, url):
             if 'plain_https' in these_ratings.keys():
                 if 'plain_https' not in given_ratings[label]:
                     score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
-                    jsons.append(json)
+                    jsons.append(json) if json else ""
                     scores.append(score)
                     given_ratings[label].append('plain_https')
                 else:
@@ -534,6 +534,9 @@ def rate_timeline(timeline, url):
         }""".strip()
 
             # this makes the whole operation a bit slower, but more readable, which matters.
+            # is also verified json. That also helps.
+            # print(jsons)
+            # print(",".join(jsons))
             unsorted = xjson.loads("[" + ",".join(jsons) + "]")
             l = sorted(unsorted, key=lambda k: int(k["rating"].get("points", 0)), reverse=True)
             l = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
@@ -544,7 +547,7 @@ def rate_timeline(timeline, url):
             # print("l")
             # print(l)
             # print("z")
-            # print(",".join(jsons))
+            #
 
             endpoint_jsons.append(endpoint_template % (endpoint.ip,
                                                        endpoint.port,

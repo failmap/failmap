@@ -418,7 +418,7 @@ def stats_determine_when(stat, weeks_back=0):
     return when
 
 
-@cache_page(cache_time)
+# @cache_page(cache_time)
 def stats(request, weeks_back=0):
     # todo: 390 * 7 queries. Still missing the django time dimension type queries.
     # Info: the number of urls can be slightly inflated since some organizations share urls
@@ -447,50 +447,57 @@ def stats(request, weeks_back=0):
                        'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
                        'included_organizations': 0}
 
-        # todo: this can now be rewritten to be faster.
-        for o in os:
-            try:
+        #                 if stat == 'earliest':
+        #           rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
+        #           rating = rating.earliest('when')
+        #       else:
+        #           rating = OrganizationRating.objects.filter(
+        #               organization=o, when__lte=when, rating__gt=-1)
+        #           rating = rating.latest('when')#
 
-                if stat == 'earliest':
-                    rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
-                    rating = rating.earliest('when')
-                else:
-                    rating = OrganizationRating.objects.filter(
-                        organization=o, when__lte=when, rating__gt=-1)
-                    rating = rating.latest('when')
+        ratings = OrganizationRating.objects.raw("""SELECT * FROM 
+                                           map_organizationrating
+                                       INNER JOIN 
+                                       (SELECT MAX(id) as id2 FROM map_organizationrating or2  
+                                       WHERE `when` <= '%s' GROUP BY organization_id) as x 
+                                       ON x.id2 = map_organizationrating.id""" % when)
 
-                measurement["total_organizations"] += 1
-                measurement["total_score"] += rating.rating
+        for rating in ratings:
+            measurement["total_organizations"] += 1
+            measurement["total_score"] += rating.rating
 
-                if rating.rating < 200:
-                    measurement["green"] += 1
+            if rating.rating < 200:
+                measurement["green"] += 1
 
-                if 199 < rating.rating < 1000:
-                    measurement["orange"] += 1
+            if 199 < rating.rating < 1000:
+                measurement["orange"] += 1
 
-                if rating.rating > 999:
-                    measurement["red"] += 1
+            if rating.rating > 999:
+                measurement["red"] += 1
 
-                # count the urls, from the latest rating. Which is very dirty :)
-                # it will double the urls that are shared between organizations.
-                # that is not really bad, it distorts a little.
-                # we're forced to load each item separately anyway, so why not read it?
-                x = json.loads(rating.calculation)
-                measurement["total_urls"] += len(x['organization']['urls'])
+            # count the urls, from the latest rating. Which is very dirty :)
+            # it will double the urls that are shared between organizations.
+            # that is not really bad, it distorts a little.
+            # we're forced to load each item separately anyway, so why not read it?
+            x = json.loads(rating.calculation)
+            measurement["total_urls"] += len(x['organization']['urls'])
 
-                measurement["green_urls"] += sum(
-                    [int(l['url']['points']) < 200 for l in x['organization']['urls']])
-                measurement["orange_urls"] += sum(
-                    [199 < int(l['url']['points']) < 1000 for l in x['organization']['urls']])
-                measurement["red_urls"] += sum(
-                    [int(l['url']['points']) > 999 for l in x['organization']['urls']])
+            measurement["green_urls"] += sum(
+                [int(l['url']['points']) < 200 for l in x['organization']['urls']])
+            measurement["orange_urls"] += sum(
+                [199 < int(l['url']['points']) < 1000 for l in x['organization']['urls']])
+            measurement["red_urls"] += sum(
+                [int(l['url']['points']) > 999 for l in x['organization']['urls']])
 
-                measurement["included_organizations"] += 1
+            measurement["included_organizations"] += 1
 
-            except OrganizationRating.DoesNotExist:
-                measurement["total_organizations"] += 1
-                measurement["total_score"] += 0
-                measurement["no_rating"] += 1
+
+        # todo: add all non-existing organizations at this point:
+        #
+        """                measurement["total_organizations"] += 1
+                            measurement["total_score"] += 0
+                            measurement["no_rating"] += 1
+        """
 
         if measurement["included_organizations"]:
             measurement["red percentage"] = round((measurement["red"] /
