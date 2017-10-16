@@ -66,7 +66,8 @@ var failmap = {
             accessToken: 'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
         }).addTo(this.map);
 
-        L.control.fullscreen().addTo(this.map);
+        // we have our own fullscreen control
+        // L.control.fullscreen().addTo(this.map);
 
         // console.log(this.map.isFullscreen());
 
@@ -653,6 +654,25 @@ $(document).ready(function () {
             unknownpercentage: function () {
                 return (!this.data.data) ? "0%" :
                     roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+            },
+            greenurlpercentage: function () {
+                return (!this.data.data) ? "0%" :
+                    roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+            },
+
+            redurlpercentage: function () {
+                return (!this.data.data) ? "0%" :
+                    roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+            },
+
+            orangeurlpercentage: function () {
+                if (this.data.data) {
+                    var score = 100 -
+                        roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                        roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                    return roundTo(score, 2) + "%";
+                }
+                return 0
             }
         },
         methods: {

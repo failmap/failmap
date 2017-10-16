@@ -36,9 +36,8 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a href="#intro">{% trans "Introduction" %}</a></li>
+                        <li><a href="#intro">{% trans "Intro" %}</a></li>
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
-                        <li><a href="#bar">{% trans "Bar" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
@@ -49,9 +48,8 @@
         <div id='map'></div>
 
         <div class="container theme-showcase" role="main">
-
+            <a name="intro" class="jumptonav"></a>
             <div class="jumbotron">
-                <a name="intro" class="jumptonav"></a>
                 <h1>{% trans "Fail Map" %}</h1>
                 <p>{% trans "Fail Map Introduction" %}</p>
                 <p>Stuur nieuwe subdomeinen in via twitter:
@@ -65,36 +63,30 @@
             {% include "map/donation_row.html" %}
 
             <div id="statistics">
-                <div class="page-header">
-                    <a name="bar" class="jumptonav"></a>
-                    <h1>{% trans "The Bar" %}</h1>
-                    <p>{% trans "The Bar Explained" %}</p>
-                </div>
-
-                <div class="progress">
-                    <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
-                        <span class="sr-only">Oh, wow!</span>
-                    </div>
-                    <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
-                        <span class="sr-only">Pretty fair, but not really there.</span>
-                    </div>
-                    <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
-                        <span class='sr-only'>They have a lot to learn.</span>
-                    </div>
-                    <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
-                        <span class='sr-only'>We didn't scan them then...</span>
-                    </div>
-                </div>
 
                 <div class="page-header">
                     <a name="numbers" class="jumptonav"></a>
-                    <h1>{% trans "The Numbers" %}</h1>
-                    <p>{% trans "The Numbers Explained" %}</p>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
                         <h3>{% trans "Organizations" %}</h3>
                         <p>{% trans "Organizations Explained" %}</p>
+
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
+                                <span class="sr-only">Oh, wow!</span>
+                            </div>
+                            <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
+                                <span class="sr-only">Pretty fair, but not really there.</span>
+                            </div>
+                            <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
+                                <span class='sr-only'>They have a lot to learn.</span>
+                            </div>
+                            <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
+                                <span class='sr-only'>We didn't scan them then...</span>
+                            </div>
+                        </div>
+
                         <table class="table">
                             <thead>
                             <tr>
@@ -121,6 +113,17 @@
                     <div class="col-md-6">
                         <h3>{% trans "Internet addresses" %}</h3>
                         <p>{% trans "Internet addresses Explained" %}</p>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" :style="{width:greenurlpercentage}">
+                                <span class="sr-only">Oh, wow!</span>
+                            </div>
+                            <div class="progress-bar progress-bar-warning" :style="{width:orangeurlpercentage}">
+                                <span class="sr-only">Pretty fair, but not really there.</span>
+                            </div>
+                            <div class="progress-bar progress-bar-danger" :style="{width:redurlpercentage}">
+                                <span class='sr-only'>They have a lot to learn.</span>
+                            </div>
+                        </div>
                         <table class="table">
                             <thead>
                             <tr>
@@ -147,7 +150,6 @@
                 </div>
             </div>
 
-            {% include "map/donation_row.html" %}
 
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
@@ -203,10 +205,14 @@
                 {% include "map/topwin.html" %}
             </div>
 
+            {% include "map/donation_row.html" %}
+
             <div class="row">
                 {% include "map/terrible_urls.html" %}
                 {% include "map/faq.html" %}
             </div>
+
+            {% include "map/donation_row.html" %}
 
             <div id="lastrow">
                 <div class="row">
