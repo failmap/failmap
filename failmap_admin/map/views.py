@@ -167,7 +167,7 @@ def terrible_urls(request, weeks_back=0):
             GROUP BY url.url
             HAVING(`rating`) > 999
             ORDER BY `rating` DESC, `organization`.`name` ASC
-            LIMIT 50
+            LIMIT 20
             ''' % (when, )
     # print(sql)
     cursor.execute(sql)
@@ -275,7 +275,7 @@ def topfail(request, weeks_back=0):
             GROUP BY organization.name
             HAVING rating > 0
             ORDER BY `rating` DESC, `organization`.`name` ASC
-            LIMIT 30
+            LIMIT 10
             ''' % (when,)
     cursor.execute(sql)
     # print(sql)
@@ -378,7 +378,7 @@ def topwin(request, weeks_back=0):
             GROUP BY organization.name
             HAVING rating = 0
             ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
-            LIMIT 30
+            LIMIT 10
             ''' % (when,)
     cursor.execute(sql)
 

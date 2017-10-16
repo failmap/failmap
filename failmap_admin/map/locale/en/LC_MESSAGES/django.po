@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-05 10:45+0000\n"
+"POT-Creation-Date: 2017-10-16 15:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "About Failmap"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:7
+#: failmap_admin/map/templates/map/index.html:5
 msgid "Site Title"
 msgstr ""
 
@@ -30,131 +30,95 @@ msgid "Toggle navigation"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:35
-#: failmap_admin/map/templates/map/index.html:58
+#: failmap_admin/map/templates/map/index.html:53
 msgid "Fail Map"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:39
-msgid "Map"
+msgid "Intro"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:40
-msgid "Bar"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:41
 msgid "Numbers"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:42
+#: failmap_admin/map/templates/map/index.html:41
 #: failmap_admin/map/templates/map/topfail.html:6
 msgid "Top Fail"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:43
+#: failmap_admin/map/templates/map/index.html:42
 msgid "Explanation"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:46
-msgid "Data slider"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:59
+#: failmap_admin/map/templates/map/index.html:54
 msgid "Fail Map Introduction"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:72
-msgid "The Map"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:73
-msgid "The Map Introduction"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:82
-msgid "Domains"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:96
-msgid "The Bar"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:97
-msgid "The Bar Explained"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:117
-msgid "The Numbers"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:118
-msgid "The Numbers Explained"
-msgstr ""
-
-#: failmap_admin/map/templates/map/index.html:122
 msgid "Organizations"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:123
+#: failmap_admin/map/templates/map/index.html:73
 msgid "Organizations Explained"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:127
-#: failmap_admin/map/templates/map/index.html:153
+#: failmap_admin/map/templates/map/index.html:93
+#: failmap_admin/map/templates/map/index.html:130
 msgid "When"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:128
-#: failmap_admin/map/templates/map/index.html:154
+#: failmap_admin/map/templates/map/index.html:94
+#: failmap_admin/map/templates/map/index.html:131
 msgid "Number"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:129
-#: failmap_admin/map/templates/map/index.html:155
+#: failmap_admin/map/templates/map/index.html:95
+#: failmap_admin/map/templates/map/index.html:132
 msgid "Good"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:130
-#: failmap_admin/map/templates/map/index.html:156
+#: failmap_admin/map/templates/map/index.html:96
+#: failmap_admin/map/templates/map/index.html:133
 msgid "Average"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:131
-#: failmap_admin/map/templates/map/index.html:157
+#: failmap_admin/map/templates/map/index.html:97
+#: failmap_admin/map/templates/map/index.html:134
 msgid "Bad"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:148
+#: failmap_admin/map/templates/map/index.html:114
 msgid "Internet addresses"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:149
+#: failmap_admin/map/templates/map/index.html:115
 msgid "Internet addresses Explained"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:183
+#: failmap_admin/map/templates/map/index.html:159
 msgid "Data from"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:184
+#: failmap_admin/map/templates/map/index.html:160
 #: failmap_admin/map/templates/map/topfail.html:16
 #: failmap_admin/map/templates/map/topwin.html:16
 msgid "Points"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:184
+#: failmap_admin/map/templates/map/index.html:160
 msgid "congratulations"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:205
+#: failmap_admin/map/templates/map/index.html:182
 msgid "Address"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:210
+#: failmap_admin/map/templates/map/index.html:187
 msgid "Since"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:210
+#: failmap_admin/map/templates/map/index.html:187
 msgid "Last check"
 msgstr ""
 
