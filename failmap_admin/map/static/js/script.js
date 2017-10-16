@@ -89,6 +89,7 @@ var failmap = {
     add_fullscreenreport: function () {
         this.fullscreenreport.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'fullscreenmap');
+            L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = '<div class="page-header" id="fullscreenreport" v-if="visible">\n' +
                 '                <div v-if="name" class="fullscreenlayout">\n' +
                 '                    <h1>{{ name }}</h1>\n' +
@@ -178,6 +179,7 @@ var failmap = {
     add_dataslider: function () {
         this.dataslider.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
+            L.DomEvent.disableClickPropagation(this._div);
             dataslider_control = " <div id=\"historycontrol\">" +
             "    <h4>{{ visibleweek }}<span v-if='loading'> (loading...)</span></h4>" +
             "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
