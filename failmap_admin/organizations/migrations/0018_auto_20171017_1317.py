@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='url',
             name='is_dead',
-            field=models.BooleanField(default=False, help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
+            field=models.BooleanField(
+                default=False, help_text="Dead url's will not be rendered on the map. Scanners can set this check automatically (which might change in the future)"),
         ),
         migrations.AlterField(
             model_name='url',
