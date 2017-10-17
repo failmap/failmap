@@ -286,7 +286,7 @@ LOGGING = {
         'color': {
             '()': 'colorlog.ColoredFormatter',
             'format': '%(log_color)s%(asctime)s\t%(levelname)-8s - '
-                      '%(filename)s:%(lineno)-4s - %(funcName)40s() - %(message)s',
+                      '%(message)s',
             'datefmt': '%Y%-m-%d %H:%M',
             'log_colors': {
                 'DEBUG':    'green',
@@ -305,18 +305,6 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-        },
-        'failmap_admin.scanners': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-            'propagate': False,  # if you don't the root logger will also output.
-            # see: https://stackoverflow.com/questions/19561058/duplicate-output-in-simple-p...
-        },
-        'failmap_admin.map': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-            'propagate': False,  # if you don't the root logger will also output.
-            # see: https://stackoverflow.com/questions/19561058/duplicate-output-in-simple-p...
         },
     },
 }
@@ -406,3 +394,17 @@ if not DEBUG:
     COMPRESS_OFFLINE = True  # defaults to false
     # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
     # Enabled when debug is off by default.
+
+# Celery config
+BROKER_URL = os.environ.get('BROKER', 'amqp://guest:guest@localhost:5672')
+ENABLE_UTC = True
+
+# Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
+# this stuff... message signing makes it a bit better, not perfect as it peels the onion.
+# see: https://blog.nelhage.com/2011/03/exploiting-pickle/
+# Yet pickle is the only convenient way of transporting objects without having to lean in all kinds
+# of directions to get the job done. Intermediate tables to store results could be an option.
+CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_TIMEZONE = 'Europe/Amsterdam'
