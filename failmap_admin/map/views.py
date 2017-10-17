@@ -84,6 +84,8 @@ def string_to_delta(string_delta):
     return datetime.timedelta(**{unit: float(value)})
 
 # slow in sqlite, seemingly fast in mysql
+
+
 @cache_page(cache_time)
 def terrible_urls(request, weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
@@ -161,7 +163,7 @@ def terrible_urls(request, weeks_back=0):
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_urlrating or2 
+              (SELECT MAX(id) as id2 FROM map_urlrating or2
               WHERE `when` <= '%s' GROUP BY url_id) as x
               ON x.id2 = map_urlrating.id
             GROUP BY url.url
@@ -223,7 +225,7 @@ def topfail(request, weeks_back=0):
     cursor = connection.cursor()
 
     """        INNER JOIN
-          (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+          (SELECT MAX(id) as id2 FROM map_organizationrating or2
           WHERE `when` <= '%s' GROUP BY organization_id) as x
           ON x.id2 = map_organizationrating.id
     """
@@ -269,7 +271,7 @@ def topfail(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
@@ -372,7 +374,7 @@ def topwin(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
@@ -453,11 +455,11 @@ def stats(request, weeks_back=0):
         #               organization=o, when__lte=when, rating__gt=-1)
         #           rating = rating.latest('when')#
 
-        ratings = OrganizationRating.objects.raw("""SELECT * FROM 
+        ratings = OrganizationRating.objects.raw("""SELECT * FROM
                                            map_organizationrating
-                                       INNER JOIN 
-                                       (SELECT MAX(id) as id2 FROM map_organizationrating or2  
-                                       WHERE `when` <= '%s' GROUP BY organization_id) as x 
+                                       INNER JOIN
+                                       (SELECT MAX(id) as id2 FROM map_organizationrating or2
+                                       WHERE `when` <= '%s' GROUP BY organization_id) as x
                                        ON x.id2 = map_organizationrating.id""" % when)
 
         if stat == "now":
@@ -574,7 +576,7 @@ def urlstats(request, weeks_back=0):
         """
         What makes the difference from organizationratings? Why are there more urls?
         Does this have to do with dead endpoints? Or dead urls? Probably.
-        
+
         now	            5144	243 (5%)	4422 (86%)	479 (9%)
         7 days ago	    5149	241 (5%)	4420 (86%)	488 (9%)
         2 weeks ago	    5143	3729 (73%)	1331 (26%)	83 (2%)
@@ -584,11 +586,11 @@ def urlstats(request, weeks_back=0):
         3 months ago	2357	1818 (77%)	496 (21%)	43 (2%)
         """
 
-        ratings = UrlRating.objects.raw("""SELECT * FROM 
+        ratings = UrlRating.objects.raw("""SELECT * FROM
                                            map_urlrating
-                                       INNER JOIN 
-                                       (SELECT MAX(id) as id2 FROM map_urlrating or2  
-                                       WHERE `when` <= '%s' GROUP BY url_id) as x 
+                                       INNER JOIN
+                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
+                                       WHERE `when` <= '%s' GROUP BY url_id) as x
                                        ON x.id2 = map_urlrating.id
                                        """ % (when, ))
 
@@ -617,7 +619,6 @@ def urlstats(request, weeks_back=0):
 
                     measurement["explained"][r['type']][r['explanation']] += 1
 
-
         measurement["red percentage"] = round((measurement["red"] /
                                                measurement["total_urls"]) * 100)
         measurement["orange percentage"] = round((measurement["orange"] /
@@ -625,12 +626,13 @@ def urlstats(request, weeks_back=0):
         measurement["green percentage"] = round((measurement["green"] /
                                                  measurement["total_urls"]) * 100)
 
-
         stats[stat] = measurement
 
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
 
 # @cache_page(cache_time)
+
+
 def wanted_urls(request):
     """
     Creates a list of organizations that have very little to none domains, and where manual
@@ -772,17 +774,18 @@ def map_data(request, weeks_back=0):
     mysql has a different way of grouping: it first groups and THEN does having. While sqllite first
     does having THEn grouping. That is why in mysql all ratings where -1, because the grouping kills
     off all other records in the HAVING.
-    
+
     The only way to fix that is using a subquery, unfortunately.
-    
+
     Old query: select ... from . inner joins... where when <= x, group by area, having max when
     which is about 1000x slower. (new one takes about a second).
-    
+
     So instead of a subquery, we ask for the latest ratings and join on this:
     SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating GROUP BY organization_id;
-    
+
     IN or SELECT:
-    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating WHERE `when` <= '2017-08-14 18:21:36.984601+00:00' GROUP BY organization_id;
+    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating WHERE `when` <= 
+    '2017-08-14 18:21:36.984601+00:00' GROUP BY organization_id;
     """
 
     # original query, doesn't work in mysql due to ordering of having and group. works in sqlite
@@ -824,7 +827,8 @@ def map_data(request, weeks_back=0):
     #     INNER JOIN
     #       coordinate ON coordinate.organization_id = organization.id
     #     WHERE `when` = (select MAX(`when`) FROM map_organizationrating or2
-    #           WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '2017-08-14 18:21:36.984601+00:00')
+    #           WHERE or2.organization_id = map_organizationrating.organization_id AND
+    #           `when` <= '2017-08-14 18:21:36.984601+00:00')
     #     GROUP BY coordinate.area
     #     ORDER BY `when` ASC
     #     ''' % (when, )
@@ -871,7 +875,7 @@ def map_data(request, weeks_back=0):
         INNER JOIN
           coordinate ON coordinate.organization_id = organization.id
         INNER JOIN
-          (SELECT MAX(id) as id2 FROM map_organizationrating or2 
+          (SELECT MAX(id) as id2 FROM map_organizationrating or2
           WHERE `when` <= '%s' GROUP BY organization_id) as x
           ON x.id2 = map_organizationrating.id
         GROUP BY coordinate.area

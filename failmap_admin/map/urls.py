@@ -2,7 +2,7 @@
 from django.conf.urls import url
 
 from failmap_admin.map.views import (index, map_data, organization_report, robots_txt, security_txt,
-                                     stats, terrible_urls, topfail, topwin, wanted_urls, urlstats)
+                                     stats, terrible_urls, topfail, topwin, urlstats, wanted_urls)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),

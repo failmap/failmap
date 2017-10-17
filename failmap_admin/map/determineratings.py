@@ -543,10 +543,10 @@ def rate_timeline(timeline, url):
             # print(",".join(jsons))
             unsorted = xjson.loads("[" + ",".join(ratings) + "]")
             # unsorted.sort(key)
-            l = sorted(unsorted, key=lambda k: k['points'], reverse=True)
-            l = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
-            if l[0:1] == "[":
-                l = l[1:len(l)-1]  # we add [] somewhere else already.
+            sorted_ratings = sorted(unsorted, key=lambda k: k['points'], reverse=True)
+            sorted_ratings = xjson.dumps(obj=sorted_ratings, indent=4)  # without correct indent, you'll get single quotes
+            if sorted_ratings[0:1] == "[":
+                sorted_ratings = sorted_ratings[1:len(sorted_ratings) - 1]  # we add [] somewhere else already.
 
             # there is difference between these objects, it seems.
             # print("l")
@@ -558,7 +558,7 @@ def rate_timeline(timeline, url):
                                                        endpoint.protocol,
                                                        endpoint.is_ipv4(),
                                                        sum(endpoint_scores),
-                                                       l))
+                                                       sorted_ratings))
 
         previous_endpoints += relevant_endpoints
         url_rating_template = """
@@ -575,11 +575,10 @@ def rate_timeline(timeline, url):
         # print(endpoint_jsons)
         # todo sort endpoints. with the same disgusting code :)
         unsorted = xjson.loads("[" + ",".join(endpoint_jsons) + "]")
-        l = sorted(unsorted, key=lambda k: k['points'], reverse=True)
-        sorted_endpoints = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
+        sorted_endpoints = sorted(unsorted, key=lambda k: k['points'], reverse=True)
+        sorted_endpoints = xjson.dumps(obj=sorted_endpoints, indent=4)
         if sorted_endpoints[0:1] == "[":
             sorted_endpoints = sorted_endpoints[1:len(sorted_endpoints) - 1]  # we add [] somewhere else already.
-
 
         url_rating_json = url_rating_template % (url.url, sum(scores), sorted_endpoints)
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
@@ -963,16 +962,16 @@ def get_url_score_modular(url, when=""):
             get_report_from_scanner_http_plain(endpoint, when)
 
         (r1, j1) = get_report_from_scanner_security_headers(endpoint, when,
-                                                          'Strict-Transport-Security')
+                                                            'Strict-Transport-Security')
 
         (r2, j2) = get_report_from_scanner_security_headers(endpoint, when,
-                                                          'X-Content-Type-Options')
+                                                            'X-Content-Type-Options')
 
         (r3, j3) = get_report_from_scanner_security_headers(endpoint, when,
-                                                          'X-Frame-Options')
+                                                            'X-Frame-Options')
 
         (r4, j4) = get_report_from_scanner_security_headers(endpoint, when,
-                                                          'X-XSS-Protection')
+                                                            'X-XSS-Protection')
 
         jsons = []
         jsons.append(scanner_tls_qualys_json) if scanner_tls_qualys_json else ""
@@ -983,7 +982,7 @@ def get_url_score_modular(url, when=""):
         jsons.append(j4) if j4 else ""
 
         rating += int(scanner_tls_qualys_rating) + int(scanner_http_plain_rating) + \
-                  int(r1) + int(r2) + int(r3) + int(r4)
+            int(r1) + int(r2) + int(r3) + int(r4)
 
         if jsons:
             endpoint_jsons.append((endpoint_template % (endpoint.ip,
