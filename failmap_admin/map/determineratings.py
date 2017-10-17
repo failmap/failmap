@@ -346,7 +346,7 @@ def rate_timeline(timeline, url):
             # Don't punish for having multiple IPv4 or IPv6 endpoints: since we visit the site
             # over DNS, there are only two entrypoints: an ipv4 and ipv6 ip.
 
-            jsons = []
+            ratings = []
             these_ratings = {}
             if endpoint.id in endpoint_ratings.keys():
                 for rating in endpoint_ratings[endpoint.id]:
@@ -425,30 +425,27 @@ def rate_timeline(timeline, url):
             if label not in given_ratings:
                 given_ratings[label] = []
 
-            message = "Repeated finding, not giving a score again. It seems this " \
-                " website has multiple IP adresses, which is common in failover and load-" \
-                "balancing scenarios. Please fix the aforementioned issue to get rid of this " \
-                "message."
+            message = "Repeated finding. Probably because this url changes IP adresses or has multiple IP " \
+                      "adresses (common for failover / load-balancing). Please fix the issue. "
 
             repetition_message = """{
-                "rating": {
                         "type": "%s",
                         "explanation": "%s",
-                        "points": "0",
+                        "points": 0,
                         "since": "%s",
                         "last_scan": "%s"
                         }
-                    }
             """
-
+            endpoint_scores = []
             if 'tls_qualys_scan' in these_ratings.keys():
                 if 'tls_qualys_scan' not in given_ratings[label]:
                     score, json = tls_qualys_rating_based_on_scan(these_ratings['tls_qualys_scan'])
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('tls_qualys_scan')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'tls_qualys',
                         message,
                         these_ratings['tls_qualys_scan'].rating_determined_on,
@@ -458,11 +455,12 @@ def rate_timeline(timeline, url):
                 if 'Strict-Transport-Security' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['Strict-Transport-Security'], 'Strict-Transport-Security')
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('Strict-Transport-Security')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'security_headers_strict_transport_security',
                         message,
                         these_ratings['Strict-Transport-Security'].rating_determined_on,
@@ -472,11 +470,12 @@ def rate_timeline(timeline, url):
                 if 'X-Frame-Options' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-Frame-Options'], 'X-Frame-Options')
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('X-Frame-Options')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'security_headers_x_frame_options',
                         message,
                         these_ratings['X-Frame-Options'].rating_determined_on,
@@ -486,11 +485,12 @@ def rate_timeline(timeline, url):
                 if 'X-XSS-Protection' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-XSS-Protection'], 'X-XSS-Protection')
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('X-XSS-Protection')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'security_headers_x_xss_protection',
                         message,
                         these_ratings['X-XSS-Protection'].rating_determined_on,
@@ -500,11 +500,12 @@ def rate_timeline(timeline, url):
                 if 'X-Content-Type-Options' not in given_ratings[label]:
                     score, json = security_headers_rating_based_on_scan(
                         these_ratings['X-Content-Type-Options'], 'X-Content-Type-Options')
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('X-Content-Type-Options')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'security_headers_x_content_type_options',
                         message,
                         these_ratings['X-Content-Type-Options'].rating_determined_on,
@@ -513,32 +514,36 @@ def rate_timeline(timeline, url):
             if 'plain_https' in these_ratings.keys():
                 if 'plain_https' not in given_ratings[label]:
                     score, json = http_plain_rating_based_on_scan(these_ratings['plain_https'])
-                    jsons.append(json) if json else ""
+                    ratings.append(json) if json else ""
                     scores.append(score)
+                    endpoint_scores.append(score)
                     given_ratings[label].append('plain_https')
                 else:
-                    jsons.append(repetition_message % (
+                    ratings.append(repetition_message % (
                         'plain_https',
                         message,
                         these_ratings['plain_https'].rating_determined_on,
                         these_ratings['plain_https'].last_scan_moment,))
 
+            # todo: remove the unneeded endpoint label.
             endpoint_template = """
         {
-        "%s:%s": {
             "ip": "%s",
             "port": "%s",
             "protocol": "%s",
+            "v4": "%s",
+            "points": %s,
             "ratings": [%s]
-            }
+
         }""".strip()
 
             # this makes the whole operation a bit slower, but more readable, which matters.
             # is also verified json. That also helps.
-            # print(jsons)
+            # print(ratings)
             # print(",".join(jsons))
-            unsorted = xjson.loads("[" + ",".join(jsons) + "]")
-            l = sorted(unsorted, key=lambda k: int(k["rating"].get("points", 0)), reverse=True)
+            unsorted = xjson.loads("[" + ",".join(ratings) + "]")
+            # unsorted.sort(key)
+            l = sorted(unsorted, key=lambda k: k['points'], reverse=True)
             l = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
             if l[0:1] == "[":
                 l = l[1:len(l)-1]  # we add [] somewhere else already.
@@ -547,25 +552,36 @@ def rate_timeline(timeline, url):
             # print("l")
             # print(l)
             # print("z")
-            #
 
             endpoint_jsons.append(endpoint_template % (endpoint.ip,
                                                        endpoint.port,
-                                                       endpoint.ip,
-                                                       endpoint.port,
-                                                       endpoint.protocol, l))
+                                                       endpoint.protocol,
+                                                       endpoint.is_ipv4(),
+                                                       sum(endpoint_scores),
+                                                       l))
 
         previous_endpoints += relevant_endpoints
         url_rating_template = """
     {
-    "url": {
         "url": "%s",
-        "points": "%s",
+        "points": %s,
         "endpoints": [%s]
-        }
     }""".strip()
 
-        url_rating_json = url_rating_template % (url.url, sum(scores), ",".join(endpoint_jsons))
+        # prevent empty ratings cluttering the database and skewing the stats.
+        if not endpoint_jsons:
+            continue
+
+        # print(endpoint_jsons)
+        # todo sort endpoints. with the same disgusting code :)
+        unsorted = xjson.loads("[" + ",".join(endpoint_jsons) + "]")
+        l = sorted(unsorted, key=lambda k: k['points'], reverse=True)
+        sorted_endpoints = xjson.dumps(obj=l, indent=4)  # without correct indent, you'll get single quotes...
+        if sorted_endpoints[0:1] == "[":
+            sorted_endpoints = sorted_endpoints[1:len(sorted_endpoints) - 1]  # we add [] somewhere else already.
+
+
+        url_rating_json = url_rating_template % (url.url, sum(scores), sorted_endpoints)
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
         # logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
         # logger.debug("Url rating json: %s", url_rating_json)
@@ -1148,13 +1164,11 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
 
     rating_template = """
                 {
-                "rating": {
                     "type": "security_headers_%s",
                     "explanation": "%s",
-                    "points": "%s",
+                    "points": %s,
                     "since": "%s",
                     "last_scan": "%s"
-                    }
                 }""".strip()
 
     # don't need to add things that are OK to the report. It might be in the future.
@@ -1230,13 +1244,11 @@ def get_report_from_scanner_http_plain(endpoint, when):
 def http_plain_rating_based_on_scan(scan):
     rating_template = """
                     {
-                    "rating": {
-                        "type": "http_plain",
+                        "type": "plain_https",
                         "explanation": "%s",
-                        "points": "%s",
+                        "points": %s,
                         "since": "%s",
                         "last_scan": "%s"
-                        }
                     }""".strip()
 
     # also here: the last scan moment increases with every scan. When you have a set of
@@ -1287,7 +1299,7 @@ def tls_qualys_rating_based_on_scan(scan):
         "A-": "Good Transport Security, rated A-.",
         "A": "Good Transport Security, rated A.",
         "A+": "Perfect Transport Security, rated A+.",
-        "T": "Chain of trust missing, could not establish trust. ",
+        "T": "Could not establish trust. ",
         "I": "Certificate not valid for domain name.",  # Custom message
         "0": "-",
     }
@@ -1309,13 +1321,11 @@ def tls_qualys_rating_based_on_scan(scan):
 
     tlsratingtemplate = """
             {
-                "rating": {
                     "type": "tls_qualys",
                     "explanation": "%s",
-                    "points": "%s",
+                    "points": %s,
                     "since": "%s",
                     "last_scan": "%s"
-                    }
                 }""".strip()
 
     # configuration errors
@@ -1326,7 +1336,7 @@ def tls_qualys_rating_based_on_scan(scan):
         if scan.qualys_rating == "T":
             rating = ratings[scan.qualys_rating] + ratings[scan.qualys_rating_no_trust]
             explanation = explanations[scan.qualys_rating] + \
-                " And for the certificate itself: " + \
+                " For the certificate installation: " + \
                 explanations[scan.qualys_rating_no_trust]
             starttls_json = (tlsratingtemplate %
                              (explanation, rating,

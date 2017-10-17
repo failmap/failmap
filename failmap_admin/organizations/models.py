@@ -106,14 +106,12 @@ class Url(models.Model):
     )
 
     is_dead = models.BooleanField(
-        db_column='isDead',
         default=False,
         help_text="Dead url's will not be rendered on the map. Scanners can set this check "
                   "automatically (which might change in the future)")
     is_dead_since = models.DateTimeField(
-        db_column='isDeadSince', blank=True, null=True)
+        blank=True, null=True)
     is_dead_reason = models.CharField(
-        db_column='isDeadReason',
         max_length=255,
         blank=True,
         null=True)
