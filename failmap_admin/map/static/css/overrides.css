@@ -411,3 +411,15 @@ body {
 .jumbotron {
     margin-top: 40px;
 }
+
+.orangerow {
+    color: darkorange;
+}
+
+.redrow {
+    color: darkred;
+}
+
+.greenrow{
+    color: darkgreen;
+}

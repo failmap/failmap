@@ -148,6 +148,72 @@
                         </table>
                     </div>
                 </div>
+                <div class="row" v-if="data.data">
+                    <div class="col-md-6">
+                        <h3>{% trans "Technical TLS" %}</h3>
+                        <p>{% trans "Technical stats TLS explained" %}</p>
+
+                        <div v-for="(x, key) in data.data">
+                            <table class="table" v-if="x['explained']">
+                            <thead>
+                            <tr>
+                                <th width="25%">{% trans "Technology" %}</th>
+                                <th width="25%">{% trans "Result" %}</th>
+                                <th width="25%">{% trans "Total" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% verbatim %}
+                                <tr v-if="x['explained']['plain_https']"><td colspan="3">Toepassing van versleuteling</td></tr>
+                                <tr v-if="x['explained']['plain_https']" class="redrow"><td></td><td>Geheel niet:</td><td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}</td></tr>
+                                <tr v-if="x['explained']['plain_https']" class="orangerow"><td></td><td>Doorverwijzing vanaf onveilig adres:</td><td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']"><td colspan="3">Kwaliteit van versleuteling</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Onvoldoende:</td><td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Ongeldig voor adres:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Matig:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Redelijk:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Goed:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Perfect:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Perfect en meer+:</td><td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}</td></tr>
+                            {% endverbatim %}
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>{% trans "Technical stats headers" %}</h3>
+                        <p>{% trans "Technical stats headers explained" %}</p>
+
+                        <div v-for="(x, key) in data.data">
+                            <table class="table" v-if="x['explained']">
+                            <thead>
+                            <tr>
+                                <th width="25%">{% trans "Technology" %}</th>
+                                <th width="25%">{% trans "Result" %}</th>
+                                <th width="25%">{% trans "Total" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% verbatim %}
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']"><td colspan="3">Afdwingen van versleuteling / HTTP Strict Transport Security (HSTS)</td></tr>
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']"><td colspan="3">Voorkomen van Clickjacking aanvallen (X-Frame Options)</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']"><td colspan="3">X-XSS Protection</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']"><td colspan="3">X-Content Type Options</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}</td></tr>
+
+                            {% endverbatim %}
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
 
@@ -160,35 +226,29 @@
                         {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
                         <br />
                         {% verbatim %}
-                        <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.url.points) + ', white);'">
+                        <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.points) + ', white);'">
                             <div class="screenshotlist">
-                                <div v-for="(endpoint, key) in url.url.endpoints">
-                                    <div v-for="(myendpoint, mykey) in endpoint" class="servicelink">
-                                        <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
-                                        <a v-bind:href="myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port" target="_blank"
-                                        v-bind:title="'Visit ' + myendpoint.protocol + '://' + url.url.url + ':' + myendpoint.port">
-                                            <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ myendpoint.protocol + idize(url.url.url) + myendpoint.port + '_latest.png\');'"></div>
-                                            <span v-html="'Bezoek adres van type: ' + myendpoint.protocol + '/' + myendpoint.port"> </span>
-                                        </a>
-                                    </div>
+                                <div v-for="endpoint in url.endpoints" class="servicelink">
+                                    <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
+                                    <a v-bind:href="endpoint.protocol + '://' + url.url + ':' + endpoint.port" target="_blank"
+                                    v-bind:title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                        <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
+                                        <span v-html="'Bezoek adres van type: ' + endpoint.protocol + '/' + endpoint.port"> </span>
+                                    </a>
                                 </div>
                             </div>
                             <div class="reportlist">
-                                <span v-html="total_awarded_points(url.url.points)"> </span>
-                                <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >
-                                            {{ url.url.url }}</span><br />
-                                <div v-for="(endpoint, key) in url.url.endpoints">
-                                    <div v-for="(myendpoint, mykey) in endpoint"><br />
-                                        &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ myendpoint.ip }}:{{ myendpoint.port }}
-                                        <div v-for="(rating, key) in myendpoint.ratings">
+                                <span v-html="total_awarded_points(url.points)"> </span>
+                                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)" >
+                                            {{ url.url }}</span><br />
+                                <div v-for="endpoint in url.endpoints"><br />
+                                        &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ endpoint.ip }}:{{ endpoint.port }}
+                                        <div v-for="rating in endpoint.ratings">
                                             <h3>&nbsp; {{ create_header(rating) }}</h3>
-                                            <div v-for="(myrating, myratingkey) in rating">
-                                                &nbsp; &nbsp; <span v-html="awarded_points(myrating.points)"></span> {{ myrating.explanation }}<br />
-                                                &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(myrating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(myrating.last_scan) }} <br />
-                                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                                <br />
-                                            </div>
-                                        </div>
+                                            &nbsp; &nbsp; <span v-html="awarded_points(rating.points)"></span> {{ rating.explanation }}<br />
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }} <br />
+                                            &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
+                                            <br />
                                     </div>
                                 </div>
                             </div>

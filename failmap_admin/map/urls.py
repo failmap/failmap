@@ -2,13 +2,14 @@
 from django.conf.urls import url
 
 from failmap_admin.map.views import (index, map_data, organization_report, robots_txt, security_txt,
-                                     stats, terrible_urls, topfail, topwin, wanted_urls)
+                                     stats, terrible_urls, topfail, topwin, wanted_urls, urlstats)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),
     url(r'^robots.txt$', robots_txt),
     url(r'^data/map/(?P<weeks_back>[0-9]{0,2})', map_data, name='map data'),
     url(r'^data/stats/(?P<weeks_back>[0-9]{0,2})', stats, name='stats'),
+    url(r'^data/urlstats/(?P<weeks_back>[0-9]{0,2})', urlstats, name='urlstats'),
     url(r'^data/topfail/(?P<weeks_back>[0-9]{0,2})', topfail, name='top fail'),
     url(r'^data/topwin/(?P<weeks_back>[0-9]{0,2})', topwin, name='top win'),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)

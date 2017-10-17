@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-16 15:55+0000\n"
+"POT-Creation-Date: 2017-10-17 18:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,29 +96,60 @@ msgstr ""
 msgid "Internet addresses Explained"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:159
-msgid "Data from"
+#: failmap_admin/map/templates/map/index.html:153
+msgid "Technical TLS"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:154
+msgid "Technical stats TLS explained"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:160
+#: failmap_admin/map/templates/map/index.html:191
+msgid "Technology"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:161
+#: failmap_admin/map/templates/map/index.html:192
+msgid "Result"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:162
+#: failmap_admin/map/templates/map/index.html:193
+msgid "Total"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:184
+msgid "Technical stats headers"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:185
+msgid "Technical stats headers explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:225
+msgid "Data from"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:226
 #: failmap_admin/map/templates/map/topfail.html:16
 #: failmap_admin/map/templates/map/topwin.html:16
 msgid "Points"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:160
+#: failmap_admin/map/templates/map/index.html:226
 msgid "congratulations"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:182
+#: failmap_admin/map/templates/map/index.html:245
 msgid "Address"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:187
+#: failmap_admin/map/templates/map/index.html:249
 msgid "Since"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:187
+#: failmap_admin/map/templates/map/index.html:249
 msgid "Last check"
 msgstr ""
 

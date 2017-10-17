@@ -76,6 +76,7 @@ var failmap = {
                 console.log('entered fullscreen');
             } else {
                 vueFullScreenReport.hide();
+                vueFullscreen.fullscreen = "View Full Screen"  // ugly fix :)
             }
         });
 
@@ -99,35 +100,29 @@ var failmap = {
                 '                        Gegevens van: {{ humanize(when) }}<br />\n' +
                 '                        Score: {{ points }}, congratulations!<br />\n' +
                 '                        <br />\n' +
-                '                        <div v-for="url in urls" class="perurl" v-bind:style="\'background: linear-gradient(\' + colorizebg(url.url.points) + \', rgba(255, 255, 255,.5));\'">\n' +
+                '                        <div v-for="url in urls" class="perurl" v-bind:style="\'background: linear-gradient(\' + colorizebg(url.points) + \', rgba(255, 255, 255,.5));\'">\n' +
                 '                            <div class="screenshotlist">\n' +
-                '                                <div v-for="(endpoint, key) in url.url.endpoints">\n' +
-                '                                    <div v-for="(myendpoint, mykey) in endpoint" class="servicelink">\n' +
-                '                                        <!-- There is no support for different ip\'s/ipv6 in endpoint, only for protocols. -->\n' +
-                '                                        <a v-bind:href="myendpoint.protocol + \'://\' + url.url.url + \':\' + myendpoint.port" target="_blank"\n' +
-                '                                        v-bind:title="\'Visit \' + myendpoint.protocol + \'://\' + url.url.url + \':\' + myendpoint.port">\n' +
-                '                                            <div class="imagediv" v-bind:style="\'background-image: url(\\\'/static/images/screenshots/\'+ myendpoint.protocol + idize(url.url.url) + myendpoint.port + \'_latest.png\\\');\'"></div>\n' +
-                '                                            <span v-html="\'Bezoek adres van type: \' + myendpoint.protocol + \'/\' + myendpoint.port"> </span>\n' +
-                '                                        </a>\n' +
-                '                                    </div>\n' +
+                '                                <div v-for="endpoint in url.endpoints" class="servicelink">\n' +
+            '                                        <!-- There is no support for different ip\'s/ipv6 in endpoint, only for protocols. -->\n' +
+            '                                        <a v-bind:href="endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port" target="_blank"\n' +
+            '                                        v-bind:title="\'Visit \' + endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port">\n' +
+            '                                            <div class="imagediv" v-bind:style="\'background-image: url(\\\'/static/images/screenshots/\'+ endpoint.protocol + idize(url.url) + endpoint.port + \'_latest.png\\\');\'"></div>\n' +
+            '                                            <span v-html="\'Bezoek adres van type: \' + endpoint.protocol + \'/\' + endpoint.port"> </span>\n' +
+            '                                        </a>\n' +
                 '                                </div>\n' +
                 '                            </div>\n' +
                 '                            <div class="reportlist">\n' +
-                '                                <span v-html="total_awarded_points(url.url.points)"> </span>\n' +
-                '                                <span class="faildomain" v-bind:class="colorize(url.url.points)" v-bind:data-tooltip-content="idizetag(url.url.url)" >\n' +
-                '                                            {{ url.url.url }}</span><br />\n' +
-                '                                <div v-for="(endpoint, key) in url.url.endpoints">\n' +
-                '                                    <div v-for="(myendpoint, mykey) in endpoint"><br />\n' +
-                '                                        &nbsp; Adres: {{ myendpoint.ip }}:{{ myendpoint.port }}\n' +
-                '                                        <div v-for="(rating, key) in myendpoint.ratings">\n' +
+                '                                <span v-html="total_awarded_points(url.points)"> </span>\n' +
+                '                                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)" >\n' +
+                '                                            {{ url.url }}</span><br />\n' +
+                '                                <div v-for="endpoint in url.endpoints"><br />\n' +
+                '                                        &nbsp; Adres: {{ endpoint.ip }}:{{ endpoint.port }}\n' +
+                '                                        <div v-for="rating in endpoint.ratings">\n' +
                 '                                            <h3>&nbsp; {{ create_header(rating) }}</h3>\n' +
-                '                                            <div v-for="(myrating, myratingkey) in rating">\n' +
-                '                                                &nbsp; &nbsp; <span v-html="awarded_points(myrating.points)"></span> {{ myrating.explanation }}<br />\n' +
-                '                                                &nbsp; &nbsp; Sinds: {{ humanize(myrating.since) }}, Last Check: {{ humanize(myrating.last_scan) }} <br />\n' +
+                '                                                &nbsp; &nbsp; <span v-html="awarded_points(rating.points)"></span> {{ rating.explanation }}<br />\n' +
+                '                                                &nbsp; &nbsp; Sinds: {{ humanize(rating.since) }}, Last Check: {{ humanize(rating.last_scan) }} <br />\n' +
                 '                                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>\n' +
                 '                                                <br />\n' +
-                '                                            </div>\n' +
-                '                                        </div>\n' +
                 '                                    </div>\n' +
                 '                                </div>\n' +
                 '                            </div>\n' +
@@ -199,8 +194,8 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
                 "                    <div v-for=\"url in urls\">\n" +
-                "                        <span v-bind:class=\"colorize(url.url.points)\">\n" +
-                "                            {{ url.url.url }}\n" +
+                "                        <span v-bind:class=\"colorize(url.points)\">\n" +
+                "                            {{ url.url }}\n" +
                 "                        </span>\n" +
                 "                    </div>\n" +
                 "                    <br />\n" +
@@ -462,31 +457,31 @@ $(document).ready(function () {
                 return new Date(date).humanTimeStamp()
             },
             create_header: function(rating){
-                if (rating.rating.type === "security_headers_strict_transport_security")
+                if (rating.type === "security_headers_strict_transport_security")
                     return "Strict-Transport-Security Header (HSTS)";
-                if (rating.rating.type === "tls_qualys")
+                if (rating.type === "tls_qualys")
                     return "Transport Layer Security (TLS)";
-                if (rating.rating.type === "http_plain")
+                if (rating.type === "http_plain")
                     return "Missing transport security (TLS)";
-                if (rating.rating.type === "security_headers_x_xss_protection")
+                if (rating.type === "security_headers_x_xss_protection")
                     return "X-XSS-Protection Header";
-                if (rating.rating.type === "security_headers_x_frame_options")
+                if (rating.type === "security_headers_x_frame_options")
                     return "X-Frame-Options Header (clickjacking)";
-                if (rating.rating.type === "security_headers_x_content_type_options")
+                if (rating.type === "security_headers_x_content_type_options")
                     return "X-Content-Type-Options";
             },
             second_opinion_links: function(rating, url){
-                if (rating.rating.type === "security_headers_strict_transport_security")
+                if (rating.type === "security_headers_strict_transport_security")
                     return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://securityheaders.io/?q=' + url.url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
-                if (rating.rating.type === "tls_qualys")
+                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
+                if (rating.type === "tls_qualys")
                     return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
-                if (rating.rating.type === "security_headers_x_xss_protection")
+                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                if (rating.type === "security_headers_x_xss_protection")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
-                if (rating.rating.type === "security_headers_x_frame_options")
+                if (rating.type === "security_headers_x_frame_options")
                     return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">Documentation (wikipedia)</a>';
-                if (rating.rating.type === "security_headers_x_content_type_options")
+                if (rating.type === "security_headers_x_content_type_options")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
             },
             total_awarded_points: function(points) {
@@ -567,32 +562,10 @@ $(document).ready(function () {
                 return new Date(date).humanTimeStamp()
             },
             create_header: function(rating){
-                if (rating.rating.type === "security_headers_strict_transport_security")
-                    return "Strict-Transport-Security Header (HSTS)";
-                if (rating.rating.type === "tls_qualys")
-                    return "Transport Layer Security (TLS)";
-                if (rating.rating.type === "http_plain")
-                    return "Missing transport security (TLS)";
-                if (rating.rating.type === "security_headers_x_xss_protection")
-                    return "X-XSS-Protection Header";
-                if (rating.rating.type === "security_headers_x_frame_options")
-                    return "X-Frame-Options Header (clickjacking)";
-                if (rating.rating.type === "security_headers_x_content_type_options")
-                    return "X-Content-Type-Options";
+                return vueReport.create_header(rating);
             },
             second_opinion_links: function(rating, url){
-                if (rating.rating.type === "security_headers_strict_transport_security")
-                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://securityheaders.io/?q=' + url.url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
-                if (rating.rating.type === "tls_qualys")
-                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
-                if (rating.rating.type === "security_headers_x_xss_protection")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
-                if (rating.rating.type === "security_headers_x_frame_options")
-                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">Documentation (wikipedia)</a>';
-                if (rating.rating.type === "security_headers_x_content_type_options")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
+                return vueReport.second_opinion_links(rating, url);
             },
             total_awarded_points: function(points) {
                 if (points === "0")
