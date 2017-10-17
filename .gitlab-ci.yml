@@ -10,9 +10,6 @@ test: &test_template
 
   image: python:3.4
 
-  # temporary ignore failures to allow development of pipeline
-  allow_failure: true
-
   cache:
     paths:
     - ~/.cache/pip/
@@ -93,9 +90,8 @@ build:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build -t registry.gitlab.com/failmap/admin:build .
     - docker push registry.gitlab.com/failmap/admin:build
-  # temporary to develop build pipeline
-  #  only:
-  #  - master
+  only:
+    - master
 
 
 # provide codequality context for merge requests
@@ -132,6 +128,9 @@ staging:
 
     - docker push registry.gitlab.com/failmap/admin:staging
 
+  only:
+    - master
+
 production:
   stage: production
 
@@ -145,3 +144,5 @@ production:
     - docker tag registry.gitlab.com/failmap/admin:staging registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
+  only:
+    - master
