@@ -12,7 +12,7 @@ test: &test_template
   tags:
       - unprivileged
 
-  image: python:3.4
+  image: python:3
 
   cache:
     paths:
@@ -91,9 +91,9 @@ build:
   stage: build
 
   services:
-  - docker:dind
+    - docker:dind
 
-  image: docker:git
+  image: python:3
 
   before_script:
     - pip install vdt.version vdt.versionplugin.default
