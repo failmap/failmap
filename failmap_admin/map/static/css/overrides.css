@@ -423,3 +423,9 @@ body {
 .greenrow{
     color: darkgreen;
 }
+
+/* awesome transition */
+path {
+    -webkit-transition:fill 400ms;
+    transition:fill 400ms;
+}
