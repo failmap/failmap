@@ -528,14 +528,14 @@ $(document).ready(function () {
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
             },
             total_awarded_points: function(points) {
-                if (points === "0")
+                if (points === 0)
                     marker = "✓ perfect";
                 else
                     marker = points;
                 return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
             },
             awarded_points: function(points) {
-                if (points === "0")
+                if (points === 0)
                     marker = "✓ perfect";
                 else
                     marker = points;
