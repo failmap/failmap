@@ -1,4 +1,5 @@
 stages:
+  - check
   - test
   - version
   - build
@@ -68,6 +69,7 @@ test_postgres: &test_postgres_template
 # code quality checks
 check:
   <<: *test_template
+  stage: check
   script:
     - tox -e check
 

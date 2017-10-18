@@ -2,7 +2,6 @@ import json
 import math
 from datetime import datetime
 
-from pkg_resources import get_distribution
 import pytz
 from dateutil.relativedelta import relativedelta  # stats
 from django.db import connection
@@ -11,6 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
+from pkg_resources import get_distribution
 
 from .models import Organization, OrganizationRating, Url, UrlRating
 
