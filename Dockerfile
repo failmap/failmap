@@ -1,20 +1,23 @@
 # use full image for build (compile) dependencies
 FROM python:3 as build
 
-COPY requirements*.txt /
-
-COPY . /source/
+# install app and dependencies in a artifact-able directory
 RUN pip install virtualenv
 RUN virtualenv /pyenv
 
+# install requirements seperately as they change less often then source, improved caching
+COPY requirements*.txt /
 RUN /pyenv/bin/pip install -r requirements.txt
 RUN /pyenv/bin/pip install -r requirements.deploy.txt
+
+# install the app
+COPY . /source/
 RUN /pyenv/bin/pip install /source/
 
 # switch to lightweight base image for distribution
 FROM python:3-slim
 
-# install dependencies (remove cache to prevent inclusion in layer)
+# install dependent libraries (remove cache to prevent inclusion in layer)
 RUN apt-get update && \
   apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql postgresql-contrib mime-support && \
   rm -rf /var/lib/apt/lists/*

@@ -1,23 +1,40 @@
+import os
 from subprocess import check_output
 from setuptools import find_packages, setup
 
 
-def get_git_version():
+def get_version():
     """Determine current version number from nearest git tag."""
+
+    # prefer explicit version provided by (docker) build environment
     try:
+        return open('version').read().strip()
+    except Exception:
+        pass
+
+    # fallback to git tag if building python package
+    try:
+        # get closest tag version
         version = check_output(["git", "describe", "--tags", "--abbrev=0"]).rstrip().decode()
-        develop = bool(check_output(["git", "status", "--porcelain"]).strip())
+        # determine if there has been development beyond the tagged commit
+        dirty = bool(check_output(["git", "status", "--porcelain"]).strip())
+        unpushed = bool(check_output(["git", "rev-list", "origin/master.."]).strip())
+        develop = dirty or unpushed
+
         if develop:
             return version + '.dev'
         else:
             return version
-    except:
-        return '0.0.0'
+    except Exception:
+        pass
+
+    # fallback
+    return '0.0.0'
 
 
 setup(
     name='failmap-admin',
-    version=get_git_version(),
+    version=get_version(),
     packages=find_packages(),
     install_requires=open('requirements.txt').readlines(),
     entry_points={
