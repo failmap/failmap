@@ -93,9 +93,10 @@ build:
   services:
     - docker:dind
 
-  image: python:3
+  image: docker:git
 
   before_script:
+    - apkg add --nocache python
     - pip install vdt.version vdt.versionplugin.default
 
   script:
