@@ -358,6 +358,8 @@ class ScannerTlsQualys:
         """
         Qualys parameters
 
+        https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+
         # publish: off, it's friendlier to the domains scanned
         # startnew: off, that's done automatically when needed by service provider
         # fromcache: on: they are chached for a few hours only.
@@ -366,8 +368,12 @@ class ScannerTlsQualys:
         :return:
         """
         ScannerTlsQualys.log.debug("Requesting cached data from qualys for %s", domain)
-        payload = {'host': domain, 'publish': "off", 'startNew': "off",
-                   'fromCache': "on", 'all': "done"}
+        payload = {'host': domain,
+                   'publish': "off",
+                   'startNew': "off",
+                   'fromCache': "off",  # cache can have mismatches, but is ignored when startnew
+                   'ignoreMismatch': "on",
+                   'all': "done"}
 
         retries = 3
 
