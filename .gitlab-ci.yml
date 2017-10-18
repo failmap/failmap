@@ -8,6 +8,10 @@ stages:
 test: &test_template
   stage: test
 
+  # allow all jobs to be run on unprivileged runners (our own) unless otherwise configured (empty tags list)
+  tags:
+      - unprivileged
+
   image: python:3.4
 
   cache:
@@ -25,6 +29,8 @@ test_mysql: &test_mysql_template
   <<: *test_template
   services:
     - mysql:5.5
+  # do not run these jobs on unprivileged runners
+  tags: []
   variables:
     # configuration for docker mysql service
     MYSQL_ROOT_PASSWORD: failmap
@@ -43,6 +49,8 @@ test_postgres: &test_postgres_template
   services:
     # current version in debian jessie
     - postgres:9.4
+  # do not run these jobs on unprivileged runners
+  tags: []
   variables:
     # configuration for docker mysql service
     POSTGRES_DB: failmap
@@ -98,11 +106,15 @@ build:
 codequality:
   stage: test
 
+  services:
+    - docker:dind
+
+  # do not run these jobs on unprivileged runners
+  tags: []
+
   image: docker:latest
   variables:
     DOCKER_DRIVER: overlay
-  services:
-    - docker:dind
   script:
     - docker pull codeclimate/codeclimate
     # generate linter configurations
