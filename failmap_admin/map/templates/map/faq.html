@@ -5,7 +5,7 @@
                         <h1>{% trans "About Failmap" %}</h1>
                     </div>
 
-                    <h2>Waarom Faalkaart?</h2>
+                    <h3>Waarom Faalkaart?</h3>
                     <p>
                         Antwoord: Er zijn veel instanties die gevoelige gegevens verwerken. Dit moet op een
                         veilige manier gebeuren: als deze informatie op straat komt te liggen kan
@@ -19,20 +19,19 @@
                     </p><p>
                         Er is met opzet gekozen voor de naam "faalkaart": een meer tendentieuze naam
                         leidt eerder tot actie en is makkelijk te begrijpen. Staat een organisatie
-                        rood op de kaart, dan moeten ze actie ondernemen.
+                        rood op de kaart, dan moet ze actie ondernemen.
                     </p>
 
-                    <h2>Mijn gemeente/organisatie is rood, wat nu?</h2>
+                    <h3>Mijn gemeente/organisatie is rood, wat nu?</h3>
                     <p>
                         Antwoord: Helaas zit er een gat in de muur. De organisatie zal actie moeten
                         ondernemen om dit te dichten.
                     </p><p>
                         Vaak heeft een organisatie meerdere websites of diensten op het internet. We
-                        tellen hiervan alle fouten bij elkaar op. Het kan dus zijn dat een organisatie
-                        rood op de kaart staat omdat er veel kleine foutjes zijn aangetroffen.
+                        tellen hiervan alle fouten bij elkaar op.
                     </p>
 
-                    <h2>Mijn gemeente is groen, is alles goed?</h2>
+                    <h3>Mijn gemeente is groen, is alles goed?</h3>
                     <p>
                         Antwoord: Faalkaart test alleen het laagste niveau van beveiliging, dit
                         is toonaangevend voor de hele organisatie.
@@ -42,10 +41,9 @@
                         deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
                     </p>
 
-                    <h2>Hoe compleet is dit?</h2>
+                    <h3>Hoe compleet is dit?</h3>
                     <p>
-                        Antwoord: rond de 7.000 domeinen van gemeenten worden regelmatig gecontroleerd. Als deze domeinen
-                        hebben samen meer dan 20.000 verbindingen naar het internet.
+                        Antwoord: rond de 5.000 domeinen van gemeenten worden regelmatig gecontroleerd.
                     </p><p>
                         Op faalkaart wordt alleen de basale beveiliging gecontroleerd van organisaties.
                     </p><p>
@@ -55,34 +53,67 @@
                         deze worden dan zo snel mogelijk meegenomen. Zie: <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
                     </p>
 
-                    <h2>Hoe komt de score tot stand?</h2>
+                    <h3>Hoe komt de score tot stand?</h3>
                     <p>
                         Antwoord: Sinds eind 2017 wordt de score anders opgebouwd: er wordt gerekend in punten.
                         Aan ieder beveiligingsprobleem worden punten toegekend.
                     </p><p>
-                        Zonder punten, of met weinig punten, wordt een organisatie groen weergegeven. Naarmate
-                        het puntenaantal oploopt wordt de organisatie oranje of zelfs rood.
-                    </p><p>
-                        De gedachte hierachter is dat organisaties die erg veel aan het internet hangen ook
-                        meer risico nemen. Natuurlijk wordt er naar ernst van de situatie punten gegeven:
-                        een ernstig probleem betekent dus ook dat de organisatie als rood wordt getoond.
+                        Punten worden toegekend naarmate de ernst van een gevonden probleem.
+                        <table class="table">
+                        <thead>
+                        <tr>
+                            <th width="15%">Score</th>
+                            <th width="15%">Kleur</th>
+                            <th width="70%">Ernst</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="greenrow"><td>0-199</td><td>Groen</td><td>Een probleem dat een vrij laag risico met zich meedraagt.</td></tr>
+                            <tr class="orangerow"><td>200-999</td><td>Oranje</td><td>Zeker de moeite waard om naar te kijken en op te lossen.</td></tr>
+                            <tr class="redrow"><td>1000-1000+</td><td>Rood</td><td>Ernstig probleem dat moet worden opgelost.</td></tr>
+                            <tr class="grayrow"><td>-1</td><td>Grijs</td><td>Geen scores bekend.</td></tr>
+                        </tbody>
+                        </table>
                     </p>
 
-                    <h2>De score is incorrect, wat moet ik doen?</h2>
+                    <h3>Welke grote veranderingen zijn er geweest?</h3>
+                    <p>
+                        Antwoord:
+                        <table class="table">
+                        <thead>
+                        <tr>
+                            <th width="20%">Wanneer</th>
+                            <th width="80%">Verandering</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Oktober 2017</td><td>Scan op het helemaal niet gebruiken van TLS toegevoegd.</td></tr>
+                            <tr><td></td><td>Scores tussen 0 (geen vermelding), 200 en 1000.</td></tr>
+                            <tr><td>Oktober 2017</td><td>Scan op HTTP Headers toegevoegd, waaronder HSTS.</td></tr>
+                            <tr><td></td><td>Scores tussen 0 en 200.</td></tr>
+                            <tr><td>Oktober 2017</td><td>Enkele duizenden domeinen toegevoegd.</td></tr>
+                            <tr><td>Januari 2017</td><td>Scanners hebben enkele maanden op pauze gestaan.</td></tr>
+                            <tr><td>Juni 2016</td><td>Nieuwe TLS kwetsbaarheid: veel rood.</td></tr>
+                            <tr><td>Maart 2016</td><td>Introductie faalkaart, 1800 domeinen.</td></tr>
+                            <tr><td></td><td>Scores tussen 0 tot en met 1000.</td></tr>
+                        </tbody>
+                        </table>
+                    </p>
+
+                    <h3>De score is incorrect, wat moet ik doen?</h3>
                     <p>
                        Antwoord: het kan even duren voordat een wijziging in de beveiliging door
                         faalkaart is gedetecteerd. Mocht er behoefte zijn om deze informatie sneller
-                        door te voeren, neem dan even contact op met info@faalkaart.nl. Let er op
-                        dat we de historie niet aanpassen: metingen blijven voor altijd zichtbaar.
+                        door te voeren, neem dan even contact op met <a href="mailto:info@faalkaart.nl">info@faalkaart.nl</a>.
                     </p>
                     <p>
                         Het doel is dat de kaart alle informatie correct weergeeft. Mocht er desondanks
                         iets verkeerd op de kaart staan, dan zullen we dit proberen recht te trekken.
-                        Neem contact op met info@faalkaart.nl om in contact te komen met een van de
+                        Neem contact op met <a href="mailto:info@faalkaart.nl">info@faalkaart.nl</a> om in contact te komen met een van de
                         moderators.
                     </p>
 
-                    <h2>Hoe moet SSL/TLS worden ingericht?</h2>
+                    <h3>Hoe moet SSL/TLS worden ingericht?</h3>
                     <p>
                         Antwoord: Er is een <a href="https://www.google.nl/search?q=secure+tls+configuration&oq=secure+tls+configuration">aantal goede handleidingen te vinden</a>.
                         Toonaangevend advies komt van het <a href="https://www.ncsc.nl/actueel/whitepapers/ict-beveiligingsrichtlijnen-voor-transport-layer-security-tls.html">Nationaal Cyber Security Centrum</a>.
@@ -91,7 +122,7 @@
                         Lijsten met goede instellingen zijn te vinden op <a href="https://cipherli.st">Cipher List</a>.
                     </p>
 
-                    <h2>Sinds wanneer bestaat deze kaart?</h2>
+                    <h3>Sinds wanneer bestaat deze kaart?</h3>
                     <p>
                         Antwoord: De kaart is gepresenteerd door sprekers op de
                         "<a href="http://inhethoofdvandehacker.nl/" target="_blank">in het hoofd van de hacker</a>"
@@ -100,7 +131,7 @@
                         zijn er meer dan 150 verbindingen extra versleuteld.
                     </p>
 
-                    <h2>Hoe is dit tot stand gekomen?</h2>
+                    <h3>Hoe is dit tot stand gekomen?</h3>
                     <p>Antwoord: Dit project is tot stand gekomen door:</p>
                     <ul>
                         <li>Initiatiefnemer, programmeer, hak en breekwerk door Elger Jonker</li>
@@ -120,7 +151,7 @@
                         <li>Database: <a href="https://mariadb.org/" target="_blank">MariaDB</a> / <a href="https://sqlite.org/" target="_blank">sqlite</a></li>
                     </ul>
 
-                    <h2>Wat is de historie van Faalkaart?</h2>
+                    <h3>Wat is de historie van Faalkaart?</h3>
 
                     <p>
                         <small><b>28 augustus 2017</b>: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld.

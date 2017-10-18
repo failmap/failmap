@@ -424,6 +424,11 @@ body {
     color: darkgreen;
 }
 
+.grayrow{
+    color: darkgray;
+}
+
+
 /* awesome transition */
 path {
     -webkit-transition:fill 400ms;
