@@ -425,8 +425,8 @@ def rate_timeline(timeline, url):
             if label not in given_ratings:
                 given_ratings[label] = []
 
-            message = "Repeated finding. Probably because this url changes IP adresses or has multiple IP " \
-                      "adresses (common for failover / load-balancing). Please fix the issue. "
+            message = "Repeated finding. Probably because this url changed IP adresses or has multiple IP " \
+                      "adresses (common for failover / load-balancing)."
 
             repetition_message = """{
                         "type": "%s",
@@ -1252,6 +1252,15 @@ def http_plain_rating_based_on_scan(scan):
                         "since": "%s",
                         "last_scan": "%s"
                     }""".strip()
+
+    # changed the ratings in the database. They are not really correct.
+    # When there is no https at all, it's worse than having broken https. So rate them the same.
+    if scan.explanation == "Site does not redirect to secure url, and has nosecure alternative on a standard port.":
+        scan.rating = 1000
+
+    # And have redirects looked at: why is there no secure alternative on the standard counterpart port?
+    if scan.explanation == "Redirects to a secure site, while a secure counterpart on the standard port is missing.":
+        scan.rating = 200
 
     # also here: the last scan moment increases with every scan. When you have a set of
     # relevant dates (when scans where made) ....

@@ -504,7 +504,7 @@ $(document).ready(function () {
                     return "Strict-Transport-Security Header (HSTS)";
                 if (rating.type === "tls_qualys")
                     return "Transport Layer Security (TLS)";
-                if (rating.type === "http_plain")
+                if (rating.type === "plain_https")
                     return "Missing transport security (TLS)";
                 if (rating.type === "security_headers_x_xss_protection")
                     return "X-XSS-Protection Header";
