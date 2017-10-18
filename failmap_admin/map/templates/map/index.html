@@ -233,7 +233,7 @@
                                     <a v-bind:href="endpoint.protocol + '://' + url.url + ':' + endpoint.port" target="_blank"
                                     v-bind:title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
                                         <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
-                                        <span v-html="'Bezoek adres van type: ' + endpoint.protocol + '/' + endpoint.port"> </span>
+                                        <span v-html="'Bezoek adres van type: ' + create_type(endpoint) "> </span>
                                     </a>
                                 </div>
                             </div>

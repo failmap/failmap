@@ -107,7 +107,7 @@ var failmap = {
             '                                        <a v-bind:href="endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port" target="_blank"\n' +
             '                                        v-bind:title="\'Visit \' + endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port">\n' +
             '                                            <div class="imagediv" v-bind:style="\'background-image: url(\\\'/static/images/screenshots/\'+ endpoint.protocol + idize(url.url) + endpoint.port + \'_latest.png\\\');\'"></div>\n' +
-            '                                            <span v-html="\'Bezoek adres van type: \' + endpoint.protocol + \'/\' + endpoint.port"> </span>\n' +
+            '                                            <span v-html="\'Bezoek adres van type: \' +  create_type(endpoint) "> </span>\n' +
             '                                        </a>\n' +
                 '                                </div>\n' +
                 '                            </div>\n' +
@@ -549,6 +549,11 @@ $(document).ready(function () {
                     marker = points;
                 return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
             },
+            create_type: function (endpoint) {
+                if (endpoint.v4 === "True")
+                    return endpoint.protocol + "/" + endpoint.port + " (IPv4)";
+                return endpoint.protocol + "/" + endpoint.port + " (IPv6)";
+            },
             load: function(OrganizationID, weeks_ago){
 
                 if (!weeks_ago) {
@@ -624,6 +629,9 @@ $(document).ready(function () {
                 else
                     marker = points;
                 return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            },
+            create_type: function (endpoint) {
+                return vueReport.create_type(endpoint);
             },
             awarded_points: function(points) {
                 if (points === "0")
