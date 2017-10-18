@@ -308,7 +308,50 @@ var failmap = {
         location.hash = "#" + layer.feature.properties['OrganizationName'];
     },
 
+    /* Transition, which is much smoother. */
     loadmap: function (weeknumber) {
+        vueMap.loading = true;
+        $.getJSON('/data/map/' + weeknumber, function (json) {
+            // if there is one already, overwrite the attributes...
+            if (failmap.geojson) {
+                failmap.geojson.eachLayer(function(layer){
+                    // overwrite some properties
+                    // a for loop is not ideal.
+                    for (i = 0; i < json.features.length; i++) {
+                        if (layer.feature.properties.OrganizationName === json.features[i].properties.OrganizationName){
+                            // console.log(layer);
+                            layer.feature.properties.Overall = json.features[i].properties.Overall;
+                            // make the transition
+                            if (layer.feature.geometry.type === "MultiPolygon")
+                                layer.setStyle(failmap.style(layer.feature));
+                            if (layer.feature.geometry.type === "Point") {
+                                if (layer.feature.properties.Overall > 999)
+                                    layer.setIcon(failmap.redIcon);
+                                if (layer.feature.properties.Overall > 199 && layer.feature.properties.Overall < 1000)
+                                    layer.setIcon(failmap.orangeIcon);
+                                if (layer.feature.properties.Overall > -1 && layer.feature.properties.Overall < 200)
+                                    layer.setIcon(failmap.greenIcon);
+                                if (layer.feature.properties.Overall < 0)
+                                    layer.setIcon(failmap.grayIcon);
+                            }
+                        }
+                    }
+                });
+                vueMap.loading = false;
+            } else {
+                failmap.geojson = L.geoJson(json, {
+                    style: failmap.style,
+                    pointToLayer: failmap.pointToLayer,
+                    onEachFeature: failmap.onEachFeature
+                }).addTo(failmap.map); // only if singleton, its somewhat dirty.
+                vueMap.loading = false;
+            }
+        });
+    },
+
+    // legacy function that force-overwrites the layer, helpful during development if you're
+    // experimenting and need a clean set of layers.
+    loadmap_overwrite: function (weeknumber) {
         vueMap.loading = true;
         $.getJSON('/data/map/' + weeknumber, function (json) {
             if (failmap.geojson) { // if there already was data present
@@ -386,7 +429,7 @@ $(document).ready(function () {
             },
             next_week: function(){
                 if (this.week > 0) {
-                    this.week -= 1;
+                    this.week = parseInt(this.week) - 1; // 1, 11, 111... glitch.
                     this.show_week();
                 }
             },
@@ -417,7 +460,7 @@ $(document).ready(function () {
 
                 vueStatistics.load(this.week);
                 vueMap.weeksback = this.week;
-            }, 1000)
+            }, 100)
         }
     });
 

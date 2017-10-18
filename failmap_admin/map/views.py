@@ -784,6 +784,7 @@ def map_data(request, weeks_back=0):
     SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating GROUP BY organization_id;
 
     IN or SELECT:
+
     SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating WHERE `when` <=
     '2017-08-14 18:21:36.984601+00:00' GROUP BY organization_id;
     """

@@ -544,8 +544,10 @@ def rate_timeline(timeline, url):
             unsorted = xjson.loads("[" + ",".join(ratings) + "]")
             # unsorted.sort(key)
             sorted_ratings = sorted(unsorted, key=lambda k: k['points'], reverse=True)
+
             # without correct indent, you'll get single quotes
             sorted_ratings = xjson.dumps(obj=sorted_ratings, indent=4)
+
             if sorted_ratings[0:1] == "[":
                 sorted_ratings = sorted_ratings[1:len(sorted_ratings) - 1]  # we add [] somewhere else already.
 
