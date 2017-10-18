@@ -2,6 +2,7 @@ import json
 import math
 from datetime import datetime
 
+from pkg_resources import get_distribution
 import pytz
 from dateutil.relativedelta import relativedelta  # stats
 from django.db import connection
@@ -27,7 +28,9 @@ def index(request):
     :return:
     """
 
-    return render(request, 'map/index.html')
+    return render(request, 'map/index.html', {
+        'version': get_distribution(__name__.split('.', 1)[0]).version,
+    })
 
 
 def robots_txt(request):
