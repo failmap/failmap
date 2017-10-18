@@ -96,8 +96,8 @@ build:
   image: docker:git
 
   before_script:
-    - apkg add --nocache python
-    - pip install vdt.version vdt.versionplugin.default
+    - apk add --no-cache py-pip
+    - pip install vdt.version
 
   script:
     # build docker image and push to registry
