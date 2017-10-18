@@ -90,14 +90,28 @@ dataset_postgres:
 build:
   stage: build
 
-  image: docker:git
   services:
   - docker:dind
+
+  image: docker:git
+
+  before_script:
+    - pip install vdt.version vdt.versionplugin.default
+
   script:
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build -t registry.gitlab.com/failmap/admin:build .
     - docker push registry.gitlab.com/failmap/admin:build
+    # setup for pushing tags
+    - git remote set-url --push origin $(echo $CI_BUILD_REPO | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#')
+    # increment minor version and tag git repository
+    - version --minor
+    # push tag to git
+    - git push --tags
+    # push tag to docker registry
+    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(git describe --tags --abbrev=0)
+    - docker push registry.gitlab.com/failmap/admin:$(git describe --tags --abbrev=0)
   only:
     - master
 
