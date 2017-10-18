@@ -92,7 +92,8 @@ dataset_postgres:
 version:
   stage: version
 
-  image: python:3
+  # vdt.version is not python3 compatible
+  image: python:2
 
   before_script:
     - pip install vdt.version
