@@ -247,6 +247,13 @@ var failmap = {
                     '#c1bcbb';
     },
 
+    getColorCode: function (d) {
+        return d === "red" ? '#bd383c' :
+            d === "orange" ? '#fc9645' :
+                d === "green" ? '#62fe69' :
+                    '#c1bcbb';
+    },
+
     style: function (feature) {
         return {
             weight: 2,
@@ -254,7 +261,7 @@ var failmap = {
             color: 'white',
             dashArray: '3',
             fillOpacity: 0.7,
-            fillColor: failmap.getColor(feature.properties.Overall)
+            fillColor: failmap.getColorCode(feature.properties.color)
         };
     },
 
@@ -321,17 +328,18 @@ var failmap = {
                         if (layer.feature.properties.OrganizationName === json.features[i].properties.OrganizationName){
                             // console.log(layer);
                             layer.feature.properties.Overall = json.features[i].properties.Overall;
+                            layer.feature.properties.color = json.features[i].properties.color;
                             // make the transition
                             if (layer.feature.geometry.type === "MultiPolygon")
                                 layer.setStyle(failmap.style(layer.feature));
                             if (layer.feature.geometry.type === "Point") {
-                                if (layer.feature.properties.Overall > 999)
+                                if (layer.feature.properties.color === "red")
                                     layer.setIcon(failmap.redIcon);
-                                if (layer.feature.properties.Overall > 199 && layer.feature.properties.Overall < 1000)
+                                if (layer.feature.properties.color === "orange")
                                     layer.setIcon(failmap.orangeIcon);
-                                if (layer.feature.properties.Overall > -1 && layer.feature.properties.Overall < 200)
+                                if (layer.feature.properties.color === "green")
                                     layer.setIcon(failmap.greenIcon);
-                                if (layer.feature.properties.Overall < 0)
+                                if (layer.feature.properties.color === "gray")
                                     layer.setIcon(failmap.grayIcon);
                             }
                         }

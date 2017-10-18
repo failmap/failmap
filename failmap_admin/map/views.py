@@ -867,7 +867,8 @@ def map_data(request, weeks_back=0):
             organizations_organizationtype.name,
             coordinate.area,
             coordinate.geoJsonType,
-            organization.id
+            organization.id,
+            calculation
         FROM map_organizationrating
         INNER JOIN
           organization on organization.id = map_organizationrating.organization_id
@@ -889,6 +890,21 @@ def map_data(request, weeks_back=0):
 
     # unfortunately numbered results are used.
     for i in rows:
+
+        red = 0
+        orange = 0
+        green = 0
+
+        # figure out if red, orange or green:
+        calculation = json.loads(i[6])
+        for url in calculation['organization']['urls']:
+            if url['points'] > 999:
+                red += 1
+            if 199 < url['points'] < 1000:
+                orange += 1
+            if -1 < url['points'] < 200:
+                green += 1
+
         dataset = {
             "type": "Feature",
             "properties":
@@ -897,12 +913,14 @@ def map_data(request, weeks_back=0):
                     "OrganizationType": i[2],
                     "OrganizationName": i[1],
                     "Overall": i[0],
-                    "DataFrom": when
+                    "DataFrom": when,
+                    "color": "red" if red else "orange" if orange else "green" if green else "gray"
                 },
             "geometry":
                 {
                     "type": i[4],
-                    # does whitespace change the meaning of the if? otherwise line too long...
+                    # Sometimes the data is a string, sometimes it's a list. The admin
+                    # interface might influence this.
                     "coordinates":
                         json.loads(i[3]) if type(json.loads(i[3])) is list
                         else json.loads(json.loads(i[3]))  # hack :)
