@@ -26,7 +26,7 @@ Download and install below system requirements to get started:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3](https://www.python.org/downloads/) (download and install)
-- [direnv](https://direnv.net/) (download and install, the follow setup instructions)
+- [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/))
 
 
 After installation of above tools, all following steps use the command line:
@@ -38,23 +38,39 @@ After installation of above tools, all following steps use the command line:
 
 In a directory of your choosing:
 
-    git clone --recursive https://github.com/failmap/admin/  # downloads the software
-    cd admin  # enter the directory of the downloaded software
-    direnv allow  # sets Debug to true in this folder. Do not change the settings.py file.
+    # download the software
+    git clone --recursive https://github.com/failmap/admin/
+
+    # enter the directory of the downloaded software
+    cd admin
+
+    # sets Debug to true in this folder. Do not change the settings.py file.
+    direnv allow
 
 # Quickstart
 
 Below commands result in a failmap installation that is suitable for testing and development. It is
 capable of handling thousands of urls and still be modestly responsive.
 
-If you need a faster, more robust installation, please contact us.
+If you need a faster, more robust installation, please [contact us](mailto:hosting@internetcleanup.foundation).
 
-    pip3 install -e .  # downloads requirements needed to run this software
-    failmap-admin migrate  # creates the database
-    failmap-admin createsuperuser  # create a user to view the admin interface
-    failmap-admin load-dataset testdata  # loads a series of sample data into the database
-    failmap-admin rebuild-ratings  # calculate the scores that should be displayed on the map
-    failmap-admin runserver  # finally starts the server
+    # download even more requirements needed to run this software
+    pip3 install -e .
+
+    # creates the database
+    failmap-admin migrate
+
+    # create a user to view the admin interface
+    failmap-admin createsuperuser
+
+    # loads a series of sample data into the database
+    failmap-admin load-dataset testdata
+
+    # calculate the scores that should be displayed on the map
+    failmap-admin rebuild-ratings
+
+    # finally start the development server
+    failmap-admin runserver
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
@@ -64,9 +80,14 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 These services help fill the database with accurate up to date information. Run each one of them in
 a separate command line window and keep them running.
 
-    failmap-admin onboard-service  # handles all new urls with an initial (fast) scan
-    failmap-admin scan-tls-qualys-service  # slowly gets results from qualys
-    failmap-admin screenshot-service  # makes many gigabytes of screenshots
+    # handles all new urls with an initial (fast) scan
+    failmap-admin onboard-service
+
+    # slowly gets results from qualys
+    failmap-admin scan-tls-qualys-service
+
+    # makes many gigabytes of screenshots
+    failmap-admin screenshot-service
 
 # Using the software
 
