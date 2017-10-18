@@ -95,16 +95,22 @@ version:
   # vdt.version is not python3 compatible
   image: python:2
 
+  variables:
+    CI_REPOSITORY_URL: https://$GIT_ACCESS_USER:$GIT_ACCESS_TOKEN@gitlab.com/$CI_PROJECT_PATH.git
+
   before_script:
     - pip install vdt.version
 
   script:
+    - git config --global user.name $GIT_ACCESS_USER
+    - git config --global user.email $GIT_ACCESS_EMAIL
+
     # setup for pushing tags
     - git remote set-url --push origin $(echo $CI_REPOSITORY_URL | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#')
     # increment minor version and tag git repository
     - version --minor
     # push tag to git
-    - git push --tags
+    - git push --tags $CI_REPOSITORY_URL
   only:
     - master
 
