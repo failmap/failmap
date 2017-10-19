@@ -97,7 +97,8 @@ build:
   image: docker:git
 
   before_script:
-    - apk add --no-cache python
+    # required for quering python package version
+    - apk add --no-cache py-setuptools
 
   script:
     # store current version as artifact to copy into docker container
