@@ -98,11 +98,11 @@ build:
 
   before_script:
     # required for quering python package version
-    - apk add --no-cache py-setuptools
+    - apk add --no-cache python3
 
   script:
     # store current version as artifact to copy into docker container
-    - python setup.py --version > version
+    - python3 setup.py --version > version
 
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
