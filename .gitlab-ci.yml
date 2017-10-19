@@ -1,7 +1,6 @@
 stages:
   - check
   - test
-  - version
   - build
   - staging
   - production
@@ -88,32 +87,6 @@ dataset_postgres:
   script:
     - tox -e datasets
 
-
-version:
-  stage: version
-
-  # vdt.version is not python3 compatible
-  image: python:2
-
-  variables:
-    CI_REPOSITORY_URL: https://$GIT_ACCESS_USER:$GIT_ACCESS_TOKEN@gitlab.com/$CI_PROJECT_PATH.git
-
-  before_script:
-    - pip install vdt.version
-
-  script:
-    - git config --global user.name $GIT_ACCESS_USER
-    - git config --global user.email $GIT_ACCESS_EMAIL
-
-    # setup for pushing tags
-    - git remote set-url --push origin $(echo $CI_REPOSITORY_URL | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#')
-    # increment minor version and tag git repository
-    - version --minor
-    # push tag to git
-    - git push --tags $CI_REPOSITORY_URL
-  only:
-    - master
-
 # create distributable release
 build:
   stage: build
@@ -123,17 +96,23 @@ build:
 
   image: docker:git
 
+  before_script:
+    - apk add --no-cache python
+
   script:
+    # store current version as artifact to copy into docker container
+    - python setup.py --version > version
+
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build -t registry.gitlab.com/failmap/admin:build .
     - docker push registry.gitlab.com/failmap/admin:build
-    # push tag to docker registry
-    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(git describe --tags --abbrev=0)
-    - docker push registry.gitlab.com/failmap/admin:$(git describe --tags --abbrev=0)
+
+    # push version tag to docker registry
+    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version)
+    - docker push registry.gitlab.com/failmap/admin:$(cat version)
   only:
     - master
-
 
 # provide codequality context for merge requests
 codequality:
@@ -191,3 +170,4 @@ production:
 
   only:
     - master
+    - tags

@@ -15,16 +15,16 @@ def get_version():
     # fallback to git tag if building python package
     try:
         # get closest tag version
-        version = check_output(["git", "describe", "--tags", "--abbrev=0"]).rstrip().decode()
-        # determine if there has been development beyond the tagged commit
+        tag_version = check_output(["git", "describe", "--tags", "--abbrev=0"]).rstrip().decode()
+        # determine if there has been development beyond the latest tagged commit
         dirty = bool(check_output(["git", "status", "--porcelain"]).strip())
-        unpushed = bool(check_output(["git", "rev-list", "origin/master.."]).strip())
+        unpushed = bool(check_output(["git", "rev-list", tag_version + ".."]).strip())
         develop = dirty or unpushed
 
         if develop:
-            return version + '.dev'
+            return tag_version + '.dev0'
         else:
-            return version
+            return tag_version
     except Exception:
         pass
 
