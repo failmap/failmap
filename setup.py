@@ -1,35 +1,38 @@
 import os
+import sys
 from subprocess import check_output
+
 from setuptools import find_packages, setup
 
 
 def get_version():
-    """Determine current version number from nearest git tag."""
+    """Determine the most appropriate version number for this package."""
 
     # prefer explicit version provided by (docker) build environment
-    try:
+    if os.path.exists('version'):
         return open('version').read().strip()
-    except Exception:
-        pass
 
-    # fallback to git tag if building python package
+    # try to use git tag if building python package
     try:
         # get closest tag version
         tag_version = check_output(["git", "describe", "--tags", "--abbrev=0"]).rstrip().decode()
         # determine if there has been development beyond the latest tagged commit
         dirty = bool(check_output(["git", "status", "--porcelain"]).strip())
-        unpushed = bool(check_output(["git", "rev-list", tag_version + ".."]).strip())
-        develop = dirty or unpushed
+        unreleased = bool(check_output(["git", "rev-list", tag_version + ".."]).strip())
 
-        if develop:
+        # there are unsaved changes
+        if dirty:
             return tag_version + '.dev0'
-        else:
-            return tag_version
-    except Exception:
-        pass
 
-    # fallback
-    return '0.0.0'
+        # the verion is commits ahead of latest tagged release
+        if unreleased:
+            # append git sha to version
+            return tag_version + '+' + check_output("git rev-parse --short HEAD".split()).strip().decode()
+
+        return tag_version
+    except Exception as e:
+        print("Failed to acquire version info from git: {e}".format(e=e), file=sys.stderr)
+        return '0.0.0'
 
 
 setup(
