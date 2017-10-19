@@ -175,6 +175,18 @@ Be sure to active the environment before starting development every time:
     . venv/bin/activate
     export DEBUG=1
 
+# Versioning
+
+Version for the project is losely semver with no specific release schedule or meaning to version numbers (eg: stable/unstable).
+
+Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated builds which will release the specified code under that version. Tags can be pushed from a local repository or created through the Gitlab interface: https://gitlab.com/failmap/admin/tags/new
+
+Informal releases are created by new commits pushed/merged to the master. The version number of the last formal release will be suffixed with the current short Git SHA.
+
+For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/admin/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
+
+For local development informal release or a special `dev0` build release is used which indicates a different state from the formal releases.
+
 # Thanks to
 This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
 Special thanks to the SIDN Fonds for believing in this method of improving privacy.
