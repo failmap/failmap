@@ -171,4 +171,4 @@ production:
     - docker push registry.gitlab.com/failmap/admin:latest
 
   only:
-    - tags
+    - master
