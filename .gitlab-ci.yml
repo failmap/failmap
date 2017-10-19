@@ -110,8 +110,8 @@ build:
     - docker push registry.gitlab.com/failmap/admin:build
 
     # push version tag to docker registry
-    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version)
-    - docker push registry.gitlab.com/failmap/admin:$(cat version)
+    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version|tr + _)
+    - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
   only:
     - master
 
