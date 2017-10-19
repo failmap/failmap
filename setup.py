@@ -12,7 +12,11 @@ def get_version():
 
     # prefer explicit version provided by (docker) build environment
     if os.path.exists('version'):
-        return open('version').read().strip()
+        version = open('version').read().strip()
+        # ignore empty version file
+        if version:
+            print('Found version in file', file=sys.stderr)
+            return version
 
     # try to use git tag if building python package
     try:
@@ -24,10 +28,13 @@ def get_version():
 
         # there are unsaved changes
         if dirty:
+            print('Repo has unsaved changes, versioning as development', file=sys.stderr)
             return tag_version + '.dev0'
 
         # the verion is commits ahead of latest tagged release
         if unreleased:
+            print('Found commits after last release, versioning with latest sha', file=sys.stderr)
+
             # append git sha to version
             return tag_version + '+' + check_output("git rev-parse --short HEAD".split()).strip().decode()
 
