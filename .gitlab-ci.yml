@@ -163,12 +163,12 @@ production:
   services:
   - docker:dind
   script:
+    - export tag=$(git describe --exact-match --tags --abbrev=0)
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:staging
-    - docker tag registry.gitlab.com/failmap/admin:staging registry.gitlab.com/failmap/admin:latest
+    - docker pull registry.gitlab.com/failmap/admin:$tag
+    - docker tag registry.gitlab.com/failmap/admin:$tag registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
   only:
-    - master
     - tags
