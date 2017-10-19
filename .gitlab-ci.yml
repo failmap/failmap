@@ -152,6 +152,8 @@ staging:
     # here is where I would put my staging integration tests, if I had one!!!
 
     - docker push registry.gitlab.com/failmap/admin:staging
+    # until there is a CD staging environment
+    - docker push registry.gitlab.com/failmap/admin:latest
 
   only:
     - master
@@ -170,5 +172,7 @@ production:
     - docker tag registry.gitlab.com/failmap/admin:$tag registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
+    # insert deploy magic here
+
   only:
-    - master
+    - tags
