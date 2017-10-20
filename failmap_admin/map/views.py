@@ -1,3 +1,4 @@
+import collections
 import json
 import math
 from datetime import datetime
@@ -12,8 +13,8 @@ from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
 from pkg_resources import get_distribution
 
-from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.map.models import OrganizationRating, UrlRating
+from failmap_admin.organizations.models import Organization, Url
 
 cache_time = 24 * 60 * 60
 
@@ -423,12 +424,13 @@ def stats_determine_when(stat, weeks_back=0):
 
     return when
 
-import collections
 
 def recursively_default_dict():
     return collections.defaultdict(recursively_default_dict)
 
 # @cache_page(cache_time)
+
+
 def stats(request, weeks_back=0):
     # todo: 390 * 7 queries. Still missing the django time dimension type queries.
     # Info: the number of urls can be slightly inflated since some organizations share urls
@@ -460,7 +462,6 @@ def stats(request, weeks_back=0):
         # don't bother with key checking everywhere...
         # this works fine if they key checks are only initializers.
         # measurement = recursively_default_dict()
-
 
         #                 if stat == 'earliest':
         #           rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
