@@ -428,9 +428,8 @@ def stats_determine_when(stat, weeks_back=0):
 def recursively_default_dict():
     return collections.defaultdict(recursively_default_dict)
 
+
 # @cache_page(cache_time)
-
-
 def stats(request, weeks_back=0):
     # todo: 390 * 7 queries. Still missing the django time dimension type queries.
     # Info: the number of urls can be slightly inflated since some organizations share urls

@@ -48,6 +48,7 @@ var failmap = {
     internetadresses: L.control(),
     fullscreenreport: L.control(),
     fullscreenhint: L.control(),
+    searchbar: L.control(),
     dataslider: L.control(),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
@@ -82,6 +83,7 @@ var failmap = {
 
         this.add_fullscreen_hint();
         this.add_dataslider();
+        this.add_searchbar();
         this.add_info();
         this.add_internetadresses();
         this.addlegend();
@@ -136,9 +138,21 @@ var failmap = {
         this.fullscreenreport.addTo(this.map);
     },
 
+    add_searchbar: function () {
+        this.searchbar.onAdd = function (map) {
+            this._div = L.DomUtil.create('div', 'info');
+            this._div.innerHTML = "<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' />";
+            L.DomEvent.disableClickPropagation(this._div);
+            return this._div;
+        };
+
+        this.searchbar.addTo(this.map);
+    },
+
     add_info: function () {
         this.info.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
+            L.DomEvent.disableClickPropagation(this._div);
             this.update();
             return this._div;
         };
@@ -192,6 +206,7 @@ var failmap = {
     add_internetadresses: function () {
         this.internetadresses.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
+            L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
                 "                    <div v-for=\"url in urls\">\n" +
                 "                        <span v-bind:class=\"colorize(url.points)\">\n" +
@@ -256,21 +271,32 @@ var failmap = {
 
     style: function (feature) {
         return {
-            weight: 2,
+            weight: 1,
             opacity: 1,
             color: 'white',
-            dashArray: '3',
+            dashArray: '0',
             fillOpacity: 0.7,
             fillColor: failmap.getColorCode(feature.properties.color)
         };
     },
 
+    searchResultStyle: function (feature) {
+        return {
+            weight: 1,
+            opacity: 1,
+            color: 'white',
+            dashArray: '0',
+            fillOpacity: 0.7,
+            fillColor: 'lightblue'
+        };
+    },
+
     pointToLayer: function (geoJsonPoint, latlng) {
-        if (geoJsonPoint.properties.Overall > 999)
+        if (geoJsonPoint.properties.color === "red")
             return L.marker(latlng, {icon: failmap.redIcon});
-        if (geoJsonPoint.properties.Overall > 199)
+        if (geoJsonPoint.properties.color === "orange")
             return L.marker(latlng, {icon: failmap.orangeIcon});
-        if (geoJsonPoint.properties.Overall > 0)
+        if (geoJsonPoint.properties.color === "green")
             return L.marker(latlng, {icon: failmap.greenIcon});
         return L.marker(latlng, {icon: failmap.grayIcon});
     },
@@ -281,9 +307,9 @@ var failmap = {
         // doesn't work for points, only for polygons and lines
         if (typeof layer.setStyle === "function") {
             layer.setStyle({
-                weight: 5,
+                weight: 1,
                 color: '#ccc',
-                dashArray: '',
+                dashArray: '0',
                 fillOpacity: 0.7
             });
             if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -302,7 +328,14 @@ var failmap = {
     },
 
     resetHighlight: function (e) {
-        failmap.geojson.resetStyle(e.target);
+        // todo: add search for points
+        // todo: make this type of thing cleaner.
+        if (failmap.isSearchedFor(e.target.feature)){
+            if (e.target.feature.geometry.type === "MultiPolygon")
+                e.target.setStyle(failmap.searchResultStyle(e.target.feature))
+        } else {
+            failmap.geojson.resetStyle(e.target);
+        }
         failmap.info.update();
     },
 
@@ -313,6 +346,38 @@ var failmap = {
     gotoLink: function (e) {
         var layer = e.target;
         location.hash = "#" + layer.feature.properties['OrganizationName'];
+    },
+
+    isSearchedFor: function(feature){
+        x = $('#searchbar').val();
+        if (!x || x === "")
+            return false;
+        return (feature.properties.OrganizationName.toLowerCase().indexOf(x) !== -1)
+    },
+
+    search: function(query) {
+        if ((query === "") || (!query)){
+            // reset
+            failmap.geojson.eachLayer(function(layer) {
+                if (layer.feature.geometry.type === "MultiPolygon")
+                    layer.setStyle(failmap.style(layer.feature))
+
+                }
+            )
+        } else {
+            // text match
+            failmap.geojson.eachLayer(function (layer) {
+                    if (layer.feature.properties.OrganizationName.toLowerCase().indexOf(query) !== -1) {
+                        if (layer.feature.geometry.type === "MultiPolygon")
+                            layer.setStyle(failmap.searchResultStyle(layer.feature))
+                    } else {
+                        if (layer.feature.geometry.type === "MultiPolygon")
+                            layer.setStyle(failmap.style(layer.feature))
+                    }
+                }
+            )
+        }
+
     },
 
     /* Transition, which is much smoother. */
@@ -624,7 +689,7 @@ $(document).ready(function () {
                 return vueReport.second_opinion_links(rating, url);
             },
             total_awarded_points: function(points) {
-                if (points === "0")
+                if (points === 0)
                     marker = "✓ perfect";
                 else
                     marker = points;
@@ -634,7 +699,7 @@ $(document).ready(function () {
                 return vueReport.create_type(endpoint);
             },
             awarded_points: function(points) {
-                if (points === "0")
+                if (points === 0)
                     marker = "✓ perfect";
                 else
                     marker = points;

@@ -51,11 +51,6 @@ Todo: better separation of UI and data. The JS messes things up.
     /* opacity: 0.7; causes glitch after fullscreen was added. */
 }
 
-.leaflet-interactive{
-    stroke-dasharray: 0 !important; /* Away with the noise */
-    stroke-width:1 !important; /* and a bit less obnoxious please*/
-}
-
 .green {
     text-decoration: none;
     color: #00ff00;
@@ -435,3 +430,13 @@ path {
     transition:fill 400ms;
 }
 
+#searchbar {
+    width: 100%;
+    font-size: 20px;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: 1000;
+  }
+}
