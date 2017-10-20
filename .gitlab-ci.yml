@@ -112,8 +112,18 @@ build:
     # push version tag to docker registry
     - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version|tr + _)
     - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
+
+  after_script:
+    # export artifacts from container for debugging
+    - docker create --name build registry.gitlab.com/failmap/admin:build
+    - docker cp build:/srv/failmap-admin/static/ /static_files
+    - tar zcf static_files.tgz /static_files
+
   only:
     - master
+  artifacts:
+    paths:
+      - /static_files.tgz
 
 # provide codequality context for merge requests
 codequality:
