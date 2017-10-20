@@ -2,6 +2,7 @@
 
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 log = logging.getLogger(__name__)
@@ -46,13 +47,12 @@ class TaskCommand(BaseCommand):
         elif verbosity == 0:
             root_logger.setLevel(logging.ERROR)
 
-        # execute task based on method
-        if options['method'] == 'direct':
-            self.task()
-        elif options['method'] == 'sync':
+        # execute task based on selected method
+        if options['method'] == 'sync':
             self.task.apply_async().get()
         elif options['method'] == 'async':
             task_id = self.task.apply_async()
             log.info('Task %s scheduled for execution.', task_id)
         else:
-            raise NotImplementedError()
+            # by default execute the task directly without involving celery or a broker
+            self.task()
