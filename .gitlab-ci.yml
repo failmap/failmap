@@ -99,6 +99,8 @@ build:
   before_script:
     # required for quering python package version
     - apk add --no-cache python3
+    # pull the latest succesful release to try and leverage docker cache
+    - docker pull registry.gitlab.com/failmap/admin:latest || exit 0
 
   script:
     # store current version as artifact to copy into docker container
