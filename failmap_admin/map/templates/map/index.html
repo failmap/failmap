@@ -63,8 +63,9 @@
             {% include "map/donation_row.html" %}
 
             <div id="statistics">
-
                 <div class="page-header">
+                    <h2>{% trans "The Numbers" %}</h2>
+                    <a href="#" class="backtomap">back to map ↑</a>
                     <a name="numbers" class="jumptonav"></a>
                 </div>
                 <div class="row">
@@ -257,7 +258,10 @@
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
                 <div v-if="name">
-                    <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
+                    <div class="page-header">
+                        <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
+                        <a href="#" class="backtomap">back to map ↑</a>
+                    </div>
                     <div>
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
                         {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
