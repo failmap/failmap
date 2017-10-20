@@ -117,13 +117,12 @@ build:
     # export artifacts from container for debugging
     - docker create --name build registry.gitlab.com/failmap/admin:build
     - docker cp build:/srv/failmap-admin/static/ /static_files
-    - tar zcf static_files.tgz /static_files
 
   only:
     - master
   artifacts:
     paths:
-      - /static_files.tgz
+      - /static_files
 
 # provide codequality context for merge requests
 codequality:
