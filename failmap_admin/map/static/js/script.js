@@ -350,12 +350,14 @@ var failmap = {
 
     isSearchedFor: function(feature){
         x = $('#searchbar').val();
+        x = x.toLowerCase();
         if (!x || x === "")
             return false;
         return (feature.properties.OrganizationName.toLowerCase().indexOf(x) !== -1)
     },
 
     search: function(query) {
+        query = query.toLowerCase();
         if ((query === "") || (!query)){
             // reset
             failmap.geojson.eachLayer(function(layer) {
