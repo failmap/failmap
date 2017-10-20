@@ -12,7 +12,9 @@ from django.conf import settings
 
 app = Celery(__name__)
 app.config_from_object('django.conf:settings')
-app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+# autodiscover all celery tasks in tasks.py files inside failmap_admin modules
+appname = __name__.split('.', 1)[0]
+app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])
 
 
 @app.task(bind=True)

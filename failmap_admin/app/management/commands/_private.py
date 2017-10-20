@@ -52,7 +52,7 @@ class TaskCommand(BaseCommand):
         elif options['method'] == 'sync':
             self.task.apply_async().get()
         elif options['method'] == 'async':
-            self.task.apply_async()
-            log.info('Task scheduled for execution.')
+            task_id = self.task.apply_async()
+            log.info('Task %s scheduled for execution.', task_id)
         else:
             raise NotImplementedError()
