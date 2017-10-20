@@ -118,13 +118,14 @@ build:
   after_script:
     # export artifacts from container for debugging
     - docker create --name build registry.gitlab.com/failmap/admin:build
-    - docker cp build:/srv/failmap-admin/static/ /static_files
+    - docker cp build:/srv/failmap-admin/static/ static_files/
+    - find static_files/
 
   only:
     - master
   artifacts:
     paths:
-      - /static_files
+      - static_files/
 
 # provide codequality context for merge requests
 codequality:
