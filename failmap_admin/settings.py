@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
     'django.contrib.humanize',
     'compressor',
+    'django_celery_beat',
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light
@@ -407,4 +408,6 @@ ENABLE_UTC = True
 CELERY_ACCEPT_CONTENT = ['pickle']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
-CELERY_TIMEZONE = 'Europe/Amsterdam'
+CELERY_TIMEZONE = 'UTC'
+
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

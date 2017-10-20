@@ -12,7 +12,8 @@ typing
 # scanners
 requests
 pytz
-celery  # distribution, not yet used
+celery
+django-celery-beat
 # cefpython3==57.0  # Screenshots, not reliable
 Pillow  # screenshots
 python-resize-image  # screenshots

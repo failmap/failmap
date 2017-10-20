@@ -6,3 +6,8 @@ pytest-cov
 pytest-django
 django-coverage
 django-extensions
+
+# # dashboard for celery introspection
+# # run failmap-admin celery flower
+# # go to http://localhost:5555/
+# celery-flower
