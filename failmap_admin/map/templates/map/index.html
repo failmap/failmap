@@ -153,7 +153,7 @@
                         <h3>{% trans "Technical TLS" %}</h3>
                         <p>{% trans "Technical stats TLS explained" %}</p>
 
-                        <div v-for="(x, key) in data.data">
+                        <div v-for="(x, key) in data.data" v-if="key == 'now'">
                             <table class="table" v-if="x['explained']">
                             <thead>
                             <tr>
@@ -170,6 +170,10 @@
                                 <tr v-if="x['explained']['tls_qualys']"><td colspan="3">Kwaliteit van versleuteling</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Onvoldoende:</td><td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Ongeldig voor adres:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, C:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, B:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, A-:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, A:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Matig:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Redelijk:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Goed:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td></tr>
@@ -184,7 +188,7 @@
                         <h3>{% trans "Technical stats headers" %}</h3>
                         <p>{% trans "Technical stats headers explained" %}</p>
 
-                        <div v-for="(x, key) in data.data">
+                        <div v-for="(x, key) in data.data" v-if="key == 'now'">
                             <table class="table" v-if="x['explained']">
                             <thead>
                             <tr>
@@ -207,11 +211,44 @@
                                 <tr v-if="x['explained']['security_headers_x_content_type_options']"><td colspan="3">X-Content Type Options</td></tr>
                                 <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}</td></tr>
                                 <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}</td></tr>
-
                             {% endverbatim %}
                             </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+                <div class="row" v-if="data.data">
+                    <div class="col-md-6">
+                        <h3>{% trans "Services" %}</h3>
+                        <p>{% trans "Services explained" %}</p>
+                        {% verbatim %}
+                        <div v-for="(x, key) in data.data" v-if="key == 'now'">
+                            <table class="table">
+                            <tr v-for="(xx, xkey) in x['endpoint']">
+                                <td>{{ xx[0] }}</td><td>{{ xx[1] }}</td>
+                            </tr>
+                            </table>
+                        </div>
+                        {% endverbatim %}
+                    </div>
+                    <div class="col-md-6">
+                        <h3>{% trans "Services faq" %}</h3>
+                        <p>Het versturen van informatie over het internet kan op allerlei manieren:
+                        via verschillende adressen, protocollen en poorten. Sommige combinaties hiervan zijn
+                        zo gebruikelijk dat niemand er nog over nadenkt. Maar door de grote flexibiliteit zijn
+                        ook ongebruikelijke combinaties mogelijk.</p>
+                        <p>Faalkaart kijkt niet alleen naar de meest gebruikelijke diensten maar neemt ook bekende
+                        alternatieven hier van mee.</p>
+                        <p>Bijvoorbeeld: De meest gebruikelijke diensten op het internet zijn websites. Deze worden aangeboden
+                            op poort 80 (onversleuteld) en 443 (versleuteld). Het is niet nodig om dit aan te geven:
+                            door www.example.com in te tikken wordt http://www.example.com:80 bedoeld. Door expliciet
+                            een poort op te geven, zoals :8080, is het mogelijk om eem extra dienst aan een adres te koppelen.</p>
+                        <p>Lees meer over:</p>
+                        <ul>
+                            <li><a href="https://en.wikipedia.org/wiki/IPv4" target="_blank">IPv4</a> en <a href="https://en.wikipedia.org/wiki/IPv6">IPv6</a></li>
+                            <li><a href="https://en.wikipedia.org/wiki/Port_(computer_networking)" target="_blank">Poorten</a></li>
+                            <li><a href="https://en.wikipedia.org/wiki/Application_layer" target="_blank">Protocollen</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>

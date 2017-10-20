@@ -76,6 +76,15 @@ except ImportError:
     # only configure uwsgi app if installed (ie: production environment)
     pass
 
+# don't run this in production
+try:
+    import django_extensions
+    INSTALLED_APPS += ['django_extensions']
+except ImportError:
+    print("swag")
+    pass
+
+
 MIDDLEWARE_CLASSES = [
     # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

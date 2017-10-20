@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-17 18:47+0000\n"
+"POT-Creation-Date: 2017-10-20 11:47+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -105,51 +105,63 @@ msgid "Technical stats TLS explained"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:160
-#: failmap_admin/map/templates/map/index.html:191
+#: failmap_admin/map/templates/map/index.html:195
 msgid "Technology"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:161
-#: failmap_admin/map/templates/map/index.html:192
+#: failmap_admin/map/templates/map/index.html:196
 msgid "Result"
 msgstr ""
 
 #: failmap_admin/map/templates/map/index.html:162
-#: failmap_admin/map/templates/map/index.html:193
+#: failmap_admin/map/templates/map/index.html:197
 msgid "Total"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:184
+#: failmap_admin/map/templates/map/index.html:188
 msgid "Technical stats headers"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:185
+#: failmap_admin/map/templates/map/index.html:189
 msgid "Technical stats headers explained"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:225
+#: failmap_admin/map/templates/map/index.html:222
+msgid "Services"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:223
+msgid "Services explained"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:235
+msgid "Services faq"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:261
 msgid "Data from"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:226
+#: failmap_admin/map/templates/map/index.html:262
 #: failmap_admin/map/templates/map/topfail.html:16
 #: failmap_admin/map/templates/map/topwin.html:16
 msgid "Points"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:226
+#: failmap_admin/map/templates/map/index.html:262
 msgid "congratulations"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:245
+#: failmap_admin/map/templates/map/index.html:281
 msgid "Address"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:249
+#: failmap_admin/map/templates/map/index.html:285
 msgid "Since"
 msgstr ""
 
-#: failmap_admin/map/templates/map/index.html:249
+#: failmap_admin/map/templates/map/index.html:285
 msgid "Last check"
 msgstr ""
 

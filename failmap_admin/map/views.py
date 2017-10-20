@@ -12,7 +12,8 @@ from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
 from pkg_resources import get_distribution
 
-from .models import Organization, OrganizationRating, Url, UrlRating
+from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.map.models import OrganizationRating, UrlRating
 
 cache_time = 24 * 60 * 60
 
@@ -422,6 +423,10 @@ def stats_determine_when(stat, weeks_back=0):
 
     return when
 
+import collections
+
+def recursively_default_dict():
+    return collections.defaultdict(recursively_default_dict)
 
 # @cache_page(cache_time)
 def stats(request, weeks_back=0):
@@ -445,10 +450,17 @@ def stats(request, weeks_back=0):
 
         # Next to measurements in hard numbers, we also derive a conclusion in three categories:
         # red, orange and green. This is done to simplify the data, so it can be better understood.
+
         measurement = {'red': 0, 'orange': 0, 'green': 0,
                        'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
                        'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
-                       'included_organizations': 0}
+                       'included_organizations': 0, 'endpoints': 0,
+                       "endpoint": collections.OrderedDict(), "explained": {}}
+
+        # don't bother with key checking everywhere...
+        # this works fine if they key checks are only initializers.
+        # measurement = recursively_default_dict()
+
 
         #                 if stat == 'earliest':
         #           rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
@@ -465,9 +477,7 @@ def stats(request, weeks_back=0):
                                        WHERE `when` <= '%s' GROUP BY organization_id) as x
                                        ON x.id2 = map_organizationrating.id""" % when)
 
-        if stat == "now":
-            measurement["explained"] = {}
-
+        noduplicates = []
         for rating in ratings:
             measurement["total_organizations"] += 1
             measurement["total_score"] += rating.rating
@@ -497,25 +507,56 @@ def stats(request, weeks_back=0):
 
             measurement["included_organizations"] += 1
 
-            # only add this to the first output, otherwise you have to make this a graph.
-            # it's simply too much numbers to make sense anymore.
-            # yet there is not enough data to really make a graph.
-            if stat == "now":
-                for url in x['organization']['urls']:
-                    for e in url['endpoints']:
-                        for r in e['ratings']:
-                            if r['type'] not in measurement["explained"].keys():
-                                measurement["explained"][r['type']] = {}
+            # make some generic stats for endpoints
+            for url in x['organization']['urls']:
+                if url['url'] in noduplicates:
+                    continue
+                noduplicates.append(url['url'])
+
+                # endpoints
+
+                # only add this to the first output, otherwise you have to make this a graph.
+                # it's simply too much numbers to make sense anymore.
+                # yet there is not enough data to really make a graph.
+                # do not have duplicate urls in the stats.
+                # ratings
+                for endpoint in url['endpoints']:
+
+                    # Only add the endpoint once for a series of ratings. And only if the
+                    # ratings is not a repeated finding.
+                    added_endpoint = False
+
+                    for r in endpoint['ratings']:
+                        # stats over all different ratings
+                        if r['type'] not in measurement["explained"].keys():
+                            measurement["explained"][r['type']] = {}
+                            measurement["explained"][r['type']]['total'] = 0
+                        if not r['explanation'].startswith("Repeated finding."):
                             if r['explanation'] not in measurement["explained"][r['type']].keys():
                                 measurement["explained"][r['type']][r['explanation']] = 0
-                            measurement["explained"][r['type']][r['explanation']] += 1
 
-        # todo: add all non-existing organizations at this point:
-        #
-        """                measurement["total_organizations"] += 1
+                            measurement["explained"][r['type']][r['explanation']] += 1
+                            measurement["explained"][r['type']]['total'] += 1
+
+                            # stats over all endpoints
+                            # duplicates skew these stats.
+                            # it is possible to have multiple endpoints of the same type
+                            # while you can have multiple ipv4 and ipv6, you can only reach one
+                            # therefore reduce this to have only one v4 and v6
+                            if not added_endpoint:
+                                added_endpoint = True
+                                type = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
+                                                       ("IPv4" if endpoint["v4"] == "True" else "IPv6"))
+                                if type not in measurement["endpoint"].keys():
+                                    measurement["endpoint"][type] = 0
+                                measurement["endpoint"][type] += 1
+                                measurement["endpoints"] += 1
+
+        """                 measurement["total_organizations"] += 1
                             measurement["total_score"] += 0
                             measurement["no_rating"] += 1
         """
+        measurement["endpoint"] = sorted(measurement["endpoint"].items())
 
         if measurement["included_organizations"]:
             measurement["red percentage"] = round((measurement["red"] /
