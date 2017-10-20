@@ -162,6 +162,7 @@ staging:
 
     - docker push registry.gitlab.com/failmap/admin:staging
     # until there is a CD staging environment
+    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
   only:
