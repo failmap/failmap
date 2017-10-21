@@ -19,6 +19,7 @@ one_hour = 60 * 60
 one_day = 24 * 60 * 60
 ten_minutes = 60 * 10
 
+
 @cache_page(one_hour)
 def index(request):
     # todo: move to vue translations on client side. There are many javascript components that
@@ -34,13 +35,16 @@ def index(request):
         'version': get_distribution(__name__.split('.', 1)[0]).version,
     })
 
+
 @cache_page(one_day)
 def robots_txt(request):
     return render(request, 'map/robots.txt', content_type="text/plain")
 
+
 @cache_page(one_day)
 def security_txt(request):
     return render(request, 'map/security.txt', content_type="text/plain")
+
 
 @cache_page(ten_minutes)
 def organization_report(request, organization_id, weeks_back=0):
@@ -201,7 +205,7 @@ def terrible_urls(request, weeks_back=0):
 
 @cache_page(one_hour)
 def topfail(request, weeks_back=0):
-    
+
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -425,7 +429,7 @@ def recursively_default_dict():
 @cache_page(one_hour)
 def stats(request, weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
-             '2 months ago': 0, '3 months ago': 0}
+                  '2 months ago': 0, '3 months ago': 0}
 
     for stat in timeframes:
 
@@ -513,7 +517,7 @@ def stats(request, weeks_back=0):
                             if not added_endpoint:
                                 added_endpoint = True
                                 endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
-                                                       ("IPv4" if endpoint["v4"] == "True" else "IPv6"))
+                                                               ("IPv4" if endpoint["v4"] == "True" else "IPv6"))
                                 if endpointtype not in measurement["endpoint"].keys():
                                     measurement["endpoint"][endpointtype] = 0
                                 measurement["endpoint"][endpointtype] += 1
@@ -635,6 +639,7 @@ def urlstats(request, weeks_back=0):
         stats[stat] = measurement
 
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
+
 
 @cache_page(one_day)
 def wanted_urls(request):
