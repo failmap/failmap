@@ -390,6 +390,21 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
+# todo: consider upgrading to another solution... although the amount of memory for this site is zip
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'yolo-mcswaggerson',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
+
 if not DEBUG:
     # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
     COMPRESS_OFFLINE = True  # defaults to false

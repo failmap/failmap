@@ -1,25 +1,25 @@
 import collections
 import json
-import math
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
-from dateutil.relativedelta import relativedelta  # stats
+from dateutil.relativedelta import relativedelta
 from django.db import connection
-from django.db.models import Count, Max
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.template.loader import get_template
 from django.views.decorators.cache import cache_page
 from pkg_resources import get_distribution
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Url
 
-cache_time = 24 * 60 * 60
+one_minute = 60
+one_hour = 60 * 60
+one_day = 24 * 60 * 60
+ten_minutes = 60 * 10
 
-
-# @cache_page(cache_time)
+@cache_page(one_hour)
 def index(request):
     # todo: move to vue translations on client side. There are many javascript components that
     # also need to be translated some way.
@@ -34,17 +34,15 @@ def index(request):
         'version': get_distribution(__name__.split('.', 1)[0]).version,
     })
 
-
+@cache_page(one_day)
 def robots_txt(request):
     return render(request, 'map/robots.txt', content_type="text/plain")
 
-
+@cache_page(one_day)
 def security_txt(request):
     return render(request, 'map/security.txt', content_type="text/plain")
 
-# @cache_page(cache_time)
-
-
+@cache_page(ten_minutes)
 def organization_report(request, organization_id, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -76,7 +74,7 @@ def organization_report(request, organization_id, weeks_back=0):
                                      r['pk'],
                                      r['organizationrating__calculation'])
         # print(report_json)
-    except Organization.DoesNotExist as e:
+    except Organization.DoesNotExist:
         report_json = "{}"
 
     x = json.loads(report_json)
@@ -86,12 +84,12 @@ def organization_report(request, organization_id, weeks_back=0):
 
 def string_to_delta(string_delta):
     value, unit, _ = string_delta.split()
-    return datetime.timedelta(**{unit: float(value)})
+    return timedelta(**{unit: float(value)})
 
 # slow in sqlite, seemingly fast in mysql
 
 
-@cache_page(cache_time)
+@cache_page(one_day)
 def terrible_urls(request, weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
     # currently this goes wrong when the endpoints are dead but the url still resolves.
@@ -201,14 +199,9 @@ def terrible_urls(request, weeks_back=0):
     return JsonResponse(data, json_dumps_params={'indent': 4})
 
 
-# @cache_page(cache_time)
+@cache_page(one_hour)
 def topfail(request, weeks_back=0):
-    # todo: still no django solution for the time dimension discovered, doing a manual query... :(
-    # at least it's fast.
-
-    # This gets the organizations until a certain score that is seen as bad.
-    # From that everything with > 0 points.
-
+    
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -429,46 +422,20 @@ def recursively_default_dict():
     return collections.defaultdict(recursively_default_dict)
 
 
-# @cache_page(cache_time)
+@cache_page(one_hour)
 def stats(request, weeks_back=0):
-    # todo: 390 * 7 queries. Still missing the django time dimension type queries.
-    # Info: the number of urls can be slightly inflated since some organizations share urls
-    # and they are rated PER organization.
-
-    # todo: there is no begin and end date on organizations yet. So your history might have
-    # done: then there are also no scans, so there will be no organization ratings.
-    # organizations will merge in the future, rarely to not ever die.
-
-    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
+    timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
              '2 months ago': 0, '3 months ago': 0}
-    # reduce the numbers a bit, just scroll through time using the slider if you want to look back.
-    # ,  '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
-    #   '12 months ago': 0
 
-    for stat in stats:
-        # confusing decomposition to comply with mccabe
+    for stat in timeframes:
+
         when = stats_determine_when(stat, weeks_back)
-
-        # Next to measurements in hard numbers, we also derive a conclusion in three categories:
-        # red, orange and green. This is done to simplify the data, so it can be better understood.
 
         measurement = {'red': 0, 'orange': 0, 'green': 0,
                        'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
                        'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
                        'included_organizations': 0, 'endpoints': 0,
                        "endpoint": collections.OrderedDict(), "explained": {}}
-
-        # don't bother with key checking everywhere...
-        # this works fine if they key checks are only initializers.
-        # measurement = recursively_default_dict()
-
-        #                 if stat == 'earliest':
-        #           rating = OrganizationRating.objects.filter(organization=o, rating__gt=-1)
-        #           rating = rating.earliest('when')
-        #       else:
-        #           rating = OrganizationRating.objects.filter(
-        #               organization=o, when__lte=when, rating__gt=-1)
-        #           rating = rating.latest('when')#
 
         ratings = OrganizationRating.objects.raw("""SELECT * FROM
                                            map_organizationrating
@@ -545,11 +512,11 @@ def stats(request, weeks_back=0):
                             # therefore reduce this to have only one v4 and v6
                             if not added_endpoint:
                                 added_endpoint = True
-                                type = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
+                                endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
                                                        ("IPv4" if endpoint["v4"] == "True" else "IPv6"))
-                                if type not in measurement["endpoint"].keys():
-                                    measurement["endpoint"][type] = 0
-                                measurement["endpoint"][type] += 1
+                                if endpointtype not in measurement["endpoint"].keys():
+                                    measurement["endpoint"][endpointtype] = 0
+                                measurement["endpoint"][endpointtype] += 1
                                 measurement["endpoints"] += 1
 
         """                 measurement["total_organizations"] += 1
@@ -587,14 +554,8 @@ def stats(request, weeks_back=0):
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
 
 
+# this function doesn't give the relevant urls at the moment, it needs to select stuff better.
 def urlstats(request, weeks_back=0):
-    # todo: 390 * 7 queries. Still missing the django time dimension type queries.
-    # Info: the number of urls can be slightly inflated since some organizations share urls
-    # and they are rated PER organization.
-
-    # todo: there is no begin and end date on organizations yet. So your history might have
-    # done: then there are also no scans, so there will be no organization ratings.
-    # organizations will merge in the future, rarely to not ever die.
 
     stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
              '2 months ago': 0, '3 months ago': 0}
@@ -603,6 +564,7 @@ def urlstats(request, weeks_back=0):
     #   '12 months ago': 0
 
     # todo: remove some empty url ratings / don't store that nonsense as it skews the stats
+    # No: those have been added to close off url ratings...???
     # the stats should only contiain some meaningful data.
     # { "url": { "url": "legacy.gemeentewestland.nl", "points": "0", "endpoints": [] } }
 
@@ -674,9 +636,7 @@ def urlstats(request, weeks_back=0):
 
     return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
 
-# @cache_page(cache_time)
-
-
+@cache_page(one_day)
 def wanted_urls(request):
     """
     Creates a list of organizations that have very little to none domains, and where manual
@@ -723,7 +683,7 @@ def wanted_urls(request):
     return JsonResponse(data, json_dumps_params={'indent': 2})
 
 
-# @cache_page(cache_time)
+@cache_page(ten_minutes)
 def map_data(request, weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
