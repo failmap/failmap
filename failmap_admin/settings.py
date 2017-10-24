@@ -72,8 +72,11 @@ INSTALLED_APPS = [
 ]
 
 try:
-    import django_uwsgi
-    INSTALLED_APPS += ['django_uwsgi', ]
+    # hack to disable django_uwsgi app as it currently conflicts with compressor
+    # https://github.com/django-compressor/django-compressor/issues/881
+    if not os.environ['COMPRESS']:
+        import django_uwsgi
+        INSTALLED_APPS += ['django_uwsgi', ]
 except ImportError:
     # only configure uwsgi app if installed (ie: production environment)
     pass
@@ -291,10 +294,10 @@ LOGGING = {
                       '%(message)s',
             'datefmt': '%Y%-m-%d %H:%M',
             'log_colors': {
-                'DEBUG':    'green',
-                'INFO':     'white',
-                'WARNING':  'yellow',
-                'ERROR':    'red',
+                'DEBUG': 'green',
+                'INFO': 'white',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
                 'CRITICAL': 'bold_red',
             },
         }
