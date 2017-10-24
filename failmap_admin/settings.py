@@ -38,7 +38,8 @@ DEBUG = os.environ.get('DEBUG', False)
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,::1').split(',')
 
 INTERNAL_IPS = [
-    '127.0.0.1'
+    '127.0.0.1',
+    'localhost'
 ]
 
 # Application definition
@@ -388,6 +389,18 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     # other finders..
     'compressor.finders.CompressorFinder',
+)
+
+COMPRESS_CSS_FILTERS = ['compressor.filters.cssmin.CSSCompressorFilter']
+
+# Slimit doesn't work with vue. Tried two versions. Had to rewrite some other stuff.
+# Now using the default, so not explicitly adding that to the settings
+# COMPRESS_JS_FILTERS = ['compressor.filters.jsmin.JSMinFilter']
+
+# Brotli compress storage gives some issues.
+# This creates the original compressed and a gzipped compressed file.
+COMPRESS_STORAGE = (
+    'compressor.storage.GzipCompressorFileStorage'
 )
 
 # todo: consider upgrading to another solution... although the amount of memory for this site is zip

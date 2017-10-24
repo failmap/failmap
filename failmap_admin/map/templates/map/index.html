@@ -1,24 +1,37 @@
 <!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %}
-<html>
+<html lang="nl">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="Tomato"/>
+
         <title>{% trans "Site Title" %}</title>
         <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/>
         {% compress css %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.css' %}" />
-        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.css' %}" />
+            <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
         {% endcompress %}
-        {% compress js %}
-        <script type="text/javascript" src="{% static 'js/jquery_v2.2.0.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/bootstrap_v3.3.6.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
-        {% endcompress %}
+        {% if debug %}
+            <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/leaflet-src.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/lazyload.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+        {% else %}{% compress js %}
+            <script type="text/javascript" src="{% static 'js/vue.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/lazyload.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+        {% endcompress %}{% endif %}
     </head>
 
     <body role="document">
@@ -41,6 +54,11 @@
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
+                    {% if debug %}
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>DEBUG</span></li>
+                    </ul>
+                    {% endif %}
                 </div><!--/.nav-collapse -->
             </div>
         </nav>
@@ -322,7 +340,8 @@
                     <div class="col-md-2 logoandtext">
                         <div class="logo fail_logo">
                             <a href="https://internetcleanup.foundation" target="_blank">
-                                <img src="{% static 'images/internet_cleanup_foundation_logo.png' %}"/>
+                                <img class="lazyload" data-src="{% static 'images/internet_cleanup_foundation_logo.png' %}" alt="Internet Cleanup Foundation Logo"
+                                src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" />
                             </a>
                         </div>
                         <b><a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></b>
@@ -331,7 +350,8 @@
                     <div class="col-md-2 logoandtext">
                         <div class="logo sidn_logo">
                             <a href="https://www.sidnfonds.nl/" target="_blank">
-                                <img src="{% static 'images/sidnfonds-logo.png' %}" />
+                                <img class="lazyload" data-src="{% static 'images/sidnfonds-logo.png' %}" alt="SIDN Fonds Logo"
+                                src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" />
                             </a>
                         </div>
                         <b><a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></b>
@@ -340,7 +360,8 @@
                     <div class="col-md-2 logoandtext">
                         <div class="logo git_logo">
                             <a href="https://github.com/failmap/" target="_blank">
-                                <img src="{% static 'images/github_logo.png' %}"/>
+                                <img class="lazyload" data-src="{% static 'images/github_logo.png' %}" alt="Github Logo"
+                                src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs=" />
                             </a>
                         </div>
                         <b><a href="https://github.com/failmap/" target="_blank">Fail Map</a></b>

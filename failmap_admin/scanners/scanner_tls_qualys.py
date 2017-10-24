@@ -494,6 +494,7 @@ class ScannerTlsQualys:
         if status_message == "Unable to connect to the server" or \
            status_message == "Failed to communicate with the secure server" or \
            status_message == "Unexpected failure" or \
+           status_message == "Failed to obtain certificate" or \
            status_message == "IP address is from private address space (RFC 1918)":
             return ScannerTlsQualys. \
                 endpoint_could_not_connect_to_server(qualys_endpoint, domain, status_message)

@@ -153,7 +153,7 @@ var failmap = {
         this.info.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
-            this.update();
+            // this.update();
             return this._div;
         };
 
@@ -461,6 +461,7 @@ var failmap = {
 
 $(document).ready(function () {
     failmap.initializemap();
+    lazyload();
 
     // there are some issues with having the map in a Vue. Somehow the map doesn't
     // render. So we're currently not using that feature over there.

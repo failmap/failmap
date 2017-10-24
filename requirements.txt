@@ -6,22 +6,17 @@ django-jsonfield
 pyyaml
 tldextract
 docutils
-# django-nested-admin (doesn't work with Django Jet).
 typing
+# django-nested-admin (doesn't work with Django Jet).
 
 # scanners
 requests
 pytz
 celery
 django-celery-beat
-# cefpython3==57.0  # Screenshots, not reliable
 Pillow  # screenshots
 python-resize-image  # screenshots
-# selenium  # screenshots # too slow
 untangle  # dns scans https://github.com/stchris/untangle
-
-# manual scans
-# django-autocomplete-light # moved to admin interface
 
 # tests (of scanners)
 httmock
@@ -37,7 +32,8 @@ django-silk
 # logging
 colorlog
 
-# django-cachalot - Is not more efficient.
-
 # website
-django_compressor
+django_compressor  # bundle javascript and css
+csscompressor  # css compression
+brotlipy  # for file compression
+# slimit does not work with vue.js

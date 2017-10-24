@@ -553,9 +553,9 @@ def stats(request, weeks_back=0):
             measurement["orange url percentage"] = 0
             measurement["green url percentage"] = 0
 
-        stats[stat] = measurement
+        timeframes[stat] = measurement
 
-    return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
+    return JsonResponse({"data": timeframes}, json_dumps_params={'indent': 4})
 
 
 # this function doesn't give the relevant urls at the moment, it needs to select stuff better.
