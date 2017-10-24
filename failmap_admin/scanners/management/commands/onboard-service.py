@@ -5,11 +5,12 @@ from time import sleep
 import pytz
 from django.core.management.base import BaseCommand
 
+from failmap_admin.map.determineratings import rerate_url_with_timeline
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.scanner_dns import ScannerDns
-from failmap_admin.scanners.scanner_http import ScannerHttp
-from failmap_admin.scanners.scanner_plain_http import ScannerPlainHttp
-from failmap_admin.scanners.scanner_screenshot import ScannerScreenshot
+from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
+from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
+from failmap_admin.scanners.scanner_plain_http import scan_url
+from failmap_admin.scanners.scanner_screenshot import screenshot_url
 
 logger = logging.getLogger(__package__)
 
@@ -42,13 +43,13 @@ class Command(BaseCommand):
             # scan for http/https endpoints
             if url.is_top_level():
                 # some DNS scans, to find more urls to onboard.
-                ScannerDns.brute_known_subdomains([url])
-                ScannerDns.certificate_transparency(url)  # todo, equal method calls
-            ScannerHttp.scan_url_list_standard_ports([url])   # takes about 60 seconds per url
-            ScannerPlainHttp.scan_url(url)  # takes about 10 seconds per url, if internet conn.
-            ScannerScreenshot.make_screenshot(url)   # takes about 10 seconds per url, can hang.
+                brute_known_subdomains([url])
+                certificate_transparency(url)  # todo, equal method calls
+            scan_url_list_standard_ports([url])   # takes about 60 seconds per url
+            scan_url(url)  # plain http, takes about 10 seconds per url, if internet conn.
+            screenshot_url(url)   # takes about 10 seconds per url, can hang.
             # tls scans are picked up by scanner_tls_qualys and may take a while.
-            # other scans the same.
+            # other scans the same. They will do the ratings.
 
             url.onboarded = True
             url.onboarded_on = datetime.now(pytz.utc)

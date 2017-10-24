@@ -404,17 +404,17 @@ COMPRESS_STORAGE = (
 )
 
 # todo: consider upgrading to another solution... although the amount of memory for this site is zip
-if not DEBUG:
+if DEBUG:
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'yolo-mcswaggerson',
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         }
     }
 else:
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'yolo-mcswaggerson',
         }
     }
 
@@ -429,6 +429,7 @@ BROKER_URL = os.environ.get('BROKER', 'amqp://guest:guest@localhost:5672')
 ENABLE_UTC = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
+# this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # this stuff... message signing makes it a bit better, not perfect as it peels the onion.
 # see: https://blog.nelhage.com/2011/03/exploiting-pickle/
 # Yet pickle is the only convenient way of transporting objects without having to lean in all kinds

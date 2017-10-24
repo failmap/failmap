@@ -11,7 +11,7 @@ from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certifica
 from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
-from .models import Coordinate, Organization, Url
+from .models import Coordinate, Organization, OrganizationType, Url
 
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
@@ -182,6 +182,13 @@ class UrlAdmin(admin.ModelAdmin):
     print_on_commandline.short_description = "(debug) Print on command line"
 
 
+class OrganizationTypeAdmin(admin.ModelAdmin):
+    list_display = ('name', )
+    search_field = ('name', )
+    list_filter = ('name', )
+    fields = ('name', )
+
+
 class CoordinateAdmin(admin.ModelAdmin):
     list_display = ('organization', 'geojsontype')
     search_field = ('organization', 'geojsontype')
@@ -192,3 +199,4 @@ class CoordinateAdmin(admin.ModelAdmin):
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Url, UrlAdmin)
 admin.site.register(Coordinate, CoordinateAdmin)
+admin.site.register(OrganizationType, OrganizationTypeAdmin)

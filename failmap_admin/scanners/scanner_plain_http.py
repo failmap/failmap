@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap_admin.scanners.scanner_http import ScannerHttp
+from failmap_admin.scanners.scanner_http import scan_url_list
 
 from .models import Endpoint
 
@@ -115,9 +115,7 @@ def scan_url(url):
 def verify_is_secure(url):
     # i've seen qualys saying there is no TLS, while there is!
     # This _might_ revive an endpoint.
-    s = ScannerHttp()
-
-    s.scan_url_list([url], 443, 'https')
+    scan_url_list([url], 443, 'https')
 
     endpoints = Endpoint.objects.all().filter(url=url, is_dead=False,
                                               protocol="https", port=443)

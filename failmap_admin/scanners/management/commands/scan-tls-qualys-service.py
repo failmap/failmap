@@ -99,6 +99,8 @@ class Command(BaseCommand):
     def scan_new_urls():
         # find urls that don't have an qualys scan and are resolvable on https/443
         # todo: perhaps find per organization, so there will be less ratings? (rebuilratings cleans)
+        # ah, this finds both ipv4 and 6 endpoints, since this is done in batches it doesn't
+        # really matter (yet).
         urls = Url.objects.filter(is_dead=False,
                                   not_resolvable=False,
                                   endpoint__port=443,
@@ -176,6 +178,7 @@ class Command(BaseCommand):
                 rerate_url_with_timeline(url=url)
 
             for url in myurls:
-                rate_organization_efficient(organization=url.organization)
+                for organization in url.organization.all():
+                    rate_organization_efficient(organization=organization)
 
         return urls

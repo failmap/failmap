@@ -596,8 +596,15 @@ def rate_timeline(timeline, url):
 def save_url_rating(url, date, score, json):
     u = UrlRating()
     u.url = url
-    u.when = datetime(year=date.year, month=date.month, day=date.day,
-                      hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+
+    # save it as NOW if it's done today, else on the last moment on the same day.
+    # So the url ratings immediately are shown, even if the day is not over.
+
+    if date == datetime.now().date():
+        u.when = datetime.now(pytz.utc)
+    else:
+        u.when = datetime(year=date.year, month=date.month, day=date.day,
+                          hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
     u.rating = score
     u.calculation = json
     u.save()
