@@ -92,7 +92,7 @@ dataset_postgres:
     - master
 
 # create distributable release
-build: &build_template
+build:
   stage: build
 
   services:
@@ -121,14 +121,19 @@ build: &build_template
     - master
 
 test_build:
-  <<: *build_template
+  stage: test
+
+  services:
+    - docker:dind
+
+  image: docker:git
 
   script:
     # build docker image without explicit tag to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build .
+
   # run on MR
-  only: []
   except: [master]
 
 
