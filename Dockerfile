@@ -17,6 +17,9 @@ RUN /pyenv/bin/pip install /source/
 # switch to lightweight base image for distribution
 FROM python:3-slim
 
+# hack for slim image to fix broken install of postgres
+RUN /bin/bash -c 'mkdir -p /usr/share/man/man{1..8}'
+
 # install dependent libraries (remove cache to prevent inclusion in layer)
 RUN apt-get update && \
   apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql postgresql-contrib mime-support && \
