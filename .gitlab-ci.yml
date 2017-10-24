@@ -121,7 +121,7 @@ build: &build_template
     - master
 
 test_build:
-  <<: *test_build
+  <<: *build_template
 
   script:
     # build docker image without explicit tag to test building
