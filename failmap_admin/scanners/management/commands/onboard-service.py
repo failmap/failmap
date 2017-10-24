@@ -5,12 +5,12 @@ from time import sleep
 import pytz
 from django.core.management.base import BaseCommand
 
+from failmap_admin.map.determineratings import rerate_url_with_timeline
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
 from failmap_admin.scanners.scanner_plain_http import scan_url
 from failmap_admin.scanners.scanner_screenshot import screenshot_url
-from failmap_admin.map.determineratings import rerate_url_with_timeline
 
 logger = logging.getLogger(__package__)
 

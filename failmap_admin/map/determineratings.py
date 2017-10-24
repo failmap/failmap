@@ -604,7 +604,7 @@ def save_url_rating(url, date, score, json):
         u.when = datetime.now(pytz.utc)
     else:
         u.when = datetime(year=date.year, month=date.month, day=date.day,
-                      hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+                          hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
     u.rating = score
     u.calculation = json
     u.save()

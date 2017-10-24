@@ -11,7 +11,7 @@ from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certifica
 from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
-from .models import Coordinate, Organization, Url, OrganizationType
+from .models import Coordinate, Organization, OrganizationType, Url
 
 # Solved: http://stackoverflow.com/questions/11754877/
 #   troubleshooting-related-field-has-invalid-lookup-icontains
