@@ -74,7 +74,7 @@ INSTALLED_APPS = [
 try:
     # hack to disable django_uwsgi app as it currently conflicts with compressor
     # https://github.com/django-compressor/django-compressor/issues/881
-    if not os.environ['COMPRESS']:
+    if not os.environ.get('COMPRESS', False):
         import django_uwsgi
         INSTALLED_APPS += ['django_uwsgi', ]
 except ImportError:
