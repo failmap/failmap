@@ -127,6 +127,9 @@ test_build:
     # build docker image without explicit tag to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker build .
+  # run on MR
+  only: []
+  except: [master]
 
 
 # provide codequality context for merge requests
