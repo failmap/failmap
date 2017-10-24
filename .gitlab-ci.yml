@@ -37,6 +37,8 @@ test_mysql: &test_mysql_template
     DJANGO_DATABASE: production
     # add mysqlclient to tox environment
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
+  only:
+    - master
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
@@ -57,6 +59,10 @@ test_postgres: &test_postgres_template
     # add mysqlclient to tox environment
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
 
+  # run long/non-critical tests only on master
+  only:
+    - master
+
 # code quality checks
 check:
   <<: *test_template
@@ -73,11 +79,17 @@ dataset_mysql:
   <<: *test_mysql_template
   script:
     - tox -e datasets
+  # run long tests only on master
+  only:
+    - master
 
 dataset_postgres:
   <<: *test_postgres_template
   script:
     - tox -e datasets
+  # run long tests only on master
+  only:
+    - master
 
 # create distributable release
 build:
