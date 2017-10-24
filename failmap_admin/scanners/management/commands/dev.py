@@ -11,7 +11,7 @@ from failmap_admin.map.determineratings import (rate_organization_efficient,
 from failmap_admin.map.models import OrganizationRating
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
+# from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
 from failmap_admin.scanners.state_manager import StateManager
 
 logger = logging.getLogger(__package__)
@@ -32,7 +32,16 @@ class Command(BaseCommand):
 
 
 def develop_timeline():
-    # organization = Organization.objects.filter(name="Zutphen").get()
+
+    if True:
+        organization = Organization.objects.filter(name="Internet Cleanup Foundation").get()
+        urls = Url.objects.all().filter(organization=organization)
+        for url in urls:
+            data = timeline(url=url)
+            show_timeline_console(data, url)
+            rerate_url_with_timeline(url=url)
+        rate_organization_efficient(organization=organization, create_history=True)
+
     if False:
         organizations = Organization.objects.all().order_by('name')
         for organization in organizations:
@@ -40,7 +49,7 @@ def develop_timeline():
             for url in urls:
                 rerate_url_with_timeline(url=url)
 
-    if True:
+    if False:
         # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
         # url = Url.objects.all().filter(url='sip.arnhem.nl').get()
 

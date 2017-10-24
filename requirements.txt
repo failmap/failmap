@@ -18,6 +18,9 @@ Pillow  # screenshots
 python-resize-image  # screenshots
 untangle  # dns scans https://github.com/stchris/untangle
 
+dnspython  # dnsrecon
+netaddr  # dnsrecon
+
 # tests (of scanners)
 httmock
 freezegun
