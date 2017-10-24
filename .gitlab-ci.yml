@@ -92,7 +92,7 @@ dataset_postgres:
     - master
 
 # create distributable release
-build:
+build: &build_template
   stage: build
 
   services:
@@ -119,6 +119,15 @@ build:
 
   only:
     - master
+
+test_build:
+  <<: *test_build
+
+  script:
+    # build docker image without explicit tag to test building
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build .
+
 
 # provide codequality context for merge requests
 codequality:
