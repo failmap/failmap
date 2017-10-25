@@ -41,8 +41,8 @@ ENV UWSGI_UID root
 ENV UWSGI_MODULE failmap_admin.wsgi
 # serve static files (to caching proxy) from collected/generated static files
 ENV UWSGI_STATIC_MAP /static=/srv/failmap-admin/static
-# set proxy and browser caching for static files to 1 day
-ENV UWSGI_STATIC_EXPIRES 86400
+# set proxy and browser caching for static files to 1 month
+ENV UWSGI_STATIC_EXPIRES 2678400
 
 # collect all static files form all django applications into static files directory
 RUN /pyenv/bin/failmap-admin collectstatic
