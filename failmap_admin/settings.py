@@ -403,20 +403,13 @@ COMPRESS_STORAGE = (
     'compressor.storage.GzipCompressorFileStorage'
 )
 
-# todo: consider upgrading to another solution... although the amount of memory for this site is zip
 if DEBUG:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
         }
     }
-else:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-            'LOCATION': 'yolo-mcswaggerson',
-        }
-    }
+# Django only emits caching headers, the server config makes sure the rest of the caching is handled.
 
 if not DEBUG:
     # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
