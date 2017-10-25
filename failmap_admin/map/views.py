@@ -46,6 +46,11 @@ def security_txt(request):
     return render(request, 'map/security.txt', content_type="text/plain")
 
 
+@cache_page(one_day)
+def manifest_json(request):
+    return render(request, 'map/manifest.json', content_type="application/javascript")
+
+
 @cache_page(ten_minutes)
 def organization_report(request, organization_id, weeks_back=0):
     if not weeks_back:
@@ -931,7 +936,7 @@ def map_data(request, weeks_back=0):
                     # Sometimes the data is a string, sometimes it's a list. The admin
                     # interface might influence this.
                     "coordinates":
-                        json.loads(i[3]) if type(json.loads(i[3])) is list
+                        json.loads(i[3]) if isinstance(json.loads(i[3]), list)
                         else json.loads(json.loads(i[3]))  # hack :)
                 }
         }
