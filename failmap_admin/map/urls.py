@@ -1,12 +1,14 @@
 # urls for scanners, maybe in their own url files
 from django.conf.urls import url
 
-from failmap_admin.map.views import (index, map_data, organization_report, robots_txt, security_txt,
-                                     stats, terrible_urls, topfail, topwin, urlstats, wanted_urls)
+from failmap_admin.map.views import (index, manifest_json, map_data, organization_report,
+                                     robots_txt, security_txt, stats, terrible_urls, topfail,
+                                     topwin, urlstats, wanted_urls)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),
     url(r'^robots.txt$', robots_txt),
+    url(r'^manifest.json$', manifest_json),
     url(r'^data/map/(?P<weeks_back>[0-9]{0,2})', map_data, name='map data'),
     url(r'^data/stats/(?P<weeks_back>[0-9]{0,2})', stats, name='stats'),
     url(r'^data/urlstats/(?P<weeks_back>[0-9]{0,2})', urlstats, name='urlstats'),

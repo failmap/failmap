@@ -37,10 +37,9 @@ DEBUG = os.environ.get('DEBUG', False)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,::1').split(',')
 
-INTERNAL_IPS = [
-    '127.0.0.1',
-    'localhost'
-]
+# allow better debugging for these clients
+# https://docs.djangoproject.com/en/1.11/ref/settings/#internal-ips
+INTERNAL_IPS = ['localhost', '127.0.0.1', '::1']
 
 # Application definition
 
@@ -367,7 +366,6 @@ TOOLS = {
         }
     }
 }
-# exit(-1)
 
 
 # Celery 4.0 settings
@@ -406,19 +404,19 @@ COMPRESS_STORAGE = (
     'compressor.storage.GzipCompressorFileStorage'
 )
 
-if DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        }
+# Disable caching during development and production.
+# Django only emits caching headers, the webserver/caching-proxy makes sure the rest of the caching is handled.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     }
-# Django only emits caching headers, the server config makes sure the rest of the caching is handled.
+}
 
-if not DEBUG:
-    # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
-    COMPRESS_OFFLINE = True  # defaults to false
-    # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
-    # Enabled when debug is off by default.
+# Enable static file (js/css) compression when not running debug
+# https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_OFFLINE
+COMPRESS_OFFLINE = not DEBUG
+# https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
+# Enabled when debug is off by default.
 
 # Celery config
 BROKER_URL = os.environ.get('BROKER', 'amqp://guest:guest@localhost:5672')
