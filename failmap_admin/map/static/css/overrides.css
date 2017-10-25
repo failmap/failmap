@@ -1,12 +1,10 @@
 /*
 Overrides some values given in CSS from frameworks and third party stuff.
+*/
 
-Todo: there is a layer over the control box / time slider. (leaflet map pane).
-Todo: make sure the control box is OVER the map, not under the map.
-Todo: better separation of UI and data. The JS messes things up.
-**/
-
-/* Some leaflet user styling to make it more attractive */
+body {
+    height: 100%;
+}
 
 #history {
     margin-bottom: 10px;
@@ -19,7 +17,7 @@ Todo: better separation of UI and data. The JS messes things up.
 }
 
 #map {
-    height: 900px;
+    height: calc(100vh - 50px);
 }
 
 .info {

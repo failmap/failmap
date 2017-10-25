@@ -176,7 +176,7 @@ var failmap = {
     add_fullscreen_hint: function () {
         this.fullscreenhint.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
-            html = " <div id=\"fullscreen\">" +
+            html = "<div id=\"fullscreen\">" +
             "   <span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
 
