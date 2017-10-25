@@ -17,6 +17,9 @@ RUN /pyenv/bin/pip install /source/
 # switch to lightweight base image for distribution
 FROM python:3-slim
 
+# hack for slim image to fix broken install of postgres
+RUN /bin/bash -c 'mkdir -p /usr/share/man/man{1..8}'
+
 # install dependent libraries (remove cache to prevent inclusion in layer)
 RUN apt-get update && \
   apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql postgresql-contrib mime-support && \
@@ -41,7 +44,9 @@ ENV UWSGI_STATIC_MAP /static=/srv/failmap-admin/static
 RUN /pyenv/bin/failmap-admin collectstatic
 
 # Compress JS/CSS before serving, using django-compressor, run after collectstatic
-RUN /pyenv/bin/failmap-admin compress
+# COMPRESS=1 is a hack to disable django_uwsgi app as it currently conflicts with compressor
+# https://github.com/django-compressor/django-compressor/issues/881
+RUN env COMPRESS=1 /pyenv/bin/failmap-admin compress
 
 EXPOSE 8000
 

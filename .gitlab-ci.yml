@@ -120,6 +120,23 @@ build:
   only:
     - master
 
+test_build:
+  stage: test
+
+  services:
+    - docker:dind
+
+  image: docker:git
+
+  script:
+    # build docker image without explicit tag to test building
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker build .
+
+  # run on MR
+  except: [master]
+
+
 # provide codequality context for merge requests
 codequality:
   stage: test

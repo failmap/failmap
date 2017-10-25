@@ -21,6 +21,7 @@ build/
 code.json
 codeclimate.json
 static/
+!failmap_admin/*/static/
 .direnv
 version
 vendor/dnsrecon/
