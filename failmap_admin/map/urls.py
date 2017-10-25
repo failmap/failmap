@@ -1,4 +1,6 @@
 # urls for scanners, maybe in their own url files
+import proxy.views
+from django.conf import settings
 from django.conf.urls import url
 
 from failmap_admin.map.views import (index, manifest_json, map_data, organization_report,
@@ -20,4 +22,9 @@ urlpatterns = [
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),
     url(r'^$', index, name='failmap'),
+    # proxy maptile requests, in production this can be done by caching proxy, this makes sure
+    # it works for dev. as well.
+    url(r'^proxy/(?P<url>https://api.tiles.mapbox.com/v4/.*.png$)',
+        proxy.views.proxy_view,
+        {"requests_args": {"params": {"access_token": settings.MAPBOX_TOKEN}}})
 ]

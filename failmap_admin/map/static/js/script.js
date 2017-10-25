@@ -52,12 +52,22 @@ var failmap = {
     dataslider: L.control(),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
+    proxy_tiles: true,
 
     initializemap: function () {
         this.map = L.map('map').setView([52.15, 5.8], 8);
         this.map.scrollWheelZoom.disable();
+        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png'
+        let tile_uri_params = 'access_token={accessToken}'
+        let tile_uri = tile_uri_base + '?' + tile_uri_params;
 
-        L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+        // allow tiles to be fetched through a proxy to apply our own caching rules
+        // and prevent exhausion of free mapbox account credits
+        if (this.proxy_tiles){
+          tile_uri = '/proxy/' + tile_uri_base;
+        }
+
+        L.tileLayer(tile_uri, {
             maxZoom: 18,
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
