@@ -111,6 +111,8 @@ var failmap = {
                 '                    <div>\n' +
                 '                        Gegevens van: {{ humanize(when) }}<br />\n' +
                 '                        Score: {{ points }}, congratulations!<br />\n' +
+                '                        Gaat faalkaart niet ver genoeg? <a v-bind:href="\'mailto:incoming+failmap/admin@gitlab.com?subject=Pentest%20aanvraag%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Vraag hier een echte pentest aan.</a><br/>\n' +
+                '                        Ontbreken er domeinen? <a v-bind:href="\'mailto:incoming+failmap/admin@gitlab.com?subject=Nieuwe%20domeinen%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Stuur hier domeinen in.</a><br/>\n' +
                 '                        <br />\n' +
                 '                        <div v-for="url in urls" class="perurl" v-bind:style="\'background: linear-gradient(\' + colorizebg(url.points) + \', rgba(255, 255, 255,.5));\'">\n' +
                 '                            <div class="screenshotlist">\n' +
@@ -127,6 +129,7 @@ var failmap = {
                 '                                <span v-html="total_awarded_points(url.points)"> </span>\n' +
                 '                                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)" >\n' +
                 '                                            {{ url.url }}</span><br />\n' +
+                '                                <a v-bind:href="\'mailto:incoming+failmap/admin@gitlab.com?subject=verkeerde%20bevinding%20op%20\' + url.url + \'&body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A- %0D%0A- %0D%0A- %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'" class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste bevinding</a>\n' +
                 '                                <div v-for="endpoint in url.endpoints"><br />\n' +
                 '                                        &nbsp; Adres: {{ endpoint.ip }}:{{ endpoint.port }}\n' +
                 '                                        <div v-for="rating in endpoint.ratings">\n' +
