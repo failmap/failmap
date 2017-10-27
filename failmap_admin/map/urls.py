@@ -1,8 +1,8 @@
 # urls for scanners, maybe in their own url files
+import proxy.views
 from django.conf import settings
 from django.conf.urls import url
 
-import proxy.views
 from failmap_admin.map.views import (index, manifest_json, map_data, organization_report,
                                      robots_txt, security_txt, stats, terrible_urls, topfail,
                                      topwin, urlstats, wanted_urls)
