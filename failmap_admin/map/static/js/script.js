@@ -57,8 +57,8 @@ var failmap = {
     initializemap: function () {
         this.map = L.map('map').setView([52.15, 5.8], 8);
         this.map.scrollWheelZoom.disable();
-        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png'
-        let tile_uri_params = 'access_token={accessToken}'
+        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
+        let tile_uri_params = 'access_token={accessToken}';
         let tile_uri = tile_uri_base + '?' + tile_uri_params;
 
         // allow tiles to be fetched through a proxy to apply our own caching rules
@@ -106,11 +106,14 @@ var failmap = {
             L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = '<div class="page-header" id="fullscreenreport" v-if="visible">\n' +
                 '                <div v-if="name" class="fullscreenlayout">\n' +
-                '                    <h1>{{ name }}</h1>\n' +
+                '                    <h1><span class="organization_points" v-html="organization_points(points)"></span> {{ name }}</h1>\n' +
                 '                    <p class="closebutton" onclick="vueFullScreenReport.hide()">X</p>\n' +
                 '                    <div>\n' +
+                '                        Dit resultaat delen? <span v-html="create_twitter_link(name, twitter_handle, points)"></span><br />' +
+                '                        <br />' +
                 '                        Gegevens van: {{ humanize(when) }}<br />\n' +
                 '                        Score: {{ points }}, congratulations!<br />\n' +
+                '                        <br />' +
                 '                        Gaat faalkaart niet ver genoeg? <a v-bind:href="\'mailto:incoming+failmap/admin@gitlab.com?subject=Pentest%20aanvraag%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Vraag hier een echte pentest aan.</a><br/>\n' +
                 '                        Ontbreken er domeinen? <a v-bind:href="\'mailto:incoming+failmap/admin@gitlab.com?subject=Nieuwe%20domeinen%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Stuur hier domeinen in.</a><br/>\n' +
                 '                        <br />\n' +
@@ -558,7 +561,9 @@ $(document).ready(function () {
         data: {
             calculation: '',
             rating: 0,
+            points: 0,
             when: 0,
+            twitter_handle: '',
             name: "",
             urls: Array
         },
@@ -623,6 +628,13 @@ $(document).ready(function () {
                     marker = points;
                 return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
             },
+            organization_points: function(points) {
+                if (points === 0)
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            },
             awarded_points: function(points) {
                 if (points === 0)
                     marker = "✓ perfect";
@@ -646,12 +658,22 @@ $(document).ready(function () {
                     vueReport.points = data.rating;
                     vueReport.when = data.when;
                     vueReport.name = data.name;
+                    vueReport.twitter_handle = data.twitter_handle;
                 });
             },
             show_in_browser: function(){
                 // you can only jump once to an anchor, unless you use a dummy
                 location.hash = "#loading";
                 location.hash = "#report";
+            },
+            create_twitter_link: function(name, twitter_handle, points){
+                if (twitter_handle) {
+                    if (points) {
+                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
+                    } else {
+                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
+                    }
+                }
             }
         }
     });
@@ -661,8 +683,10 @@ $(document).ready(function () {
         data: {
             calculation: '',
             rating: 0,
+            points: 0,
             when: 0,
             name: "",
+            twitter_handle: '',
             urls: Array,
             visible: false
         },
@@ -704,6 +728,13 @@ $(document).ready(function () {
             second_opinion_links: function(rating, url){
                 return vueReport.second_opinion_links(rating, url);
             },
+            organization_points: function(points) {
+                if (points === 0)
+                    marker = "✓ perfect";
+                else
+                    marker = points;
+                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            },
             total_awarded_points: function(points) {
                 if (points === 0)
                     marker = "✓ perfect";
@@ -733,7 +764,11 @@ $(document).ready(function () {
                     vueFullScreenReport.points = data.rating;
                     vueFullScreenReport.when = data.when;
                     vueFullScreenReport.name = data.name;
+                    vueFullScreenReport.twitter_handle = data.twitter_handle;
                 });
+            },
+            create_twitter_link: function(name, twitter_handle, points) {
+                return vueReport.create_twitter_link(name, twitter_handle, points);
             }
         }
     });

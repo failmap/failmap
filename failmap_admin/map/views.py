@@ -65,23 +65,28 @@ def organization_report(request, organization_id, weeks_back=0):
                    'organizationrating__calculation',
                    'organizationrating__when',
                    'name',
-                   'pk').latest('organizationrating__when')
+                   'pk',
+                   'twitter_handle').latest('organizationrating__when')
         # latest replaced: order_by('-organizationrating__when')[:1].get()
 
         report_json = """
 {
-    "rating": %s,
-    "when": "%s",
     "name": "%s",
     "id": %s,
+    "twitter_handle": "%s",
+    "rating": %s,
+    "when": "%s",
     "calculation": %s
 }
         """
-        report_json = report_json % (r['organizationrating__rating'],
-                                     r['organizationrating__when'],
-                                     r['name'],
-                                     r['pk'],
-                                     r['organizationrating__calculation'])
+        report_json = report_json % (
+            r['name'],
+            r['pk'],
+            r['twitter_handle'],
+            r['organizationrating__rating'],
+            r['organizationrating__when'],
+            r['organizationrating__calculation'],
+        )
         # print(report_json)
     except Organization.DoesNotExist:
         report_json = "{}"
@@ -425,10 +430,6 @@ def stats_determine_when(stat, weeks_back=0):
         when = when - relativedelta(weeks=int(weeks_back))
 
     return when
-
-
-def recursively_default_dict():
-    return collections.defaultdict(recursively_default_dict)
 
 
 @cache_page(one_hour)

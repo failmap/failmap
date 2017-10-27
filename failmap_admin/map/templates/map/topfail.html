@@ -23,7 +23,7 @@
                                 <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
                                 <td>{{ rank.Points }}</td>
                                 <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
+                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat positie ' + rank.Rank + ' op Faalkaart! 🥀&hashtags=' + rank.OrganizationName + ',faal,faalkaart'">Tweet! 📣</a></td>
                             </tr>
                             {% endverbatim %}
                             </tbody>
