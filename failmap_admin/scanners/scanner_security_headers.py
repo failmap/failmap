@@ -9,7 +9,7 @@ import pytz
 from celery import Celery
 from celery.task import task
 
-from celery_test import app
+from failmap_admin.celery import app
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import EndpointGenericScanScratchpad
@@ -51,6 +51,14 @@ def scan_organization(organization):
                                     organization=organization)
     for url in urls:
         scan_headers(url)
+
+
+def scan_organization_celery(organization):
+    urls = Url.objects.all().filter(is_dead=False,
+                                    not_resolvable=False,
+                                    organization=organization)
+    for url in urls:
+        scan_header_celery(url)
 
 
 def scan_headers(url):
