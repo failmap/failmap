@@ -278,12 +278,15 @@
                 <a name="report" class="jumptonav"></a>
                 <div v-if="name">
                     <div class="page-header">
-                        <h1>{% verbatim %}{{ name }}{% endverbatim %}</h1>
+                        <h1><span class="organization_points" v-html="organization_points(points)"></span> {% verbatim %}{{ name }}{% endverbatim %}</h1>
                         <a href="#" class="backtomap">back to map ↑</a>
                     </div>
                     <div>
+                        Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
+                        <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
                         {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
+                        <br />
                         Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:incoming+failmap/admin@gitlab.com?subject=Pentest%20aanvraag%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br/>
                         Ontbreken er domeinen? <a v-bind:href="'mailto:incoming+failmap/admin@gitlab.com?subject=Nieuwe%20domeinen%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br/>
                         <br />

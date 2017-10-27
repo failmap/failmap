@@ -444,3 +444,8 @@ path {
     position: relative;
     top: -15px;
 }
+
+.organization_points {
+    font-size: inherit !important;
+    margin: 0 5px 0 0 !important;
+}
