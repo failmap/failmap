@@ -29,14 +29,25 @@ class TaskCommand(BaseCommand):
     """
 
     task = None
+    # it is a anti-pattern to instantiate empty lists/dicts as class parameters
+    # but since management commands are contained in their own invocation this can fly
+    args = list()
+    kwargs = dict()
 
     def add_arguments(self, parser):
         """Add common argument for Celery tasks."""
-        parser.add_argument('-m', '--method', choices=['direct', 'sync', 'async'])
+        parser.add_argument(
+            '-m',
+            '--method',
+            choices=[
+                'direct',
+                'sync',
+                'async'],
+            default='direct',
+            help='Execute the task directly or via Celery queues.')
 
     def handle(self, *args, **options):
         """Command handle logic, eg: logging."""
-
         # set django loglevel based on `-v` argument
         verbosity = int(options['verbosity'])
         root_logger = logging.getLogger('')
@@ -48,11 +59,12 @@ class TaskCommand(BaseCommand):
             root_logger.setLevel(logging.ERROR)
 
         # execute task based on selected method
-        if options['method'] == 'sync':
-            self.task.apply_async().get()
-        elif options['method'] == 'async':
-            task_id = self.task.apply_async()
+        if options['method'] in ['sync', 'async']:
+            task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
             log.info('Task %s scheduled for execution.', task_id)
+            if options['method'] == 'sync':
+                return task_id.get()
         else:
+
             # by default execute the task directly without involving celery or a broker
-            self.task()
+            return self.task(*self.args, **self.kwargs)

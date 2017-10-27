@@ -4,6 +4,10 @@ isort
 pylama
 pytest-cov
 pytest-django
+# counterpart of requests for mock responses
+pytest-responses
+# output logging when test fails
+pytest-logging
 django-coverage
 django-extensions
 
