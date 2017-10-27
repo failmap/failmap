@@ -27,7 +27,7 @@ Download and install below system requirements to get started:
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3](https://www.python.org/downloads/) (download and install)
 - [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/))
-
+- [rabbitmq](http://www.rabbitmq.com/download.html) (for scanners only, download and install)
 
 After installation of above tools, all following steps use the command line:
 
@@ -76,6 +76,19 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
 
 # Scanning services (beta)
+
+Todo: add celery beat information
+
+Some scanners require RabbitMQ to be installed. We're currently in transition from running scanners
+manually to supporting both manual scans and celery beat.
+
+Each of the below commands requires their own command line window:
+
+    # start rabbitmq
+    rabbitmq-server
+
+    # start a worker
+    failmap-admin celery worker -ldebug
 
 These services help fill the database with accurate up to date information. Run each one of them in
 a separate command line window and keep them running.

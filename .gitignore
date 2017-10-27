@@ -27,3 +27,5 @@ version
 vendor/dnsrecon/
 vendor/theHarvester/
 vendor/Google Chrome.app/
+failmap_dataset*
+failmap_testdataset*

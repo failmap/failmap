@@ -1,7 +1,10 @@
+import logging
 from datetime import datetime
 
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
+
+logger = logging.getLogger(__package__)
 
 
 class EndpointScanManager:
@@ -26,10 +29,12 @@ class EndpointScanManager:
         # last scan had exactly the same result, so don't create a new scan and just update the
         # last scan date.
         if gs.explanation == message and gs.rating == rating:
+            logger.debug("Scan had the same rating and message, updating last_scan_moment only.")
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.save()
         else:
             # make a new one, please don't update the existing one :)
+            logger.debug("Message or rating changed: making a new generic scan.")
             gs = EndpointGenericScan()
             gs.explanation = message
             gs.rating = rating
