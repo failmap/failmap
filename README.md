@@ -72,6 +72,12 @@ It is possible to start the environment in the background using:
 
 This can be shutdown using `docker-compose down`
 
+There is a command-line application available to perform administrative tasks. To run it do:
+
+    docker-compose exec admin failmap-admin
+
+Further in this documentation the `failmap-admin` command is mentioned, when using the Docker environment always prepend `docker-compose exec admin` before the command.
+
 To view (and follow) all logs run:
 
     docker-compose logs -f
