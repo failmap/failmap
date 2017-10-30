@@ -13,7 +13,7 @@ else
 fi
 
 # start docker container
-docker run --rm --name admin -p 8000:8000 -d admin runuwsgi
+docker run --rm --name admin -e "ALLOWED_HOSTS=$host" -p 8000:8000 -d admin runuwsgi
 trap "docker logs admin;docker stop admin&" EXIT
 
 # wait for server to be ready
