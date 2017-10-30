@@ -26,13 +26,9 @@ Download and install below system requirements to get started:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3](https://www.python.org/downloads/) (download and install)
-- [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/))
-- [rabbitmq](http://www.rabbitmq.com/download.html) (for scanners only, download and install)
-
-After installation of above tools, all following steps use the command line:
-
-    sudo easy_install pip  # installs pip, a python package manager, with the command pip3
-
+- Tox (`pip3 install --user tox`)
+- [direnv](https://direnv.net/) (optional, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
+- [Docker](https://docs.docker.com/engine/installation/) (optional, recommended, follow instructions to install.)
 
 # Obtaining the software
 
@@ -44,15 +40,87 @@ In a directory of your choosing:
     # enter the directory of the downloaded software
     cd admin
 
-    # sets Debug to true in this folder. Do not change the settings.py file.
+Use Direnv to manage environment (see Direnv section below). This manages the Python Virtualenv and `DEBUG` setting required for local development.
+
     direnv allow
 
 # Quickstart
+
+For the quickstart we assume the usage of Docker as it offers the most complete environment for development. This project aims to be environment agnostic and development without Docker is possible. See Development section below.
 
 Below commands result in a failmap installation that is suitable for testing and development. It is
 capable of handling thousands of urls and still be modestly responsive.
 
 If you need a faster, more robust installation, please [contact us](mailto:hosting@internetcleanup.foundation).
+
+Ensure Docker is installed and running. Execute the following command to bring up the environment:
+
+    docker-compose up
+
+This will build and start all required components and dependencies to run a complete instance of the Failmap project (grab some coffee the first time this takes a while).
+
+You can now visit the [map website](http://127.0.0.1:8000/) and/or the
+[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
+
+To stop the environment simply press [CTRL][C].
+
+The environment is aware of code changes in the `failmap_admin` folder. Services are automatically restarted to reflect the latest changes.
+
+It is possible to start the environment in the background using:
+
+    docker-compose up -d
+
+This can be shutdown using `docker-compose down`
+
+There is a command-line application available to perform administrative tasks. To run it do:
+
+    docker-compose exec admin failmap-admin
+
+Further in this documentation the `failmap-admin` command is mentioned, when using the Docker environment always prepend `docker-compose exec admin` before the command.
+
+To view (and follow) all logs run:
+
+    docker-compose logs -f
+
+To see all running components:
+
+    $ docker-compose ps
+          Name                    Command               State                 Ports
+    ---------------------------------------------------------------------------------------------
+    admin_admin_1      /usr/local/bin/autoreload  ...   Up       0.0.0.0:8000->8000/tcp
+    admin_broker_1     docker-entrypoint.sh redis ...   Up       0.0.0.0:5672->5672/tcp, 6379/tcp
+    admin_database_1   docker-entrypoint.sh mysqld      Up       0.0.0.0:3306->3306/tcp
+    admin_loaddata_1   /usr/local/bin/failmap-adm ...   Exit 0
+    admin_migrate_1    /usr/local/bin/failmap-adm ...   Exit 0
+    admin_worker_1     /usr/local/bin/autoreload  ...   Up       8000/tcp
+
+The platform consists of 2 external dependencies `broker` (redis), `database` (mysql) and 2 main components `admin` (web frontend and administrative environment), `worker` (async task executor).
+
+Two tasks are run at startup `migrate` (database schema management) and `loaddata` (test and development data loading).
+
+Most composer commands can be run against individual components, eg:
+
+    docker-compose logs -f worker
+
+For more information consult docker composer [documentation](https://docs.docker.com/compose/) or:
+
+    docker-compose -h
+
+# Development
+
+To perform non-Docker development, make sure all Requirements are installed. Run the following script to setup a development instance:
+
+    tools/dev_setup.sh
+
+After this run:
+
+    # finally start the development server
+    failmap-admin runserver
+
+Now visit the [map website](http://127.0.0.1:8000/) and/or the
+[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
+
+The setup script performs the following steps:
 
     # download even more requirements needed to run this software
     pip3 install -e .
@@ -61,19 +129,13 @@ If you need a faster, more robust installation, please [contact us](mailto:hosti
     failmap-admin migrate
 
     # create a user to view the admin interface
-    failmap-admin createsuperuser
+    failmap-admin loaddata development
 
     # loads a series of sample data into the database
     failmap-admin load-dataset testdata
 
     # calculate the scores that should be displayed on the map
     failmap-admin rebuild-ratings
-
-    # finally start the development server
-    failmap-admin runserver
-
-Now visit the [map website](http://127.0.0.1:8000/) and/or the
-[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000
 
 # Scanning services (beta)
 

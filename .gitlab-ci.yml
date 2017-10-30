@@ -67,8 +67,13 @@ test_postgres: &test_postgres_template
 check:
   <<: *test_template
   stage: check
+  before_script:
+    - pip install tox
+    - apt-get update -qq
+    - apt-get install -yqq shellcheck
   script:
     - tox -e check
+    - shellcheck tests/*.sh tools/*.sh
 
 dataset:
   <<: *test_template
@@ -128,10 +133,16 @@ test_build:
 
   image: docker:git
 
+  before_script:
+    - apk add --no-cache curl
+
   script:
-    # build docker image without explicit tag to test building
+    # build docker imageg to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build .
+    - docker build . -t admin
+
+    # run simple smoketests to verify Docker image is sane
+    - tests/docker.sh docker
 
   # run on MR
   except: [master]

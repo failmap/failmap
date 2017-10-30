@@ -10,9 +10,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-from collections import defaultdict
-
-from colorlog import ColoredFormatter
 
 # this application can run in 2 modes: admin and frontend
 # admin exposes all routes and uses no caching. It should be restricted in access
@@ -86,7 +83,6 @@ try:
     import django_extensions
     INSTALLED_APPS += ['django_extensions']
 except ImportError:
-    print("Django Extensions is not installed (not a dev setup?) Install requirements.dev.txt if needed.")
     pass
 
 
@@ -164,9 +160,6 @@ DATABASES_SETTINGS = {
 # allow database to be selected through environment variables
 DATABASE = os.environ.get('DJANGO_DATABASE', 'dev')
 DATABASES = {'default': DATABASES_SETTINGS[DATABASE]}
-# avoid uncertainty about applied database settings
-print('database settings: {ENGINE}, {NAME}, {USER}, {HOST}'.format_map(
-    defaultdict(str, **DATABASES['default'])))
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -420,7 +413,8 @@ COMPRESS_OFFLINE = not DEBUG
 # Enabled when debug is off by default.
 
 # Celery config
-BROKER_URL = os.environ.get('BROKER', 'amqp://guest:guest@localhost:5672')
+BROKER_URL = os.environ.get('BROKER', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.environ.get('RESULT_BACKEND', BROKER_URL.replace('amqp://', 'rpc://'))
 ENABLE_UTC = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with
@@ -437,3 +431,6 @@ CELERY_TIMEZONE = 'UTC'
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"
+
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
+CELERY_BROKER_CONNECTION_RETRY = False

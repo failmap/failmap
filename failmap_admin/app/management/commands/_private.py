@@ -1,9 +1,17 @@
 """Management command base classes."""
 
+import json
 import logging
+import time
+from collections import Counter
 
+import celery.exceptions
+import kombu.exceptions
+from celery.result import AsyncResult, GroupResult, ResultSet
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
+from failmap_admin.celery import app
 
 log = logging.getLogger(__name__)
 
@@ -29,14 +37,37 @@ class TaskCommand(BaseCommand):
     """
 
     task = None
+    # it is a anti-pattern to instantiate empty lists/dicts as class parameters
+    # but since management commands are contained in their own invocation this can fly
+    args = list()
+    kwargs = dict()
+
+    def _add_arguments(self, parser):
+        """Method to allow subclasses to add command specific arguments."""
+        pass
 
     def add_arguments(self, parser):
         """Add common argument for Celery tasks."""
-        parser.add_argument('-m', '--method', choices=['direct', 'sync', 'async'])
+        self.mutual_group = parser.add_mutually_exclusive_group()
+
+        parser.add_argument('-m', '--method', default='direct',
+                            choices=['direct', 'sync', 'async'],
+                            help='Execute the task directly or on remote workers.')
+
+        parser.add_argument('-i', '--interval', default=5, type=int,
+                            help="Interval between status reports (sync only).")
+
+        self.mutual_group.add_argument('-t', '--task_id', default='',
+                                       help="Report status for task ID and return result (if available).")
+
+        self._add_arguments(parser)
+
+    def compose(self, *args, **options):
+        """Placeholder to allow subclass to compose a task(set) if task is not specified."""
+        raise NotImplementedError()
 
     def handle(self, *args, **options):
         """Command handle logic, eg: logging."""
-
         # set django loglevel based on `-v` argument
         verbosity = int(options['verbosity'])
         root_logger = logging.getLogger('')
@@ -47,12 +78,78 @@ class TaskCommand(BaseCommand):
         elif verbosity == 0:
             root_logger.setLevel(logging.ERROR)
 
+        self.interval = options['interval']
+
+        if options['task_id']:
+            # return self.wait_for_result(GroupResult(options['task_id']))
+            # this currently doesn't work
+            raise NotImplementedError('needs to be added')
+
+        # output resulting dict as JSON object as that plays nice with
+        # tools like jq for output parsing
+        def serialize(value):
+            """Convert value into JSON serializable output."""
+            # recursively output exception trace
+            if isinstance(value, Exception):
+                error = {
+                    'error': value.__class__.__name__,
+                    'message': str(value)
+                }
+                if value.__cause__:
+                    error['cause'] = serialize(value.__cause__)
+                return error
+            else:
+                return value
+        return json.dumps([serialize(r) for r in self.run_task(*args, **options)])
+
+    def run_task(self, *args, **options):
+        # try to compose task if not specified
+        if not self.task:
+            self.task = self.compose(*args, **options)
+
         # execute task based on selected method
-        if options['method'] == 'sync':
-            self.task.apply_async().get()
-        elif options['method'] == 'async':
-            task_id = self.task.apply_async()
-            log.info('Task %s scheduled for execution.', task_id)
+        if options['method'] in ['sync', 'async']:
+            # verify if broker is accessible (eg: might not be started in dev. environment)
+            try:
+                app.connection().ensure_connection(max_retries=3)
+            except kombu.exceptions.OperationalError:
+                log.warning(
+                    'Connection with task broker %s unavailable, tasks might not be starting.',
+                    settings.BROKER_URL)
+
+            task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
+            log.info('Task scheduled for execution.')
+            log.debug("Task ID: %s", task_id.id)
+
+            # wrap a single task in a resultset to not have 2 ways to handle results
+            if not isinstance(task_id, ResultSet):
+                task_id = ResultSet([task_id])
+
+            if options['method'] == 'sync':
+                return self.wait_for_result(task_id)
+            else:
+                # if async return taskid to allow query for status later on
+                return task_id.id
         else:
-            # by default execute the task directly without involving celery or a broker
-            self.task()
+            # By default execute the task directly without involving celery or a broker.
+            # Return all results without raising exceptions.
+            return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
+
+    def wait_for_result(self, task_id):
+        """Wait for all (sub)tasks to complete and return result."""
+        # wait for all tasks to be completed
+        while not task_id.ready():
+            # get latests intermediate state update from results backend
+            try:
+                task_id.collect(timeout=0)
+            except BaseException:
+                pass
+
+            # show intermediate status
+            log.info('Task status: %s', dict(Counter([t.state for t in task_id.results])))
+            time.sleep(self.interval)
+
+        log.info('Final task status: %s', dict(Counter([t.state for t in task_id.results])))
+
+        # return final results, don't reraise exceptions
+        return task_id.get(propagate=False)
