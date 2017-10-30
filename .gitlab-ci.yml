@@ -142,7 +142,7 @@ test_build:
     - docker build . -t admin
 
     # run simple smoketests to verify Docker image is sane
-    - tests/docker.sh
+    - tests/docker.sh admin
 
   # run on MR
   except: [master]
