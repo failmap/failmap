@@ -8,3 +8,9 @@
     expires: null, enabled: true, last_run_at: !!timestamp '2017-10-20 19:36:00.000880+00:00',
     total_run_count: 8, date_changed: !!timestamp '2017-10-20 19:36:42.347785+00:00',
     description: ''}
+- model: django_celery_beat.periodictask
+  pk: 2
+  fields: {name: scan-security-headers, task: failmap_admin.scanners.scanner_security_headers.scan,
+    interval: 2, crontab: null, args: '[]', kwargs: '{}', queue: null, exchange: null,
+    routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0,
+    date_changed: !!timestamp '2017-10-30 21:36:15.027577+00:00', description: ''}

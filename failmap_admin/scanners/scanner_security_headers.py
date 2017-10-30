@@ -15,7 +15,7 @@ from celery.task import task
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
 from failmap_admin.celery import ExceptionPropagatingTask, app
-from failmap_admin.organizations.models import Url
+from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import EndpointGenericScanScratchpad
 
@@ -24,7 +24,36 @@ from .models import Endpoint
 logger = logging.getLogger(__name__)
 
 
-def compose_scan_organizations(organizations):
+def organizations_from_names(organization_names):
+    """Turn list of organization names into list of Organization objects.
+
+    Will return all organizations if none are specified.
+    """
+    # select specified or all organizations to be scanned
+    if organization_names:
+        organizations = list()
+        for organization_name in organization_names:
+            try:
+                organizations.append(Organization.objects.get(name__iexact=organization_name))
+            except Organization.DoesNotExist as e:
+                raise Exception("Failed to find organization '%s' by name" % organization_name) from e
+    else:
+        organizations = Organization.objects.all()
+
+    return organizations
+
+
+@app.task
+def scan(organization_names, execute=True):
+    """Compose and execute taskset to scan specified organizations."""
+    task = compose(organizations_from_names(organization_names))
+    if execute:
+        return task.apply_async()
+    else:
+        return task
+
+
+def compose(organizations):
     """Compose taskset to scan specified organizations."""
 
     # collect all scannable urls for provided organizations
@@ -37,14 +66,14 @@ def compose_scan_organizations(organizations):
     logger.debug('scanning %s endpoints for %s urls for %s organizations',
                  len(endpoints), len(urls), len(organizations))
 
-    def compose_task(endpoint):
+    def compose_subtasks(endpoint):
         """Create a task chain of scan & store for a given endpoint."""
         scan_task = get_headers.s(endpoint.uri_url())
         store_task = analyze_headers.s(endpoint)
         return scan_task | store_task
 
     # create a group of parallel executable scan&store tasks for all endpoints
-    taskset = group(compose_task(endpoint) for endpoint in endpoints)
+    taskset = group(compose_subtasks(endpoint) for endpoint in endpoints)
 
     return taskset
 
