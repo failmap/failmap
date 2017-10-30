@@ -6,13 +6,19 @@ RUN pip install virtualenv
 RUN virtualenv /pyenv
 
 # install requirements seperately as they change less often then source, improved caching
-COPY requirements*.txt /
-RUN /pyenv/bin/pip install -r requirements.txt
-RUN /pyenv/bin/pip install -r requirements.deploy.txt
+COPY requirements*.txt /source/
+RUN /pyenv/bin/pip install -r /source/requirements.txt
+RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
 
-# install the app
-COPY . /source/
-RUN /pyenv/bin/pip install /source/
+# copy all relevant files for python installation
+COPY ./failmap_admin/ /source/failmap_admin/
+COPY ./setup.py /source/setup.py
+COPY ./setup.cfg /source/setup.cfg
+COPY ./MANIFEST.in /source/MANIFEST.in
+
+# Install app by linking source into virtualenv. This is against convention
+# but allows the source to be overwritten by a volume during development.
+RUN /pyenv/bin/pip install -e /source/
 
 # switch to lightweight base image for distribution
 FROM python:3-slim
@@ -22,11 +28,16 @@ RUN /bin/bash -c 'mkdir -p /usr/share/man/man{1..8}'
 
 # install dependent libraries (remove cache to prevent inclusion in layer)
 RUN apt-get update && \
-  apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql postgresql-contrib mime-support && \
+  apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql \
+    postgresql-contrib mime-support python-watchdog python-setuptools && \
   rm -rf /var/lib/apt/lists/*
+
+ADD tools/autoreload.sh /usr/local/bin/autoreload
+RUN chmod a+x /usr/local/bin/autoreload
 
 # install build application
 COPY --from=build /pyenv /pyenv
+COPY --from=build /source /source
 
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap-admin /usr/local/bin/

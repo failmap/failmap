@@ -1,22 +1,36 @@
+import json
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.management.base import BaseCommand
+from failmap_admin.app.management.commands._private import TaskCommand
+from failmap_admin.organizations.models import Organization
+from failmap_admin.scanners.scanner_security_headers import compose_scan_organizations
 
-from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.scanner_security_headers import (scan_organization,
-                                                             scan_organization_celery)
-from failmap_admin.scanners.state_manager import StateManager
-
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
-    help = 'Scan for http sites that don\'t have https'
+class Command(TaskCommand):
+    """Remove all organization and url ratings, then rebuild them from scratch."""
 
-    def handle(self, *args, **options):
-        organizations = StateManager.create_resumed_organizationlist(scanner="Security Headers")
-        for organization in organizations:
-            StateManager.set_state("Security Headers", organization.name)
-            scan_organization_celery(organization)
-            return
+    help = __doc__
+
+    def _add_arguments(self, parser):
+        """Add command specific arguments."""
+        self.mutual_group.add_argument('-o', '--organizations', nargs='*',
+                                       help="Perform scans on these organizations (default is all).")
+
+    def compose(self, *args, **options):
+        """Compose set of tasks based on provided arguments."""
+
+        # select specified or all organizations to be scanned
+        if options['organizations']:
+            organizations = list()
+            for organization_name in options['organizations']:
+                try:
+                    organizations.append(Organization.objects.get(name__iexact=organization_name))
+                except Organization.DoesNotExist as e:
+                    raise Exception("Failed to find organization '%s' by name" % organization_name) from e
+        else:
+            organizations = Organization.objects.all()
+
+        # compose set of tasks to be executed
+        return compose_scan_organizations(organizations)

@@ -1,0 +1,92 @@
+# docker-compose configuration to build a local development installation of the failmap platform.
+
+version: "3"
+services:
+  # message broker to distribute tasks
+  broker:
+    image: redis
+    # this containers logging is not really that interesting during development
+    logging:
+      driver: none
+    # Not configuring persistent storage for broker. Restarting will cause all unfinished
+    # tasks to be forgotten, instead of lingering around.
+    ports:
+      - 5672:5672
+
+  # stateful storage
+  database:
+    image: mysql
+    # this containers logging is not really that interesting during development
+    logging:
+      driver: none
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-secret}"
+      MYSQL_DATABASE: "${DB_NAME:-failmap}"
+      MYSQL_USER: "${DB_USER:-failmap}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-failmap}"
+    ports:
+      - 3306:3306
+    # Configure database to persist accross restarts of the development environment.
+    volumes:
+      - ./dev_db/:/var/lib/mysql/
+
+  # task executer
+  worker:
+    image: failmap/admin
+    build:
+      context: .
+      dockerfile: "${PWD}/Dockerfile"
+    links:
+      - broker
+      - database:mysql
+    # celery dislikes running as root
+    user: nobody
+    environment:
+      BROKER: redis://broker:6379/0
+      # BROKER: amqp://guest:guest@broker:5672
+      DJANGO_DATABASE: production
+    # mount current source into container to allow changes to propagate without container rebuild
+    volumes:
+      - .:/source/
+    # let celery be a little more informative regarding console messages
+    tty: true
+    # use watchdog to provide auto restart functionality on changed code
+    entrypoint: [ '/usr/local/bin/autoreload', 'failmap-admin']
+    command: [ "celery", "worker", "-l", "info", "-c", "6" ]
+
+  # web interface
+  admin:
+    image: failmap/admin
+    build:
+      context: .
+      dockerfile: "${PWD}/Dockerfile"
+    links:
+      - broker
+      - database:mysql
+    environment:
+      BROKER: redis://broker:6379/0
+      # BROKER: amqp://guest:guest@broker:5672
+      DJANGO_DATABASE: production
+      UWSGI_PYTHON_AUTORELOAD: "yes"
+    # mount current source into container to allow changes to propagate without container rebuild
+    volumes:
+      - .:/source/
+    ports:
+      - 8080:8000
+    # django decides what to log based on type of console
+    tty: true
+    entrypoint: [ '/usr/local/bin/autoreload', 'failmap-admin']
+    command: [ "runuwsgi" ]
+
+  migrate:
+    image: failmap/admin
+    build:
+      context: .
+      dockerfile: "${PWD}/Dockerfile"
+    links:
+      - database:mysql
+    environment:
+      DJANGO_DATABASE: production
+    tty: true
+    command: [ "migrate" ]

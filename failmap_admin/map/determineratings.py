@@ -185,8 +185,7 @@ def timeline(url):
     # take the last moment of the date, so the scan will have happened at the correct time
     datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
                   for x in datetimes]
-    datetimes2 = list(set(datetimes2))
-    datetimes2.sort()
+    datetimes2 = sorted(set(datetimes2))
 
     # if the last datetime2 is today, then just reduce it to NOW to cause less confusion in
     # the dataset (don't place ratings in the future).
@@ -350,21 +349,21 @@ def rate_timeline(timeline, url):
             these_ratings = {}
             if endpoint.id in endpoint_ratings.keys():
                 for rating in endpoint_ratings[endpoint.id]:
-                    if type(rating) == TlsQualysScan:
+                    if isinstance(rating, TlsQualysScan):
                         these_ratings['tls_qualys_scan'] = rating
-                    if type(rating) == EndpointGenericScan:
+                    if isinstance(rating, EndpointGenericScan):
                         if rating.type == 'Strict-Transport-Security':
                             these_ratings['Strict-Transport-Security'] = rating
-                    if type(rating) == EndpointGenericScan:
+                    if isinstance(rating, EndpointGenericScan):
                         if rating.type == 'X-Content-Type-Options':
                             these_ratings['X-Content-Type-Options'] = rating
-                    if type(rating) == EndpointGenericScan:
+                    if isinstance(rating, EndpointGenericScan):
                         if rating.type == 'X-Frame-Options':
                             these_ratings['X-Frame-Options'] = rating
-                    if type(rating) == EndpointGenericScan:
+                    if isinstance(rating, EndpointGenericScan):
                         if rating.type == 'X-XSS-Protection':
                             these_ratings['X-XSS-Protection'] = rating
-                    if type(rating) == EndpointGenericScan:
+                    if isinstance(rating, EndpointGenericScan):
                         if rating.type == 'plain_https':
                             these_ratings['plain_https'] = rating
 
@@ -757,8 +756,7 @@ def significant_times(organization=None, url=None):
     # take the last moment of the date, so the scan will have happened at the correct time
     datetimes2 = [x.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
                   for x in datetimes]
-    datetimes2 = list(set(datetimes2))
-    datetimes2.sort()
+    datetimes2 = sorted(set(datetimes2))
 
     # if the last datetime2 is today, then just reduce it to NOW to cause less confusion in
     # the dataset (don't place ratings in the future).
