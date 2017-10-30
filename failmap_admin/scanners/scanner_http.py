@@ -33,98 +33,106 @@ import requests
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
-from failmap_admin.organizations.models import Url
+from failmap_admin.celery import app
 
 from .models import Endpoint
 
 logger = logging.getLogger(__package__)
 
 
-# todo: separating finding IP adresses and endpoints.
-def scan(self):
-    # clean url: add http and portnumber 80. Try other ports later.
-    urls = Url.objects.all()
-    for url in urls:
-        scan_url(url, 80, "http")
-    return
+def validate_port(port):
+    if port > 65535 or port < 0:
+        logger.error("Invalid port number, must be between 0 and 65535. %s" % port)
+        raise ValueError("Invalid port number, must be between 0 and 65535. %s" % port)
 
 
-def scan_url_list_standard_ports(urls):
-    scan_url_list(urls, 443, 'https')
-    scan_url_list(urls, 80, 'http')
-    scan_url_list(urls, 8080, 'http')
-    scan_url_list(urls, 8443, 'https')
-
-    # ScannerHttp.scan_url_list(urls, 8088, 'http')
-    # ScannerHttp.scan_url_list(urls, 8888, 'http')
-    # ScannerHttp.scan_url_list(urls, 8008, 'http')
-    # ScannerHttp.scan_url_list(urls, 9443, 'https')
+def validate_protocol(protocol):
+    if protocol not in ["http", "https"]:
+        logger.error("Invalid protocol %s, options are: http, https" % protocol)
+        raise ValueError("Invalid protocol %s, options are: http, https" % protocol)
 
 
-def scan_url_list(urls, port=80, protocol="http"):
-    from multiprocessing import Pool
-    pool = Pool(processes=8)
+def scan_urls_on_standard_ports(urls):
+    scan_url(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
+
+
+def scan_urls(urls, ports, protocols):
 
     if not has_internet_connection():
         logger.error("No internet connection! Try again later!")
         return
 
-    if protocol not in ["http", "https"]:
-        logger.error("Invalid protocol %s, options are: http, https" % protocol)
-        return
+    for port in ports:
+        validate_port(port)
 
-    if port > 65535 or port < 0:
-        logger.error("Invalid port number, must be between 0 and 65535. %s" % port)
-        return
+    for protocol in protocols:
+        validate_protocol(protocol)
 
-    for url in urls:
-        pool.apply_async(scan_url, [url, port, protocol],
-                         callback=success_callback,
-                         error_callback=error_callback)
-    logger.debug("Closing pool")
-    pool.close()
-    logger.debug("Joining pool")
-    pool.join()
-
-
-def scan_multithreaded(port=80, protocol="http", only_new=False):
-
-    if not only_new:
-        urls = Url.objects.all()  # scans ALL urls.
-    else:
-        # todo: only new urls, those that don't have an endpoint on the protocol+port.
-        # not without _any_ endpoint, given that there will soon be endpoints for it.
-        # this also re-verifies all domains that explicitly don't have an endpoint on this
-        # port+protocol, which can be a bit slow. (we're not saving it reversely).
-        # todo: this is not correct yet.
-        urls = Url.objects.all().exclude(endpoint__port=port, endpoint__protocol=protocol)
-        urls = Url.objects.all()
-
-    scan_url_list(urls, port, protocol)
-
-
-def success_callback(x):
-    logger.info("Success!")
-
-
-def error_callback(x):
-    logger.error("Error callback!")
-    logger.error(x)
-    logger.error(vars(x))
-
-# Simple: if there is a http response (status code), there is a http server.
-# There might be other protocols on standard ports.
-# Even if the IP constantly changes, we know that a scanner will find something by url
-# todo: check if we can scan https, due to our https lib not supporting "rest of world"
-# todo: check headers using another scanner, don't use this one, even though it contacts
-# the server (?)
-# todo: further look into dig, which at the moment doesn't return more than what we have...
-# We don't make endpoints for servers that don't exist: as opposed to qualys, since that
-# scanner is slow. (perhaps we should in that case?)
-# todo: option to not find IP's, only use existing ip's of endpoints / urls.
+    # put some distance between the times an url is contacted, so it is less pressuring
+    # therefore, we do this per port and protocol instead of per url.
+    for port in ports:
+        for protocol in protocols:
+            for url in urls:
+                scan_url(url, port, protocol)
 
 
 def scan_url(url, port=80, protocol="https"):
+
+    task = scan_url_task.s(url, port, protocol)
+    task.apply_async()
+
+
+def database_debug():
+    # had the wrong env.
+    from django.db import connection
+    from failmap_admin import settings
+
+    logger.error(dir(settings))
+    logger.error(settings.DATABASE)
+    logger.error(settings.DATABASES)
+
+    sql = "SELECT name FROM sqlite_master WHERE type='table';"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    logger.error(rows)
+
+    for row in rows:
+        logger.error(row)
+
+
+@app.task
+def scan_url_task(url, port=80, protocol="https"):
+    """
+    Searches for both IPv4 and IPv6 IP addresses / types.
+
+    The algorithm is very simple: if there is a http status code, or "a response" there is an
+    http(s) server. Some servers don't return a status code, others have problems with tls.
+    So you need either build something extremely robust, or make an easy assumption that there
+    could be a website there. Given the ports we scan, the probabilty of a website is extremely
+    high.
+
+    We don't scan for the obsoleted S-HTTP protocol, only for http and https.
+
+    It's possible to have a TLS site on port 80 and a non-TLS site on port 443. We've seen those.
+
+    This function does not store all ports it couldn't contact. Would we do that, the amount
+    of endpoints that are not resolvable explodes. There is not really value in storing the
+    non-resolvable urls, as you need to re-scan everything an a while anyway.
+    If we would store this, it would be url * ports endpoints. Now it's roughly urls * 1.8.
+
+    TLS does not have to be succesful. We also store https sites where HTTPS completely or
+    partially fails. As long as there is a "sort of" response we just assume there is a
+    website there. Other TLS scanners can check what's wrong with the connection. Perhaps
+    this leads to some false positives or to some other wrong data.
+    The big question is: would some https sites only respond IF the right protocol (SSL 1) or
+    something like that is spoken to them? Do we need a "special" TLS implementation on our server?
+
+    Todo: futher look if DIG can be of value to us. Until now it seems not so.
+
+    Todo: remove IP from endpoints. (change for version 1.1)
+
+    """
     domain = "%s://%s:%s" % (protocol, url.url, port)
     logger.debug("Scanning http(s) server on: %s" % domain)
 
@@ -168,14 +176,22 @@ def scan_url(url, port=80, protocol="https"):
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
         logger.debug("%s: Timeout! - %s" % (url, Ex))
     except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
-        # ConnectionRefusedError: [Errno 61] Connection refused
-        # Some errors have our interests:
-        # BadStatusLine is an error, which signifies that the server gives an answer.
-        # Example: returning HTML, incompatible TLS (binary)
-        # CertificateError
-        # Example: wrong domain name for certificate
-        # certificate verify failed
-        # We don't care about certificate verification errors: it is a valid response.
+        """
+        Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
+        which means the endpoint can be killed.
+
+        Yet...
+
+        There can be many, many, many errors that still can be translated into an existing site.
+
+        Until now we've found in responses:
+        - BadStatusLine
+        - CertificateError
+        - certificate verify failed
+
+        This all indicates that there is a service there. So this is stored.
+
+        """
         # Nope: EOF occurred in violation of protocol
         # Nope: also: fine, a response! :) - youll get an unexpected closed connection.
         logger.debug("%s: NOPE! - %s" % (url, Ex))
@@ -272,7 +288,6 @@ def endpoint_exists(url, port, protocol, ip):
 
 
 def kill_endpoint(url, port, protocol, ip):
-
     eps = Endpoint.objects.all().filter(url=url,
                                         port=port,
                                         ip=ip,
