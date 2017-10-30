@@ -7,11 +7,12 @@ set -ve
 if test -f /bin/busybox;then
   timeout="timeout -t 10"
 else
-  timeout=timeout
+  timeout="timeout 10"
 fi
 
 # start docker container
-docker run --name admin -p 8000:8000 -d admin runuwsgi
+docker run --rm --name admin -p 8000:8000 -d admin runuwsgi
+trap "docker stop admin&" EXIT
 
 # wait for server to be ready
 $timeout /bin/sh -c "while ! curl -sSIk http://localhost:8000 | grep 200\ OK;do sleep 1;done"
@@ -29,3 +30,5 @@ curl -sI "http://localhost:8000/static/$(curl -s http://localhost:8000/static/CA
 # admin login
 curl -si --cookie-jar cookie --cookie cookie http://localhost:8000/admin/login/|grep 200\ OK
 curl -si --cookie-jar cookie --cookie cookie --data "csrfmiddlewaretoken=$(grep csrftoken cookie | cut -f 7)&username=admin&password=faalkaart" http://localhost:8000/admin/login/|grep 302\ Found
+
+echo "All good!"
