@@ -6,6 +6,8 @@ set -ve
 
 pip3 install -e .
 failmap-admin migrate
-# failmap-admin load-dataset dev_user
+# load development environment users/settings
+failmap-admin load-dataset development
+# load a test data set
 failmap-admin load-dataset testdata -v0
 failmap-admin rebuild-ratings -v0

@@ -73,12 +73,13 @@ services:
     volumes:
       - .:/source/
     ports:
-      - 8080:8000
+      - 8000:8000
     # django decides what to log based on type of console
     tty: true
     entrypoint: [ '/usr/local/bin/autoreload', 'failmap-admin']
     command: [ "runuwsgi" ]
 
+  # migrate
   migrate:
     image: failmap/admin
     build:
@@ -90,3 +91,15 @@ services:
       DJANGO_DATABASE: production
     tty: true
     command: [ "migrate" ]
+
+  loaddata:
+    image: failmap/admin
+    build:
+      context: .
+      dockerfile: "${PWD}/Dockerfile"
+    links:
+      - database:mysql
+    environment:
+      DJANGO_DATABASE: production
+    tty: true
+    command: [ "loaddata", "development", "testdata" ]
