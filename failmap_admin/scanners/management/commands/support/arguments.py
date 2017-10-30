@@ -14,6 +14,7 @@ def add_organization_argument(parser):
         type=valid_organization
     )
 
+
 def valid_organization(name):
     if "_ALL_" in name:
         return "_ALL_"

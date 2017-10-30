@@ -2,9 +2,10 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.organizations.models import Url, Organization
+from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_http import scan_url, scan_urls
+
 from .support.arguments import add_organization_argument
 
 logger = logging.getLogger(__package__)

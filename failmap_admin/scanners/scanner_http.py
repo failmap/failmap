@@ -50,6 +50,7 @@ def validate_protocol(protocol):
         logger.error("Invalid protocol %s, options are: http, https" % protocol)
         raise ValueError("Invalid protocol %s, options are: http, https" % protocol)
 
+
 def scan_urls_on_standard_ports(urls):
     scan_url(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
 
@@ -157,18 +158,18 @@ def scan_url_task(url, port=80, protocol="https"):
         """
         Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
         which means the endpoint can be killed.
-        
+
         Yet...
-        
+
         There can be many, many, many errors that still can be translated into an existing site.
-        
+
         Until now we've found in responses:
         - BadStatusLine
         - CertificateError
         - certificate verify failed
-        
+
         This all indicates that there is a service there. So this is stored.
-        
+
         """
         # Nope: EOF occurred in violation of protocol
         # Nope: also: fine, a response! :) - youll get an unexpected closed connection.
