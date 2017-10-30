@@ -129,25 +129,12 @@ test_build:
   image: docker:git
 
   script:
-    # build docker image to test building
+    # build docker imageg to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker build . -t testbuild
+    - docker build . -t admin
+
     # run simple smoketests to verify Docker image is sane
-    - docker run --name testbuild -p 8000:8000 -d testbuild runuwsgi
-
-    # setup database and implicitly test running commands
-    - docker exec testbuild failmap-admin migrate
-    - docker exec testbuild failmap-admin loaddata development
-
-    # index page
-    - curl -s http://localhost:8000 |grep MSPAINT.EXE
-    # static files
-    - curl -sI http://localhost:8000/static/images/red-dot.png |grep 200\ OK
-    # compressed static files
-    - "curl -sI http://localhost:8000/static/$(curl -s http://localhost:8000/static/CACHE/manifest.json|sed -n 's,.*\(CACHE/js/.*js\).*,\1,p')|grep 200\ OK"
-    # admin login
-    - curl -si --cookie-jar cookie --cookie cookie http://localhost:8000/admin/login/|grep 200\ OK
-    - curl -si --cookie-jar cookie --cookie cookie --data "csrfmiddlewaretoken=$(grep csrftoken cookie | cut -f 7)&username=admin&password=faalkaart" http://localhost:8000/admin/login/|grep 302\ Found
+    - tests/docker.sh
 
   # run on MR
   except: [master]
