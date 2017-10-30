@@ -6,7 +6,7 @@ from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_http import scan_url, scan_urls
 
-from .support.arguments import add_organization_argument
+from .support.arguments import add_discover_verify, add_organization_argument
 
 logger = logging.getLogger(__package__)
 
@@ -17,20 +17,26 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         add_organization_argument(parser)
+        add_discover_verify(parser)
 
     def handle(self, *args, **options):
 
+        # some expansion magic to avoid using eval
+        func = "verify_existing_endpoints" if options['method'] == "verify" else "discover_endpoints"
+        functionlist = {"verify_existing_endpoints": verify_existing_endpoints,
+                        "discover_endpoints": discover_endpoints}
+
         if not options['organization']:
-            discover_endpoints()
+            functionlist[func]()
             return
 
         if options['organization'][0] == "_ALL_":
-            discover_endpoints()
+            functionlist[func]()
             return
 
         organization = Organization.objects.all().filter(name=options['organization'][0])
 
-        discover_endpoints(organization=organization)
+        functionlist[func](organization=organization)
 
 
 def verify_existing_endpoints(port=None, protocol=None, organization=None):
@@ -54,7 +60,7 @@ def verify_existing_endpoints(port=None, protocol=None, organization=None):
     if protocol:
         endpoints = endpoints.filter(protocol=protocol)
     else:
-        endpoints = endpoints.filter(endpoint__protocol__in=['http', 'https'])
+        endpoints = endpoints.filter(protocol__in=['http', 'https'])
 
     if organization:
         endpoints = endpoints.filter(url__organization=organization)

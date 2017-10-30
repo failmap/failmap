@@ -15,6 +15,17 @@ def add_organization_argument(parser):
     )
 
 
+def add_discover_verify(parser):
+    return parser.add_argument(
+        '--method', '-m',
+        help="verify|discover. Verify checks all existing ones, discover tries to find new ones.",
+        nargs='?',
+        required=False,
+        type=valid_discover_verify,
+        default="verify"
+    )
+
+
 def valid_organization(name):
     if "_ALL_" in name:
         return "_ALL_"
@@ -22,5 +33,10 @@ def valid_organization(name):
         o = Organization.objects.get(name=name)
         return o.name
     except ObjectDoesNotExist:
-        msg = "%s is not a valid organization or _ALL_" % name
-        raise argparse.ArgumentTypeError(msg)
+        raise argparse.ArgumentTypeError("%s is not a valid organization or _ALL_" % name)
+
+
+def valid_discover_verify(option):
+    if option == "verify" or option == "discover":
+        return option
+    raise argparse.ArgumentTypeError("Method can be either 'discover' or 'verify'. Given: " % option)

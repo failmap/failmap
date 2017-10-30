@@ -34,7 +34,8 @@ from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
-from failmap_admin.scanners.models import Endpoint
+
+from .models import Endpoint
 
 logger = logging.getLogger(__package__)
 
@@ -76,8 +77,28 @@ def scan_urls(urls, ports, protocols):
 
 
 def scan_url(url, port=80, protocol="https"):
+
     task = scan_url_task.s(url, port, protocol)
     task.apply_async()
+
+
+def database_debug():
+    # had the wrong env.
+    from django.db import connection
+    from failmap_admin import settings
+
+    logger.error(dir(settings))
+    logger.error(settings.DATABASE)
+    logger.error(settings.DATABASES)
+
+    sql = "SELECT name FROM sqlite_master WHERE type='table';"
+    cursor = connection.cursor()
+    cursor.execute(sql)
+    rows = cursor.fetchall()
+    logger.error(rows)
+
+    for row in rows:
+        logger.error(row)
 
 
 @app.task
@@ -267,7 +288,6 @@ def endpoint_exists(url, port, protocol, ip):
 
 
 def kill_endpoint(url, port, protocol, ip):
-
     eps = Endpoint.objects.all().filter(url=url,
                                         port=port,
                                         ip=ip,

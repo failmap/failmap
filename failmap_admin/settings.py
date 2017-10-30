@@ -86,7 +86,7 @@ try:
     import django_extensions
     INSTALLED_APPS += ['django_extensions']
 except ImportError:
-    print("swag")
+    print("Django Extensions is not installed (not a dev setup?) Install requirements.dev.txt if needed.")
     pass
 
 
