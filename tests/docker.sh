@@ -10,11 +10,11 @@ else
   timeout=timeout
 fi
 
-# wait for server to be ready
-$timeout /bin/sh -c "while ! curl -sSIk http://localhost:8000 | grep 200\ OK;do sleep 1;done"
-
 # start docker container
 docker run --name admin -p 8000:8000 -d admin runuwsgi
+
+# wait for server to be ready
+$timeout /bin/sh -c "while ! curl -sSIk http://localhost:8000 | grep 200\ OK;do sleep 1;done"
 
 # setup database and implicitly test running commands
 docker exec admin failmap-admin migrate
