@@ -5,14 +5,14 @@ set -ve
 # run simple smoketests to verify docker image build is sane
 
 if test -f /bin/busybox;then
-  timeout="timeout -t 10"
+  timeout="timeout -t 15"
 else
-  timeout="timeout 10"
+  timeout="timeout 15"
 fi
 
 # start docker container
 docker run --rm --name admin -p 8000:8000 -d admin runuwsgi
-trap "docker stop admin&" EXIT
+trap "docker logs admin;docker stop admin&" EXIT
 
 # wait for server to be ready
 $timeout /bin/sh -c "while ! curl -sSIk http://localhost:8000 | grep 200\ OK;do sleep 1;done"
