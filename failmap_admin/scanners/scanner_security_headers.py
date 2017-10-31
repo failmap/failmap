@@ -44,7 +44,7 @@ def organizations_from_names(organization_names):
 
 
 @app.task
-def scan(organization_names, execute=True):
+def scan(organization_names=None, execute=True):
     """Compose and execute taskset to scan specified organizations."""
     task = compose(organizations_from_names(organization_names))
     if execute:
