@@ -129,7 +129,7 @@ The setup script performs the following steps:
     failmap-admin migrate
 
     # create a user to view the admin interface
-    failmap-admin loaddata development
+    failmap-admin load-dataset development
 
     # loads a series of sample data into the database
     failmap-admin load-dataset testdata

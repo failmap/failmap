@@ -102,4 +102,4 @@ services:
     environment:
       DJANGO_DATABASE: production
     tty: true
-    command: [ "loaddata", "development", "testdata" ]
+    command: [ "load-dataset", "development", "testdata" ]
