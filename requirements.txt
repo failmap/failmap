@@ -14,7 +14,8 @@ requests
 pytz
 celery[redis]
 django-celery-beat
-celery-statsd
+# https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
+git+https://github.com/pi-bjl/celery-statsd/@0.1.3#egg=celery-statsd
 statsd
 Pillow  # screenshots
 python-resize-image  # screenshots

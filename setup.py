@@ -44,11 +44,24 @@ def get_version():
         return '0.0.0'
 
 
+def requirements(filename='requirements.txt'):
+    """Return list of required package names from requirements.txt."""
+    # strip trailing comments, and extract package name from git urls.
+    requirements = [r.strip().split(' ', 1)[0].split('egg=', 1)[-1]
+                    for r in open(filename) if not r.startswith('#')]
+    return requirements
+
+
 setup(
     name='failmap-admin',
     version=get_version(),
     packages=find_packages(),
-    install_requires=open('requirements.txt').readlines(),
+    install_requires=requirements(),
+    # allow extra packages to be installed, eg: `pip install -e .[deploy]`
+    extras_require={
+        'development': requirements('requirements.dev.txt'),
+        'deploy': requirements('requirements.deploy.txt'),
+    },
     entry_points={
         'console_scripts': [
             'failmap-admin = failmap_admin.manage:main',
