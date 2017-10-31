@@ -428,6 +428,12 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_TIMEZONE = 'UTC'
 
+# Settings for celery/worker statsd logging. Statsd defaults over UDP.
+# https://github.com/lyst/celery-statsd
+STATSD_HOST = os.environ.get('STATSD_HOST', 'localhost')
+STATSD_PORT = 8125
+STATSD_PREFIX = 'failmap'
+
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"

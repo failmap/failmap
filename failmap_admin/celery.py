@@ -9,6 +9,8 @@ import celery.exceptions
 from celery import Celery, Task
 from django.conf import settings
 
+import celery_statsd
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap_admin.settings")
 
 app = Celery(__name__)

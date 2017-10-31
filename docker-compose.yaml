@@ -11,7 +11,7 @@ services:
     # Not configuring persistent storage for broker. Restarting will cause all unfinished
     # tasks to be forgotten, instead of lingering around.
     ports:
-      - 5672:5672
+      - 6379:6379
 
   # stateful storage
   database:
@@ -44,7 +44,6 @@ services:
     user: nobody
     environment:
       BROKER: redis://broker:6379/0
-      # BROKER: amqp://guest:guest@broker:5672
       DJANGO_DATABASE: production
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
@@ -66,7 +65,6 @@ services:
       - database:mysql
     environment:
       BROKER: redis://broker:6379/0
-      # BROKER: amqp://guest:guest@broker:5672
       DJANGO_DATABASE: production
       UWSGI_PYTHON_AUTORELOAD: "yes"
     # mount current source into container to allow changes to propagate without container rebuild
