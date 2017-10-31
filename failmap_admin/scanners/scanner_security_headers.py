@@ -6,6 +6,7 @@ import logging
 import random
 import time
 from datetime import datetime
+from typing import List
 
 import celery
 import pytz
@@ -24,7 +25,7 @@ from .models import Endpoint
 logger = logging.getLogger(__name__)
 
 
-def organizations_from_names(organization_names):
+def organizations_from_names(organization_names: List[str]) -> List[Organization]:
     """Turn list of organization names into list of Organization objects.
 
     Will return all organizations if none are specified.
@@ -44,7 +45,7 @@ def organizations_from_names(organization_names):
 
 
 @app.task
-def scan(organization_names=None, execute=True):
+def scan(organization_names: List[str], execute=True):
     """Compose and execute taskset to scan specified organizations."""
     task = compose(organizations_from_names(organization_names))
     if execute:
@@ -53,7 +54,7 @@ def scan(organization_names=None, execute=True):
         return task
 
 
-def compose(organizations):
+def compose(organizations: List[Organization]):
     """Compose taskset to scan specified organizations."""
 
     # collect all scannable urls for provided organizations

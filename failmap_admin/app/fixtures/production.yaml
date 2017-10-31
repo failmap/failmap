@@ -11,6 +11,7 @@
 - model: django_celery_beat.periodictask
   pk: 2
   fields: {name: scan-security-headers, task: failmap_admin.scanners.scanner_security_headers.scan,
-    interval: 1, crontab: null, args: '[]', kwargs: '{}', queue: null, exchange: null,
-    routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0,
-    date_changed: !!timestamp '2017-10-30 21:36:15.027577+00:00', description: ''}
+    interval: 1, crontab: null, solar: null, args: '[[]]', kwargs: '{}', queue: null,
+    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: ! '2017-10-31
+      15:10:41+00:00', total_run_count: 38, date_changed: ! '2017-10-31 15:11:21+00:00',
+    description: ''}
