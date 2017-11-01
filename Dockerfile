@@ -13,9 +13,10 @@ RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
 
 # copy all relevant files for python installation
 COPY ./failmap_admin/ /source/failmap_admin/
-COPY ./setup.py /source/setup.py
-COPY ./setup.cfg /source/setup.cfg
-COPY ./MANIFEST.in /source/MANIFEST.in
+COPY requirements.dev.txt /source/
+COPY ./setup.py /source/
+COPY ./setup.cfg /source/
+COPY ./MANIFEST.in /source/
 
 # Install app by linking source into virtualenv. This is against convention
 # but allows the source to be overwritten by a volume during development.
