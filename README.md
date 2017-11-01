@@ -250,6 +250,14 @@ Be sure to active the environment before starting development every time:
     . venv/bin/activate
     export DEBUG=1
 
+# Known Issues
+
+## Docker installation
+
+### ERROR: for admin_database_1  Cannot start service database: Mounts denied:
+As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
+
+
 # Versioning
 
 Version for the project is losely semver with no specific release schedule or meaning to version numbers (eg: stable/unstable).
