@@ -35,7 +35,7 @@ Download and install below system requirements to get started:
 In a directory of your choosing:
 
     # download the software
-    git clone --recursive https://github.com/failmap/admin/
+    git clone --recursive https://gitlab.com/failmap/admin/
 
     # enter the directory of the downloaded software
     cd admin
