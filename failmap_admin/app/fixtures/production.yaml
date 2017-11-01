@@ -2,7 +2,7 @@
   pk: 1
   fields: {every: 1, period: days}
 - model: django_celery_beat.intervalschedule
-  pk: 1
+  pk: 2
   fields: {every: 3, period: days}
 - model: django_celery_beat.periodictask
   pk: 1
