@@ -10,6 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
+from ..celery import app
 from .models import OrganizationRating, UrlRating
 
 logger = logging.getLogger(__package__)
@@ -75,6 +76,7 @@ def rate_organizations_efficient(create_history=False):
             rate_organization(o, datetime.now(pytz.utc))
 
 
+@app.task
 def rate_organization_efficient(organization, create_history=False):
     if create_history:
         times = significant_times(organization=organization)
