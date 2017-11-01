@@ -197,10 +197,6 @@ class ScannerTlsQualys:
         except KeyboardInterrupt:
             ScannerTlsQualys.log.info("Received keyboard interrupt, waiting for scan to end.")
 
-        ScannerTlsQualys.log.debug("Closing pool")
-        pool.close()
-        ScannerTlsQualys.log.debug("Joining pool")
-        pool.join()  # possible cause of locks, solution: set thread timeout. A scan max takes 5 min
         ScannerTlsQualys.log.debug("Done")
 
     @staticmethod
