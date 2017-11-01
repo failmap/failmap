@@ -9,14 +9,11 @@ stages:
 test: &test_template
   stage: test
 
-  image: python:3
+  image: registry.gitlab.com/failmap/ci:latest
 
   cache:
     paths:
     - ~/.cache/pip/
-
-  before_script:
-    - pip install tox
 
   script:
     - tox -e py34
@@ -67,10 +64,7 @@ test_postgres: &test_postgres_template
 check:
   <<: *test_template
   stage: check
-  before_script:
-    - pip install tox
-    - apt-get update -qq
-    - apt-get install -yqq shellcheck
+
   script:
     - tox -e check
     - shellcheck tests/*.sh tools/*.sh
