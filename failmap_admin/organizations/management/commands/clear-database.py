@@ -5,10 +5,11 @@ import tldextract
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.organizations.models import Coordinate, Organization, OrganizationType, Url
-from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, Screenshot, \
-    EndpointGenericScanScratchpad, TlsQualysScratchpad, State
 from failmap_admin.map.models import OrganizationRating, UrlRating
+from failmap_admin.organizations.models import Coordinate, Organization, OrganizationType, Url
+from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan,
+                                           EndpointGenericScanScratchpad, Screenshot, State,
+                                           TlsQualysScan, TlsQualysScratchpad)
 
 logger = logging.getLogger(__package__)
 
@@ -18,6 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         askreset()
+
 
 def askreset():
     try:
@@ -31,6 +33,7 @@ def askreset():
 
     except KeyboardInterrupt:
         nothing_happened()
+
 
 def nothing_happened():
     print("Nothing was deleted.")
