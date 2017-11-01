@@ -21,3 +21,13 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith
 @app.task(bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
+
+
+class ParentFailed(Exception):
+    """Error to indicate parent task has failed."""
+
+    def __init__(self, message, *args, cause=None):
+        """Allow to set parent exception as cause."""
+        if cause:
+            self.__cause__ = cause
+        super(ParentFailed, self).__init__(message, *args)

@@ -15,7 +15,7 @@ from celery import Celery, Task, group
 from celery.task import task
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
-from failmap_admin.celery import app
+from failmap_admin.celery import ParentFailed, app
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import EndpointGenericScanScratchpad
@@ -83,7 +83,7 @@ def compose(organizations: List[Organization]):
 def analyze_headers(result, endpoint):
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return {'status': 'failed', 'scan_task_error': result}
+        return ParentFailed('skipping result parsing because scan failed.', cause=result)
 
     headers = result
 

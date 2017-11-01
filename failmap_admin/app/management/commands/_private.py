@@ -19,9 +19,15 @@ log = logging.getLogger(__name__)
 class ResultEncoder(json.JSONEncoder):
     """JSON encoder that serializes results from celery tasks."""
 
-    def default(self, o):
-        if isinstance(o, BaseException):
-            return repr(o)
+    def default(self, value):
+        if isinstance(value, Exception):
+            error = {
+                'error': value.__class__.__name__,
+                'message': str(value)
+            }
+            if value.__cause__:
+                error['cause'] = self.default(value.__cause__)
+            return error
 
 
 class TaskCommand(BaseCommand):
@@ -92,22 +98,6 @@ class TaskCommand(BaseCommand):
             # return self.wait_for_result(GroupResult(options['task_id']))
             # this currently doesn't work
             raise NotImplementedError('needs to be added')
-
-        # output resulting dict as JSON object as that plays nice with
-        # tools like jq for output parsing
-        def serialize(value):
-            """Convert value into JSON serializable output."""
-            # recursively output exception trace
-            if isinstance(value, Exception):
-                error = {
-                    'error': value.__class__.__name__,
-                    'message': str(value)
-                }
-                if value.__cause__:
-                    error['cause'] = serialize(value.__cause__)
-                return error
-            else:
-                return value
 
         return json.dumps(self.run_task(*args, **options), cls=ResultEncoder)
 
