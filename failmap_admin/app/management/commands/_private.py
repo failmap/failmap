@@ -129,7 +129,7 @@ class TaskCommand(BaseCommand):
                 return self.wait_for_result(task_id)
             else:
                 # if async return taskid to allow query for status later on
-                return task_id.id
+                return [task_id.id]
         else:
             # By default execute the task directly without involving celery or a broker.
             # Return all results without raising exceptions.
