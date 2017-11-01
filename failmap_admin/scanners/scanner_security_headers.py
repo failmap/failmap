@@ -15,7 +15,7 @@ from celery import Celery, Task, group
 from celery.task import task
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
-from failmap_admin.celery import ExceptionPropagatingTask, app
+from failmap_admin.celery import app
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import EndpointGenericScanScratchpad
@@ -79,8 +79,14 @@ def compose(organizations: List[Organization]):
     return taskset
 
 
-@app.task(base=ExceptionPropagatingTask)
-def analyze_headers(headers, endpoint):
+@app.task
+def analyze_headers(result, endpoint):
+    # if scan task failed, ignore the result (exception) and report failed status
+    if isinstance(result, Exception):
+        return {'status': 'failed', 'scan_task_error': result}
+
+    headers = result
+
     # scratch it, for debugging.
     egss = EndpointGenericScanScratchpad()
     egss.when = datetime.now(pytz.utc)
@@ -114,7 +120,7 @@ def generic_check(endpoint, headers, header):
                                      "Security Header not present: %s" % header)
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, base=ExceptionPropagatingTask)
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})
 def get_headers(self, uri_url):
     try:
         # ignore wrong certificates, those are handled in a different scan.
@@ -127,10 +133,14 @@ def get_headers(self, uri_url):
         for header in response.headers:
             logger.debug('Received header: %s' % header)
         return response.headers
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, Exception) as e:
-        # If an error is encountered put this task back on the queue to be retried.
+    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
+        # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
-        # Since this raises an exception itself, any code after this won't be executed.
-        # Also if this task still fails after max retries the rest of the chain is cancelled.
-        raise self.retry(exc=e)
+        try:
+            # Since this action raises an exception itself, any code after this won't be executed.
+            raise self.retry(exc=e)
+        except BaseException:
+            # If this task still fails after maximum retries the last
+            # error will be passed as result to the next task.
+            return e

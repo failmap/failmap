@@ -101,3 +101,17 @@ services:
       DJANGO_DATABASE: production
     tty: true
     command: [ "load-dataset", "development", "testdata" ]
+
+  flower:
+    image: failmap/admin
+    build:
+      context: .
+      dockerfile: "${PWD}/Dockerfile"
+    links:
+      - broker
+    environment:
+      BROKER: redis://broker:6379/0
+    ports:
+      - 5555:5555
+    tty: true
+    command: [ "celery", "flower" ]

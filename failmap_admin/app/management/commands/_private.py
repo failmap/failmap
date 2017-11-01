@@ -16,6 +16,14 @@ from failmap_admin.celery import app
 log = logging.getLogger(__name__)
 
 
+class ResultEncoder(json.JSONEncoder):
+    """JSON encoder that serializes results from celery tasks."""
+
+    def default(self, o):
+        if isinstance(o, BaseException):
+            return repr(o)
+
+
 class TaskCommand(BaseCommand):
     """A command that performs it's intended behaviour through a Celery task.
 
@@ -100,7 +108,8 @@ class TaskCommand(BaseCommand):
                 return error
             else:
                 return value
-        return json.dumps([serialize(r) for r in self.run_task(*args, **options)])
+
+        return json.dumps(self.run_task(*args, **options), cls=ResultEncoder)
 
     def run_task(self, *args, **options):
         # try to compose task if not specified
@@ -139,17 +148,9 @@ class TaskCommand(BaseCommand):
         """Wait for all (sub)tasks to complete and return result."""
         # wait for all tasks to be completed
         while not task_id.ready():
-            # get latests intermediate state update from results backend
-            try:
-                task_id.collect(timeout=0)
-            except BaseException:
-                pass
-
             # show intermediate status
-            log.info('Task status: %s', dict(Counter([t.state for t in task_id.results])))
+            log.info('Task execution status: %s', dict(Counter([t.state for t in task_id.results])))
             time.sleep(self.interval)
-
-        log.info('Final task status: %s', dict(Counter([t.state for t in task_id.results])))
 
         # return final results, don't reraise exceptions
         return task_id.get(propagate=False)

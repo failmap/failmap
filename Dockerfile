@@ -6,8 +6,9 @@ RUN pip install virtualenv
 RUN virtualenv /pyenv
 
 # install requirements seperately as they change less often then source, improved caching
-COPY requirements*.txt /source/
+COPY requirements.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.txt
+COPY requirements.deploy.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
 
 # copy all relevant files for python installation
