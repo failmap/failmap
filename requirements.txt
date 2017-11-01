@@ -11,6 +11,8 @@ typing
 
 # scanners
 requests
+# use mozzila certificate bundle by default
+certifi
 pytz
 celery[redis]
 django-celery-beat
