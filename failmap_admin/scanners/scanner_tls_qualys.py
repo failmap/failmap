@@ -176,9 +176,6 @@ class ScannerTlsQualys:
         :return:
         """
 
-        from multiprocessing import Pool
-        pool = Pool(processes=7)  # max 7 concurrent scans
-
         domains = ScannerTlsQualys.external_service_task_rate_limit(domains)
         ScannerTlsQualys.log.debug("Loaded %s domains.", len(domains))
 
@@ -192,13 +189,9 @@ class ScannerTlsQualys:
         # scans slower. Event with 30 seconds it's too fast. So just do 60.
 
         # todo: add keyboard interrupt handler.
-        # todo: figure out why it's not parallel anymore.
         try:
             for domain in domains:
-                pool.apply_async(ScannerTlsQualys.scantask, [domain],
-                                 callback=ScannerTlsQualys.success_callback,
-                                 error_callback=ScannerTlsQualys.error_callback)
-                # ScannerTlsQualys.scantask(domain) # old sequential approach
+                ScannerTlsQualys.scantask(domain)  # old sequential approach
                 ScannerTlsQualys.log.debug("Applying rate limiting, waiting max 70 seconds.")
                 sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
         except KeyboardInterrupt:
