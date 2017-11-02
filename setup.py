@@ -44,9 +44,13 @@ def get_version():
         return '0.0.0'
 
 
-def requirements(filename='requirements.txt'):
+def requirements(extra=None):
     """Return list of required package names from requirements.txt."""
     # strip trailing comments, and extract package name from git urls.
+    if extra:
+        filename = 'requirements.' + extra + '.txt'
+    else:
+        filename = 'requirements.txt'
     requirements = [r.strip().split(' ', 1)[0].split('egg=', 1)[-1]
                     for r in open(filename) if not r.startswith('#')]
     return requirements
@@ -59,8 +63,8 @@ setup(
     install_requires=requirements(),
     # allow extra packages to be installed, eg: `pip install -e .[deploy]`
     extras_require={
-        'development': requirements('requirements.dev.txt'),
-        'deploy': requirements('requirements.deploy.txt'),
+        'development': requirements(extra='dev'),
+        'deploy': requirements(extra='deploy'),
     },
     entry_points={
         'console_scripts': [

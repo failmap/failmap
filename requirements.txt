@@ -22,6 +22,7 @@ statsd
 Pillow  # screenshots
 python-resize-image  # screenshots
 untangle  # dns scans https://github.com/stchris/untangle
+django_uwsgi
 
 dnspython  # dnsrecon
 netaddr  # dnsrecon
