@@ -73,6 +73,7 @@ try:
     # hack to disable django_uwsgi app as it currently conflicts with compressor
     # https://github.com/django-compressor/django-compressor/issues/881
     if not os.environ.get('COMPRESS', False):
+        import django_uwsgi  # NOQA
         INSTALLED_APPS += ['django_uwsgi', ]
 except ImportError:
     # only configure uwsgi app if installed (ie: production environment)
@@ -80,6 +81,7 @@ except ImportError:
 
 # don't run this in production
 try:
+    import django_extensions  # NOQA
     INSTALLED_APPS += ['django_extensions']
 except ImportError:
     pass
