@@ -45,14 +45,14 @@ services:
     environment:
       BROKER: redis://broker:6379/0
       DJANGO_DATABASE: production
+      # let celery be a little more informative regarding console messages
       TERM: xterm-color
       DEBUG: 1
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
       - .:/source/
-    # let celery be a little more informative regarding console messages
     # use watchdog to provide auto restart functionality on changed code
-    entrypoint: [ '/usr/local/bin/autoreload', 'failmap-admin']
+    entrypoint: [ '/source/tools/autoreload.sh', 'failmap-admin']
     command: [ "celery", "worker", "-l", "info", "-c", "6" ]
 
   # web interface
@@ -68,6 +68,7 @@ services:
       BROKER: redis://broker:6379/0
       DJANGO_DATABASE: production
       UWSGI_PYTHON_AUTORELOAD: "yes"
+      # django decides what to log based on type of console
       TERM: xterm-color
       DEBUG: 1
     # mount current source into container to allow changes to propagate without container rebuild
@@ -75,8 +76,8 @@ services:
       - .:/source/
     ports:
       - 8000:8000
-    # django decides what to log based on type of console
-    entrypoint: [ '/usr/local/bin/autoreload', 'failmap-admin']
+    # use watchdog to provide auto restart functionality on changed code
+    entrypoint: [ '/source/tools/autoreload.sh', 'failmap-admin']
     command: [ "runuwsgi" ]
 
   # migrate
@@ -91,6 +92,7 @@ services:
       - .:/source/
     environment:
       DJANGO_DATABASE: production
+      # django decides what to log based on type of console
       TERM: xterm-color
     command: [ "migrate" ]
     # retry if action failes (ie: database container is not ready yet)
@@ -107,6 +109,7 @@ services:
       - .:/source/
     environment:
       DJANGO_DATABASE: production
+      # django decides what to log based on type of console
       TERM: xterm-color
     command: [ "load-dataset", "development", "testdata" ]
     # retry if action failes (ie: database container is not ready yet)

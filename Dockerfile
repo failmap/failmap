@@ -34,9 +34,6 @@ RUN apt-get update && \
     postgresql-contrib mime-support python-watchdog python-setuptools && \
   rm -rf /var/lib/apt/lists/*
 
-ADD tools/autoreload.sh /usr/local/bin/autoreload
-RUN chmod a+x /usr/local/bin/autoreload
-
 # install build application
 COPY --from=build /pyenv /pyenv
 COPY --from=build /source /source

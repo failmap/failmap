@@ -11,6 +11,9 @@ class Command(BaseCommand):
 
     help = __doc__
 
+    # disable (MySQL) check on startup
+    requires_system_checks = False
+
     def run_from_argv(self, argv):
         """Replace python with celery process with given arguments."""
         appname = __name__.split('.', 1)[0] + '.celery:app'
