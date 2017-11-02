@@ -443,10 +443,9 @@ STATSD_HOST = os.environ.get('STATSD_HOST', '127.0.0.1')
 STATSD_PREFIX = 'failmap'
 # register hooks for selery tasks
 STATSD_CELERY_SIGNALS = True
-# log database query statistics
-STATSD_PATCHES = [
-    'django_statsd.patches.db',
-]
+# send database query metric (in production, in development we have debug toolbar for this)
+if not DEBUG:
+    STATSD_PATCHES = ['django_statsd.patches.db', ]
 
 # enable some features during debug
 if DEBUG:
