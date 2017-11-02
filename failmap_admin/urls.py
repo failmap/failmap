@@ -36,6 +36,12 @@ urlpatterns = frontend_urls.copy()
 if settings.APPNAME == 'failmap-admin':
     urlpatterns += admin_urls
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
+
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
 

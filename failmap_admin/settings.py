@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
 
 # this application can run in 2 modes: admin and frontend
 # admin exposes all routes and uses no caching. It should be restricted in access
@@ -60,19 +61,18 @@ INSTALLED_APPS = [
     'compressor',
     'django_celery_beat',
     'proxy',
+    'django_statsd',
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light
     # 'cachalot',  # query cache, is not faster.
     # 'silk'  # works great for debugging.
-    # debug_toolbar',  # debugging and optimization, seems mostly useless in json apps, don't use
 ]
 
 try:
     # hack to disable django_uwsgi app as it currently conflicts with compressor
     # https://github.com/django-compressor/django-compressor/issues/881
     if not os.environ.get('COMPRESS', False):
-        import django_uwsgi
         INSTALLED_APPS += ['django_uwsgi', ]
 except ImportError:
     # only configure uwsgi app if installed (ie: production environment)
@@ -80,13 +80,15 @@ except ImportError:
 
 # don't run this in production
 try:
-    import django_extensions
     INSTALLED_APPS += ['django_extensions']
 except ImportError:
     pass
 
 
 MIDDLEWARE_CLASSES = [
+    # statsd metrics collection
+    'django_statsd.middleware.GraphiteRequestTimingMiddleware',
+    'django_statsd.middleware.GraphiteMiddleware',
     # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -97,7 +99,6 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.admindocs.middleware.XViewMiddleware',  # admindocs
-
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
@@ -428,15 +429,35 @@ CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_TIMEZONE = 'UTC'
 
-# Settings for celery/worker statsd logging. Statsd defaults over UDP.
-# https://github.com/lyst/celery-statsd
-STATSD_HOST = os.environ.get('STATSD_HOST', 'localhost')
-STATSD_PORT = 8125
-STATSD_PREFIX = 'failmap'
-
 CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"
 
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
+
+# Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
+# https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
+STATSD_HOST = os.environ.get('STATSD_HOST', '127.0.0.1')
+STATSD_PREFIX = 'failmap'
+# register hooks for selery tasks
+STATSD_CELERY_SIGNALS = True
+# log database query statistics
+STATSD_PATCHES = [
+    'django_statsd.patches.db',
+]
+
+# enable some features during debug
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+    MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+
+    import debug_toolbar.settings
+    DEBUG_TOOLBAR_PANELS = debug_toolbar.settings.PANELS_DEFAULTS + [
+        'django_statsd.panel.StatsdPanel',
+    ]
+    # 'log' metrics to toolbar during normal invocation and to logging in celery worker
+    if len(sys.argv) > 1 and sys.argv[2] == 'failmap_admin.celery:app':
+        STATSD_CLIENT = 'django_statsd.clients.log'
+    else:
+        STATSD_CLIENT = 'django_statsd.clients.toolbar'

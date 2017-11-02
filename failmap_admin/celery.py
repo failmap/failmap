@@ -5,7 +5,6 @@
 
 import os
 
-import celery_statsd
 from celery import Celery
 from django.conf import settings
 
