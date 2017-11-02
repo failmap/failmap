@@ -10,7 +10,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-import sys
 
 # this application can run in 2 modes: admin and frontend
 # admin exposes all routes and uses no caching. It should be restricted in access
@@ -453,7 +452,7 @@ STATSD_PATCHES = [
 if DEBUG:
     # enable debug toolbar if available
     try:
-        import debug_toolbar  # NOQA
+        import debug_toolbar
         INSTALLED_APPS.append('debug_toolbar')
         MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
@@ -463,6 +462,6 @@ if DEBUG:
         ]
         # send statsd metrics to debug_toolbar
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
-    except BaseException:
+    except ImportError:
         # send statsd metrics to logging
         STATSD_CLIENT = 'django_statsd.clients.log'
