@@ -451,15 +451,18 @@ STATSD_PATCHES = [
 
 # enable some features during debug
 if DEBUG:
-    INSTALLED_APPS.append('debug_toolbar')
-    MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    # enable debug toolbar if available
+    try:
+        import debug_toolbar  # NOQA
+        INSTALLED_APPS.append('debug_toolbar')
+        MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
-    import debug_toolbar.settings
-    DEBUG_TOOLBAR_PANELS = debug_toolbar.settings.PANELS_DEFAULTS + [
-        'django_statsd.panel.StatsdPanel',
-    ]
-    # 'log' metrics to toolbar during normal invocation and to logging in celery worker
-    if len(sys.argv) > 2 and sys.argv[2] == 'failmap_admin.celery:app':
-        STATSD_CLIENT = 'django_statsd.clients.log'
-    else:
+        import debug_toolbar.settings
+        DEBUG_TOOLBAR_PANELS = debug_toolbar.settings.PANELS_DEFAULTS + [
+            'django_statsd.panel.StatsdPanel',
+        ]
+        # send statsd metrics to debug_toolbar
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
+    except BaseException:
+        # send statsd metrics to logging
+        STATSD_CLIENT = 'django_statsd.clients.log'
