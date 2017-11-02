@@ -1,5 +1,6 @@
 # tools/dependencies required for development or running tests
 autopep8
+autoflake
 isort
 pylama
 pytest-cov
