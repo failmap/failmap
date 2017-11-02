@@ -47,12 +47,22 @@ class Endpoint(models.Model):
     server_name = models.CharField(max_length=255,
                                    help_text="rdns, gift from the scan, deprecated",
                                    blank=True)  # a gift from the scan
+
+    ip_version = models.IntegerField(
+        help_text="Either IPv4 or IPv6. There are basically two possibilities to reach the endpoint, "
+                  "which due to immaturity often look very different. The old way is using IPv4"
+                  "addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lot"
+                  "different between IPv4 or IPv6. That shouldn't be the case, but it is.",
+        default=4
+    )
+
     ip = models.CharField(
         max_length=255,
         help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed "
                   "representation: removing as many zeros as possible. For example:  "
                   "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
                   "IPv4: 127.000.000.001 = 127.0.0.1")
+
     port = models.IntegerField(default=443,
                                help_text="Ports range from 1 to 65535.")  # 1 to 65535
     protocol = models.CharField(
@@ -75,9 +85,9 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s = %s | %s/%s [%s]" % (self.domain,  self.ip, self.protocol, self.port, self.id)
+            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.domain,  self.ip, self.ip_version,  self.protocol, self.port, self.id)
         else:
-            return "%s = %s | %s/%s [%s]" % (self.domain, self.ip, self.protocol, self.port, self.id)
+            return "%s = %s IPv%s | %s/%s [%s]" % (self.domain, self.ip, self.ip_version, self.protocol, self.port, self.id)
 
     def uri_url(self):
         return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
@@ -87,10 +97,55 @@ class Endpoint(models.Model):
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):
-        return ":" not in self.ip
+        return self.ip_version == 4
 
     def is_ipv6(self):
-        return ":" in self.ip
+        return self.ip_version == 6
+
+
+class UrlIp(models.Model):
+    """
+    IP addresses of endpoints change constantly. They are more like metadata. The IP metadata can
+    be a source of endpoints or other organization specific things. Therefore we save it.
+    We now also have the room to do reverse DNS on these IP addresses.
+
+    At one time an endpoint can have multiple IPv4 and IPv6 addresses. They are not worth too much
+    and managed quite brutally by scanners (some just deleting all of the existing ones if there is
+    a new set of addresses, which is common for some service providers).
+
+    If an IP address does indeed have a website, or other service specifically, it should be treated
+    as URL, as the chance is very high this URL is as static as any other URL.
+
+    It's perfectly possible to make this a many-many relation to save some data. But that might be
+    done in the next version as it increases complexity slightly.
+    """
+
+    url = models.ForeignKey(Url, blank=True, null=True)
+
+    ip = models.CharField(
+        max_length=255,
+        help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed "
+                  "representation: removing as many zeros as possible. For example:  "
+                  "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
+                  "IPv4: 127.000.000.001 = 127.0.0.1")
+
+    rdns_name = models.CharField(
+        max_length=255,
+        help_text="The reverse name can be a server name, containing a provider or anything else."
+                  "It might contain the name of a yet undiscovered url or hint to a service.")
+
+    discovered_on = models.DateTimeField(blank=True, null=True)
+
+    is_unused = models.IntegerField(default=False,
+                                    help_text="If the address was used in the past, but not anymore."
+                                              "It's possible that the same address is more than once "
+                                              "associated with and endpoint over time, as some providers"
+                                              "rotate a set of IP addresses.")
+
+    is_unused_since = models.DateTimeField(blank=True, null=True)
+
+    is_unused_reason = models.CharField(max_length=255, blank=True, null=True)
+
 
 
 class TlsQualysScan(models.Model):

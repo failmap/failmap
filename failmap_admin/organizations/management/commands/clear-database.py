@@ -6,7 +6,7 @@ from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Coordinate, Organization, OrganizationType, Url
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan,
                                            EndpointGenericScanScratchpad, Screenshot, State,
-                                           TlsQualysScan, TlsQualysScratchpad)
+                                           TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
 logger = logging.getLogger(__package__)
 
@@ -57,6 +57,7 @@ def and_its_gone():
     EndpointGenericScan.objects.all().delete()
     TlsQualysScan.objects.all().delete()
     Endpoint.objects.all().delete()
+    UrlIp.objects.all().delete()
 
     # organizations
     Url.objects.all().delete()

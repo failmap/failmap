@@ -2,10 +2,11 @@ from django.contrib import admin
 from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import rate_url
-from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
+
+from failmap_admin.scanners.scanner_tls_qualys import scan
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
-                     State, TlsQualysScan, TlsQualysScratchpad)
+                     State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -20,15 +21,23 @@ class TlsQualysScanAdminInline(CompactInline):
 #    extra = 0
 
 
+class UrlIpAdmin(admin.ModelAdmin):
+    list_display = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
+    search_fields = ('url__url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
+    list_filter = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
+    fields = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused', 'is_unused_since', 'is_unused_reason')
+    readonly_fields = ['discovered_on']
+
+
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('url', 'domain', 'discovered_on', 'ip', 'port', 'protocol', 'is_dead_since',
+    list_display = ('url', 'domain', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead_since',
                     'tls_scan_count')
-    search_fields = ('url__url', 'domain', 'server_name', 'ip', 'port', 'protocol', 'is_dead',
+    search_fields = ('url__url', 'domain', 'server_name', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
-    list_filter = ('server_name', 'ip', 'port', 'protocol', 'is_dead')
+    list_filter = ('server_name', 'ip_version', 'ip', 'port', 'protocol', 'is_dead')
     fieldsets = (
         (None, {
-            'fields': ('url', 'domain', 'server_name', 'ip', 'port', 'discovered_on')
+            'fields': ('url', 'domain', 'server_name', 'ip_version', 'ip', 'port', 'discovered_on')
         }),
         ('dead endpoint management', {
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
@@ -37,7 +46,8 @@ class EndpointAdmin(admin.ModelAdmin):
 
     readonly_fields = ['discovered_on']
 
-    def tls_scan_count(self, inst):
+    @staticmethod
+    def tls_scan_count(inst):
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()
 
     inlines = [TlsQualysScanAdminInline]
@@ -58,8 +68,7 @@ class EndpointAdmin(admin.ModelAdmin):
         for endpoint in queryset:
             urls_to_scan.append(endpoint.url.url)
 
-        s = ScannerTlsQualys()
-        s.scan(urls_to_scan)
+        scan(urls_to_scan)
 
         self.message_user(request, "URL(s) have been scanned")
 
@@ -75,7 +84,7 @@ class TlsQualysScanAdmin(admin.ModelAdmin):
     list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
                    'scan_date', 'rating_determined_on', 'qualys_message')
     fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-              'rating_determined_on')
+              'rating_determined_on', 'scan_moment')
 
     readonly_fields = ('scan_date', 'scan_time', 'scan_moment')
 
@@ -94,8 +103,7 @@ class TlsQualysScanAdmin(admin.ModelAdmin):
         for tlsqualysscan in queryset:
             urls_to_scan.append(tlsqualysscan.endpoint.url.url)
 
-        s = ScannerTlsQualys()
-        s.scan(urls_to_scan)
+        scan(urls_to_scan)
 
         self.message_user(request, "URL(s) have been scanned")
 
@@ -152,3 +160,4 @@ admin.site.register(Screenshot, ScreenshotAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)
 admin.site.register(EndpointGenericScanScratchpad, EndpointGenericScanScratchpadAdmin)
+admin.site.register(UrlIp, UrlIpAdmin)

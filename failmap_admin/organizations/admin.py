@@ -11,10 +11,14 @@ from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, r
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
+<<<<<<< HEAD
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
+=======
+from failmap_admin.scanners.scanner_tls_qualys import scan
+>>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
 
 from ..app.models import Job
 from .models import Coordinate, Organization, OrganizationType, Url
@@ -80,8 +84,7 @@ class OrganizationAdmin(admin.ModelAdmin):
             for url in urls:
                 urls_to_scan.append(url.url)
 
-        s = ScannerTlsQualys()
-        s.scan(urls_to_scan)
+        scan(urls_to_scan)
 
         self.message_user(request, "Organization(s) have been scanned")
 
@@ -136,6 +139,7 @@ class UrlAdmin(admin.ModelAdmin):
             url.onboarded = True
             url.onboarded_on = datetime.now(pytz.utc)
             url.save()
+<<<<<<< HEAD
         self.message_user(request, "Onboard: Done")
     actions.append('onboard')
     onboard.short_description = "🔮  Onboard (dns, endpoints, scans, screenshot)"
@@ -151,6 +155,27 @@ class UrlAdmin(admin.ModelAdmin):
         self.message_user(request, "Discover subdomains (using known subdomains): Done")
     dns_known_subdomains.short_description = "🗺  Discover subdomains (using known subdomains)"
     actions.append('dns_known_subdomains')
+=======
+
+        self.message_user(request, "URL(s) have been declared dead")
+
+    def rate_url(self, request, queryset):
+
+        for url in queryset:
+            rate_url(url=url)
+
+        self.message_user(request, "URL(s) have been rated")
+
+    def scan_url(self, request, queryset):
+
+        urls_to_scan = []
+        for url in queryset:
+            urls_to_scan.append(url.url)
+
+        scan(urls_to_scan)
+
+        self.message_user(request, "URL(s) have been scanned on TLS")
+>>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
 
     def discover_http_endpoints(self, request, queryset):
         scan_urls_on_standard_ports([url for url in queryset])

@@ -25,8 +25,9 @@ Likely: 80, 8080, 8008, 8888, 8088
 
 """
 import logging
-import socket
 from datetime import datetime
+import socket
+from .timeout import timeout
 
 import pytz
 import requests
@@ -35,7 +36,7 @@ from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
 
-from .models import Endpoint
+from .models import Endpoint, UrlIp
 
 logger = logging.getLogger(__package__)
 
@@ -53,10 +54,14 @@ def validate_protocol(protocol):
 
 
 def scan_urls_on_standard_ports(urls):
+<<<<<<< HEAD
     scan_urls(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
+=======
+    scan_urls(['http', 'https'], urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443])
+>>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
 
 
-def scan_urls(urls, ports, protocols):
+def scan_urls(protocols, urls, ports):
 
     if not has_internet_connection():
         logger.error("No internet connection! Try again later!")
@@ -73,36 +78,66 @@ def scan_urls(urls, ports, protocols):
     for port in ports:
         for protocol in protocols:
             for url in urls:
-                scan_url(url, port, protocol)
+                scan_url(protocol, url, port)
 
 
-def scan_url(url, port=80, protocol="https"):
-
-    task = scan_url_task.s(url, port, protocol)
-    task.apply_async()
-
-
-def database_debug():
-    # had the wrong env.
-    from django.db import connection
-    from failmap_admin import settings
-
-    logger.error(dir(settings))
-    logger.error(settings.DATABASE)
-    logger.error(settings.DATABASES)
-
-    sql = "SELECT name FROM sqlite_master WHERE type='table';"
-    cursor = connection.cursor()
-    cursor.execute(sql)
-    rows = cursor.fetchall()
-    logger.error(rows)
-
-    for row in rows:
-        logger.error(row)
+def scan_url(protocol, url, port):
+    resolve_task = resolve_and_scan.s(protocol, url, port)
+    resolve_task.apply_async()
 
 
 @app.task
-def scan_url_task(url, port=80, protocol="https"):
+def resolve_and_scan(protocol, url, port):
+
+    ips = get_ips(url.url)
+
+    # this can take max 20 seconds, no use to wait
+    store_task = store_url_ips.s(url, ips)  # administrative, does reverse dns query
+    store_task.apply_async()
+
+    if not any(ips):
+        kill_url_task = kill_url.s(url)  # administrative
+        kill_url_task.apply_async()
+        return
+
+    url_revive_task = revive_url.s(url)
+    url_revive_task.apply_async()
+
+    # todo: switch between ipv4 and ipv6, make tasks for different workers.
+    (ipv4, ipv6) = ips
+    if ipv4:
+        connect_task = can_connect.s(protocol, url, port)  # Network task
+        result_task = connect_result.s(protocol, url, port, 4)  # administrative task
+        task = (connect_task | result_task)
+        task.apply_async()
+
+    # v6 is not yet supported, as we don't have v6 workers yet.
+
+
+def get_ips(url):
+    ip4 = ""
+    ip6 = ""
+
+    try:
+        ip4 = socket.gethostbyname(url)
+    except Exception as ex:
+        # when not known: [Errno 8] nodename nor servname provided, or not known
+        logger.debug("Get IPv4 error: %s" % ex)
+
+    try:
+        x = socket.getaddrinfo(url, None, socket.AF_INET6)
+        ip6 = x[0][4][0]
+    except Exception as ex:
+        # when not known: [Errno 8nodename nor servname provided, or not known
+        logger.debug("Get IPv6 error: %s" % ex)
+
+    logger.debug("%s has IPv4 address: %s" % (url, ip4))
+    logger.debug("%s has IPv6 address: %s" % (url, ip6))
+    return ip4, ip6
+
+
+@app.task
+def can_connect(protocol, url, port):
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -133,84 +168,68 @@ def scan_url_task(url, port=80, protocol="https"):
     Todo: remove IP from endpoints. (change for version 1.1)
 
     """
-    domain = "%s://%s:%s" % (protocol, url.url, port)
-    logger.debug("Scanning http(s) server on: %s" % domain)
-
-    # the ipv6 address returned here is already compressed.
-    (ip4, ip6) = get_ips(url.url)
-#
-    if not ip4 and not ip6:
-        logger.debug("%s: No IPv4 or IPv6 address found. Url not resolvable?" % url)
-        url.not_resolvable = True
-        url.not_resolvable_since = datetime.now(pytz.utc)
-        url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
-        url.save()
-        # todo: then kill all endpoints on this url for http and https?
-        # url not resolvable.
-        return
-    else:
-        # if the domain was not resolvable, it surely is now. Undo resolvability.
-        if url.not_resolvable:
-            url.not_resolvable = False
-            url.not_resolvable_since = datetime.now(pytz.utc)
-            url.not_resolvable_reason = "Made resolvable again since ip address was found."
-            url.save()
+    uri = "%s://%s:%s" % (protocol, url.url, port)
+    logger.debug("Scanning http(s) server on: %s" % uri)
 
     try:
-        # 10 seconds network timeout, 10 seconds timeout waiting for server response
-        # a redirect means a server, so don't follow: much faster also.
-        # todo: how to work with dropped connections?
-        # todo: perhaps use httplib?
-        r = requests.get(domain, timeout=(10, 10), allow_redirects=False)
+        """
+        5 seconds network timeout, 8 seconds timeout for server response.
+        If we get a redirect, it means there is a server. Don't follow.
 
-        # 200, 418, who cares: http status code = http server and that is enough.
+        Any status code is enough to verify that there is an endpoint.
+        Some servers don't return a status code, that will trigger an exception (AttributeError?)
+        """
+        r = requests.get(uri, timeout=(5, 8), allow_redirects=False)
         if r.status_code:
             logger.debug("%s: status: %s" % (url, r.status_code))
-            if ip4:
-                save_endpoint(url, port, protocol, ip4)
-            if ip6:
-                save_endpoint(url, port, protocol, ip6)
-
+            return True
         else:
             logger.debug("No status code? Now what?! %s" % url)
+            # probably never reached
+            return True
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
         logger.debug("%s: Timeout! - %s" % (url, Ex))
+        return False
     except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
         """
         Some errors really mean there is no site. Example is the ConnectionRefusedError: [Errno 61]
         which means the endpoint can be killed.
 
-        Yet...
-
-        There can be many, many, many errors that still can be translated into an existing site.
-
+        There are exceptions that still can be translated into an existing site.
         Until now we've found in responses:
         - BadStatusLine
         - CertificateError
         - certificate verify failed
-
-        This all indicates that there is a service there. So this is stored.
-
+        
+        Perhaps: (todo)
+        - EOF occurred in violation of protocol
         """
-        # Nope: EOF occurred in violation of protocol
-        # Nope: also: fine, a response! :) - youll get an unexpected closed connection.
-        logger.debug("%s: NOPE! - %s" % (url, Ex))
+        logger.debug("%s: Exception returned: %s" % (url, Ex))
         strerror = Ex.args  # this can be multiple.  # zit in nested exception?
-        # logger.debug("Error message: %s" % strerror)
         strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
-        if "BadStatusLine" in strerror or "CertificateError" in strerror or \
-                                          "certificate verify failed" in strerror:
-            logger.debug("Received BadStatusLine or CertificateError, which is an answer. "
-                         "Still creating endpoint.")
-            if ip4:
-                save_endpoint(url, port, protocol, ip4)
-            if ip6:
-                save_endpoint(url, port, protocol, ip6)
+        if any(["BadStatusLine" in strerror,
+                "CertificateError" in strerror,
+                "certificate verify failed" in strerror]):
+            logger.debug("Exception indicates that there is a server, but we're not able to "
+                         "communicate with it correctly. Error: %s" % strerror)
+            return True
         else:
-            if ip4:
-                kill_endpoint(url, port, protocol, ip4)
-            if ip6:
-                kill_endpoint(url, port, protocol, ip6)
+            logger.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
+            return False
+
+
+@app.task
+def connect_result(result, protocol, url, port, ip_version):
+    # logger.info("%s %s" % (url, result))
+    # logger.info("%s %s" % (url, url))
+    # logger.info("%s %s" % (url, port))
+    # logger.info("%s %s" % (url, protocol))
+    # logger.info("%s %s" % (url, ip_version))
+
+    if result:
+        save_endpoint(protocol, url, port, ip_version)
+    else:
+        kill_endpoint(protocol, url, port, ip_version)
 
 
 def resolves(url):
@@ -220,29 +239,7 @@ def resolves(url):
     return False
 
 
-def get_ips(url):
-    ip4 = ""
-    ip6 = ""
-
-    try:
-        ip4 = socket.gethostbyname(url)
-    except Exception as ex:
-        # when not known: [Errno 8] nodename nor servname provided, or not known
-        logger.debug("Get IPv4 error: %s" % ex)
-
-    try:
-        x = socket.getaddrinfo(url, None, socket.AF_INET6)
-        ip6 = x[0][4][0]
-    except Exception as ex:
-        # when not known: [Errno 8nodename nor servname provided, or not known
-        logger.debug("Get IPv6 error: %s" % ex)
-
-    logger.debug("%s has IPv4 address: %s" % (url, ip4))
-    logger.debug("%s has IPv6 address: %s" % (url, ip6))
-    return ip4, ip6
-
-
-def has_internet_connection(host="8.8.8.8", port=53, timeout=10):
+def has_internet_connection(host="8.8.8.8", port=53, connection_timeout=10):
     """
     https://stackoverflow.com/questions/3764291/checking-network-connection#3764660
     Host: 8.8.8.8 (google-public-dns-a.google.com)
@@ -250,7 +247,7 @@ def has_internet_connection(host="8.8.8.8", port=53, timeout=10):
     Service: domain (DNS/TCP)
     """
     try:
-        socket.setdefaulttimeout(timeout)
+        socket.setdefaulttimeout(connection_timeout)
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
     except Exception as ex:
@@ -258,15 +255,19 @@ def has_internet_connection(host="8.8.8.8", port=53, timeout=10):
         return False
 
 
-def save_endpoint(url, port, protocol, ip):
+def save_endpoint(protocol, url, port, ip_version):
+
     # prevent duplication
-    if not endpoint_exists(url, port, protocol, ip):
+    if not endpoint_exists(url, port, protocol, ip_version):
         endpoint = Endpoint()
-        endpoint.port = port
         endpoint.url = url
-        endpoint.protocol = protocol
         endpoint.domain = url.url
-        endpoint.ip = ip
+
+        endpoint.port = port
+        endpoint.protocol = protocol
+        endpoint.ip_version = ip_version
+
+        endpoint.is_dead = False
         endpoint.discovered_on = datetime.now(pytz.utc)
         # endpoint.dossier = "Found using the http scanner."  #
         endpoint.save()
@@ -277,22 +278,109 @@ def save_endpoint(url, port, protocol, ip):
     return
 
 
-def endpoint_exists(url, port, protocol, ip):
+@app.task
+def revive_url(url):
+    """
+    This does not revive all endpoints... There should be new ones to better match with actual
+    happenings with servers.
+
+    Should this add a new url instead of reviving the old one to better reflect the network?
+
+    :param url:
+    :return:
+    """
+    if url.not_resolvable:
+        url.not_resolvable = False
+        url.not_resolvable_since = datetime.now(pytz.utc)
+        url.not_resolvable_reason = "Made resolvable again since ip address was found."
+        url.save()
+
+
+@app.task
+def kill_url(url):
+    url.not_resolvable = True
+    url.not_resolvable_since = datetime.now(pytz.utc)
+    url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
+    url.save()
+
+    Endpoint.objects.all().filter(url=url).update(is_dead=True,
+                                                  is_dead_since=datetime.now(pytz.utc),
+                                                  is_dead_reason="Url was killed")
+
+    UrlIp.objects.all().filter(url=url).update(
+        is_unused=True,
+        is_unused_since=datetime.now(pytz.utc),
+        is_unused_reason="Url was killed"
+    )
+
+
+@app.task
+def store_url_ips(url, ips):
+    """
+    Todo: method should be stored in manager
+
+    Be sure to give all ip's that are currently active in one call. Mix IPv4 and IPv6.
+
+    the http endpoint finder will clash with qualys on this method, until we're using the same
+    method to discover all ip's this url currently has.
+    """
+
+    for ip in ips:
+
+        # sometimes there is no ipv4 or 6 address... or you get some other dirty dataset.
+        if not ip:
+            continue
+
+        # the same thing that exists already? don't do anything about it.
+        if UrlIp.objects.all().filter(url=url, ip=ip, is_unused=False).count():
+            continue
+
+        epip = UrlIp()
+        epip.ip = ip
+        epip.url = url
+        epip.is_unused = False
+        epip.discovered_on = datetime.now(pytz.utc)
+        epip.rdns_name = get_rdns_name(ip)
+        epip.save()
+
+    # and then clean up all that are not in the current set of ip's.
+    UrlIp.objects.all().filter(url=url, is_unused=False).exclude(ip__in=ips).update(
+        is_unused=True,
+        is_unused_since=datetime.now(pytz.utc),
+        is_unused_reason="cleanup at storing new endpoints"
+    )
+
+
+@timeout(10)
+def get_rdns_name(ip):
+    reverse_name = ""
+    try:
+        reverse_name = socket.gethostbyaddr(ip)
+    except (TimeoutError, socket.herror):
+        # takes too long
+        # host doesn't exist
+        pass
+    except BaseException as e:
+        logger.error('Unknown rdns failure %s on ip %s' % (str(e), ip))
+
+    return reverse_name
+
+
+def endpoint_exists(url, port, protocol, ip_version):
     return Endpoint.objects.all().filter(url=url,
                                          port=port,
-                                         ip=ip,
+                                         ip_version=ip_version,
                                          protocol=protocol,
                                          is_dead=False).count()
 
 
-def kill_endpoint(url, port, protocol, ip):
+def kill_endpoint(protocol, url, port, ip_version):
     eps = Endpoint.objects.all().filter(url=url,
                                         port=port,
-                                        ip=ip,
+                                        ip_version=ip_version,
                                         protocol=protocol,
                                         is_dead=False)
 
-    # todo: check if there is something attached to the endpoint?
     for ep in eps:
         ep.is_dead = True
         ep.is_dead_since = datetime.now(pytz.utc)
