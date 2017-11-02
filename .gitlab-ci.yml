@@ -33,8 +33,7 @@ test_mysql: &test_mysql_template
     DJANGO_DATABASE: production
     # add mysqlclient to tox environment
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
-  only:
-    - master
+  only: [master]
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
@@ -56,8 +55,7 @@ test_postgres: &test_postgres_template
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
 
   # run long/non-critical tests only on master
-  only:
-    - master
+  only: [master]
 
 # code quality checks
 check:
@@ -68,18 +66,23 @@ check:
     - tox -e check
     - shellcheck tests/*.sh tools/*.sh
 
+  # runs on merge requests, merge requests require rebase, no need to run on master again
+  except: [master]
+
 dataset:
   <<: *test_template
   script:
     - tox -e datasets
+
+  # runs on merge requests, merge requests require rebase, no need to run on master again
+  except: [master]
 
 dataset_mysql:
   <<: *test_mysql_template
   script:
     - tox -e datasets
   # run long tests only on master
-  only:
-    - master
+  only: [master]
 
 dataset_postgres:
   <<: *test_postgres_template
@@ -115,8 +118,7 @@ build:
     - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version|tr + _)
     - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
 
-  only:
-    - master
+  only: [master]
 
 test_build:
   stage: test
@@ -137,7 +139,7 @@ test_build:
     # run simple smoketests to verify Docker image is sane
     - tests/docker.sh docker
 
-  # run on MR
+  # run on merge request to determine if build will not break on master
   except: [master]
 
 
@@ -179,8 +181,7 @@ staging:
     - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
-  only:
-    - master
+  only: [master]
 
 production:
   stage: production
@@ -198,5 +199,4 @@ production:
 
     # insert deploy magic here
 
-  only:
-    - tags
+  only: [tags]
