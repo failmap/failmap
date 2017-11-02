@@ -17,6 +17,8 @@ test: &test_template
   script:
     - tox -e py34
 
+  retry: 1
+
 # functional testing using mysql database instead of sqlite
 test_mysql: &test_mysql_template
   <<: *test_template
@@ -34,6 +36,7 @@ test_mysql: &test_mysql_template
     # add mysqlclient to tox environment
     TOX_EXTRA_DEPS: -rrequirements.deploy.txt
   only: [master]
+  retry: 1
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
@@ -56,6 +59,7 @@ test_postgres: &test_postgres_template
 
   # run long/non-critical tests only on master
   only: [master]
+  retry: 1
 
 # code quality checks
 check:
@@ -119,6 +123,7 @@ build:
     - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
 
   only: [master]
+  retry: 1
 
 test_build:
   stage: test
@@ -141,6 +146,7 @@ test_build:
 
   # run on merge request to determine if build will not break on master
   except: [master]
+  retry: 1
 
 
 # provide codequality context for merge requests
@@ -161,6 +167,7 @@ codequality:
     - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
   artifacts:
     paths: [codeclimate.json]
+  retry: 1
 
 staging:
   stage: staging
@@ -182,6 +189,7 @@ staging:
     - docker push registry.gitlab.com/failmap/admin:latest
 
   only: [master]
+  retry: 1
 
 production:
   stage: production
@@ -200,3 +208,4 @@ production:
     # insert deploy magic here
 
   only: [tags]
+  retry: 1
