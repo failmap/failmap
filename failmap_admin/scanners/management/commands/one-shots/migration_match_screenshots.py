@@ -30,6 +30,5 @@ class Command(BaseCommand):
                     screenshot.url = Url.objects.all().filter(url=url).first()
                 except ObjectDoesNotExist:
                     print("No URL exists for screenshot: %s, saving without one." % screenshot)
-                    pass
 
                 screenshot.save()

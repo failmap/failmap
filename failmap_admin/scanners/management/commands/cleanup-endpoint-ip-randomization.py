@@ -1,12 +1,9 @@
-import ipaddress
 import logging
 
-import tldextract
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, Url
+from failmap_admin.scanners.models import Endpoint, Url
 
 logger = logging.getLogger(__package__)
 
@@ -53,7 +50,7 @@ opendata.arnhem.nl	2 december 2016 15:01	4 december 2016 15:50	1
     # https://docs.djangoproject.com/en/1.11/howto/custom-management-commands/
 
     def handle(self, *args, **options):
-        endpoints = Endpoint.objects.all()
+        # pyflakes endpoints = Endpoint.objects.all()
 
         # Command.urls_with_ridiculous_number_of_endpoints()
         Command.resequence_endpoint_deaths()

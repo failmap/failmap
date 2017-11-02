@@ -1,4 +1,3 @@
-import json
 import logging
 
 from failmap_admin.app.management.commands._private import TaskCommand

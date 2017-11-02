@@ -4,9 +4,7 @@ from time import sleep
 
 import pytz
 from django.core.management.base import BaseCommand
-from django.db.models import Q
 
-from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_screenshot import screenshot_endpoint
 
@@ -60,4 +58,3 @@ class Command(BaseCommand):
                 screenshot_endpoint(endpoint)
             except TimeoutError:
                 logger.warning('Took too long to make screenshot of: %s' % endpoint)
-                pass

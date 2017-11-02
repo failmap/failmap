@@ -4,9 +4,7 @@ from datetime import datetime
 import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
-from django.db import connection
 
-from failmap_admin import settings
 from failmap_admin.organizations.models import Coordinate, Organization, OrganizationType, Url
 from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 

@@ -5,9 +5,8 @@ import logging
 import time
 from collections import Counter
 
-import celery.exceptions
 import kombu.exceptions
-from celery.result import AsyncResult, GroupResult, ResultSet
+from celery.result import ResultSet
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
@@ -58,7 +57,6 @@ class TaskCommand(BaseCommand):
 
     def _add_arguments(self, parser):
         """Method to allow subclasses to add command specific arguments."""
-        pass
 
     def add_arguments(self, parser):
         """Add common argument for Celery tasks."""

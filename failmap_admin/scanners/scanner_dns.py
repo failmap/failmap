@@ -21,7 +21,7 @@ import subprocess
 import untangle
 from django.conf import settings
 
-from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_http import resolves
 
 logger = logging.getLogger(__package__)

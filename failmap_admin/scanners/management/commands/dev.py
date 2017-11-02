@@ -1,18 +1,13 @@
 import logging
-from datetime import datetime
 
-import pytz
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import (rate_organization_efficient,
                                                 rerate_url_with_timeline, show_timeline_console,
                                                 timeline)
-from failmap_admin.map.models import OrganizationRating
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
-# from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
-from failmap_admin.scanners.state_manager import StateManager
+from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
 
 logger = logging.getLogger(__package__)
 
@@ -128,12 +123,12 @@ def develop_determineratings():
     # for url in urls:
     #     DetermineRatings.get_url_score_modular(url)
 
-    when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
+    # pyflakes when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
     # when = datetime.now(pytz.utc)
 
     organization = Organization.objects.filter(name="Arnhem").get()
-    clear_organization_and_urls(organization)
-    rate_organization_urls_efficient(organization, create_history=True)
+    # pyflakes clear_organization_and_urls(organization)
+    # pyflakes rate_organization_urls_efficient(organization, create_history=True)
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
     rate_organization_efficient(organization, create_history=True)

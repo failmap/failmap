@@ -94,10 +94,10 @@ class SmartAddUrl(DashboardModule):
                 # the first/only object.
                 # are domains unique? no. Might cause issues.
 
-                domainandtld = xtrct.domain + '.' + xtrct.suffix
+                # pyflakes domainandtld = xtrct.domain + '.' + xtrct.suffix
                 completedomain = xtrct.subdomain + '.' + xtrct.domain + '.' + xtrct.suffix
 
-                o = Url.objects.get(url=domainandtld)
+                # pyflakes o = Url.objects.get(url=domainandtld)
                 newurl = Url(url=completedomain)
                 newurl.save()
                 # newurl.organization = o.organization.all()

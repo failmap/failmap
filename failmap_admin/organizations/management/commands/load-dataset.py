@@ -1,10 +1,7 @@
 import logging
 import warnings
-from datetime import datetime
 
-import pytz
 from django.core.management.commands.loaddata import Command as LoadDataCommand
-from django.db import connection
 
 from failmap_admin import settings
 

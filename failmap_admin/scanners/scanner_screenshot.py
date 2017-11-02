@@ -18,14 +18,11 @@ import os
 import platform
 import re
 from datetime import datetime
-from time import sleep
 
 import pytz
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from PIL import Image
 
-from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.models import Endpoint, Screenshot
 from failmap_admin.scanners.timeout import timeout
 

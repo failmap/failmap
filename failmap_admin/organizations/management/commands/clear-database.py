@@ -1,8 +1,5 @@
-import ipaddress
 import logging
 
-import tldextract
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.models import OrganizationRating, UrlRating

@@ -1,11 +1,11 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import OrganizationRating, UrlRating, rate_url
+from failmap_admin.map.determineratings import rate_url
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
-                     State, TlsQualysScan, TlsQualysScratchpad, Url)
+                     State, TlsQualysScan, TlsQualysScratchpad)
 
 
 class TlsQualysScanAdminInline(CompactInline):

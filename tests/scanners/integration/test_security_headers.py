@@ -1,7 +1,6 @@
 """Integration tests of scanner commands."""
 
 import json
-import os
 
 import pytest
 from django.core.management import call_command
@@ -41,7 +40,7 @@ def test_security_headers_notfound(responses, db, faalonië):
         call_command('scan-security-headers', '-v3', '-o', NON_EXISTING_ORGANIZATION)
 
 
-def test_security_headers(responses, db, faalonië):
+def test_security_headers_failure(responses, db, faalonië):
     """Test with failing endpoint."""
 
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', status=500)

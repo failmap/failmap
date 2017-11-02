@@ -1,12 +1,9 @@
-import ipaddress
 import logging
 
-import tldextract
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Url
+from failmap_admin.scanners.models import TlsQualysScan, TlsQualysScratchpad, Url
 
 logger = logging.getLogger(__package__)
 

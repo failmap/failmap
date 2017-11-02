@@ -6,12 +6,6 @@ future.
 
 """
 import logging
-import subprocess
-from datetime import datetime
-
-import pytz
-import untangle
-from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager

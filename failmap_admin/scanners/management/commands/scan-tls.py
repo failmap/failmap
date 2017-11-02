@@ -1,9 +1,7 @@
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.scanner_tls import test_real
 
 logger = logging.getLogger(__package__)

@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 
 import pytz
-from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta  # history
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -281,9 +280,6 @@ def timeline(url):
 
 def rate_timeline(timeline, url):
     logger.info("Rebuilding ratings for for %s" % url)
-
-    # will be filled with dates and
-    url_rating_jsons = {}
 
     previous_ratings = {}
     previous_endpoints = []
@@ -615,7 +611,6 @@ def show_timeline_console(timeline, url):
     print("")
     print(url.url)
     for moment in timeline:
-        scores = []
         # prepare endpoints to contain ratings
         # for ep in timeline[moment]['endpoints']:
         #     ep["ratings"] = {}
@@ -807,7 +802,6 @@ def rate_organization(organization, when=""):
             all_url_ratings.append(urlrating)
         except UrlRating.DoesNotExist:
             logger.warning("Url has no rating at this moment: %s %s" % (url, when))
-            pass
 
     # sort all_url_ratings on rating desc.
     # https://stackoverflow.com/questions/403421/
@@ -1297,7 +1291,6 @@ def get_report_from_scanner_tls_qualys(endpoint, when):
     except TlsQualysScan.DoesNotExist:
         # can happen that a rating simply isn't there yet. Perfectly possible.
         logger.debug("No tls qualys scan on endpoint %s." % endpoint)
-        pass
 
     return 0, ""
 

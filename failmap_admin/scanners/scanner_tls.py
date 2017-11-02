@@ -9,7 +9,6 @@ import untangle
 from django.conf import settings
 
 from celery_test import app
-from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.timeout import timeout
 
@@ -550,6 +549,6 @@ def cert_chain_is_complete(url, port):
     :param port:
     :return:
     """
-    tool = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
+    # pyflakes tool = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
 
     raise NotImplemented

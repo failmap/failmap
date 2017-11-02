@@ -3,7 +3,7 @@ import logging
 from failmap_admin.celery import app
 from failmap_admin.map.determineratings import (default_ratings, rate_organizations_efficient,
                                                 rerate_existing_urls)
-from failmap_admin.map.models import OrganizationRating, UrlRating
+from failmap_admin.map.models import OrganizationRating
 
 log = logging.getLogger(__name__)
 

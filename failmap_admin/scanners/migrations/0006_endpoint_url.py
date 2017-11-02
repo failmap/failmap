@@ -5,9 +5,6 @@ from __future__ import unicode_literals
 import django.db.models.deletion
 from django.db import migrations, models
 
-from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import Endpoint
-
 
 """
 +------+------------------------------------+----------------------------+----------------------------+------+----------+---------+----------------+---------------+

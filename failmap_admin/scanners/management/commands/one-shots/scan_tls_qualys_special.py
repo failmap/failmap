@@ -1,10 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import DetermineRatings
-from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Url
-from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys, TlsQualysScratchpad
+from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 
 class Command(BaseCommand):

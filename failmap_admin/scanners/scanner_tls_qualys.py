@@ -3,7 +3,6 @@
 import ipaddress
 import json
 import logging
-import sys
 from datetime import date, datetime, timedelta
 from random import randint
 from time import sleep
@@ -13,10 +12,9 @@ import pytz
 import requests
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap_admin.map.determineratings import (rate_organization_efficient, rate_organizations,
-                                                rate_url, rerate_url_with_timeline)
+from failmap_admin.map.determineratings import rate_organization_efficient, rerate_url_with_timeline
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad, Url
+from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad
 from failmap_admin.scanners.state_manager import StateManager
 
 from ..celery import app

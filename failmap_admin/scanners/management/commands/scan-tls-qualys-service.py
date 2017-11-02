@@ -34,7 +34,7 @@ class Command(BaseCommand):
             url = input("Type the url, without protocol:")
             url = Url.objects.all().filter(url=url).first()
 
-            s = ScannerTlsQualys()
+            s = scanner_tls_qualys.ScannerTlsQualys()
             s.scan([url.url])
 
             rerate_url_with_timeline(url=url)

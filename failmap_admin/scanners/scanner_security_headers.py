@@ -3,16 +3,12 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-import random
-import time
 from datetime import datetime
 from typing import List
 
-import celery
 import pytz
 import requests
-from celery import Celery, Task, group
-from celery.task import task
+from celery import group
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
 from failmap_admin.celery import ParentFailed, app

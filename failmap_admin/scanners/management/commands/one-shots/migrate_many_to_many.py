@@ -1,9 +1,5 @@
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import DetermineRatings
-from failmap_admin.organizations.models import Organization
-from failmap_admin.scanners.models import Url
-
 
 # Only the latest ratings...
 class Command(BaseCommand):

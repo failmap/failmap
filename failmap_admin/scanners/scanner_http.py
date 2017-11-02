@@ -229,7 +229,6 @@ def get_ips(url):
     except Exception as ex:
         # when not known: [Errno 8] nodename nor servname provided, or not known
         logger.debug("Get IPv4 error: %s" % ex)
-        pass
 
     try:
         x = socket.getaddrinfo(url, None, socket.AF_INET6)
@@ -237,7 +236,6 @@ def get_ips(url):
     except Exception as ex:
         # when not known: [Errno 8nodename nor servname provided, or not known
         logger.debug("Get IPv6 error: %s" % ex)
-        pass
 
     logger.debug("%s has IPv4 address: %s" % (url, ip4))
     logger.debug("%s has IPv6 address: %s" % (url, ip6))
