@@ -59,6 +59,8 @@ Ensure Docker is installed and running. Execute the following command to bring u
 
 This will build and start all required components and dependencies to run a complete instance of the Failmap project (grab some coffee the first time this takes a while).
 
+Notice: MySQL/Redis connection errors might be shown during startup. This is normal as the database container takes some time to startup. All related actions will be retried until they succeed. To check everything is correct see the `docker-compose ps` command below for the expected output.
+
 You can now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
 
@@ -96,7 +98,7 @@ To see all running components:
 
 The platform consists of 2 external dependencies `broker` (redis), `database` (mysql) and 2 main components `admin` (web frontend and administrative environment), `worker` (async task executor).
 
-Two tasks are run at startup `migrate` (database schema management) and `loaddata` (test and development data loading).
+Two tasks are run at startup `migrate` (database schema management) and `loaddata` (test and development data loading). The status of `Exit 0` indicated they have completed without issues.
 
 Most composer commands can be run against individual components, eg:
 
