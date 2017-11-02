@@ -457,7 +457,7 @@ if DEBUG:
         'django_statsd.panel.StatsdPanel',
     ]
     # 'log' metrics to toolbar during normal invocation and to logging in celery worker
-    if len(sys.argv) > 1 and sys.argv[2] == 'failmap_admin.celery:app':
+    if len(sys.argv) > 2 and sys.argv[2] == 'failmap_admin.celery:app':
         STATSD_CLIENT = 'django_statsd.clients.log'
     else:
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
