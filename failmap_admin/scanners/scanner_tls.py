@@ -8,7 +8,7 @@ import pytz
 import untangle
 from django.conf import settings
 
-from celery_test import app
+from failmap_admin.celery import app
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.timeout import timeout
 

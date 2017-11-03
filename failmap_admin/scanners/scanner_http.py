@@ -25,9 +25,8 @@ Likely: 80, 8080, 8008, 8888, 8088
 
 """
 import logging
-from datetime import datetime
 import socket
-from .timeout import timeout
+from datetime import datetime
 
 import pytz
 import requests
@@ -37,6 +36,7 @@ from requests.exceptions import ConnectionError
 from failmap_admin.celery import app
 
 from .models import Endpoint, UrlIp
+from .timeout import timeout
 
 logger = logging.getLogger(__package__)
 
@@ -200,7 +200,7 @@ def can_connect(protocol, url, port):
         - BadStatusLine
         - CertificateError
         - certificate verify failed
-        
+
         Perhaps: (todo)
         - EOF occurred in violation of protocol
         """

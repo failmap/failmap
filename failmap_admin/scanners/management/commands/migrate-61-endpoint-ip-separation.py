@@ -1,15 +1,9 @@
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 
-
-from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.models import Endpoint, UrlIp, \
-    EndpointGenericScan, TlsQualysScan, Screenshot
-from failmap_admin.scanners.scanner_http import scan_url, scan_urls
-
-from .support.arguments import add_discover_verify, add_organization_argument
+from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan,
+                                           UrlIp)
 
 logger = logging.getLogger(__package__)
 
@@ -27,6 +21,7 @@ class Command(BaseCommand):
         #   todo: history slider does not change report over time. Also on original.
         # scanners should work differently: ip has to be stored separately.
         # life-cycle of discovery changes completely.
+
 
 def move_ip_information():
     """
@@ -60,6 +55,7 @@ def move_ip_information():
     epips = UrlIp.objects.all()
     for epip in epips:
         UrlIp.objects.all().filter(url=epip.url, ip=epip.ip).exclude(id=epip.id).delete()
+
 
 """
 Going back:

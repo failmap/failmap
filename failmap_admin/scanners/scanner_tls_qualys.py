@@ -36,17 +36,17 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.map.determineratings import rate_organization_efficient, rerate_url_with_timeline
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan, TlsQualysScratchpad, EndpointGenericScan
-
-from failmap_admin.scanners.state_manager import StateManager
+from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
+                                           TlsQualysScratchpad)
 from failmap_admin.scanners.scanner_http import store_url_ips
+from failmap_admin.scanners.state_manager import StateManager
 
 from ..celery import app
 
 log = logging.getLogger(__name__)
 
 
-def scan(urls: List[Url]):
+def scan_url_list(urls: List[Url]):
     urls = external_service_task_rate_limit(urls)
     log.debug("Domains to scan: %s", len(urls))
 
@@ -105,7 +105,7 @@ def scan_task(url):
 
         """
         While the documentation says to check every 10 seconds, we'll do that between every
-        20 to 25, simply because it matters very little when scans are ran parralel. 
+        20 to 25, simply because it matters very little when scans are ran parralel.
         https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
         """
         sleep(20 + randint(0, 5))  # don't pulsate.
@@ -445,9 +445,9 @@ def endpoints_alive_in_past_24_hours(url):
                                      endpoint__protocol__in=["https"],
                                      scan_date__gt=date.today() - timedelta(1)).exists()
     if x:
-        log.debug("Scanned in past 24 hours: yes %s", url.url)
+        log.debug("Scanned in past 24 hours: yes: %s", url.url)
     else:
-        log.debug("Scanned in past 24 hours: no %s", url.url)
+        log.debug("Scanned in past 24 hours: no : %s", url.url)
     return x
 
 

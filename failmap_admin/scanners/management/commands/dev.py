@@ -7,7 +7,7 @@ from failmap_admin.map.determineratings import (rate_organization_efficient,
                                                 timeline)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_security_headers import scan_all_urls_celery, scan_headers
+from failmap_admin.scanners.scanner_security_headers import scan as scan_headers
 
 logger = logging.getLogger(__package__)
 
@@ -85,10 +85,6 @@ def test_sslscan_real():
     test_real('johnkr.com', 443)
 
 
-def develop_celery_test_async_tasks():
-    scan_all_urls_celery()
-
-
 def develop_celery_advanced():
     url = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
     http_endpoints = Endpoint.objects.all().filter(url=url, is_dead=False, protocol='http')
@@ -101,11 +97,6 @@ def develop_celery_advanced():
 
     # for endpoint in eps:
     #     dispatch_scan_security_headers(endpoint)
-
-
-def develop_celery():
-    from celery_test import add
-    add.delay(1, 2)
 
 
 def develop_security_headers_scanner():
@@ -127,8 +118,6 @@ def develop_determineratings():
     # when = datetime.now(pytz.utc)
 
     organization = Organization.objects.filter(name="Arnhem").get()
-    # pyflakes clear_organization_and_urls(organization)
-    # pyflakes rate_organization_urls_efficient(organization, create_history=True)
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
     rate_organization_efficient(organization, create_history=True)

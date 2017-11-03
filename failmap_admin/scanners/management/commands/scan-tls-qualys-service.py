@@ -3,8 +3,8 @@ import logging
 from django.core.management.base import BaseCommand
 
 from failmap_admin.map.determineratings import rate_organization_efficient, rerate_url_with_timeline
-from failmap_admin.scanners.scanner_tls_qualys import scan_task, scan
 from failmap_admin.scanners.models import Url
+from failmap_admin.scanners.scanner_tls_qualys import scan, scan_task
 
 logger = logging.getLogger(__package__)
 

@@ -1,17 +1,20 @@
 """
-Check if a domain is only reachable on plain http, instead of both http and https
+Check if a domain is only reachable on plain http, instead of both http and https.
 
-Browsers first connect to http, not https when entering a domain. That will be changed in the
-future.
+Browsers first connect to http, not https when entering a domain. That will be changed in the future.
 
+
+Further reading:
+https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 """
 import logging
 
+
 from celery import group
 
+from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 
 from ..celery import app
 from .models import Endpoint
@@ -57,11 +60,14 @@ def scan_url(url):
     has_https = False
     http_endpoints = []
 
+    # The default ports matter for normal humans. All services on other ports are special services.
+    # we only give points if there is not a normal https site when there is a normal http site.
+    # todo: ip_version is relevant here.
     for endpoint in endpoints:
-        if endpoint.protocol == "http":
+        if endpoint.protocol == "http" and endpoint.port == 80:
             has_http = True
             http_endpoints.append(endpoint)
-        if endpoint.protocol == "https":
+        if endpoint.protocol == "https" and endpoint.port == 443:
             has_https = True
 
     # calculate the score
@@ -122,6 +128,7 @@ def scan_url(url):
 def verify_is_secure(url):
     # i've seen qualys saying there is no TLS, while there is!
     # This _might_ revive an endpoint.
+
     scanner_http_scan_urls([url], [443], ['https'])
 
     endpoints = Endpoint.objects.all().filter(url=url, is_dead=False,
@@ -131,8 +138,6 @@ def verify_is_secure(url):
         return True
     logger.debug("Url is still not secure: %s" % url)
     return False
-
-# https://stackoverflow.com/questions/20475552/python-requests-library-redirect-new-url#20475712
 
 
 def redirects_to_safety(url):

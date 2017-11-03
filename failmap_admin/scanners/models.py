@@ -85,9 +85,11 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.domain,  self.ip, self.ip_version,  self.protocol, self.port, self.id)
+            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.domain,  self.ip, self.ip_version,
+                                                     self.protocol, self.port, self.id)
         else:
-            return "%s = %s IPv%s | %s/%s [%s]" % (self.domain, self.ip, self.ip_version, self.protocol, self.port, self.id)
+            return "%s = %s IPv%s | %s/%s [%s]" % (self.domain, self.ip, self.ip_version,
+                                                   self.protocol, self.port, self.id)
 
     def uri_url(self):
         return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
@@ -145,7 +147,6 @@ class UrlIp(models.Model):
     is_unused_since = models.DateTimeField(blank=True, null=True)
 
     is_unused_reason = models.CharField(max_length=255, blank=True, null=True)
-
 
 
 class TlsQualysScan(models.Model):

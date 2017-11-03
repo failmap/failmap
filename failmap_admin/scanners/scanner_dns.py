@@ -1,20 +1,14 @@
-# This is going to scan DNS using well known tools.
+"""
+Performs a range of DNS scans:
+- Using Search engines
+- Using Wordlists
+- Using Certificate Transparency
 
-# DNS Recon:
-# The Harvester: - going to deprecated
+This library deserves a cleanup.
 
 """
-DNS Recon in some cases things all subdomains are valid, correctly, because there is always an
-answer. So we're going to test if a few random domains exist and such.
+# todo: if ScannerHttp.has_internet_connection():
 
-Afterwards, we do know that a subdomain exist, but we don't know what ports give results we can
-audit. We will check for TLS on 443. There are infinite possibilities.
-We can check both for endpoints on http and https for the new domains. So they can be picked up by
-other scanners.
-
-todo: noordwijkerhout.nl, has a wildcard, but dnsrecon doesn't notice. Develop a wildcard detection.
-Sometimes it detects it, sometimes it doesnt.
-"""
 import logging
 import subprocess
 
@@ -25,11 +19,6 @@ from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_http import resolves
 
 logger = logging.getLogger(__package__)
-
-
-# todo: record that some domains have a catch all, and should not be scanned.
-# the catch all is sometimes not detected by dnsrecon
-
 
 harvester_path = settings.TOOLS['theHarvester']['executable']
 dnsrecon_path = settings.TOOLS['dnsrecon']['executable']
@@ -60,12 +49,8 @@ wordlists = {
     }
 }
 
-# todo: make a "tool" dir, or something so the harvester and such are always available.
-# todo: if ScannerHttp.has_internet_connection():
 
 # todo: move this to url logic / url manager. The resolves bit is somewhat in the way. Refactor
-
-
 def add_subdomain(subdomain, url):
     fulldomain = subdomain + "." + url.url
     logger.debug("Trying to add subdomain to database: %s" % fulldomain)
@@ -172,8 +157,6 @@ def search_engines_scan(url):
             addedlist.append(added)
     return addedlist
 
-# todo: also include censys, google and let's encrypt( if has one )
-
 
 def certificate_transparency(urls):
     """
@@ -226,9 +209,9 @@ def certificate_transparency(urls):
         return addedlist
 
 
+# todo: very ugly parsing, should be just reading the XML output.
 def subdomains_harvester(url):
     # deprecated
-    # todo: very ugly parsing, should be just reading the XML output.
     # python theHarvester.py -d zutphen.nl -b google -l 100
     engine = "google"
     process = subprocess.Popen(['python', harvester_path,
@@ -304,23 +287,22 @@ def create_nonsense():
             text_file.write(word + '\n')
 
 
-def organization_brute_dutch(self, organization):
+def organization_brute_dutch(organization):
     urls = topleveldomains(organization)
     wordlist = wordlists["dutch_basic"]["path"]
     return dnsrecon_brute(urls, wordlist)
 
 
-def organization_brute_threeletters(self, organization):
+def organization_brute_threeletters(organization):
     urls = topleveldomains(organization)
     wordlist = wordlists["three_letters"]["path"]
     return dnsrecon_brute(urls, wordlist)
 
+
 # hundreds of words
 # todo: language matters, many of the NL subdomains don't make sense in other countries.
 # todo: don't use the subdomains that are already known to exist.
-
-
-def organization_brute_knownsubdomains(self, organization):
+def organization_brute_knownsubdomains(organization):
     update_wordlist_known_subdomains()
     urls = topleveldomains(organization)
     wordlist = wordlists["known_subdomains"]["path"]
@@ -333,7 +315,7 @@ def brute_known_subdomains(urls):
     return dnsrecon_brute(urls, wordlist)
 
 
-def organization_standard_scan(self, organization):
+def organization_standard_scan(organization):
     urls = Url.objects.all().filter(organization=organization,
                                     url__iregex="^[^.]*\.[^.]*$")
     return dnsrecon_default(urls)
@@ -402,10 +384,9 @@ def dnsrecon_default(urls):
 
     return imported_urls
 
+
 # This helps to determine at database level if the DNS uses wildcards, so it can be dealt
 # with in another way.
-
-
 def topleveldomains(organization):
     # todo: move to manager, expand the queryset with the uses dns wildcard.
     topleveldomains = Url.objects.all().filter(organization=organization,
@@ -415,7 +396,7 @@ def topleveldomains(organization):
     non_wildcard_toplevel_domains = []
     # inspect if the url employs wildcards. If so, register it and make it a point of
     # interest for people to test this by hand (or more advanced scanners)
-    create_nonsense()  # Get some random stuff.
+
     for url in topleveldomains:
         if url_uses_wildcards(url):
             logger.info("Domain %s uses wildcards, DNS brute force not possible" % url.url)
@@ -431,6 +412,12 @@ def topleveldomains(organization):
 
 
 def url_uses_wildcards(url):
+    """
+    We need to perform a check ourselves, since we cannot get from the DNSRecon report if the url
+    uses wildcards. We store this ourselves so we can better filter domains.
+
+    In some cases DNSrecon makes a wrong assumption about wildcard usage. This is hopefully a bit better.
+    """
     logger.debug("Checking for DNS wildcards on domain: %s" % url.url)
     file = "%s_data_wildcards.json" % url.url
     path = settings.TOOLS['dnsrecon']['output_dir'] + file
@@ -438,6 +425,7 @@ def url_uses_wildcards(url):
     logger.debug("DNS results will be stored in file: %s" % path)
 
     # never continue with wildcard domains
+    create_nonsense()
     p = subprocess.Popen(['python', dnsrecon_path,
                           '--domain', url.url,
                           '-t', 'brt',
@@ -460,7 +448,7 @@ def url_uses_wildcards(url):
     return wildcard
 
 
-def dnsrecon_google(url):
+def dnsrecon_google():
     raise NotImplemented
     # todo: make this new manual scan.
     # requires: netaddr, dnspython
@@ -470,9 +458,6 @@ def dnsrecon_google(url):
 
     # Brute force op DNS:
     # python dnsrecon.py --domain amsterdam.nl -j output_brt.json
-    return
-
-# todo: also perform basic endpoint scans for new subdomains
 
 
 def import_dnsrecon_report(url, path):
