@@ -53,13 +53,14 @@ class Command(DumpDataCommand):
 
         check_referential_integrity()
 
-        filename = "failmap_dataset_%s.yaml" % datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S")
+        filename = "failmap_dataset_{}.{options[format]}".format(
+            datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S"),
+            options=options
+        )
 
         # Override default options.
-        options["indent"] = 2
-        options["format"] = "yaml"
-        options["output"] = filename
-        options["verbosity"] = 1  # Show progress bar, it's not really helpful though :)
+        if not options['output']:
+            options["output"] = filename
 
         # Fill the list of things to export
         if not app_labels:
