@@ -1,35 +1,13 @@
 import logging
-from datetime import datetime
 
-import pytz
-from django.core.management.commands.dumpdata import Command as DumpDataCommand
-
-from .datasethelpers import check_referential_integrity
+from .create_dataset import Command as CreateDatasetCommand
 
 logger = logging.getLogger(__package__)
 
 
-# Remove ALL organization and URL ratings and rebuild them
-class Command(DumpDataCommand):
+class Command(CreateDatasetCommand):
     help = "Create a near complete export for debugging on another server."
 
-    def handle(self, *app_labels, **options):
+    FILENAME = "failmap_debug_dataset_{}.{options[format]}"
 
-        check_referential_integrity()
-
-        filename = "failmap_debug_dataset_%s.yaml" % datetime.now(pytz.utc).strftime("%Y%m%d_%H%M%S")
-
-        # Override default options.
-        options["indent"] = 2
-        options["format"] = "yaml"
-        options["output"] = filename
-        options["verbosity"] = 1  # Show progress bar, it's not really helpful though :)
-
-        # Fill the list of things to export
-        if not app_labels:
-            app_labels = ('organizations', 'scanners', 'map', 'django_celery_beat')
-
-        logger.debug(app_labels)
-        logger.debug(options)
-
-        super(Command, self).handle(*app_labels, **options)
+    APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat')
