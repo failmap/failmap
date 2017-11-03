@@ -34,7 +34,7 @@ test_mysql: &test_mysql_template
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
     # add mysqlclient to tox environment
-    TOX_EXTRA_DEPS: -rrequirements.deploy.txt
+    TOX_EXTRAS: deploy
   only: [master]
   retry: 1
 
@@ -55,7 +55,7 @@ test_postgres: &test_postgres_template
     DB_ENGINE: postgresql_psycopg2
     DB_HOST: postgres
     # add mysqlclient to tox environment
-    TOX_EXTRA_DEPS: -rrequirements.deploy.txt
+    TOX_EXTRAS: deploy
 
   # run long/non-critical tests only on master
   only: [master]
