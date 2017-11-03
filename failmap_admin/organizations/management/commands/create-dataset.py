@@ -74,9 +74,12 @@ class Command(DumpDataCommand):
             options=options
         )
 
-        # Override default options.
+        # if no output specified use default file
         if not options['output']:
             options["output"] = filename
+        # allow to output to stdout to enable gzip compression if needed
+        if options['output'] == '-':
+            options['output'] = None
 
         # unless specified on the commandline, use default set of apps to export
         if not app_labels:
