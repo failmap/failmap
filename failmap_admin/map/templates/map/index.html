@@ -5,6 +5,8 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=0.5">
         <meta name="theme-color" content="Tomato"/>
+        <!-- export variables to javascript from server configuration -->
+        <meta name="mailto" content="{{mailto}}">
 
         <title>{% trans "Site Title" %}</title>
         <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/>
@@ -15,10 +17,6 @@
             <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
             <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
         {% endcompress %}
-        <script type="text/javascript">
-          // export variables from server configuration
-          var mailto = '{{ mailto }}';
-        </script>
         {% if debug %}
             <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
@@ -404,6 +402,54 @@
             </div>
         </div>
     </body>
+    <script type="x-template" id="fullscreenreport">
+      {% verbatim %}
+      <div class="page-header" id="fullscreenreport" v-if="visible">
+        <div v-if="name" class="fullscreenlayout">
+          <h1>
+            {{ name }}
+          </h1>
+          <p class="closebutton" onclick="vueFullScreenReport.hide()">
+            X
+          </p>
+          <div>
+            Dit resultaat delen?<br>
+            <br>
+            Gegevens van: {{ humanize(when) }}<br>
+            Score: {{ points }}, congratulations!<br>
+            <br>
+            Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br>
+            Ontbreken er domeinen? <a v-bind:href="'mailto:' + mailto + '?subject=Nieuwe%20domeinen%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br>
+            <br>
+            <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.points) + ', rgba(255, 255, 255,.5));'">
+              <div class="screenshotlist">
+                <div v-for="endpoint in url.endpoints" class="servicelink">
+                  <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
+                   <a v-bind:href="endpoint.protocol + '://' + url.url + ':' + endpoint.port" target="_blank" v-bind:title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port"></a>
+                  <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
+                </div>
+              </div>
+              <div class="reportlist">
+                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br>
+                <a v-bind:href="'mailto:' + mailto + '?subject=verkeerde%20bevinding%20op%20' + url.url + '&amp;body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A- %0D%0A- %0D%0A- %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'" class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste bevinding</a>
+                <div v-for="endpoint in url.endpoints">
+                  <br>
+                  &nbsp; Adres: {{ endpoint.ip }}:{{ endpoint.port }}
+                  <div v-for="rating in endpoint.ratings">
+                    <h3>
+                      &nbsp; {{ create_header(rating) }}
+                    </h3>&nbsp; &nbsp; {{ rating.explanation }}<br>
+                    &nbsp; &nbsp; Sinds: {{ humanize(rating.since) }}, Last Check: {{ humanize(rating.last_scan) }}<br>
+                    &nbsp; &nbsp;<br>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endverbatim %}
+    </script>
 </html>
 <!--
 This page was generated with MSPAINT.EXE on {{ timestamp }} in over 9000 seconds, version: {{ version }}.

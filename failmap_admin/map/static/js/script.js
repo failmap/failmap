@@ -104,50 +104,7 @@ var failmap = {
         this.fullscreenreport.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'fullscreenmap');
             L.DomEvent.disableClickPropagation(this._div);
-            this._div.innerHTML = '<div class="page-header" id="fullscreenreport" v-if="visible">\n' +
-                '                <div v-if="name" class="fullscreenlayout">\n' +
-                '                    <h1><span class="organization_points" v-html="organization_points(points)"></span> {{ name }}</h1>\n' +
-                '                    <p class="closebutton" onclick="vueFullScreenReport.hide()">X</p>\n' +
-                '                    <div>\n' +
-                '                        Dit resultaat delen? <span v-html="create_twitter_link(name, twitter_handle, points)"></span><br />' +
-                '                        <br />' +
-                '                        Gegevens van: {{ humanize(when) }}<br />\n' +
-                '                        Score: {{ points }}, congratulations!<br />\n' +
-                '                        <br />' +
-                '                        Gaat faalkaart niet ver genoeg? <a v-bind:href="\'mailto:\' + mailto + \'?subject=Pentest%20aanvraag%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Vraag hier een echte pentest aan.</a><br/>\n' +
-                '                        Ontbreken er domeinen? <a v-bind:href="\'mailto:\' + mailto + \'?subject=Nieuwe%20domeinen%20voor%20\'+name+\'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'">Stuur hier domeinen in.</a><br/>\n' +
-                '                        <br />\n' +
-                '                        <div v-for="url in urls" class="perurl" v-bind:style="\'background: linear-gradient(\' + colorizebg(url.points) + \', rgba(255, 255, 255,.5));\'">\n' +
-                '                            <div class="screenshotlist">\n' +
-                '                                <div v-for="endpoint in url.endpoints" class="servicelink">\n' +
-            '                                        <!-- There is no support for different ip\'s/ipv6 in endpoint, only for protocols. -->\n' +
-            '                                        <a v-bind:href="endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port" target="_blank"\n' +
-            '                                        v-bind:title="\'Visit \' + endpoint.protocol + \'://\' + url.url + \':\' + endpoint.port">\n' +
-            '                                            <div class="imagediv" v-bind:style="\'background-image: url(\\\'/static/images/screenshots/\'+ endpoint.protocol + idize(url.url) + endpoint.port + \'_latest.png\\\');\'"></div>\n' +
-            '                                            <span v-html="\'Bezoek adres van type: \' +  create_type(endpoint) "> </span>\n' +
-            '                                        </a>\n' +
-                '                                </div>\n' +
-                '                            </div>\n' +
-                '                            <div class="reportlist">\n' +
-                '                                <span v-html="total_awarded_points(url.points)"> </span>\n' +
-                '                                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)" >\n' +
-                '                                            {{ url.url }}</span><br />\n' +
-                '                                <a v-bind:href="\'mailto:\' + mailto + \'?subject=verkeerde%20bevinding%20op%20\' + url.url + \'&body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A- %0D%0A- %0D%0A- %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A\'" class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste bevinding</a>\n' +
-                '                                <div v-for="endpoint in url.endpoints"><br />\n' +
-                '                                        &nbsp; Adres: {{ endpoint.ip }}:{{ endpoint.port }}\n' +
-                '                                        <div v-for="rating in endpoint.ratings">\n' +
-                '                                            <h3>&nbsp; {{ create_header(rating) }}</h3>\n' +
-                '                                                &nbsp; &nbsp; <span v-html="awarded_points(rating.points)"></span> {{ rating.explanation }}<br />\n' +
-                '                                                &nbsp; &nbsp; Sinds: {{ humanize(rating.since) }}, Last Check: {{ humanize(rating.last_scan) }} <br />\n' +
-                '                                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>\n' +
-                '                                                <br />\n' +
-                '                                    </div>\n' +
-                '                                </div>\n' +
-                '                            </div>\n' +
-                '                        </div>\n' +
-                '                    </div>\n' +
-                '                </div>\n' +
-                '            </div>';
+            this._div.innerHTML = document.getElementById('fullscreenreport').innerHTML;
             return this._div;
         };
 
@@ -566,7 +523,7 @@ $(document).ready(function () {
             twitter_handle: '',
             name: "",
             urls: Array,
-            mailto: mailto,
+            mailto: document.head.querySelector("[name=mailto]").getAttribute('content')
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
@@ -689,7 +646,8 @@ $(document).ready(function () {
             name: "",
             twitter_handle: '',
             urls: Array,
-            visible: false
+            visible: false,
+            mailto: document.head.querySelector("[name=mailto]").getAttribute('content')
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
