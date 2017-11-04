@@ -81,6 +81,13 @@ body {
   padding-top: 50px;
 }
 
+/* prevent dynamic content loading in the div before this element to scroll
+the recently jumped anchor (report) out of view.
+*/
+div#report {
+  margin-top: 55px;
+}
+
 @media screen and (max-width: 768px) {
     body { padding-top: 50px; }
 }

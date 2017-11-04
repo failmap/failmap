@@ -417,17 +417,18 @@ var failmap = {
     },
 
     showreport: function(e) {
+        let organization_id = e.target.feature.properties['OrganizationID'];
         if (failmap.map.isFullscreen()){
             // var layer = e.target;
-            vueFullScreenReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
+            vueFullScreenReport.load(organization_id, vueMap.week);
             vueFullScreenReport.show();
 
             // Load the report for when you leave fullscreen
             // perhaps this should be in the leave fullscreen event handler
-            vueReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
+            vueReport.load(organization_id, vueMap.week);
         } else {
             vueReport.show_in_browser();
-            vueReport.load(e.target.feature.properties['OrganizationID'], vueMap.week);
+            vueReport.load(organization_id, vueMap.week);
         }
     }
 };
@@ -617,6 +618,8 @@ $(document).ready(function () {
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                     vueReport.twitter_handle = data.twitter_handle;
+                    // include id in anchor to allow url sharing
+                    location.href = '#report-' + OrganizationID;
                 });
             },
             show_in_browser: function(){
@@ -895,5 +898,15 @@ $(document).ready(function () {
     vueTopfail.load(0);
     vueStatistics.load(0);
     vueTerribleurls.load(0);
+
+    // if browser contains report anchor with organization id load that organization
+    let organization_id = RegExp('report-([0-9]+)').exec(location.hash)[1] || undefined;
+    if (organization_id != undefined){
+      // trigger rendering initial report html so anchor can be jumped to
+      vueReport.name = '  ';
+      // jump to the just rendered content (report anchor)
+      vueReport.show_in_browser();
+      vueReport.load(organization_id, vueMap.week);
+    }
 });
 
