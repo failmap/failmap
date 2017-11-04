@@ -464,3 +464,6 @@ if DEBUG:
     except ImportError:
         # send statsd metrics to logging
         STATSD_CLIENT = 'django_statsd.clients.log'
+
+# is administrative backend enabled on this instance
+ADMIN = bool(APPNAME == 'failmap-admin')

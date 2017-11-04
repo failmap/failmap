@@ -60,6 +60,11 @@
                         <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>DEBUG</span></li>
                     </ul>
                     {% endif %}
+                    {% if admin %}
+                    <ul class="nav navbar-nav pull-right">
+                        <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                      </ul>
+                    {% endif %}
                 </div><!--/.nav-collapse -->
             </div>
         </nav>

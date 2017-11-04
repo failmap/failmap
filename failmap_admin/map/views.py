@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import pytz
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.db import connection
 from django.db.models import Count
 from django.http import JsonResponse
@@ -33,6 +34,7 @@ def index(request):
 
     return render(request, 'map/index.html', {
         'version': get_distribution(__name__.split('.', 1)[0]).version,
+        'admin': settings.ADMIN,
     })
 
 

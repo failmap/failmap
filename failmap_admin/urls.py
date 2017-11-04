@@ -33,7 +33,8 @@ frontend_urls = [
 
 urlpatterns = frontend_urls.copy()
 
-if settings.APPNAME == 'failmap-admin':
+# enable admin url's if this is an administrative (more secured/read-write) instance
+if settings.ADMIN:
     urlpatterns += admin_urls
 
 if settings.DEBUG:
