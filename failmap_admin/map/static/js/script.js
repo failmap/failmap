@@ -114,7 +114,7 @@ var failmap = {
     add_searchbar: function () {
         this.searchbar.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
-            this._div.innerHTML = "<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' />";
+            this._div.innerHTML = "<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"Zoek op gemeente...\"/>";
             L.DomEvent.disableClickPropagation(this._div);
             return this._div;
         };
