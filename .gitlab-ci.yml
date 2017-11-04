@@ -122,7 +122,9 @@ build:
     - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version|tr + _)
     - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
 
-  only: [master]
+  only:
+    - master
+    - tags
   retry: 1
 
 test_build:
@@ -207,5 +209,6 @@ production:
 
     # insert deploy magic here
 
-  only: [tags]
+  only:
+    - tags
   retry: 1
