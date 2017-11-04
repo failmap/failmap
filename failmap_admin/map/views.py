@@ -35,6 +35,7 @@ def index(request):
     return render(request, 'map/index.html', {
         'version': get_distribution(__name__.split('.', 1)[0]).version,
         'admin': settings.ADMIN,
+        'mailto': settings.MAILTO,
     })
 
 

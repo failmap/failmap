@@ -467,3 +467,6 @@ if DEBUG:
 
 # is administrative backend enabled on this instance
 ADMIN = bool(APPNAME == 'failmap-admin')
+
+# general email address
+MAILTO = 'info@faalkaart.nl'
