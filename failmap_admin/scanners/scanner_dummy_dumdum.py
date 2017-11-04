@@ -9,7 +9,7 @@ import random
 import time
 from typing import List
 
-from celery import group
+from celery import Task, group
 
 from failmap_admin.celery import ParentFailed, app
 from failmap_admin.organizations.models import Organization, Url
@@ -28,17 +28,50 @@ EXPIRES = 5
 
 
 @app.task
-def scan(organization_names: List[str], execute=True):
-    """Compose and execute taskset to scan specified organizations."""
-    task = compose(organizations_from_names(organization_names))
-    if execute:
-        return task.apply_async()
-    else:
-        return task
+def scan(
+    organizations: dict = None,
+    urls: dict = None,
+    endpoints: dict = None
+) -> Task:
+    """Compose and execute taskset to scan specified organizations.
+
+    :param organizations: dict: limit organizations to scan to these filters, see below
+    :param urls: dict: limit urls to scan to these filters, see below
+    :param endpoints: dict: limit endpoints to scan to these filters, see below
+
+    Depending on the type of scanner (endpoint, domain level, etc) a list of scanable
+    items will be generated and a taskset will be composed to allow scanning of these items.
+
+    By default all elegible items will be used. Which means a complete scan of everything possible
+    with this scanner.
+
+    By specifying filters the list of items to scan can be reduced. These filters are passed to
+    Django QuerySet filters on the respective models.
+
+    For example, to scan all urls/endpoints for one organization named 'example' run:
+
+    >>> scan(organizations={'name__iexact': 'example})
+
+    Multiple filters can be applied, to scan only port 80 for organizations added today run:
+
+    >>> scan(
+    ...     organizations={'date_added__day': datetime.datetime.today().day},
+    ...     endpoints={'port': 80}
+    ... )
+
+    """
+    task = compose(organizations_from_names(organizations))
+
+    return task
 
 
 def compose(organizations: List[Organization]):
-    """Compose taskset to scan specified organizations."""
+    """Compose taskset to scan specified organizations.
+
+    :param organizations: List[Organization]:
+    :param organizations: List[Organization]:
+
+    """
 
     # collect all scannable urls for provided organizations
     urls = Url.objects.all().filter(is_dead=False,
@@ -51,7 +84,11 @@ def compose(organizations: List[Organization]):
               len(endpoints), len(urls), len(organizations))
 
     def compose_subtasks(endpoint):
-        """Create a task chain of scan & store for a given endpoint."""
+        """Create a task chain of scan & store for a given endpoint.
+
+        :param endpoint:
+
+        """
         scan_task = scan_dummy.s(endpoint.uri_url())
         store_task = store_dummy.s(endpoint)
         return scan_task | store_task
@@ -64,6 +101,12 @@ def compose(organizations: List[Organization]):
 
 @app.task
 def store_dummy(result, endpoint):
+    """
+
+    :param result: param endpoint:
+    :param endpoint:
+
+    """
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
@@ -89,6 +132,11 @@ class SomeError(Exception):
           retry_kwargs={'max_retries': MAX_RETRIES},
           expires=EXPIRES)
 def scan_dummy(self, uri_url):
+    """
+
+    :param uri_url:
+
+    """
     try:
         log.info('Start scanning %s', uri_url)
 
