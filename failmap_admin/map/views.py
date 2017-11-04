@@ -9,11 +9,13 @@ from django.db import connection
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
-from pkg_resources import get_distribution
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Url
+
+from .. import __version__
 
 one_minute = 60
 one_hour = 60 * 60
@@ -33,7 +35,7 @@ def index(request):
     """
 
     return render(request, 'map/index.html', {
-        'version': get_distribution(__name__.split('.', 1)[0]).version,
+        'version': __version__,
         'admin': settings.ADMIN,
         'mailto': settings.MAILTO,
     })
@@ -51,7 +53,25 @@ def security_txt(request):
 
 @cache_page(one_day)
 def manifest_json(request):
-    return render(request, 'map/manifest.json', content_type="application/javascript")
+    # App manifest
+    # https://developer.chrome.com/apps/manifest
+    # https://developer.mozilla.org/en-US/docs/Web/Manifest
+    manifest = {
+        "name": _("Fail Map"),
+        "short_name": _("Fail Map"),
+        "description": _("Fail Map Introduction"),
+        "version": __version__,
+        "manifest_version": 2,
+        "start_url": ".",
+        "display": "standalone",
+        "background_color": "#fff",
+        "orientation": "any",
+        "icons": [{
+            "src": "static/images/logo-200x200.png",
+            "sizes": "200x200",
+        }],
+    }
+    return JsonResponse(manifest)
 
 
 @cache_page(ten_minutes)
