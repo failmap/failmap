@@ -91,6 +91,27 @@ var failmap = {
             }
         });
 
+        //
+        var currentHash = ""
+        $(document).scroll(function () {
+            let current_anchor = $('a.jumptonav').filter(function () {
+                var top = window.pageYOffset;
+                var distance = top - $(this).offset().top;
+                var hash = $(this).attr('name');
+                // 30 is an arbitrary padding choice,
+                // if you want a precise check then use distance===0
+                if (distance < 30 && distance > -30 && currentHash != hash) {
+                    return true;
+                }
+            }).first();
+
+            var hash = current_anchor.attr('name');
+            if (hash != undefined){
+                history.pushState({}, '', '#' + hash);
+                currentHash = hash;
+            }
+        });
+
         this.add_fullscreen_hint();
         this.add_dataslider();
         this.add_searchbar();
