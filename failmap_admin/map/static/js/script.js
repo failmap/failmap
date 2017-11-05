@@ -64,7 +64,7 @@ var failmap = {
         // allow tiles to be fetched through a proxy to apply our own caching rules
         // and prevent exhausion of free mapbox account credits
         if (this.proxy_tiles){
-          tile_uri = '/proxy/' + tile_uri_base;
+            tile_uri = '/proxy/' + tile_uri_base;
         }
 
         L.tileLayer(tile_uri, {
@@ -181,13 +181,13 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
-                "                    <div v-for=\"url in urls\">\n" +
-                "                        <span v-bind:class=\"colorize(url.points)\">\n" +
-                "                            {{ url.url }}\n" +
-                "                        </span>\n" +
-                "                    </div>\n" +
-                "                    <br />\n" +
-                "                </div>";
+            "                    <div v-for=\"url in urls\">\n" +
+            "                        <span v-bind:class=\"colorize(url.points)\">\n" +
+            "                            {{ url.url }}\n" +
+            "                        </span>\n" +
+            "                    </div>\n" +
+            "                    <br />\n" +
+            "                </div>";
             return this._div;
         };
 
@@ -230,16 +230,16 @@ var failmap = {
     // get color depending on population density value
     getColor: function (d) {
         return d > 999 ? '#bd383c' :
-            d > 199 ? '#fc9645' :
-                d >= 0 ? '#62fe69' :
-                    '#c1bcbb';
+        d > 199 ? '#fc9645' :
+        d >= 0 ? '#62fe69' :
+        '#c1bcbb';
     },
 
     getColorCode: function (d) {
         return d === "red" ? '#bd383c' :
-            d === "orange" ? '#fc9645' :
-                d === "green" ? '#62fe69' :
-                    '#c1bcbb';
+        d === "orange" ? '#fc9645' :
+        d === "green" ? '#62fe69' :
+        '#c1bcbb';
     },
 
     style: function (feature) {
@@ -336,21 +336,18 @@ var failmap = {
             failmap.geojson.eachLayer(function(layer) {
                 if (layer.feature.geometry.type === "MultiPolygon")
                     layer.setStyle(failmap.style(layer.feature))
-
-                }
-            )
+            });
         } else {
             // text match
             failmap.geojson.eachLayer(function (layer) {
-                    if (layer.feature.properties.OrganizationName.toLowerCase().indexOf(query) !== -1) {
-                        if (layer.feature.geometry.type === "MultiPolygon")
-                            layer.setStyle(failmap.searchResultStyle(layer.feature))
-                    } else {
-                        if (layer.feature.geometry.type === "MultiPolygon")
-                            layer.setStyle(failmap.style(layer.feature))
-                    }
+                if (layer.feature.properties.OrganizationName.toLowerCase().indexOf(query) !== -1) {
+                    if (layer.feature.geometry.type === "MultiPolygon")
+                        layer.setStyle(failmap.searchResultStyle(layer.feature))
+                } else {
+                    if (layer.feature.geometry.type === "MultiPolygon")
+                        layer.setStyle(failmap.style(layer.feature))
                 }
-            )
+            });
         }
 
     },
@@ -593,10 +590,10 @@ $(document).ready(function () {
             second_opinion_links: function(rating, url){
                 if (rating.type === "security_headers_strict_transport_security")
                     return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
+                '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
                 if (rating.type === "tls_qualys")
                     return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
                 if (rating.type === "security_headers_x_xss_protection")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
                 if (rating.type === "security_headers_x_frame_options")
@@ -682,10 +679,10 @@ $(document).ready(function () {
         },
         methods: {
             show: function(){
-              this.visible = true;
+                this.visible = true;
             },
             hide: function(){
-              this.visible = false;
+                this.visible = false;
             },
             colorize: function (points) {
                 if (points < 199) return "green";
@@ -767,43 +764,43 @@ $(document).ready(function () {
         computed: {
             greenpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             redpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             orangepercentage: function () {
                 if (this.data.data) {
                     var score = 100 -
-                        roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
+                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
             },
             unknownpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
             greenurlpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+                roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
             },
 
             redurlpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                    roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+                roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
             },
 
             orangeurlpercentage: function () {
                 if (this.data.data) {
                     var score = 100 -
-                        roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                        roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                    roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                    roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
@@ -930,4 +927,3 @@ $(document).ready(function () {
         vueReport.selected = organization_id;
     }
 });
-
