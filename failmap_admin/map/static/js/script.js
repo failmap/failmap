@@ -563,12 +563,13 @@ $(document).ready(function () {
             // load list of organizations from map features
             organizations: function(){
                 if (vueMap.features != null){
-                    return vueMap.features.map(function(feature){
+                    let organizations = vueMap.features.map(function(feature){
                         return {
                             "id": feature.properties.OrganizationID,
                             "name": feature.properties.OrganizationName,
                         }
                     });
+                    return organizations.sort();
                 }
             }
         },
