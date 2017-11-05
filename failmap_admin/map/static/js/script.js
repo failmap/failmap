@@ -357,7 +357,12 @@ var failmap = {
         vueMap.loading = true;
         $.getJSON('/data/map/' + weeknumber, function (json) {
             // make map features (organization data) available to other vues
-            vueMap.features = json.features;
+            // do not update this attribute if an empty list is returned as currently
+            // the map does not remove organizations for these kind of responses.
+            if (json.features.length > 0){
+                vueMap.features = json.features;
+            }
+
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
                 failmap.geojson.eachLayer(function(layer){
