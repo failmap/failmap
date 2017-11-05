@@ -86,7 +86,7 @@ def organization_report(request, organization_id, weeks_back=0):
             r['pk'],
             r['twitter_handle'],
             r['organizationrating__rating'],
-            r['organizationrating__when'],
+            r['organizationrating__when'].isoformat(),
             r['organizationrating__calculation'],
         )
         # print(report_json)

@@ -446,7 +446,7 @@ def rate_timeline(timeline, url):
                         'tls_qualys',
                         message,
                         these_ratings['tls_qualys_scan'].rating_determined_on,
-                        these_ratings['tls_qualys_scan'].scan_moment,))
+                        these_ratings['tls_qualys_scan'].scan_moment.isoformat(),))
 
             if 'Strict-Transport-Security' in these_ratings.keys():
                 if 'Strict-Transport-Security' not in given_ratings[label]:
@@ -461,7 +461,7 @@ def rate_timeline(timeline, url):
                         'security_headers_strict_transport_security',
                         message,
                         these_ratings['Strict-Transport-Security'].rating_determined_on,
-                        these_ratings['Strict-Transport-Security'].last_scan_moment,))
+                        these_ratings['Strict-Transport-Security'].last_scan_moment.isoformat(),))
 
             if 'X-Frame-Options' in these_ratings.keys():
                 if 'X-Frame-Options' not in given_ratings[label]:
@@ -476,7 +476,7 @@ def rate_timeline(timeline, url):
                         'security_headers_x_frame_options',
                         message,
                         these_ratings['X-Frame-Options'].rating_determined_on,
-                        these_ratings['X-Frame-Options'].last_scan_moment,))
+                        these_ratings['X-Frame-Options'].last_scan_moment.isoformat(),))
 
             if 'X-XSS-Protection' in these_ratings.keys():
                 if 'X-XSS-Protection' not in given_ratings[label]:
@@ -491,7 +491,7 @@ def rate_timeline(timeline, url):
                         'security_headers_x_xss_protection',
                         message,
                         these_ratings['X-XSS-Protection'].rating_determined_on,
-                        these_ratings['X-XSS-Protection'].last_scan_moment,))
+                        these_ratings['X-XSS-Protection'].last_scan_moment.isoformat(),))
 
             if 'X-Content-Type-Options' in these_ratings.keys():
                 if 'X-Content-Type-Options' not in given_ratings[label]:
@@ -506,7 +506,7 @@ def rate_timeline(timeline, url):
                         'security_headers_x_content_type_options',
                         message,
                         these_ratings['X-Content-Type-Options'].rating_determined_on,
-                        these_ratings['X-Content-Type-Options'].last_scan_moment,))
+                        these_ratings['X-Content-Type-Options'].last_scan_moment.isoformat(),))
 
             if 'plain_https' in these_ratings.keys():
                 if 'plain_https' not in given_ratings[label]:
@@ -520,7 +520,7 @@ def rate_timeline(timeline, url):
                         'plain_https',
                         message,
                         these_ratings['plain_https'].rating_determined_on,
-                        these_ratings['plain_https'].last_scan_moment,))
+                        these_ratings['plain_https'].last_scan_moment.isoformat(),))
 
             # todo: remove the unneeded endpoint label.
             endpoint_template = """
@@ -1104,7 +1104,7 @@ def get_report_from_scanner_dead(endpoint, when):
         scan = scan.latest('is_dead_since')
 
         json = (rating_template % ("Endpoint was cleaned up.",
-                                   scan.is_dead_since, scan.is_dead_since))
+                                   scan.is_dead_since.isoformat(), scan.is_dead_since.isoformat()))
 
         logger.debug("Dead: On %s, Endpoint %s was dead." % (when, endpoint))
         return 0, json
@@ -1180,8 +1180,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
             header.lower().replace("-", "_"),
             header + " header present.",
             0,
-            scan.rating_determined_on,
-            scan.last_scan_moment))
+            scan.rating_determined_on.isoformat(),
+            scan.last_scan_moment.isoformat()))
         rating = 0
 
     else:
@@ -1189,8 +1189,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
             header.lower().replace("-", "_"),
             "Missing " + header + " header.",
             security_headers_scores[scan.type],
-            scan.rating_determined_on,
-            scan.last_scan_moment))
+            scan.rating_determined_on.isoformat(),
+            scan.last_scan_moment.isoformat()))
         rating = security_headers_scores[scan.type]
 
     return rating, json
@@ -1268,8 +1268,8 @@ def http_plain_rating_based_on_scan(scan):
 
     json = (rating_template % (scan.explanation,
                                scan.rating,
-                               scan.rating_determined_on,
-                               scan.last_scan_moment))
+                               scan.rating_determined_on.isoformat(),
+                               scan.last_scan_moment.isoformat()))
     return int(scan.rating), json
 
 
@@ -1351,11 +1351,11 @@ def tls_qualys_rating_based_on_scan(scan):
                 explanations[scan.qualys_rating_no_trust]
             starttls_json = (tlsratingtemplate %
                              (explanation, rating,
-                              scan.rating_determined_on, scan.scan_moment))
+                              scan.rating_determined_on.isoformat(), scan.scan_moment.isoformat()))
         else:
             starttls_json = (tlsratingtemplate %
                              (explanations[scan.qualys_rating], ratings[scan.qualys_rating],
-                              scan.rating_determined_on, scan.scan_moment))
+                              scan.rating_determined_on.isoformat(), scan.scan_moment.isoformat()))
 
             rating = ratings[scan.qualys_rating]
 
