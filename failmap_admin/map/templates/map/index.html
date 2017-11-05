@@ -55,6 +55,7 @@
                     <ul class="nav navbar-nav">
                         <li><a href="#intro">{% trans "Intro" %}</a></li>
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
+                        <li><a href="#report">{% trans "Report" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
@@ -284,12 +285,23 @@
 
             <div class="page-header" id="report">
                 <a name="report" class="jumptonav"></a>
-                <div v-if="name">
+                <div>
                     <div class="page-header">
-                        <h1><span class="organization_points" v-html="organization_points(points)"></span> {% verbatim %}{{ name }}{% endverbatim %}</h1>
+                        <h1><span class="organization_points"></span>{% trans "Report" %}</h1>
                         <a href="#" class="backtomap">back to map ↑</a>
                     </div>
                     <div>
+                      <div>
+                        {% trans "Show report for organization" %}:
+                        {% verbatim %}
+                        <select v-model="selected">
+                          <option v-for="organization in organizations" v-bind:value="organization.id">
+                            {{ organization.name }}
+                          </option>
+                        </select>
+                        {% endverbatim %}
+                      </div>
+                      <div v-if="selected">
                         Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
                         <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
@@ -328,6 +340,7 @@
                                 </div>
                             </div>
                         </div>
+                      </div>
                         {% endverbatim %}
                     </div>
                 </div>

@@ -217,3 +217,6 @@ msgstr ""
 #: failmap_admin/map/templates/map/topwin.html:9
 msgid "This is the top win from"
 msgstr ""
+
+msgid "Report"
+msgstr ""

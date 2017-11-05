@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-20 11:47+0000\n"
+"POT-Creation-Date: 2017-11-05 12:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,37 +21,47 @@ msgstr ""
 msgid "About Failmap"
 msgstr "Over Faalkaart"
 
-#: failmap_admin/map/templates/map/index.html:5
+#: failmap_admin/map/templates/map/index.html:11
 msgid "Site Title"
 msgstr "Faalkaart - Geeft inzicht in beveiliging."
 
-#: failmap_admin/map/templates/map/index.html:30
+#: failmap_admin/map/templates/map/index.html:46
 msgid "Toggle navigation"
 msgstr "In of uitklappen"
 
-#: failmap_admin/map/templates/map/index.html:35
-#: failmap_admin/map/templates/map/index.html:53
+#: failmap_admin/map/templates/map/index.html:51
+#: failmap_admin/map/templates/map/index.html:80 failmap_admin/map/views.py:60
+#: failmap_admin/map/views.py:61
 msgid "Fail Map"
 msgstr "Faalkaart"
 
-#: failmap_admin/map/templates/map/index.html:39
+#: failmap_admin/map/templates/map/index.html:55
 msgid "Intro"
 msgstr "Introductie"
 
-#: failmap_admin/map/templates/map/index.html:40
+#: failmap_admin/map/templates/map/index.html:56
 msgid "Numbers"
 msgstr "Cijfers"
 
-#: failmap_admin/map/templates/map/index.html:41
+#: failmap_admin/map/templates/map/index.html:57
+#: failmap_admin/map/templates/map/index.html:289
+msgid "Report"
+msgstr "Verslag"
+
+#: failmap_admin/map/templates/map/index.html:58
 #: failmap_admin/map/templates/map/topfail.html:6
 msgid "Top Fail"
 msgstr "Top faal"
 
-#: failmap_admin/map/templates/map/index.html:42
+#: failmap_admin/map/templates/map/index.html:59
 msgid "Explanation"
 msgstr "Uitleg"
 
-#: failmap_admin/map/templates/map/index.html:54
+#: failmap_admin/map/templates/map/index.html:68
+msgid "Admin"
+msgstr ""
+
+#: failmap_admin/map/templates/map/index.html:81 failmap_admin/map/views.py:62
 msgid "Fail Map Introduction"
 msgstr ""
 "Faalkaart geeft inzicht in hoe veilig uw gemeente is richting het internet. "
@@ -59,119 +69,133 @@ msgstr ""
 "Het is belangrijk dat dit goed gebeurt omdat hierover ook uw gegevens worden "
 "verstuurd."
 
-#: failmap_admin/map/templates/map/index.html:72
+#: failmap_admin/map/templates/map/index.html:94
+msgid "The Numbers"
+msgstr "De Cijfers"
+
+#: failmap_admin/map/templates/map/index.html:100
 msgid "Organizations"
 msgstr "Organisaties"
 
-#: failmap_admin/map/templates/map/index.html:73
+#: failmap_admin/map/templates/map/index.html:101
 msgid "Organizations Explained"
 msgstr ""
 "Organisaties hebben vaak meerdere internet adressen. Alle fouten op deze "
 "adressen bij elkaar opgeteld bepalen of de organisatie haar beveiliging op "
 "orde heeft."
 
-#: failmap_admin/map/templates/map/index.html:93
-#: failmap_admin/map/templates/map/index.html:130
+#: failmap_admin/map/templates/map/index.html:121
+#: failmap_admin/map/templates/map/index.html:158
 msgid "When"
 msgstr "Tijdstip"
 
-#: failmap_admin/map/templates/map/index.html:94
-#: failmap_admin/map/templates/map/index.html:131
+#: failmap_admin/map/templates/map/index.html:122
+#: failmap_admin/map/templates/map/index.html:159
 msgid "Number"
 msgstr "Aantal"
 
-#: failmap_admin/map/templates/map/index.html:95
-#: failmap_admin/map/templates/map/index.html:132
+#: failmap_admin/map/templates/map/index.html:123
+#: failmap_admin/map/templates/map/index.html:160
 msgid "Good"
 msgstr "Goed"
 
-#: failmap_admin/map/templates/map/index.html:96
-#: failmap_admin/map/templates/map/index.html:133
+#: failmap_admin/map/templates/map/index.html:124
+#: failmap_admin/map/templates/map/index.html:161
 msgid "Average"
 msgstr "Matig"
 
-#: failmap_admin/map/templates/map/index.html:97
-#: failmap_admin/map/templates/map/index.html:134
+#: failmap_admin/map/templates/map/index.html:125
+#: failmap_admin/map/templates/map/index.html:162
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap_admin/map/templates/map/index.html:114
+#: failmap_admin/map/templates/map/index.html:142
 msgid "Internet addresses"
 msgstr "Internet adressen"
 
-#: failmap_admin/map/templates/map/index.html:115
+#: failmap_admin/map/templates/map/index.html:143
 msgid "Internet addresses Explained"
 msgstr ""
 "Van de onderstaande adressen hebben we een beveilingsstatus weten te bepalen."
 
-#: failmap_admin/map/templates/map/index.html:153
+#: failmap_admin/map/templates/map/index.html:181
 msgid "Technical TLS"
 msgstr "Integriteit en vertrouwelijkheid"
 
-#: failmap_admin/map/templates/map/index.html:154
+#: failmap_admin/map/templates/map/index.html:182
 msgid "Technical stats TLS explained"
 msgstr ""
 "Goede versleuteling garandeert dat informatie niet door anderen gelezen of "
 "aangepast kan worden."
 
-#: failmap_admin/map/templates/map/index.html:160
-#: failmap_admin/map/templates/map/index.html:195
+#: failmap_admin/map/templates/map/index.html:188
+#: failmap_admin/map/templates/map/index.html:223
 msgid "Technology"
 msgstr "Beveiliging"
 
-#: failmap_admin/map/templates/map/index.html:161
-#: failmap_admin/map/templates/map/index.html:196
+#: failmap_admin/map/templates/map/index.html:189
+#: failmap_admin/map/templates/map/index.html:224
 msgid "Result"
 msgstr "Resultaat"
 
-#: failmap_admin/map/templates/map/index.html:162
-#: failmap_admin/map/templates/map/index.html:197
+#: failmap_admin/map/templates/map/index.html:190
+#: failmap_admin/map/templates/map/index.html:225
 msgid "Total"
 msgstr "Aantal"
 
-#: failmap_admin/map/templates/map/index.html:188
+#: failmap_admin/map/templates/map/index.html:216
 msgid "Technical stats headers"
 msgstr "Veiligheid inhoud website"
 
-#: failmap_admin/map/templates/map/index.html:189
+#: failmap_admin/map/templates/map/index.html:217
 msgid "Technical stats headers explained"
 msgstr "Of de website diverse aanvallen voorkomt."
 
-#: failmap_admin/map/templates/map/index.html:222
+#: failmap_admin/map/templates/map/index.html:250
 msgid "Services"
 msgstr "Diensten"
 
-#: failmap_admin/map/templates/map/index.html:223
+#: failmap_admin/map/templates/map/index.html:251
 msgid "Services explained"
 msgstr "Een adres kan allerlei diensten aanbieden, waaronder websites."
 
-#: failmap_admin/map/templates/map/index.html:235
+#: failmap_admin/map/templates/map/index.html:263
 msgid "Services faq"
 msgstr "Meer over Diensten"
 
-#: failmap_admin/map/templates/map/index.html:261
+#: failmap_admin/map/templates/map/index.html:294
+msgid "Show report for organization"
+msgstr "Toon verslag voor organisatie"
+
+#: failmap_admin/map/templates/map/index.html:296
+#, fuzzy
+#| msgid "Organization"
+msgid "Select an organization"
+msgstr "Selecteer een organisatie"
+
+#: failmap_admin/map/templates/map/index.html:302
 msgid "Data from"
 msgstr "Gegevens van"
 
-#: failmap_admin/map/templates/map/index.html:262
+#: failmap_admin/map/templates/map/index.html:303
 #: failmap_admin/map/templates/map/topfail.html:16
-#: failmap_admin/map/templates/map/topwin.html:16
+#: failmap_admin/map/templates/map/topwin.html:17
 msgid "Points"
 msgstr "Punten"
 
-#: failmap_admin/map/templates/map/index.html:262
+#: failmap_admin/map/templates/map/index.html:303
 msgid "congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap_admin/map/templates/map/index.html:281
+#: failmap_admin/map/templates/map/index.html:327
 msgid "Address"
 msgstr "Adres"
 
-#: failmap_admin/map/templates/map/index.html:285
+#: failmap_admin/map/templates/map/index.html:331
 msgid "Since"
 msgstr "Sinds"
 
-#: failmap_admin/map/templates/map/index.html:285
+#: failmap_admin/map/templates/map/index.html:331
 msgid "Last check"
 msgstr "Laatste controle"
 
@@ -197,13 +221,13 @@ msgstr "Dit zijn de slechtste adressen op"
 
 #: failmap_admin/map/templates/map/terrible_urls.html:14
 #: failmap_admin/map/templates/map/topfail.html:14
-#: failmap_admin/map/templates/map/topwin.html:14
+#: failmap_admin/map/templates/map/topwin.html:15
 msgid "Rank"
 msgstr "Notering"
 
 #: failmap_admin/map/templates/map/terrible_urls.html:15
 #: failmap_admin/map/templates/map/topfail.html:15
-#: failmap_admin/map/templates/map/topwin.html:15
+#: failmap_admin/map/templates/map/topwin.html:16
 msgid "Organization"
 msgstr "Organisatie"
 
@@ -216,7 +240,7 @@ msgid "This is the top fail from"
 msgstr "Dit is de top faal van"
 
 #: failmap_admin/map/templates/map/topfail.html:17
-#: failmap_admin/map/templates/map/topwin.html:17
+#: failmap_admin/map/templates/map/topwin.html:18
 msgid "Tweet"
 msgstr ""
 
@@ -224,7 +248,7 @@ msgstr ""
 msgid "Top Win!"
 msgstr "Top Win!"
 
-#: failmap_admin/map/templates/map/topwin.html:9
+#: failmap_admin/map/templates/map/topwin.html:10
 msgid "This is the top win from"
 msgstr "Dit is de top win van"
 
@@ -253,9 +277,6 @@ msgstr "Dit is de top win van"
 
 #~ msgid "The Bar"
 #~ msgstr "De Balk"
-
-#~ msgid "The Numbers"
-#~ msgstr "De Cijfers"
 
 #~ msgid "The Numbers Explained"
 #~ msgstr ""

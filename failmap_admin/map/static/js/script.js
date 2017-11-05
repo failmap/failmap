@@ -359,6 +359,8 @@ var failmap = {
     loadmap: function (weeknumber) {
         vueMap.loading = true;
         $.getJSON('/data/map/' + weeknumber, function (json) {
+            // make map features (organization data) available to other vues
+            vueMap.features = json.features;
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
                 failmap.geojson.eachLayer(function(layer){
@@ -427,8 +429,9 @@ var failmap = {
             // perhaps this should be in the leave fullscreen event handler
             vueReport.load(organization_id, vueMap.week);
         } else {
-            vueReport.show_in_browser();
-            vueReport.load(organization_id, vueMap.week);
+            // trigger load of organization data and jump to Report view.
+            vueReport.selected = organization_id;
+            location.href = '#report';
         }
     }
 };
@@ -452,6 +455,7 @@ $(document).ready(function () {
             loading: false,
             week: 0,
             selected_organization: -1,
+            features: null,
         },
         computed: {
             visibleweek: function () {
@@ -524,11 +528,31 @@ $(document).ready(function () {
             twitter_handle: '',
             name: "",
             urls: Array,
-            mailto: document.head.querySelector("[name=mailto]").getAttribute('content')
+            mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
+            selected: null
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
             // therefore we explicitly do this elsewhere
+        },
+        computed: {
+            // load list of organizations from map features
+            organizations: function(){
+                if (vueMap.features != null){
+                    return vueMap.features.map(function(feature){
+                        return {
+                            "id": feature.properties.OrganizationID,
+                            "name": feature.properties.OrganizationName,
+                        }
+                    });
+                }
+            }
+        },
+        watch: {
+            selected: function(){
+                // load selected organization id
+                this.load(this.selected);
+            }
         },
         methods: {
             colorize: function (points) {
@@ -902,11 +926,8 @@ $(document).ready(function () {
     // if browser contains report anchor with organization id load that organization
     let organization_id = RegExp('report-([0-9]+)').exec(location.hash)[1] || undefined;
     if (organization_id != undefined){
-      // trigger rendering initial report html so anchor can be jumped to
-      vueReport.name = '  ';
-      // jump to the just rendered content (report anchor)
-      vueReport.show_in_browser();
-      vueReport.load(organization_id, vueMap.week);
+        location.href = '#report';
+        vueReport.selected = organization_id;
     }
 });
 
