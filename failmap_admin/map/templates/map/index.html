@@ -66,8 +66,9 @@
                     {% endif %}
                     {% if admin %}
                     <ul class="nav navbar-nav pull-right">
+                        <li><span class="navbar-text"><span class="label label-default">{{ version }}</span></span></li>
                         <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                      </ul>
+                    </ul>
                     {% endif %}
                 </div><!--/.nav-collapse -->
             </div>
