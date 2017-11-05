@@ -299,9 +299,11 @@
                             {{ organization.name }}
                           </option>
                         </select>
+                        <span v-if='loading'> (loading...)</span>
                         {% endverbatim %}
                       </div>
-                      <div v-if="selected">
+                      <br />
+                      <div v-if="name">
                         Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
                         <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />

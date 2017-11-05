@@ -526,7 +526,8 @@ $(document).ready(function () {
             name: "",
             urls: Array,
             mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
-            selected: null
+            selected: null,
+            loading: false
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
@@ -632,8 +633,10 @@ $(document).ready(function () {
                 if (!weeks_ago) {
                     weeks_ago = 0;
                 }
-
+                vueReport.loading = true;
+                vueReport.name = null;
                 $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                    vueReport.loading = false;
                     vueReport.urls = data.calculation["organization"]["urls"];
                     vueReport.points = data.rating;
                     vueReport.when = data.when;
