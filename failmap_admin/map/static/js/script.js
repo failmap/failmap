@@ -569,7 +569,9 @@ $(document).ready(function () {
                             "name": feature.properties.OrganizationName,
                         }
                     });
-                    return organizations.sort();
+                    return organizations.sort(function(a,b){
+                        return a.name > b.name;
+                    });
                 }
             }
         },
