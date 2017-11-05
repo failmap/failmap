@@ -1,4 +1,9 @@
 /*!
+ *
+ * This custom version applies this fix:
+ * https://github.com/tuupola/jquery_lazyload/issues/383
+ * to support IE11 and Edge.
+ *
  * Lazy Load - JavaScript plugin for lazy loading images
  *
  * Copyright (c) 2007-2017 Mika Tuupola
