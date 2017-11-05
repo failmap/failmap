@@ -107,7 +107,7 @@ var failmap = {
 
             var hash = current_anchor.attr('name');
             if (hash != undefined){
-                history.pushState({}, '', '#' + hash);
+                history.replaceState({}, '', '#' + hash);
                 currentHash = hash;
             }
         });
