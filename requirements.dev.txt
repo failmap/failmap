@@ -12,6 +12,7 @@ pytest-logging
 django-coverage
 django-extensions
 django-debug-toolbar
+django-debug-toolbar-request-history
 
 # # dashboard for celery introspection
 # # run failmap-admin celery flower

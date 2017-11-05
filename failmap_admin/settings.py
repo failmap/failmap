@@ -456,7 +456,9 @@ if DEBUG:
         MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
         import debug_toolbar.settings
-        DEBUG_TOOLBAR_PANELS = debug_toolbar.settings.PANELS_DEFAULTS + [
+        DEBUG_TOOLBAR_PANELS = [
+            'ddt_request_history.panels.request_history.RequestHistoryPanel',
+        ] + debug_toolbar.settings.PANELS_DEFAULTS + [
             'django_statsd.panel.StatsdPanel',
         ]
         # send statsd metrics to debug_toolbar
