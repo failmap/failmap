@@ -924,8 +924,9 @@ $(document).ready(function () {
     vueTerribleurls.load(0);
 
     // if browser contains report anchor with organization id load that organization
-    let organization_id = RegExp('report-([0-9]+)').exec(location.hash)[1] || undefined;
-    if (organization_id != undefined){
+    let match = RegExp('report-([0-9]+)').exec(location.hash);
+    if (match){
+        let organization_id = match[1];
         location.href = '#report';
         vueReport.selected = organization_id;
     }
