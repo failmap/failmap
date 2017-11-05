@@ -134,7 +134,7 @@
             if (!this.settings) { return; }
 
             var self = this;
-            this.images.forEach(function (image) {
+            Array.prototype.forEach.call(this.images, function (image) {
                 var src = image.getAttribute(self.settings.src);
                 var srcset = image.getAttribute(self.settings.srcset);
                 if ("img" === image.tagName.toLowerCase()) {
