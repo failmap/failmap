@@ -453,8 +453,8 @@ var failmap = {
             vueReport.load(organization_id, vueMap.week);
         } else {
             // trigger load of organization data and jump to Report view.
-            vueReport.selected = organization_id;
             location.href = '#report';
+            vueReport.selected = organization_id;
         }
     }
 };
@@ -669,7 +669,9 @@ $(document).ready(function () {
                     vueReport.name = data.name;
                     vueReport.twitter_handle = data.twitter_handle;
                     // include id in anchor to allow url sharing
-                    location.href = '#report-' + OrganizationID;
+                    let newHash = 'report-' + OrganizationID;
+                    $('a#report-anchor').attr('name', newHash)
+                    history.replaceState({}, '', '#' + newHash);
                 });
             },
             show_in_browser: function(){
