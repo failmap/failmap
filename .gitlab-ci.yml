@@ -1,12 +1,11 @@
 stages:
-  - test
-  - build
+  - test_build
   - staging
   - production
 
 # functional testing
 test: &test_template
-  stage: test
+  stage: test_build
 
   image: registry.gitlab.com/failmap/ci:latest
 
@@ -64,7 +63,7 @@ test_postgres: &test_postgres_template
 # code quality checks
 check:
   <<: *test_template
-  stage: test
+  stage: test_build
 
   script:
     - tox -e check
@@ -98,7 +97,7 @@ dataset_postgres:
 
 # create distributable release
 build:
-  stage: build
+  stage: test_build
 
   services:
     - docker:dind
@@ -127,8 +126,8 @@ build:
     - tags
   retry: 1
 
-test_build:
-  stage: test
+build_test:
+  stage: test_build
 
   services:
     - docker:dind
@@ -153,7 +152,7 @@ test_build:
 
 # provide codequality context for merge requests
 codequality:
-  stage: test
+  stage: test_build
 
   services:
     - docker:dind
@@ -177,17 +176,26 @@ staging:
   image: docker:git
   services:
   - docker:dind
+
+  before_script:
+    # required for quering python package version
+    - apk add --no-cache python3
+
   script:
+    # store current version as artifact to copy into docker container
+    - python3 setup.py --version > version
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:build
-    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:staging
+    - docker pull registry.gitlab.com/failmap/admin:$(cat version|tr + _)
+    - docker tag registry.gitlab.com/failmap/admin:$(cat version|tr + _) registry.gitlab.com/failmap/admin:staging
 
     # here is where I would put my staging integration tests, if I had one!!!
 
+    # promote to staging after tests have succeeded
     - docker push registry.gitlab.com/failmap/admin:staging
+
     # until there is a CD staging environment
-    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:latest
+    - docker tag registry.gitlab.com/failmap/admin:$(cat version|tr + _) registry.gitlab.com/failmap/admin:latest
     - docker push registry.gitlab.com/failmap/admin:latest
 
   only: [master]
