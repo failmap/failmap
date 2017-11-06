@@ -114,6 +114,7 @@ build:
 
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/admin:latest
     - docker build -t registry.gitlab.com/failmap/admin:build .
     - docker push registry.gitlab.com/failmap/admin:build
 
@@ -140,6 +141,7 @@ build_test:
   script:
     # build docker imageg to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/admin:latest
     - docker build . -t admin
 
     # run simple smoketests to verify Docker image is sane
