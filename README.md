@@ -1,5 +1,16 @@
 [![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin) [![Test Coverage](https://codeclimate.com/github/failmap/admin/badges/coverage.svg)](https://codeclimate.com/github/failmap/admin/coverage)
 
+# Introduction
+Failmap is a web application that continuously scans and evaluates (government) organization websites for security best practices and allows these results to be published on a map.
+
+This repository contains the main application of Failmap, it consists of a public web frontend, a administrative interface and scanners.
+
+To run a local testing/development instance see the instructions below.
+
+For a public production installation please refer to: https://gitlab.com/failmap/server
+
+![screenshot](docs/screenshot.png)
+
 # Support fail map
 We keep organizations on their toes to protect everyone's data. Do you like this? Your donation insures continuous support, updates,
 and new features.
