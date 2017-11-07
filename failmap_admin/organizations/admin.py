@@ -93,7 +93,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 class UrlAdmin(admin.ModelAdmin):
     list_display = ('url', 'is_dead_reason', 'not_resolvable', 'created_on')
-    search_field = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
+    search_fields = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'uses_dns_wildcard', 'organization')
 
@@ -192,14 +192,14 @@ class UrlAdmin(admin.ModelAdmin):
 
 class OrganizationTypeAdmin(admin.ModelAdmin):
     list_display = ('name', )
-    search_field = ('name', )
+    search_fields = ('name', )
     list_filter = ('name', )
     fields = ('name', )
 
 
 class CoordinateAdmin(admin.ModelAdmin):
     list_display = ('organization', 'geojsontype')
-    search_field = ('organization', 'geojsontype')
+    search_fields = ('organization', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
     fields = ('organization', 'geojsontype', 'area')
 
