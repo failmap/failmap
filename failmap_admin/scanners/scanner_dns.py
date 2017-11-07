@@ -114,7 +114,7 @@ def organization_certificate_transparency(organization):
 
     addedlist = []
     for url in urls:
-        addedlist = addedlist + certificate_transparency(url)
+        addedlist = addedlist + certificate_transparency([url])
     return addedlist
 
 
@@ -175,53 +175,55 @@ def search_engines_scan(url):
 # todo: also include censys, google and let's encrypt( if has one )
 
 
-def certificate_transparency(url):
+def certificate_transparency(urls):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
     are extracted. This method is extremely fast and reliable: these certificates all exist.
 
     Hooray for transparency :)
 
-    :param url:
+    :param urls: List of Url objects
     :return:
     """
     import requests
     import re
 
-    # https://crt.sh/?q=%25.zutphen.nl
-    crt_sh_url = "https://crt.sh/?q=%25." + str(url.url)
-    pattern = r"[^\s%>]*\." + str(url.url.replace(".", "\."))  # harder string formatting :)
+    for url in urls:
 
-    response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
-    matches = re.findall(pattern, response.text)
+        # https://crt.sh/?q=%25.zutphen.nl
+        crt_sh_url = "https://crt.sh/?q=%25." + str(url.url)
+        pattern = r"[^\s%>]*\." + str(url.url.replace(".", "\."))  # harder string formatting :)
 
-    subdomains = []
-    for match in matches:
-        # handle wildcards, sometimes subdomains have nice features.
-        # examples: *.apps.domain.tld.
-        # todo: perhaps store that it was a wildcard cert, for further inspection?
-        match = match.replace("*.", "")
-        if match != url.url:
-            subdomains.append(match[0:len(match) - len(url.url) - 1])  # wraps around
+        response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
+        matches = re.findall(pattern, response.text)
 
-    subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
-    subdomains = set(subdomains)
+        subdomains = []
+        for match in matches:
+            # handle wildcards, sometimes subdomains have nice features.
+            # examples: *.apps.domain.tld.
+            # todo: perhaps store that it was a wildcard cert, for further inspection?
+            match = match.replace("*.", "")
+            if match != url.url:
+                subdomains.append(match[0:len(match) - len(url.url) - 1])  # wraps around
 
-    # 25 and '' are created due to the percentage and empty subdomains. Remove them
-    # wildcards (*) are also not allowed.
-    if '' in subdomains:
-        subdomains.remove('')
-    if '25' in subdomains:
-        subdomains.remove('25')
+        subdomains = [x.lower() for x in subdomains]  # do lowercase normalization elsewhere
+        subdomains = set(subdomains)
 
-    logger.debug("Found subdomains: %s" % subdomains)
+        # 25 and '' are created due to the percentage and empty subdomains. Remove them
+        # wildcards (*) are also not allowed.
+        if '' in subdomains:
+            subdomains.remove('')
+        if '25' in subdomains:
+            subdomains.remove('25')
 
-    addedlist = []
-    for subdomain in subdomains:
-        added = add_subdomain(subdomain, url)
-        if added:
-            addedlist.append(added)
-    return addedlist
+        logger.debug("Found subdomains: %s" % subdomains)
+
+        addedlist = []
+        for subdomain in subdomains:
+            added = add_subdomain(subdomain, url)
+            if added:
+                addedlist.append(added)
+        return addedlist
 
 
 def subdomains_harvester(url):

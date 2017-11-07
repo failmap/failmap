@@ -851,6 +851,11 @@ def rate_organization(organization, when=""):
             "The calculation is still the same, not creating a new OrganizationRating")
 
 
+def rate_urls(urls, when=""):
+    for url in urls:
+        rate_url(url, when)
+
+
 # also callable as admin action
 # this is incomplete, use the timeline variant -> it's better with endpoints over time.
 # but this will give the correct score, possibly on the wrong endpoints.

@@ -43,20 +43,33 @@ def organizations_from_names(organization_names: List[str]) -> List[Organization
 @app.task
 def scan(organization_names: List[str], execute=True):
     """Compose and execute taskset to scan specified organizations."""
-    task = compose(organizations_from_names(organization_names))
+    task = compose(organizations=organizations_from_names(organization_names))
     if execute:
         return task.apply_async()
     else:
         return task
 
 
-def compose(organizations: List[Organization]):
-    """Compose taskset to scan specified organizations."""
+@app.task
+def scan_urls(urls: List[Url], execute=True):
+    """Compose and execute taskset to scan specified urls."""
+    task = compose(urls=urls)
+    return task.apply_async() if execute else task
+
+
+def compose(organizations: List[Organization]=None, urls: List[Url]=None):
+    """Compose taskset to scan specified organizations or urls (not both)."""
+
+    if not any([organizations, urls]):
+        raise ValueError("No organizations or urls supplied.")
 
     # collect all scannable urls for provided organizations
-    urls = Url.objects.all().filter(is_dead=False,
-                                    not_resolvable=False,
-                                    organization__in=organizations)
+    if organizations:
+        urls_organizations = Url.objects.all().filter(is_dead=False,
+                                                      not_resolvable=False,
+                                                      organization__in=organizations)
+
+        urls = list(urls_organizations) + urls if urls else list(urls_organizations)
 
     endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=False, protocol__in=['http', 'https'])
 

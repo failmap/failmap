@@ -39,17 +39,17 @@ working_directory = '../map/static/images/screenshots'  # deprecated
 script_directory = os.path.join(os.path.abspath(os.path.dirname(__file__)))  # deprecated
 
 
-@timeout(30, 'Took too long to make screenshot')
-def screenshot_url(url):
+def screenshot_urls(urls):
     """
     Contains a pointer to the most accurate and fastes screenshot method.
     Will remove the hassle of chosing the right screenshot tool.
-    :param url:
+    :param urls: list of url objects
     :return:
     """
-    endpoints = Endpoint.objects.all().filter(url=url)
-    for endpoint in endpoints:
-        screenshot_with_chrome(endpoint)
+    for url in urls:
+        endpoints = Endpoint.objects.all().filter(url=url)
+        for endpoint in endpoints:
+            screenshot_with_chrome(endpoint)
 
 
 @timeout(30, 'Took too long to make screenshot')

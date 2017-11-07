@@ -9,7 +9,7 @@ import logging
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap_admin.scanners.scanner_http import scan_url_list
+from failmap_admin.scanners.scanner_http import scan_urls
 
 from .models import Endpoint
 
@@ -32,6 +32,11 @@ def scan_all_urls():
                                     not_resolvable=False)
 
     # todo: haven't got the queryset logic down to filter like below. Could be just one query.
+    for url in urls:
+        scan_url(url)
+
+
+def scan_urls(urls):
     for url in urls:
         scan_url(url)
 
@@ -109,7 +114,7 @@ def scan_url(url):
 def verify_is_secure(url):
     # i've seen qualys saying there is no TLS, while there is!
     # This _might_ revive an endpoint.
-    scan_url_list([url], 443, 'https')
+    scan_urls([url], [443], ['https'])
 
     endpoints = Endpoint.objects.all().filter(url=url, is_dead=False,
                                               protocol="https", port=443)

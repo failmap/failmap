@@ -7,9 +7,9 @@ from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
-from failmap_admin.scanners.scanner_http import scan_url_list_standard_ports
+from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
 from failmap_admin.scanners.scanner_plain_http import scan_url
-from failmap_admin.scanners.scanner_screenshot import screenshot_url
+from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 
 logger = logging.getLogger(__package__)
 
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         try:
             logger.info("Started onboarding.")
             while True:
-                Command.onboard()
+                onboard()
                 logger.info("Waiting for more urls to be onboarded. Sleeping for 60 seconds.")
                 sleep(60)
         except KeyboardInterrupt:
@@ -32,44 +32,43 @@ class Command(BaseCommand):
             else:
                 logger.info("Stopped onboarding.")
 
-    @staticmethod
-    # todo: make scan log, so you can see what has been scanned, and what completed.
-    def onboard():
 
-        urls = Command.onboard_gather()
-        # perform initial tests that can happen asynchronous
-        for url in urls:
-            # scan for http/https endpoints
-            if url.is_top_level():
-                # some DNS scans, to find more urls to onboard.
-                brute_known_subdomains([url])
-                certificate_transparency(url)  # todo, equal method calls
-            scan_url_list_standard_ports([url])   # takes about 60 seconds per url
-            scan_url(url)  # plain http, takes about 10 seconds per url, if internet conn.
-            screenshot_url(url)   # takes about 10 seconds per url, can hang.
-            # tls scans are picked up by scanner_tls_qualys and may take a while.
-            # other scans the same. They will do the ratings.
+# todo: make scan log, so you can see what has been scanned, and what completed.
+def onboard():
 
-            url.onboarded = True
-            url.onboarded_on = datetime.now(pytz.utc)
-            url.save()
+    urls = onboard_gather()
+    for url in urls:
+        # scan for http/https endpoints
+        if url.is_top_level():
+            # some DNS scans, to find more urls to onboard.
+            brute_known_subdomains([url])
+            certificate_transparency([url])
+        scan_urls_on_standard_ports([url])
+        scan_url(url)
+        screenshot_urls([url])
+        # tls scans are picked up by scanner_tls_qualys and may take a while.
+        # other scans the same. They will do the ratings.
 
-    @staticmethod
-    def onboard_existing_urls():
-        """A quick fix for an existing database."""
-        urls = Url.objects.all()
-        for url in urls:
-            url.onboarded = True
-            url.onboarded_on = datetime.now(pytz.utc)
-            url.save()
+        url.onboarded = True
+        url.onboarded_on = datetime.now(pytz.utc)
+        url.save()
 
-    @staticmethod
-    def onboard_gather():
 
-        never_onboarded = Url.objects.all().filter(onboarded=False)
+def onboard_existing_urls():
+    """A quick fix for an existing database."""
+    urls = Url.objects.all()
+    for url in urls:
+        url.onboarded = True
+        url.onboarded_on = datetime.now(pytz.utc)
+        url.save()
 
-        if never_onboarded.count() > 0:
-            cyber = """
+
+def onboard_gather():
+
+    never_onboarded = Url.objects.all().filter(onboarded=False)
+
+    if never_onboarded.count() > 0:
+        cyber = """
 ................................................................................
 .......-:////:.....:-.......::...-///////:-......://////////:..../////////:.....
 ...../mMMMMMMMN...NMM+.....hMMy..+MMMMMMMMMNy-...dMMMMMMMMMMMN..-MMMMMMMMMMNy...
@@ -83,7 +82,7 @@ class Command(BaseCommand):
 ...../dMMMMMMMN......./MMN.......+MMMMMMMMMNy-...dMMMMMMMMMMMN...NMM+....-mMMs..
 .......-::::::.........-:........-::::::::-......::::::::::::.....:-.......::...
 ................................................................................
-            """
-            logger.info("There are %s new urls to onboard! %s" % (never_onboarded.count(), cyber))
+        """
+        logger.info("There are %s new urls to onboard! %s" % (never_onboarded.count(), cyber))
 
-        return never_onboarded
+    return never_onboarded
