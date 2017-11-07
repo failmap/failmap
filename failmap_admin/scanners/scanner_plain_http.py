@@ -9,7 +9,7 @@ import logging
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap_admin.scanners.scanner_http import scanner_http_scan_urls
+from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 
 from .models import Endpoint
 
