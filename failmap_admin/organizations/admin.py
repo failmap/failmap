@@ -93,7 +93,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 class UrlAdmin(admin.ModelAdmin):
     list_display = ('url', 'is_dead_reason', 'not_resolvable', 'created_on')
-    search_fields = ('url', 'is_dead', 'is_dead_reason', 'not_resolvable')
+    search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'uses_dns_wildcard', 'organization')
 
