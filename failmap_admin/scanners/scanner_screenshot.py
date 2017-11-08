@@ -17,6 +17,7 @@ import logging
 import os
 import platform
 import re
+import subprocess
 from datetime import datetime
 
 import pytz
@@ -31,8 +32,6 @@ logger = logging.getLogger(__package__)
 
 # todo: wait: https://bugzilla.mozilla.org/show_bug.cgi?id=1378010, FFX 57
 # todo: how to instruct the environment that there is a chrome present.
-chrome = settings.TOOLS['chrome']['executable'][platform.system()]
-firefox = settings.TOOLS['firefox']['executable'][platform.system()]
 
 # deprecated
 working_directory = '../map/static/images/screenshots'  # deprecated
@@ -67,7 +66,8 @@ def screenshot_endpoint(endpoint):
 # filed bug:
 # https://bugzilla.mozilla.org/show_bug.cgi?id=1403934
 def screenshot_with_firefox(endpoint, skip_if_latest=False):
-    import subprocess
+    if not check_installation('firefox'):
+        return
 
     now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
     screenshot_image = settings.TOOLS['firefox']['screenshot_output_dir'] + \
@@ -87,7 +87,7 @@ def screenshot_with_firefox(endpoint, skip_if_latest=False):
         logger.debug("Skipped making screenshot, by request")
         return
 
-    subprocess.call([firefox,
+    subprocess.call([settings.TOOLS['firefox']['executable'][platform.system()],
                      '-screenshot',
                      screenshot_image,
                      endpoint.uri_url(),
@@ -132,7 +132,8 @@ def thumbnail(image_path, output_path):
 
 # todo: what about directories? directory = application_endpoint?
 def screenshot_with_chrome(endpoint, skip_if_latest=False):
-    import subprocess
+    if not check_installation('chrome'):
+        return
 
     now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
     logger.debug("Chrome Headless : Making screenshot: %s, on %s" % (endpoint.uri_url(), now))
@@ -165,7 +166,7 @@ def screenshot_with_chrome(endpoint, skip_if_latest=False):
     # timeout doesn't work, it just blocks the process and hangs it.
     subprocess.call(['mkdir', tmp_dir])
     subprocess.call(['cd', tmp_dir])
-    subprocess.call([chrome,
+    subprocess.call([settings.TOOLS['chrome']['executable'][platform.system()],
                      '--disable-gpu',
                      '--headless',
                      '--screenshot',
@@ -182,6 +183,25 @@ def screenshot_with_chrome(endpoint, skip_if_latest=False):
     # make copies of these images, so the latest are easily accessible.
     subprocess.call(['cp', output_filepath_resized, output_filepath_latest])
     logger.info('Made screenshot of: %s' % endpoint.uri_url())
+
+
+def check_installation(browser):
+    try:
+        browser_binary = settings.TOOLS[browser]['executable'][platform.system()]
+    except KeyError:
+        logger.error("Not possible to read configuration setting: TOOLS[browser]['executable'][platform].")
+        logger.error("Platform can be Darwin, Unix. Browser can be chrome or firefox.")
+        return False
+
+    if not browser_binary:
+        logger.error('%s is not available for %s, please update the configuration with the correct binary.'
+                     % (browser, platform.system()))
+        return False
+    if not os.path.exists(browser_binary):
+        logger.error('Supplied browser does not exist in configured path: %s' % browser_binary)
+        return False
+
+    return True
 
 
 """
