@@ -2,6 +2,11 @@
 // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
 // also: reacts patent clause and mandatory jsx syntax ... NO
 
+// Registry Sentry for error reporting
+let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
+if (sentry_token){
+    Raven.config(sentry_token).install();
+}
 
 // support for week numbers in javascript
 // https://stackoverflow.com/questions/7765767/show-week-number-with-javascript

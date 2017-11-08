@@ -38,6 +38,7 @@ def index(request):
         'version': __version__,
         'admin': settings.ADMIN,
         'mailto': settings.MAILTO,
+        'sentry_token': settings.SENTRY_TOKEN,
     })
 
 
