@@ -138,6 +138,9 @@ The setup script performs the following steps:
     # download even more requirements needed to run this software
     pip3 install -e .
 
+    # and download the development requirements
+    pip3 install -r requirements.dev.txt
+
     # creates the database
     failmap-admin migrate
 
