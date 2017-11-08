@@ -112,9 +112,9 @@ def analyze_headers(result: requests.Response, endpoint):
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
-    Note: The Strict-Transport-Security header is ignored by the browser when your site is accessed using HTTP; 
-    this is because an attacker may intercept HTTP connections and inject the header or remove it.  When your 
-    site is accessed over HTTPS with no certificate errors, the browser knows your site is HTTPS capable and will 
+    Note: The Strict-Transport-Security header is ignored by the browser when your site is accessed using HTTP;
+    this is because an attacker may intercept HTTP connections and inject the header or remove it.  When your
+    site is accessed over HTTPS with no certificate errors, the browser knows your site is HTTPS capable and will
     honor the Strict-Transport-Security header.
     """
     if endpoint.protocol == "https":
