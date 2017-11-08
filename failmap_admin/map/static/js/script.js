@@ -4,8 +4,9 @@
 
 // Registry Sentry for error reporting
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
+let version = document.head.querySelector("[name=version]").getAttribute('content');
 if (sentry_token){
-    Raven.config(sentry_token).install();
+    Raven.config(sentry_token, {release: version}).install();
 }
 
 // support for week numbers in javascript
