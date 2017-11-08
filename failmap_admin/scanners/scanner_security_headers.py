@@ -73,8 +73,10 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
 
     endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=False, protocol__in=['http', 'https'])
 
-    logger.debug('scanning %s endpoints for %s urls for %s organizations',
-                 len(endpoints), len(urls), len(organizations))
+    if not endpoints:
+        raise Endpoint.DoesNotExist("No endpoints exist for the selected urls.")
+
+    logger.debug('scanning %s endpoints for %s urls', len(endpoints), len(urls))
 
     def compose_subtasks(endpoint):
         """Create a task chain of scan & store for a given endpoint."""
@@ -89,38 +91,46 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
 
 
 @app.task
-def analyze_headers(result, endpoint):
+def analyze_headers(result: requests.Response, endpoint):
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
 
-    headers = result
+    response = result
 
     # scratch it, for debugging.
     egss = EndpointGenericScanScratchpad()
     egss.when = datetime.now(pytz.utc)
-    egss.data = headers
+    egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
     egss.type = "security headers"
     egss.domain = endpoint.uri_url()
     egss.save()
 
-    generic_check(endpoint, headers, 'X-XSS-Protection')
-    generic_check(endpoint, headers, 'X-Frame-Options')
-    generic_check(endpoint, headers, 'X-Content-Type-Options')
+    generic_check(endpoint, response.headers, 'X-XSS-Protection')
+    generic_check(endpoint, response.headers, 'X-Frame-Options')
+    generic_check(endpoint, response.headers, 'X-Content-Type-Options')
 
+    """
+    https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+    Note: The Strict-Transport-Security header is ignored by the browser when your site is accessed using HTTP; 
+    this is because an attacker may intercept HTTP connections and inject the header or remove it.  When your 
+    site is accessed over HTTPS with no certificate errors, the browser knows your site is HTTPS capable and will 
+    honor the Strict-Transport-Security header.
+    """
     if endpoint.protocol == "https":
-        generic_check(endpoint, headers, 'Strict-Transport-Security')
+        generic_check(endpoint, response.headers, 'Strict-Transport-Security')
 
     return {'status': 'success'}
 
 
-def generic_check(endpoint, headers, header):
-    if header in headers.keys():  # this is case insensitive
+def generic_check(endpoint: Endpoint, headers, header):
+    # this is case insensitive
+    if header in headers.keys():
         logger.debug('Has %s' % header)
         EndpointScanManager.add_scan(header,
                                      endpoint,
                                      'True',
-                                     headers[header])  # exploitable :)
+                                     headers[header])
     else:
         logger.debug('Has no %s' % header)
         EndpointScanManager.add_scan(header,
@@ -129,19 +139,61 @@ def generic_check(endpoint, headers, header):
                                      "Security Header not present: %s" % header)
 
 
+def error_response_400_500(endpoint):
+    # Set all headers for this endpoint to 400_500, which are not shown in the report.
+    # These are not shown in the report anymore. Not using this
+    EndpointScanManager.add_scan('X-XSS-Protection', endpoint, '400_500', "")
+    EndpointScanManager.add_scan('X-Frame-Options', endpoint, '400_500', "")
+    EndpointScanManager.add_scan('X-Content-Type-Options', endpoint, '400_500', "")
+
+    if endpoint.protocol == "https":
+        EndpointScanManager.add_scan('Strict-Transport-Security', endpoint, '400_500', "")
+
+
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})
 def get_headers(self, uri_url):
+    """
+        Issue #94:
+        TL;DR: The fix is to follow all redirects.
+
+        Citing: https://stackoverflow.com/questions/22077618/respect-x-frame-options-with-http-redirect
+        Source: https://tools.ietf.org/html/rfc7034
+        Thanks to: antoinet.
+
+        From the terminology used in RFC 7034,
+
+        The use of "X-Frame-Options" allows a web page from host B to declare that its content (for example, a
+        button, links, text, etc.) must not be displayed in a frame (<frame> or <iframe>) of another page (e.g.,
+        from host A). This is done by a policy declared in the HTTP header and enforced by browser implementations
+        as documented here.
+
+        The X-Frame-Options HTTP header field indicates a policy that specifies whether the browser should render
+        the transmitted resource within a <frame> or an <iframe>. Servers can declare this policy in the header of
+        their HTTP responses to prevent clickjacking attacks, which ensures that their content is not embedded
+        into other pages or frames.
+
+
+        Similarly, since a redirect is a flag not to render the content, the content can't be manipulated.
+        This also means no X-XSS-Protection or X-Content-Type-Options are needed. So just follow all redirects.
+
+        :return: requests.response
+        """
+
     try:
         # ignore wrong certificates, those are handled in a different scan.
-        # Only get the first website, that should be fine (todo: also any redirects)
-        response = requests.get(uri_url, timeout=(10, 10), allow_redirects=False,
-                                verify=False)
-        # only continue for valid responses (eg: 200)
-        response.raise_for_status()
+        # 10 seconds for network delay, 10 seconds for the site to respond.
+        response = requests.get(uri_url, timeout=(10, 10), allow_redirects=True, verify=False)
+
+        # Removed: only continue for valid responses (eg: 200)
+        # Error pages, such as 404 are super fancy, with forms and all kinds of content.
+        # it's obvious that such pages (with content) follow the same security rules as any 2XX response.
+        # if 400 <= response.status_code <= 600:
+        #     error_response_400_500(endpoint)
+        # response.raise_for_status()
 
         for header in response.headers:
             logger.debug('Received header: %s' % header)
-        return response.headers
+        return response
     except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).

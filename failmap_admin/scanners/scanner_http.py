@@ -53,7 +53,7 @@ def validate_protocol(protocol):
 
 
 def scan_urls_on_standard_ports(urls):
-    scan_url(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
+    scan_urls(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
 
 
 def scan_urls(urls, ports, protocols):
