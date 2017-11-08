@@ -8,8 +8,11 @@ https://docs.djangoproject.com/en/1.9/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
-
 import os
+
+from pkg_resources import get_distribution
+
+__version__ = get_distribution(__name__.split('.', 1)[0]).version
 
 # this application can run in 2 modes: admin and frontend
 # admin exposes all routes and uses no caching. It should be restricted in access
@@ -472,3 +475,10 @@ ADMIN = bool(APPNAME == 'failmap-admin')
 
 # general email address
 MAILTO = 'info@faalkaart.nl'
+
+if os.environ.get('SENTRY_DSN'):
+    INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
+    RAVEN_CONFIG = {
+        'dsn': os.environ.get('SENTRY_DSN'),
+        'release': __version__,
+    }

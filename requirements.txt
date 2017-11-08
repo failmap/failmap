@@ -46,3 +46,6 @@ csscompressor  # css compression
 # brotlipy  # doesn't work, some vague errors not worth the time: compression handled elsewhere
 # slimit does not work with vue.js
 django-proxy
+
+# sentry client
+raven
