@@ -40,6 +40,7 @@ def test_security_headers_notfound(responses, db, faalonië):
         call_command('scan-security-headers', '-v3', '-o', NON_EXISTING_ORGANIZATION)
 
 
+# todo: could do a redirect test
 def test_security_headers_failure(responses, db, faalonië):
     """Test with failing endpoint."""
 
@@ -47,4 +48,4 @@ def test_security_headers_failure(responses, db, faalonië):
 
     result = json.loads(call_command('scan-security-headers', '-v3', '-o', TEST_ORGANIZATION))
 
-    assert result[0]['cause']['error'] == 'HTTPError'
+    assert result[0]['status'] == 'success'
