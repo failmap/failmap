@@ -44,6 +44,9 @@ INTERNAL_IPS = ['localhost', '127.0.0.1', '::1']
 # Application definition
 
 INSTALLED_APPS = [
+    # needs to be before jet and admin to extend admin/base.html template
+    'failmap_admin.app',
+    # Jet admin dashboard
     'jet.dashboard',
     'jet',
     'django.contrib.admin',
@@ -53,7 +56,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'failmap_admin.fail',
-    'failmap_admin.app',
     'failmap_admin.organizations',
     'failmap_admin.scanners',
     'failmap_admin.map',

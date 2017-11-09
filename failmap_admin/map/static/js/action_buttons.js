@@ -31,4 +31,4 @@
     $(function () {
         fix_actions();
     });
-})(django.jQuery);
+})(jQuery);
