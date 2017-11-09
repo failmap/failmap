@@ -52,6 +52,9 @@ class UrlRatingAdminInline(CompactInline):
 
 
 class OrganizationAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('js/action_buttons.js', )
+
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
@@ -92,6 +95,9 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class UrlAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('js/action_buttons.js', )
+
     list_display = ('url', 'is_dead_reason', 'not_resolvable', 'created_on')
     search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
