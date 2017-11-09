@@ -4,3 +4,13 @@
 <!-- Inject admin action dropdown conversion to button for all admin pages. -->
 <script type="text/javascript" src="{% static 'js/action_buttons.js' %}"></script>
 {% endblock %}
+<!-- Override user message logic to allow html in messages (Admin Action Job Links) -->
+{% block messages %}
+{% if messages %}
+<ul class="messagelist">
+  {% for message in messages %}
+  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst|safe }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

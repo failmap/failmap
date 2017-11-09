@@ -7,10 +7,13 @@ future.
 """
 import logging
 
+from celery import group
+
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 
+from ..celery import app
 from .models import Endpoint
 
 logger = logging.getLogger(__package__)
@@ -36,11 +39,15 @@ def scan_all_urls():
         scan_url(url)
 
 
-def scan_urls(urls):
-    for url in urls:
-        scan_url(url)
+def scan_urls(urls, execute=True):
+    task = group([scan_url.s(url) for url in urls])
+    if execute:
+        task.apply_async()
+    else:
+        return task
 
 
+@app.task
 def scan_url(url):
     scan_manager = EndpointScanManager
     logger.debug("Checking for http only sites on: %s" % url)
@@ -109,6 +116,7 @@ def scan_url(url):
                     scan_manager.add_scan("plain_https", http_endpoint, 0,
                                           "Has a secure equivalent, which wasn't so in the"
                                           "past.")
+    return 'done'
 
 
 def verify_is_secure(url):

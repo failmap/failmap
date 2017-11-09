@@ -48,6 +48,8 @@ class Job(models.Model):
         """Celery task to store result of task after it has completed."""
         print(result, job_id)
         job = Job.objects.get(id=job_id)
+        if not result:
+            result = '-- task generated no result object --'
         job.result = result
         job.status = 'completed'
         job.finished_on = datetime.datetime.now()
