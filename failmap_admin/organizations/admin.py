@@ -98,7 +98,7 @@ class UrlAdmin(admin.ModelAdmin):
     class Media:
         js = ('js/action_buttons.js', )
 
-    list_display = ('url', 'endpoints', 'onboarded', 'uses_dns_wildcard', 'is_dead', 'not_resolvable')
+    list_display = ('url', 'endpoints', 'onboarded', 'uses_dns_wildcard', 'is_dead', 'not_resolvable', 'created_on')
     search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'uses_dns_wildcard', 'organization')
