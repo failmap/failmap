@@ -773,11 +773,9 @@ def significant_times(organization=None, url=None):
 # make sure the URL ratings are up to date, they will check endpoints and such.
 
 
-# probably not used anymore
-# def rate_organizations(organizations, when=""):
-#     # since a url can now have multiple organizations, you should rate each one separately
-#     for organization in organizations.all():
-#         rate_organization(organization, when)
+def rate_selected_organizations(organizations, when=""):
+    for organization in organizations:
+        rate_organization(organization, when)
 
 
 def rate_organization(organization, when=""):
@@ -790,8 +788,8 @@ def rate_organization(organization, when=""):
     total_rating = 0
 
     # todo: closing off urls, after no relevant endpoints, but still resolvable.
-    urls = get_relevant_urls_at_timepoint(organization=organization,
-                                          when=when)
+    urls = get_relevant_urls_at_timepoint(organization=organization, when=when)
+
     all_url_ratings = []
     calculation_json = []
     for url in urls:

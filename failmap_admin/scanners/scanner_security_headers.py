@@ -53,14 +53,18 @@ def scan(organization_names: List[str], execute=True):
 @app.task
 def scan_urls(urls: List[Url], execute=True):
     """Compose and execute taskset to scan specified urls."""
-    task = compose(urls=urls)
-    return task.apply_async() if execute else task
+    try:
+        task = compose(urls=urls)
+        return task.apply_async() if execute else task
+    except (ValueError, Endpoint.DoesNotExist):
+        logger.error('Could not schedule scans, due to error reported above.')
 
 
 def compose(organizations: List[Organization]=None, urls: List[Url]=None):
     """Compose taskset to scan specified organizations or urls (not both)."""
 
     if not any([organizations, urls]):
+        logger.error('No organizations or urls supplied.')
         raise ValueError("No organizations or urls supplied.")
 
     # collect all scannable urls for provided organizations
@@ -74,6 +78,7 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
     endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=False, protocol__in=['http', 'https'])
 
     if not endpoints:
+        logger.error('No endpoints exist for the selected urls.')
         raise Endpoint.DoesNotExist("No endpoints exist for the selected urls.")
 
     logger.debug('scanning %s endpoints for %s urls', len(endpoints), len(urls))
