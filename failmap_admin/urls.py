@@ -20,7 +20,6 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
-from django.views import static
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
@@ -52,8 +51,6 @@ if settings.DEBUG:
         ] + urlpatterns
     except ImportError:
         pass
-
-    urlpatterns.append(url(r'^static/(?P<path>.*)$', static.serve, {'document_root': settings.STATIC_ROOT}))
 
 # debugging
 # urlpatterns += [url(r'^silk/', include('silk.urls', namespace='silk'))]
