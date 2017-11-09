@@ -16,7 +16,8 @@ class Job(models.Model):
 
     name = models.CharField(max_length=255, help_text="name of the job")
     task = models.TextField(help_text="celery task signature in string form")
-    result_id = models.CharField(unique=True, max_length=255, help_text="celery asyncresult ID for tracing task")
+    result_id = models.CharField(unique=True, null=True, blank=True, max_length=255,
+                                 help_text="celery asyncresult ID for tracing task")
     status = models.CharField(max_length=255, help_text="status of the job")
     result = JSONField(help_text="output of the task as JSON", encoder_class=ResultEncoder)
 
@@ -35,7 +36,7 @@ class Job(models.Model):
 
         # publish original task which stores the result in this Job object
         result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
-        job.name = name
+        job.name = name[:255]
         job.result_id = result_id.id
         job.status = 'created'
         job.save()

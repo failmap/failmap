@@ -196,13 +196,18 @@ class UrlAdmin(admin.ModelAdmin):
         task = security_headers_scan_urls(urls=urls, execute=False)
         name = "Scan Security Headers (%s) " % str(urls)
         job = Job.create(task, name, request)
-        self.message_user(request, "%s: job created, id:%s" % (name, str(job)))
+        link = reverse('admin:app_job_change', args=(job.id,))
+        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
     security_headers.short_description = "🔬  Scan Security Headers"
     actions.append('security_headers')
 
     def plain_http_scan(self, request, queryset):
-        plain_http_scan_urls([url for url in queryset])
-        self.message_user(request, "Scan Plain Http: done")
+        urls = list(queryset)
+        task = plain_http_scan_urls(urls=urls, execute=False)
+        name = "Scan Plain Http (%s) " % str(urls)
+        job = Job.create(task, name, request)
+        link = reverse('admin:app_job_change', args=(job.id,))
+        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
     plain_http_scan.short_description = "🔬  Scan Plain Http"
     actions.append('plain_http_scan')
 

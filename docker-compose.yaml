@@ -30,6 +30,8 @@ services:
     # Configure database to persist accross restarts of the development environment.
     volumes:
       - ./dev_db/:/var/lib/mysql/
+      # overwrite memory hungry default config for docker mysql
+      - ./etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf
 
   # task executer
   worker:
