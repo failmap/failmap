@@ -3,6 +3,7 @@
 
 import datetime
 
+from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
 
@@ -21,12 +22,15 @@ class Job(models.Model):
 
     created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True, help_text="when task was created")
     finished_on = models.DateTimeField(blank=True, null=True, help_text="when task ended")
+    created_by = models.ForeignKey(User, blank=True, null=True)
 
     @classmethod
-    def create(cls, task, name, *args, **kwargs):
+    def create(cls, task, name, request, *args, **kwargs):
         """Create job object and publish task on celery queue."""
         # create database object
         job = cls(task=str(task))
+        if request:
+            job.created_by = request.user
         job.save()
 
         # publish original task which stores the result in this Job object
