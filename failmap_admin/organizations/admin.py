@@ -160,7 +160,7 @@ class UrlAdmin(admin.ModelAdmin):
         task = security_headers_scan_urls(urls=urls, execute=False)
         name = "Scan Security Headers (%s) " % str(urls)
         job = Job.create(task, name)
-        self.message_user(request, "%s: job created, id:%s" % (name, job.id))
+        self.message_user(request, "%s: job created, id:%s" % (name, str(job)))
     security_headers.short_description = "Scan Security Headers"
     actions.append('security_headers')
 

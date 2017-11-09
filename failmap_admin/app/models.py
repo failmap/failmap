@@ -14,7 +14,7 @@ class Job(models.Model):
 
     name = models.CharField(max_length=255, help_text="name of the job")
     task = models.TextField(help_text="celery task signature in string form")
-    result_id = models.CharField(max_length=255, help_text="celery asyncresult ID for tracing task")
+    result_id = models.CharField(unique=True, max_length=255, help_text="celery asyncresult ID for tracing task")
     status = models.CharField(max_length=255, help_text="status of the job")
     result = JSONField(help_text="output of the task as JSON")
 
