@@ -1,0 +1,5 @@
+<p>You've encountered an error, oh noes!</p>
+{% if request.sentry.id %}
+    <p>If you need assistance, you may reference this error as
+    <strong>{{ request.sentry.id }}</strong>.</p>
+{% endif %}

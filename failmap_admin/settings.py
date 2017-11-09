@@ -483,6 +483,11 @@ if os.environ.get('SENTRY_DSN'):
         'dsn': os.environ.get('SENTRY_DSN'),
         'release': __version__,
     }
+    # add sentry ID to request for inclusion in templates
+    # https://docs.sentry.io/clients/python/integrations/django/#message-references
+    MIDDLEWARE_CLASSES = (
+        'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
+    ) + MIDDLEWARE_CLASSES
 
 # set javascript sentry token if provided
 SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', 'https://a4f72b82fc0742bc82b82560b340006b@sentry.io/242170')

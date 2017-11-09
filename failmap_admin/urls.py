@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.template.response import TemplateResponse
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
@@ -51,3 +52,17 @@ if settings.DEBUG:
 
 # Nested inlines don't work with Django Jet (yet).
 # urlpatterns += [url(r'^_nested_admin/', include('nested_admin.urls'))]
+
+# set a different page for 500 errors to include sentry event ID.
+# https://docs.sentry.io/clients/python/integrations/django/#message-references
+if settings.SENTRY_DSN:
+    def handler500(request):
+        """500 error handler which includes ``request`` in the context.
+
+        Templates: `500.html`
+        Context: None
+        """
+
+        context = {'request': request}
+        template_name = '500.html'  # You need to create a 500.html template.
+        return TemplateResponse(request, template_name, context, status=500)
