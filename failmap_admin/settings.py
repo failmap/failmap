@@ -477,10 +477,11 @@ ADMIN = bool(APPNAME == 'failmap-admin')
 MAILTO = 'info@faalkaart.nl'
 
 # if sentry DSN is provided register raven to emit events on exceptions
-if os.environ.get('SENTRY_DSN'):
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+if SENTRY_DSN:
     INSTALLED_APPS += ('raven.contrib.django.raven_compat',)
     RAVEN_CONFIG = {
-        'dsn': os.environ.get('SENTRY_DSN'),
+        'dsn': SENTRY_DSN,
         'release': __version__,
     }
     # add sentry ID to request for inclusion in templates
