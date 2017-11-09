@@ -1,11 +1,9 @@
+import logging
 from datetime import datetime
 
 import pytz
-import logging
 from django.contrib import admin
 from jet.admin import CompactInline
-
-from ..app.models import Job
 
 from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
                                                 rate_selected_organizations, rate_urls)
@@ -16,8 +14,9 @@ from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_sc
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
-from .models import Coordinate, Organization, OrganizationType, Url
 
+from ..app.models import Job
+from .models import Coordinate, Organization, OrganizationType, Url
 
 logger = logging.getLogger(__name__)
 
