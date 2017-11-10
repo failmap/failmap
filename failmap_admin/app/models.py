@@ -3,6 +3,7 @@
 
 import datetime
 
+import celery
 from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
@@ -26,19 +27,20 @@ class Job(models.Model):
     created_by = models.ForeignKey(User, blank=True, null=True)
 
     @classmethod
-    def create(cls, task, name, request, *args, **kwargs):
+    def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':
         """Create job object and publish task on celery queue."""
         # create database object
         job = cls(task=str(task))
         if request:
             job.created_by = request.user
+        job.name = name[:255]
+        job.status = 'created'
         job.save()
 
         # publish original task which stores the result in this Job object
         result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
-        job.name = name[:255]
+        job = Job.objects.get(id=job.id)
         job.result_id = result_id.id
-        job.status = 'created'
         job.save()
 
         return job
@@ -54,6 +56,7 @@ class Job(models.Model):
         job.result = result
         job.status = 'completed'
         job.finished_on = datetime.datetime.now()
+        print(job.status)
         job.save()
 
     def __str__(self):

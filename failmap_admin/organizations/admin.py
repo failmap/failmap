@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytz
 from django.contrib import admin
+from django.urls import reverse
 from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
