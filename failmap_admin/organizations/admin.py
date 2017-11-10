@@ -15,9 +15,10 @@ from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
-from failmap_admin.scanners.scanner_tls_qualys import scan_url_list
+from failmap_admin.scanners.scanner_tls_qualys import scan_urls as tls_qualys_scan_urls
 
 from ..app.models import Job
+from ..celery import PRIO_HIGH
 from .models import Coordinate, Organization, OrganizationType, Promise, Url
 
 logger = logging.getLogger(__name__)
@@ -101,7 +102,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
     def scan_organization(self, request, queryset):
         urls = Url.objects.filter(organization__in=list(queryset))
-        scan_url_list(list(urls))
+        tls_qualys_scan_urls(list(urls))
         self.message_user(request, "Organization(s) have been scanned")
 
     rate_organization.short_description = \
@@ -186,9 +187,14 @@ class UrlAdmin(admin.ModelAdmin):
     actions.append('discover_http_endpoints')
 
     def scan_tls_qualys(self, request, queryset):
-        scan_url_list(list(queryset))
-        self.message_user(request, "Scan TLS (qualys, slow): Scheduled with Priority")
-    scan_tls_qualys.short_description = "🔬  Scan TLS (qualys, slow)"
+        # create a celery task and use Job object to keep track of the status
+        urls = list(queryset)
+        task = tls_qualys_scan_urls(urls=urls, execute=False)
+        name = "Scan TLS  Qualys (%s) " % str(urls)
+        job = Job.create(task, name, request, priority=PRIO_HIGH)
+        link = reverse('admin:app_job_change', args=(job.id,))
+        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
+    scan_tls_qualys.short_description = "🔬  Scan TLS Qualys"
     actions.append('scan_tls_qualys')
 
     def security_headers(self, request, queryset):
@@ -196,7 +202,7 @@ class UrlAdmin(admin.ModelAdmin):
         urls = list(queryset)
         task = security_headers_scan_urls(urls=urls, execute=False)
         name = "Scan Security Headers (%s) " % str(urls)
-        job = Job.create(task, name, request)
+        job = Job.create(task, name, request, priority=PRIO_HIGH)
         link = reverse('admin:app_job_change', args=(job.id,))
         self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
     security_headers.short_description = "🔬  Scan Security Headers"
@@ -206,7 +212,7 @@ class UrlAdmin(admin.ModelAdmin):
         urls = list(queryset)
         task = plain_http_scan_urls(urls=urls, execute=False)
         name = "Scan Plain Http (%s) " % str(urls)
-        job = Job.create(task, name, request)
+        job = Job.create(task, name, request, priority=PRIO_HIGH)
         link = reverse('admin:app_job_change', args=(job.id,))
         self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
     plain_http_scan.short_description = "🔬  Scan Plain Http"

@@ -5,7 +5,7 @@
 
 import os
 
-from celery import Celery
+from celery import Celery, Task
 from django.conf import settings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap_admin.settings")
@@ -15,6 +15,21 @@ app.config_from_object('django.conf:settings')
 # autodiscover all celery tasks in tasks.py files inside failmap_admin modules
 appname = __name__.split('.', 1)[0]
 app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])
+
+
+# https://github.com/celery/celery/blob/a87ef75884e59c78da21b1482bb66cf649fbb7d3/docs/history/whatsnew-3.0.rst#redis-priority-support
+# https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
+PRIO_HIGH = 9
+PRIO_NORMAL = 5
+
+
+class DefaultTask(Task):
+    """Default settings for all failmap tasks."""
+
+    priority = PRIO_NORMAL
+
+
+app.Task = DefaultTask
 
 
 @app.task(bind=True)

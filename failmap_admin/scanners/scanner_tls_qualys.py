@@ -32,10 +32,11 @@ from typing import List
 
 import pytz
 import requests
+from celery import group
 from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.map.determineratings import rate_organization_efficient, rerate_url_with_timeline
-from failmap_admin.organizations.models import Url
+from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                            TlsQualysScratchpad)
 from failmap_admin.scanners.scanner_http import store_url_ips
@@ -58,6 +59,41 @@ def scan_url_list(urls: List[Url]):
 
 
 @app.task
+def scan_urls(urls: List[Url], execute=True):
+    """Compose and execute taskset to scan specified urls."""
+    try:
+        task = compose(urls=urls)
+        return task.apply_async() if execute else task
+    except (ValueError, Endpoint.DoesNotExist):
+        log.error('Could not schedule scans, due to error reported above.')
+
+
+def compose(organizations: List[Organization]=None, urls: List[Url]=None):
+    """Compose taskset to scan specified organizations or urls (not both)."""
+
+    if not any([organizations, urls]):
+        log.error('No organizations or urls supplied.')
+        raise ValueError("No organizations or urls supplied.")
+
+    # collect all scannable urls for provided organizations
+    if organizations:
+        urls_organizations = Url.objects.all().filter(is_dead=False,
+                                                      not_resolvable=False,
+                                                      organization__in=organizations)
+
+        urls = list(urls_organizations) + urls if urls else list(urls_organizations)
+
+    # create a group of parallel executable scan&store tasks for all endpoints
+    taskset = group(scan_task.s(url) for url in urls)
+
+    return taskset
+
+
+@app.task(
+    # http://docs.celeryproject.org/en/latest/userguide/tasks.html#Task.rate_limit
+    # start at most 1 qualys task per minute to not get our IP blocked
+    rate_limit='1/m',
+)
 def scan_task(url):
     """
     Carries out a scan until the ERROR or READY is returned. There will be many checks performed
@@ -85,9 +121,9 @@ def scan_task(url):
 
         if 'status' in data.keys():
             if data['status'] == "READY" and 'endpoints' in data.keys():
-                save_scan(url, data)
+                result = save_scan(url, data)
                 clean_endpoints(url, data['endpoints'])
-                return
+                return '%s %' % (url, result)
 
             if data['status'] == "ERROR":
                 """
@@ -108,6 +144,7 @@ def scan_task(url):
         20 to 25, simply because it matters very little when scans are ran parralel.
         https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
         """
+        log.info('Still waiting for Qualys result.')
         sleep(20 + randint(0, 5))  # don't pulsate.
 
 
@@ -251,6 +288,9 @@ def save_scan(url, data):
     stored_ipv6 = False
     stored_ipv4 = False
 
+    # keep kind of result for every endpoint to return at end of task
+    results = []
+
     for qep in data['endpoints']:
         """
         qep['grade']  # T, if trust issues.
@@ -302,12 +342,18 @@ def save_scan(url, data):
                 previous_scan.scan_date = datetime.now(pytz.utc)
                 previous_scan.qualys_message = message
                 previous_scan.save()
+                results.append('no-change')
+
             else:
                 log.info("Rating changed on %s, we're going to save the scan to retain history" % failmap_endpoint)
                 create_scan(failmap_endpoint, rating, rating_no_trust, message)
+                results.append('rating-changed')
         else:
             log.info("This endpoint on %s was never scanned, creating a new scan." % failmap_endpoint)
             create_scan(failmap_endpoint, rating, rating_no_trust, message)
+            results.append('first-scan')
+
+    return results
 
 
 def create_scan(endpoint, rating, rating_no_trust, status_message):
