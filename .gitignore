@@ -30,3 +30,4 @@ failmap_dataset*
 failmap_testdataset*
 dev_db/
 failmap_debug_dataset*
+temp/*

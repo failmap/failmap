@@ -54,11 +54,7 @@ def validate_protocol(protocol):
 
 
 def scan_urls_on_standard_ports(urls):
-<<<<<<< HEAD
-    scan_urls(urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443], ['http', 'https'])
-=======
     scan_urls(['http', 'https'], urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443])
->>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
 
 
 def scan_urls(protocols, urls, ports):

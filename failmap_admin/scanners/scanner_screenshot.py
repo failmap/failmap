@@ -149,6 +149,8 @@ def screenshot_with_chrome(endpoint, skip_if_latest=False):
     :param skip_if_latest:
     :return:
     """
+    if not check_installation('chrome'):
+        return
 
     logger.debug("Chrome Screenshot: %s over IPv%s" % (endpoint.uri_url(), endpoint.ip_version))
 
@@ -209,6 +211,7 @@ def check_installation(browser):
         logger.error('%s is not available for %s, please update the configuration with the correct binary.'
                      % (browser, platform.system()))
         return False
+
     if not os.path.exists(browser_binary):
         logger.error('Supplied browser does not exist in configured path: %s' % browser_binary)
         return False

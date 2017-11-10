@@ -3,7 +3,6 @@ from datetime import datetime
 
 import pytz
 from django.contrib import admin
-from django.urls import reverse
 from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
@@ -11,14 +10,11 @@ from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, r
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
-<<<<<<< HEAD
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
-from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
-=======
-from failmap_admin.scanners.scanner_tls_qualys import scan
->>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
+from failmap_admin.scanners.scanner_tls_qualys import scan_url_list
+from failmap_admin.scanners.admin import UrlIpInline
 
 from ..app.models import Job
 from .models import Coordinate, Organization, OrganizationType, Url
@@ -57,6 +53,9 @@ class UrlRatingAdminInline(CompactInline):
 
 
 class OrganizationAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('js/action_buttons.js', )
+
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
@@ -74,18 +73,8 @@ class OrganizationAdmin(admin.ModelAdmin):
         self.message_user(request, "Organization(s) have been rated")
 
     def scan_organization(self, request, queryset):
-
-        # it's best to add all url's in one go, resulting in the fastest processing
-
-        urls_to_scan = []
-
-        for organization in queryset:
-            urls = Url.objects.filter(organization=organization)
-            for url in urls:
-                urls_to_scan.append(url.url)
-
-        scan(urls_to_scan)
-
+        urls = Url.objects.filter(organization__in=list(queryset))
+        scan_url_list(list(urls))
         self.message_user(request, "Organization(s) have been scanned")
 
     rate_organization.short_description = \
@@ -96,7 +85,11 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class UrlAdmin(admin.ModelAdmin):
-    list_display = ('url', 'endpoints', 'onboarded', 'uses_dns_wildcard', 'is_dead', 'not_resolvable', 'created_on')
+    class Media:
+        js = ('js/action_buttons.js', )
+
+    list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
+                    'is_dead', 'not_resolvable', 'created_on')
     search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'uses_dns_wildcard', 'organization')
@@ -120,7 +113,11 @@ class UrlAdmin(admin.ModelAdmin):
     def endpoints(self, obj: Url):
         return obj.endpoint_set.count()
 
-    inlines = [EndpointAdminInline, UrlRatingAdminInline]
+    @staticmethod
+    def current_rating(obj):
+        return UrlRating.objects.filter(url=obj).latest('when').rating
+
+    inlines = [EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
 
     actions = []
 
@@ -139,7 +136,6 @@ class UrlAdmin(admin.ModelAdmin):
             url.onboarded = True
             url.onboarded_on = datetime.now(pytz.utc)
             url.save()
-<<<<<<< HEAD
         self.message_user(request, "Onboard: Done")
     actions.append('onboard')
     onboard.short_description = "🔮  Onboard (dns, endpoints, scans, screenshot)"
@@ -155,27 +151,6 @@ class UrlAdmin(admin.ModelAdmin):
         self.message_user(request, "Discover subdomains (using known subdomains): Done")
     dns_known_subdomains.short_description = "🗺  Discover subdomains (using known subdomains)"
     actions.append('dns_known_subdomains')
-=======
-
-        self.message_user(request, "URL(s) have been declared dead")
-
-    def rate_url(self, request, queryset):
-
-        for url in queryset:
-            rate_url(url=url)
-
-        self.message_user(request, "URL(s) have been rated")
-
-    def scan_url(self, request, queryset):
-
-        urls_to_scan = []
-        for url in queryset:
-            urls_to_scan.append(url.url)
-
-        scan(urls_to_scan)
-
-        self.message_user(request, "URL(s) have been scanned on TLS")
->>>>>>> [WIP] #61 tls scanner rewrite, migration script, http_scanner_rewrite
 
     def discover_http_endpoints(self, request, queryset):
         scan_urls_on_standard_ports([url for url in queryset])
@@ -184,7 +159,7 @@ class UrlAdmin(admin.ModelAdmin):
     actions.append('discover_http_endpoints')
 
     def scan_tls_qualys(self, request, queryset):
-        ScannerTlsQualys().scan([url.url for url in queryset])
+        scan_url_list(list(queryset))
         self.message_user(request, "Scan TLS (qualys, slow): Scheduled with Priority")
     scan_tls_qualys.short_description = "🔬  Scan TLS (qualys, slow)"
     actions.append('scan_tls_qualys')
@@ -200,13 +175,8 @@ class UrlAdmin(admin.ModelAdmin):
     actions.append('security_headers')
 
     def plain_http_scan(self, request, queryset):
-        urls = list(queryset)
-        task = plain_http_scan_urls(urls=urls, execute=False)
-        print(task)
-        name = "Scan Plain Http (%s) " % str(urls)
-        job = Job.create(task, name, request)
-        link = reverse('admin:app_job_change', args=(job.id,))
-        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
+        plain_http_scan_urls([url for url in queryset])
+        self.message_user(request, "Scan Plain Http: done")
     plain_http_scan.short_description = "🔬  Scan Plain Http"
     actions.append('plain_http_scan')
 

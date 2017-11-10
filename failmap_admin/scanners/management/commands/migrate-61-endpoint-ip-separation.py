@@ -3,7 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan,
-                                           UrlIp)
+                                           UrlIp, Url)
 
 logger = logging.getLogger(__package__)
 
@@ -65,7 +65,11 @@ failmap-admin createsuperuser
 
 failmap-admin clear-database
 failmap-admin load-dataset testdata  # we've not deleted columns till here.
+failmap-admin rebuild-ratings
 failmap-admin migrate-61-endpoint-ip-separation
+failmap-admin rebuild-ratings
+
+# The ratings should be the same
 """
 
 
@@ -82,13 +86,51 @@ def merge_duplicate_endpoints():
 
     # ordered by newest first, so you'll not have to figure out the current is_dead situation.
     endpoints = Endpoint.objects.all().order_by("-discovered_on")
+
     for endpoint in endpoints:
-        similar_endpoints = Endpoint.objects.all().filter(ip_version=endpoint.ip_version,
-                                                          port=endpoint.port,
-                                                          protocol=endpoint.protocol,
-                                                          url=endpoint.url).exclude(id=endpoint.id)
+
+        # check if this endpoint still exists... it could be deleted in a previous check
+        # it can mess up connecting deleted endpoints
+        if not Endpoint.objects.filter(id=endpoint.id).exists():
+            logger.debug('Endpoint does not exist anymore, probably merged previously. Continuing...')
+            continue
+
+        logger.debug("Endpoint: %s, Discovered on: %s" % (endpoint, endpoint.discovered_on))
+        similar_endpoints = list(Endpoint.objects.all().filter(
+            ip_version=endpoint.ip_version,
+            port=endpoint.port,
+            protocol=endpoint.protocol,
+            url=endpoint.url).exclude(id=endpoint.id).order_by('-discovered_on'))
+
+        # In some cases there are hundreds of endpoints due to IP switching.
+        # Using the first one, we can determine from when the endpoint existed.
+        # This is relevant for creating reports.
+        # EX:
+        """
+        URL                 DOMAIN              DISCOVERED ON       ipv PORT PROTOCOL IS DEAD SINCE     TLS SCAN COUNT
+        ... and 200 more...
+        
+        opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
+        opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
+        opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
+        opendata.arnhem.nl	opendata.arnhem.nl	8 april 2016 19:52	4	443	https	27 april 2016 14:59	1
+        opendata.arnhem.nl	opendata.arnhem.nl	8 april 2016 19:52	4	443	https	27 april 2016 14:59	1        
+        """
+        if similar_endpoints:
+            first_similar = similar_endpoints[-1]
+            logger.debug("Last similar: %s, Discovered on: %s" % (first_similar, first_similar.discovered_on))
+            endpoint.discovered_on = first_similar.discovered_on
+            endpoint.save()
+        else:
+            logger.debug("There are no similar endpoints. Ignoring.")
+
         for similar_endpoint in similar_endpoints:
+            # apperantly exclude doesn't work... there goes my faith in the data layer.
+            if similar_endpoint == endpoint:
+                continue
+
             # migrate all scans to the same endpoint
+            logger.debug("Merging similar: %s, Discovered on: %s" % (similar_endpoint, similar_endpoint.discovered_on))
             EndpointGenericScan.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)
             TlsQualysScan.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)
             Screenshot.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)

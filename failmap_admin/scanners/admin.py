@@ -14,10 +14,24 @@ class TlsQualysScanAdminInline(CompactInline):
     show_change_link = True
     ordering = ["-rating_determined_on"]
 
+
+class EndpointGenericScanInline(CompactInline):
+    model = EndpointGenericScan
+    extra = 0
+    show_change_link = True
+    ordering = ["-rating_determined_on"]
+
+
 # can't make this admin, there is no join. And there shouldn't be.
 # class TlsQualysScratchpadAdminInline(admin.StackedInline):
 #    model = TlsQualysScratchpad
 #    extra = 0
+
+class UrlIpInline(CompactInline):
+    model = UrlIp
+    extra = 0
+    show_change_link = True
+    ordering = ["-discovered_on"]
 
 
 class UrlIpAdmin(admin.ModelAdmin):
@@ -29,8 +43,8 @@ class UrlIpAdmin(admin.ModelAdmin):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('url', 'domain', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead_since',
-                    'tls_scan_count')
+    list_display = ('id', 'url', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead_since',
+                    'tls_scans', 'generic_scans')
     search_fields = ('url__url', 'domain', 'server_name', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
     list_filter = ('server_name', 'ip_version', 'ip', 'port', 'protocol', 'is_dead')
@@ -46,10 +60,14 @@ class EndpointAdmin(admin.ModelAdmin):
     readonly_fields = ['discovered_on']
 
     @staticmethod
-    def tls_scan_count(inst):
+    def tls_scans(inst):
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()
 
-    inlines = [TlsQualysScanAdminInline]
+    @staticmethod
+    def generic_scans(inst):
+        return EndpointGenericScan.objects.filter(endpoint_id=inst.id).count()
+
+    inlines = [TlsQualysScanAdminInline, EndpointGenericScanInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
 
     actions = ['rate_url', 'scan_url']

@@ -129,7 +129,7 @@ def verify_is_secure(url):
     # i've seen qualys saying there is no TLS, while there is!
     # This _might_ revive an endpoint.
 
-    scanner_http_scan_urls([url], [443], ['https'])
+    scanner_http_scan_urls(['https'], [url], [443])
 
     endpoints = Endpoint.objects.all().filter(url=url, is_dead=False,
                                               protocol="https", port=443)

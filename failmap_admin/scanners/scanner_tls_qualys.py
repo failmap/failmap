@@ -556,7 +556,7 @@ def scan_organization(organization):
         log.info("There are no alive https urls for this organization: %s" % organization)
         return
 
-    scan(urls)
+    scan_url_list(urls)
 
     for url in urls:
         rerate_url_with_timeline(url=url)

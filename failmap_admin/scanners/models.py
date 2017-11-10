@@ -71,7 +71,7 @@ class Endpoint(models.Model):
                   "SSH and so on. For more, read here: "
                   "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol")
 
-    discovered_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    discovered_on = models.DateTimeField(blank=True, null=True)
 
     # Till when the endpoint existed and why it was deleted (or didn't exist at all).
     is_dead = models.IntegerField(default=False,
@@ -147,6 +147,9 @@ class UrlIp(models.Model):
     is_unused_since = models.DateTimeField(blank=True, null=True)
 
     is_unused_reason = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return "%s %s" % (self.ip, self.discovered_on.date())
 
 
 class TlsQualysScan(models.Model):
@@ -224,7 +227,7 @@ class EndpointGenericScan(models.Model):
     )
 
     def __str__(self):
-        return "%s: %s rated %s on %s" % (self.rating_determined_on, self.type, self.rating, self.endpoint)
+        return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.endpoint)
 
 
 class EndpointGenericScanScratchpad(models.Model):

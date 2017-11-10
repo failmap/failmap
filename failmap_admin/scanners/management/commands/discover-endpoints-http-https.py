@@ -1,5 +1,4 @@
 import logging
-from random import Random
 
 from django.core.management.base import BaseCommand
 
@@ -18,9 +17,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         add_organization_argument(parser)
-        add_discover_verify(parser)  # default verify
+        add_discover_verify(parser)
 
     def handle(self, *args, **options):
+
         # some expansion magic to avoid using eval
         func = "verify_existing_endpoints" if options['method'] == "verify" else "discover_endpoints"
         functionlist = {"verify_existing_endpoints": verify_existing_endpoints,
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         functionlist[func](organization=organization)
 
 
-def verify_existing_endpoints(protocol=None, port=None, organization=None):
+def verify_existing_endpoints(port=None, protocol=None, organization=None):
     """
     Checks all http(s) endpoints if they still exist. This is to monitor changes in the existing
     dataset, without contacting an organization too often. It can be checked every few days,
@@ -66,12 +66,12 @@ def verify_existing_endpoints(protocol=None, port=None, organization=None):
         endpoints = endpoints.filter(url__organization=organization)
 
     for endpoint in endpoints:
-        # todo: add IP version?
         scan_url(endpoint.protocol, endpoint.url, endpoint.port)
 
 
-def discover_endpoints(protocol=None, port=None, organization=None):
+def discover_endpoints(port=None, protocol=None, organization=None):
     """
+
 
     :return: None
     """
@@ -92,9 +92,6 @@ def discover_endpoints(protocol=None, port=None, organization=None):
         # Don't underestimate the flexibility of the internet.
         ports = [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443]
 
-    # scan the urls in a semi-random order
-    urls = sorted(urls, key=lambda L: Random().random())
-
-    logger.debug("Going to scan %s urls." % len(urls))
+    logger.debug("Going to scan %s urls." % urls.count())
 
     scan_urls(protocols, urls, ports)
