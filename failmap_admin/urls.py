@@ -18,6 +18,7 @@ import sys
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 
 # Django 1.10 http://stackoverflow.com/questions/38744285/
@@ -41,6 +42,8 @@ if settings.ADMIN:
     urlpatterns += admin_urls
 
 if settings.DEBUG:
+    urlpatterns += staticfiles_urlpatterns()
+
     try:
         import debug_toolbar
         urlpatterns = [
