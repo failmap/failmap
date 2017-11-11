@@ -4,6 +4,7 @@ from datetime import datetime
 
 import pytz
 from dateutil.relativedelta import relativedelta  # history
+from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 
 from failmap_admin.organizations.models import Organization, Url
@@ -293,14 +294,14 @@ def rate_timeline(timeline, url):
             logger.debug('Url became non-resolvable. Adding an empty rating to lower the score of'
                          'this domain if it had a score. It has been cleaned up. (hooray)')
             # this is the end for the domain.
-            default_calculation = """
-            {"url":
-                {
-                "url": "%s",
-                "points": "0",
-                "endpoints": []
+            default_calculation = {
+                "url": {
+                    "url": url.url,
+                    "points": "0",
+                    "endpoints": []
                 }
-            }""" % url.url
+            }
+
             save_url_rating(url, moment, 0, default_calculation)
             return
 
@@ -563,12 +564,6 @@ def rate_timeline(timeline, url):
                                                        sorted_ratings))
 
         previous_endpoints += relevant_endpoints
-        url_rating_template = """
-    {
-        "url": "%s",
-        "points": %s,
-        "endpoints": [%s]
-    }""".strip()
 
         # prevent empty ratings cluttering the database and skewing the stats.
         if not endpoint_jsons:
@@ -578,11 +573,13 @@ def rate_timeline(timeline, url):
         # todo sort endpoints. with the same disgusting code :)
         unsorted = xjson.loads("[" + ",".join(endpoint_jsons) + "]")
         sorted_endpoints = sorted(unsorted, key=lambda k: k['points'], reverse=True)
-        sorted_endpoints = xjson.dumps(obj=sorted_endpoints, indent=4)
-        if sorted_endpoints[0:1] == "[":
-            sorted_endpoints = sorted_endpoints[1:len(sorted_endpoints) - 1]  # we add [] somewhere else already.
 
-        url_rating_json = url_rating_template % (url.url, sum(scores), sorted_endpoints)
+        url_rating_json = {
+            "url": url.url,
+            "points": sum(scores),
+            "endpoints": sorted_endpoints
+        }
+
         logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
         # logger.debug("With JSON: %s " % ",".join(endpoint_jsons))
         # logger.debug("Url rating json: %s", url_rating_json)
@@ -592,7 +589,7 @@ def rate_timeline(timeline, url):
         save_url_rating(url, moment, sum(scores), url_rating_json)
 
 
-def save_url_rating(url, date, score, json):
+def save_url_rating(url, date, score, calculation):
     u = UrlRating()
     u.url = url
 
@@ -605,7 +602,7 @@ def save_url_rating(url, date, score, json):
         u.when = datetime(year=date.year, month=date.month, day=date.day,
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
     u.rating = score
-    u.calculation = json
+    u.calculation = calculation
     u.save()
 
 
@@ -793,7 +790,7 @@ def rate_organization(organization, when=""):
     urls = get_relevant_urls_at_timepoint(organization=organization, when=when)
 
     all_url_ratings = []
-    calculation_json = []
+    url_calculations = []
     for url in urls:
         try:
             urlratings = UrlRating.objects.filter(url=url, when__lte=when)
@@ -809,7 +806,7 @@ def rate_organization(organization, when=""):
 
     for urlrating in all_url_ratings:
         total_rating += urlrating["rating"]
-        calculation_json.append(urlrating["calculation"])
+        url_calculations.append(urlrating["calculation"])
 
     try:
         last = OrganizationRating.objects.filter(
@@ -822,33 +819,29 @@ def rate_organization(organization, when=""):
     # rated on will add a new organizationrating every time. It's very useful for debugging
     # and showing when ratings happened.
 
-    organizationratingtemplate = """
-{
-"organization": {
-    "name": "%s",
-    "rating": "%s",
-    "urls": [%s]
+    calculation = {
+        "organization": {
+            "name": organization.name,
+            "rating": total_rating,
+            "urls": url_calculations
+        }
     }
-}""".strip()
 
-    organization_json = (organizationratingtemplate % (organization.name, total_rating,
-                                                       ",".join(calculation_json)))
     # print(organization_json)
     # verify the JSON is correct
     # parsed = json.loads(organization_json)
     # organization_json_checked = json.dumps(parsed)
     # print("%s %s" % (last.calculation, total_calculation))
-    if last.calculation != organization_json:
+    if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
         logger.debug("The calculation (json) has changed, so we're saving this report, rating.")
         u = OrganizationRating()
         u.organization = organization
         u.rating = total_rating
         u.when = when
-        u.calculation = organization_json
+        u.calculation = calculation
         u.save()
     else:
-        logger.warning(
-            "The calculation is still the same, not creating a new OrganizationRating")
+        logger.warning("The calculation is still the same, not creating a new OrganizationRating")
 
 
 def rate_urls(urls, when=""):
@@ -880,7 +873,7 @@ def rate_url(url, when=""):
     # avoid duplication. We think the explanation is the most unique identifier.
     # therefore the order in which URLs are grabbed (if there are new ones) is important.
     # it cannot be random, otherwise the explanation will be different every time.
-    if explanation and last_url_rating.calculation != explanation:
+    if explanation and DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True):
         u = UrlRating()
         u.url = url
         u.rating = rating
@@ -927,28 +920,8 @@ def get_url_score_modular(url, when=""):
     had_ipv4 = False
     had_ipv6 = False
 
-    # general reporting json:
-    url_rating_template = """
-    {
-    "url": {
-        "url": "%s",
-        "points": "%s",
-        "endpoints": [%s]
-        }
-    }""".strip()
-
-    endpoint_template = """
-        {
-        "%s:%s": {
-            "ip": "%s",
-            "port": "%s",
-            "protocol": "%s",
-            "ratings": [%s]
-            }
-        }""".strip()
-
     rating = 0
-    endpoint_jsons = []
+    endpoint_calculations = []
     for endpoint in endpoints:
 
         # todo: add some empty rating, to still show the endpoint in the report.
@@ -994,12 +967,14 @@ def get_url_score_modular(url, when=""):
             int(r1) + int(r2) + int(r3) + int(r4)
 
         if jsons:
-            endpoint_jsons.append((endpoint_template % (endpoint.ip_version,
-                                                        endpoint.port,
-                                                        endpoint.ip_version,
-                                                        endpoint.port,
-                                                        endpoint.protocol,
-                                                        ",".join(jsons))))
+            endpoint_calculations.append({
+                "%s:%s" % (endpoint.ip_version, endpoint.port): {
+                    "ip": endpoint.ip_version,
+                    "port": endpoint.port,
+                    "protocol": endpoint.protocol,
+                    "ratings": jsons
+                }
+            })
         else:
             logger.debug('No tls or http rating at this moment. Not saving. %s %s' %
                          (url, when))
@@ -1025,16 +1000,18 @@ def get_url_score_modular(url, when=""):
     #     int(scanner_dead_rating)
 
     # now prepare the url bit:
-    if endpoint_jsons:
-        url_json = url_rating_template % (url.url, rating, ",".join(endpoint_jsons))
-        # logger.debug(url_json)
-        # verify correctness of json:
-        # parsed = json.loads(url_json)
-        # url_json = json.dumps(parsed)  # nice format
-        return url_json, rating
+    if endpoint_calculations:
+        url_rating_calculation = {
+            "url": {
+                "url": url.url,
+                "points": rating,
+                "endpoints": endpoint_calculations
+            }
+        }
+        return url_rating_calculation, rating
     else:
         # empty explanations don't get saved.
-        return "", 0
+        return {}, 0
 
 
 def close_url_rating(url, when):
@@ -1053,19 +1030,19 @@ def close_url_rating(url, when):
     # if did have score in past (we assume there was a check if there where endpoints before)
     # create 0 rating.
 
-    default_calculation = """
-    {"url":
+    default_calculation = {
+        "url":
         {
-        "url": "%s",
-        "points": "0",
-        "endpoints": []
+            "url": url.url,
+            "points": "0",
+            "endpoints": []
         }
-    }""" % url.url
+    }
 
     try:
         urlratings = UrlRating.objects.filter(url=url, when__lte=when)
         urlrating = urlratings.latest("when")
-        if urlrating.calculation != default_calculation:
+        if DeepDiff(urlrating.calculation, default_calculation, ignore_order=True, report_repetition=True):
             logger.debug('Added an empty zero rating. The url has probably been cleaned up.')
             x = UrlRating()
             x.calculation = default_calculation
@@ -1435,15 +1412,14 @@ def default_ratings():
         r.when = when
         r.rating = -1
         r.organization = organization
-        r.calculation = """
-{
-    "organization": {
-      "name": "%s",
-      "rating": "-1",
-      "urls": []
-    }
-}
-        """.strip() % organization.name
+        r.calculation = {
+            "organization": {
+                "name": organization.name,
+                "rating": "-1",
+                "urls": []
+            }
+        }
+
         r.save()
 
 

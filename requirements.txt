@@ -49,3 +49,6 @@ django-proxy
 
 # sentry client
 raven
+
+# allow recursive comparison of dictionaries
+deepdiff

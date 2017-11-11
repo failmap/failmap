@@ -73,7 +73,7 @@ def manifest_json(request):
             "sizes": "200x200",
         }],
     }
-    return JsonResponse(manifest)
+    return JsonResponse(manifest, cls=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -85,48 +85,33 @@ def organization_report(request, organization_id, weeks_back=0):
 
     # getting the latest report.
     try:
-        r = Organization.objects.filter(pk=organization_id, organizationrating__when__lte=when). \
-            values('organizationrating__rating',
-                   'organizationrating__calculation',
-                   'organizationrating__when',
-                   'name',
-                   'pk',
-                   'twitter_handle').latest('organizationrating__when')
-        # latest replaced: order_by('-organizationrating__when')[:1].get()
-
+        ratings = Organization.objects.filter(pk=organization_id, organizationrating__when__lte=when)
+        values = ratings.values('organizationrating__rating',
+                                'organizationrating__calculation',
+                                'organizationrating__when',
+                                'name',
+                                'pk',
+                                'twitter_handle').latest('organizationrating__when')
+    except Organization.DoesNotExist:
+        report = {}
+    else:
         # get the most recent non-expired 'promise'
         promise = Promise.objects.filter(organization_id=organization_id, expires_on__gt=datetime.now())
         promise = promise.order_by('-expires_on')
         promise = promise.values('created_on', 'expires_on')
         promise = promise.first()
 
-        report_json = """
-{
-    "name": "%s",
-    "id": %s,
-    "twitter_handle": "%s",
-    "rating": %s,
-    "when": "%s",
-    "calculation": %s,
-    "promise": %s
-}
-        """
-        report_json = report_json % (
-            r['name'],
-            r['pk'],
-            r['twitter_handle'],
-            r['organizationrating__rating'],
-            r['organizationrating__when'].isoformat(),
-            r['organizationrating__calculation'],
-            json.dumps(promise, cls=JSEncoder),
-        )
-        # print(report_json)
-    except Organization.DoesNotExist:
-        report_json = "{}"
+        report = {
+            "name": values['name'],
+            "id": values['pk'],
+            "twitter_handle": values['twitter_handle'],
+            "rating": values['organizationrating__rating'],
+            "when": values['organizationrating__when'].isoformat(),
+            "calculation": values['organizationrating__calculation'],
+            "promise": promise,
+        }
 
-    x = json.loads(report_json)
-
-    return JsonResponse(x, json_dumps_params={'indent': 2}, safe=False)
+    return JsonResponse(report, safe=False, cls=JSEncoder)
 
 
 def string_to_delta(string_delta):
@@ -243,7 +228,7 @@ def terrible_urls(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["urls"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 4})
+    return JsonResponse(data, cls=JSEncoder)
 
 
 @cache_page(one_hour)
@@ -344,7 +329,7 @@ def topfail(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 4})
+    return JsonResponse(data, cls=JSEncoder)
 
 
 # @cache_page(cache_time)
@@ -447,7 +432,7 @@ def topwin(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 4})
+    return JsonResponse(data, cls=JSEncoder)
 
 
 def stats_determine_when(stat, weeks_back=0):
@@ -505,20 +490,20 @@ def stats(request, weeks_back=0):
             # it will double the urls that are shared between organizations.
             # that is not really bad, it distorts a little.
             # we're forced to load each item separately anyway, so why not read it?
-            x = json.loads(rating.calculation)
-            measurement["total_urls"] += len(x['organization']['urls'])
+            calculation = rating.calculation
+            measurement["total_urls"] += len(calculation['organization']['urls'])
 
             measurement["green_urls"] += sum(
-                [int(l['points']) < 200 for l in x['organization']['urls']])
+                [int(l['points']) < 200 for l in calculation['organization']['urls']])
             measurement["orange_urls"] += sum(
-                [199 < int(l['points']) < 1000 for l in x['organization']['urls']])
+                [199 < int(l['points']) < 1000 for l in calculation['organization']['urls']])
             measurement["red_urls"] += sum(
-                [int(l['points']) > 999 for l in x['organization']['urls']])
+                [int(l['points']) > 999 for l in calculation['organization']['urls']])
 
             measurement["included_organizations"] += 1
 
             # make some generic stats for endpoints
-            for url in x['organization']['urls']:
+            for url in calculation['organization']['urls']:
                 if url['url'] in noduplicates:
                     continue
                 noduplicates.append(url['url'])
@@ -594,7 +579,7 @@ def stats(request, weeks_back=0):
 
         timeframes[stat] = measurement
 
-    return JsonResponse({"data": timeframes}, json_dumps_params={'indent': 4})
+    return JsonResponse({"data": timeframes}, cls=JSEncoder)
 
 
 # this function doesn't give the relevant urls at the moment, it needs to select stuff better.
@@ -658,8 +643,8 @@ def urlstats(request, weeks_back=0):
                 measurement["red"] += 1
 
             # make stats on what kind of vulnerabilities:
-            x = json.loads(rating.calculation)
-            for e in x['url']['endpoints']:
+            calculation = rating.calculation
+            for e in calculation['url']['endpoints']:
                 for r in e['ratings']:
                     if r['type'] not in measurement["explained"].keys():
                         measurement["explained"][r['type']] = {}
@@ -677,7 +662,7 @@ def urlstats(request, weeks_back=0):
 
         stats[stat] = measurement
 
-    return JsonResponse({"data": stats}, json_dumps_params={'indent': 4})
+    return JsonResponse({"data": stats}, cls=JSEncoder)
 
 
 @cache_page(one_day)
@@ -724,7 +709,7 @@ def wanted_urls(request):
 
         data["organizations"].append(od)
 
-    return JsonResponse(data, json_dumps_params={'indent': 2})
+    return JsonResponse(data, cls=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -985,7 +970,7 @@ def map_data(request, weeks_back=0):
 
         data["features"].append(dataset)
 
-    return JsonResponse(data, json_dumps_params={'indent': 4})
+    return JsonResponse(data, cls=JSEncoder)
 
 
 def calculate_failscore(number_of_points, number_of_endpoints):

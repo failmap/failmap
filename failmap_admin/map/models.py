@@ -1,4 +1,5 @@
 from django.db import models
+from jsonfield import JSONField
 
 from failmap_admin.organizations.models import Organization, Url
 
@@ -34,7 +35,7 @@ class OrganizationRating(models.Model):
                   "in gray on the map. All next ratings are between 0 (perfect) and 2147483647."
     )
     when = models.DateTimeField(db_index=True)
-    calculation = models.TextField(
+    calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment, for all urls "
                   "of this organization. This can be a lot."
     )  # calculations of the independent urls... and perhaps others?
@@ -59,7 +60,7 @@ class UrlRating(models.Model):
                   "up to 2147483647."
     )
     when = models.DateTimeField(db_index=True)
-    calculation = models.TextField(
+    calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "
                   "be spread out over multiple endpoints, which might look a bit confusing. Yet it "
                   "is perfectly possible as some urls change their IP every five minutes and "
