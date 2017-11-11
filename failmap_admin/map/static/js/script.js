@@ -5,6 +5,7 @@
 // Registry Sentry for error reporting
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
 let version = document.head.querySelector("[name=version]").getAttribute('content');
+console.log(sentry_token)
 if (sentry_token){
     Raven.config(sentry_token, {release: version}).install();
 }
@@ -559,7 +560,8 @@ $(document).ready(function () {
             urls: Array,
             mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
             selected: null,
-            loading: false
+            loading: false,
+            promises: false,
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
@@ -673,12 +675,14 @@ $(document).ready(function () {
                 vueReport.loading = true;
                 vueReport.name = null;
                 $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                    console.log(data)
                     vueReport.loading = false;
                     vueReport.urls = data.calculation["organization"]["urls"];
                     vueReport.points = data.rating;
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                     vueReport.twitter_handle = data.twitter_handle;
+                    vueReport.promises = data.promises;
                     // include id in anchor to allow url sharing
                     let newHash = 'report-' + OrganizationID;
                     $('a#report-anchor').attr('name', newHash)

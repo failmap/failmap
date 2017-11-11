@@ -312,11 +312,15 @@
                         Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
                         <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
-                        {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}, {% trans "congratulations" %}!<br />
+                        {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}<span v-if="promises">*</span>, {% trans "congratulations" %}!
+                        <br />
                         <br />
                         Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br/>
                         Ontbreken er domeinen? <a v-bind:href="'mailto:' + mailto + '?subject=Nieuwe%20domeinen%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br/>
                         <br />
+                        <div v-if="promises" id="promise">* Deze orgranisatie heeft contact opgenomen met Faalkaart en toegezegd om op korte termijn verandering door te voeren om de score te verbeteren. Faalkaart draait dagelijks nieuwe scans op alle organsaties en domeinen, de resultaten van deze veranderingen zullen dus binnenkort zichtbaar zijn.
+                        </div>
+                        <br/>
                         {% verbatim %}
                         <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.points) + ', white);'">
                             <div class="screenshotlist">

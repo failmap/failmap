@@ -13,7 +13,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
-from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.organizations.models import Organization, Promise, Url
 
 from .. import __version__
 
@@ -92,6 +92,7 @@ def organization_report(request, organization_id, weeks_back=0):
                    'pk',
                    'twitter_handle').latest('organizationrating__when')
         # latest replaced: order_by('-organizationrating__when')[:1].get()
+        promises = bool(Promise.objects.filter(organization_id=organization_id, expires_on__gt=datetime.now()).count())
 
         report_json = """
 {
@@ -100,7 +101,8 @@ def organization_report(request, organization_id, weeks_back=0):
     "twitter_handle": "%s",
     "rating": %s,
     "when": "%s",
-    "calculation": %s
+    "calculation": %s,
+    "promises": %s
 }
         """
         report_json = report_json % (
@@ -110,6 +112,7 @@ def organization_report(request, organization_id, weeks_back=0):
             r['organizationrating__rating'],
             r['organizationrating__when'].isoformat(),
             r['organizationrating__calculation'],
+            promises,
         )
         # print(report_json)
     except Organization.DoesNotExist:

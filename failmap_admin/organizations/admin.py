@@ -17,7 +17,7 @@ from failmap_admin.scanners.scanner_security_headers import scan_urls as securit
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 from ..app.models import Job
-from .models import Coordinate, Organization, OrganizationType, Url
+from .models import Coordinate, Organization, OrganizationType, Promise, Url
 
 logger = logging.getLogger(__name__)
 
@@ -229,7 +229,15 @@ class CoordinateAdmin(admin.ModelAdmin):
     fields = ('organization', 'geojsontype', 'area')
 
 
+class PromiseAdmin(admin.ModelAdmin):
+    list_display = ('organization', 'created_on', 'expires_on')
+    search_fields = ('organization',)
+    list_filter = ('organization',)
+    fields = ('organization', 'created_on', 'expires_on', 'notes')
+
+
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Url, UrlAdmin)
 admin.site.register(Coordinate, CoordinateAdmin)
 admin.site.register(OrganizationType, OrganizationTypeAdmin)
+admin.site.register(Promise, PromiseAdmin)
