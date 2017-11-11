@@ -65,7 +65,7 @@ if settings.SENTRY_DSN:
         Context: None
         """
 
-        context = {'request': request}
+        context = {'request': request, 'admin_instance': settings.ADMIN}
 
         # on privileged instance show the actual error message to hopefully be useful for the user
         if settings.ADMIN:
