@@ -52,13 +52,19 @@ class UrlRatingAdminInline(CompactInline):
     ordering = ["-when"]
 
 
+class PromiseAdminInline(CompactInline):
+    model = Promise
+    extra = 0
+    ordering = ["-created_on"]
+
+
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
     fields = ('name', 'type', 'country', 'twitter_handle')
 
-    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]  #
+    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
     actions = ['rate_organization', 'scan_organization']
 
