@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+import sys
+
 from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
@@ -64,5 +66,11 @@ if settings.SENTRY_DSN:
         """
 
         context = {'request': request}
+
+        # on privileged instance show the actual error message to hopefully be useful for the user
+        if settings.ADMIN:
+            _, value, _ = sys.exc_info()
+            context['exception_message'] = value
+
         template_name = '500.html'  # You need to create a 500.html template.
         return TemplateResponse(request, template_name, context, status=500)

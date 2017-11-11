@@ -3,3 +3,7 @@
     <p>If you need assistance, you may reference this error as
     <strong>{{ request.sentry.id }}</strong>.</p>
 {% endif %}
+
+{% if exception_message %}
+<p>For what it's worth the error message was: {{ exception_message }}</p>
+{% endif %}
