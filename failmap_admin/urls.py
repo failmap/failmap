@@ -65,7 +65,11 @@ if settings.SENTRY_DSN:
         Context: None
         """
 
-        context = {'request': request, 'admin_instance': settings.ADMIN}
+        context = {
+            'request': request,
+            'admin_instance': settings.ADMIN,
+            'sentry_project_url': settings.SENTRY_PROJECT_URL,
+        }
 
         # on privileged instance show the actual error message to hopefully be useful for the user
         if settings.ADMIN:

@@ -492,3 +492,7 @@ if SENTRY_DSN:
 
 # set javascript sentry token if provided
 SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', 'https://a4f72b82fc0742bc82b82560b340006b@sentry.io/242170')
+
+SENTRY_ORGANIZATION = 'internet-cleanup-foundation'
+SENTRY_PROJECT = 'faalkaart'
+SENTRY_PROJECT_URL = 'https://sentry.io/%s/%s' % (SENTRY_ORGANIZATION, SENTRY_PROJECT)
