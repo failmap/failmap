@@ -58,7 +58,6 @@ class Job(models.Model):
         job.result = result
         job.status = 'completed'
         job.finished_on = datetime.datetime.now()
-        print(job.status)
         job.save()
 
     def __str__(self):
