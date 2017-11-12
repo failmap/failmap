@@ -71,6 +71,8 @@ services:
       # django decides what to log based on type of console
       TERM: xterm-color
       DEBUG: 1
+      # disable server static files from collectstatic during development, passthrough to django staticfiles urlpatterns
+      UWSGI_STATIC_MAP:
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
       - .:/source/
