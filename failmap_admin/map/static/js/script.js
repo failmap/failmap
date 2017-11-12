@@ -5,7 +5,6 @@
 // Registry Sentry for error reporting
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
 let version = document.head.querySelector("[name=version]").getAttribute('content');
-console.log(sentry_token)
 if (sentry_token){
     Raven.config(sentry_token, {release: version}).install();
 }
@@ -675,7 +674,6 @@ $(document).ready(function () {
                 vueReport.loading = true;
                 vueReport.name = null;
                 $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
-                    console.log(data)
                     vueReport.loading = false;
                     vueReport.urls = data.calculation["organization"]["urls"];
                     vueReport.points = data.rating;
