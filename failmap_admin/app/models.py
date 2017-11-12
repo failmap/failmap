@@ -39,6 +39,8 @@ class Job(models.Model):
 
         # publish original task which stores the result in this Job object
         result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
+
+        # retrieve job object again (might have changed if celery was really fast or eager was enabled)
         job = Job.objects.get(id=job.id)
         job.result_id = result_id.id
         job.save()
