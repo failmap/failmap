@@ -169,7 +169,10 @@ class Promise(models.Model):
     """Allow recording of organisation promises for improvement."""
 
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
-    notes = models.TextField(help_text="Context information about the promise (eg: ticket reference).")
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Context information about the promise (eg: ticket reference).")
 
     created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
     expires_on = models.DateTimeField(
