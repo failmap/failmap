@@ -3,7 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan,
-                                           UrlIp, Url)
+                                           UrlIp)
 
 logger = logging.getLogger(__package__)
 
@@ -69,6 +69,9 @@ failmap-admin rebuild-ratings
 failmap-admin migrate-61-endpoint-ip-separation
 failmap-admin rebuild-ratings
 
+failmap-admin clear-database && failmap-admin load-dataset productiondata &&
+failmap-admin migrate-61-endpoint-ip-separation && failmap-admin rebuild-ratings
+
 # The ratings should be the same
 """
 
@@ -109,12 +112,12 @@ def merge_duplicate_endpoints():
         """
         URL                 DOMAIN              DISCOVERED ON       ipv PORT PROTOCOL IS DEAD SINCE     TLS SCAN COUNT
         ... and 200 more...
-        
+
         opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
         opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
         opendata.arnhem.nl	opendata.arnhem.nl	27 april 2016 14:59	4	443	https	3 mei 2016 03:18	1
         opendata.arnhem.nl	opendata.arnhem.nl	8 april 2016 19:52	4	443	https	27 april 2016 14:59	1
-        opendata.arnhem.nl	opendata.arnhem.nl	8 april 2016 19:52	4	443	https	27 april 2016 14:59	1        
+        opendata.arnhem.nl	opendata.arnhem.nl	8 april 2016 19:52	4	443	https	27 april 2016 14:59	1
         """
         if similar_endpoints:
             first_similar = similar_endpoints[-1]

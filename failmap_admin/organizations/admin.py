@@ -7,6 +7,7 @@ from jet.admin import CompactInline
 
 from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
                                                 rate_selected_organizations, rate_urls)
+from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
 from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
@@ -14,7 +15,6 @@ from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_sc
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap_admin.scanners.scanner_tls_qualys import scan_url_list
-from failmap_admin.scanners.admin import UrlIpInline
 
 from ..app.models import Job
 from .models import Coordinate, Organization, OrganizationType, Url

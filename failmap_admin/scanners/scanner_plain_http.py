@@ -9,12 +9,11 @@ https://stackoverflow.com/questions/20475552/python-requests-library-redirect-ne
 """
 import logging
 
-
 from celery import group
 
-from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
 
 from ..celery import app
 from .models import Endpoint
