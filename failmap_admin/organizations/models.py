@@ -1,7 +1,7 @@
 # coding=UTF-8
 # from __future__ import unicode_literals
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -174,8 +174,10 @@ class Promise(models.Model):
         null=True,
         help_text="Context information about the promise (eg: ticket reference).")
 
-    created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
+    created_on = models.DateTimeField(
+        default=datetime.today, blank=True, null=True)
     expires_on = models.DateTimeField(
+        default=lambda: datetime.now() + timedelta(days=7),
         blank=True,
         null=True,
         help_text="When in the future this promise is expected to be fulfilled.")
