@@ -22,6 +22,19 @@ from .models import Coordinate, Organization, OrganizationType, Promise, Url
 logger = logging.getLogger(__name__)
 
 
+PROMISE_DESCRIPTION = """
+<p>A 'promise' is an indication by an organisation representitive that an improvement
+has been made which will alter the organizations score. A generic message will be
+displayed on the organization report with the creation and expiry date of the promise
+until it expires.</p>
+<p>This indication is to overcome the problem of a negative score even though improvement
+are made, but the score cannot reflect them yet due to technical or bureaucratic reasons.</p>
+<p>It is not intended for long term promises of improvement that have not been applied or
+put in to progress. The promised improvement must be verifiable by Faalkaart within a
+handfull of days.</p>
+"""
+
+
 class UrlAdminInline(CompactInline):
     model = Url
     extra = 0
@@ -56,6 +69,13 @@ class PromiseAdminInline(CompactInline):
     model = Promise
     extra = 0
     ordering = ["-created_on"]
+
+    fieldsets = (
+        (None, {
+            'fields': ('organization', 'created_on', 'expires_on', 'notes'),
+            'description': PROMISE_DESCRIPTION,
+        }),
+    )
 
 
 class OrganizationAdmin(admin.ModelAdmin):
@@ -233,19 +253,6 @@ class CoordinateAdmin(admin.ModelAdmin):
     search_fields = ('organization', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
     fields = ('organization', 'geojsontype', 'area')
-
-
-PROMISE_DESCRIPTION = """
-<p>A 'promise' is an indication by an organisation representitive that an improvement
-has been made which will alter the organizations score. A generic message will be
-displayed on the organization report with the creation and expiry date of the promise
-until it expires.</p>
-<p>This indication is to overcome the problem of a negative score even though improvement
-are made, but the score cannot reflect them yet due to technical or bureaucratic reasons.</p>
-<p>It is not intended for long term promises of improvement that have not been applied or
-put in to progress. The promised improvement must be verifiable by Faalkaart within a
-handfull of days.</p>
-"""
 
 
 class PromiseAdmin(admin.ModelAdmin):
