@@ -13,9 +13,10 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
-from failmap_admin.organizations.models import Organization, Url
+from failmap_admin.organizations.models import Organization, Promise, Url
 
 from .. import __version__
+from ..app.common import JSEncoder
 
 one_minute = 60
 one_hour = 60 * 60
@@ -93,6 +94,12 @@ def organization_report(request, organization_id, weeks_back=0):
                    'twitter_handle').latest('organizationrating__when')
         # latest replaced: order_by('-organizationrating__when')[:1].get()
 
+        # get the most recent non-expired 'promise'
+        promise = Promise.objects.filter(organization_id=organization_id, expires_on__gt=datetime.now())
+        promise = promise.order_by('-expires_on')
+        promise = promise.values('created_on', 'expires_on')
+        promise = promise.first()
+
         report_json = """
 {
     "name": "%s",
@@ -100,7 +107,8 @@ def organization_report(request, organization_id, weeks_back=0):
     "twitter_handle": "%s",
     "rating": %s,
     "when": "%s",
-    "calculation": %s
+    "calculation": %s,
+    "promise": %s
 }
         """
         report_json = report_json % (
@@ -110,6 +118,7 @@ def organization_report(request, organization_id, weeks_back=0):
             r['organizationrating__rating'],
             r['organizationrating__when'].isoformat(),
             r['organizationrating__calculation'],
+            json.dumps(promise, cls=JSEncoder),
         )
         # print(report_json)
     except Organization.DoesNotExist:

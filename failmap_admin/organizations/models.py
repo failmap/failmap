@@ -1,6 +1,8 @@
 # coding=UTF-8
 # from __future__ import unicode_literals
 
+from datetime import datetime, timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_countries.fields import CountryField
@@ -161,3 +163,24 @@ class Url(models.Model):
 # so they are not used anymore.
 # class Port(models.Model):
 #    url = models.ForeignKey(Url, on_delete=models.PROTECT)
+
+
+class Promise(models.Model):
+    """Allow recording of organisation promises for improvement."""
+
+    organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+    notes = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Context information about the promise (eg: ticket reference).")
+
+    created_on = models.DateTimeField(
+        default=datetime.today, blank=True, null=True)
+    expires_on = models.DateTimeField(
+        default=lambda: datetime.now() + timedelta(days=7),
+        blank=True,
+        null=True,
+        help_text="When in the future this promise is expected to be fulfilled.")
+
+    def __str__(self):
+        return '%s - %s' % (self.organization.name, self.created_on)

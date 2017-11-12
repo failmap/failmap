@@ -1,5 +1,13 @@
 <p>You've encountered an error, oh noes!</p>
 {% if request.sentry.id %}
-    <p>If you need assistance, you may reference this error as
-    <strong>{{ request.sentry.id }}</strong>.</p>
+<p>If you need assistance, you may reference this error as
+{% if admin_instance %}
+<a href="{{sentry_project_url}}/?query={{ request.sentry.id }}">{{ request.sentry.id }}</a>,
+{% else %}
+<strong>{{ request.sentry.id }}</strong>.</p>
+{% endif %}
+{% endif %}
+
+{% if exception_message %}
+<p>For what it's worth the error message was: {{ exception_message }}</p>
 {% endif %}

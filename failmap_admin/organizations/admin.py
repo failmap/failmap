@@ -17,9 +17,22 @@ from failmap_admin.scanners.scanner_security_headers import scan_urls as securit
 from failmap_admin.scanners.scanner_tls_qualys import scan_url_list
 
 from ..app.models import Job
-from .models import Coordinate, Organization, OrganizationType, Url
+from .models import Coordinate, Organization, OrganizationType, Promise, Url
 
 logger = logging.getLogger(__name__)
+
+
+PROMISE_DESCRIPTION = """
+<p>A 'promise' is an indication by an organisation representitive that an improvement
+has been made which will alter the organizations score. A generic message will be
+displayed on the organization report with the creation and expiry date of the promise
+until it expires.</p>
+<p>This indication is to overcome the problem of a negative score even though improvement
+are made, but the score cannot reflect them yet due to technical or bureaucratic reasons.</p>
+<p>It is not intended for long term promises of improvement that have not been applied or
+put in to progress. The promised improvement must be verifiable by Faalkaart within a
+handfull of days.</p>
+"""
 
 
 class UrlAdminInline(CompactInline):
@@ -52,6 +65,19 @@ class UrlRatingAdminInline(CompactInline):
     ordering = ["-when"]
 
 
+class PromiseAdminInline(CompactInline):
+    model = Promise
+    extra = 0
+    ordering = ["-created_on"]
+
+    fieldsets = (
+        (None, {
+            'fields': ('organization', 'created_on', 'expires_on', 'notes'),
+            'description': PROMISE_DESCRIPTION,
+        }),
+    )
+
+
 class OrganizationAdmin(admin.ModelAdmin):
     class Media:
         js = ('js/action_buttons.js', )
@@ -61,7 +87,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
     fields = ('name', 'type', 'country', 'twitter_handle')
 
-    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline]  #
+    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
     actions = ['rate_organization', 'scan_organization']
 
@@ -224,7 +250,21 @@ class CoordinateAdmin(admin.ModelAdmin):
     fields = ('organization', 'geojsontype', 'area')
 
 
+class PromiseAdmin(admin.ModelAdmin):
+    list_display = ('organization', 'created_on', 'expires_on')
+    search_fields = ('organization',)
+    list_filter = ('organization',)
+
+    fieldsets = (
+        (None, {
+            'fields': ('organization', 'created_on', 'expires_on', 'notes'),
+            'description': PROMISE_DESCRIPTION,
+        }),
+    )
+
+
 admin.site.register(Organization, OrganizationAdmin)
 admin.site.register(Url, UrlAdmin)
 admin.site.register(Coordinate, CoordinateAdmin)
 admin.site.register(OrganizationType, OrganizationTypeAdmin)
+admin.site.register(Promise, PromiseAdmin)

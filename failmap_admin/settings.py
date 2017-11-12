@@ -469,8 +469,7 @@ if DEBUG:
         # send statsd metrics to debug_toolbar
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
     except ImportError:
-        # send statsd metrics to logging
-        STATSD_CLIENT = 'django_statsd.clients.log'
+        pass
 
 # is administrative backend enabled on this instance
 ADMIN = bool(APPNAME == 'failmap-admin')
@@ -491,4 +490,8 @@ if SENTRY_DSN:
     MIDDLEWARE_CLASSES.insert(0, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
 
 # set javascript sentry token if provided
-SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', 'https://a4f72b82fc0742bc82b82560b340006b@sentry.io/242170')
+SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
+
+SENTRY_ORGANIZATION = 'internet-cleanup-foundation'
+SENTRY_PROJECT = 'faalkaart'
+SENTRY_PROJECT_URL = 'https://sentry.io/%s/%s' % (SENTRY_ORGANIZATION, SENTRY_PROJECT)

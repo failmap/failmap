@@ -33,13 +33,13 @@ class CustomIndexDashboard(Dashboard):
             _('Failmap resources'),
             children=[
                 {
-                    'title': _('Github Repository'),
-                    'url': 'https://github.com/failmap/',
+                    'title': _('Gitlab Repository'),
+                    'url': 'https://gitlab.com/failmap/',
                     'external': True,
                 },
                 {
                     'title': _('Admin repository'),
-                    'url': 'https://github.com/failmap/admin',
+                    'url': 'https://gitlab.com/failmap/admin',
                     'external': True,
                 },
                 {

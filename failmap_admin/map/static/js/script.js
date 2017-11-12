@@ -559,7 +559,8 @@ $(document).ready(function () {
             urls: Array,
             mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
             selected: null,
-            loading: false
+            loading: false,
+            promise: false,
         },
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
@@ -679,6 +680,8 @@ $(document).ready(function () {
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                     vueReport.twitter_handle = data.twitter_handle;
+                    vueReport.promise = data.promise;
+
                     // include id in anchor to allow url sharing
                     let newHash = 'report-' + OrganizationID;
                     $('a#report-anchor').attr('name', newHash)
@@ -698,6 +701,9 @@ $(document).ready(function () {
                         return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
                     }
                 }
+            },
+            formatDate: function(date){
+                return new Date(date).toISOString().substring(0, 10)
             }
         }
     });
