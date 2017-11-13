@@ -16,7 +16,7 @@ def faalonië():
     url.save()
     url.organization.add(faalonië)
 
-    endpoint = Endpoint(ip='127.0.0.1', protocol='https', url=url)
+    endpoint = Endpoint(ip_version=4, port=443, protocol='https', url=url)
     endpoint.save()
 
     return {
