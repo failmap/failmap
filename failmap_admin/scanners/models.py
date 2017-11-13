@@ -30,7 +30,10 @@ class Endpoint(models.Model):
     """
 
     url = models.ForeignKey(
-        Url, null=True, blank=True)
+        Url,
+        null=True,
+        blank=True
+    )
 
     ip_version = models.IntegerField(
         help_text="Either 4: IPv4 or 6: IPv6. There are basically two possibilities to reach the endpoint, "
