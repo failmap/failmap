@@ -28,30 +28,9 @@ class Endpoint(models.Model):
     Additionally it's easier for humans to understand a "url", much more than that there are
     ports, protocols, ip-addresses and more of that.
     """
-    # There was duplication between URL.URL and endpoint.domain. This resulted on both
-    # places the same data was stored (increase in database size). Additionally there was no
-    # django way to travel between endpoints and urls, which made it impossible to main
-    # database independence. Which would then result in the solution being harder to maintain.
-    # Therefore we've dropped the domain field and added a foreign key to URL.
-    # todo-cancelled: drop domain at the next possible option.
-    # We want, for some reason, to also save scans that don't have a URL.
-    domain = models.CharField(
-        max_length=255,
-        help_text="This is a legacy field, "
-        "used by the scanner. Will be obsoleted "
-        "after the incorrectly migrated domains"
-        "have been fixed manually in production"
-        "and the scanner is ready.")
+
     url = models.ForeignKey(
         Url, null=True, blank=True)
-
-    # server information
-    server_name = models.CharField(
-        max_length=255,
-        help_text="Deprecated. Don't fill.",
-        blank=True,
-        null=True
-    )
 
     ip_version = models.IntegerField(
         help_text="Either 4: IPv4 or 6: IPv6. There are basically two possibilities to reach the endpoint, "
@@ -61,15 +40,9 @@ class Endpoint(models.Model):
         default=4
     )
 
-    ip = models.CharField(
-        max_length=255,
-        help_text="Deprecated. Don't fill.",
-        blank=True,
-        null=True,
-    )
-
-    port = models.IntegerField(default=443,
-                               help_text="Ports range from 1 to 65535.")  # 1 to 65535
+    port = models.IntegerField(
+        default=443,
+        help_text="Ports range from 1 to 65535.")  # 1 to 65535
 
     protocol = models.CharField(
         max_length=20,
@@ -78,17 +51,32 @@ class Endpoint(models.Model):
                   "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
     )
 
-    discovered_on = models.DateTimeField(blank=True, null=True)
+    discovered_on = models.DateTimeField(
+        blank=True,
+        null=True
+    )
 
     # Till when the endpoint existed and why it was deleted (or didn't exist at all).
-    is_dead = models.BooleanField(default=False,
-                                  help_text="If the port is closed, or the endpoint is otherwise"
-                                            "not reachable over the specified protocol, then mark"
-                                            "it as dead. A scanner for this port/protocol can also"
-                                            "declare it dead. This port is closed on this protocol."
-                                            "")
-    is_dead_since = models.DateTimeField(blank=True, null=True)
-    is_dead_reason = models.CharField(max_length=255, blank=True, null=True)
+    is_dead = models.BooleanField(
+        default=False,
+        help_text="Use the 'declare dead' button to autofill the date. "
+                  "If the port is closed, or the endpoint is otherwise"
+                  "not reachable over the specified protocol, then mark"
+                  "it as dead. A scanner for this port/protocol can also"
+                  "declare it dead. This port is closed on this protocol."
+                  ""
+    )
+
+    is_dead_since = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    is_dead_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         if self.is_dead:
