@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+env
 set -ex
 
 # Compare output of a test script run against two different branches.
