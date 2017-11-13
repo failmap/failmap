@@ -1,6 +1,6 @@
 /.idea/
 .DS_Store
-db.sqlite3
+*.sqlite3
 *.py[co]
 .tox
 .tox2
@@ -31,3 +31,4 @@ failmap_testdataset*
 dev_db/
 failmap_debug_dataset*
 temp/*
+*.out
