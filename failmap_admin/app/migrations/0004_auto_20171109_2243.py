@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='job',
             name='result_id',
-            field=models.CharField(blank=True, help_text='celery asyncresult ID for tracing task', max_length=255, null=True, unique=True),
+            field=models.CharField(blank=True, help_text='celery asyncresult ID for tracing task',
+                                   max_length=255, null=True, unique=True),
         ),
     ]

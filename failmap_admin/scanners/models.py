@@ -35,21 +35,26 @@ class Endpoint(models.Model):
     # Therefore we've dropped the domain field and added a foreign key to URL.
     # todo-cancelled: drop domain at the next possible option.
     # We want, for some reason, to also save scans that don't have a URL.
-    domain = models.CharField(max_length=255, help_text="This is a legacy field, "
-                                                        "used by the scanner. Will be obsoleted "
-                                                        "after the incorrectly migrated domains"
-                                                        "have been fixed manually in production"
-                                                        "and the scanner is ready.")
+    domain = models.CharField(
+        max_length=255,
+        help_text="This is a legacy field, "
+        "used by the scanner. Will be obsoleted "
+        "after the incorrectly migrated domains"
+        "have been fixed manually in production"
+        "and the scanner is ready.")
     url = models.ForeignKey(
         Url, null=True, blank=True)
 
     # server information
-    server_name = models.CharField(max_length=255,
-                                   help_text="rdns, gift from the scan, deprecated",
-                                   blank=True)  # a gift from the scan
+    server_name = models.CharField(
+        max_length=255,
+        help_text="Deprecated. Don't fill.",
+        blank=True,
+        null=True
+    )
 
     ip_version = models.IntegerField(
-        help_text="Either IPv4 or IPv6. There are basically two possibilities to reach the endpoint, "
+        help_text="Either 4: IPv4 or 6: IPv6. There are basically two possibilities to reach the endpoint, "
                   "which due to immaturity often look very different. The old way is using IPv4"
                   "addresses (4) and the newer method is uing IPv6 (6). The internet looks a whole lot"
                   "different between IPv4 or IPv6. That shouldn't be the case, but it is.",
@@ -58,18 +63,20 @@ class Endpoint(models.Model):
 
     ip = models.CharField(
         max_length=255,
-        help_text="IPv4 or IPv6 Address. Addresses have to be normalized to the compressed "
-                  "representation: removing as many zeros as possible. For example:  "
-                  "IPv6: abcd:0000:0000:00fd becomes abcd::fd, or "
-                  "IPv4: 127.000.000.001 = 127.0.0.1")
+        help_text="Deprecated. Don't fill.",
+        blank=True,
+        null=True,
+    )
 
     port = models.IntegerField(default=443,
                                help_text="Ports range from 1 to 65535.")  # 1 to 65535
+
     protocol = models.CharField(
         max_length=20,
-        help_text="Mostly application layer protocols, such as HTTP, FTP,"
+        help_text="Lowercase. Mostly application layer protocols, such as HTTP, FTP,"
                   "SSH and so on. For more, read here: "
-                  "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol")
+                  "https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol",
+    )
 
     discovered_on = models.DateTimeField(blank=True, null=True)
 
@@ -85,17 +92,12 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.url,  self.ip, self.ip_version,
-                                                     self.protocol, self.port, self.id)
+            return "✝ IPv%s %s/%s | [%s] %s  " % (self.ip_version, self.protocol, self.port, self.id, self.url)
         else:
-            return "%s = %s IPv%s | %s/%s [%s]" % (self.url, self.ip, self.ip_version,
-                                                   self.protocol, self.port, self.id)
+            return "IPv%s %s/%s | [%s] %s " % (self.ip_version, self.protocol, self.port, self.id, self.url)
 
     def uri_url(self):
         return "%s://%s:%s" % (self.protocol, self.url.url, self.port)
-
-    def uri_ip(self):
-        return "%s://%s:%s" % (self.protocol, self.ip, self.port)
 
     # when testing for ipv4 or ipv6, an endpoint is mutually exclusive.
     def is_ipv4(self):

@@ -45,18 +45,19 @@ class UrlIpAdmin(admin.ModelAdmin):
 class EndpointAdmin(admin.ModelAdmin):
     list_display = ('id', 'url', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
                     'tls_scans', 'generic_scans')
-    search_fields = ('url__url', 'domain', 'server_name', 'ip_version', 'port', 'protocol', 'is_dead',
+    search_fields = ('url__url', 'server_name', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
-    list_filter = ('server_name', 'ip_version', 'ip', 'port', 'protocol', 'is_dead')
+    list_filter = ('ip_version', 'port', 'protocol', 'is_dead')
     fieldsets = (
         (None, {
-            'fields': ('url', 'domain', 'server_name', 'ip_version', 'ip', 'port', 'discovered_on')
+            'fields': ('url', 'ip_version', 'protocol', 'port', 'discovered_on')
         }),
         ('dead endpoint management', {
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
 
+    exclude = ('server_name', 'ip', 'domain')
     readonly_fields = ['discovered_on']
 
     @staticmethod
