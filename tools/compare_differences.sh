@@ -29,4 +29,4 @@ for branch in "${branches[@]}"; do
 done
 
 # compare output
-sdiff "${branches[@]/%/.out}" | less
+sdiff -s "${branches[@]/%/.out}" | less
