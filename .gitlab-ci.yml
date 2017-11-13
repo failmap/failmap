@@ -95,6 +95,22 @@ dataset_postgres:
   only:
     - master
 
+# test if rating rebuilding is deterministic
+deterministic:
+  <<: *test_template
+  script:
+    - tox -e deterministic
+
+  # runs on merge requests, merge requests require rebase, no need to run on master again
+  except: [master]
+
+  # keep output for debugging
+  artifacts:
+    paths:
+      - 0-HEAD.txt
+      - 1-HEAD.txt
+
+
 # create distributable release
 build:
   stage: test_build

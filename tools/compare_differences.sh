@@ -13,10 +13,14 @@ branches=(${1?First argument needs to be branch name} ${2?Second argument needs 
 test_script=${3?Last argument needs to be test script}
 dataset=${4:-productiondata}
 
-for branch in "${branches[@]}"; do
+output=()
+
+for index in "${!branches[@]}"; do
+  branch="${branches[$index]}"
   git checkout "$branch"
+
   # prepare database
-  export DB_NAME=$branch.sqlite3
+  export DB_NAME="$index-$branch.sqlite3"
   test -f "$DB_NAME" && rm "$DB_NAME"
   failmap-admin migrate -v0
 
@@ -25,8 +29,9 @@ for branch in "${branches[@]}"; do
   failmap-admin rebuild-ratings -v0
 
   # create output
-  "$test_script" > "$branch.out"
+  "$test_script" > "$index-$branch.txt"
+  output+=("$index-$branch.txt")
 done
 
 # compare output
-sdiff -s "${branches[@]/%/.out}" | less
+sdiff -s "${output[@]}"
