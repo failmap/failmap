@@ -23,6 +23,12 @@ class Command(DumpDataCommand):
     # for testing it is nice to have a human editable serialization language
     FORMAT = 'yaml'
 
+    def add_arguments(self, parser):
+        """Add arguments."""
+        parser.add_argument('-c', '--count', default=20, type=int,
+                            help='Maximum amount of organization to create in the dataset.')
+        super(Command, self).add_arguments(parser)
+
     def handle(self, *app_labels, **options):
         """
         This function will make a YAML testdata export of the data in the database that is not
@@ -60,7 +66,7 @@ class Command(DumpDataCommand):
 
         objects += OrganizationType.objects.all()
 
-        organizations = Organization.objects.all().filter(name__istartswith='A')[0:20]
+        organizations = Organization.objects.all().filter(name__istartswith='A')[0:options['count']]
         objects += organizations
 
         coordinates = Coordinate.objects.all().filter(organization__in=organizations)
