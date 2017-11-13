@@ -553,7 +553,7 @@ def rate_timeline(timeline, url):
             # print(l)
             # print("z")
 
-            endpoint_jsons.append(endpoint_template % (endpoint.ip,
+            endpoint_jsons.append(endpoint_template % (endpoint.ip_version,
                                                        endpoint.port,
                                                        endpoint.protocol,
                                                        endpoint.is_ipv4(),
@@ -992,9 +992,9 @@ def get_url_score_modular(url, when=""):
             int(r1) + int(r2) + int(r3) + int(r4)
 
         if jsons:
-            endpoint_jsons.append((endpoint_template % (endpoint.ip,
+            endpoint_jsons.append((endpoint_template % (endpoint.ip_version,
                                                         endpoint.port,
-                                                        endpoint.ip,
+                                                        endpoint.ip_version,
                                                         endpoint.port,
                                                         endpoint.protocol,
                                                         ",".join(jsons))))

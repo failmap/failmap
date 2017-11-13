@@ -942,16 +942,21 @@ def map_data(request, weeks_back=0):
         red = 0
         orange = 0
         green = 0
+        endpoint_counter = 0
 
         # figure out if red, orange or green:
+        # #162, only make things red if there is a critical issue.
         calculation = json.loads(i[6])
         for url in calculation['organization']['urls']:
-            if url['points'] > 999:
-                red += 1
-            if 199 < url['points'] < 1000:
-                orange += 1
-            if -1 < url['points'] < 200:
-                green += 1
+            for endpoint in url['endpoints']:
+                endpoint_counter += 1
+                for rating in endpoint['ratings']:
+                    if rating['points'] > 999:
+                        red += 1
+                    if 199 < rating['points'] < 1000:
+                        orange += 1
+                    if -1 < rating['points'] < 200:
+                        green += 1
 
         dataset = {
             "type": "Feature",
@@ -975,6 +980,15 @@ def map_data(request, weeks_back=0):
                 }
         }
 
+        # todo: calculate this on determining ratings. So it's available in topwin.
+        dataset["properties"]["failscore"] = calculate_failscore(i[0], endpoint_counter)
+
         data["features"].append(dataset)
 
     return JsonResponse(data, json_dumps_params={'indent': 4})
+
+
+def calculate_failscore(number_of_points, number_of_endpoints):
+    if number_of_endpoints and number_of_points:
+        return round(number_of_points / number_of_endpoints, 0)
+    return 0
