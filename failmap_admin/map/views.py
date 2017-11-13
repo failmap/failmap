@@ -928,7 +928,7 @@ def map_data(request, weeks_back=0):
           (SELECT MAX(id) as id2 FROM map_organizationrating or2
           WHERE `when` <= '%s' GROUP BY organization_id) as x
           ON x.id2 = map_organizationrating.id
-        GROUP BY coordinate.area
+        GROUP BY coordinate.area, organization.name
         ORDER BY `when` ASC
         ''' % (when, )
     # print(sql)

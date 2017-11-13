@@ -27,15 +27,17 @@ class Command(DumpDataCommand):
     #         - Organizations         Yes         Hard to gather
     #         - OrganizationType      Yes         Foreign Keys
     #         - Urls                  Yes         Even harder to gather
+    #         - Promises              Yes         Might contain valuable data
     #
     #         Scanners:
     #         - Endpoints             Yes         Needed for rebuild ratings, hard to gather
     #         - Screenshots           No          Can be recreated with ease (except history)
     #         - States                No          Just start somewhere
     #         - TLS Qualys Scans      Yes         Needed for rebuild ratings
-    #         - TLS Qualys Scratchpa  No          This is mainly for debugging (todo: check scan tls qual)
+    #         - TLS Qualys Scratchpa  No          This is mainly for debugging
     #         - Generic Scans         Yes
     #         - Generic Scans scratch No
+    #         - UrlIp                 Yes         Might contain valuable data
     #
     #         Auth:
     #         - Users                 No          Create this yourself
@@ -46,9 +48,11 @@ class Command(DumpDataCommand):
         "organizations.Organization",
         "organizations.Coordinate",
         "organizations.Url",
+        "organizations.Promise",
         "scanners.Endpoint",
         "scanners.TlsQualysScan",
-        "scanners.EndpointGenericScan"
+        "scanners.EndpointGenericScan",
+        "scanners.UrlIp"
     )
 
     def handle(self, *app_labels, **options):

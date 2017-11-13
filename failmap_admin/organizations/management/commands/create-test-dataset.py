@@ -5,8 +5,9 @@ import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
-from failmap_admin.organizations.models import Coordinate, Organization, OrganizationType, Url
-from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
+from failmap_admin.organizations.models import (Coordinate, Organization, OrganizationType, Promise,
+                                                Url)
+from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlIp
 
 log = logging.getLogger(__package__)
 
@@ -76,6 +77,12 @@ class Command(DumpDataCommand):
 
         endpointgenericscans = EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
         objects += endpointgenericscans
+
+        promises = Promise.objects.all().filter(organization__in=organizations)
+        objects += promises
+
+        urlips = UrlIp.objects.all().filter(url__in=urls)
+        objects += urlips
 
         with open(filename, "w") as f:
             f.write(serialize(self.FORMAT, objects))

@@ -74,7 +74,7 @@ class Endpoint(models.Model):
     discovered_on = models.DateTimeField(blank=True, null=True)
 
     # Till when the endpoint existed and why it was deleted (or didn't exist at all).
-    is_dead = models.IntegerField(default=False,
+    is_dead = models.BooleanField(default=False,
                                   help_text="If the port is closed, or the endpoint is otherwise"
                                             "not reachable over the specified protocol, then mark"
                                             "it as dead. A scanner for this port/protocol can also"
@@ -85,10 +85,10 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.is_dead:
-            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.domain,  self.ip, self.ip_version,
+            return "✝ %s = %s IPv%s | %s/%s [%s]" % (self.url,  self.ip, self.ip_version,
                                                      self.protocol, self.port, self.id)
         else:
-            return "%s = %s IPv%s | %s/%s [%s]" % (self.domain, self.ip, self.ip_version,
+            return "%s = %s IPv%s | %s/%s [%s]" % (self.url, self.ip, self.ip_version,
                                                    self.protocol, self.port, self.id)
 
     def uri_url(self):

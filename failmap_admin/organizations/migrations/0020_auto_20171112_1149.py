@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import datetime
+
 from django.db import migrations, models
 
 
@@ -21,11 +22,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='promise',
             name='expires_on',
-            field=models.DateTimeField(blank=True, help_text='When in the future this promise is expected to be fulfilled.', null=True),
+            field=models.DateTimeField(
+                blank=True, help_text='When in the future this promise is expected to be fulfilled.', null=True),
         ),
         migrations.AlterField(
             model_name='promise',
             name='notes',
-            field=models.TextField(blank=True, help_text='Context information about the promise (eg: ticket reference).', null=True),
+            field=models.TextField(
+                blank=True, help_text='Context information about the promise (eg: ticket reference).', null=True),
         ),
     ]

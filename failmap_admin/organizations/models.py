@@ -3,6 +3,7 @@
 
 from datetime import datetime, timedelta
 
+import pytz
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_countries.fields import CountryField
@@ -165,19 +166,30 @@ class Url(models.Model):
 #    url = models.ForeignKey(Url, on_delete=models.PROTECT)
 
 
+def seven_days_in_the_future():
+    return datetime.now(pytz.utc) + timedelta(days=7)
+
+
+def today():
+    return datetime.now(pytz.utc).today()
+
+
 class Promise(models.Model):
     """Allow recording of organisation promises for improvement."""
 
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+
     notes = models.TextField(
         blank=True,
         null=True,
         help_text="Context information about the promise (eg: ticket reference).")
 
+    # https://stackoverflow.com/questions/29549611/fixed-default-value-provided-after-upgrading-to-django-1-8#29549675
     created_on = models.DateTimeField(
-        default=datetime.today, blank=True, null=True)
+        default=today, blank=True, null=True)
+
     expires_on = models.DateTimeField(
-        default=lambda: datetime.now() + timedelta(days=7),
+        default=seven_days_in_the_future,
         blank=True,
         null=True,
         help_text="When in the future this promise is expected to be fulfilled.")

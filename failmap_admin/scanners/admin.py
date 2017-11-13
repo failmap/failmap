@@ -43,7 +43,7 @@ class UrlIpAdmin(admin.ModelAdmin):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('id', 'url', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead_since',
+    list_display = ('id', 'url', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
                     'tls_scans', 'generic_scans')
     search_fields = ('url__url', 'domain', 'server_name', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
