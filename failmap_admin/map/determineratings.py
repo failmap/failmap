@@ -283,7 +283,9 @@ def rate_timeline(timeline, url):
 
     previous_ratings = {}
     previous_endpoints = []
-    for moment in timeline:
+
+    # work on a sorted timeline as otherwise this code is non-deterministic!
+    for moment in sorted(timeline):
         scores = []
         given_ratings = {}
 
