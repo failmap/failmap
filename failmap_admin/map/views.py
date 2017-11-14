@@ -73,7 +73,7 @@ def manifest_json(request):
             "sizes": "200x200",
         }],
     }
-    return JsonResponse(manifest, cls=JSEncoder)
+    return JsonResponse(manifest, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -111,7 +111,7 @@ def organization_report(request, organization_id, weeks_back=0):
             "promise": promise,
         }
 
-    return JsonResponse(report, safe=False, cls=JSEncoder)
+    return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 
 def string_to_delta(string_delta):
@@ -228,7 +228,7 @@ def terrible_urls(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["urls"].append(dataset)
 
-    return JsonResponse(data, cls=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(one_hour)
@@ -329,7 +329,7 @@ def topfail(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, cls=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 # @cache_page(cache_time)
@@ -432,7 +432,7 @@ def topwin(request, weeks_back=0):
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
 
-    return JsonResponse(data, cls=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 def stats_determine_when(stat, weeks_back=0):
@@ -579,7 +579,7 @@ def stats(request, weeks_back=0):
 
         timeframes[stat] = measurement
 
-    return JsonResponse({"data": timeframes}, cls=JSEncoder)
+    return JsonResponse({"data": timeframes}, encoder=JSEncoder)
 
 
 # this function doesn't give the relevant urls at the moment, it needs to select stuff better.
@@ -662,7 +662,7 @@ def urlstats(request, weeks_back=0):
 
         stats[stat] = measurement
 
-    return JsonResponse({"data": stats}, cls=JSEncoder)
+    return JsonResponse({"data": stats}, encoder=JSEncoder)
 
 
 @cache_page(one_day)
@@ -709,7 +709,7 @@ def wanted_urls(request):
 
         data["organizations"].append(od)
 
-    return JsonResponse(data, cls=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -970,7 +970,7 @@ def map_data(request, weeks_back=0):
 
         data["features"].append(dataset)
 
-    return JsonResponse(data, cls=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 def calculate_failscore(number_of_points, number_of_endpoints):
