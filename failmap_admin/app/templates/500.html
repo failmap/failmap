@@ -11,3 +11,13 @@
 {% if exception_message %}
 <p>For what it's worth the error message was: {{ exception_message }}</p>
 {% endif %}
+
+<!-- Do not use Django static feature to not potentially break 500 page with another error. -->
+<!-- Also do not include large CSS content inside the 500.html. -->
+<link rel="stylesheet" type="text/css" href="static/css/500.css" />
+<div id="image" ></div>
+<script type="text/javascript">
+  var images = Array('1082039', '1152109', '1162745', '1367533', '15766',   '211795',  '251835',  '276860',  '611778',  '639305',  '768393',  '857857',)
+  var image = images[Math.floor(Math.random()*images.length)];
+  document.getElementById("image").classList.add('image_' + image);
+</script>
