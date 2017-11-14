@@ -27,7 +27,7 @@ for index in "${!branches[@]}"; do
   # load dataset and update ratings
   failmap-admin load-dataset -v0 "$dataset"
   # explictly set different random seed as gitlab CI environment don't seem random enought
-  PYTHONHASHSEED=$index failmap-admin rebuild-ratings -v0
+  failmap-admin rebuild-ratings -v0
 
   # create output
   "$test_script" > "$index-$branch.txt"
