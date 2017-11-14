@@ -99,7 +99,8 @@ dataset_postgres:
 deterministic:
   <<: *test_template
   script:
-    - tox -e deterministic
+    # disable the fixed random seed for this test to allow random behaviour to occur
+    - tox -e deterministic --hashseed noset
 
   # runs on merge requests, merge requests require rebase, no need to run on master again
   except: [master]
