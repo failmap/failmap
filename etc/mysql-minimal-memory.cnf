@@ -1,3 +1,4 @@
+[mysqld]
 innodb_buffer_pool_size=5M
 innodb_log_buffer_size=256K
 query_cache_size=0
@@ -23,3 +24,6 @@ innodb_sort_buffer_size=64K
 #settings that relate to the binary log (if enabled)
 binlog_cache_size=4K
 binlog_stmt_cache_size=4K
+
+# performance schema provides debugging facilities
+performance_schema=off
