@@ -1,17 +1,16 @@
 import logging
 from datetime import datetime
+from typing import List
 
 import pytz
-
-from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 
+from deepdiff import DeepDiff
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
 from ..celery import app
 from .models import OrganizationRating, UrlRating
-from typing import List
 from .points_and_calculations import points_and_calculation
 
 logger = logging.getLogger(__package__)
@@ -77,7 +76,7 @@ def rerate_organizations(organizations: List[Organization]=None):
 
 
 def rerate_urls_of_organizations(organizations: List[Organization]):
-        rerate_urls(Url.objects.filter(is_dead=False, organization__in=organizations).order_by('url'))
+    rerate_urls(Url.objects.filter(is_dead=False, organization__in=organizations).order_by('url'))
 
 
 def significant_moments(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -609,11 +608,11 @@ def get_url_score_modular(url: Url, when: datetime=None):
 
         if calculations:
             endpoint_calculations.append({
-                    "ip": endpoint.ip_version,
-                    "port": endpoint.port,
-                    "protocol": endpoint.protocol,
-                    "points": endpoint_points,
-                    "ratings": calculations
+                "ip": endpoint.ip_version,
+                "port": endpoint.port,
+                "protocol": endpoint.protocol,
+                "points": endpoint_points,
+                "ratings": calculations
             })
 
         else:

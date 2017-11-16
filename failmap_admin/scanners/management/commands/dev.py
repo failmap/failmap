@@ -2,9 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import (add_organization_rating,
-                                                rerate_urls, show_timeline_console,
-                                                create_timeline, rebuild_ratings)
+from failmap_admin.map.determineratings import (add_organization_rating, create_timeline,
+                                                rebuild_ratings, rerate_urls, show_timeline_console)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan as scan_headers

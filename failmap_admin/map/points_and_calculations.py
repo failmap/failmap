@@ -216,4 +216,3 @@ def tls_qualys_rating_based_on_scan(scan):
     }
 
     return gained_points, rating
-

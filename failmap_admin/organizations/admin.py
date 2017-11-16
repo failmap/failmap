@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.urls import reverse
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization_on_moment,
-                                                add_organization_rating, add_url_rating)
+from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, add_url_rating,
+                                                rate_organization_on_moment)
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
@@ -252,7 +252,6 @@ class UrlAdmin(admin.ModelAdmin):
     def timeline_debug(self, request, queryset):
         from failmap_admin.map.determineratings import create_timeline, show_timeline_console
         from django.http import HttpResponse
-        from django.contrib.contenttypes.models import ContentType
 
         content = "<pre>"
         for url in queryset:
@@ -263,6 +262,7 @@ class UrlAdmin(admin.ModelAdmin):
         return HttpResponse(content)
     timeline_debug.short_description = "🐞  Timeline"
     actions.append('timeline_debug')
+
 
 class OrganizationTypeAdmin(admin.ModelAdmin):
     list_display = ('name', )
