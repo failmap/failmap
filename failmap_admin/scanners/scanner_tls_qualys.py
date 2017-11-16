@@ -35,7 +35,7 @@ import requests
 from celery import group
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap_admin.map.determineratings import rate_organization_efficient, rerate_url_with_timeline
+from failmap_admin.map.determineratings import add_organization_rating, rerate_urls
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                            TlsQualysScratchpad)
@@ -331,13 +331,13 @@ def save_scan(url, data):
 
         # possibly update the most recent scan, to save on records in the database
         previous_scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint). \
-            order_by('-scan_moment').first()
+            order_by('-last_scan_moment').first()
 
         if previous_scan:
             if all([previous_scan.qualys_rating == rating,
                     previous_scan.qualys_rating_no_trust == rating_no_trust]):
                 log.info("Scan on %s did not alter the rating, updating scan date only." % failmap_endpoint)
-                previous_scan.scan_moment = datetime.now(pytz.utc)
+                previous_scan.last_scan_moment = datetime.now(pytz.utc)
                 previous_scan.scan_time = datetime.now(pytz.utc)
                 previous_scan.scan_date = datetime.now(pytz.utc)
                 previous_scan.qualys_message = message
@@ -361,7 +361,7 @@ def create_scan(endpoint, rating, rating_no_trust, status_message):
     tls_scan.endpoint = endpoint
     tls_scan.qualys_rating = rating
     tls_scan.qualys_rating_no_trust = rating_no_trust
-    tls_scan.scan_moment = datetime.now(pytz.utc)
+    tls_scan.last_scan_moment = datetime.now(pytz.utc)
     tls_scan.scan_time = datetime.now(pytz.utc)
     tls_scan.scan_date = datetime.now(pytz.utc)
     tls_scan.rating_determined_on = datetime.now(pytz.utc)
@@ -604,9 +604,9 @@ def scan_organization(organization):
 
     scan_url_list(urls)
 
-    for url in urls:
-        rerate_url_with_timeline(url=url)
-    rate_organization_efficient.s(organization=organization).apply()
+    rerate_urls(urls)
+
+    add_organization_rating.s(organization=organization).apply()
 
 
 @app.task
@@ -682,11 +682,10 @@ def scan_new_urls():
         i = i + 1
         scan(myurls)
 
-        for url in myurls:
-            rerate_url_with_timeline(url=url)
+        rerate_urls(myurls)
 
         for url in myurls:
             for organization in url.organization.all():
-                rate_organization_efficient(organization=organization)
+                add_organization_rating(organization=organization)
 
     return urls

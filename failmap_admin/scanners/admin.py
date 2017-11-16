@@ -95,15 +95,15 @@ class EndpointAdmin(admin.ModelAdmin):
 
 class TlsQualysScanAdmin(admin.ModelAdmin):
     list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',
-                    'scan_moment', 'rating_determined_on')
+                    'last_scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
                      'scan_date', 'rating_determined_on')
     list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
                    'scan_date', 'rating_determined_on', 'qualys_message')
     fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-              'rating_determined_on', 'scan_moment')
+              'rating_determined_on', 'last_scan_moment')
 
-    readonly_fields = ('scan_date', 'scan_time', 'scan_moment')
+    readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment')
 
     actions = ['rate_url', 'scan_url']
 

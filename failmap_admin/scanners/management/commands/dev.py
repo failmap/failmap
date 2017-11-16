@@ -2,9 +2,9 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import (rate_organization_efficient,
-                                                rerate_url_with_timeline, show_timeline_console,
-                                                timeline)
+from failmap_admin.map.determineratings import (add_organization_rating,
+                                                rerate_urls, show_timeline_console,
+                                                create_timeline, rebuild_ratings)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan as scan_headers
@@ -16,7 +16,8 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        develop_timeline()
+        rebuild_ratings()
+        # develop_timeline()
         # develop_determineratings()
         # Command.test_sslscan_real()
         # Command.test_determine_grade()
@@ -32,17 +33,15 @@ def develop_timeline():
         organization = Organization.objects.filter(name="Internet Cleanup Foundation").get()
         urls = Url.objects.all().filter(organization=organization)
         for url in urls:
-            data = timeline(url=url)
+            data = create_timeline(url=url)
             show_timeline_console(data, url)
-            rerate_url_with_timeline(url=url)
-        rate_organization_efficient(organization=organization, create_history=True)
+            rerate_urls([url])
+        add_organization_rating(organization=organization, create_history=True)
 
     if False:
         organizations = Organization.objects.all().order_by('name')
         for organization in organizations:
-            urls = Url.objects.all().filter(organization=organization)
-            for url in urls:
-                rerate_url_with_timeline(url=url)
+            rerate_urls(Url.objects.all().filter(organization=organization))
 
     if False:
         # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
@@ -58,9 +57,9 @@ def develop_timeline():
         url = Url.objects.all().filter(url='webmail.zaltbommel.nl').get()
         url = Url.objects.all().filter(url='geo.aaenhunze.nl').get()
         url = Url.objects.all().filter(url='webserver03.bloemendaal.nl').get()
-        data = timeline(url=url)
+        data = create_timeline(url=url)
         show_timeline_console(data, url)
-        rerate_url_with_timeline(url)
+        rerate_urls([url])
 
         # OrganizationRating.objects.all().delete()
         # for organization in url.organization.all():
@@ -120,6 +119,6 @@ def develop_determineratings():
     organization = Organization.objects.filter(name="Arnhem").get()
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
-    rate_organization_efficient(organization, create_history=True)
+    add_organization_rating(organization, create_history=True)
     # create one for NOW, not this night. This is a bug :)
-    rate_organization_efficient(organization)
+    add_organization_rating(organization)

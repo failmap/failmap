@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.urls import reverse
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization,
-                                                rate_selected_organizations, rate_urls)
+from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, rate_organization_on_moment,
+                                                add_organization_rating, add_url_rating)
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
@@ -96,7 +96,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     def rate_organization(self, request, queryset):
 
         for organization in queryset:
-            rate_organization(organization=organization)
+            rate_organization_on_moment(organization=organization)
 
         self.message_user(request, "Organization(s) have been rated")
 
@@ -225,14 +225,16 @@ class UrlAdmin(admin.ModelAdmin):
     actions.append('screenshots')
 
     def rate_url(self, request, queryset):
-        rate_urls([url for url in queryset])
+        add_url_rating([url for url in queryset])
         self.message_user(request, "Rate Url: done")
     rate_url.short_description = "✅  Rate Url"
     actions.append('rate_url')
 
     def rate_organization_(self, request, queryset):
-        print(list(url.organization.all()) for url in queryset)
-        rate_selected_organizations(list(url.organization.all()) for url in queryset)
+        # a queryset doesn't have the "name" property...
+        for url in queryset:
+            for organization in url.organization.all():
+                rate_organization_on_moment(organization)
         self.message_user(request, "Rate Organization: done")
     rate_organization_.short_description = "✅  Rate Organization"
     actions.append('rate_organization_')
@@ -247,6 +249,20 @@ class UrlAdmin(admin.ModelAdmin):
     declare_dead.short_description = "🔪  Declare dead"
     actions.append('declare_dead')
 
+    def timeline_debug(self, request, queryset):
+        from failmap_admin.map.determineratings import create_timeline, show_timeline_console
+        from django.http import HttpResponse
+        from django.contrib.contenttypes.models import ContentType
+
+        content = "<pre>"
+        for url in queryset:
+            content += show_timeline_console(create_timeline(url), url)
+
+        content += "</pre>"
+
+        return HttpResponse(content)
+    timeline_debug.short_description = "🐞  Timeline"
+    actions.append('timeline_debug')
 
 class OrganizationTypeAdmin(admin.ModelAdmin):
     list_display = ('name', )
