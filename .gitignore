@@ -15,8 +15,6 @@ failmap_admin/map/static/images/screenshots/*
 failmap_admin/scanners/resources/wordlists/knownsubdomains.txt
 dist/
 build/
-.eslintignore
-.eslintrc.yml
 code.json
 codeclimate.json
 static/

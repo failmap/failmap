@@ -163,8 +163,7 @@ codequality:
   variables:
     DOCKER_DRIVER: overlay
   script:
-    # pinning to version that works for now until 0.70.0 is fixed or documentation how to properly run it is available
-    - docker pull codeclimate/codeclimate:0.69.0
+    - docker pull codeclimate/codeclimate
     # run code quality
     - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
   artifacts:
