@@ -15,7 +15,7 @@ logger = logging.getLogger(__package__)
 
 # create the smallest, most complete and lowest possible granulation for the data.
 def update_stats():
-    client = InfluxDBClient("influxdb", 8086, "admin", "admin", "elger_test")
+    client = InfluxDBClient("influxdb", 8086, "", "", "elger_test")
 
     url_ratings = UrlRating.objects.all()
     logger.info("Creating stats, this can take a while. Get a cup of tea and say hi to the cat.")
