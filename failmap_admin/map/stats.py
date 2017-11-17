@@ -20,9 +20,19 @@ def update_stats():
     url_ratings = UrlRating.objects.all()
     logger.info("Creating stats, this can take a while. Get a cup of tea and say hi to the cat.")
     for url_rating in url_ratings:
+
+        if 'endpoints' not in url_rating.calculation.keys():
+            logger.info("nope")
+            continue
+
         for endpoint in url_rating.calculation['endpoints']:
             for rating in endpoint['ratings']:
                 for organization in url_rating.url.organization.all():
+
+                    if 'low' not in rating.keys():
+                        logger.info("nope2")
+                        continue
+
                     metrics = [
                         {
                             "measurement": "url_rating",
@@ -37,7 +47,7 @@ def update_stats():
                                 "country": poorly_escape(organization.country.name)
                             },
                             # epoch time, from isotime in UTC
-                            "time": timegm(time.strptime(rating['last_scan'], "%Y-%m-%dT%H:%M:%S+00:00")),
+                            "time": rating['last_scan'],
                             "fields": {
                                 "low": rating['low'],
                                 "medium": rating['medium'],
