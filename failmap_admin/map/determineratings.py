@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import List
 
 import pytz
+from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 
-from deepdiff import DeepDiff
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
