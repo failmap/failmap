@@ -375,196 +375,196 @@
 - model: scanners.tlsqualysscan
   pk: 422
   fields: {endpoint: 291, qualys_rating: F, qualys_rating_no_trust: F, qualys_message: null,
-    scan_date: 2016-04-07, scan_time: '14:59:20', scan_moment: !!timestamp '2016-04-07
+    scan_date: 2016-04-07, scan_time: '14:59:20', last_scan_moment: !!timestamp '2016-04-07
       14:59:20+00:00', rating_determined_on: !!timestamp '2016-04-07 14:59:20+00:00'}
 - model: scanners.tlsqualysscan
   pk: 4413
   fields: {endpoint: 291, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-09-16, scan_time: '02:51:52.547982', scan_moment: !!timestamp '2017-09-16
+    scan_date: 2017-09-16, scan_time: '02:51:52.547982', last_scan_moment: !!timestamp '2017-09-16
       02:51:52.547939+00:00', rating_determined_on: !!timestamp '2016-08-23 01:00:56+00:00'}
 - model: scanners.tlsqualysscan
   pk: 1190
   fields: {endpoint: 1087, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
-      not valid for domain name, scan_date: 2016-05-17, scan_time: '10:25:35', scan_moment: !!timestamp '2016-05-17
+      not valid for domain name, scan_date: 2016-05-17, scan_time: '10:25:35', last_scan_moment: !!timestamp '2016-05-17
       10:25:35+00:00', rating_determined_on: !!timestamp '2016-05-17 10:25:35+00:00'}
 - model: scanners.tlsqualysscan
   pk: 2535
   fields: {endpoint: 2311, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
-      to connect to the server, scan_date: 2016-06-04, scan_time: '14:43:01', scan_moment: !!timestamp '2016-06-04
+      to connect to the server, scan_date: 2016-06-04, scan_time: '14:43:01', last_scan_moment: !!timestamp '2016-06-04
       14:43:01+00:00', rating_determined_on: !!timestamp '2016-06-04 14:43:01+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8275
   fields: {endpoint: 2311, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-12, scan_time: '01:08:26.139427',
-    scan_moment: !!timestamp '2017-09-12 01:08:26.139490+00:00', rating_determined_on: !!timestamp '2017-09-12
+    last_scan_moment: !!timestamp '2017-09-12 01:08:26.139490+00:00', rating_determined_on: !!timestamp '2017-09-12
       01:08:26.139120+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8938
   fields: {endpoint: 2311, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-13, scan_time: '13:03:24.652755',
-    scan_moment: !!timestamp '2017-09-13 13:03:24.652912+00:00', rating_determined_on: !!timestamp '2017-09-13
+    last_scan_moment: !!timestamp '2017-09-13 13:03:24.652912+00:00', rating_determined_on: !!timestamp '2017-09-13
       13:03:24.651796+00:00'}
 - model: scanners.tlsqualysscan
   pk: 10327
   fields: {endpoint: 2311, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-16, scan_time: '02:46:21.297887',
-    scan_moment: !!timestamp '2017-09-16 02:46:21.297965+00:00', rating_determined_on: !!timestamp '2017-09-16
+    last_scan_moment: !!timestamp '2017-09-16 02:46:21.297965+00:00', rating_determined_on: !!timestamp '2017-09-16
       02:46:21.297404+00:00'}
 - model: scanners.tlsqualysscan
   pk: 2536
   fields: {endpoint: 2312, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
-      to connect to the server, scan_date: 2016-06-04, scan_time: '14:43:33', scan_moment: !!timestamp '2016-06-04
+      to connect to the server, scan_date: 2016-06-04, scan_time: '14:43:33', last_scan_moment: !!timestamp '2016-06-04
       14:43:33+00:00', rating_determined_on: !!timestamp '2016-06-04 14:43:33+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8748
   fields: {endpoint: 2312, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-12, scan_time: '13:55:17.825191',
-    scan_moment: !!timestamp '2017-09-12 13:55:17.825300+00:00', rating_determined_on: !!timestamp '2017-09-12
+    last_scan_moment: !!timestamp '2017-09-12 13:55:17.825300+00:00', rating_determined_on: !!timestamp '2017-09-12
       13:55:17.824628+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8937
   fields: {endpoint: 2312, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-13, scan_time: '12:59:20.458424',
-    scan_moment: !!timestamp '2017-09-13 12:59:20.458549+00:00', rating_determined_on: !!timestamp '2017-09-13
+    last_scan_moment: !!timestamp '2017-09-13 12:59:20.458549+00:00', rating_determined_on: !!timestamp '2017-09-13
       12:59:20.457477+00:00'}
 - model: scanners.tlsqualysscan
   pk: 10330
   fields: {endpoint: 2312, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-16, scan_time: '02:53:02.252764',
-    scan_moment: !!timestamp '2017-09-16 02:53:02.252847+00:00', rating_determined_on: !!timestamp '2017-09-16
+    last_scan_moment: !!timestamp '2017-09-16 02:53:02.252847+00:00', rating_determined_on: !!timestamp '2017-09-16
       02:53:02.252298+00:00'}
 - model: scanners.tlsqualysscan
   pk: 2537
   fields: {endpoint: 2313, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
-      to connect to the server, scan_date: 2016-06-04, scan_time: '14:44:04', scan_moment: !!timestamp '2016-06-04
+      to connect to the server, scan_date: 2016-06-04, scan_time: '14:44:04', last_scan_moment: !!timestamp '2016-06-04
       14:44:04+00:00', rating_determined_on: !!timestamp '2016-06-04 14:44:04+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8551
   fields: {endpoint: 2313, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-12, scan_time: '08:45:58.352138',
-    scan_moment: !!timestamp '2017-09-12 08:45:58.352250+00:00', rating_determined_on: !!timestamp '2017-09-12
+    last_scan_moment: !!timestamp '2017-09-12 08:45:58.352250+00:00', rating_determined_on: !!timestamp '2017-09-12
       08:45:58.351484+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8936
   fields: {endpoint: 2313, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-13, scan_time: '12:58:10.394860',
-    scan_moment: !!timestamp '2017-09-13 12:58:10.394940+00:00', rating_determined_on: !!timestamp '2017-09-13
+    last_scan_moment: !!timestamp '2017-09-13 12:58:10.394940+00:00', rating_determined_on: !!timestamp '2017-09-13
       12:58:10.394350+00:00'}
 - model: scanners.tlsqualysscan
   pk: 10329
   fields: {endpoint: 2313, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Unable
       to connect to the server, scan_date: 2017-09-16, scan_time: '02:51:53.284801',
-    scan_moment: !!timestamp '2017-09-16 02:51:53.284884+00:00', rating_determined_on: !!timestamp '2017-09-16
+    last_scan_moment: !!timestamp '2017-09-16 02:51:53.284884+00:00', rating_determined_on: !!timestamp '2017-09-16
       02:51:53.284314+00:00'}
 - model: scanners.tlsqualysscan
   pk: 3844
   fields: {endpoint: 3342, qualys_rating: A-, qualys_rating_no_trust: A-, qualys_message: null,
-    scan_date: 2016-07-31, scan_time: '01:28:04', scan_moment: !!timestamp '2016-07-31
+    scan_date: 2016-07-31, scan_time: '01:28:04', last_scan_moment: !!timestamp '2016-07-31
       01:28:04+00:00', rating_determined_on: !!timestamp '2016-07-31 01:28:04+00:00'}
 - model: scanners.tlsqualysscan
   pk: 5723
   fields: {endpoint: 4395, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-09-16, scan_time: '02:51:02.468647', scan_moment: !!timestamp '2017-09-16
+    scan_date: 2017-09-16, scan_time: '02:51:02.468647', last_scan_moment: !!timestamp '2017-09-16
       02:51:02.468617+00:00', rating_determined_on: !!timestamp '2017-01-15 07:51:27+00:00'}
 - model: scanners.tlsqualysscan
   pk: 6237
   fields: {endpoint: 4595, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:53:40.676413', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:53:40.676413', last_scan_moment: !!timestamp '2017-10-31
       08:53:40.676346+00:00', rating_determined_on: !!timestamp '2017-01-17 02:35:53+00:00'}
 - model: scanners.tlsqualysscan
   pk: 6322
   fields: {endpoint: 4645, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:54:42.700924', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:54:42.700924', last_scan_moment: !!timestamp '2017-10-31
       08:54:42.700889+00:00', rating_determined_on: !!timestamp '2017-08-29 15:58:03.785622+00:00'}
 - model: scanners.tlsqualysscan
   pk: 6375
   fields: {endpoint: 4667, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2017-08-29, scan_time: '16:20:19.026002',
-    scan_moment: !!timestamp '2017-08-29 16:20:19.026131+00:00', rating_determined_on: !!timestamp '2017-08-29
+    last_scan_moment: !!timestamp '2017-08-29 16:20:19.026131+00:00', rating_determined_on: !!timestamp '2017-08-29
       16:20:19.025125+00:00'}
 - model: scanners.tlsqualysscan
   pk: 6700
   fields: {endpoint: 4667, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2017-09-04, scan_time: '08:53:06.811186',
-    scan_moment: !!timestamp '2017-09-04 08:53:06.811267+00:00', rating_determined_on: !!timestamp '2017-09-04
+    last_scan_moment: !!timestamp '2017-09-04 08:53:06.811267+00:00', rating_determined_on: !!timestamp '2017-09-04
       08:53:06.810609+00:00'}
 - model: scanners.tlsqualysscan
   pk: 8939
   fields: {endpoint: 4667, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2017-09-13, scan_time: '13:12:57.322213',
-    scan_moment: !!timestamp '2017-09-13 13:12:57.322358+00:00', rating_determined_on: !!timestamp '2017-09-13
+    last_scan_moment: !!timestamp '2017-09-13 13:12:57.322358+00:00', rating_determined_on: !!timestamp '2017-09-13
       13:12:57.321317+00:00'}
 - model: scanners.tlsqualysscan
   pk: 10328
   fields: {endpoint: 4667, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2017-09-16, scan_time: '02:48:27.216125',
-    scan_moment: !!timestamp '2017-09-16 02:48:27.216209+00:00', rating_determined_on: !!timestamp '2017-09-16
+    last_scan_moment: !!timestamp '2017-09-16 02:48:27.216209+00:00', rating_determined_on: !!timestamp '2017-09-16
       02:48:27.215584+00:00'}
 - model: scanners.tlsqualysscan
   pk: 12309
   fields: {endpoint: 10050, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:52:37.951652', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:52:37.951652', last_scan_moment: !!timestamp '2017-10-31
       08:52:37.951571+00:00', rating_determined_on: !!timestamp '2017-09-22 17:35:35.393528+00:00'}
 - model: scanners.tlsqualysscan
   pk: 12311
   fields: {endpoint: 10051, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:56:53.663242', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:56:53.663242', last_scan_moment: !!timestamp '2017-10-31
       08:56:53.663219+00:00', rating_determined_on: !!timestamp '2017-09-22 17:37:24.355424+00:00'}
 - model: scanners.tlsqualysscan
   pk: 12647
   fields: {endpoint: 10671, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:52:14.790922', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:52:14.790922', last_scan_moment: !!timestamp '2017-10-31
       08:52:14.790849+00:00', rating_determined_on: !!timestamp '2017-09-23 02:03:27.768610+00:00'}
 - model: scanners.tlsqualysscan
   pk: 12310
   fields: {endpoint: 13603, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:52:37.965424', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:52:37.965424', last_scan_moment: !!timestamp '2017-10-31
       08:52:37.965406+00:00', rating_determined_on: !!timestamp '2017-09-22 17:35:35.414304+00:00'}
 - model: scanners.tlsqualysscan
   pk: 14878
   fields: {endpoint: 13605, qualys_rating: '0', qualys_rating_no_trust: '0', qualys_message: Certificate
       not valid for domain name, scan_date: 2017-09-28, scan_time: '02:17:28.796534',
-    scan_moment: !!timestamp '2017-09-28 02:17:28.796659+00:00', rating_determined_on: !!timestamp '2017-09-28
+    last_scan_moment: !!timestamp '2017-09-28 02:17:28.796659+00:00', rating_determined_on: !!timestamp '2017-09-28
       02:17:28.795721+00:00'}
 - model: scanners.tlsqualysscan
   pk: 16217
   fields: {endpoint: 13605, qualys_rating: T, qualys_rating_no_trust: B, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:49:29.767826', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:49:29.767826', last_scan_moment: !!timestamp '2017-10-31
       08:49:29.767750+00:00', rating_determined_on: !!timestamp '2017-10-27 09:11:07.656095+00:00'}
 - model: scanners.tlsqualysscan
   pk: 14879
   fields: {endpoint: 13606, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:46:54.847652', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:46:54.847652', last_scan_moment: !!timestamp '2017-10-31
       08:46:54.847560+00:00', rating_determined_on: !!timestamp '2017-09-28 02:17:31.862776+00:00'}
 - model: scanners.tlsqualysscan
   pk: 14332
   fields: {endpoint: 13734, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-09-28, scan_time: '02:21:48.273110', scan_moment: !!timestamp '2017-09-28
+    scan_date: 2017-09-28, scan_time: '02:21:48.273110', last_scan_moment: !!timestamp '2017-09-28
       02:21:48.273091+00:00', rating_determined_on: !!timestamp '2017-09-25 23:47:16.386982+00:00'}
 - model: scanners.tlsqualysscan
   pk: 16216
   fields: {endpoint: 13734, qualys_rating: T, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:47:54.954802', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:47:54.954802', last_scan_moment: !!timestamp '2017-10-31
       08:47:54.954711+00:00', rating_determined_on: !!timestamp '2017-10-27 09:09:39.384351+00:00'}
 - model: scanners.tlsqualysscan
   pk: 14315
   fields: {endpoint: 13735, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-09-28, scan_time: '02:15:26.340620', scan_moment: !!timestamp '2017-09-28
+    scan_date: 2017-09-28, scan_time: '02:15:26.340620', last_scan_moment: !!timestamp '2017-09-28
       02:15:26.340570+00:00', rating_determined_on: !!timestamp '2017-09-25 23:29:54.837810+00:00'}
 - model: scanners.tlsqualysscan
   pk: 16219
   fields: {endpoint: 13735, qualys_rating: T, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:55:24.832780', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:55:24.832780', last_scan_moment: !!timestamp '2017-10-31
       08:55:24.832758+00:00', rating_determined_on: !!timestamp '2017-10-27 09:17:13.249276+00:00'}
 - model: scanners.tlsqualysscan
   pk: 14333
   fields: {endpoint: 13736, qualys_rating: C, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-09-28, scan_time: '02:19:43.611661', scan_moment: !!timestamp '2017-09-28
+    scan_date: 2017-09-28, scan_time: '02:19:43.611661', last_scan_moment: !!timestamp '2017-09-28
       02:19:43.611614+00:00', rating_determined_on: !!timestamp '2017-09-25 23:48:19.522523+00:00'}
 - model: scanners.tlsqualysscan
   pk: 16218
   fields: {endpoint: 13736, qualys_rating: T, qualys_rating_no_trust: C, qualys_message: Ready,
-    scan_date: 2017-10-31, scan_time: '08:51:04.814304', scan_moment: !!timestamp '2017-10-31
+    scan_date: 2017-10-31, scan_time: '08:51:04.814304', last_scan_moment: !!timestamp '2017-10-31
       08:51:04.814236+00:00', rating_determined_on: !!timestamp '2017-10-27 09:12:57.838265+00:00'}
 - model: scanners.endpointgenericscan
   pk: 432
