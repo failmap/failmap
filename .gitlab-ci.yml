@@ -163,9 +163,8 @@ codequality:
   variables:
     DOCKER_DRIVER: overlay
   script:
-    - docker pull codeclimate/codeclimate
     # run code quality
-    - docker run --env CODECLIMATE_DEBUG=1 --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate analyze -f json > codeclimate.json
+    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate:0.69.0 analyze -f json > codeclimate.json
   artifacts:
     paths: [codeclimate.json]
   retry: 1
