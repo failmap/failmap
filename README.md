@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![Build Status](https://travis-ci.org/failmap/admin.svg?branch=master)](https://travis-ci.org/failmap/admin) [![Test Coverage](https://codeclimate.com/github/failmap/admin/badges/coverage.svg)](https://codeclimate.com/github/failmap/admin/coverage)
+[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![pipeline status](https://gitlab.com/failmap/admin/badges/master/pipeline.svg)](https://gitlab.com/failmap/admin/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/admin/badges/coverage.svg)](https://codeclimate.com/github/failmap/admin/coverage)
 
 # Introduction
 Failmap is a web application that continuously scans and evaluates (government) organization websites for security best practices and allows these results to be published on a map.
