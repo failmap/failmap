@@ -20,6 +20,8 @@ ratings:
     - "**.sh"
     - "**.js"
 
+# exclude generated, vendor and hidden files from code quality checks
 exclude_paths:
-  - "failmap_admin/*/migrations/*"
+  - "**/migrations/*"
+  - "**/vendor/"
   - ".*"
