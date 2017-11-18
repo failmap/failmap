@@ -231,6 +231,6 @@ github_mirror:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - git push git@github.com:failmap/admin.git
+    - git push git@github.com:failmap/admin.git HEAD:master
   only:
     - master
