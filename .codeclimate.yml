@@ -13,15 +13,12 @@ engines:
   # Misc.
   duplication:
     enabled: true
-  markdownlint:
-    enabled: true
 
 ratings:
   paths:
     - "**.py"
     - "**.sh"
     - "**.js"
-    - "**.md"
 
 exclude_paths:
   - "failmap_admin/*/migrations/*"
