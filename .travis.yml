@@ -2,10 +2,13 @@ language: python
 python:
   - 3.4
 
-install: pip install tox-travis codeclimate-test-reporter
+# dependencies (pin coverage for codeclimate compat)
+# https://bitbucket.org/ned/coveragepy/issues/578/incomplete-file-path-in-xml-report
+install: pip install tox-travis codeclimate-test-reporter coverage<4.4
 
+# run tests
 script: tox
 
+# push results to CC
 after_success:
-  - coveralls
   - CODECLIMATE_REPO_TOKEN=4bd7b6de99845dea19ae759dd9021a652198cc89c7003a562045ece83ae541bd codeclimate-test-reporter
