@@ -3,6 +3,10 @@ autopep8
 autoflake
 isort
 pylama
+# pin for compatibility with codeclimate
+# https://bitbucket.org/ned/coveragepy/issues/578/incomplete-file-path-in-xml-report
+coverage <4.4
+pytest
 pytest-cov
 pytest-django
 # counterpart of requests for mock responses

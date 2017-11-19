@@ -31,10 +31,6 @@ httmock
 freezegun
 colorama
 
-# dev. tools
-tox
-coverage
-pytest
 django-silk
 
 # logging
