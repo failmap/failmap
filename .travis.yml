@@ -4,7 +4,7 @@ python:
 
 # dependencies (pin coverage for codeclimate compat)
 # https://bitbucket.org/ned/coveragepy/issues/578/incomplete-file-path-in-xml-report
-install: pip install tox-travis codeclimate-test-reporter coverage<4.4
+install: pip install tox-travis codeclimate-test-reporter "coverage<4.4"
 
 # run tests
 script: tox
