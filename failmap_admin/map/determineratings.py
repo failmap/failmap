@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from functools import lru_cache
 from typing import List
 
 import pytz
@@ -481,7 +482,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     total_rating = 0
 
     # todo: closing off urls, after no relevant endpoints, but still resolvable.
-    urls = get_relevant_urls_at_timepoint(organization=organization, when=when)
+    urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
 
     all_url_ratings = []
     url_calculations = []
@@ -574,7 +575,7 @@ def get_url_score_modular(url: Url, when: datetime=None):
     Afterwards we'll check if at this time there also where dead endpoints.
     Dead endpoints add 0 points to the rating, but it can lower a rating.(?)
     """
-    endpoints = get_relevant_endpoints_at_timepoint(url, when)
+    endpoints = relevant_endpoints_at_timepoint([url], when)
 
     # We're not going to have duplicate endpoints. This might happen if someone accidentally adds an
     # endpoint with the same info.
@@ -739,55 +740,88 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
         return 0, {}
 
 
-def get_relevant_urls_at_timepoint(organization: Organization, when: datetime):
+# to save some database roundtrips
+# @lru_cache(maxsize=None)  # TypeError: unhashable type: 'list'
+def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime):
     """
     It's possible that the url only has endpoints that are dead, but the URL resolves fine.
 
-    :param organization:
+    :param organizations:
     :param when:
     :return:
     """
 
-    urls = Url.objects.filter(organization=organization)
+    urls = Url.objects.filter(organization__in=organizations)
 
-    # urls alive at this moment, that are dead in the future
-    not_resolving_urls = urls.filter(
+    resolvable_in_the_past = urls.filter(
         created_on__lte=when,
         not_resolvable=True,
         not_resolvable_since__gte=when,
     )
-    logger.debug("Not resolvable urls:  %s" % not_resolving_urls.count())
+    logger.debug("Resolvable in the past:  %s" % resolvable_in_the_past.count())
 
-    dead_urls = urls.filter(
+    alive_in_the_past = urls.filter(
         created_on__lte=when,
         is_dead=True,
         is_dead_since__gte=when,
     )
-    logger.debug("Dead urls:  %s" % dead_urls.count())
+    logger.debug("Alive in the past:  %s" % alive_in_the_past.count())
 
-    # urls that are still alive
-    existing_urls = urls.filter(
+    currently_alive_and_resolvable = urls.filter(
         created_on__lte=when,
         not_resolvable=False,
         is_dead=False,
     )  # or is_dead=False,
-    logger.debug("Alive urls:  %s" % existing_urls.count())
+    logger.debug("Alive urls:  %s" % currently_alive_and_resolvable.count())
 
-    url_list = list(not_resolving_urls) + list(dead_urls) + list(existing_urls)
-    url_list_with_relevant_endpoints = []
-    for url in url_list:
+    possibly_relevant_urls = (list(resolvable_in_the_past) +
+                              list(alive_in_the_past) +
+                              list(currently_alive_and_resolvable))
+
+    relevant_urls = []
+    for url in possibly_relevant_urls:
         # Check if they also had relevant endpoint. We do this separately to reduce the
-        # enormous complexity of history in queries. It's slower, but easier to understand.
-        has_endpoints = get_relevant_endpoints_at_timepoint(url=url, when=when)
+        # complexity of history in queries and complexer ORM queries. It's slower, but easier to understand.
+        # And using the lru_cache, it should be pretty fast (faster than having these subqueries executed
+        # every time)
+        has_endpoints = relevant_endpoints_at_timepoint(urls=[url], when=when)
         if has_endpoints:
-            logger.debug(
-                "The url %s is relevant on %s and has endpoints: " % (url, when))
-            url_list_with_relevant_endpoints.append(url)
+            logger.debug("The url %s is relevant on %s and has endpoints: " % (url, when))
+            relevant_urls.append(url)
         else:
-            logger.debug("While the url %s was relevant on %s, "
-                         "it does not have any relevant endpoints" % (url, when))
+            logger.debug("While the url %s was relevant on %s, it does not have any relevant endpoints." % (url, when))
 
-    return url_list_with_relevant_endpoints
+    return relevant_urls
+
+
+# to save some database roundtrips
+# @lru_cache(maxsize=None)  # TypeError: unhashable type: 'list'
+def relevant_endpoints_at_timepoint(urls: List[Url], when: datetime):
+    endpoints = Endpoint.objects.all()
+
+    # Alive then
+    then_alive = endpoints.filter(
+        url__in=urls,
+        discovered_on__lte=when,
+        is_dead=True,
+        is_dead_since__gte=when,
+    )
+
+    # Alive then and still alive
+    still_alive_endpoints = endpoints.filter(
+        url__in=urls,
+        discovered_on__lte=when,
+        is_dead=False,
+    )
+
+    logger.debug("Endpoints alive back then:  %s, Still alive today: %s" % (
+        then_alive.count(), still_alive_endpoints.count()))
+
+    relevant_endpoints = list(then_alive) + list(still_alive_endpoints)
+
+    [logger.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
+
+    return relevant_endpoints
 
 
 def default_ratings():
@@ -813,32 +847,3 @@ def default_ratings():
         }
 
         r.save()
-
-
-def get_relevant_endpoints_at_timepoint(url: Url, when: datetime):
-    endpoints = Endpoint.objects.all()
-
-    # all endpoints in the past given the timeframe, they can be dead.
-    then_alive = endpoints.filter(
-        url=url,
-        discovered_on__lte=when,
-        is_dead=True,
-        is_dead_since__gte=when,
-    )
-
-    # all endpoints that are still alive on the timeperiod
-    still_alive_endpoints = endpoints.filter(
-        url=url,
-        discovered_on__lte=when,
-        is_dead=False,
-    )
-
-    logger.debug("Then alive endpoints for this url:  %s" % then_alive.count())
-    logger.debug("Alive endpoints for this url: %s" % still_alive_endpoints.count())
-
-    endpoint_list = list(then_alive) + list(still_alive_endpoints)
-
-    for endpoint in endpoint_list:
-        logger.debug("relevant endpoint for %s: %s" % (when, endpoint))
-
-    return endpoint_list
