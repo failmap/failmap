@@ -1,13 +1,14 @@
-import logging
 import datetime
+import logging
+
 import pytz
 import tldextract
 
-from influxdb import InfluxDBClient
-
+from failmap_admin.map.determineratings import (relevant_endpoints_at_timepoint,
+                                                relevant_urls_at_timepoint)
 from failmap_admin.map.models import UrlRating
 from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.map.determineratings import relevant_urls_at_timepoint, relevant_endpoints_at_timepoint
+from influxdb import InfluxDBClient
 
 # https://docs.influxdata.com/influxdb/v1.3/tools/shell/#influx-arguments
 # https://docs.influxdata.com/influxdb/v1.3/tools/api/#write
@@ -165,7 +166,8 @@ def update_old_metrics_to_today(date, metrics):
         metric_date = datetime.datetime.strptime(metrics[metric]["time"], "%Y-%m-%dT%H:%M:%S+00:00")
         metric_date = pytz.utc.localize(metric_date)
         if metric_date.date() != date:
-            metrics[metric]["time"] = str(metric_date.replace(year=date.year, month=date.month, day=date.day).isoformat())
+            metrics[metric]["time"] = str(metric_date.replace(
+                year=date.year, month=date.month, day=date.day).isoformat())
 
     return metrics
 
