@@ -3,12 +3,12 @@ import logging
 
 import pytz
 import tldextract
+from influxdb import InfluxDBClient
 
 from failmap_admin.map.determineratings import (relevant_endpoints_at_timepoint,
                                                 relevant_urls_at_timepoint)
 from failmap_admin.map.models import UrlRating
 from failmap_admin.organizations.models import Organization, Url
-from influxdb import InfluxDBClient
 
 # https://docs.influxdata.com/influxdb/v1.3/tools/shell/#influx-arguments
 # https://docs.influxdata.com/influxdb/v1.3/tools/api/#write
@@ -31,6 +31,10 @@ from influxdb import InfluxDBClient
 # drop database elger_test
 # create database elger_test
 
+
+# grafana-cli plugins install grafana-piechart-panel  # awesome
+# grafana-cli plugins install savantly-heatmap-panel  # testing
+# brew service grafana-server restart
 logger = logging.getLogger(__package__)
 
 
