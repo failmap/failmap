@@ -118,13 +118,15 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
 
-    # is this relevant? I think we can do without.
     non_resolvable_urls = Url.objects.filter(not_resolvable=True, url__in=urls)
     non_resolvable_dates = [x.not_resolvable_since for x in non_resolvable_urls]
 
+    dead_urls = Url.objects.filter(is_dead=True, url__in=urls)
+    dead_url_dates = [x.is_dead_since for x in dead_urls]
+
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient. Using the latest possible time of the day is used.
-    moments = tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates + dead_scan_dates
+    moments = tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates + dead_scan_dates + dead_url_dates
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
 
@@ -134,7 +136,8 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
             'tls_qualys_scans': [],
             'generic_scans': [],
             'dead_endpoints': [],
-            'non_resolvable_urls': []
+            'non_resolvable_urls': [],
+            'dead_urls': []
         }
 
     # make sure you don't save the scan for today at the end of the day (which would make it visible only at the end
@@ -150,7 +153,8 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         'tls_qualys_scans': tls_qualys_scans,
         'generic_scans': generic_scans,
         'dead_endpoints': dead_endpoints,
-        'non_resolvable_urls': non_resolvable_urls
+        'non_resolvable_urls': non_resolvable_urls,
+        'dead_urls': dead_urls
     }
 
     return moments, happenings
@@ -220,10 +224,15 @@ def create_timeline(url: Url):
                 timeline[moment]["endpoints"].append(endpoint)
         timeline[moment]['scans'] += list(scans)
 
-    # seems to be incorrect? What exactly is not resolvable here?
+    # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
+    # see there are gaps in using the url over time. Which is more truthful.
     for moment in [not_resolvable_url.not_resolvable_since for not_resolvable_url in happenings['non_resolvable_urls']]:
         moment = moment.date()
-        timeline[moment]["not_resolvable"] = True
+        timeline[moment]["url_not_resolvable"] = True
+
+    for moment in [dead_url.is_dead_since for dead_url in happenings['dead_urls']]:
+        moment = moment.date()
+        timeline[moment]["url_is_dead"] = True
 
     for moment in [dead_endpoint.is_dead_since for dead_endpoint in happenings['dead_endpoints']]:
         moment = moment.date()
@@ -234,7 +243,7 @@ def create_timeline(url: Url):
                 if ep not in timeline[moment]["dead_endpoints"]:
                     timeline[moment]["dead_endpoints"].append(ep)
 
-    # unique endpoints only, always in the same order
+    # unique endpoints only
     for moment in moments:
         timeline[moment.date()]["endpoints"] = list(set(timeline[moment.date()]["endpoints"]))
 
@@ -257,8 +266,8 @@ def rate_timeline(timeline, url: Url):
         scores = []
         given_ratings = {}
 
-        if 'not_resolvable' in timeline[moment].keys():
-            logger.debug('Url became non-resolvable. Adding an empty rating to lower the score of'
+        if 'url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys():
+            logger.debug('Url became non-resolvable or dead. Adding an empty rating to lower the score of'
                          'this domain if it had a score. It has been cleaned up. (hooray)')
             # this is the end for the domain.
             default_calculation = {
@@ -457,8 +466,11 @@ def show_timeline_console(timeline, url: Url):
             for endpoint in timeline[moment]['dead_endpoints']:
                 message += "|  |  |- %s" % endpoint + newline
 
-        if 'not_resolvable' in timeline[moment].keys():
+        if 'url_not_resolvable' in timeline[moment].keys():
             message += "|  |- url became not resolvable" + newline
+
+        if 'url_is_dead' in timeline[moment].keys():
+            message += "|  |- url died" + newline
 
     message += "" + newline
     # support this on command line

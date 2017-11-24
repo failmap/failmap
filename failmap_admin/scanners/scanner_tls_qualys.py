@@ -35,7 +35,7 @@ import requests
 from celery import group
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap_admin.map.determineratings import add_organization_rating, rerate_urls
+from failmap_admin.map.rating import add_organization_rating, rerate_urls
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                            TlsQualysScratchpad)

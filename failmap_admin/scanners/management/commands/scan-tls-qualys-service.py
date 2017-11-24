@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import add_organization_rating, rerate_urls
+from failmap_admin.map.rating import add_organization_rating, rerate_urls
 from failmap_admin.scanners.models import Url
 from failmap_admin.scanners.scanner_tls_qualys import scan, scan_task
 

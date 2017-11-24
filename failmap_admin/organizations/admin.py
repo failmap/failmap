@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.urls import reverse
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import (OrganizationRating, UrlRating, add_url_rating,
-                                                rate_organization_on_moment)
+from failmap_admin.map.rating import (OrganizationRating, UrlRating, add_url_rating,
+                                      rate_organization_on_moment)
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
@@ -250,7 +250,7 @@ class UrlAdmin(admin.ModelAdmin):
     actions.append('declare_dead')
 
     def timeline_debug(self, request, queryset):
-        from failmap_admin.map.determineratings import create_timeline, show_timeline_console
+        from failmap_admin.map.rating import create_timeline, show_timeline_console
         from django.http import HttpResponse
 
         content = "<pre>"

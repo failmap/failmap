@@ -1,7 +1,7 @@
 from django.contrib import admin
 from jet.admin import CompactInline
 
-from failmap_admin.map.determineratings import rate_url
+from failmap_admin.map.rating import rate_url
 from failmap_admin.scanners.scanner_tls_qualys import scan
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.determineratings import DetermineRatings
+from failmap_admin.map.rating import DetermineRatings
 from failmap_admin.scanners.scanner_tls_qualys import ScannerTlsQualys
 
 
