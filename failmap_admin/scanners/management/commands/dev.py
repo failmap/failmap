@@ -2,8 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.rating import (add_organization_rating, create_timeline, rebuild_ratings,
-                                      rerate_urls, show_timeline_console)
+from failmap_admin.map.rating import (add_organization_rating, create_timeline, rerate_urls,
+                                      show_timeline_console)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan as scan_headers
@@ -15,9 +15,10 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        rebuild_ratings()
+        # rebuild_ratings()
+        develop_determineratings()
         # develop_timeline()
-        # develop_determineratings()
+        #
         # Command.test_sslscan_real()
         # Command.test_determine_grade()
         # Command.develop_sslscan()
@@ -114,10 +115,11 @@ def develop_determineratings():
 
     # pyflakes when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
     # when = datetime.now(pytz.utc)
+    organization = Organization.objects.filter(name="Ameland").get()
+    rerate_urls(Url.objects.all().filter(organization=organization))
 
-    organization = Organization.objects.filter(name="Arnhem").get()
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
-    add_organization_rating(organization, create_history=True)
+    # add_organization_rating(organization, create_history=True)
     # create one for NOW, not this night. This is a bug :)
-    add_organization_rating(organization)
+    # add_organization_rating(organization)

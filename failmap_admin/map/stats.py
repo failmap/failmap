@@ -87,6 +87,9 @@ def metrics_per_url(url):
     So if an endpoint was in a previous rating, but not in this one, the endpoint died (or there where no relevant
     metrics for it to store it in the url rating).
 
+    todo: dead endpoints are not removed from url_ratings. mail.ameland.nl is dead at some point, but still stored
+    as a rating. :( Or a new rating is not written somehow.
+
     The best choice is to have the smallest granularity for ratings: these are ratings on an endpoint per day.
 
     Url ratings are stored using deduplication. This saves several gigabytes of data.
@@ -130,8 +133,8 @@ def metrics_per_url(url):
             yesterdays_relevant_rating = relevant_rating
 
             if 'endpoints' not in relevant_rating.calculation.keys():
-                logger.info("No endpoints in this calculation. Url died or became not resolvable. "
-                            "No metrics needed anymore :).")
+                logger.debug("No endpoints in this calculation. Url died, became non-resolvable or it's endpoints died."
+                             "No metrics needed anymore for this one.")
                 return []
 
             for endpoint in relevant_rating.calculation['endpoints']:
@@ -139,6 +142,7 @@ def metrics_per_url(url):
                     for organization in relevant_rating.url.organization.all():
 
                         if 'low' not in rating.keys():
+                            # When an url still is resolvable, but all endpoints themselves don't exist anymore.
                             # logger.info("No (low) rating in this endpoint. Is it a repeated finding? Those should "
                             #             "have been all gone by now. What went wrong? %s" % endpoint)
                             continue

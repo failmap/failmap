@@ -260,13 +260,15 @@ def rate_timeline(timeline, url: Url):
 
     previous_ratings = {}
     previous_endpoints = []
+    url_was_once_rated = False
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
         scores = []
         given_ratings = {}
 
-        if 'url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys():
+        if ('url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys()) \
+                and url_was_once_rated:
             logger.debug('Url became non-resolvable or dead. Adding an empty rating to lower the score of'
                          'this domain if it had a score. It has been cleaned up. (hooray)')
             # this is the end for the domain.
@@ -311,6 +313,7 @@ def rate_timeline(timeline, url: Url):
                       "tls_qualys", "plain_https"]
 
         for endpoint in relevant_endpoints:
+            url_was_once_rated = True
 
             calculations = []
             these_scans = {}
@@ -387,7 +390,8 @@ def rate_timeline(timeline, url: Url):
         previous_endpoints += relevant_endpoints
 
         # prevent empty ratings cluttering the database and skewing the stats.
-        if not endpoint_calculations:
+        # todo: only do this if there never was a urlrating before this.
+        if not endpoint_calculations and not url_was_once_rated:
             continue
 
         sorted_endpoints = sorted(endpoint_calculations, key=lambda k: k['points'], reverse=True)
@@ -492,7 +496,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
 
     total_rating = 0
 
-    # todo: closing off urls, after no relevant endpoints, but still resolvable.
+    # todo: closing off urls, after no relevant endpoints, but still resolvable. Done.
     urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
 
     all_url_ratings = []
