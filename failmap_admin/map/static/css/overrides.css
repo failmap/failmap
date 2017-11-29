@@ -55,7 +55,7 @@ body {
 }
 
 .orange {
-       text-decoration: none;
+    text-decoration: none;
     color: #FFA500;
 }
 
@@ -78,18 +78,20 @@ body {
 
 /* bootstrap fixed menu terribleness... always overlaps content. */
 body {
-  padding-top: 50px;
+    padding-top: 50px;
 }
 
 /* prevent dynamic content loading in the div before this element to scroll
 the recently jumped anchor (report) out of view.
 */
 div#report {
-  margin-top: 55px;
+    margin-top: 55px;
 }
 
 @media screen and (max-width: 768px) {
-    body { padding-top: 50px; }
+    body {
+        padding-top: 50px;
+    }
 }
 
 /* https://github.com/twbs/bootstrap/issues/1768 */
@@ -101,7 +103,7 @@ div#report {
     visibility: hidden;
 }
 
-.perurl{
+.perurl {
     width: 100%;
     clear: both;
     display: table;
@@ -122,13 +124,12 @@ div#report {
     display: inline-block;
     float: left;
     background-color: gainsboro;
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.5) 35px, rgba(255,255,255,.5) 70px)
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px)
 }
 
 .servicelink {
     margin-bottom: 15px;
 }
-
 
 .faildomain {
     font-size: 23px;
@@ -155,14 +156,14 @@ div#report {
     padding-bottom: 20px;
 }
 
-@media (min-width: 768px){
+@media (min-width: 768px) {
     #lastrow .row {
         width: 750px;
         margin: auto;
     }
 }
 
-@media (min-width: 992px){
+@media (min-width: 992px) {
     #lastrow .row {
         width: 970px;
         margin: auto;
@@ -176,7 +177,7 @@ div#report {
     }
 }
 
-.Donate{
+.Donate {
     border: 1px solid silver;
     padding: 4px;
     width: 60px;
@@ -195,7 +196,6 @@ div#report {
     color: #828578;
 }
 
-
 .Donate.a10 {
     background-color: #EFB8BF;
 }
@@ -204,7 +204,6 @@ div#report {
     color: #B65145;
 }
 
-
 .Donate.a20 {
     background-color: #A9C7DE;
 }
@@ -212,7 +211,6 @@ div#report {
 .Donate.a20 a:link {
     color: #5F627F;
 }
-
 
 .Donate.a50 {
     background-color: #FACA8E;
@@ -251,7 +249,7 @@ div#report {
     background-color: pink;
 }
 
-.Donate.aother a:link, .Donate.aother a:visited  {
+.Donate.aother a:link, .Donate.aother a:visited {
     color: darkgray;
 }
 
@@ -264,7 +262,7 @@ div#report {
     margin-top: 11px;
 }
 
-.donate-content{
+.donate-content {
     background-color: lightgray;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
@@ -303,7 +301,6 @@ div#report {
     border-radius: 4px;
 }
 
-
 .total_awarded_points_orange {
     border: 2px solid darkorange;
     background-color: orange;
@@ -334,7 +331,7 @@ div#report {
     margin-left: 5px;
 }
 
-.fail_logo{
+.fail_logo {
     background-color: black;
     padding: 5px;
     border: 3px inset;
@@ -355,9 +352,10 @@ div#report {
     padding-bottom: 17px;
 }
 
-.git_logo img{
+.git_logo img {
     height: 70px;
 }
+
 .logo {
     width: 100%;
     text-align: center;
@@ -403,7 +401,7 @@ div#report {
 }
 
 .navbar-default {
-    background-image: linear-gradient(to bottom,rgba(255,255,255,0.9) 0,rgba(255,255,255,0.8) 100%) !important;
+    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.8) 100%) !important;
     backdrop-filter: blur(10px);
     background-color: transparent !important;
 }
@@ -420,19 +418,18 @@ div#report {
     color: darkred;
 }
 
-.greenrow{
+.greenrow {
     color: darkgreen;
 }
 
-.grayrow{
+.grayrow {
     color: darkgray;
 }
 
-
 /* awesome transition */
 path {
-    -webkit-transition:fill 400ms;
-    transition:fill 400ms;
+    -webkit-transition: fill 400ms;
+    transition: fill 400ms;
 }
 
 #searchbar {
@@ -441,12 +438,12 @@ path {
 }
 
 @keyframes dash {
-  to {
-    stroke-dashoffset: 1000;
-  }
+    to {
+        stroke-dashoffset: 1000;
+    }
 }
 
-.backtomap{
+.backtomap {
     float: right;
     position: relative;
     top: -15px;
@@ -456,3 +453,33 @@ path {
     font-size: inherit !important;
     margin: 0 5px 0 0 !important;
 }
+
+/* Begin D3 JS*/
+.axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: Verdana;
+    font-size: 13px;
+}
+
+.area {
+    opacity: 0.5;
+    shape-rendering: geometricPrecision;
+}
+
+.d3_tooltip {
+    border: 1px solid gray;
+    padding: 5px;
+    border-radius: 3px;
+    font-family: verdana;
+    font-size: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    position: absolute;
+    z-index: 2000;
+}
+/* End D3 JS */

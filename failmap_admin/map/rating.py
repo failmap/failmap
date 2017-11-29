@@ -100,10 +100,10 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         raise ValueError("Both URL and organization given, please supply one! %s %s" % (organizations, urls))
 
     if organizations:
-        logger.info("Getting all urls from organization: %s" % organizations)
+        logger.debug("Getting all urls from organization: %s" % organizations)
         urls = Url.objects.filter(organization__in=organizations)
     if urls:
-        logger.info("Getting all url: %s" % urls)
+        logger.debug("Getting all url: %s" % urls)
 
     if not urls:
         logger.info("Could not find urls from organization or url.")
@@ -264,7 +264,7 @@ def rate_timeline(timeline, url: Url):
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
-        scores = []
+        total_scores, total_high, total_medium, total_low = 0, 0, 0, 0
         given_ratings = {}
 
         if ('url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys()) \
@@ -275,12 +275,12 @@ def rate_timeline(timeline, url: Url):
             default_calculation = {
                 "url": {
                     "url": url.url,
-                    "points": "0",
+                    "points": 0,
                     "endpoints": []
                 }
             }
 
-            save_url_rating(url, moment, 0, default_calculation)
+            save_url_rating(url, moment, 0, 0, 0, 0, default_calculation)
             return
 
         # reverse the relation: so we know all ratings per endpoint.
@@ -355,15 +355,23 @@ def rate_timeline(timeline, url: Url):
             if label not in given_ratings:
                 given_ratings[label] = []
 
-            endpoint_scores = []
+            endpoint_scores, endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0, 0
 
             for scan_type in scan_types:
                 if scan_type in these_scans.keys():
                     if scan_type not in given_ratings[label]:
                         points, calculation = points_and_calculation(these_scans[scan_type], scan_type)
-                        calculations.append(calculation) if calculation else ""
-                        scores.append(points)
-                        endpoint_scores.append(points)
+                        if calculation:
+                            calculations.append(calculation)
+                            total_scores += points
+                            endpoint_scores += points
+                            endpoint_high += calculation["high"]
+                            endpoint_medium += calculation["medium"]
+                            endpoint_low += calculation["low"]
+                            total_high += calculation["high"]
+                            total_medium += calculation["medium"]
+                            total_low += calculation["low"]
+
                         given_ratings[label].append(scan_type)
                     else:
                         calculations.append({
@@ -371,19 +379,26 @@ def rate_timeline(timeline, url: Url):
                             "explanation": "Repeated finding. Probably because this url changed IP adresses or has "
                                            "multiple IP adresses (common for failover / load-balancing).",
                             "points": 0,
+                            "high": 0,
+                            "medium": 0,
+                            "low": 0,
                             "since": these_scans[scan_type].rating_determined_on.isoformat(),
                             "last_scan": these_scans[scan_type].last_scan_moment.isoformat()
                         })
 
             # Readibility is important: it's ordered from the worst to least points.
-            calculations = sorted(calculations, key=lambda k: k['points'], reverse=True)
+            calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
             endpoint_calculations.append({
                 "ip": endpoint.ip_version,
+                "ip_version": endpoint.ip_version,
                 "port": endpoint.port,
                 "protocol": endpoint.protocol,
                 "v4": endpoint.is_ipv4(),
-                "points": sum(endpoint_scores),
+                "points": endpoint_scores,
+                "high": endpoint_high,
+                "medium": endpoint_medium,
+                "low": endpoint_low,
                 "ratings": calculations
             })
 
@@ -394,20 +409,23 @@ def rate_timeline(timeline, url: Url):
         if not endpoint_calculations and not url_was_once_rated:
             continue
 
-        sorted_endpoints = sorted(endpoint_calculations, key=lambda k: k['points'], reverse=True)
+        sorted_endpoints = sorted(endpoint_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
         url_rating_json = {
             "url": url.url,
-            "points": sum(scores),
+            "points": total_scores,
+            "high": total_high,
+            "medium": total_medium,
+            "low": total_low,
             "endpoints": sorted_endpoints
         }
 
-        logger.debug("On %s this would score: %s " % (moment, sum(scores)), )
+        logger.debug("On %s this would score: %s " % (moment, total_scores), )
 
-        save_url_rating(url, moment, sum(scores), url_rating_json)
+        save_url_rating(url, moment, total_scores, total_high, total_medium, total_low, url_rating_json)
 
 
-def save_url_rating(url: Url, date: datetime, points: int, calculation):
+def save_url_rating(url: Url, date: datetime, points: int, high: int, medium: int, low: int, calculation):
     u = UrlRating()
     u.url = url
 
@@ -420,6 +438,9 @@ def save_url_rating(url: Url, date: datetime, points: int, calculation):
         u.when = datetime(year=date.year, month=date.month, day=date.day,
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
     u.rating = points
+    u.high = high
+    u.medium = medium
+    u.low = low
     u.calculation = calculation
     u.save()
 
@@ -495,6 +516,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     logger.debug("rating on: %s, Organization %s" % (when, organization))
 
     total_rating = 0
+    total_high, total_medium, total_low = 0, 0, 0
 
     # todo: closing off urls, after no relevant endpoints, but still resolvable. Done.
     urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
@@ -504,7 +526,6 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     for url in urls:
         try:
             urlratings = UrlRating.objects.filter(url=url, when__lte=when)
-            urlratings = urlratings.values("rating", "calculation")
             urlrating = urlratings.latest("when")  # kills the queryset, results 1
             all_url_ratings.append(urlrating)
         except UrlRating.DoesNotExist:
@@ -512,11 +533,14 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
 
     # sort all_url_ratings on rating desc.
     # https://stackoverflow.com/questions/403421/
-    all_url_ratings.sort(key=lambda x: x['rating'], reverse=True)
+    all_url_ratings.sort(key=lambda x: (x.high, x.medium, x.low), reverse=True)
 
     for urlrating in all_url_ratings:
-        total_rating += urlrating["rating"]
-        url_calculations.append(urlrating["calculation"])
+        total_rating += urlrating.rating
+        total_high += urlrating.high
+        total_medium += urlrating.medium
+        total_low += urlrating.low
+        url_calculations.append(urlrating.calculation)
 
     try:
         last = OrganizationRating.objects.filter(
@@ -529,18 +553,24 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
         "organization": {
             "name": organization.name,
             "rating": total_rating,
+            "high": total_high,
+            "medium": total_medium,
+            "low": total_low,
             "urls": url_calculations
         }
     }
 
     if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
         logger.debug("The calculation (json) has changed, so we're saving this report, rating.")
-        u = OrganizationRating()
-        u.organization = organization
-        u.rating = total_rating
-        u.when = when
-        u.calculation = calculation
-        u.save()
+        organizationrating = OrganizationRating()
+        organizationrating.organization = organization
+        organizationrating.rating = total_rating
+        organizationrating.high = total_high
+        organizationrating.medium = total_medium
+        organizationrating.low = total_low
+        organizationrating.when = when
+        organizationrating.calculation = calculation
+        organizationrating.save()
     else:
         logger.warning("The calculation is still the same, not creating a new OrganizationRating")
 
@@ -599,9 +629,11 @@ def get_url_score_modular(url: Url, when: datetime=None):
     processed_endpoints = []
 
     overall_points = 0
+    overall_high, overall_medium, overall_low = 0, 0, 0
     endpoint_calculations = []
     for endpoint in endpoints:
         endpoint_points = 0
+        endpoint_highs, endpoint_mediums, endpoint_lows = 0, 0, 0
 
         # protect from rating the same endpoints, if someone made a mistake and added a copy. See above comment.
         label = "%s%s%s" % (endpoint.is_ipv6(), endpoint.port, endpoint.protocol)
@@ -619,8 +651,14 @@ def get_url_score_modular(url: Url, when: datetime=None):
             if calculation:
                 calculations.append(calculation)
                 endpoint_points += points
+                endpoint_highs += calculation["high"]
+                endpoint_mediums += calculation["medium"]
+                endpoint_lows += calculation["low"]
 
         overall_points += endpoint_points
+        overall_high += endpoint_highs
+        overall_medium += endpoint_mediums
+        overall_low += endpoint_lows
 
         if calculations:
             endpoint_calculations.append({
@@ -628,6 +666,9 @@ def get_url_score_modular(url: Url, when: datetime=None):
                 "port": endpoint.port,
                 "protocol": endpoint.protocol,
                 "points": endpoint_points,
+                "high": endpoint_highs,
+                "medium": endpoint_mediums,
+                "low": endpoint_lows,
                 "ratings": calculations
             })
 
@@ -643,6 +684,9 @@ def get_url_score_modular(url: Url, when: datetime=None):
             "url": {
                 "url": url.url,
                 "points": overall_points,
+                "high": overall_high,
+                "medium": overall_medium,
+                "low": overall_low,
                 "endpoints": endpoint_calculations
             }
         }
@@ -672,7 +716,10 @@ def close_url_rating(url: Url, when: datetime):
         "url":
         {
             "url": url.url,
-            "points": "0",
+            "points": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
             "endpoints": []
         }
     }
@@ -692,45 +739,6 @@ def close_url_rating(url: Url, when: datetime):
             logger.debug('This was already cleaned up.')
     except ObjectDoesNotExist:
         logger.debug('There where no prior ratings, so cannot close this url.')
-
-
-def get_report_from_scanner_dead(endpoint: Endpoint, when: datetime):
-    logger.debug("get_report_from_scanner_dead")
-    """
-    Endpoints also die. In that case, you do return a rating of 0 for that endpoint.
-
-    So that when you get the latest URL rating, you'll get 0 points, instead of some old
-    score. If the endpoint is dead, well: it has been cleaned up. Which is a good thing mostly.
-
-    Endpoints have the lifecycle: once dead, it stays dead. A new endpoint will be created when
-    a new scan is performed. The new endpoint may be exactly the same as the old one, including
-    IP and such. This might be a bit confusing.
-    """
-
-    rating_template = """
-            {
-            "dead": {
-                "explanation": "%s",
-                "points": 0,
-                "since": "%s",
-                "last_scan": "%s"
-                }
-            }""".strip()
-
-    try:
-        scan = Endpoint.objects.filter(id=endpoint.id,
-                                       is_dead_since__lte=when,
-                                       )
-        scan = scan.latest('is_dead_since')
-
-        json = (rating_template % ("Endpoint was cleaned up.",
-                                   scan.is_dead_since.isoformat(), scan.is_dead_since.isoformat()))
-
-        logger.debug("Dead: On %s, Endpoint %s was dead." % (when, endpoint))
-        return 0, json
-    except ObjectDoesNotExist:
-        logger.debug("Endpoint is not dead: %s." % endpoint)
-        return 0, ""
 
 
 def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_type: str):
@@ -839,6 +847,7 @@ def relevant_endpoints_at_timepoint(urls: List[Url], when: datetime):
     return relevant_endpoints
 
 
+# todo: use the organization creation date for this.
 def default_ratings():
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents

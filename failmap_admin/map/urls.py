@@ -5,7 +5,7 @@ from django.conf.urls import url
 
 from failmap_admin.map.views import (index, manifest_json, map_data, organization_report,
                                      robots_txt, security_txt, stats, terrible_urls, topfail,
-                                     topwin, urlstats, wanted_urls)
+                                     topwin, vulnstats, wanted_urls)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),
@@ -13,7 +13,9 @@ urlpatterns = [
     url(r'^manifest.json$', manifest_json),
     url(r'^data/map/(?P<weeks_back>[0-9]{0,2})', map_data, name='map data'),
     url(r'^data/stats/(?P<weeks_back>[0-9]{0,2})', stats, name='stats'),
-    url(r'^data/urlstats/(?P<weeks_back>[0-9]{0,2})', urlstats, name='urlstats'),
+
+    # url(r'^d3.html', d3, name='d3'),
+    url(r'^data/vulnstats/(?P<weeks_back>[0-9]{0,2})', vulnstats, name='vulnstats'),
     url(r'^data/topfail/(?P<weeks_back>[0-9]{0,2})', topfail, name='top fail'),
     url(r'^data/topwin/(?P<weeks_back>[0-9]{0,2})', topwin, name='top win'),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)

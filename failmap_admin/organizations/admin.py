@@ -6,8 +6,7 @@ from django.contrib import admin
 from django.urls import reverse
 from jet.admin import CompactInline
 
-from failmap_admin.map.rating import (OrganizationRating, UrlRating, add_url_rating,
-                                      rate_organization_on_moment)
+from failmap_admin.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
@@ -91,7 +90,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
-    actions = ['rate_organization', 'scan_organization']
+    # actions = ['rate_organization', 'scan_organization']
 
     def rate_organization(self, request, queryset):
 
@@ -224,20 +223,22 @@ class UrlAdmin(admin.ModelAdmin):
     screenshots.short_description = "📷  Create screenshot"
     actions.append('screenshots')
 
-    def rate_url(self, request, queryset):
-        add_url_rating([url for url in queryset])
-        self.message_user(request, "Rate Url: done")
-    rate_url.short_description = "✅  Rate Url"
-    actions.append('rate_url')
+    # suspended, since adding ratings and rebuild ratings don't produce 100% the same results.
+    # def rate_url(self, request, queryset):
+    #     add_url_rating([url for url in queryset])
+    #     self.message_user(request, "Rate Url: done")
+    # rate_url.short_description = "✅  Rate Url"
+    # actions.append('rate_url')
 
-    def rate_organization_(self, request, queryset):
-        # a queryset doesn't have the "name" property...
-        for url in queryset:
-            for organization in url.organization.all():
-                rate_organization_on_moment(organization)
-        self.message_user(request, "Rate Organization: done")
-    rate_organization_.short_description = "✅  Rate Organization"
-    actions.append('rate_organization_')
+    # suspended, since adding ratings and rebuild ratings don't produce 100% the same results.
+    # def rate_organization_(self, request, queryset):
+    #     # a queryset doesn't have the "name" property...
+    #     for url in queryset:
+    #         for organization in url.organization.all():
+    #             rate_organization_on_moment(organization)
+    #     self.message_user(request, "Rate Organization: done")
+    # rate_organization_.short_description = "✅  Rate Organization"
+    # actions.append('rate_organization_')
 
     def declare_dead(self, request, queryset):
         for url in queryset:

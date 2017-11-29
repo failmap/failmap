@@ -10,10 +10,10 @@ class OrganizationRatingAdmin(admin.ModelAdmin):
             '<a href="../../organizations/organization/{id}/change">inspect organization</a>',
             id=format(obj.organization_id))
 
-    list_display = ('organization', 'rating', 'when', 'inspect_organization')
-    search_fields = (['organization__name', 'rating', 'when', 'calculation'])
+    list_display = ('organization', 'rating', 'high', 'medium', 'low', 'when', 'inspect_organization')
+    search_fields = (['organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
     list_filter = ('organization', 'rating', 'when')
-    fields = ('organization', 'rating', 'when', 'calculation')
+    fields = ('organization', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
 
     ordering = ["-when"]
 
@@ -25,10 +25,10 @@ class UrlRatingAdmin(admin.ModelAdmin):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
                            id=format(obj.url_id))
 
-    list_display = ('url', 'rating', 'when', 'inspect_url')
-    search_fields = (['url__organization__name', 'rating', 'when', 'calculation'])
+    list_display = ('url', 'rating', 'high', 'medium', 'low', 'when', 'inspect_url')
+    search_fields = (['url__organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
     list_filter = ('url', 'rating', 'when')
-    fields = ('url', 'rating', 'when', 'calculation')
+    fields = ('url', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
 
     ordering = ["-when"]
 

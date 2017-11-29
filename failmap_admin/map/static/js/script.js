@@ -160,12 +160,17 @@ var failmap = {
         this.info.update = function (props) {
             var sometext = "";
             if (props) {
-                sometext += "<h4>" + props.OrganizationName + "</h4>";
-                if (props.Overall > 1)
-                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">' + props.Overall + ' points</span>';
-                else
-                    sometext += '<b>Score: </b><span style="color: ' + failmap.getColor(props.Overall) + '">- points</span>';
-                vueDomainlist.load(props.OrganizationID, vueMap.week);
+                sometext += "<h4>" + props.organization_name + "</h4>";
+                if (props.high || props.medium || props.low) {
+                    sometext += '<b>High: </b><span style="color: ' + failmap.getColor(1000) + '">' + props.high + '</span><br />';
+                    sometext += '<b>Medium: </b><span style="color: ' + failmap.getColor(500) + '">' + props.medium + '</span><br />';
+                    sometext += '<b>Low: </b><span style="color: ' + failmap.getColor(0) + '">' + props.low + '</span><br />';
+                } else {
+                    sometext += '<b>High: </b><span style="color: ' + failmap.getColor(1000) + '">0</span><br />';
+                    sometext += '<b>Medium: </b><span style="color: ' + failmap.getColor(500) + '">0</span><br />';
+                    sometext += '<b>Low: </b><span style="color: ' + failmap.getColor(0) + '">0</span><br />';
+                }
+                vueDomainlist.load(props.organization_id, vueMap.week);
                 this._div.innerHTML = sometext;
             }
         };
@@ -208,13 +213,15 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
-            "                    <div v-for=\"url in urls\">\n" +
-            "                        <span v-bind:class=\"colorize(url.points)\">\n" +
-            "                            {{ url.url }}\n" +
-            "                        </span>\n" +
-            "                    </div>\n" +
-            "                    <br />\n" +
-            "                </div>";
+                "<table width='100%'><thead>" +
+                "<tr><th>Url</th><th width='5%'>H</th><th width='5%'>M</th><th width='5%'>L</th></tr></thead>" +
+                "<tr v-for=\"url in urls\">\n" +
+                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.url }}</span></td>" +
+                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.high }}</span></td>" +
+                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.medium }}</span></td>" +
+                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.low }}</span></td>\n" +
+                "</tr></table>\n" +
+                "</div>";
             return this._div;
         };
 
@@ -345,7 +352,7 @@ var failmap = {
 
     gotoLink: function (e) {
         var layer = e.target;
-        location.hash = "#" + layer.feature.properties['OrganizationName'];
+        location.hash = "#" + layer.feature.properties['organization_name'];
     },
 
     isSearchedFor: function(feature){
@@ -353,7 +360,7 @@ var failmap = {
         x = x.toLowerCase();
         if (!x || x === "")
             return false;
-        return (feature.properties.OrganizationName.toLowerCase().indexOf(x) !== -1)
+        return (feature.properties.organization_name.toLowerCase().indexOf(x) !== -1)
     },
 
     search: function(query) {
@@ -367,7 +374,7 @@ var failmap = {
         } else {
             // text match
             failmap.geojson.eachLayer(function (layer) {
-                if (layer.feature.properties.OrganizationName.toLowerCase().indexOf(query) !== -1) {
+                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) !== -1) {
                     if (layer.feature.geometry.type === "MultiPolygon")
                         layer.setStyle(failmap.searchResultStyle(layer.feature))
                 } else {
@@ -396,7 +403,7 @@ var failmap = {
                     // overwrite some properties
                     // a for loop is not ideal.
                     for (i = 0; i < json.features.length; i++) {
-                        if (layer.feature.properties.OrganizationName === json.features[i].properties.OrganizationName){
+                        if (layer.feature.properties.organization_name === json.features[i].properties.organization_name){
                             // console.log(layer);
                             layer.feature.properties.Overall = json.features[i].properties.Overall;
                             layer.feature.properties.color = json.features[i].properties.color;
@@ -448,7 +455,7 @@ var failmap = {
     },
 
     showreport: function(e) {
-        let organization_id = e.target.feature.properties['OrganizationID'];
+        let organization_id = e.target.feature.properties['organization_id'];
         if (failmap.map.isFullscreen()){
             // var layer = e.target;
             vueFullScreenReport.load(organization_id, vueMap.week);
@@ -468,6 +475,7 @@ var failmap = {
 $(document).ready(function () {
     failmap.initializemap();
     lazyload();
+    d3stats();
 
     // there are some issues with having the map in a Vue. Somehow the map doesn't
     // render. So we're currently not using that feature over there.
@@ -553,6 +561,9 @@ $(document).ready(function () {
             calculation: '',
             rating: 0,
             points: 0,
+            high: 0,
+            medium: 0,
+            low: 0,
             when: 0,
             twitter_handle: '',
             name: "",
@@ -572,8 +583,8 @@ $(document).ready(function () {
                 if (vueMap.features != null){
                     let organizations = vueMap.features.map(function(feature){
                         return {
-                            "id": feature.properties.OrganizationID,
-                            "name": feature.properties.OrganizationName,
+                            "id": feature.properties.organization_id,
+                            "name": feature.properties.organization_name,
                         }
                     });
                     return organizations.sort(function(a,b){
@@ -591,15 +602,15 @@ $(document).ready(function () {
             }
         },
         methods: {
-            colorize: function (points) {
-                if (points < 199) return "green";
-                if (points < 1000) return "orange";
-                if (points > 999) return "red";
+            colorize: function (high, medium, low) {
+               if (high > 0) return "red";
+                if (medium > 0) return "orange";
+                return "green";
             },
-            colorizebg: function (points) {
-                if (points < 199) return "#dff9d7";
-                if (points < 1000) return "#ffefd3";
-                if (points > 999) return "#fbeaea";
+            colorizebg: function (high, medium, low) {
+                if (high > 0) return "#fbeaea";
+                if (medium > 0) return "#ffefd3";
+                return "#dff9d7";
             },
             idize: function (url) {
                 url = url.toLowerCase();
@@ -640,50 +651,52 @@ $(document).ready(function () {
                 if (rating.type === "security_headers_x_content_type_options")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
             },
-            total_awarded_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
+            total_awarded_points: function(high, medium, low) {
+                var marker = vueReport.make_marker(high, medium, low);
+                return '<span class="total_awarded_points_'+ this.colorize(high, medium, low) +'">' + marker + '</span>'
+            },
+            organization_points: function(high, medium, low) {
+                var marker = vueReport.make_marker(high, medium, low);
+                return '<span class="total_awarded_points_'+ this.colorize(high, medium, low) +'">' + marker + '</span>'
+            },
+            awarded_points: function(high, medium, low) {
+                var marker = vueReport.make_marker(high, medium, low);
+                return '<span class="awarded_points_'+ this.colorize(high, medium, low) +'">+ ' + marker + '</span>'
+            },
+            make_marker: function(high, medium, low) {
+                if (high === 0 && medium === 0 && low === 0)
+                    return "perfect";
+                else if (high > 0)
+                    return "hoog";
+                else if (medium > 0)
+                    return "midden";
                 else
-                    marker = points;
-                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+                    return "laag";
             },
-            organization_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
-                else
-                    marker = points;
-                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            endpoint_type: function (endpoint) {
+                return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
             },
-            awarded_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
-                else
-                    marker = points;
-                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
-            },
-            create_type: function (endpoint) {
-                if (endpoint.v4 === "True")
-                    return endpoint.protocol + "/" + endpoint.port + " (IPv4)";
-                return endpoint.protocol + "/" + endpoint.port + " (IPv6)";
-            },
-            load: function(OrganizationID, weeks_ago){
+            load: function(organization_id, weeks_ago){
 
                 if (!weeks_ago) {
                     weeks_ago = 0;
                 }
                 vueReport.loading = true;
                 vueReport.name = null;
-                $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                $.getJSON('/data/report/' + organization_id + '/' + weeks_ago, function (data) {
                     vueReport.loading = false;
                     vueReport.urls = data.calculation["organization"]["urls"];
                     vueReport.points = data.rating;
+                    vueReport.high = data.calculation["organization"]["high"];
+                    vueReport.medium = data.calculation["organization"]["medium"];
+                    vueReport.low = data.calculation["organization"]["low"];
                     vueReport.when = data.when;
                     vueReport.name = data.name;
                     vueReport.twitter_handle = data.twitter_handle;
                     vueReport.promise = data.promise;
 
                     // include id in anchor to allow url sharing
-                    let newHash = 'report-' + OrganizationID;
+                    let newHash = 'report-' + organization_id;
                     $('a#report-anchor').attr('name', newHash)
                     history.replaceState({}, '', '#' + newHash);
                 });
@@ -714,6 +727,9 @@ $(document).ready(function () {
             calculation: '',
             rating: 0,
             points: 0,
+            high: 0,
+            medium: 0,
+            low: 0,
             when: 0,
             name: "",
             twitter_handle: '',
@@ -732,26 +748,20 @@ $(document).ready(function () {
             hide: function(){
                 this.visible = false;
             },
-            colorize: function (points) {
-                if (points < 199) return "green";
-                if (points < 1000) return "orange";
-                if (points > 999) return "red";
+            colorize: function (high, medium, low) {
+               return vueReport.colorize(high, medium, low);
             },
-            colorizebg: function (points) {
-                if (points < 199) return "#dff9d7";
-                if (points < 1000) return "#ffefd3";
-                if (points > 999) return "#fbeaea";
+            colorizebg: function (high, medium, low) {
+                return vueReport.colorizebg(high, medium, low);
             },
             idize: function (url) {
-                url = url.toLowerCase();
-                return url.replace(/[^0-9a-z]/gi, '')
+                return vueReport.idize(url);
             },
             idizetag: function (url) {
-                url = url.toLowerCase();
-                return "#" + url.replace(/[^0-9a-z]/gi, '')
+                return vueReport.idizetag(url);
             },
             humanize: function (date) {
-                return new Date(date).humanTimeStamp()
+                return vueReport.humanize(date);
             },
             create_header: function(rating){
                 return vueReport.create_header(rating);
@@ -759,40 +769,31 @@ $(document).ready(function () {
             second_opinion_links: function(rating, url){
                 return vueReport.second_opinion_links(rating, url);
             },
-            organization_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
-                else
-                    marker = points;
-                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            organization_points: function(high, medium, low) {
+                return vueReport.organization_points(high, medium, low);
             },
-            total_awarded_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
-                else
-                    marker = points;
-                return '<span class="total_awarded_points_'+ this.colorize(points) +'">' + marker + '</span>'
+            total_awarded_points: function(high, medium, low) {
+                return vueReport.total_awarded_points(high, medium, low);
             },
-            create_type: function (endpoint) {
-                return vueReport.create_type(endpoint);
+            endpoint_type: function (endpoint) {
+                return vueReport.endpoint_type(endpoint);
             },
-            awarded_points: function(points) {
-                if (points === 0)
-                    marker = "✓ perfect";
-                else
-                    marker = points;
-                return '<span class="awarded_points_'+ this.colorize(points) +'">+ ' + marker + '</span>'
+            awarded_points: function(high, medium, low) {
+                return vueReport.awarded_points(high, medium, low);
             },
-            load: function(OrganizationID, weeks_ago){
-                vueMap.selected_organization = OrganizationID;
+            load: function(organization_id, weeks_ago){
+                vueMap.selected_organization = organization_id;
 
                 if (!weeks_ago) {
                     weeks_ago = 0;
                 }
 
-                $.getJSON('/data/report/' + OrganizationID + '/' + weeks_ago, function (data) {
+                $.getJSON('/data/report/' + organization_id + '/' + weeks_ago, function (data) {
                     vueFullScreenReport.urls = data.calculation["organization"]["urls"];
                     vueFullScreenReport.points = data.rating;
+                    vueFullScreenReport.high = data.calculation["organization"]["high"];
+                    vueFullScreenReport.medium = data.calculation["organization"]["medium"];
+                    vueFullScreenReport.low = data.calculation["organization"]["low"];
                     vueFullScreenReport.when = data.when;
                     vueFullScreenReport.name = data.name;
                     vueFullScreenReport.twitter_handle = data.twitter_handle;
@@ -867,10 +868,10 @@ $(document).ready(function () {
         el: '#domainlist',
         data: {urls: Array},
         methods: {
-            colorize: function (points) {
-                if (points < 199) return "green";
-                if (points < 1000) return "orange";
-                if (points > 999) return "red";
+            colorize: function (high, medium, low) {
+                if (high > 0) return "red";
+                if (medium > 0) return "orange";
+                return "green";
             },
             load: debounce(function (organization, weeks_back) {
                 if (!weeks_back)
@@ -905,10 +906,10 @@ $(document).ready(function () {
         el: '#topfail',
         data: {top: Array},
         methods: {
-            showReport: function (OrganizationID) {
+            showReport: function (organization_id) {
                 vueReport.show_in_browser();
-                vueReport.load(OrganizationID, vueMap.week);
-                vueDomainlist.load(OrganizationID, vueMap.week);
+                vueReport.load(organization_id, vueMap.week);
+                vueDomainlist.load(organization_id, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
@@ -925,10 +926,10 @@ $(document).ready(function () {
         el: '#topwin',
         data: {top: Array},
         methods: {
-            showReport: function (OrganizationID) {
+            showReport: function (organization_id) {
                 vueReport.show_in_browser();
-                vueReport.load(OrganizationID, vueMap.week);
-                vueDomainlist.load(OrganizationID, vueMap.week);
+                vueReport.load(organization_id, vueMap.week);
+                vueDomainlist.load(organization_id, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
@@ -945,10 +946,10 @@ $(document).ready(function () {
         el: '#terrible_urls',
         data: {top: Array},
         methods: {
-            showReport: function (OrganizationID) {
+            showReport: function (organization_id) {
                 vueReport.show_in_browser();
-                vueReport.load(OrganizationID, vueMap.week);
-                vueDomainlist.load(OrganizationID, vueMap.week);
+                vueReport.load(organization_id, vueMap.week);
+                vueDomainlist.load(organization_id, vueMap.week);
             },
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
@@ -976,3 +977,198 @@ $(document).ready(function () {
         vueReport.selected = organization_id;
     }
 });
+
+function d3stats(){
+        // bl.ocks.org
+    // https://bl.ocks.org/mbostock/3885211
+    // https://www.mattlayman.com/2015/d3js-area-chart.html
+    // https://github.com/d3/d3/blob/master/API.md
+    var tooltip = d3.select("body")
+        .append("div")
+        .attr("class", "remove")
+        .attr("class", "d3_tooltip")
+        .style("visibility", "hidden")
+        .style("top", "30px")
+        .style("left", "55px");
+
+
+    d3.json("data/vulnstats/0/index.json", function (error, data) {
+        stacked_area_chart("tls_qualys", error, data.tls_qualys);
+        stacked_area_chart("plain_https", error, data.plain_https);
+        stacked_area_chart("security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
+        stacked_area_chart("security_headers_x_frame_options", error, data.security_headers_x_frame_options);
+        stacked_area_chart("security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
+        stacked_area_chart("security_headers_x_xss_protection", error, data.security_headers_x_xss_protection);
+    });
+
+    // tooltip value.
+    // this is declared globally, otherwise the value would be overwritten by the many "gaps" that are automatically
+    // filled by SVG (see below)
+    pro = 0;
+
+    function stacked_area_chart(element, error, data) {
+        // chart layout
+        var svg = d3.select("#" + element),
+            margin = {top: 20, right: 20, bottom: 30, left: 50},
+            width = svg.attr("width") - margin.left - margin.right,
+            height = svg.attr("height") - margin.top - margin.bottom;
+
+        var parseDate = d3.timeParse("%Y-%m-%d");
+
+        var x = d3.scaleTime().range([0, width]),
+            y = d3.scaleLinear().range([height, 0]),
+            z = d3.scaleOrdinal(['yellow', 'orange', 'red']);
+
+        var stack = d3.stack();
+
+        // https://bl.ocks.org/d3noob/ced1b9b18bd8192d2c898884033b5529
+        var area = d3.area()
+            .x(function (d, i) {
+                return x(parseDate(d.data.date));
+            })
+            .y0(function (d) {
+                return y(d[0]);
+            })
+            .y1(function (d) {
+                return y(d[1]);
+            })
+            .curve(d3.curveMonotoneX);
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        // plotting values on the chart
+        if (error) throw error;
+
+        var keys = ["low", "medium", "high"];
+
+        x.domain(d3.extent(data, function (d) {
+            return parseDate(d.date);
+        }));
+        y.domain([0, d3.max(data, function (d) {
+            return (d.high + d.medium + d.low);
+        })]);
+
+        stack.keys(keys);
+        z.domain(keys);
+
+        var layer = g.selectAll(".layer")
+            .data(stack(data))
+            .enter().append("g")
+            .attr("class", "layer");
+
+        layer.append("path")
+            .attr("class", "area")
+            .style("fill", function (d) {
+                return z(d.key);
+            })
+            .attr("d", area);
+
+        layer.filter(function (d) {
+            return d[d.length - 1][1] - d[d.length - 1][0] > 0.01;
+        })
+            .append("text")
+            .attr("x", width - 6)
+            .attr("y", function (d) {
+                return y((d[d.length - 1][0] + d[d.length - 1][1]) / 2);
+            })
+            .attr("dy", ".35em")
+            .style("font", "10px sans-serif")
+            .style("text-anchor", "end")
+            .text(function (d) {
+                return d.key;
+            });
+
+        g.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + height + ")")
+            //.ticks(d3.time.weeks);  Uncaught TypeError: Cannot read property 'weeks' of undefined
+            .call(d3.axisBottom(x).ticks(4));
+
+        //
+        g.append("g")
+            .attr("class", "axis axis--y")
+            .call(d3.axisLeft(y).ticks(6));
+
+
+        // taken from:
+        // tooltips http://bl.ocks.org/WillTurman/4631136
+        // with various customizations, especially in the hashing function for month + date
+        // given: februari 1st = 2 + 1 = 3 and januari second = 1 + 2 = 3. Use isodates as strings and it works.
+        var datearray = [];
+
+        svg.selectAll(".layer")
+            .attr("opacity", 1)
+            .on("mouseover", function (d, i) {
+                svg.selectAll(".layer").transition()
+                    .duration(250)
+                    .attr("opacity", function (d, j) {
+                        return j !== i ? 0.6 : 1;
+                    })
+            })
+
+            // calculating this every time the mouse moves seems a bit excessive.
+            .on("mousemove", function (d, i) {
+                // console.log("d");
+                // console.log(d);
+                mouse = d3.mouse(this);
+                mousex = mouse[0];
+                var invertedx = x.invert(mousex);
+                // console.log(invertedx);
+
+                // downsampling to days, using a hash function to find the correct value.
+                invertedx = "" + invertedx.getFullYear() + invertedx.getMonth() + invertedx.getDate(); // nr of month day of the month
+                // console.log("invertedx");
+                // console.log(invertedx);
+                var selected = d;
+                for (var k = 0; k < selected.length; k++) {
+                    // daite = Date(selected[k].data.date);
+                    // console.log(daite.toLocaleString());
+                    mydate = new Date(selected[k].data.date);
+                    datearray[k] = "" + mydate.getFullYear() + mydate.getMonth() + mydate.getDate();
+                }
+
+                // invertedx can have any day value, for example; d3js does a fill of dates you don't have.
+                // and invertedx can thus have one of those filled days that are not in your dataset.
+                // therefore you can't read the data from your dataset and get a typeerror.
+                // therefore we check on mousedate.
+
+                // console.log("datearray");
+                // console.log(datearray);
+                // todo: we could find the date that's "closest by", but in the end the result will remain grainy
+                // due to the filled dates.
+                mousedate = datearray.indexOf(invertedx);  // returns -1 if not in index
+
+
+                if (mousedate !== -1) {
+                    pro = d[mousedate][1] - d[mousedate][0];
+                }
+
+                d3.select(this)
+                    .classed("hover", true),
+                    // mouse is the location of the mouse on the graph.
+                    // v4 has clientx and clienty, which resembles the document.
+                    tooltip.html("<p>" + d.key + "<br>" + pro + "</p>")
+                        .style("visibility", "visible")
+                        .style("top", (window.pageYOffset + d3.event.clientY + 25)+ "px")
+                        .style("left", (window.pageXOffset + d3.event.clientX) + "px");
+
+
+
+            })
+            .on("mouseout", function (d, i) {
+                svg.selectAll(".layer")
+                    .transition()
+                    .duration(550)
+                    .attr("opacity", "1");
+                d3.select(this)
+                    .classed("hover", false)
+                    .attr("stroke-width", "0px"),
+                    tooltip.html("<p>" + d.key + "<br>" + pro + "</p>")
+                        .style("visibility", "hidden");
+            });
+
+
+    }
+}

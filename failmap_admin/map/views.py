@@ -43,6 +43,10 @@ def index(request):
     })
 
 
+def d3(request):
+    return render(request, 'map/d3.html')
+
+
 @cache_page(one_day)
 def robots_txt(request):
     return render(request, 'map/robots.txt', content_type="text/plain")
@@ -91,12 +95,15 @@ def organization_report(request, organization_id, weeks_back=0):
                                 'organizationrating__when',
                                 'name',
                                 'pk',
-                                'twitter_handle').latest('organizationrating__when')
+                                'twitter_handle',
+                                'organizationrating__high',
+                                'organizationrating__medium',
+                                'organizationrating__low').latest('organizationrating__when')
     except Organization.DoesNotExist:
         report = {}
     else:
         # get the most recent non-expired 'promise'
-        promise = Promise.objects.filter(organization_id=organization_id, expires_on__gt=datetime.now())
+        promise = Promise.objects.filter(organization_id=organization_id, expires_on__gt=datetime.now(pytz.utc))
         promise = promise.order_by('-expires_on')
         promise = promise.values('created_on', 'expires_on')
         promise = promise.first()
@@ -109,6 +116,9 @@ def organization_report(request, organization_id, weeks_back=0):
             "when": values['organizationrating__when'].isoformat(),
             "calculation": values['organizationrating__calculation'],
             "promise": promise,
+            "high": values['organizationrating__high'],
+            "medium": values['organizationrating__medium'],
+            "low": values['organizationrating__low'],
         }
 
     return JsonResponse(report, safe=False, encoder=JSEncoder)
@@ -187,7 +197,10 @@ def terrible_urls(request, weeks_back=0):
                 organization.twitter_handle,
                 url.url,
                 url.is_dead,
-                url.not_resolvable
+                url.not_resolvable,
+                high,
+                medium,
+                low
             FROM map_urlrating
             INNER JOIN
               url on url.id = map_urlrating.url_id
@@ -202,8 +215,8 @@ def terrible_urls(request, weeks_back=0):
               WHERE `when` <= '%s' GROUP BY url_id) as x
               ON x.id2 = map_urlrating.id
             GROUP BY url.url
-            HAVING(`rating`) > 999
-            ORDER BY `rating` DESC, `organization`.`name` ASC
+            HAVING(`high`) > 0
+            ORDER BY `high` DESC, `medium` DESC, `low` DESC, `organization`.`name` ASC
             LIMIT 20
             ''' % (when, )
     # print(sql)
@@ -214,14 +227,16 @@ def terrible_urls(request, weeks_back=0):
     rank = 1
     for i in rows:
         dataset = {
-            "Rank": rank,
-            "Url": i[6],
-            "OrganizationID": i[3],
-            "OrganizationType": i[2],
-            "OrganizationName": i[1],
-            "OrganizationTwitter": i[5],
-            "Points": i[0],
-            "DataFrom": i[4]
+            "rank": rank,
+            "url": i[6],
+            "organization_id": i[3],
+            "organization_type": i[2],
+            "organization_name": i[1],
+            "organization_twitter": i[5],
+            "data_from": i[4],
+            "high": i[9],
+            "medium": i[10],
+            "low": i[11]
         }
         rank = rank + 1
 
@@ -292,7 +307,10 @@ def topfail(request, weeks_back=0):
                 organizations_organizationtype.name,
                 organization.id,
                 `when`,
-                organization.twitter_handle
+                organization.twitter_handle,
+                high,
+                medium,
+                low
             FROM map_organizationrating
             INNER JOIN
               organization on organization.id = map_organizationrating.organization_id
@@ -306,7 +324,7 @@ def topfail(request, weeks_back=0):
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
             HAVING rating > 0
-            ORDER BY `rating` DESC, `organization`.`name` ASC
+            ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
             LIMIT 10
             ''' % (when,)
     cursor.execute(sql)
@@ -316,13 +334,15 @@ def topfail(request, weeks_back=0):
     rank = 1
     for i in rows:
         dataset = {
-            "Rank": rank,
-            "OrganizationID": i[3],
-            "OrganizationType": i[2],
-            "OrganizationName": i[1],
-            "OrganizationTwitter": i[5],
-            "Points": i[0],
-            "DataFrom": i[4]
+            "rank": rank,
+            "organization_id": i[3],
+            "organization_type": i[2],
+            "organization_name": i[1],
+            "organization_twitter": i[5],
+            "data_from": i[4],
+            "high": i[6],
+            "medium": i[7],
+            "low": i[8],
         }
         rank = rank + 1
 
@@ -395,7 +415,10 @@ def topwin(request, weeks_back=0):
                 organizations_organizationtype.name,
                 organization.id,
                 `when`,
-                organization.twitter_handle
+                organization.twitter_handle,
+                high,
+                medium,
+                low
             FROM map_organizationrating
             INNER JOIN
               organization on organization.id = map_organizationrating.organization_id
@@ -408,8 +431,8 @@ def topwin(request, weeks_back=0):
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
-            HAVING rating = 0
-            ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
+            HAVING high = 0 AND medium = 0
+            ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
             LIMIT 10
             ''' % (when,)
     cursor.execute(sql)
@@ -419,13 +442,15 @@ def topwin(request, weeks_back=0):
     rank = 1
     for i in rows:
         dataset = {
-            "Rank": rank,
-            "OrganizationID": i[3],
-            "OrganizationType": i[2],
-            "OrganizationName": i[1],
-            "OrganizationTwitter": i[5],
-            "Points": i[0],
-            "DataFrom": i[4]
+            "rank": rank,
+            "organization_id": i[3],
+            "organization_type": i[2],
+            "organization_name": i[1],
+            "organization_twitter": i[5],
+            "data_from": i[4],
+            "high": i[6],
+            "medium": i[7],
+            "low": i[8]
         }
         rank = rank + 1
 
@@ -477,14 +502,12 @@ def stats(request, weeks_back=0):
             measurement["total_organizations"] += 1
             measurement["total_score"] += rating.rating
 
-            if rating.rating < 200:
-                measurement["green"] += 1
-
-            if 199 < rating.rating < 1000:
-                measurement["orange"] += 1
-
-            if rating.rating > 999:
+            if rating.high:
                 measurement["red"] += 1
+            elif rating.medium:
+                measurement["orange"] += 1
+            else:
+                measurement["green"] += 1
 
             # count the urls, from the latest rating. Which is very dirty :)
             # it will double the urls that are shared between organizations.
@@ -493,12 +516,11 @@ def stats(request, weeks_back=0):
             calculation = rating.calculation
             measurement["total_urls"] += len(calculation['organization']['urls'])
 
-            measurement["green_urls"] += sum(
-                [int(l['points']) < 200 for l in calculation['organization']['urls']])
-            measurement["orange_urls"] += sum(
-                [199 < int(l['points']) < 1000 for l in calculation['organization']['urls']])
-            measurement["red_urls"] += sum(
-                [int(l['points']) > 999 for l in calculation['organization']['urls']])
+            measurement["green_urls"] += sum([l['high'] == 0 and l['medium'] == 0
+                                              for l in calculation['organization']['urls']])
+            measurement["orange_urls"] += sum([l['high'] == 0 and l['medium'] > 0
+                                               for l in calculation['organization']['urls']])
+            measurement["red_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
 
             measurement["included_organizations"] += 1
 
@@ -541,7 +563,7 @@ def stats(request, weeks_back=0):
                             if not added_endpoint:
                                 added_endpoint = True
                                 endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
-                                                               ("IPv4" if endpoint["v4"] == "True" else "IPv6"))
+                                                               ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"))
                                 if endpointtype not in measurement["endpoint"].keys():
                                     measurement["endpoint"][endpointtype] = 0
                                 measurement["endpoint"][endpointtype] += 1
@@ -580,6 +602,72 @@ def stats(request, weeks_back=0):
         timeframes[stat] = measurement
 
     return JsonResponse({"data": timeframes}, encoder=JSEncoder)
+
+
+@cache_page(one_hour)
+def vulnstats(request, weeks_back=0):
+
+    # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
+    # they might.
+    # also: it's "1 days ago", not "1 day ago".
+    timeframes = [
+        'now', '1 days ago', '2 days ago', '3 days ago', '4 days ago', '5 days ago', '6 days ago', '7 days ago',
+        '8 days ago', '9 days ago', '10 days ago', '11 days ago', '12 days ago', '13 days ago', '14 days ago',
+        '21 days ago', '28 days ago',
+        '35 days ago', '42 days ago', '49 days ago', '56 days ago',
+        '63 days ago', '70 days ago', '77 days ago', '84 days ago', '91 days ago']
+
+    timeframes = reversed(timeframes)
+
+    # if you print this, the result will be empty. WHY :)
+    # print([timeframe for timeframe in timeframes])
+
+    stats = {}
+    scan_types = []
+
+    for stat in timeframes:
+        measurement = {}
+        when = stats_determine_when(stat, weeks_back)
+        print("%s: %s" % (stat, when))
+        urlratings = UrlRating.objects.raw("""SELECT * FROM
+                                           map_urlrating
+                                       INNER JOIN
+                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
+                                       WHERE `when` <= '%s' GROUP BY url_id) as x
+                                       ON x.id2 = map_urlrating.id""" % when)
+
+        # group by vulnerability type
+        for urlrating in urlratings:
+
+            # rare occasions there are no endpoints.
+            if "endpoints" not in urlrating.calculation.keys():
+                continue
+
+            for endpoint in urlrating.calculation['endpoints']:
+                for rating in endpoint['ratings']:
+                    if rating['type'] not in measurement.keys():
+                        measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                    if rating['type'] not in scan_types:
+                        scan_types.append(rating['type'])
+
+                    measurement[rating['type']]['high'] += rating['high']
+                    measurement[rating['type']]['medium'] += rating['medium']
+                    measurement[rating['type']]['low'] += rating['low']
+
+        for scan_type in scan_types:
+            if scan_type not in stats.keys():
+                stats[scan_type] = []
+
+        for scan_type in scan_types:
+            if scan_type in measurement.keys():
+                stats[scan_type].append({'date': when.date(),
+                                         'high': measurement[scan_type]['high'],
+                                         'medium': measurement[scan_type]['medium'],
+                                         'low': measurement[scan_type]['low'],
+                                         })
+
+    return JsonResponse(stats, encoder=JSEncoder)
 
 
 # this function doesn't give the relevant urls at the moment, it needs to select stuff better.
@@ -901,7 +989,10 @@ def map_data(request, weeks_back=0):
             coordinate.area,
             coordinate.geoJsonType,
             organization.id,
-            calculation
+            calculation,
+            high,
+            medium,
+            low
         FROM map_organizationrating
         INNER JOIN
           organization on organization.id = map_organizationrating.organization_id
@@ -924,35 +1015,28 @@ def map_data(request, weeks_back=0):
     # unfortunately numbered results are used.
     for i in rows:
 
-        red = 0
-        orange = 0
-        green = 0
-        endpoint_counter = 0
-
         # figure out if red, orange or green:
         # #162, only make things red if there is a critical issue.
-        calculation = json.loads(i[6])
-        for url in calculation['organization']['urls']:
-            for endpoint in url['endpoints']:
-                endpoint_counter += 1
-                for rating in endpoint['ratings']:
-                    if rating['points'] > 999:
-                        red += 1
-                    if 199 < rating['points'] < 1000:
-                        orange += 1
-                    if -1 < rating['points'] < 200:
-                        green += 1
+        # removed json parsing of the calculation. This saves time.
+        # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
+        if "endpoints" not in i[6]:
+            color = "gray"
+        else:
+            color = "red" if i[7] else "orange" if i[8] else "green"
 
         dataset = {
             "type": "Feature",
             "properties":
                 {
-                    "OrganizationID": i[5],
-                    "OrganizationType": i[2],
-                    "OrganizationName": i[1],
-                    "Overall": i[0],
-                    "DataFrom": when,
-                    "color": "red" if red else "orange" if orange else "green" if green else "gray"
+                    "organization_id": i[5],
+                    "organization_type": i[2],
+                    "organization_name": i[1],
+                    "overall": i[0],
+                    "high": i[7],
+                    "medium": i[8],
+                    "low": i[9],
+                    "data_from": when,
+                    "color": color
                 },
             "geometry":
                 {
@@ -966,7 +1050,7 @@ def map_data(request, weeks_back=0):
         }
 
         # todo: calculate this on determining ratings. So it's available in topwin.
-        dataset["properties"]["failscore"] = calculate_failscore(i[0], endpoint_counter)
+        # dataset["properties"]["failscore"] = calculate_failscore(i[0], endpoint_counter)
 
         data["features"].append(dataset)
 

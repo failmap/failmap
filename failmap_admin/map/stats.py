@@ -62,7 +62,7 @@ def update_stats():
         metrics = metrics_per_url(url)
         logger.info("Metrics found: %s" % len(metrics))
         if metrics:
-            if not client.write_points(metrics):
+            if not client.write_points(metrics, batch_size=2500):
                 raise SyntaxError("Something went wrong inserting points. DB offline? Wrong syntax?")
 
     logger.info("Done creating stats.")
@@ -149,26 +149,27 @@ def metrics_per_url(url):
 
                         todays_metrics.append({
                             "measurement": "url_rating",
+                            # removed tld: most of it will be a country tld. But we use the country field for this.
                             "tags": {
-                                "ip_version": endpoint['ip'],
-                                "port": endpoint['port'],
-                                "protocol": endpoint['protocol'],
-                                "scan_type": rating['type'],
-                                "url": relevant_rating.url.url,
-                                "subdomain": tldextract.extract(relevant_rating.url.url).subdomain,
-                                "suffix": tldextract.extract(relevant_rating.url.url).suffix,
-                                "organization": organization.name,
-                                "organization_type": organization.type.name,
-                                "country": organization.country.name,
-                                "explanation": rating['explanation'],
+                                "ip_version": endpoint['ip_version'],  # 2
+                                "port": endpoint['port'],  # 10
+                                "protocol": endpoint['protocol'],  # 2
+                                "scan_type": rating['type'],  # 6
+                                # "url": relevant_rating.url.url,  # 4000 lower cardinality.
+                                "subdomain": tldextract.extract(relevant_rating.url.url).subdomain,  # 500
+                                "organization": organization.name,  # 400
+                                "organization_type": organization.type.name,  # 2
+                                "country": organization.country.name,  # 1
+                                "explanation": rating['explanation'],  # 10
                             },
                             "time": dt,
+                            # removed exists: you can do that with count on any field
+                            # removed points, as they are not really telling anything
+                            # todo: not the fields as an integer, default = float.
                             "fields": {
                                 "low": rating['low'],
                                 "medium": rating['medium'],
                                 "high": rating['high'],
-                                "points": rating['points'],
-                                "exists": 1,
                             }
                         })
 

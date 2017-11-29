@@ -14,17 +14,21 @@
                             <tr>
                                 <th>{% trans "Rank" %}</th>
                                 <th>{% trans "Organization" %}</th>
-                                <th>{% trans "Points" %}</th>
+                                <th>{% trans "High" %}</th>
+                                <th>{% trans "Medium" %}</th>
+                                <th>{% trans "Low" %}</th>
                                 <th>{% trans "Tweet" %}</th>
                             </tr>
                             </thead><tbody>
                             {% verbatim %}
                             <tr v-for='rank in top.ranking'>
-                                <td>{{ rank.Rank }}</td>
-                                <td><a v-on:click="showReport(rank.OrganizationID)">{{ rank.OrganizationName }}</a></td>
-                                <td>{{ rank.Points }}</td>
+                                <td>{{ rank.rank }}</td>
+                                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
+                                <td>{{ rank.high }}</td>
+                                <td>{{ rank.medium }}</td>
+                                <td>{{ rank.low }}</td>
                                 <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                                <td><a v-if="rank.OrganizationTwitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.OrganizationTwitter + '&text=' + rank.OrganizationTwitter + ' gefeliciteerd! ' + rank.OrganizationName + ' staat als OK op Faalkaart! &hashtags=' + rank.OrganizationName + ',faal,failmap'">Tweet! 📣</a></td>
+                                <td><a v-if="rank.organization_twitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.organization_twitter + '&text=' + rank.organization_twitter + ' gefeliciteerd! ' + rank.organization_name + ' staat als OK op Faalkaart! &hashtags=' + rank.organization_name + ',faal,failmap'">Tweet! 📣</a></td>
                             </tr>
                             {% endverbatim %}
                             </tbody>

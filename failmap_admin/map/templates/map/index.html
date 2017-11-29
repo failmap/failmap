@@ -39,6 +39,7 @@
             <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
         {% endcompress %}{% endif %}
+            <script src="https://d3js.org/d3.v4.min.js"></script>
         <link rel="manifest" href="/manifest.json">
     </head>
 
@@ -59,6 +60,7 @@
                     <ul class="nav navbar-nav">
                         <li><a href="#intro">{% trans "Intro" %}</a></li>
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
+                        <li><a href="#graphs">{% trans "Graphs" %}</a></li>
                         <li><a href="#report">{% trans "Report" %}</a></li>
                         <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
@@ -94,8 +96,6 @@
 
             {% include "map/target_audience.html" %}
 
-            {% include "map/donation_row.html" %}
-
             <div id="statistics">
                 <div class="page-header">
                     <a name="numbers" class="jumptonav"></a>
@@ -106,7 +106,14 @@
                     <div class="col-md-6">
                         <h3>{% trans "Organizations" %}</h3>
                         <p>{% trans "Organizations Explained" %}</p>
-
+                    </div>
+                    <div class="col-md-6">
+                        <h3>{% trans "Internet addresses" %}</h3>
+                        <p>{% trans "Internet addresses Explained" %}</p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
                         <div class="progress">
                             <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
                                 <span class="sr-only">Oh, wow!</span>
@@ -146,8 +153,6 @@
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <h3>{% trans "Internet addresses" %}</h3>
-                        <p>{% trans "Internet addresses Explained" %}</p>
                         <div class="progress">
                             <div class="progress-bar progress-bar-success" :style="{width:greenurlpercentage}">
                                 <span class="sr-only">Oh, wow!</span>
@@ -183,11 +188,19 @@
                         </table>
                     </div>
                 </div>
-                <div class="row" v-if="data.data">
+
+                <div class="row">
                     <div class="col-md-6">
                         <h3>{% trans "Technical TLS" %}</h3>
                         <p>{% trans "Technical stats TLS explained" %}</p>
-
+                    </div>
+                    <div class="col-md-6">
+                        <h3>{% trans "Technical stats headers" %}</h3>
+                        <p>{% trans "Technical stats headers explained" %}</p>
+                    </div>
+                </div>
+                <div class="row" v-if="data.data">
+                    <div class="col-md-6">
                         <div v-for="(x, key) in data.data" v-if="key == 'now'">
                             <table class="table" v-if="x['explained']">
                             <thead>
@@ -204,11 +217,11 @@
                                 <tr v-if="x['explained']['plain_https']" class="orangerow"><td></td><td>Doorverwijzing vanaf onveilig adres:</td><td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']"><td colspan="3">Kwaliteit van versleuteling</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Onvoldoende:</td><td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Ongeldig voor adres:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, C:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, B:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, A-:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Geen vertrouwen, A:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Ongeldig voor adres:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, C:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, B:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, A-:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, A:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Matig:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Redelijk:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}</td></tr>
                                 <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Goed:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td></tr>
@@ -220,9 +233,6 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <h3>{% trans "Technical stats headers" %}</h3>
-                        <p>{% trans "Technical stats headers explained" %}</p>
-
                         <div v-for="(x, key) in data.data" v-if="key == 'now'">
                             <table class="table" v-if="x['explained']">
                             <thead>
@@ -258,9 +268,13 @@
                         <p>{% trans "Services explained" %}</p>
                         {% verbatim %}
                         <div v-for="(x, key) in data.data" v-if="key == 'now'">
+                            <p>Er wordt door faalkaart controle uitgevoerd op {{ x['endpoints'] }} diensten.</p>
                             <table class="table">
+                                {% endverbatim %}
+                                <tr><th>{% trans "Service" %}</th><th>{% trans "Amount" %}</th><th>{% trans "Percentage" %}</th></tr>
+                                {% verbatim %}
                             <tr v-for="(xx, xkey) in x['endpoint']">
-                                <td>{{ xx[0] }}</td><td>{{ xx[1] }}</td>
+                                <td>{{ xx[0] }}</td><td>{{ xx[1] }}</td><td>{{ ((xx[1]/x['endpoints']) * 100).toFixed(2) }}%</td>
                             </tr>
                             </table>
                         </div>
@@ -284,6 +298,47 @@
                             <li><a href="https://en.wikipedia.org/wiki/Port_(computer_networking)" target="_blank">Poorten</a></li>
                             <li><a href="https://en.wikipedia.org/wiki/Application_layer" target="_blank">Protocollen</a></li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="graphs">
+                <div class="page-header">
+                    <a name="graphs" class="jumptonav"></a>
+                    <h2>{% trans "Graphs" %}</h2>
+                    <a href="#" class="backtomap">back to map ↑</a>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Versleuteling Faal</h3>
+                        <svg id="tls_qualys" width="555" height="300"></svg>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Gebrek aan versleuteling Faal</h3>
+                        <svg id="plain_https" width="555" height="300"></svg>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Forceren van versleuteling (HSTS) Faal</h3>
+                        <svg id="security_headers_strict_transport_security" width="555" height="300"></svg>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>X-Frame Options (clickjacking) Faal</h3>
+                        <svg id="security_headers_x_frame_options" width="555" height="300"></svg>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>X-Content-Type-Options Faal</h3>
+                        <svg id="security_headers_x_content_type_options" width="555" height="300"></svg>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>X-XSS-Protection Faal</h3>
+                        <svg id="security_headers_x_xss_protection" width="555" height="300"></svg>
                     </div>
                 </div>
             </div>
@@ -312,7 +367,11 @@
                         Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
                         <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
-                        {% trans "Points" %}: {% verbatim %}{{ points }}{% endverbatim %}<span v-if="promise"><strong>*</strong></span>, {% trans "congratulations" %}!
+                        Score<span v-if="promise"><strong>*</strong></span>:<br />
+                        {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br />
+                        {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br />
+                        {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br />
+                        {% trans "congratulations" %}!
                         <br />
                         <br />
                         Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br/>
@@ -326,28 +385,28 @@
                         {% endverbatim %}
                         <br/>
                         {% verbatim %}
-                        <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.points) + ', white);'">
+                        <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
                             <div class="screenshotlist">
                                 <div v-for="endpoint in url.endpoints" class="servicelink">
                                     <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
                                     <a v-bind:href="endpoint.protocol + '://' + url.url + ':' + endpoint.port" target="_blank"
                                     v-bind:title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
                                         <div class="imagediv" v-bind:style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
-                                        <span v-html="'Bezoek adres van type: ' + create_type(endpoint) "> </span>
+                                        <span v-html="'Bezoek adres van type: ' + endpoint_type(endpoint) "> </span>
                                     </a>
                                 </div>
                             </div>
                             <div class="reportlist">
-                                <span v-html="total_awarded_points(url.points)"> </span>
-                                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)" >
+                                <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                                <span class="faildomain" v-bind:class="colorize(url.high, url.medium, url.low)" v-bind:data-tooltip-content="idizetag(url.url)" >
                                     {{ url.url }}</span><br />
                                 <a v-bind:href="'mailto:' + mailto + '?subject=verkeerde%20bevinding%20op%20' + url.url + '&body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A1: ... %0D%0A2: ... %0D%0A3: ... %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'" class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste bevinding</a>
                                 <br/>
                                 <div v-for="endpoint in url.endpoints"><br />
-                                        &nbsp; {% endverbatim %}{% trans "Address" %}{% verbatim %}: {{ endpoint.ip }}:{{ endpoint.port }}
+                                        &nbsp; {% endverbatim %}{% trans "Service" %}: {% verbatim %}: {{ endpoint_type(endpoint) }}
                                         <div v-for="rating in endpoint.ratings">
                                             <h3>&nbsp; {{ create_header(rating) }}</h3>
-                                            &nbsp; &nbsp; <span v-html="awarded_points(rating.points)"></span> {{ rating.explanation }}<br />
+                                            &nbsp; &nbsp; <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ rating.explanation }}<br />
                                             &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }} <br />
                                             &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
                                             <br />
@@ -368,14 +427,11 @@
                 {% include "map/topwin.html" %}
             </div>
 
-            {% include "map/donation_row.html" %}
 
             <div class="row">
                 {% include "map/terrible_urls.html" %}
                 {% include "map/faq.html" %}
             </div>
-
-            {% include "map/donation_row.html" %}
 
             <div id="lastrow">
                 <div class="row">
@@ -442,15 +498,17 @@
             X
           </p>
           <div>
-            Dit resultaat delen?<br>
-            <br>
             Gegevens van: {{ humanize(when) }}<br>
-            Score: {{ points }}, congratulations!<br>
+            Score<span v-if="promise"><strong>*</strong></span>:<br />
+            {% endverbatim %}{% trans "High" %}: {% verbatim %}{{ high }} <br />
+            {% endverbatim %}{% trans "Medium" %}: {% verbatim %}{{ medium }} <br />
+            {% endverbatim %}{% trans "Low" %}: {% verbatim %}{{ low }} <br />
+            {% endverbatim %}{% trans "congratulations" %}!{% verbatim %}
             <br>
             Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br>
             Ontbreken er domeinen? <a v-bind:href="'mailto:' + mailto + '?subject=Nieuwe%20domeinen%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br>
             <br>
-            <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.points) + ', rgba(255, 255, 255,.5));'">
+            <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255,.5));'">
               <div class="screenshotlist">
                 <div v-for="endpoint in url.endpoints" class="servicelink">
                   <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
@@ -459,15 +517,15 @@
                 </div>
               </div>
               <div class="reportlist">
-                <span class="faildomain" v-bind:class="colorize(url.points)" v-bind:data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br>
+                <span class="faildomain" v-bind:class="colorize(url.high, url.medium, url.low)" v-bind:data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br>
                 <a v-bind:href="'mailto:' + mailto + '?subject=verkeerde%20bevinding%20op%20' + url.url + '&amp;body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A- %0D%0A- %0D%0A- %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'" class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste bevinding</a>
                 <div v-for="endpoint in url.endpoints">
                   <br>
-                  &nbsp; Adres: {{ endpoint.ip }}:{{ endpoint.port }}
+                  &nbsp; Dienst: {{ endpoint_type(endpoint) }}
                   <div v-for="rating in endpoint.ratings">
                     <h3>
                       &nbsp; {{ create_header(rating) }}
-                    </h3>&nbsp; &nbsp; {{ rating.explanation }}<br>
+                    </h3>&nbsp; &nbsp;<span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ rating.explanation }}<br>
                     &nbsp; &nbsp; Sinds: {{ humanize(rating.since) }}, Last Check: {{ humanize(rating.last_scan) }}<br>
                     &nbsp; &nbsp;<br>
                   </div>

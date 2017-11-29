@@ -34,6 +34,10 @@ class OrganizationRating(models.Model):
                   " this moment. Rating -1 is used as a default first rating, which are displayed "
                   "in gray on the map. All next ratings are between 0 (perfect) and 2147483647."
     )
+    high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
+    medium = models.IntegerField(help_text="The number of medium risk vulnerabilities and failures.", default=0)
+    low = models.IntegerField(help_text="The number of low risk vulnerabilities and failures.", default=0)
+
     when = models.DateTimeField(db_index=True)
     calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment, for all urls "
@@ -59,6 +63,11 @@ class UrlRating(models.Model):
                   "default value for when there are no ratings at all. Ratings can go from 0 "
                   "up to 2147483647."
     )
+
+    high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
+    medium = models.IntegerField(help_text="The number of medium risk vulnerabilities and failures.", default=0)
+    low = models.IntegerField(help_text="The number of low risk vulnerabilities and failures.", default=0)
+
     when = models.DateTimeField(db_index=True)
     calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "

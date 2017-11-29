@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-10-20 11:47+0000\n"
+"POT-Creation-Date: 2017-11-29 14:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Failmap resources"
 msgstr ""
 
 #: failmap_admin/organizations/dashboard.py:36
-msgid "Github Repository"
+msgid "Gitlab Repository"
 msgstr ""
 
 #: failmap_admin/organizations/dashboard.py:41
