@@ -1,7 +1,7 @@
 # coding=UTF-8
 from django.db import models
 
-from failmap_admin.organizations.models import Url
+# from failmap_admin.organizations.models import Url
 
 
 class Endpoint(models.Model):
@@ -29,8 +29,10 @@ class Endpoint(models.Model):
     ports, protocols, ip-addresses and more of that.
     """
 
+    # imported using a string, to avoid circular imports, which happens in complexer models
+    # https://stackoverflow.com/questions/4379042/django-circular-model-import-issue
     url = models.ForeignKey(
-        Url,
+        'organizations.Url',
         null=True,
         blank=True
     )
@@ -115,7 +117,10 @@ class UrlIp(models.Model):
     done in the next version as it increases complexity slightly.
     """
 
-    url = models.ForeignKey(Url, blank=True, null=True)
+    url = models.ForeignKey(
+        'organizations.Url',
+        blank=True,
+        null=True)
 
     ip = models.CharField(
         max_length=255,

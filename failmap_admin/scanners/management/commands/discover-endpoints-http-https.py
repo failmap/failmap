@@ -12,6 +12,11 @@ logger = logging.getLogger(__package__)
 
 
 # todo: add command line arguments: port and protocol.
+# Verify that all endpoints we currently have still exist:
+# failmap-admin discover-endpoints-http-https --method=verify
+
+# try to find open ports
+# failmap-admin discover-endpoints-http-https --method=discover
 class Command(BaseCommand):
     help = 'Discover http(s) endpoints on well known ports.'
 
@@ -30,7 +35,7 @@ class Command(BaseCommand):
             functionlist[func]()
             return
 
-        if options['organization'][0] == "_ALL_":
+        if options['organization'][0] == "*":
             functionlist[func]()
             return
 

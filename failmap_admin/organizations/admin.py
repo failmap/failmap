@@ -9,7 +9,7 @@ from jet.admin import CompactInline
 from failmap_admin.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
+from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency_scan
 from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
@@ -154,7 +154,7 @@ class UrlAdmin(admin.ModelAdmin):
         for url in queryset:
             if url.is_top_level():
                 brute_known_subdomains([url])
-                certificate_transparency([url])
+                certificate_transparency_scan([url])
             scan_urls_on_standard_ports([url])  # discover endpoints
             plain_http_scan_urls([url])  # see if there is missing https
             security_headers_scan_urls([url])
@@ -168,7 +168,7 @@ class UrlAdmin(admin.ModelAdmin):
     onboard.short_description = "🔮  Onboard (dns, endpoints, scans, screenshot)"
 
     def dns_certificate_transparency(self, request, queryset):
-        certificate_transparency([url for url in queryset])
+        certificate_transparency_scan([url for url in queryset])
         self.message_user(request, "URL(s) have been scanned on known subdomains: Done")
     actions.append('dns_certificate_transparency')
     dns_certificate_transparency.short_description = "🗺  Discover subdomains (using certificate transparency)"

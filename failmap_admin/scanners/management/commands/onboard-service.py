@@ -6,7 +6,7 @@ import pytz
 from django.core.management.base import BaseCommand
 
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency
+from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency_scan
 from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
 from failmap_admin.scanners.scanner_plain_http import scan_url
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
@@ -42,7 +42,7 @@ def onboard():
         if url.is_top_level():
             # some DNS scans, to find more urls to onboard.
             brute_known_subdomains([url])
-            certificate_transparency([url])
+            certificate_transparency_scan([url])
         scan_urls_on_standard_ports([url])
         scan_url(url)
         screenshot_urls([url])

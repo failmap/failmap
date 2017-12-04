@@ -27,8 +27,8 @@ def add_discover_verify(parser):
 
 
 def valid_organization(name):
-    if "_ALL_" in name:
-        return "_ALL_"
+    if name in ["_ALL_", "*"]:
+        return "*"
     try:
         o = Organization.objects.get(name=name)
         return o.name

@@ -1,6 +1,7 @@
 # coding=UTF-8
 # from __future__ import unicode_literals
 
+import logging
 from datetime import datetime, timedelta
 
 import pytz
@@ -8,6 +9,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django_countries.fields import CountryField
 from jsonfield import JSONField
+
+from failmap_admin.scanners.scanner_http import resolves
+
+logger = logging.getLogger(__package__)
 
 
 class OrganizationType(models.Model):
@@ -157,6 +162,30 @@ class Url(models.Model):
         if self.url.count(".") == 1:
             return True
         return False
+
+    def add_subdomain(self, subdomain):
+        new_url = (subdomain + "." + self.url).lower()
+
+        if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
+            logger.debug("Subdomain already in the database: %s" % new_url)
+            return
+
+        if not resolves(new_url):
+            logger.debug("New subdomain did not resolve on both ipv4 and ipv6: %s" % new_url)
+            return
+
+        u = Url()
+        # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
+        u.save()
+        u.organization = self.organization.all()
+        u.url = new_url
+        u.save()
+        logger.info("Added domain to database: %s" % new_url)
+
+        # run standard checks, so you know the
+        # discover_wildcards([u])
+
+        return u
 
 # are open ports based on IP adresses.
 # adresses might change (and thus an endpoint changes).

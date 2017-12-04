@@ -34,8 +34,8 @@ from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
+from failmap_admin.scanners.models import Endpoint, UrlIp
 
-from .models import Endpoint, UrlIp
 from .timeout import timeout
 
 logger = logging.getLogger(__package__)
@@ -84,6 +84,7 @@ def scan_url(protocol, url, port):
 
 @app.task
 def resolve_and_scan(protocol, url, port):
+    # vhosts
 
     ips = get_ips(url.url)
 
@@ -99,6 +100,19 @@ def resolve_and_scan(protocol, url, port):
     url_revive_task = revive_url.s(url)
     url_revive_task.apply_async()
 
+    """
+    import requests; requests.get('https://[2a01:7c8:aac0:56b:5054:ff:fe1f:cce8]', headers={'Host':'faalkaart.nl'})
+
+    >>> import requests; requests.get('https://[2a01:7c8:aac0:56b:5054:ff:fe1f:cce8]',
+    headers={'Host':'faalkaart.nl'}, verify=False)
+    /usr/lib/python2.7/dist-packages/urllib3/connectionpool.py:732:
+    InsecureRequestWarning: Unverified HTTPS request is being made.
+    Adding certificate verification is strongly advised.
+    See: https://urllib3.readthedocs.org/en/latest/security.html (This warning will only appear once by default.)
+      InsecureRequestWarning)
+    <Response [200]>
+    todo: just change the host headers
+    """
     # todo: switch between ipv4 and ipv6, make tasks for different workers.
     (ipv4, ipv6) = ips
     if ipv4:
@@ -110,7 +124,7 @@ def resolve_and_scan(protocol, url, port):
     # v6 is not yet supported, as we don't have v6 workers yet.
 
 
-def get_ips(url):
+def get_ips(url: str):
     ip4 = ""
     ip6 = ""
 
@@ -121,6 +135,8 @@ def get_ips(url):
         logger.debug("Get IPv4 error: %s" % ex)
 
     try:
+        # dig AAAA faalkaart.nl +short
+        # 2a01:7c8:aac0:56b:5054:ff:fe1f:cce8
         x = socket.getaddrinfo(url, None, socket.AF_INET6)
         ip6 = x[0][4][0]
     except Exception as ex:

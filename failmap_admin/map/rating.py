@@ -13,7 +13,62 @@ from ..celery import app
 from .models import OrganizationRating, UrlRating
 from .points_and_calculations import points_and_calculation
 
+# from functools import lru_cache
+
 logger = logging.getLogger(__package__)
+"""
+python -m cProfile -s time `which failmap-admin` rebuild-ratings
+mainly SQL queries (still)
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+   186699   50.724    0.000   61.517    0.000 base.py:324(execute)
+    30872   31.178    0.001   31.178    0.001 {method 'commit' of 'sqlite3.Connection' objects}
+6499892/6498375   11.051    0.000   11.676    0.000 {built-in method builtins.hasattr}
+6952977/6930265    9.602    0.000    9.632    0.000 {built-in method builtins.getattr}
+1832647/1419376    7.205    0.000   51.009    0.000 compiler.py:368(compile)
+   213054    6.303    0.000   11.092    0.000 query.py:266(clone)
+  2860662    6.152    0.000   10.844    0.000 compiler.py:351(quote_name_unless_alias)
+8490147/8489630    5.820    0.000    9.672    0.000 {built-in method builtins.isinstance}
+  1139637    4.941    0.000    5.813    0.000 operations.py:199(get_db_converters)
+   117238    4.884    0.000   15.216    0.000 compiler.py:523(get_default_columns)
+173027/173005    4.818    0.000   43.225    0.000 query.py:1122(build_filter)
+   186699    4.645    0.000   78.305    0.000 utils.py:77(execute)
+   125021    4.598    0.000   43.696    0.000 compiler.py:165(get_select)
+   170439    4.413    0.000    8.271    0.000 base.py:473(__init__)
+  1308273    4.337    0.000    7.837    0.000 __init__.py:353(get_col)
+     8322    4.188    0.001   80.269    0.010 rating.py:262(rate_timeline)
+   349379    3.985    0.000    7.710    0.000 query.py:1284(names_to_path)
+  1336234    3.972    0.000   14.358    0.000 expressions.py:693(as_sql)
+   175012    3.905    0.000    4.338    0.000 query.py:128(__init__)
+   124954    3.698    0.000   18.109    0.000 compiler.py:812(get_converters)
+125021/124955    3.487    0.000   85.670    0.001 compiler.py:413(as_sql)
+193674/129098    3.486    0.000   59.677    0.000 query.py:1255(_add_q)
+   265136    3.428    0.000  197.598    0.001 query.py:47(__iter__)
+   156383    3.403    0.000    3.404    0.000 {method 'sub' of '_sre.SRE_Pattern' objects}
+   247487    3.176    0.000    8.180    0.000 dateparse.py:85(parse_datetime)
+  2440240    3.124    0.000    4.241    0.000 __init__.py:471(__eq__)
+   155826    2.981    0.000    2.981    0.000 {method 'execute' of 'sqlite3.Cursor' objects}
+   133288    2.888    0.000  171.005    0.001 compiler.py:855(execute_sql)
+  1539350    2.870    0.000    4.268    0.000 operations.py:147(quote_name)
+  1131921    2.811    0.000    8.557    0.000 expressions.py:703(get_db_converters)
+   199980    2.748    0.000    6.912    0.000 {method 'fetchmany' of 'sqlite3.Cursor' objects}
+   200977    2.562    0.000   12.755    0.000 lookups.py:158(process_lhs)
+   513049    2.560    0.000    3.892    0.000 related.py:651(foreign_related_fields)
+   365765    2.280    0.000    2.280    0.000 {method 'replace' of 'datetime.datetime' objects}
+   214624    2.261    0.000  200.017    0.001 query.py:1116(_fetch_all)
+    45086    2.256    0.000    2.256    0.000 encoder.py:204(iterencode)
+   522577    2.193    0.000    3.852    0.000 abc.py:178(__instancecheck__)
+  8729938    2.179    0.000    2.179    0.000 {method 'append' of 'list' objects}
+    60022    2.170    0.000    3.349    0.000 __init__.py:145(__init__)
+   349455    2.046    0.000    5.804    0.000 query.py:161(__init__)
+   322815    2.032    0.000    2.784    0.000 query_utils.py:63(__init__)
+   346977    1.943    0.000    1.943    0.000 {method 'match' of '_sre.SRE_Pattern' objects}
+  1077582    1.873    0.000    1.873    0.000 tree.py:21(__init__)
+   205326    1.808    0.000   13.385    0.000 query.py:1102(_clone)
+   988849    1.799    0.000  135.076    0.000 related_descriptors.py:161(__get__)
+     8322    1.793    0.000  267.225    0.032 rating.py:167(create_timeline)
+
+"""
 
 
 @app.task
@@ -60,9 +115,9 @@ def rerate_urls(urls: List[Url]=None):
     if not urls:
         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
 
-    UrlRating.objects.all().filter(url__in=urls).delete()
-
+    # to not have all ratings empty, do it per url
     for url in urls:
+        UrlRating.objects.all().filter(url=url).delete()
         rate_timeline(create_timeline(url), url)
 
 
@@ -70,9 +125,12 @@ def rerate_organizations(organizations: List[Organization]=None):
     if not organizations:
         organizations = list(Organization.objects.all().order_by('name'))
 
-    OrganizationRating.objects.all().filter(organization__in=organizations).delete()
-    default_ratings()
-    add_organization_rating(organizations, build_history=True)
+    # to not clear the whole map at once, do this per organization.
+    # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
+    for organization in organizations:
+        OrganizationRating.objects.all().filter(organization=organization).delete()
+        default_ratings()
+        add_organization_rating([organization], build_history=True)
 
 
 def rerate_urls_of_organizations(organizations: List[Organization]):
