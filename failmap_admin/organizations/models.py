@@ -10,8 +10,6 @@ from django.db import models
 from django_countries.fields import CountryField
 from jsonfield import JSONField
 
-from failmap_admin.scanners.scanner_http import resolves
-
 logger = logging.getLogger(__package__)
 
 
@@ -164,6 +162,9 @@ class Url(models.Model):
         return False
 
     def add_subdomain(self, subdomain):
+        # import here to prevent circular/cyclic imports
+        from failmap_admin.scanners.scanner_http import resolves
+
         new_url = (subdomain + "." + self.url).lower()
 
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
@@ -171,7 +172,7 @@ class Url(models.Model):
             return
 
         if not resolves(new_url):
-            logger.debug("New subdomain did not resolve on both ipv4 and ipv6: %s" % new_url)
+            logger.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
             return
 
         u = Url()

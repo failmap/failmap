@@ -6,7 +6,7 @@ from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_http import scan_url, scan_urls
 
-from .support.arguments import add_discover_verify, add_organization_argument
+from .support.arguments import add_organization_argument
 
 logger = logging.getLogger(__package__)
 
@@ -22,26 +22,31 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         add_organization_argument(parser)
-        add_discover_verify(parser)
+        return parser.add_argument(
+            '--method', '-m',
+            help="verify|discover. Verify checks all existing ones, discover tries to find new ones.",
+            nargs='?',
+            required=False,
+            default="verify",
+        )
 
     def handle(self, *args, **options):
 
-        # some expansion magic to avoid using eval
-        func = "verify_existing_endpoints" if options['method'] == "verify" else "discover_endpoints"
-        functionlist = {"verify_existing_endpoints": verify_existing_endpoints,
-                        "discover_endpoints": discover_endpoints}
+        if options['method'] == "verify":
 
-        if not options['organization']:
-            functionlist[func]()
-            return
+            if not options['organization'] or options['organization'][0] == "*":
+                verify_existing_endpoints()
+            else:
+                organization = Organization.objects.all().filter(name=options['organization'][0])
+                verify_existing_endpoints(organization=organization)
 
-        if options['organization'][0] == "*":
-            functionlist[func]()
-            return
+        if options['method'] == "discover":
 
-        organization = Organization.objects.all().filter(name=options['organization'][0])
-
-        functionlist[func](organization=organization)
+            if not options['organization'] or options['organization'][0] == "*":
+                discover_endpoints()
+            else:
+                organization = Organization.objects.all().filter(name=options['organization'][0])
+                discover_endpoints(organization=organization)
 
 
 def verify_existing_endpoints(port=None, protocol=None, organization=None):

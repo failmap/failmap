@@ -27,6 +27,7 @@ Likely: 80, 8080, 8008, 8888, 8088
 import logging
 import socket
 from datetime import datetime
+from typing import List
 
 import pytz
 import requests
@@ -35,29 +36,30 @@ from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
 from failmap_admin.scanners.models import Endpoint, UrlIp
+from failmap_admin.organizations.models import Url
 
 from .timeout import timeout
 
 logger = logging.getLogger(__package__)
 
 
-def validate_port(port):
+def validate_port(port: int):
     if port > 65535 or port < 0:
         logger.error("Invalid port number, must be between 0 and 65535. %s" % port)
         raise ValueError("Invalid port number, must be between 0 and 65535. %s" % port)
 
 
-def validate_protocol(protocol):
+def validate_protocol(protocol: str):
     if protocol not in ["http", "https"]:
         logger.error("Invalid protocol %s, options are: http, https" % protocol)
         raise ValueError("Invalid protocol %s, options are: http, https" % protocol)
 
 
-def scan_urls_on_standard_ports(urls):
+def scan_urls_on_standard_ports(urls: List[Url]):
     scan_urls(['http', 'https'], urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443])
 
 
-def scan_urls(protocols, urls, ports):
+def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
 
     if not has_internet_connection():
         logger.error("No internet connection! Try again later!")
@@ -77,15 +79,13 @@ def scan_urls(protocols, urls, ports):
                 scan_url(protocol, url, port)
 
 
-def scan_url(protocol, url, port):
+def scan_url(protocol: str, url: Url, port: int):
     resolve_task = resolve_and_scan.s(protocol, url, port)
     resolve_task.apply_async()
 
 
 @app.task
-def resolve_and_scan(protocol, url, port):
-    # vhosts
-
+def resolve_and_scan(protocol: str, url: Url, port: int):
     ips = get_ips(url.url)
 
     # this can take max 20 seconds, no use to wait
@@ -100,24 +100,17 @@ def resolve_and_scan(protocol, url, port):
     url_revive_task = revive_url.s(url)
     url_revive_task.apply_async()
 
-    """
-    import requests; requests.get('https://[2a01:7c8:aac0:56b:5054:ff:fe1f:cce8]', headers={'Host':'faalkaart.nl'})
-
-    >>> import requests; requests.get('https://[2a01:7c8:aac0:56b:5054:ff:fe1f:cce8]',
-    headers={'Host':'faalkaart.nl'}, verify=False)
-    /usr/lib/python2.7/dist-packages/urllib3/connectionpool.py:732:
-    InsecureRequestWarning: Unverified HTTPS request is being made.
-    Adding certificate verification is strongly advised.
-    See: https://urllib3.readthedocs.org/en/latest/security.html (This warning will only appear once by default.)
-      InsecureRequestWarning)
-    <Response [200]>
-    todo: just change the host headers
-    """
     # todo: switch between ipv4 and ipv6, make tasks for different workers.
     (ipv4, ipv6) = ips
     if ipv4:
-        connect_task = can_connect.s(protocol, url, port)  # Network task
+        connect_task = can_connect.s(protocol, url, port, ipv4)  # Network task
         result_task = connect_result.s(protocol, url, port, 4)  # administrative task
+        task = (connect_task | result_task)
+        task.apply_async()
+
+    if ipv6:
+        connect_task = can_connect.s(protocol, url, port, ipv6)  # Network task
+        result_task = connect_result.s(protocol, url, port, 6)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
 
@@ -125,31 +118,30 @@ def resolve_and_scan(protocol, url, port):
 
 
 def get_ips(url: str):
-    ip4 = ""
-    ip6 = ""
+    ipv4 = ""
+    ipv6 = ""
 
     try:
-        ip4 = socket.gethostbyname(url)
+        ipv4 = socket.gethostbyname(url)
+        logger.debug("%s has IPv4 address: %s" % (url, ipv4))
     except Exception as ex:
         # when not known: [Errno 8] nodename nor servname provided, or not known
         logger.debug("Get IPv4 error: %s" % ex)
 
     try:
-        # dig AAAA faalkaart.nl +short
-        # 2a01:7c8:aac0:56b:5054:ff:fe1f:cce8
+        # dig AAAA faalkaart.nl +short (might be used for debugging)
         x = socket.getaddrinfo(url, None, socket.AF_INET6)
-        ip6 = x[0][4][0]
+        ipv6 = x[0][4][0]
+        logger.debug("%s has IPv6 address: %s" % (url, ipv6))
     except Exception as ex:
         # when not known: [Errno 8nodename nor servname provided, or not known
         logger.debug("Get IPv6 error: %s" % ex)
 
-    logger.debug("%s has IPv4 address: %s" % (url, ip4))
-    logger.debug("%s has IPv6 address: %s" % (url, ip6))
-    return ip4, ip6
+    return ipv4, ipv6
 
 
 @app.task
-def can_connect(protocol, url, port):
+def can_connect(protocol: str, url: Url, port: int, ip: str):
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -180,7 +172,11 @@ def can_connect(protocol, url, port):
     Todo: remove IP from endpoints. (change for version 1.1)
 
     """
-    uri = "%s://%s:%s" % (protocol, url.url, port)
+    if ":" in ip:
+        uri = "%s://[%s]:%s" % (protocol, ip, port)
+    else:
+        uri = "%s://%s:%s" % (protocol, ip, port)
+
     logger.debug("Scanning http(s) server on: %s" % uri)
 
     try:
@@ -190,14 +186,16 @@ def can_connect(protocol, url, port):
 
         Any status code is enough to verify that there is an endpoint.
         Some servers don't return a status code, that will trigger an exception (AttributeError?)
+        
+        https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
         """
-        r = requests.get(uri, timeout=(5, 8), allow_redirects=False)
+        r = requests.get(uri, timeout=(5, 8), allow_redirects=False, headers={'Host': url.url})
         if r.status_code:
-            logger.debug("%s: status: %s" % (url, r.status_code))
+            logger.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True
         else:
             logger.debug("No status code? Now what?! %s" % url)
-            # probably never reached
+            # probably never reached, exception thrown when no status code is present
             return True
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
         logger.debug("%s: Timeout! - %s" % (url, Ex))
@@ -231,7 +229,7 @@ def can_connect(protocol, url, port):
 
 
 @app.task
-def connect_result(result, protocol, url, port, ip_version):
+def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     # logger.info("%s %s" % (url, result))
     # logger.info("%s %s" % (url, url))
     # logger.info("%s %s" % (url, port))
@@ -244,14 +242,14 @@ def connect_result(result, protocol, url, port, ip_version):
         kill_endpoint(protocol, url, port, ip_version)
 
 
-def resolves(url):
+def resolves(url: str):
     (ip4, ip6) = get_ips(url)
     if ip4 or ip6:
         return True
     return False
 
 
-def has_internet_connection(host="8.8.8.8", port=53, connection_timeout=10):
+def has_internet_connection(host: str="8.8.8.8", port: int=53, connection_timeout: int=10):
     """
     https://stackoverflow.com/questions/3764291/checking-network-connection#3764660
     Host: 8.8.8.8 (google-public-dns-a.google.com)
@@ -267,7 +265,7 @@ def has_internet_connection(host="8.8.8.8", port=53, connection_timeout=10):
         return False
 
 
-def save_endpoint(protocol, url, port, ip_version):
+def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
 
     # prevent duplication
     if not endpoint_exists(url, port, protocol, ip_version):
@@ -291,7 +289,7 @@ def save_endpoint(protocol, url, port, ip_version):
 
 
 @app.task
-def revive_url(url):
+def revive_url(url: Url):
     """
     This does not revive all endpoints... There should be new ones to better match with actual
     happenings with servers.
@@ -309,7 +307,7 @@ def revive_url(url):
 
 
 @app.task
-def kill_url(url):
+def kill_url(url: Url):
     url.not_resolvable = True
     url.not_resolvable_since = datetime.now(pytz.utc)
     url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
@@ -327,7 +325,7 @@ def kill_url(url):
 
 
 @app.task
-def store_url_ips(url, ips):
+def store_url_ips(url: Url, ips):
     """
     Todo: method should be stored in manager
 
@@ -386,7 +384,7 @@ def endpoint_exists(url, port, protocol, ip_version):
                                          is_dead=False).count()
 
 
-def kill_endpoint(protocol, url, port, ip_version):
+def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
     eps = Endpoint.objects.all().filter(url=url,
                                         port=port,
                                         ip_version=ip_version,
