@@ -32,5 +32,5 @@ class Command(BaseCommand):
         print('+ Flusing old data')
         call_command('flush', '--no-input')
         print('+ Importing fixture ' + argv[2])
-        call_command('load-dataset', argv[2])
+        call_command('load_dataset', argv[2])
         print('Done')
