@@ -28,7 +28,7 @@ class OrganizationRating(models.Model):
     Also this should not know too much about different scanners. In OO fashion, it should ask a
     scanner to explain why something is the way it is (over time).
     """
-    organization = models.ForeignKey(Organization, on_delete=models.PROTECT,)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     rating = models.IntegerField(
         help_text="Amount of points scored by the organization based on a sum of all URL ratings at"
                   " this moment. Rating -1 is used as a default first rating, which are displayed "
@@ -56,7 +56,7 @@ class UrlRating(models.Model):
     """
         Aggregrates the results of many scanners to determine a rating for a URL.
     """
-    url = models.ForeignKey(Url)
+    url = models.ForeignKey(Url, on_delete=models.CASCADE)
     rating = models.IntegerField(
         help_text="Amount of points scored after rating the URL. Ratings are usually positive, yet "
                   "this is not a positive integerfield because we might use -1 as an 'unknown' "

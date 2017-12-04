@@ -35,8 +35,8 @@ from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
-from failmap_admin.scanners.models import Endpoint, UrlIp
 from failmap_admin.organizations.models import Url
+from failmap_admin.scanners.models import Endpoint, UrlIp
 
 from .timeout import timeout
 
@@ -186,7 +186,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
 
         Any status code is enough to verify that there is an endpoint.
         Some servers don't return a status code, that will trigger an exception (AttributeError?)
-        
+
         https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
         """
         r = requests.get(uri, timeout=(5, 8), allow_redirects=False, headers={'Host': url.url})

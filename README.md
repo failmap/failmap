@@ -141,13 +141,13 @@ The setup script performs the following steps:
     failmap-admin migrate
 
     # create a user to view the admin interface
-    failmap-admin load-dataset development
+    failmap-admin load_dataset development
 
     # loads a series of sample data into the database
-    failmap-admin load-dataset testdata
+    failmap-admin load_dataset testdata
 
     # calculate the scores that should be displayed on the map
-    failmap-admin rebuild-ratings
+    failmap-admin rebuild_ratings
 
 # Scanning services (beta)
 
@@ -168,13 +168,13 @@ These services help fill the database with accurate up to date information. Run 
 a separate command line window and keep them running.
 
     # handles all new urls with an initial (fast) scan
-    failmap-admin onboard-service
+    failmap-admin onboard_service
 
     # slowly gets results from qualys
-    failmap-admin scan-tls-qualys-service
+    failmap-admin scan_tls_qualys_service
 
     # makes many gigabytes of screenshots
-    failmap-admin screenshot-service
+    failmap-admin screenshot_service
 
 # Using the software
 

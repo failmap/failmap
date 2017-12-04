@@ -24,7 +24,10 @@ class Job(models.Model):
 
     created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True, help_text="when task was created")
     finished_on = models.DateTimeField(blank=True, null=True, help_text="when task ended")
-    created_by = models.ForeignKey(User, blank=True, null=True)
+
+    # TypeError: __init__() missing 1 required positional argument: 'on_delete'
+    # probably because of blank and/or default.
+    created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,)
 
     @classmethod
     def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':

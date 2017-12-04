@@ -85,7 +85,7 @@ class Coordinate(models.Model):
 
 
 class Url(models.Model):
-    organization_old = models.ForeignKey(Organization, null=True)  # on_delete=models.PROTECT
+    organization_old = models.ForeignKey(Organization, null=True, on_delete=models.PROTECT)
 
     organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
 
@@ -162,7 +162,7 @@ class Url(models.Model):
         return False
 
     def add_subdomain(self, subdomain):
-        # import here to prevent circular/cyclic imports
+        # import here to prevent circular/cyclic imports, this module imports Url.
         from failmap_admin.scanners.scanner_http import resolves
 
         new_url = (subdomain + "." + self.url).lower()

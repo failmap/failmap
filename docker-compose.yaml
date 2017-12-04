@@ -115,7 +115,7 @@ services:
       DJANGO_DATABASE: production
       # django decides what to log based on type of console
       TERM: xterm-color
-    command: [ "load-dataset", "development", "testdata" ]
+    command: [ "load_dataset", "development", "testdata" ]
     # retry if action failes (ie: database container is not ready yet)
     restart: on-failure
 

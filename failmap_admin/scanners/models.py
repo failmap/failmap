@@ -1,7 +1,7 @@
 # coding=UTF-8
 from django.db import models
 
-# from failmap_admin.organizations.models import Url
+from failmap_admin.organizations.models import Url
 
 
 class Endpoint(models.Model):
@@ -32,9 +32,10 @@ class Endpoint(models.Model):
     # imported using a string, to avoid circular imports, which happens in complexer models
     # https://stackoverflow.com/questions/4379042/django-circular-model-import-issue
     url = models.ForeignKey(
-        'organizations.Url',
+        Url,
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.CASCADE
     )
 
     ip_version = models.IntegerField(
@@ -118,9 +119,11 @@ class UrlIp(models.Model):
     """
 
     url = models.ForeignKey(
-        'organizations.Url',
+        Url,
         blank=True,
-        null=True)
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     ip = models.CharField(
         max_length=255,
@@ -154,7 +157,7 @@ class TlsQualysScan(models.Model):
     """
     Model for scanner tls qualys
     """
-    endpoint = models.ForeignKey(Endpoint)
+    endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
 
     # result from the API
     qualys_rating = models.CharField(max_length=3, default=0)  # 0, F, D, C, B, A-, A, A+
@@ -196,9 +199,10 @@ class EndpointGenericScan(models.Model):
                   "scan, this label separates the scans.")
     endpoint = models.ForeignKey(
         Endpoint,
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
         null=True,
-        blank=True)
+        blank=True,
+    )
     domain = models.CharField(
         max_length=255,
         help_text="Used when there is no known endpoint.")
@@ -252,7 +256,7 @@ class EndpointGenericScanScratchpad(models.Model):
 
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
-        Endpoint, null=True, blank=True)
+        Endpoint, null=True, blank=True, on_delete=models.CASCADE)
     domain = models.CharField(max_length=255, help_text="Used when there is no known URL.")
     filename = models.CharField(max_length=255)
     width_pixels = models.IntegerField(default=0)
