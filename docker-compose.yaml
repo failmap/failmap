@@ -52,7 +52,7 @@ services:
       DEBUG: 1
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
-      - .:/source/
+      - ./failmap_admin:/source/failmap_admin
     # use watchdog to provide auto restart functionality on changed code
     entrypoint: [ '/source/tools/autoreload.sh', 'failmap-admin']
     command: [ "celery", "worker", "-l", "info", "-c", "6" ]
@@ -77,7 +77,7 @@ services:
       UWSGI_STATIC_MAP:
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
-      - .:/source/
+      - ./failmap_admin:/source/failmap_admin
     ports:
       - 8000:8000
     # use watchdog to provide auto restart functionality on changed code
@@ -93,7 +93,7 @@ services:
     links:
       - database:mysql
     volumes:
-      - .:/source/
+      - ./failmap_admin:/source/failmap_admin
     environment:
       DJANGO_DATABASE: production
       # django decides what to log based on type of console
@@ -110,7 +110,7 @@ services:
     links:
       - database:mysql
     volumes:
-      - .:/source/
+      - ./failmap_admin:/source/failmap_admin
     environment:
       DJANGO_DATABASE: production
       # django decides what to log based on type of console
