@@ -9,12 +9,13 @@ from jet.admin import CompactInline
 from failmap_admin.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency_scan
-from failmap_admin.scanners.scanner_http import scan_urls_on_standard_ports
+from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
+import failmap_admin.scanners.scanner_http as scanner_http
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap_admin.scanners.scanner_tls_qualys import scan_urls as tls_qualys_scan_urls
+from failmap_admin.scanners.onboard import onboard_urls
 
 from ..app.models import Job
 from ..celery import PRIO_HIGH
@@ -149,38 +150,31 @@ class UrlAdmin(admin.ModelAdmin):
     actions = []
 
     def onboard(self, request, queryset):
-        # todo, sequentially doesn't matter if you only use tasks :)
-        # currently it might crash given there are no endpoints yet to process...
-        for url in queryset:
-            if url.is_top_level():
-                brute_known_subdomains([url])
-                certificate_transparency_scan([url])
-            scan_urls_on_standard_ports([url])  # discover endpoints
-            plain_http_scan_urls([url])  # see if there is missing https
-            security_headers_scan_urls([url])
-            screenshot_urls([url])
-
-            url.onboarded = True
-            url.onboarded_on = datetime.now(pytz.utc)
-            url.save()
-        self.message_user(request, "Onboard: Done")
+        onboard_urls(urls=list(queryset))
+        self.message_user(request, "URL(s) have been scanned on known subdomains: Done")
     actions.append('onboard')
-    onboard.short_description = "🔮  Onboard (dns, endpoints, scans, screenshot)"
+    onboard.short_description = "🔮  Onboard (discover subdomains and endpoints, http scans, screenshot)"
 
     def dns_certificate_transparency(self, request, queryset):
-        certificate_transparency_scan([url for url in queryset])
+        certificate_transparency(urls=list(queryset))
         self.message_user(request, "URL(s) have been scanned on known subdomains: Done")
     actions.append('dns_certificate_transparency')
-    dns_certificate_transparency.short_description = "🗺  Discover subdomains (using certificate transparency)"
+    dns_certificate_transparency.short_description = "🗺  +subdomains (certificate transparency)"
 
     def dns_known_subdomains(self, request, queryset):
-        brute_known_subdomains([url for url in queryset])
+        brute_known_subdomains(urls=list(queryset))
         self.message_user(request, "Discover subdomains (using known subdomains): Done")
-    dns_known_subdomains.short_description = "🗺  Discover subdomains (using known subdomains)"
+    dns_known_subdomains.short_description = "🗺  +subdomains (known subdomains)"
     actions.append('dns_known_subdomains')
 
+    def dns_nsec(self, request, queryset):
+        nsec(urls=list(queryset))
+        self.message_user(request, "Discover subdomains (using nsec): Done")
+    dns_known_subdomains.short_description = "🗺  +subdomains (nsec)"
+    actions.append('dns_nsec')
+
     def discover_http_endpoints(self, request, queryset):
-        scan_urls_on_standard_ports([url for url in queryset])
+        scanner_http.discover_endpoints(urls=list(queryset))
         self.message_user(request, "Discover http(s) endpoints: Done")
     discover_http_endpoints.short_description = "🗺  Discover http(s) endpoints"
     actions.append('discover_http_endpoints')
@@ -189,7 +183,7 @@ class UrlAdmin(admin.ModelAdmin):
         # create a celery task and use Job object to keep track of the status
         urls = list(queryset)
         task = tls_qualys_scan_urls(urls=urls, execute=False)
-        name = "Scan TLS  Qualys (%s) " % str(urls)
+        name = "Scan TLS Qualys (%s) " % str(urls)
         job = Job.create(task, name, request, priority=PRIO_HIGH)
         link = reverse('admin:app_job_change', args=(job.id,))
         self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
