@@ -1,17 +1,17 @@
 import logging
 from datetime import datetime
+from typing import List
 
 import pytz
-from typing import List
 
 import failmap_admin.scanners.scanner_http as scanner_http
 import failmap_admin.scanners.scanner_plain_http as scanner_plain_http
 from failmap_admin.organizations.models import Url
-from failmap_admin.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency, nsec_scan)
+from failmap_admin.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency,
+                                                nsec_scan)
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 
 from ..celery import app
-
 
 logger = logging.getLogger(__package__)
 

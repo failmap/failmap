@@ -6,16 +6,17 @@ from django.contrib import admin
 from django.urls import reverse
 from jet.admin import CompactInline
 
+import failmap_admin.scanners.scanner_http as scanner_http
 from failmap_admin.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
 from failmap_admin.scanners.admin import UrlIpInline
 from failmap_admin.scanners.models import Endpoint
-from failmap_admin.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
-import failmap_admin.scanners.scanner_http as scanner_http
+from failmap_admin.scanners.onboard import onboard_urls
+from failmap_admin.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency,
+                                                nsec)
 from failmap_admin.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 from failmap_admin.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap_admin.scanners.scanner_tls_qualys import scan_urls as tls_qualys_scan_urls
-from failmap_admin.scanners.onboard import onboard_urls
 
 from ..app.models import Job
 from ..celery import PRIO_HIGH
