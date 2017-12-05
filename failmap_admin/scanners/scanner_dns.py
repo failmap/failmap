@@ -8,6 +8,7 @@ Performs a range of DNS scans:
 It separates the scans as it might be desirable to use different scanners.
 
 Todo: the list of known subdomains might help (a lot) with breaking nsec3 hashes?
+https://github.com/anonion0/nsec3map
 
 """
 # todo: if ScannerHttp.has_internet_connection():

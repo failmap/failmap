@@ -35,7 +35,7 @@ from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
-from failmap_admin.organizations.models import Url
+from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, UrlIp
 
 from .timeout import timeout
@@ -55,8 +55,72 @@ def validate_protocol(protocol: str):
         raise ValueError("Invalid protocol %s, options are: http, https" % protocol)
 
 
+def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, organizations: List[Organization]=None):
+    """
+    Checks all http(s) endpoints if they still exist. This is to monitor changes in the existing
+    dataset, without contacting an organization too often. It can be checked every few days,
+    as trying to find new endpoints is more involved and should not be run more than once every
+    two to four weeks.
+
+    The only result this scanner has is the same or less endpoints than we currently have.
+
+    :return: None
+    """
+    if not urls:
+        endpoints = Endpoint.objects.all().filter(is_dead=False,
+                                                  url__not_resolvable=False,
+                                                  url__is_dead=False)
+    else:
+        endpoints = Endpoint.objects.all().filter(is_dead=False,
+                                                  url__not_resolvable=False,
+                                                  url__is_dead=False,
+                                                  url__in=urls)
+
+    if port:
+        endpoints = endpoints.filter(port=port)
+
+    if protocol:
+        endpoints = endpoints.filter(protocol=protocol)
+    else:
+        endpoints = endpoints.filter(protocol__in=['http', 'https'])
+
+    if organizations:
+        endpoints = endpoints.filter(url__organization__in=organizations)
+
+    for endpoint in endpoints:
+        scan_url(endpoint.protocol, endpoint.url, endpoint.port)
+
+
+def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
+                       organizations: List[Organization]=None):
+    """
+
+
+    :return: None
+    """
+    if not urls:
+        urls = Url.objects.all().filter(is_dead=False, not_resolvable=False)
+
+    if organizations:
+        urls = urls.filter(organization__in=organizations)
+
+    if protocol:
+        protocols = [protocol]
+    else:
+        protocols = ['http', 'https']
+
+    if port:
+        ports = [port]
+    else:
+        # Yes, HTTP sites on port 443 exist, we've seen many of them. Not just warnings(!).
+        # Don't underestimate the flexibility of the internet.
+        ports = [80, 443, 8008, 8080, 8088, 8443, 8888]
+
+    scan_urls(protocols, urls, ports)
+
+
 def scan_urls_on_standard_ports(urls: List[Url]):
-    scan_urls(['http', 'https'], urls, [80, 81, 82, 88, 443, 8008, 8080, 8088, 8443, 8888, 9443])
+    scan_urls(['http', 'https'], urls, [80, 443, 8008, 8080, 8088, 8443, 8888])
 
 
 def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
@@ -181,7 +245,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
 
     try:
         """
-        5 seconds network timeout, 8 seconds timeout for server response.
+        30 seconds network timeout, 30 seconds timeout for server response.
         If we get a redirect, it means there is a server. Don't follow.
 
         Any status code is enough to verify that there is an endpoint.
@@ -189,7 +253,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
 
         https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
         """
-        r = requests.get(uri, timeout=(5, 8), allow_redirects=False, headers={'Host': url.url})
+        r = requests.get(uri, timeout=(30, 30), allow_redirects=False, headers={'Host': url.url})
         if r.status_code:
             logger.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True

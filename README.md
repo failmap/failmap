@@ -151,15 +151,15 @@ The setup script performs the following steps:
 
 # Scanning services (beta)
 
-Todo: add celery beat information
+Some scanners require redis to be installed. We're currently in transition from running scanners
+manually to supporting both manual scans and redis.
 
-Some scanners require RabbitMQ to be installed. We're currently in transition from running scanners
-manually to supporting both manual scans and celery beat.
+Read more about installing redis, [here](https://redis.io/topics/quickstart)
 
 Each of the below commands requires their own command line window:
 
-    # start rabbitmq
-    rabbitmq-server
+    # start redis
+    redis-server
 
     # start a worker
     failmap-admin celery worker -ldebug

@@ -30,3 +30,4 @@ dev_db/
 failmap_debug_dataset*
 temp/*
 *.out
+*.rdb
