@@ -14,14 +14,18 @@ from django.views.decorators.cache import cache_page
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Promise, Url
+from failmap_admin.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
 from ..app.common import JSEncoder
+from .points_and_calculations import points_and_calculation
 
 one_minute = 60
 one_hour = 60 * 60
 one_day = 24 * 60 * 60
 ten_minutes = 60 * 10
+
+remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
 
 
 @cache_page(one_hour)
@@ -147,7 +151,7 @@ def terrible_urls(request, weeks_back=0):
             "type": "urllist",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "-",
+            "remark": remark,
         },
         "urls":
             [
@@ -217,7 +221,7 @@ def terrible_urls(request, weeks_back=0):
             GROUP BY url.url
             HAVING(`high`) > 0
             ORDER BY `high` DESC, `medium` DESC, `low` DESC, `organization`.`name` ASC
-            LIMIT 20
+            LIMIT 10
             ''' % (when, )
     # print(sql)
     cursor.execute(sql)
@@ -259,7 +263,7 @@ def topfail(request, weeks_back=0):
             "type": "toplist",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "Just fix it!",
+            "remark": remark,
         },
         "ranking":
             [
@@ -374,7 +378,7 @@ def topwin(request, weeks_back=0):
             "type": "toplist",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "You're now working with competence!",
+            "remark": remark,
         },
         "ranking":
             [
@@ -771,6 +775,7 @@ def wanted_urls(request):
             "type": "WantedOrganizations",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": datetime.now(pytz.utc),
+            "remark": remark,
         },
         "organizations": []
     }
@@ -811,7 +816,7 @@ def map_data(request, weeks_back=0):
     Returns a json structure containing all current map data.
     This is used by the client to render the map.
 
-    Renditions of this dataset might be pushed to github automatically.
+    Renditions of this dataset might be pushed to gitlab automatically.
 
     :return:
     """
@@ -857,7 +862,7 @@ def map_data(request, weeks_back=0):
             "type": "FeatureCollection",
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
-            "remark": "Get the code and all data from our github repo.",
+            "remark": remark,
         },
         "crs":
             {
@@ -870,7 +875,7 @@ def map_data(request, weeks_back=0):
         ]
     }
 
-    # todo: add comment to point to github repo
+    # todo: add comment to point to gitlab repo
     # todo: search for django server push, for instant updates sockjs?
     # Unfortunately django ORM aggregate functions only work on a single column,
     # you would think you're getting back OrganizaitonRating Objects. but thats not true.
@@ -1049,15 +1054,45 @@ def map_data(request, weeks_back=0):
                 }
         }
 
-        # todo: calculate this on determining ratings. So it's available in topwin.
-        # dataset["properties"]["failscore"] = calculate_failscore(i[0], endpoint_counter)
-
         data["features"].append(dataset)
 
     return JsonResponse(data, encoder=JSEncoder)
 
 
-def calculate_failscore(number_of_points, number_of_endpoints):
-    if number_of_endpoints and number_of_points:
-        return round(number_of_points / number_of_endpoints, 0)
-    return 0
+def latest_scans(request, scan_type):
+    scans = []
+
+    dataset = {
+        "scans": [],
+        "render_date": datetime.now(pytz.utc).isoformat(),
+        "remark": remark,
+    }
+
+    if scan_type not in ["tls_qualys",
+                         "Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
+                         "plain_https"]:
+        return JsonResponse(dataset, encoder=JSEncoder)
+
+    if scan_type == "tls_qualys":
+        scans = list(TlsQualysScan.objects.order_by('-last_scan_moment')[0:6])
+
+    if scan_type in ["Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
+                     "plain_https"]:
+        scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:6])
+
+    for scan in scans:
+        points, calculation = points_and_calculation(scan, scan_type)
+        dataset["scans"].append({
+            "url": scan.endpoint.url.url,
+            "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+            "protocol": scan.endpoint.protocol,
+            "port": scan.endpoint.port,
+            "ip_version": scan.endpoint.ip_version,
+            "explanation": calculation["explanation"],
+            "high": calculation["high"],
+            "medium": calculation["medium"],
+            "low": calculation["low"],
+            "last_scan_moment": scan.last_scan_moment.isoformat()
+        })
+
+    return JsonResponse(dataset, encoder=JSEncoder)

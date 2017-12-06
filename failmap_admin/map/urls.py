@@ -3,9 +3,9 @@ import proxy.views
 from django.conf import settings
 from django.conf.urls import url
 
-from failmap_admin.map.views import (index, manifest_json, map_data, organization_report,
-                                     robots_txt, security_txt, stats, terrible_urls, topfail,
-                                     topwin, vulnstats, wanted_urls)
+from failmap_admin.map.views import (index, latest_scans, manifest_json, map_data,
+                                     organization_report, robots_txt, security_txt, stats,
+                                     terrible_urls, topfail, topwin, vulnstats, wanted_urls)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),
@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^data/vulnstats/(?P<weeks_back>[0-9]{0,2})', vulnstats, name='vulnstats'),
     url(r'^data/topfail/(?P<weeks_back>[0-9]{0,2})', topfail, name='top fail'),
     url(r'^data/topwin/(?P<weeks_back>[0-9]{0,2})', topwin, name='top win'),
+    url(r'^data/latest_scans/(?P<scan_type>[a-zA-Z_-]{0,100})', latest_scans, name='latest scans'),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
     url(r'^data/terrible_urls/(?P<weeks_back>[0-9]{0,2})', terrible_urls, name='terrible urls'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),

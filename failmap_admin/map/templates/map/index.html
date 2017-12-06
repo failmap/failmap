@@ -61,8 +61,9 @@
                         <li><a href="#intro">{% trans "Intro" %}</a></li>
                         <li><a href="#numbers">{% trans "Numbers" %}</a></li>
                         <li><a href="#graphs">{% trans "Graphs" %}</a></li>
+                        <li><a href="#charts">{% trans "Charts" %}</a></li>
+                        <li><a href="#updates">{% trans "Updates" %}</a></li>
                         <li><a href="#report">{% trans "Report" %}</a></li>
-                        <li><a href="#topfail">{% trans "Top Fail" %}</a></li>
                         <li><a href="#explanation">{% trans "Explanation" %}</a></li>
                     </ul>
                     {% if debug %}
@@ -100,7 +101,7 @@
                 <div class="page-header">
                     <a name="numbers" class="jumptonav"></a>
                     <h2>{% trans "The Numbers" %}</h2>
-                    <a href="#" class="backtomap">back to map ↑</a>
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
@@ -306,7 +307,7 @@
                 <div class="page-header">
                     <a name="graphs" class="jumptonav"></a>
                     <h2>{% trans "Graphs" %}</h2>
-                    <a href="#" class="backtomap">back to map ↑</a>
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
 
                 <div class="row">
@@ -343,12 +344,71 @@
                 </div>
             </div>
 
+            <div id="charts">
+                <div class="page-header">
+                    <a name="charts" class="jumptonav"></a>
+                    <h2>{% trans "Charts" %}</h2>
+                    <p>Dit zijn de beste en slechtste organisaties en urls op dit moment.</p>
+                    <p></p>
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                </div>
+                <div class="row">
+                    {% include "map/topfail.html" %}
+                    {% include "map/topwin.html" %}
+                </div>
+                <div class="row">
+                    {% include "map/terrible_urls.html" %}
+                </div>
+            </div>
+
+            <div id="latest_scans">
+                <div class="page-header">
+                    <a name="updates" class="jumptonav"></a>
+                    <h2>{% trans "Latest changes" %}</h2>
+                    <p>Dit is een inzicht in de laatst gevonden veranderingen. Deze worden aan het eind van de dag
+                        verwerkt in de rapportages. Omdat alleen veranderingen worden getoond kan het zijn dat dezelfde
+                        gegevens langer blijven staan wanneer er niets veranderd. Scans worden dagelijks uitgevoerd.</p>
+                    <p></p>
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Versleuteling Updates</h3>
+                        <span id="latest_tls_qualys"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>Gebrek aan versleuteling Updates</h3>
+                        <span id="latest_plain_https"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>Forceren van versleuteling Updates</h3>
+                        <span id="latest_security_headers_strict_transport_security"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>X-Frame-Options Updates</h3>
+                        <span id="latest_security_headers_x_frame_options"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h3>X-Content-Type-Option Updates</h3>
+                        <span id="latest_security_headers_x_content_type_options"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <h3>X-XSS-Protection Updates</h3>
+                        <span id="latest_security_headers_x_xss_protection"></span>
+                    </div>
+                </div>
+            </div>
+
             <div class="page-header" id="report">
                 <div>
                     <div class="page-header">
                         <a name="report" id="report-anchor" class="jumptonav"></a>
                         <h2><span class="organization_points"></span>{% trans "Report" %}</h2>
-                        <a href="#" class="backtomap">back to map ↑</a>
+                        <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                     </div>
                     <div>
                       <div>
@@ -421,17 +481,7 @@
             </div>
 
             <br style="clear: both">
-
-            <div class="row">
-                {% include "map/topfail.html" %}
-                {% include "map/topwin.html" %}
-            </div>
-
-
-            <div class="row">
-                {% include "map/terrible_urls.html" %}
-                {% include "map/faq.html" %}
-            </div>
+            {% include "map/faq.html" %}
 
             <div id="lastrow">
                 <div class="row">
@@ -536,6 +586,26 @@
         </div>
       </div>
       {% endverbatim %}
+    </script>
+    <script type="x-template" id="latest_table">
+        <table class="table table-striped changes">
+            <thead>
+            <tr>
+                <th>{% trans "Scan moment" %}</th>
+                <th>{% trans "Url" %}</th>
+            </tr>
+            </thead><tbody v-for='scan in scans'>
+            {% verbatim %}
+            <tr v-bind:class="rowcolor(scan)">
+                <td class="date">{{ new Date(scan.last_scan_moment).toDateString() }}</td>
+                <td class="url">{{ scan.url }}</td>
+            </tr>
+            <tr>
+                <td class="service">{{ scan.service }}</td><td colspan="2" class="explanation">{{ scan.explanation }}</td>
+            </tr>
+            {% endverbatim %}
+            </tbody>
+        </table>
     </script>
 </html>
 <!--

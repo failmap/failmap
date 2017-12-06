@@ -410,6 +410,10 @@ div#report {
     margin-top: 40px;
 }
 
+.yellowrow {
+    color: #f0cf3c;
+}
+
 .orangerow {
     color: darkorange;
 }
@@ -483,3 +487,12 @@ path {
     z-index: 2000;
 }
 /* End D3 JS */
+
+.changes .date {
+    width: 140px;
+}
+
+.changes .explanation,
+.changes .service {
+    font-size: 12px;
+}

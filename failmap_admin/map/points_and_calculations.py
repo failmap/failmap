@@ -113,6 +113,9 @@ def http_plain_rating_based_on_scan(scan):
     high = 0
     medium = 0
 
+    # scan.rating is "True" or "False", we re-determine the value in this function:
+    scan.rating = 0
+
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
     if scan.explanation == "Site does not redirect to secure url, and has nosecure alternative on a standard port.":

@@ -5,7 +5,7 @@
 // Registry Sentry for error reporting
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
 let version = document.head.querySelector("[name=version]").getAttribute('content');
-if (sentry_token){
+if (sentry_token) {
     Raven.config(sentry_token, {release: version}).install();
 }
 
@@ -69,7 +69,7 @@ var failmap = {
 
         // allow tiles to be fetched through a proxy to apply our own caching rules
         // and prevent exhausion of free mapbox account credits
-        if (this.proxy_tiles){
+        if (this.proxy_tiles) {
             tile_uri = '/proxy/' + tile_uri_base;
         }
 
@@ -112,7 +112,7 @@ var failmap = {
             }).first();
 
             var hash = current_anchor.attr('name');
-            if (hash != undefined){
+            if (hash != undefined) {
                 history.replaceState({}, '', '#' + hash);
                 currentHash = hash;
             }
@@ -182,8 +182,8 @@ var failmap = {
         this.fullscreenhint.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
             html = "<div id=\"fullscreen\">" +
-            "   <span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
-            "</div>";
+                "   <span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
+                "</div>";
 
             this._div.innerHTML = html;
             return this._div;
@@ -196,11 +196,11 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             dataslider_control = " <div id=\"historycontrol\">" +
-            "    <h4>{{ visibleweek }}<span v-if='loading'> (loading...)</span></h4>" +
-            "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
-            "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
-            "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +
-            "</div>";
+                "    <h4>{{ visibleweek }}<span v-if='loading'> (loading...)</span></h4>" +
+                "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
+                "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
+                "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +
+                "</div>";
 
             this._div.innerHTML = dataslider_control;
             return this._div;
@@ -264,16 +264,16 @@ var failmap = {
     // get color depending on population density value
     getColor: function (d) {
         return d > 999 ? '#bd383c' :
-        d > 199 ? '#fc9645' :
-        d >= 0 ? '#62fe69' :
-        '#c1bcbb';
+            d > 199 ? '#fc9645' :
+                d >= 0 ? '#62fe69' :
+                    '#c1bcbb';
     },
 
     getColorCode: function (d) {
         return d === "red" ? '#bd383c' :
-        d === "orange" ? '#fc9645' :
-        d === "green" ? '#62fe69' :
-        '#c1bcbb';
+            d === "orange" ? '#fc9645' :
+                d === "green" ? '#62fe69' :
+                    '#c1bcbb';
     },
 
     style: function (feature) {
@@ -337,7 +337,7 @@ var failmap = {
     resetHighlight: function (e) {
         // todo: add search for points
         // todo: make this type of thing cleaner.
-        if (failmap.isSearchedFor(e.target.feature)){
+        if (failmap.isSearchedFor(e.target.feature)) {
             if (e.target.feature.geometry.type === "MultiPolygon")
                 e.target.setStyle(failmap.searchResultStyle(e.target.feature))
         } else {
@@ -355,7 +355,7 @@ var failmap = {
         location.hash = "#" + layer.feature.properties['organization_name'];
     },
 
-    isSearchedFor: function(feature){
+    isSearchedFor: function (feature) {
         x = $('#searchbar').val();
         x = x.toLowerCase();
         if (!x || x === "")
@@ -363,11 +363,11 @@ var failmap = {
         return (feature.properties.organization_name.toLowerCase().indexOf(x) !== -1)
     },
 
-    search: function(query) {
+    search: function (query) {
         query = query.toLowerCase();
-        if ((query === "") || (!query)){
+        if ((query === "") || (!query)) {
             // reset
-            failmap.geojson.eachLayer(function(layer) {
+            failmap.geojson.eachLayer(function (layer) {
                 if (layer.feature.geometry.type === "MultiPolygon")
                     layer.setStyle(failmap.style(layer.feature))
             });
@@ -393,17 +393,17 @@ var failmap = {
             // make map features (organization data) available to other vues
             // do not update this attribute if an empty list is returned as currently
             // the map does not remove organizations for these kind of responses.
-            if (json.features.length > 0){
+            if (json.features.length > 0) {
                 vueMap.features = json.features;
             }
 
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
-                failmap.geojson.eachLayer(function(layer){
+                failmap.geojson.eachLayer(function (layer) {
                     // overwrite some properties
                     // a for loop is not ideal.
                     for (i = 0; i < json.features.length; i++) {
-                        if (layer.feature.properties.organization_name === json.features[i].properties.organization_name){
+                        if (layer.feature.properties.organization_name === json.features[i].properties.organization_name) {
                             // console.log(layer);
                             layer.feature.properties.Overall = json.features[i].properties.Overall;
                             layer.feature.properties.color = json.features[i].properties.color;
@@ -454,9 +454,9 @@ var failmap = {
         });
     },
 
-    showreport: function(e) {
+    showreport: function (e) {
         let organization_id = e.target.feature.properties['organization_id'];
-        if (failmap.map.isFullscreen()){
+        if (failmap.map.isFullscreen()) {
             // var layer = e.target;
             vueFullScreenReport.load(organization_id, vueMap.week);
             vueFullScreenReport.show();
@@ -502,15 +502,15 @@ $(document).ready(function () {
             }
         },
         methods: {
-            load: function(week){
+            load: function (week) {
                 failmap.loadmap(week);
             },
             // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
             // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
-            update_hourly: function(){
+            update_hourly: function () {
                 setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
             },
-            hourly_update: function() {
+            hourly_update: function () {
                 vueMap.load(0);
                 vueTopfail.load(0);
                 vueTopwin.load(0);
@@ -518,13 +518,13 @@ $(document).ready(function () {
                 vueMap.week = 0;
                 setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
             },
-            next_week: function(){
+            next_week: function () {
                 if (this.week > 0) {
                     this.week = parseInt(this.week) - 1; // 1, 11, 111... glitch.
                     this.show_week();
                 }
             },
-            previous_week: function (){
+            previous_week: function () {
                 // caused 1, 11, 111 :) lol
                 if (this.week < 52) {
                     this.week += 1;
@@ -579,15 +579,15 @@ $(document).ready(function () {
         },
         computed: {
             // load list of organizations from map features
-            organizations: function(){
-                if (vueMap.features != null){
-                    let organizations = vueMap.features.map(function(feature){
+            organizations: function () {
+                if (vueMap.features != null) {
+                    let organizations = vueMap.features.map(function (feature) {
                         return {
                             "id": feature.properties.organization_id,
                             "name": feature.properties.organization_name,
                         }
                     });
-                    return organizations.sort(function(a,b){
+                    return organizations.sort(function (a, b) {
                         if (a['name'] > b['name']) return 1;
                         if (a['name'] < b['name']) return -1;
                         return 0;
@@ -596,14 +596,14 @@ $(document).ready(function () {
             }
         },
         watch: {
-            selected: function(){
+            selected: function () {
                 // load selected organization id
                 this.load(this.selected);
             }
         },
         methods: {
             colorize: function (high, medium, low) {
-               if (high > 0) return "red";
+                if (high > 0) return "red";
                 if (medium > 0) return "orange";
                 return "green";
             },
@@ -623,7 +623,7 @@ $(document).ready(function () {
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
             },
-            create_header: function(rating){
+            create_header: function (rating) {
                 if (rating.type === "security_headers_strict_transport_security")
                     return "Strict-Transport-Security Header (HSTS)";
                 if (rating.type === "tls_qualys")
@@ -637,13 +637,13 @@ $(document).ready(function () {
                 if (rating.type === "security_headers_x_content_type_options")
                     return "X-Content-Type-Options";
             },
-            second_opinion_links: function(rating, url){
+            second_opinion_links: function (rating, url) {
                 if (rating.type === "security_headers_strict_transport_security")
                     return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
+                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
                 if (rating.type === "tls_qualys")
                     return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
                 if (rating.type === "security_headers_x_xss_protection")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
                 if (rating.type === "security_headers_x_frame_options")
@@ -651,19 +651,19 @@ $(document).ready(function () {
                 if (rating.type === "security_headers_x_content_type_options")
                     return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
             },
-            total_awarded_points: function(high, medium, low) {
+            total_awarded_points: function (high, medium, low) {
                 var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="total_awarded_points_'+ this.colorize(high, medium, low) +'">' + marker + '</span>'
+                return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
             },
-            organization_points: function(high, medium, low) {
+            organization_points: function (high, medium, low) {
                 var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="total_awarded_points_'+ this.colorize(high, medium, low) +'">' + marker + '</span>'
+                return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
             },
-            awarded_points: function(high, medium, low) {
+            awarded_points: function (high, medium, low) {
                 var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="awarded_points_'+ this.colorize(high, medium, low) +'">+ ' + marker + '</span>'
+                return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
             },
-            make_marker: function(high, medium, low) {
+            make_marker: function (high, medium, low) {
                 if (high === 0 && medium === 0 && low === 0)
                     return "perfect";
                 else if (high > 0)
@@ -676,7 +676,7 @@ $(document).ready(function () {
             endpoint_type: function (endpoint) {
                 return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
             },
-            load: function(organization_id, weeks_ago){
+            load: function (organization_id, weeks_ago) {
 
                 if (!weeks_ago) {
                     weeks_ago = 0;
@@ -701,12 +701,12 @@ $(document).ready(function () {
                     history.replaceState({}, '', '#' + newHash);
                 });
             },
-            show_in_browser: function(){
+            show_in_browser: function () {
                 // you can only jump once to an anchor, unless you use a dummy
                 location.hash = "#loading";
                 location.hash = "#report";
             },
-            create_twitter_link: function(name, twitter_handle, points){
+            create_twitter_link: function (name, twitter_handle, points) {
                 if (twitter_handle) {
                     if (points) {
                         return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
@@ -715,7 +715,7 @@ $(document).ready(function () {
                     }
                 }
             },
-            formatDate: function(date){
+            formatDate: function (date) {
                 return new Date(date).toISOString().substring(0, 10)
             }
         }
@@ -742,14 +742,14 @@ $(document).ready(function () {
             // therefore we explicitly do this elsewhere
         },
         methods: {
-            show: function(){
+            show: function () {
                 this.visible = true;
             },
-            hide: function(){
+            hide: function () {
                 this.visible = false;
             },
             colorize: function (high, medium, low) {
-               return vueReport.colorize(high, medium, low);
+                return vueReport.colorize(high, medium, low);
             },
             colorizebg: function (high, medium, low) {
                 return vueReport.colorizebg(high, medium, low);
@@ -763,25 +763,25 @@ $(document).ready(function () {
             humanize: function (date) {
                 return vueReport.humanize(date);
             },
-            create_header: function(rating){
+            create_header: function (rating) {
                 return vueReport.create_header(rating);
             },
-            second_opinion_links: function(rating, url){
+            second_opinion_links: function (rating, url) {
                 return vueReport.second_opinion_links(rating, url);
             },
-            organization_points: function(high, medium, low) {
+            organization_points: function (high, medium, low) {
                 return vueReport.organization_points(high, medium, low);
             },
-            total_awarded_points: function(high, medium, low) {
+            total_awarded_points: function (high, medium, low) {
                 return vueReport.total_awarded_points(high, medium, low);
             },
             endpoint_type: function (endpoint) {
                 return vueReport.endpoint_type(endpoint);
             },
-            awarded_points: function(high, medium, low) {
+            awarded_points: function (high, medium, low) {
                 return vueReport.awarded_points(high, medium, low);
             },
-            load: function(organization_id, weeks_ago){
+            load: function (organization_id, weeks_ago) {
                 vueMap.selected_organization = organization_id;
 
                 if (!weeks_ago) {
@@ -799,7 +799,7 @@ $(document).ready(function () {
                     vueFullScreenReport.twitter_handle = data.twitter_handle;
                 });
             },
-            create_twitter_link: function(name, twitter_handle, points) {
+            create_twitter_link: function (name, twitter_handle, points) {
                 return vueReport.create_twitter_link(name, twitter_handle, points);
             }
         }
@@ -813,50 +813,50 @@ $(document).ready(function () {
         computed: {
             greenpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                    roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             redpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                    roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
 
             orangepercentage: function () {
                 if (this.data.data) {
                     var score = 100 -
-                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
+                        roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
+                        roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
+                        roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
             },
             unknownpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
+                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) + "%";
             },
             greenurlpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+                    roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
             },
 
             redurlpercentage: function () {
                 return (!this.data.data) ? "0%" :
-                roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
+                    roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) + "%";
             },
 
             orangeurlpercentage: function () {
                 if (this.data.data) {
                     var score = 100 -
-                    roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                    roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                        roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                        roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
             }
         },
         methods: {
-            load: function(weeknumber) {
+            load: function (weeknumber) {
                 $.getJSON('/data/stats/' + weeknumber, function (data) {
                     vueStatistics.data = data;
                 });
@@ -892,7 +892,7 @@ $(document).ready(function () {
         methods: {
             toggleFullScreen: function () {
                 failmap.map.toggleFullscreen(failmap.map.options)
-                if (vueFullscreen.fullscreen == "View Full Screen"){
+                if (vueFullscreen.fullscreen == "View Full Screen") {
                     vueFullscreen.fullscreen = "Exit Full Screen"
                 } else {
                     vueFullscreen.fullscreen = "View Full Screen"
@@ -914,7 +914,7 @@ $(document).ready(function () {
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
             },
-            load: function(weeknumber) {
+            load: function (weeknumber) {
                 $.getJSON('/data/topfail/' + weeknumber, function (data) {
                     vueTopfail.top = data;
                 });
@@ -954,12 +954,76 @@ $(document).ready(function () {
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
             },
-            load: function(weeknumber) {
+            load: function (weeknumber) {
                 $.getJSON('/data/terrible_urls/' + weeknumber, function (data) {
                     vueTerribleurls.top = data;
                 });
             }
         }
+    });
+
+    // 6 requests is expensive. Could be one with increased complexity.
+
+    var latest_mixin = {
+        template: '#latest_table',
+        mounted: function () {
+            var self = this;
+            $.getJSON(this.$data.data_url, function (data) {
+                self.scans = data.scans;
+            });
+        },
+        methods: {
+            rowcolor: function (scan) {
+                if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
+                    return "greenrow";
+                else if (scan.high > 0)
+                    return "redrow";
+                else if (scan.medium > 0)
+                    return "orangerow";
+                else
+                    return "yellowrow";
+            }
+        },
+        data: {
+            scans: Array,
+        }
+    };
+
+    // todo: https://css-tricks.com/intro-to-vue-5-animations/
+    window.vueLatestTlsQualys = new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_tls_qualys',
+        data: {data_url: "/data/latest_scans/tls_qualys/"}
+    });
+
+    window.vueLatestPlainHttps= new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_plain_https',
+        data: {data_url: "/data/latest_scans/plain_https/"}
+    });
+
+    window.vueLatestTlsQualys = new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_security_headers_strict_transport_security',
+        data: {data_url: "/data/latest_scans/Strict-Transport-Security/"}
+    });
+
+    window.vueLatestPlainHttps= new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_security_headers_x_frame_options',
+        data: {data_url: "/data/latest_scans/X-Content-Type-Options/"}
+    });
+
+    window.vueLatestTlsQualys = new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_security_headers_x_content_type_options',
+        data: {data_url: "/data/latest_scans/X-Frame-Options/"}
+    });
+
+    window.vueLatestPlainHttps= new Vue({
+        mixins: [latest_mixin],
+        el: '#latest_security_headers_x_xss_protection',
+        data: {data_url: "/data/latest_scans/X-XSS-Protection/"}
     });
 
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
@@ -971,15 +1035,15 @@ $(document).ready(function () {
 
     // if browser contains report anchor with organization id load that organization
     let match = RegExp('report-([0-9]+)').exec(location.hash);
-    if (match){
+    if (match) {
         let organization_id = match[1];
         location.href = '#report';
         vueReport.selected = organization_id;
     }
 });
 
-function d3stats(){
-        // bl.ocks.org
+function d3stats() {
+    // bl.ocks.org
     // https://bl.ocks.org/mbostock/3885211
     // https://www.mattlayman.com/2015/d3js-area-chart.html
     // https://github.com/d3/d3/blob/master/API.md
@@ -1151,9 +1215,8 @@ function d3stats(){
                     // v4 has clientx and clienty, which resembles the document.
                     tooltip.html("<p>" + d.key + "<br>" + pro + "</p>")
                         .style("visibility", "visible")
-                        .style("top", (window.pageYOffset + d3.event.clientY + 25)+ "px")
+                        .style("top", (window.pageYOffset + d3.event.clientY + 25) + "px")
                         .style("left", (window.pageXOffset + d3.event.clientX) + "px");
-
 
 
             })

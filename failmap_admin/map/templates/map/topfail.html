@@ -1,36 +1,38 @@
 {% load static %} {% load i18n %}
-                <div class="col-md-6">
-                    <div id="topfail">
-                        <div class="page-header">
-                            <a name="topfail"  class="jumptonav"></a>
-                            <h2>{% trans "Top Fail" %}</h2>
-                        </div>
-                        <div>
-                            <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
-                        </div>
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>{% trans "Rank" %}</th>
-                                <th>{% trans "Organization" %}</th>
-                                <th>{% trans "High" %}</th>
-                                <th>{% trans "Medium" %}</th>
-                                <th>{% trans "Low" %}</th>
-                                <th>{% trans "Tweet" %}</th>
-                            </tr>
-                            </thead><tbody>
-                            {% verbatim %}
-                            <tr v-for='rank in top.ranking'>
-                                <td>{{ rank.rank }}</td>
-                                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
-                                <td>{{ rank.high }}</td>
-                                <td>{{ rank.medium }}</td>
-                                <td>{{ rank.low }}</td>
-                                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                                <td><a v-if="rank.organization_twitter" :href="'https://twitter.com/intent/tweet?screen_name=' + rank.organization_twitter + '&text=' + rank.organization_twitter + ' gefeliciteerd! ' + rank.organization_name + ' staat positie ' + rank.rank + ' op Faalkaart! 🥀&hashtags=' + rank.organization_name + ',faal,faalkaart'">Tweet! 📣</a></td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div class="col-md-6">
+    <div id="topfail">
+
+        <h3>{% trans "Top Fail" %}</h3>
+
+        <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{
+            humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>{% trans "Rank" %}</th>
+                <th>{% trans "Organization" %}</th>
+                <th>{% trans "High" %}</th>
+                <th>{% trans "Medium" %}</th>
+                <th>{% trans "Low" %}</th>
+                <th>{% trans "Tweet" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% verbatim %}
+            <tr v-for='rank in top.ranking'>
+                <td>{{ rank.rank }}</td>
+                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
+                <td>{{ rank.high }}</td>
+                <td>{{ rank.medium }}</td>
+                <td>{{ rank.low }}</td>
+                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
+                <td><a v-if="rank.organization_twitter"
+                       :href="'https://twitter.com/intent/tweet?screen_name=' + rank.organization_twitter + '&text=' + rank.organization_twitter + ' gefeliciteerd! ' + rank.organization_name + ' staat positie ' + rank.rank + ' op Faalkaart! 🥀&hashtags=' + rank.organization_name + ',faal,faalkaart'">Tweet!
+                    📣</a></td>
+            </tr>
+            {% endverbatim %}
+            </tbody>
+        </table>
+    </div>
+</div>
