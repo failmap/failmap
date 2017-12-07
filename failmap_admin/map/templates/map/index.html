@@ -13,32 +13,32 @@
         <title>{% trans "Site Title" %}</title>
         <link rel="shortcut icon" type="image/png" href="{%  static 'favicon.ico' %}"/>
         {% compress css %}
-            <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.css' %}" />
-            <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap_v3.3.6.min.css' %}">
-            <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-theme_v3.3.6.min.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}" />
+            <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap_v3.3.6.min.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
+            <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
             <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
-            <link rel="stylesheet" type="text/css" href="{% static 'css/leaflet.fullscreen.css' %}">
         {% endcompress %}
 
         {% if debug %}
-            <script type="text/javascript" src="{% static 'js/vue.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/jquery-3.2.1.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/leaflet-src.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/lazyload-custom.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/bootstrap.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/leaflet-src.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/d3.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
         {% else %}{% compress js %}
-            <script type="text/javascript" src="{% static 'js/vue.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/leaflet.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/Leaflet.fullscreen.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/lazyload-custom.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/d3.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
         {% endcompress %}{% endif %}
         <link rel="manifest" href="/manifest.json">
