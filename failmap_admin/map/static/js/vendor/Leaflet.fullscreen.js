@@ -1,10 +1,10 @@
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD
-        define(['failmap_admin/map/static/js/vendor/leaflet'], factory);
+        define(['leaflet'], factory);
     } else if (typeof module !== 'undefined') {
         // Node/CommonJS
-        module.exports = factory(require('failmap_admin/map/static/js/vendor/leaflet'));
+        module.exports = factory(require('leaflet'));
     } else {
         // Browser globals
         if (typeof window.L === 'undefined') {

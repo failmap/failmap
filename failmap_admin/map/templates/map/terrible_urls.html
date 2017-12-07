@@ -1,35 +1,35 @@
 {% load static %} {% load i18n %}
-                <div class="col-md-6">
-                    <div id="terrible_urls">
-                        <div class="page-header">
-                            <a name="topwin"  class="jumptonav"></a>
-                            <h2>{% trans "Terrible Addresses" %}</h2>
-                        </div>
-                        <div>
-                            <p v-if="top.metadata">{% trans "These are the worst addresses on: " %} {% verbatim %}{{ humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
-                        </div>
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>{% trans "Rank" %}</th>
-                                <th>{% trans "Organization" %}</th>
-                                <th>{% trans "Url" %}</th>
-                                <th>{% trans "High" %}</th>
-                                <th>{% trans "Medium" %}</th>
-                                <th>{% trans "Low" %}</th>
-                            </tr>
-                            </thead><tbody>
-                            {% verbatim %}
-                            <tr v-for='rank in top.urls'>
-                                <td>{{ rank.rank }}</td>
-                                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
-                                <td>{{ rank.url }}</td>
-                                <td>{{ rank.high }}</td>
-                                <td>{{ rank.medium }}</td>
-                                <td>{{ rank.low }}</td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div class="col-md-6">
+    <div id="terrible_urls">
+
+        <h3>{% trans "Terrible Addresses" %}</h3>
+
+        <p v-if="top.metadata">{% trans "These are the worst addresses on: " %} {% verbatim %}{{
+            humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>{% trans "Rank" %}</th>
+                <th>{% trans "Organization" %}</th>
+                <th>{% trans "Url" %}</th>
+                <th>{% trans "High" %}</th>
+                <th>{% trans "Medium" %}</th>
+                <th>{% trans "Low" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% verbatim %}
+            <tr v-for='rank in top.urls'>
+                <td>{{ rank.rank }}</td>
+                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
+                <td>{{ rank.url }}</td>
+                <td>{{ rank.high }}</td>
+                <td>{{ rank.medium }}</td>
+                <td>{{ rank.low }}</td>
+            </tr>
+            {% endverbatim %}
+            </tbody>
+        </table>
+    </div>
+</div>
