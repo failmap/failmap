@@ -162,6 +162,8 @@ class EndpointGenericScanAdmin(admin.ModelAdmin):
     fields = ('endpoint', 'type', 'domain', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
 
+    readonly_fields = ['last_scan_moment']
+
 
 class EndpointGenericScanScratchpadAdmin(admin.ModelAdmin):
     list_display = ('type', 'domain', 'when', 'data')

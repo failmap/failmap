@@ -194,11 +194,11 @@ def has_wildcards(urls: List[Url]):
             logger.info("Domain %s uses wildcards, DNS brute force not possible" % url.url)
             url.uses_dns_wildcard = True
             url.save()
-            urls_with_wildcards += url
+            urls_with_wildcards.append(url)
         else:
             url.uses_dns_wildcard = False
             url.save()
-            urls_without_wildcards += url
+            urls_without_wildcards.append(url)
 
     return urls_without_wildcards, urls_with_wildcards
 

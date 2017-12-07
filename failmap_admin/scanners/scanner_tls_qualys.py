@@ -35,14 +35,13 @@ import requests
 from celery import group
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap_admin.map.rating import add_organization_rating, rerate_urls
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                            TlsQualysScratchpad)
 from failmap_admin.scanners.scanner_http import store_url_ips
 from failmap_admin.scanners.state_manager import StateManager
 
-from ..celery import app
+from ..celery import PRIO_HIGH, PRIO_NORMAL, app
 
 log = logging.getLogger(__name__)
 
@@ -59,11 +58,13 @@ def scan_url_list(urls: List[Url]):
 
 
 @app.task
-def scan_urls(urls: List[Url], execute=True):
+def scan_urls(urls: List[Url], execute: bool=True, priority: int=PRIO_NORMAL):
+    urls = external_service_task_rate_limit(urls)
+
     """Compose and execute taskset to scan specified urls."""
     try:
         task = compose(urls=urls)
-        return task.apply_async() if execute else task
+        return task.apply_async(priority=priority) if execute else task
     except (ValueError, Endpoint.DoesNotExist):
         log.error('Could not schedule scans, due to error reported above.')
 
@@ -123,7 +124,7 @@ def scan_task(url):
             if data['status'] == "READY" and 'endpoints' in data.keys():
                 result = save_scan(url, data)
                 clean_endpoints(url, data['endpoints'])
-                return '%s %' % (url, result)
+                return '%s %s' % (url, result)
 
             if data['status'] == "ERROR":
                 """
@@ -432,7 +433,7 @@ def kill_alive_and_get_endpoint(protocol, url, port, ip_version, message):
     log.debug("Handing could not connect to server")
 
     endpoints = Endpoint.objects.all().filter(
-        domain=url,
+        url=url,
         ip_version=ip_version,
         port=port,
         protocol=protocol,
@@ -574,7 +575,6 @@ def scan():
 
     for organization in resume:
         StateManager.set_state("ScannerTlsQualys", organization.name)
-        scan_new_urls.apply()  # always try to scan new urls first, regardless of org.
         scan_organization.s(organization).apply()
 
 
@@ -602,13 +602,18 @@ def scan_organization(organization):
         log.info("There are no alive https urls for this organization: %s" % organization)
         return
 
-    scan_url_list(urls)
+    # don't rebuild the ratings. It's hard to get right with chords and such.
+    # we want all scan_url tasks to be finished when running the other tasks (as immutable, with task.si).
+    # the "issue" now is that scan_urls says True because all urls have been added (but not read)
+    scan_urls(urls=urls, priority=PRIO_NORMAL)
 
-    rerate_urls(urls)
+    # we have rebuild ratings done periodically. That works better.
+    # rerate_urls(myurls)
+    # add_organization_rating(organizations=[organization])
 
-    add_organization_rating.s(organization=organization).apply()
 
-
+# this is an anti-pattern: any new url should be scanned when added, not via a separate clunky process.
+# currently this should be run every hour. Prio should be higher than normal scans, but not highest.
 @app.task
 def scan_new_urls():
     # find urls that don't have an qualys scan and are resolvable on https/443
@@ -680,12 +685,6 @@ def scan_new_urls():
         log.info("New batch %s: from %s to %s" % (i, i * batch_size, (i + 1) * batch_size))
         myurls = urls[i * batch_size:(i + 1) * batch_size]
         i = i + 1
-        scan(myurls)
-
-        rerate_urls(myurls)
-
-        for url in myurls:
-            for organization in url.organization.all():
-                add_organization_rating(organization=organization)
+        scan_urls(myurls, priority=PRIO_HIGH)
 
     return urls

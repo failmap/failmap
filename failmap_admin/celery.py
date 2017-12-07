@@ -21,6 +21,7 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
 PRIO_HIGH = 9
 PRIO_NORMAL = 5
+PRIO_LOW = 3
 
 
 class DefaultTask(Task):

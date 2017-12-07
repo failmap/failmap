@@ -42,7 +42,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         scan_type = options['scan_type']
-        desired_organization = options['organization'][0]
+
+        if options['organization']:
+            desired_organization = options['organization'][0]
+        else:
+            desired_organization = "*"
+
         logger.debug("Scan type: %s" % scan_type)
         logger.debug("Targetted organization: %s" % desired_organization)
 

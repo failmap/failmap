@@ -8,7 +8,7 @@ import failmap_admin.scanners.scanner_http as scanner_http
 import failmap_admin.scanners.scanner_plain_http as scanner_plain_http
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency,
-                                                nsec_scan)
+                                                nsec)
 from failmap_admin.scanners.scanner_screenshot import screenshot_urls
 
 from ..celery import app
@@ -16,6 +16,7 @@ from ..celery import app
 logger = logging.getLogger(__package__)
 
 
+@app.task
 def onboard_new_urls():
     never_onboarded = Url.objects.all().filter(onboarded=False)
 
@@ -37,6 +38,8 @@ def onboard_new_urls():
     ................................................................................
             """
         logger.info("There are %s new urls to onboard! %s" % (never_onboarded.count(), cyber))
+    else:
+        logger.info("No new urls to onboard.")
 
     onboard_urls(never_onboarded)
 
@@ -44,15 +47,31 @@ def onboard_new_urls():
 @app.task
 def onboard_urls(urls: List[Url]):
     for url in urls:
+        logger.info("Onboarding %s" % url)
 
         if url.is_top_level():
+            logger.debug("Brute known subdomains: %s" % url)
             brute_known_subdomains(urls=[url])
+
+            logger.debug("Certificate transparency: %s" % url)
             certificate_transparency(urls=[url])
-            nsec_scan(urls=[url])
+
+            logger.debug("nsec: %s" % url)
+            nsec(urls=[url])
+
+        # tasks
+        logger.debug("Discover endpoints: %s" % url)
         scanner_http.discover_endpoints(urls=[url])
+
+        # requires endpoints to be discovered, how to run groups of tasks sequentially?
+        logger.debug("Plain_http: %s" % url)
         scanner_plain_http.scan_urls(urls=[url])
+
+        # requires endpoints to be discovered
+        logger.debug("Screenshots: %s" % url)
         screenshot_urls(urls=[url])
-        # todo: add qualys tasks.
+
+        # security headers and new urls are handled elsewhere.
 
         url.onboarded = True
         url.onboarded_on = datetime.now(pytz.utc)

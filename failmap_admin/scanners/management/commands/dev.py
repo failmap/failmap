@@ -15,8 +15,9 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
+        reset_onboard()
         # rebuild_ratings()
-        develop_determineratings()
+        # develop_determineratings()
         # develop_timeline()
         #
         # Command.test_sslscan_real()
@@ -25,6 +26,14 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def reset_onboard():
+    organization = Organization.objects.filter(name="Arnhem").get()
+    urls = Url.objects.all().filter(organization=organization)
+    for url in urls:
+        url.onboarded = False
+        url.save()
 
 
 def develop_timeline():
@@ -36,7 +45,7 @@ def develop_timeline():
             data = create_timeline(url=url)
             show_timeline_console(data, url)
             rerate_urls([url])
-        add_organization_rating(organization=organization, create_history=True)
+        add_organization_rating(organizations=[organization], create_history=True)
 
     if False:
         organizations = Organization.objects.all().order_by('name')
@@ -67,7 +76,7 @@ def develop_timeline():
 
 
 def develop_sslscan():
-    from failmap_admin.scanners.scanner_tls import scan_url
+    from failmap_admin.scanners.scanner_tls_standalone import scan_url
     url = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
     scan_url(url)
     url = Url.objects.all().filter(url='www.amersfoort.nl').get()
@@ -75,12 +84,12 @@ def develop_sslscan():
 
 
 def test_determine_grade():
-    from failmap_admin.scanners.scanner_tls import test_determine_grade
+    from failmap_admin.scanners.scanner_tls_standalone import test_determine_grade
     test_determine_grade()
 
 
 def test_sslscan_real():
-    from failmap_admin.scanners.scanner_tls import test_real
+    from failmap_admin.scanners.scanner_tls_standalone import test_real
     test_real('johnkr.com', 443)
 
 

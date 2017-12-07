@@ -111,6 +111,7 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
             rate_url(url, when)
 
 
+@app.task
 def rerate_urls(urls: List[Url]=None):
     if not urls:
         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
@@ -130,7 +131,7 @@ def rerate_organizations(organizations: List[Organization]=None):
     for organization in organizations:
         OrganizationRating.objects.all().filter(organization=organization).delete()
         default_ratings()
-        add_organization_rating([organization], build_history=True)
+        add_organization_rating(organizations=[organization], build_history=True)
 
 
 def rerate_urls_of_organizations(organizations: List[Organization]):

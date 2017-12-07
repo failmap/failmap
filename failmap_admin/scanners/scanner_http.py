@@ -249,7 +249,19 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
         If we get a redirect, it means there is a server. Don't follow.
 
         Any status code is enough to verify that there is an endpoint.
-        Some servers don't return a status code, that will trigger an exception (AttributeError?)
+        Some servers don't return a status code, that will trigger an exception (AttributeError)
+
+        Some servers redirect to itself (or any host you throw at it):
+
+        ipv4 = socket.gethostbyname("demo3.data.amsterdam.nl")
+
+        r = requests.get("http://185.3.211.120:80", timeout=(30, 30), allow_redirects=False,
+            headers={'Host': "demo3.data.amsterdam.nl"})
+        r.headers
+        {'Content-length': '0', 'Location': 'https://demo3.data.amsterdam.nl/', 'Connection': 'close'}
+
+        We don't follow redirects, because we only want to know if there is something we can connect to.
+        This can lead to interesting behavior: the browser times out.
 
         https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
         """
@@ -294,7 +306,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
 
 @app.task
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
-    # logger.info("%s %s" % (url, result))
+    logger.info("%s %s" % (url, result))
     # logger.info("%s %s" % (url, url))
     # logger.info("%s %s" % (url, port))
     # logger.info("%s %s" % (url, protocol))
