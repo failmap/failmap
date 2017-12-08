@@ -1,4 +1,5 @@
 import pytest
+
 from django.contrib.auth.models import User
 
 from ..celery import app
@@ -9,7 +10,7 @@ from .models import Job
 def celery(settings):
     """Common setup for running (simulated) celery tasks inside tests."""
     # don't let celery contact broker, execute tasks directly
-    settings.CELERY_ALWAYS_EAGER = True
+    settings.CELERY_TASK_ALWAYS_EAGER = True
 
 
 @app.task
