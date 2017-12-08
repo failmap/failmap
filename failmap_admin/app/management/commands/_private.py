@@ -99,7 +99,7 @@ class TaskCommand(BaseCommand):
             except kombu.exceptions.OperationalError:
                 log.warning(
                     'Connection with task broker %s unavailable, tasks might not be starting.',
-                    settings.BROKER_URL)
+                    settings.CELERY_BROKER_URL)
 
             task_id = self.task.apply_async(args=self.args, kwargs=self.kwargs)
             log.info('Task scheduled for execution.')
