@@ -442,6 +442,13 @@ MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3Eif
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
 
+# workaround to try and make rate limited tasks coexist on the same worker as non-rate limited whilst keeping
+# good throughput on non-rate limited tasks even though worker interal queue might be plugged with rate limited tasks
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+
+# numer of tasks to be executed in parallel by celery
+CELERY_WORKER_CONCURRENCY = 10
+
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
 STATSD_HOST = os.environ.get('STATSD_HOST', '127.0.0.1')
