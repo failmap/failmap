@@ -363,7 +363,9 @@ def save_scan(url, data):
         previous_scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint). \
             order_by('-last_scan_moment').first()
 
-        if previous_scan:
+        # don't store "failures" as complete scans (with 0 scores).
+        # storing failures increases the amount of "waste" data. Since so many things can be not resolvable etc.
+        if previous_scan and rating:
             if all([previous_scan.qualys_rating == rating,
                     previous_scan.qualys_rating_no_trust == rating_no_trust]):
                 log.info("Scan on %s did not alter the rating, updating scan date only." % failmap_endpoint)

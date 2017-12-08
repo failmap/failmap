@@ -1060,6 +1060,7 @@ def map_data(request, weeks_back=0):
     return JsonResponse(data, encoder=JSEncoder)
 
 
+@cache_page(ten_minutes)
 def latest_scans(request, scan_type):
     scans = []
 
@@ -1130,7 +1131,7 @@ class LatestScanFeed(Feed):
 
     def item_description(self, item):
         points, calculation = points_and_calculation(item, self.scan_type)
-        return calculation["explanation"]
+        return calculation.get("explanation", "")
 
     def item_pubdate(self, item):
         return item.last_scan_moment
