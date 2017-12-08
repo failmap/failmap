@@ -31,13 +31,13 @@ from typing import List
 
 import pytz
 import requests
+from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap_admin.celery import app
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, UrlIp
-from django.conf import settings
 
 from .timeout import timeout
 

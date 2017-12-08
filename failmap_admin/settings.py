@@ -483,10 +483,10 @@ if DEBUG:
         import debug_toolbar.settings
 
         DEBUG_TOOLBAR_PANELS = [
-                                   'ddt_request_history.panels.request_history.RequestHistoryPanel',
-                               ] + debug_toolbar.settings.PANELS_DEFAULTS + [
-                                   'django_statsd.panel.StatsdPanel',
-                               ]
+            'ddt_request_history.panels.request_history.RequestHistoryPanel',
+        ] + debug_toolbar.settings.PANELS_DEFAULTS + [
+            'django_statsd.panel.StatsdPanel',
+        ]
         # send statsd metrics to debug_toolbar
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
     except ImportError:
