@@ -15,7 +15,10 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        reset_onboard()
+        from failmap_admin.scanners.scanner_http import get_ips
+        print(get_ips("arnhem.nl"))
+
+        # reset_onboard()
         # rebuild_ratings()
         # develop_determineratings()
         # develop_timeline()

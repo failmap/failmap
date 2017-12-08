@@ -78,6 +78,7 @@ try:
     # https://github.com/django-compressor/django-compressor/issues/881
     if not os.environ.get('COMPRESS', False):
         import django_uwsgi  # NOQA
+
         INSTALLED_APPS += ['django_uwsgi', ]
 except ImportError:
     # only configure uwsgi app if installed (ie: production environment)
@@ -86,10 +87,10 @@ except ImportError:
 # don't run this in production
 try:
     import django_extensions  # NOQA
+
     INSTALLED_APPS += ['django_extensions']
 except ImportError:
     pass
-
 
 MIDDLEWARE_CLASSES = [
     # statsd metrics collection
@@ -186,7 +187,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -214,12 +214,10 @@ USE_L10N = True
 # do exactly the same as loaddata, but will overwrite below flag preventing warnings.
 USE_TZ = True
 
-
 # https://docs.djangoproject.com/en/1.11/topics/i18n/translation/#how-django-discovers-translations
 # In all cases the name of the directory containing the translation is expected to be named using
 # locale name notation. E.g. de, pt_BR, es_AR, etc.
 LOCALE_PATHS = ['locale']
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -273,7 +271,6 @@ JET_THEMES = [
 # required for custom modules
 JET_APP_INDEX_DASHBOARD = 'failmap_admin.organizations.dashboard.CustomIndexDashboard'
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -304,7 +301,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console'],    # used when there is no logger defined or loaded.
+            'handlers': ['console'],  # used when there is no logger defined or loaded.
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
         'django': {
@@ -314,51 +311,68 @@ LOGGING = {
     },
 }
 
-# add a slash at the end so we know it's a directory.
-# Don't want to do things to anything in /
-PROJECT_DIR = os.path.abspath(os.path.dirname(__file__)) + '/'
-VENDOR_DIR = os.path.abspath(os.path.dirname(__file__) + '/../vendor/') + '/'
-# print(PROJECT_DIR)
-# print(VENDOR_DIR)
-# todo: chrome works only for mac. Not yet for linux.
+# Add a slash at the end so we know it's a directory. Tries to somewhat prevents doing things in root.
+OUTPUT_DIR = os.environ.get('OUTPUT_DIR', os.path.abspath(os.path.dirname(__file__)) + '/')
+VENDOR_DIR = os.environ.get('VENDOR_DIR', os.path.abspath(os.path.dirname(__file__) + '/../vendor/') + '/')
+
+# A number of tools and outputs are grouped to easier have access to all of them.
+# Our vendor directory contains a number of small tools that are hard to install otherwise.
+
 TOOLS = {
+    # Chrome and firefox are special cases: they install very easily and therefore don't need further grouping.
     'chrome': {
         'executable': {
-            'Darwin': VENDOR_DIR + "Google Chrome.app/Contents/MacOS/Google Chrome",
-            'Linux': "/dev/null",
+            # os.platform is used to see what binaries should be used on a worker.
+            'Darwin': os.environ.get(
+                'CHROME_EXECUTABLE_DARWIN', "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+            'Linux': os.environ.get(
+                'CHROME_EXECUTABLE_LINUX', ""),
         },
-        'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
+        'screenshot_output_dir': OUTPUT_DIR + os.environ.get(
+            'CHROME_SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/'),
     },
+    # Chrome and firefox are special cases: they install very easily and therefore don't need further grouping.
     'firefox': {
         'executable': {
-            'Darwin': VENDOR_DIR + "Firefox.app/Contents/MacOS/firefox",
-            'Linux': "/dev/null",
+            # os.platform is used to see what binaries should be used on a worker.
+            'Darwin': os.environ.get(
+                'FIREFOX_EXECUTABLE_DARWIN', "/Applications/Firefox.app/Contents/MacOS/firefox"),
+            'Linux': os.environ.get(
+                'FIREFOX_EXECUTABLE_LINUX', ""),
         },
-        'screenshot_output_dir': PROJECT_DIR + 'map/static/images/screenshots/',
+        'screenshot_output_dir': OUTPUT_DIR + os.environ.get(
+            'FIREFOX_SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/'),
     },
     'theHarvester': {
-        'executable': VENDOR_DIR + "theHarvester/theHarvester.py",
-        'output_dir': PROJECT_DIR + "scanners/resources/output/theHarvester/"
+        'executable': VENDOR_DIR + os.environ.get('THEHARVESTER_EXECUTABLE', "theHarvester/theHarvester.py"),
+        'output_dir': OUTPUT_DIR + os.environ.get('THEHARVESTER_OUTPUT_DIR', "scanners/resources/output/theHarvester/"),
     },
     'dnsrecon': {
-        'executable': VENDOR_DIR + "dnsrecon/dnsrecon.py",
-        'output_dir': PROJECT_DIR + "scanners/resources/output/dnsrecon/",
-        'wordlist_dir': PROJECT_DIR + "scanners/resources/wordlists/",
+        'executable': VENDOR_DIR + os.environ.get('DNSRECON_EXECUTABLE', "dnsrecon/dnsrecon.py"),
+        'output_dir': OUTPUT_DIR + os.environ.get('DNSRECON_OUTPUT_DIR', "scanners/resources/output/dnsrecon/"),
+
+        # The most important wordlists are auto-generated by this software, and are thus output.
+        'wordlist_dir': OUTPUT_DIR + os.environ.get('DNSRECON_WORDLIST_DIR', "scanners/resources/wordlists/"),
     },
     'sslscan': {
+        # this is beta functionality and not supported in production
+        # these are installed system wide and don't require a path (they might when development continues)
         'executable': {
             'Darwin': 'sslscan',
             'Linux': 'sslscan',
         },
-        'report_output_dir': PROJECT_DIR + "scanners/resources/output/sslscan/",
+        'report_output_dir': OUTPUT_DIR + "scanners/resources/output/sslscan/",
     },
     'openssl': {
+        # this is beta functionality and not supported in production
+        # these are installed system wide and don't require a path  (they might when development continues)
         'executable': {
             'Darwin': 'openssl',
             'Linux': 'openssl',
         },
     },
     'TLS': {
+        # this is beta functionality and not supported in production
         'cve_2016_2107': VENDOR_DIR + 'CVE-2016-2107-padding-oracle/main.go',
         'cve_2016_9244': VENDOR_DIR + 'CVE-2016-9244-ticketbleed/ticketbleed.go',
         'cert_chain_resolver': {
@@ -368,7 +382,6 @@ TOOLS = {
     }
 }
 
-
 # Celery 4.0 settings
 # Pickle can work, but you need to use certificates to communicate (to verify the right origin)
 # It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
@@ -377,7 +390,6 @@ TOOLS = {
 CELERY_accept_content = ['pickle', 'yaml']
 CELERY_task_serializer = 'pickle'
 CELERY_result_serializer = 'pickle'
-
 
 # Compression
 # Django-compressor is used to compress css and js files in production
@@ -464,15 +476,17 @@ if DEBUG:
     # enable debug toolbar if available
     try:
         import debug_toolbar
+
         INSTALLED_APPS.append('debug_toolbar')
         MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
         import debug_toolbar.settings
+
         DEBUG_TOOLBAR_PANELS = [
-            'ddt_request_history.panels.request_history.RequestHistoryPanel',
-        ] + debug_toolbar.settings.PANELS_DEFAULTS + [
-            'django_statsd.panel.StatsdPanel',
-        ]
+                                   'ddt_request_history.panels.request_history.RequestHistoryPanel',
+                               ] + debug_toolbar.settings.PANELS_DEFAULTS + [
+                                   'django_statsd.panel.StatsdPanel',
+                               ]
         # send statsd metrics to debug_toolbar
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
     except ImportError:
@@ -502,3 +516,10 @@ SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
 SENTRY_ORGANIZATION = 'internet-cleanup-foundation'
 SENTRY_PROJECT = 'faalkaart'
 SENTRY_PROJECT_URL = 'https://sentry.io/%s/%s' % (SENTRY_ORGANIZATION, SENTRY_PROJECT)
+
+# Some workers or (development) environments don't support both IP networks
+# Note that not supporting either protocols can result in all endpoints being killed as they are unreachable by scanners
+# We don't check these settings anywhere for sanity as some workers might not need a network at all.
+# The defaults stem from our live environment, where we've set IPv4 being present on all containers and workers.
+NETWORK_SUPPORTS_IPV4 = os.environ.get('NETWORK_SUPPORTS_IPV4', True)
+NETWORK_SUPPORTS_IPV6 = os.environ.get('NETWORK_SUPPORTS_IPV6', False)

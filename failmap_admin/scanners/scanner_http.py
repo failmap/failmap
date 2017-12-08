@@ -37,6 +37,7 @@ from requests.exceptions import ConnectionError
 from failmap_admin.celery import app
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, UrlIp
+from django.conf import settings
 
 from .timeout import timeout
 
@@ -185,21 +186,23 @@ def get_ips(url: str):
     ipv4 = ""
     ipv6 = ""
 
-    try:
-        ipv4 = socket.gethostbyname(url)
-        logger.debug("%s has IPv4 address: %s" % (url, ipv4))
-    except Exception as ex:
-        # when not known: [Errno 8] nodename nor servname provided, or not known
-        logger.debug("Get IPv4 error: %s" % ex)
+    if settings.NETWORK_SUPPORTS_IPV4:
+        try:
+            ipv4 = socket.gethostbyname(url)
+            logger.debug("%s has IPv4 address: %s" % (url, ipv4))
+        except Exception as ex:
+            # when not known: [Errno 8] nodename nor servname provided, or not known
+            logger.debug("Get IPv4 error: %s" % ex)
 
-    try:
-        # dig AAAA faalkaart.nl +short (might be used for debugging)
-        x = socket.getaddrinfo(url, None, socket.AF_INET6)
-        ipv6 = x[0][4][0]
-        logger.debug("%s has IPv6 address: %s" % (url, ipv6))
-    except Exception as ex:
-        # when not known: [Errno 8nodename nor servname provided, or not known
-        logger.debug("Get IPv6 error: %s" % ex)
+    if settings.NETWORK_SUPPORTS_IPV6:
+        try:
+            # dig AAAA faalkaart.nl +short (might be used for debugging)
+            x = socket.getaddrinfo(url, None, socket.AF_INET6)
+            ipv6 = x[0][4][0]
+            logger.debug("%s has IPv6 address: %s" % (url, ipv6))
+        except Exception as ex:
+            # when not known: [Errno 8nodename nor servname provided, or not known
+            logger.debug("Get IPv6 error: %s" % ex)
 
     return ipv4, ipv6
 
