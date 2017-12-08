@@ -5,15 +5,13 @@ from datetime import datetime, timedelta
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.syndication.views import Feed
 from django.db import connection
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
-
-from django.contrib.syndication.views import Feed
-from django.urls import reverse
 
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Promise, Url

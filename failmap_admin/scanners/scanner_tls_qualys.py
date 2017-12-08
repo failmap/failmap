@@ -70,12 +70,12 @@ def scan_urls(urls: List[Url], execute: bool=True, priority: int=PRIO_NORMAL):
 
 
 def scan_multithreaded(urls: List[Url]):
-        from multiprocessing import Pool
-        pool = Pool(processes=4)
+    from multiprocessing import Pool
+    pool = Pool(processes=4)
 
-        for url in urls:
-            pool.apply_async(scan_task, [url])
-            sleep(60)
+    for url in urls:
+        pool.apply_async(scan_task, [url])
+        sleep(60)
 
 
 def compose(organizations: List[Organization]=None, urls: List[Url]=None):

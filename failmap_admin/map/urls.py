@@ -3,9 +3,9 @@ import proxy.views
 from django.conf import settings
 from django.conf.urls import url
 
-from failmap_admin.map.views import (index, latest_scans, manifest_json, map_data,
+from failmap_admin.map.views import (LatestScanFeed, index, latest_scans, manifest_json, map_data,
                                      organization_report, robots_txt, security_txt, stats,
-                                     terrible_urls, topfail, topwin, vulnstats, wanted_urls, LatestScanFeed)
+                                     terrible_urls, topfail, topwin, vulnstats, wanted_urls)
 
 urlpatterns = [
     url(r'^security.txt$', security_txt),
