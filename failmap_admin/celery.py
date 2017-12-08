@@ -16,7 +16,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 appname = __name__.split('.', 1)[0]
 app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])
 
-
+# http://docs.celeryproject.org/en/master/whatsnew-4.0.html?highlight=priority#redis-priorities-reversed
+# http://docs.celeryproject.org/en/master/history/whatsnew-3.0.html?highlight=priority
 # https://github.com/celery/celery/blob/a87ef75884e59c78da21b1482bb66cf649fbb7d3/docs/history/whatsnew-3.0.rst#redis-priority-support
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
 PRIO_HIGH = 9

@@ -12,6 +12,9 @@ from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
+from django.contrib.syndication.views import Feed
+from django.urls import reverse
+
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Promise, Url
 from failmap_admin.scanners.models import EndpointGenericScan, TlsQualysScan
@@ -1096,3 +1099,44 @@ def latest_scans(request, scan_type):
         })
 
     return JsonResponse(dataset, encoder=JSEncoder)
+
+
+class LatestScanFeed(Feed):
+
+    title = "Tls Vulnerabilities"
+    link = "/data/feed/tls_qualys"
+    description = "Overview of the latest tls_qualys scans."
+
+    # magic
+    def get_object(self, request, *args, **kwargs):
+
+        # raunchy solution to get the scan_type to the item_description method
+        if kwargs['scan_type'] not in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
+                                       "X-XSS-Protection", "plain_https", "tls_qualys"]:
+            self.scan_type = "tls_qualys"
+        else:
+            self.scan_type = kwargs['scan_type']
+
+        return kwargs['scan_type']
+
+    # second parameter via magic
+    def items(self, scan_type):
+        if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
+                         "plain_https"]:
+            return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
+
+        return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
+
+    def item_title(self, item):
+        return item.endpoint.url.url
+
+    def item_description(self, item):
+        points, calculation = points_and_calculation(item, self.scan_type)
+        return calculation["explanation"]
+
+    def item_pubdate(self, item):
+        return item.last_scan_moment
+
+    # item_link is only needed if NewsItem has no get_absolute_url method.
+    def item_link(self, item):
+        return "https://faalkaart.nl/#updates"

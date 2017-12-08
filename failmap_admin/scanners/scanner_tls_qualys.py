@@ -69,6 +69,15 @@ def scan_urls(urls: List[Url], execute: bool=True, priority: int=PRIO_NORMAL):
         log.error('Could not schedule scans, due to error reported above.')
 
 
+def scan_multithreaded(urls: List[Url]):
+        from multiprocessing import Pool
+        pool = Pool(processes=4)
+
+        for url in urls:
+            pool.apply_async(scan_task, [url])
+            sleep(60)
+
+
 def compose(organizations: List[Organization]=None, urls: List[Url]=None):
     """Compose taskset to scan specified organizations or urls (not both)."""
 
@@ -93,9 +102,31 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
 @app.task(
     # http://docs.celeryproject.org/en/latest/userguide/tasks.html#Task.rate_limit
     # start at most 1 qualys task per minute to not get our IP blocked
+
+    # After starting a scan you can read it out as much as you want. The problem lies with rate limiting
+    # of starting the task.
+
+    # Creating a new task means it will be placed somewhere on the queue.
     rate_limit='1/m',
 )
 def scan_task(url):
+
+    # start the scan (or read out the cache, which is a bit inefficient)
+    # data = service_provider_scan_via_api(url.url)
+
+    log.info("Starting scan on: %s" % url.url)
+    readout = scan_readout_task.s(url)
+    # and so you're still waiting synchronously.
+    # this will create a new task, that should be read out pretty quickly (there is a deadline of about 10 minutes)
+    readout.apply_async()
+
+
+@app.task(
+    # after starting a scan (1/m) you can read out every 20 seconds.
+    # You can do so in the 10 minutes. If you don't, it will start a new scan which affects your rate limit.
+    bind=True
+)
+def scan_readout_task(self, url):
     """
     Carries out a scan until the ERROR or READY is returned. There will be many checks performed
     by the scanner, signalled by TESTING_ messages. There also are many DNS messages when
@@ -111,42 +142,40 @@ def scan_task(url):
     :param url: object representing an url
     :return:
     """
-    log.info("Starting scan on: %s" % url.url)
 
-    data = {'status': "NEW"}
+    data = service_provider_scan_via_api(url.url)
+    scratch(url.url, data)  # for debugging
+    report_to_console(url.url, data)  # for more debugging
 
-    while data['status'] != "READY" and data['status'] != "ERROR":
-        data = service_provider_scan_via_api(url.url)
-        scratch(url.url, data)  # for debugging
-        report_to_console(url.url, data)  # for more debugging
+    if 'status' in data.keys():
+        if data['status'] == "READY" and 'endpoints' in data.keys():
+            result = save_scan(url, data)
+            clean_endpoints(url, data['endpoints'])
+            return '%s %s' % (url, result)
 
-        if 'status' in data.keys():
-            if data['status'] == "READY" and 'endpoints' in data.keys():
-                result = save_scan(url, data)
-                clean_endpoints(url, data['endpoints'])
-                return '%s %s' % (url, result)
-
-            if data['status'] == "ERROR":
-                """
-                Error is usually "unable to resolve domain". This should kill the endpoint(s).
-                """
-                scratch(url, data)  # we always want to see what happened.
-                clean_endpoints(url, [])
-                return
-
-        else:
-            data['status'] = "FAILURE"  # stay in the loop
-            log.error("Unexpected result from API")
-            log.error(data)  # print for debugging purposes
+        if data['status'] == "ERROR":
+            """
+            Error is usually "unable to resolve domain". This should kill the endpoint(s).
+            """
             scratch(url, data)  # we always want to see what happened.
+            clean_endpoints(url, [])
+            return
 
-        """
-        While the documentation says to check every 10 seconds, we'll do that between every
-        20 to 25, simply because it matters very little when scans are ran parralel.
-        https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-        """
-        log.info('Still waiting for Qualys result.')
-        sleep(20 + randint(0, 5))  # don't pulsate.
+    else:
+        data['status'] = "FAILURE"  # stay in the loop
+        log.error("Unexpected result from API")
+        log.error(data)  # print for debugging purposes
+        scratch(url, data)  # we always want to see what happened.
+
+    """
+    While the documentation says to check every 10 seconds, we'll do that between every
+    20 to 25, simply because it matters very little when scans are ran parralel.
+    https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+    """
+    log.info('Still waiting for Qualys result. Retrying task in 20 seconds.')
+    # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
+    raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30)
+    # sleep(20 + randint(0, 5))  # don't pulsate.
 
 
 def external_service_task_rate_limit(urls):

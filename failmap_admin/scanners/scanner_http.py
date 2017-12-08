@@ -264,8 +264,14 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
         This can lead to interesting behavior: the browser times out.
 
         https://stackoverflow.com/questions/43156023/what-is-http-host-header#43156094
+        
+        # Certificate did not match expected hostname: 85.119.104.84. 
+        Certificate: {'subject': ((('commonName', 'webdiensten.drechtsteden.nl'),),)
         """
-        r = requests.get(uri, timeout=(30, 30), allow_redirects=False, headers={'Host': url.url})
+        r = requests.get(uri, timeout=(30, 30),
+                         allow_redirects=False,  # redirect = connection
+                         verify=False,  # any tls = connection
+                         headers={'Host': url.url})
         if r.status_code:
             logger.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True
