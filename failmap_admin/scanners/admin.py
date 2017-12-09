@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from jet.admin import CompactInline
 
 from failmap_admin.map.rating import rate_url
@@ -43,11 +44,11 @@ class UrlIpAdmin(admin.ModelAdmin):
 
 
 class EndpointAdmin(admin.ModelAdmin):
-    list_display = ('id', 'url', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
+    list_display = ('id', 'url', 'visit', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
                     'tls_scans', 'generic_scans')
     search_fields = ('url__url', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
-    list_filter = ('ip_version', 'port', 'protocol', 'is_dead')
+    list_filter = ('ip_version', 'port', 'protocol', 'is_dead', 'is_dead_reason')
     fieldsets = (
         (None, {
             'fields': ('url', 'ip_version', 'protocol', 'port', 'discovered_on')
@@ -66,6 +67,11 @@ class EndpointAdmin(admin.ModelAdmin):
     @staticmethod
     def generic_scans(inst):
         return EndpointGenericScan.objects.filter(endpoint_id=inst.id).count()
+
+    @staticmethod
+    def visit(inst):
+        url = "%s://%s:%s/" % (inst.protocol, inst.url.url, inst.port)
+        return format_html("<a href='%s' target='_blank'>Visit</a>" % url)
 
     inlines = [TlsQualysScanAdminInline, EndpointGenericScanInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
@@ -98,12 +104,19 @@ class TlsQualysScanAdmin(admin.ModelAdmin):
                     'last_scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
                      'scan_date', 'rating_determined_on')
-    list_filter = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
+
+    # listing all endpoints takes ages
+    list_filter = ('qualys_rating', 'qualys_rating_no_trust',
                    'scan_date', 'rating_determined_on', 'qualys_message')
+
+    # loading related fields in django jet is not done in a smart way: everything is prefetched.
+    # and when there are > 10000 objects of some sort, the system becomes insanely slow.
+    # Should make it an autocomplete field... or something else.
+    # therefore endpoint is set as a readonly_field.
     fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
               'rating_determined_on', 'last_scan_moment')
 
-    readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment')
+    readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment', 'endpoint')
 
     actions = ['rate_url', 'scan_url']
 
@@ -157,12 +170,13 @@ class EndpointGenericScanAdmin(admin.ModelAdmin):
                     'explanation', 'last_scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'type', 'domain', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
-    list_filter = ('endpoint', 'type', 'domain', 'rating',
+    list_filter = ('type', 'domain', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')
     fields = ('endpoint', 'type', 'domain', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
 
-    readonly_fields = ['last_scan_moment']
+    # see tlsqualysscan why endpoint is here.
+    readonly_fields = ['last_scan_moment', 'endpoint']
 
 
 class EndpointGenericScanScratchpadAdmin(admin.ModelAdmin):

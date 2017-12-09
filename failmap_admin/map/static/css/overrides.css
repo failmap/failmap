@@ -419,11 +419,11 @@ div#report {
 }
 
 .redrow {
-    color: darkred;
+    color: #d30000;
 }
 
 .greenrow {
-    color: darkgreen;
+    color: #00c700;
 }
 
 .grayrow {

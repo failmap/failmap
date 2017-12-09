@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 from django.contrib import admin
 from django.urls import reverse
+from django.utils.html import format_html
 from jet.admin import CompactInline
 
 import failmap_admin.scanners.scanner_http as scanner_http
@@ -118,10 +119,11 @@ class UrlAdmin(admin.ModelAdmin):
         js = ('js/action_buttons.js', )
 
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
-                    'is_dead', 'not_resolvable', 'created_on')
+                    'dead_for', 'unresolvable_for', 'created_on')
     search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
-                   'not_resolvable', 'uses_dns_wildcard', 'organization')
+                   'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
+                   'uses_dns_wildcard', 'organization')
 
     fieldsets = (
         (None, {
@@ -140,7 +142,24 @@ class UrlAdmin(admin.ModelAdmin):
     readonly_fields = ['created_on', 'onboarded']
 
     def endpoints(self, obj: Url):
-        return obj.endpoint_set.count()
+
+        return format_html("%s <a href='/admin/scanners/endpoint/?q=%s' target='_blank'>🔍</a>" %
+                           (obj.endpoint_set.count(), obj.url))
+
+    @staticmethod
+    def unresolvable_for(self):
+        if self.not_resolvable_since:
+            return "%s days" % (datetime.now(pytz.utc) - self.not_resolvable_since).days
+        else:
+            return "-"
+
+    # todo: further humanize this.
+    @staticmethod
+    def dead_for(self):
+        if self.is_dead_since:
+            return "%s days" % (datetime.now(pytz.utc) - self.is_dead_since).days
+        else:
+            return "-"
 
     @staticmethod
     def current_rating(obj):

@@ -51,3 +51,4 @@ raven
 # allow recursive comparison of dictionaries
 deepdiff
 influxdb
+urllib3

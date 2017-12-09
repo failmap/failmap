@@ -25,12 +25,15 @@ Likely: 80, 8080, 8008, 8888, 8088
 
 """
 import logging
+import random
 import socket
 from datetime import datetime
 from typing import List
 
 import pytz
 import requests
+# suppress InsecureRequestWarning, we do those request on purpose.
+import urllib3
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
@@ -40,6 +43,8 @@ from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, UrlIp
 
 from .timeout import timeout
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__package__)
 
@@ -88,6 +93,10 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
     if organizations:
         endpoints = endpoints.filter(url__organization__in=organizations)
 
+    # randomize the endpoints to better spread load.
+    endpoints = list(endpoints)
+    random.shuffle(endpoints)
+
     for endpoint in endpoints:
         scan_url(endpoint.protocol, endpoint.url, endpoint.port)
 
@@ -116,6 +125,10 @@ def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
         # Yes, HTTP sites on port 443 exist, we've seen many of them. Not just warnings(!).
         # Don't underestimate the flexibility of the internet.
         ports = [80, 443, 8008, 8080, 8088, 8443, 8888]
+
+    # randomize the endpoints to better spread load.
+    urls = list(urls)
+    random.shuffle(urls)
 
     scan_urls(protocols, urls, ports)
 
@@ -157,11 +170,13 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
     store_task = store_url_ips.s(url, ips)  # administrative, does reverse dns query
     store_task.apply_async()
 
+    # todo: this should be re-checked a few times before it's really killed. Retry?
     if not any(ips):
         kill_url_task = kill_url.s(url)  # administrative
         kill_url_task.apply_async()
         return
 
+    # this is not a stacking solution. Weird. Why not?
     url_revive_task = revive_url.s(url)
     url_revive_task.apply_async()
 
@@ -178,8 +193,6 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
         result_task = connect_result.s(protocol, url, port, 6)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
-
-    # v6 is not yet supported, as we don't have v6 workers yet.
 
 
 def get_ips(url: str):
@@ -207,8 +220,26 @@ def get_ips(url: str):
     return ipv4, ipv6
 
 
-@app.task
-def can_connect(protocol: str, url: Url, port: int, ip: str):
+@app.task(
+    # When doing a lot of connections, try to do them in semi-random order also not to overload networks/firewalls
+
+    # Don't try and overload the network with too many connections.
+    # The (virtual) network (card) might have a problem keeping up.
+    # Firewalls might see it as hostile.
+    # Our database might be overloaded with work,
+
+    # To consider the rate limit:
+    # There are about 11000 endpoints at this moment.
+    # 3/s = 180/m = 1800/10m = 10800/h
+    # 4/s = 240/m = 2400/10m = 14400/h
+    # 5/s = 300/m = 3000/10m = 18000/h
+    # 10/s = 600/m = 6000/10m = 36000/h
+
+    # on the development machine it scans all within 10 minutes. About 20/s.
+
+    rate_limit='3/s',
+)
+def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -244,7 +275,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str):
     else:
         uri = "%s://%s:%s" % (protocol, ip, port)
 
-    logger.debug("Scanning http(s) server on: %s" % uri)
+    logger.debug("Attempting connect on: %s: host: %s" % (uri, url.url))
 
     try:
         """
@@ -481,3 +512,42 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         ep.is_dead_since = datetime.now(pytz.utc)
         ep.is_dead_reason = "Not found in HTTP Scanner anymore."
         ep.save()
+
+
+@app.task()
+def test_network(code_location=""):
+    """
+    Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,
+    which is logged in sentry and other logs.
+
+    :return:
+    """
+
+    logger.info("Testing network connection via %s." % code_location)
+
+    url = Url()
+    url.url = "faalkaart.nl"
+
+    ips = get_ips(url.url)
+
+    can_ipv4, can_ipv6 = False, False
+
+    (ipv4, ipv6) = ips
+    if ipv4:
+        can_ipv4 = can_connect("https", url, 443, ipv4)
+
+    if ipv6:
+        can_ipv6 = can_connect("https", url, 443, ipv6)
+
+    if not can_ipv4 and not can_ipv6:
+        raise ConnectionError("Both ipv6 and ipv4 networks could not be reached via %s." % code_location)
+
+    if not can_ipv4:
+        raise ConnectionError("Could not reach IPv4 Network via %s." % code_location)
+    else:
+        logger.info("IPv4 could be reached via %s" % code_location)
+
+    if not can_ipv6:
+        raise ConnectionError("Could not reach IPv6 Network via %s." % code_location)
+    else:
+        logger.info("IPv6 could be reached via %s" % code_location)

@@ -78,6 +78,11 @@ def rebuild_ratings():
     rerate_organizations()
 
 
+def rebuild_ratings_async():
+    """Remove all organization and url ratings, then rebuild them from scratch."""
+    rerate_organizations()
+
+
 @app.task
 def add_organization_rating(organizations: List[Organization], build_history: bool=False, when: datetime=None):
     """
@@ -113,6 +118,7 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
 
 @app.task
 def rerate_urls(urls: List[Url]=None):
+
     if not urls:
         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
 
@@ -120,6 +126,18 @@ def rerate_urls(urls: List[Url]=None):
     for url in urls:
         UrlRating.objects.all().filter(url=url).delete()
         rate_timeline(create_timeline(url), url)
+
+
+@app.task
+def rerate_urls_async(urls: List[Url]=None):
+
+    if not urls:
+        urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
+
+    # to not have all ratings empty, do it per url
+    for url in urls:
+        UrlRating.objects.all().filter(url=url).delete()
+        (create_timeline.s(url) | rate_timeline.s(url)).apply_async()
 
 
 def rerate_organizations(organizations: List[Organization]=None):
@@ -219,6 +237,7 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     return moments, happenings
 
 
+@app.task
 def create_timeline(url: Url):
     """
     Maps happenings to moments.
@@ -314,6 +333,7 @@ def latest_moment_of_datetime(datetime_: datetime):
     return datetime_.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
 
+@app.task()
 def rate_timeline(timeline, url: Url):
     logger.info("Rebuilding ratings for for %s" % url)
 
