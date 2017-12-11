@@ -135,7 +135,9 @@ class UrlIp(models.Model):
     rdns_name = models.CharField(
         max_length=255,
         help_text="The reverse name can be a server name, containing a provider or anything else."
-                  "It might contain the name of a yet undiscovered url or hint to a service.")
+                  "It might contain the name of a yet undiscovered url or hint to a service.",
+        blank=True
+    )
 
     discovered_on = models.DateTimeField(blank=True, null=True)
 

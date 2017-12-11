@@ -162,6 +162,14 @@ def scan_url(protocol: str, url: Url, port: int):
     resolve_task.apply_async()
 
 
+def scan_url_direct(protocol: str, url: Url, port: int):
+    resolve_and_scan(protocol, url, port)
+
+
+# todo: apply rate limiting
+# also rate limited for the same reason as can_connect is rate limited.
+# would this be faster the ip discovery and actual scan grow to far apart.
+# also it would mean an intense series of questions to the dns server.
 @app.task
 def resolve_and_scan(protocol: str, url: Url, port: int):
     ips = get_ips(url.url)
@@ -180,7 +188,6 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
     url_revive_task = revive_url.s(url)
     url_revive_task.apply_async()
 
-    # todo: switch between ipv4 and ipv6, make tasks for different workers.
     (ipv4, ipv6) = ips
     if ipv4:
         connect_task = can_connect.s(protocol, url, port, ipv4)  # Network task
@@ -270,12 +277,15 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     Todo: remove IP from endpoints. (change for version 1.1)
 
     """
+    if not ip:
+        raise ValueError("ip not supplied.")
+
     if ":" in ip:
         uri = "%s://[%s]:%s" % (protocol, ip, port)
     else:
         uri = "%s://%s:%s" % (protocol, ip, port)
 
-    logger.debug("Attempting connect on: %s: host: %s" % (uri, url.url))
+    logger.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
 
     try:
         """
@@ -305,7 +315,8 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
         r = requests.get(uri, timeout=(30, 30),
                          allow_redirects=False,  # redirect = connection
                          verify=False,  # any tls = connection
-                         headers={'Host': url.url})
+                         headers={'Host': url.url,
+                                  'User-Agent': get_random_user_agent()})
         if r.status_code:
             logger.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True
@@ -551,3 +562,84 @@ def test_network(code_location=""):
         raise ConnectionError("Could not reach IPv6 Network via %s." % code_location)
     else:
         logger.info("IPv6 could be reached via %s" % code_location)
+
+
+def verify_is_secure(endpoint: Endpoint):
+    # i've seen qualys saying there is no TLS, while there is! So qualys kills the endpoint, this adds a new one.
+
+    scan_urls(['https'], [endpoint.url], [443])
+
+    # might hopefully result in a new endpoint
+    endpoints = Endpoint.objects.all().filter(url=endpoint.url, is_dead=False, protocol="https", port=443,
+                                              ip_version=endpoint.ip_version)
+    if endpoints:
+        logger.debug("Url does seem to be secure after all: %s" % endpoint.url)
+        return True
+    logger.debug("Url is still not secure: %s" % endpoint.url)
+    return False
+
+
+def redirects_to_safety(endpoint: Endpoint):
+    """
+    Also includes the ip-version of the endpoint.
+
+    :param endpoint:
+    :return:
+    """
+    import requests
+    from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
+
+    (ipv4, ipv6) = get_ips(endpoint.url.url)
+
+    if endpoint.ip_version == 4:
+        uri = "%s://%s:%s" % ("http", ipv4, "80")
+    else:
+        uri = "%s://[%s]:%s" % ("http", ipv6, "80")
+
+    try:
+        response = requests.get(uri,
+                                timeout=(30, 30),  # allow for insane network lag
+                                allow_redirects=True,  # point is: redirects to safety
+                                verify=False,  # certificate validity is checked elsewhere, having some https > none
+                                headers={'Host': endpoint.url.url,
+                                         'User-Agent': get_random_user_agent()})
+        if response.history:
+            logger.debug("Request was redirected, there is hope. Redirect path:")
+            for resp in response.history:
+                logger.debug("%s: %s" % (resp.status_code, resp.url))
+            logger.debug("Final destination:")
+            logger.debug("%s: %s" % (response.status_code, response.url))
+            if response.url.startswith("https://"):
+                logger.debug("Url starts with https, so it redirects to safety.")
+                return True
+            logger.debug("Url is not redirecting to a safe url.")
+            return False
+        else:
+            logger.debug("Request was not redirected, so not going to a safe url.")
+            return False
+    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects):
+        logger.debug("Request resulted into an error, it's not redirecting properly.")
+        return False
+
+
+# http://useragentstring.com/pages/useragentstring.php/
+def get_random_user_agent():
+    user_agents = [
+        # Samsung Galaxy S6
+        "Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
+        # HTC One M9
+        "Mozilla/5.0 (Linux; Android 6.0; HTC One M9 Build/MRA58K) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36",
+        # Windows 10 with Edge
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
+        # Safari
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+        "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+        # Windows 7
+        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36"
+    ]
+
+    return random.choice(user_agents)

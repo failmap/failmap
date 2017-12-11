@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytz
 from django.contrib import admin
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.urls import reverse
 from django.utils.html import format_html
 from jet.admin import CompactInline
@@ -148,16 +149,16 @@ class UrlAdmin(admin.ModelAdmin):
 
     @staticmethod
     def unresolvable_for(self):
-        if self.not_resolvable_since:
-            return "%s days" % (datetime.now(pytz.utc) - self.not_resolvable_since).days
+        if self.not_resolvable and self.not_resolvable_since:
+            return naturaltime(self.not_resolvable_since)
         else:
             return "-"
 
     # todo: further humanize this.
     @staticmethod
     def dead_for(self):
-        if self.is_dead_since:
-            return "%s days" % (datetime.now(pytz.utc) - self.is_dead_since).days
+        if self.is_dead and self.is_dead_since:
+            return naturaltime(self.is_dead_since)
         else:
             return "-"
 

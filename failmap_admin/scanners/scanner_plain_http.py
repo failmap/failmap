@@ -18,8 +18,7 @@ from celery import group
 
 from failmap_admin.organizations.models import Url
 from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap_admin.scanners.scanner_http import scan_urls as scanner_http_scan_urls
-from failmap_admin.scanners.scanner_http import get_ips
+from failmap_admin.scanners.scanner_http import redirects_to_safety, verify_is_secure
 
 from ..celery import app
 from .models import Endpoint
@@ -130,6 +129,8 @@ def scan_url(url: Url):
         logger.debug("This url seems to have no https at all: %s" % url)
         logger.debug("Checking if they exist, to be sure there is nothing.")
 
+        # todo: doesn't work anymore, as it's async
+        # quick fix: run it again after the discovery tasks have finished.
         if not verify_is_secure(http_v4_endpoint):
 
             logger.info("Checking if the URL redirects to a secure url: %s" % url)
@@ -157,60 +158,3 @@ def scan_url(url: Url):
             scan_manager.add_scan("plain_https", http_v6_endpoint, "0", cleaned_up)
 
     return 'done'
-
-
-def verify_is_secure(endpoint: Endpoint):
-    # i've seen qualys saying there is no TLS, while there is! So qualys kills the endpoint, this adds a new one.
-
-    scanner_http_scan_urls(['https'], [endpoint.url], [443])
-
-    # might hopefully result in a new endpoint
-    endpoints = Endpoint.objects.all().filter(url=endpoint.url, is_dead=False, protocol="https", port=443,
-                                              ip_version=endpoint.ip_version)
-    if endpoints:
-        logger.debug("Url does seem to be secure after all: %s" % endpoint.url)
-        return True
-    logger.debug("Url is still not secure: %s" % endpoint.url)
-    return False
-
-
-def redirects_to_safety(endpoint: Endpoint):
-    """
-    Also includes the ip-version of the endpoint.
-
-    :param endpoint:
-    :return:
-    """
-    import requests
-    from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
-
-    (ipv4, ipv6) = get_ips(endpoint.url.url)
-
-    if endpoint.ip_version == 4:
-        uri = "%s://%s:%s" % ("http", ipv4, "80")
-    else:
-        uri = "%s://[%s]:%s" % ("http", ipv6, "80")
-
-    try:
-        response = requests.get(uri,
-                                timeout=(30, 30),  # allow for insane network lag
-                                allow_redirects=True,  # point is: redirects to safety
-                                verify=False,  # certificate validity is checked elsewhere, having some https > none
-                                headers={'Host': endpoint.url.url})
-        if response.history:
-            logger.debug("Request was redirected, there is hope. Redirect path:")
-            for resp in response.history:
-                logger.debug("%s: %s" % (resp.status_code, resp.url))
-            logger.debug("Final destination:")
-            logger.debug("%s: %s" % (response.status_code, response.url))
-            if response.url.startswith("https://"):
-                logger.debug("Url starts with https, so it redirects to safety.")
-                return True
-            logger.debug("Url is not redirecting to a safe url.")
-            return False
-        else:
-            logger.debug("Request was not redirected, so not going to a safe url.")
-            return False
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects):
-        logger.debug("Request resulted into an error, it's not redirecting properly.")
-        return False

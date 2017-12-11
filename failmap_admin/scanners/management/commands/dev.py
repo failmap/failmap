@@ -15,8 +15,9 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
+        test_can_connect_to_organization()
         # as a task
-        develop_determineratings()
+        # develop_determineratings()
 
         # reset_onboard()
         # rebuild_ratings()
@@ -135,3 +136,15 @@ def develop_determineratings():
     # add_organization_rating(organization, create_history=True)
     # create one for NOW, not this night. This is a bug :)
     # add_organization_rating(organization)
+
+
+def test_can_connect_to_organization():
+    from failmap_admin.scanners.scanner_http import can_connect, get_ips
+    organization = Organization.objects.filter(name="Zederik").get()
+    urls = Url.objects.all().filter(organization=organization)
+    for url in urls:
+        ipv4, ipv6 = get_ips(url.url)
+        if ipv4:
+            logger.info(can_connect("http", url, 80, ipv4))
+        if ipv6:
+            logger.info(can_connect("http", url, 80, ipv6))
