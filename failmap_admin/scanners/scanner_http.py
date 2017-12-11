@@ -526,7 +526,7 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
 
 
 @app.task()
-def test_network(code_location=""):
+def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,
     which is logged in sentry and other logs.
@@ -535,6 +535,9 @@ def test_network(code_location=""):
     """
 
     logger.info("Testing network connection via %s." % code_location)
+
+    logger.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
+    logger.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
 
     url = Url()
     url.url = "faalkaart.nl"
@@ -551,15 +554,19 @@ def test_network(code_location=""):
         can_ipv6 = can_connect("https", url, 443, ipv6)
 
     if not can_ipv4 and not can_ipv6:
-        raise ConnectionError("Both ipv6 and ipv4 networks could not be reached via %s." % code_location)
+        raise ConnectionError("Both ipv6 and ipv4 networks could not be reached via %s."
+                              "IPv4 enabled in config: %s, IPv6 enabled in config: %s" %
+                              (code_location, settings.NETWORK_SUPPORTS_IPV4, settings.NETWORK_SUPPORTS_IPV6))
 
     if not can_ipv4:
-        raise ConnectionError("Could not reach IPv4 Network via %s." % code_location)
+        raise ConnectionError("Could not reach IPv4 Network via %s. IPv4 enabled in config: %s" %
+                              (code_location, settings.NETWORK_SUPPORTS_IPV4))
     else:
         logger.info("IPv4 could be reached via %s" % code_location)
 
     if not can_ipv6:
-        raise ConnectionError("Could not reach IPv6 Network via %s." % code_location)
+        raise ConnectionError("Could not reach IPv6 Network via %s. IPv6 enabled in config: %s" %
+                              (code_location, settings.NETWORK_SUPPORTS_IPV6))
     else:
         logger.info("IPv6 could be reached via %s" % code_location)
 

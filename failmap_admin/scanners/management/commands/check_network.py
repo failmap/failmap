@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.scanners.scanner_http import test_network
+from failmap_admin.scanners.scanner_http import check_network
 
 logger = logging.getLogger(__package__)
 
@@ -13,8 +13,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         # on a worker
-        task = test_network.s(code_location="worker")
+        task = check_network.s(code_location="worker")
         task.apply_async()
 
         # locally
-        test_network(code_location="local")
+        check_network(code_location="local")
