@@ -207,7 +207,9 @@ class EndpointGenericScan(models.Model):
     )
     domain = models.CharField(
         max_length=255,
-        help_text="Used when there is no known endpoint.")
+        help_text="Deprecated. Used when there is no known endpoint.",
+        blank=True
+    )
     rating = models.CharField(
         max_length=6,
         default=0,
@@ -246,7 +248,8 @@ class EndpointGenericScanScratchpad(models.Model):
                   "scan, this label separates the scans.")
     domain = models.CharField(
         max_length=255,
-        help_text="Used when there is no known Endpoint."
+        help_text="Deprecated. Used when there is no known Endpoint.",
+        blank=True
     )
     when = models.DateTimeField(
         auto_now_add=True
@@ -259,7 +262,7 @@ class EndpointGenericScanScratchpad(models.Model):
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE)
-    domain = models.CharField(max_length=255, help_text="Used when there is no known URL.")
+    domain = models.CharField(max_length=255, help_text="Deprecated. Used when there is no known URL.", blank=True)
     filename = models.CharField(max_length=255)
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
