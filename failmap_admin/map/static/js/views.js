@@ -41,7 +41,7 @@ Date.prototype.getWeek = function () {
 // support for an intuitive timestamp
 // translation?
 Date.prototype.humanTimeStamp = function () {
-    return this.getFullYear() + " Week " + this.getWeek();
+    return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
 };
 
 
@@ -208,13 +208,13 @@ function views() {
             },
             make_marker: function (high, medium, low) {
                 if (high === 0 && medium === 0 && low === 0)
-                    return "perfect";
+                    return gettext("score perfect");
                 else if (high > 0)
-                    return "hoog";
+                    return gettext("score high");
                 else if (medium > 0)
-                    return "midden";
+                    return gettext("score medium");
                 else
-                    return "laag";
+                    return gettext("score low");
             },
             // fullscreen report
             show: function () {
@@ -360,7 +360,7 @@ function views() {
                     return roundTo(score, 2) + "%";
                 }
                 return 0
-            }
+            },
         },
         methods: {
             load: function (weeknumber) {
@@ -371,6 +371,10 @@ function views() {
             perc: function (data, amount, total) {
                 return (!data) ? "0%" :
                     roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
+            },
+            // we can't do gettext
+            translate: function(string){
+                return gettext(string);
             }
         }
     });
@@ -398,15 +402,15 @@ function views() {
     window.vueFullscreen = new Vue({
         el: '#fullscreen',
         data: {
-            fullscreen: "View Full Screen"
+            fullscreen: gettext("View Full Screen")
         },
         methods: {
             toggleFullScreen: function () {
-                failmap.map.toggleFullscreen(failmap.map.options)
-                if (vueFullscreen.fullscreen == "View Full Screen") {
-                    vueFullscreen.fullscreen = "Exit Full Screen"
+                failmap.map.toggleFullscreen(failmap.map.options);
+                if (vueFullscreen.fullscreen === gettext("View Full Screen")) {
+                    vueFullscreen.fullscreen = gettext("Exit Full Screen")
                 } else {
-                    vueFullscreen.fullscreen = "View Full Screen"
+                    vueFullscreen.fullscreen = gettext("View Full Screen")
                 }
             }
         }
@@ -431,6 +435,21 @@ function views() {
                 $.getJSON(this.$data.data_url + weeknumber, function (data) {
                     self.top = data;
                 });
+            },
+            twitter_message: function (chart, rank){
+                message = "https://twitter.com/intent/tweet?screen_name=" + rank.organization_twitter + "&text=";
+                if (chart === 'fail') {
+                    message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
+                        + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
+                        + gettext("top fail on failmap") + ' 🥀' +
+                        '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
+                } else {
+                    message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
+                        + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
+                        + gettext("top win on failmap") + ' 🌹' +
+                        '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
+                }
+                return message
             }
         }
     };

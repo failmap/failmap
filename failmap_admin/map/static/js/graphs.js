@@ -97,6 +97,15 @@ function d3stats() {
             .style("font", "10px sans-serif")
             .style("text-anchor", "end")
             .text(function (d) {
+                // the switch is explicit for gettext translations
+                if (d.key === "low")
+                    return gettext("low");
+                if (d.key === "medium")
+                    return gettext("medium");
+                if (d.key === "high")
+                    return gettext("high");
+
+                // and for any other cases we don't know yet.
                 return d.key;
             });
 

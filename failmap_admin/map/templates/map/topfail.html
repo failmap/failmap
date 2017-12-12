@@ -27,11 +27,8 @@
                 <td>{{ rank.medium }}</td>
                 <td>{{ rank.low }}</td>
                 <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                <td><a v-if="rank.organization_twitter"
-                       :href="'https://twitter.com/intent/tweet?screen_name=' + rank.organization_twitter + '&text=' + rank.organization_twitter + ' gefeliciteerd! ' + rank.organization_name + ' staat positie ' + rank.rank + ' op Faalkaart! 🥀&hashtags=' + rank.organization_name + ',faal,faalkaart'">Tweet!
-                    📣</a></td>
+                <td><a v-if="rank.organization_twitter" :href="twitter_message('fail', rank)">{% endverbatim %}{% trans "Tweet" %}</a></td>
             </tr>
-            {% endverbatim %}
             </tbody>
         </table>
     </div>

@@ -2,6 +2,7 @@
 import proxy.views
 from django.conf import settings
 from django.conf.urls import url
+from django.views.i18n import JavaScriptCatalog
 
 from failmap_admin.map.views import (LatestScanFeed, index, latest_scans, manifest_json, map_data,
                                      organization_report, robots_txt, security_txt, stats,
@@ -30,5 +31,10 @@ urlpatterns = [
     # it works for dev. as well.
     url(r'^proxy/(?P<url>https://api.tiles.mapbox.com/v4/.*.png$)',
         proxy.views.proxy_view,
-        {"requests_args": {"params": {"access_token": settings.MAPBOX_TOKEN}}})
+        {"requests_args": {"params": {"access_token": settings.MAPBOX_TOKEN}}}),
+
+    # translations for javascript files. Copied from the manual.
+    # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
+    # cache_page(86400, key_prefix='js18n')
+    url(r'^jsi18n/map/$', JavaScriptCatalog.as_view(packages=['failmap_admin.map']), name='javascript-catalog'),
 ]

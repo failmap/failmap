@@ -29,6 +29,7 @@
             <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
+            <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
             <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -42,6 +43,7 @@
             <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
+            <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
             <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
             <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -75,7 +77,7 @@
                     </ul>
                     {% if debug %}
                     <ul class="nav navbar-nav navbar-right">
-                        <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>DEBUG</span></li>
+                        <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>{% trans "DEBUG" %}</span></li>
                     </ul>
                     {% endif %}
                     {% if admin %}
@@ -96,10 +98,7 @@
             <div class="jumbotron">
                 <h1>{% trans "Fail Map" %}</h1>
                 <p>{% trans "Fail Map Introduction" %}</p>
-                <p>Stuur nieuwe subdomeinen in via twitter:
-                    <a href="https://twitter.com/faalkaart" target="_blank">@faalkaart</a>
-                    of mail <a href="mailto:info@faalkaart.nl?subject=subdomeinen">info@faalkaart.nl</a>
-                </p>
+                <p>{% trans "Send in subdomain adresses" %}</p>
             </div>
 
             {% include "map/target_audience.html" %}
@@ -124,16 +123,16 @@
                     <div class="col-md-6">
                         <div class="progress">
                             <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
-                                <span class="sr-only">Oh, wow!</span>
+                                <span class="sr-only">{% trans "stats remark green" %}</span>
                             </div>
                             <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
-                                <span class="sr-only">Pretty fair, but not really there.</span>
+                                <span class="sr-only">{% trans "stats remark orange" %}</span>
                             </div>
                             <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
-                                <span class='sr-only'>They have a lot to learn.</span>
+                                <span class='sr-only'>{% trans "stats remark red" %}</span>
                             </div>
                             <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
-                                <span class='sr-only'>We didn't scan them then...</span>
+                                <span class='sr-only'>{% trans "stats remark gray" %}</span>
                             </div>
                         </div>
 
@@ -150,7 +149,7 @@
                             <tbody v-if="data.data">
                                 {% verbatim %}
                                 <tr v-for="(x, key) in data.data">
-                                    <td>{{ key }}</td>
+                                    <td>{{ translate(key) }}</td>
                                     <td>{{ x["included_organizations"] }}</td>
                                     <td v-bind:style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, white ' + x['green percentage'] + '%, white 100%);'">{{ x["green"] }} <small>({{ x["green percentage"] }}%)</small></td>
                                     <td v-bind:style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, white ' + x['orange percentage'] + '%, white 100%);'">{{ x["orange"] }} <small>({{ x["orange percentage"] }}%)</small></td>
@@ -185,7 +184,7 @@
                             <tbody v-if="data.data">
                                 {% verbatim %}
                                 <tr v-for="(x, key) in data.data">
-                                    <td>{{ key }}</td>
+                                    <td>{{ translate(key) }}</td>
                                     <td>{{ x["total_urls"] }}</td>
                                     <td v-bind:style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, white ' + x['green url percentage'] + '%, white 100%);'">{{ x["green_urls"] }} <small>({{ x["green url percentage"] }}%)</small></td>
                                     <td v-bind:style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, white ' + x['orange url percentage'] + '%, white 100%);'">{{ x["orange_urls"] }} <small>({{ x["orange url percentage"] }}%)</small></td>
@@ -220,21 +219,21 @@
                             </thead>
                             <tbody>
                             {% verbatim %}
-                                <tr v-if="x['explained']['plain_https']"><td colspan="3">Toepassing van versleuteling</td></tr>
-                                <tr v-if="x['explained']['plain_https']" class="redrow"><td></td><td>Geheel niet:</td><td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}</td></tr>
-                                <tr v-if="x['explained']['plain_https']" class="orangerow"><td></td><td>Doorverwijzing vanaf onveilig adres:</td><td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']"><td colspan="3">Kwaliteit van versleuteling</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Onvoldoende:</td><td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Ongeldig voor adres:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, C:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, B:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, A-:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>Geen vertrouwen, A:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Matig:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>Redelijk:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Goed:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Perfect:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td></tr>
-                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>Perfect en meer+:</td><td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}</td></tr>
+                                <tr v-if="x['explained']['plain_https']"><td colspan="3">{% endverbatim %}{% trans "Application of encryption" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['plain_https']" class="redrow"><td></td><td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td><td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}</td></tr>
+                                <tr v-if="x['explained']['plain_https']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "Redirect from unsafe address" %}{% verbatim %}:</td><td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']"><td colspan="3">{% endverbatim %} {% trans "Encryption quality" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "Broken" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "No trust, C" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "No trust, B" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "No trust, A-" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="redrow"><td></td><td>{% endverbatim %}{% trans "No trust, A" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "TLS rated C" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "TLS rated B" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "TLS rated A-" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "TLS rated A" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td></tr>
+                                <tr v-if="x['explained']['tls_qualys']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "TLS rated A+" %}{% verbatim %}:</td><td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}</td></tr>
                             {% endverbatim %}
                             </tbody>
                             </table>
@@ -252,18 +251,18 @@
                             </thead>
                             <tbody>
                             {% verbatim %}
-                                <tr v-if="x['explained']['security_headers_strict_transport_security']"><td colspan="3">Afdwingen van versleuteling / HTTP Strict Transport Security (HSTS)</td></tr>
-                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_frame_options']"><td colspan="3">Voorkomen van Clickjacking aanvallen (X-Frame Options)</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_xss_protection']"><td colspan="3">X-XSS Protection</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_content_type_options']"><td colspan="3">X-Content Type Options</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow"><td></td><td>Niet:</td><td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}</td></tr>
-                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow"><td></td><td>Wel:</td><td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']"><td colspan="3">{% endverbatim %}{% trans "Stats HSTS" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']"><td colspan="3">{% endverbatim %}{% trans "Stats X-Frame-Options" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']"><td colspan="3">{% endverbatim %}{% trans "Stats X-XSS Protection" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']"><td colspan="3">{% endverbatim %}{% trans "Stats X-Content Type Options" %}{% verbatim %}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow"><td></td><td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}</td></tr>
+                                <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow"><td></td><td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td><td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}</td></tr>
                             {% endverbatim %}
                             </tbody>
                             </table>
@@ -276,9 +275,8 @@
                         <p>{% trans "Services explained" %}</p>
                         {% verbatim %}
                         <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                            <p>Er wordt door faalkaart controle uitgevoerd op {{ x['endpoints'] }} diensten.</p>
+                            <p>{% endverbatim %}{% trans "Number of service checked" %}</p>
                             <table class="table">
-                                {% endverbatim %}
                                 <tr><th>{% trans "Service" %}</th><th>{% trans "Amount" %}</th><th>{% trans "Percentage" %}</th></tr>
                                 {% verbatim %}
                             <tr v-for="(xx, xkey) in x['endpoint']">
@@ -290,22 +288,7 @@
                     </div>
                     <div class="col-md-6">
                         <h3>{% trans "Services faq" %}</h3>
-                        <p>Het versturen van informatie over het internet kan op allerlei manieren:
-                        via verschillende adressen, protocollen en poorten. Sommige combinaties hiervan zijn
-                        zo gebruikelijk dat niemand er nog over nadenkt. Maar door de grote flexibiliteit zijn
-                        ook ongebruikelijke combinaties mogelijk.</p>
-                        <p>Faalkaart kijkt niet alleen naar de meest gebruikelijke diensten maar neemt ook bekende
-                        alternatieven hier van mee.</p>
-                        <p>Bijvoorbeeld: De meest gebruikelijke diensten op het internet zijn websites. Deze worden aangeboden
-                            op poort 80 (onversleuteld) en 443 (versleuteld). Het is niet nodig om dit aan te geven:
-                            door www.example.com in te tikken wordt http://www.example.com:80 bedoeld. Door expliciet
-                            een poort op te geven, zoals :8080, is het mogelijk om eem extra dienst aan een adres te koppelen.</p>
-                        <p>Lees meer over:</p>
-                        <ul>
-                            <li><a href="https://en.wikipedia.org/wiki/IPv4" target="_blank">IPv4</a> en <a href="https://en.wikipedia.org/wiki/IPv6">IPv6</a></li>
-                            <li><a href="https://en.wikipedia.org/wiki/Port_(computer_networking)" target="_blank">Poorten</a></li>
-                            <li><a href="https://en.wikipedia.org/wiki/Application_layer" target="_blank">Protocollen</a></li>
-                        </ul>
+                        {% trans "Services faq content" %}
                     </div>
                 </div>
             </div>
@@ -319,33 +302,33 @@
 
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Versleuteling Faal</h3>
+                        <h3>{% trans "Encryption failure" %}</h3>
                         <svg id="tls_qualys" width="555" height="300"></svg>
                     </div>
                     <div class="col-md-6">
-                        <h3>Gebrek aan versleuteling Faal</h3>
+                        <h3>{% trans "Lack of encryption failure" %}</h3>
                         <svg id="plain_https" width="555" height="300"></svg>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Forceren van versleuteling (HSTS) Faal</h3>
+                        <h3>{% trans "Forcing of encryption failure" %}</h3>
                         <svg id="security_headers_strict_transport_security" width="555" height="300"></svg>
                     </div>
                     <div class="col-md-6">
-                        <h3>X-Frame Options (clickjacking) Faal</h3>
+                        <h3>{% trans "X-Frame Options failure" %}</h3>
                         <svg id="security_headers_x_frame_options" width="555" height="300"></svg>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>X-Content-Type-Options Faal</h3>
+                        <h3>{% trans "X-Content-Type-Options failure" %}</h3>
                         <svg id="security_headers_x_content_type_options" width="555" height="300"></svg>
                     </div>
                     <div class="col-md-6">
-                        <h3>X-XSS-Protection Faal</h3>
+                        <h3>{% trans "X-XSS-Protection failure" %}</h3>
                         <svg id="security_headers_x_xss_protection" width="555" height="300"></svg>
                     </div>
                 </div>
@@ -355,7 +338,7 @@
                 <div class="page-header">
                     <a name="charts" class="jumptonav"></a>
                     <h2>{% trans "Charts" %}</h2>
-                    <p>Dit zijn de beste en slechtste organisaties en urls op dit moment.</p>
+                    <p>{% trans "Chart introduction" %}</p>
                     <p></p>
                     <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
@@ -372,45 +355,43 @@
                 <div class="page-header">
                     <a name="updates" class="jumptonav"></a>
                     <h2>{% trans "Latest changes" %}</h2>
-                    <p>Dit is een inzicht in de laatst gevonden veranderingen. Deze worden aan het eind van de dag
-                        verwerkt in de rapportages. Omdat alleen veranderingen worden getoond kan het zijn dat dezelfde
-                        gegevens langer blijven staan wanneer er niets veranderd. Scans worden dagelijks uitgevoerd.</p>
+                    {% trans "Latest changes explanation" %}
                     <p></p>
                     <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Versleuteling Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/tls_qualys" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "Encryption updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_tls_qualys"></span>
                     </div>
                     <div class="col-md-6">
-                        <h3>Gebrek aan versleuteling Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/plain_https" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "Lack of encryption updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %} <a href="/data/feed/plain_https" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_plain_https"></span>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Forceren van versleuteling Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/Strict-Transport-Security" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "Forcing encryption updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_security_headers_strict_transport_security"></span>
                     </div>
                     <div class="col-md-6">
-                        <h3>X-Frame-Options Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/X-Frame-Options" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "X-Frame-Options updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_security_headers_x_frame_options"></span>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>X-Content-Type-Option Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/X-Content-Type-Options" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "X-Content-Type-Option updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_security_headers_x_content_type_options"></span>
                     </div>
                     <div class="col-md-6">
-                        <h3>X-XSS-Protection Updates</h3>
-                        <p>Volg de laatste bevinden via de <a href="/data/feed/X-XSS-Protection" target="_blank">rss feed</a>.</p>
+                        <h3>{% trans "X-XSS-Protection updates" %}</h3>
+                        <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection" target="_blank">{% trans "rss feed" %}</a>.</p>
                         <span id="latest_security_headers_x_xss_protection"></span>
                     </div>
                 </div>
@@ -437,23 +418,21 @@
                       </div>
                       <br />
                       <div v-if="name">
-                        Dit resultaat delen? {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
+                        {% trans "Report share result question" %} {% verbatim %}<span v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br />
                         <br />
                         {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br />
-                        Score<span v-if="promise"><strong>*</strong></span>:<br />
+                        {% trans "Score" %}<span v-if="promise"><strong>*</strong></span>:<br />
                         {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br />
                         {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br />
                         {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br />
                         {% trans "congratulations" %}!
                         <br />
                         <br />
-                        Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br/>
-                        Ontbreken er domeinen? <a v-bind:href="'mailto:' + mailto + '?subject=Nieuwe%20domeinen%20voor%20'+name+'&body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br/>
+                        {% trans "Report ask pentest" %}<br/>
+                        {% trans "Report ask domains" %}<br/>
                         <br />
                         {% verbatim %}
-                        <div v-if="promise" id="promise"><strong>*</strong> Deze organisatie heeft op {{formatDate(promise.created_on)}} laten weten dat veranderingen zijn doorgevoerd.
-                          De resultaten van deze verandering zullen uiterlijk {{formatDate(promise.expires_on)}} zichtbaar zijn. Faalkaart draait continu
-                          geautomatiseerd scans. Elke cyclus bevat tienduizenden scans en kost daarom enkele dagen.
+                        <div v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
                         </div>
                         {% endverbatim %}
                         <br/>
@@ -561,15 +540,16 @@
             X
           </p>
           <div>
-            Gegevens van: {{ humanize(when) }}<br>
-            Score<span v-if="promise"><strong>*</strong></span>:<br />
+            {% endverbatim %}{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}<br>
+            {% endverbatim %}{% trans "Score" %}: {% verbatim %}<span v-if="promise"><strong>*</strong></span>:<br />
             {% endverbatim %}{% trans "High" %}: {% verbatim %}{{ high }} <br />
             {% endverbatim %}{% trans "Medium" %}: {% verbatim %}{{ medium }} <br />
             {% endverbatim %}{% trans "Low" %}: {% verbatim %}{{ low }} <br />
-            {% endverbatim %}{% trans "congratulations" %}!{% verbatim %}
+            {% endverbatim %}{% trans "congratulations" %}!
             <br>
-            Gaat faalkaart niet ver genoeg? <a v-bind:href="'mailto:' + mailto + '?subject=Pentest%20aanvraag%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Vraag hier een echte pentest aan.</a><br>
-            Ontbreken er domeinen? <a v-bind:href="'mailto:' + mailto + '?subject=Nieuwe%20domeinen%20voor%20'+name+'&amp;body=Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'">Stuur hier domeinen in.</a><br>
+            {% trans "Report ask pentest" %}<br/>
+            {% trans "Report ask domains" %}<br/>
+            {% verbatim %}
             <br>
             <div v-for="url in urls" class="perurl" v-bind:style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255,.5));'">
               <div class="screenshotlist">

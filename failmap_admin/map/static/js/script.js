@@ -5,6 +5,18 @@ if (sentry_token) {
     Raven.config(sentry_token, {release: version}).install();
 }
 
+// https://stackoverflow.com/questions/7625991/
+// how-to-properly-add-entries-for-computed-values-to-the-django-internationalizati
+var dynamic_translations = function(){
+     gettext('2 weeks ago');
+     gettext('3 weeks ago');
+     gettext('1 month ago');
+     gettext('2 months ago');
+     gettext('3 months ago');
+     gettext('7 days ago');
+     gettext('now');
+};
+
 $(document).ready(function () {
     failmap.initializemap("nl");
     views();
@@ -18,4 +30,5 @@ $(document).ready(function () {
         location.href = '#report';
         vueReport.selected = organization_id;
     }
+
 });

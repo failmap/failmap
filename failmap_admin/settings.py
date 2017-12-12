@@ -201,9 +201,15 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGES = (
     ('en', 'English'),
     ('nl', 'Dutch'),
+    # This helps to find missing translations. Using this language the goal is to replace all text
+    # strings with a single rainbow. In the end there should be no text, only rainbows! 🌈
+    ('🌈🦄', '🌈'),
 )
 
-LANGUAGE_CODE = 'nl'
+# raise ValueError('invalid token in plural form: %s' % value) on 🌈🦄 language. A shame that the js translation
+# parser doesn't understand unicode yet. This is not fixed in Django 2.0 and will likely take half a year to be fixed.
+# so we had to rename the 🌈🦄 language to rp. For Rainbow and Pony :)
+LANGUAGE_CODE = '🌈🦄'
 
 TIME_ZONE = 'UTC'
 

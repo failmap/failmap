@@ -1,0 +1,141 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-12 15:13+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: static/admin/js/actions.js:48 static/admin/js/actions.min.js:2
+msgid "%(sel)s of %(cnt)s selected"
+msgid_plural "%(sel)s of %(cnt)s selected"
+msgstr[0] ""
+msgstr[1] ""
+
+#: static/admin/js/actions.js:117 static/admin/js/actions.min.js:4
+msgid ""
+"You have unsaved changes on individual editable fields. If you run an "
+"action, your unsaved changes will be lost."
+msgstr ""
+
+#: static/admin/js/actions.js:129 static/admin/js/actions.min.js:5
+msgid ""
+"You have selected an action, but you haven't saved your changes to "
+"individual fields yet. Please click OK to save. You'll need to re-run the "
+"action."
+msgstr ""
+
+#: static/admin/js/actions.js:131 static/admin/js/actions.min.js:5
+msgid ""
+"You have selected an action, and you haven't made any changes on individual "
+"fields. You're probably looking for the Go button rather than the Save "
+"button."
+msgstr ""
+
+#: static/admin/js/calendar.js:12
+msgid "January"
+msgstr ""
+
+#: static/admin/js/calendar.js:13
+msgid "February"
+msgstr ""
+
+#: static/admin/js/calendar.js:14
+msgid "March"
+msgstr ""
+
+#: static/admin/js/calendar.js:15
+msgid "April"
+msgstr ""
+
+#: static/admin/js/calendar.js:16
+msgid "May"
+msgstr ""
+
+#: static/admin/js/calendar.js:17
+msgid "June"
+msgstr ""
+
+#: static/admin/js/calendar.js:18
+msgid "July"
+msgstr ""
+
+#: static/admin/js/calendar.js:19
+msgid "August"
+msgstr ""
+
+#: static/admin/js/calendar.js:20
+msgid "September"
+msgstr ""
+
+#: static/admin/js/calendar.js:21
+msgid "October"
+msgstr ""
+
+#: static/admin/js/calendar.js:22
+msgid "November"
+msgstr ""
+
+#: static/admin/js/calendar.js:23
+msgid "December"
+msgstr ""
+
+#: static/admin/js/calendar.js:26
+msgctxt "one letter Sunday"
+msgid "S"
+msgstr ""
+
+#: static/admin/js/calendar.js:27
+msgctxt "one letter Monday"
+msgid "M"
+msgstr ""
+
+#: static/admin/js/calendar.js:28
+msgctxt "one letter Tuesday"
+msgid "T"
+msgstr ""
+
+#: static/admin/js/calendar.js:29
+msgctxt "one letter Wednesday"
+msgid "W"
+msgstr ""
+
+#: static/admin/js/calendar.js:30
+msgctxt "one letter Thursday"
+msgid "T"
+msgstr ""
+
+#: static/admin/js/calendar.js:31
+msgctxt "one letter Friday"
+msgid "F"
+msgstr ""
+
+#: static/admin/js/calendar.js:32
+msgctxt "one letter Saturday"
+msgid "S"
+msgstr ""
+
+#: static/admin/js/collapse.js:10 static/admin/js/collapse.js:21
+#: static/admin/js/collapse.min.js:1
+msgid "Show"
+msgstr ""
+
+#: static/admin/js/collapse.js:18 static/admin/js/collapse.min.js:1
+msgid "Hide"
+msgstr ""
+
+#: static/jet/js/build/bundle.min.js:3
+msgid "'"
+msgstr ""

@@ -1,0 +1,169 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-12 17:27+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: failmap_admin/map/static/js/failmap.js:68
+#: failmap_admin/map/static/js/views.js:405
+#: failmap_admin/map/static/js/views.js:410
+#: failmap_admin/map/static/js/views.js:413
+msgid "View Full Screen"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:115
+msgid "Search organization"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:136
+#: failmap_admin/map/static/js/failmap.js:140
+msgid "High"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:137
+#: failmap_admin/map/static/js/failmap.js:141
+msgid "Medium"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:138
+#: failmap_admin/map/static/js/failmap.js:142
+msgid "Low"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:188
+msgid "Url"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:189
+msgid "H"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:190
+msgid "M"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:191
+msgid "L"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:210
+msgid "Good"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:211
+msgid "Mediocre"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:212
+msgid "Bad"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/failmap.js:213
+msgid "Unknown"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/graphs.js:102
+msgid "low"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/graphs.js:104
+msgid "medium"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/graphs.js:106
+msgid "high"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:11
+msgid "2 weeks ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:12
+msgid "3 weeks ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:13
+msgid "1 month ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:14
+msgid "2 months ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:15
+msgid "3 months ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:16
+msgid "7 days ago"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/script.js:17
+msgid "now"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:44
+msgid "week"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:211
+msgid "score perfect"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:213
+msgid "score high"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:215
+msgid "score medium"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:217
+msgid "score low"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:411
+msgid "Exit Full Screen"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:442
+#: failmap_admin/map/static/js/views.js:447
+msgid "top congratulations"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:443
+#: failmap_admin/map/static/js/views.js:448
+msgid "top position"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:444
+msgid "top fail on failmap"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:445
+#: failmap_admin/map/static/js/views.js:450
+msgid "hastag fail"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:445
+#: failmap_admin/map/static/js/views.js:450
+msgid "hastag failmap"
+msgstr "🌈"
+
+#: failmap_admin/map/static/js/views.js:449
+msgid "top win on failmap"
+msgstr "🌈"

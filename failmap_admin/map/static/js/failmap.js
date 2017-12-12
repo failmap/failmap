@@ -65,7 +65,7 @@ var failmap = {
                 console.log('entered fullscreen');
             } else {
                 vueFullScreenReport.hide();
-                vueFullscreen.fullscreen = "View Full Screen"  // ugly fix :)
+                vueFullscreen.fullscreen = gettext("View Full Screen")  // ugly fix :)
             }
         });
 
@@ -112,7 +112,7 @@ var failmap = {
     add_searchbar: function () {
         this.searchbar.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
-            this._div.innerHTML = "<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"Zoek op gemeente...\"/>";
+            this._div.innerHTML = "<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>";
             L.DomEvent.disableClickPropagation(this._div);
             return this._div;
         };
@@ -133,13 +133,13 @@ var failmap = {
             if (props) {
                 sometext += "<h4>" + props.organization_name + "</h4>";
                 if (props.high || props.medium || props.low) {
-                    sometext += '<b>High: </b><span style="color: ' + failmap.getColor(1000) + '">' + props.high + '</span><br />';
-                    sometext += '<b>Medium: </b><span style="color: ' + failmap.getColor(500) + '">' + props.medium + '</span><br />';
-                    sometext += '<b>Low: </b><span style="color: ' + failmap.getColor(0) + '">' + props.low + '</span><br />';
+                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColor(1000) + '">' + props.high + '</span><br />';
+                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColor(500) + '">' + props.medium + '</span><br />';
+                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColor(0) + '">' + props.low + '</span><br />';
                 } else {
-                    sometext += '<b>High: </b><span style="color: ' + failmap.getColor(1000) + '">0</span><br />';
-                    sometext += '<b>Medium: </b><span style="color: ' + failmap.getColor(500) + '">0</span><br />';
-                    sometext += '<b>Low: </b><span style="color: ' + failmap.getColor(0) + '">0</span><br />';
+                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColor(1000) + '">0</span><br />';
+                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColor(500) + '">0</span><br />';
+                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColor(0) + '">0</span><br />';
                 }
                 vueDomainlist.load(props.organization_id, vueMap.week);
                 this._div.innerHTML = sometext;
@@ -167,7 +167,7 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             dataslider_control = " <div id=\"historycontrol\">" +
-                "    <h4>{{ visibleweek }}<span v-if='loading'> (loading...)</span></h4>" +
+                "    <h4>{{ visibleweek }}<span v-if='loading'> (' + gettext('Loading') + '...)</span></h4>" +
                 "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
                 "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
                 "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +
@@ -185,7 +185,10 @@ var failmap = {
             L.DomEvent.disableClickPropagation(this._div);
             this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
                 "<table width='100%'><thead>" +
-                "<tr><th>Url</th><th width='5%'>H</th><th width='5%'>M</th><th width='5%'>L</th></tr></thead>" +
+                "<tr><th>" + gettext('Url') + "</th>" +
+                "<th width='5%'>" + gettext('H') + "</th>" +
+                "<th width='5%'>" + gettext('M') + "</th>" +
+                "<th width='5%'>" + gettext('L') + "</th></tr></thead>" +
                 "<tr v-for=\"url in urls\">\n" +
                 "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.url }}</span></td>" +
                 "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.high }}</span></td>" +
@@ -204,10 +207,10 @@ var failmap = {
 
             var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-            labels.push('<i style="background:' + failmap.getColor(199) + '"></i> Good');
-            labels.push('<i style="background:' + failmap.getColor(999) + '"></i> Average');
-            labels.push('<i style="background:' + failmap.getColor(1000) + '"></i> Bad');
-            labels.push('<i style="background:' + failmap.getColor(-1) + '"></i> Unknown');
+            labels.push('<i style="background:' + failmap.getColor(199) + '"></i> '+ gettext('Good'));
+            labels.push('<i style="background:' + failmap.getColor(999) + '"></i> '+ gettext('Mediocre'));
+            labels.push('<i style="background:' + failmap.getColor(1000) + '"></i> '+ gettext('Bad'));
+            labels.push('<i style="background:' + failmap.getColor(-1) + '"></i> '+ gettext('Unknown'));
 
             div.innerHTML = labels.join('<br>');
             return div;
