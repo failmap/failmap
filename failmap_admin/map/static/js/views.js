@@ -144,6 +144,12 @@ function views() {
             visible: false,  // fullscreenreport
             promise: false,
         },
+        // https://vuejs.org/v2/api/#updated
+        updated: function () {
+          this.$nextTick(function () {
+              lazyload()
+          })
+        },
         methods: {
             colorize: function (high, medium, low) {
                 if (high > 0) return "red";

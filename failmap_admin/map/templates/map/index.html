@@ -140,11 +140,11 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th width="20%">{% trans "When" %}</th>
-                        <th width="20%">{% trans "Number" %}</th>
-                        <th width="20%">{% trans "Good" %}</th>
-                        <th width="20%">{% trans "Average" %}</th>
-                        <th width="20%">{% trans "Bad" %}</th>
+                        <th width="30%">{% trans "When" %}</th>
+                        <th width="15%">{% trans "Number" %}</th>
+                        <th width="18%">{% trans "Good" %}</th>
+                        <th width="18%">{% trans "Average" %}</th>
+                        <th width="18%">{% trans "Bad" %}</th>
                     </tr>
                     </thead>
                     <tbody v-if="data.data">
@@ -184,11 +184,11 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th width="20%">{% trans "When" %}</th>
-                        <th width="20%">{% trans "Number" %}</th>
-                        <th width="20%">{% trans "Good" %}</th>
-                        <th width="20%">{% trans "Average" %}</th>
-                        <th width="20%">{% trans "Bad" %}</th>
+                        <th width="30%">{% trans "When" %}</th>
+                        <th width="15%">{% trans "Number" %}</th>
+                        <th width="18%">{% trans "Good" %}</th>
+                        <th width="18%">{% trans "Average" %}</th>
+                        <th width="18%">{% trans "Bad" %}</th>
                     </tr>
                     </thead>
                     <tbody v-if="data.data">
@@ -592,40 +592,45 @@
                     {% verbatim %}
                     <div v-for="url in urls" class="perurl"
                          :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
-                        <div class="screenshotlist">
-                            <div v-for="endpoint in url.endpoints" class="servicelink">
-                                <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
-                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
-                                   target="_blank"
-                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
-                                    <div class="imagediv"
-                                         :style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
-                                    <span v-html="'{% endverbatim %}{% trans "Visit service" %}{% verbatim %}: ' + endpoint_type(endpoint) "> </span>
-                                </a>
-                            </div>
+
+                        <div class="col-md-4">
+                            &nbsp;
                         </div>
-                        <div class="reportlist">
+                        <div class="col-md-8">
                             <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                             <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                                  :data-tooltip-content="idizetag(url.url)">
-                                    {{ url.url }}</span><br/>
+                                  :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
                             <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
                                class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
                                 {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
-                            <br/>
-                            <div v-for="endpoint in url.endpoints"><br/>
-                                &nbsp; {% endverbatim %}{% trans "Service" %}: {% verbatim %}: {{
-                                endpoint_type(endpoint) }}
-                                <div v-for="rating in endpoint.ratings">
-                                    <h3>&nbsp; {{ create_header(rating) }}</h3>
-                                    &nbsp; &nbsp; <span
-                                        v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                    translate(rating.explanation) }}<br/>
-                                    &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                    humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                    {{ humanize(rating.last_scan) }} <br/>
-                                    &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                    <br/>
+                        </div>
+
+                        <div v-for="endpoint in url.endpoints">
+                            <div class="col-md-4 giveroom">
+                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
+                                   target="_blank"
+                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                    <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
+                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                        :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
+                                    />
+                                </a>
+                            </div>
+                            <div class="col-md-8 giveroom">
+                                <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
+
+                                <div>
+                                    <div v-for="rating in endpoint.ratings">
+                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                        &nbsp; &nbsp; <span
+                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
+                                        translate(rating.explanation) }}<br/>
+                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
+                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
+                                        {{ humanize(rating.last_scan) }} <br/>
+                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
+                                        <br/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -712,54 +717,76 @@
             <p class="closebutton" onclick="vueFullScreenReport.hide()">
                 X
             </p>
-            <div>
-                {% endverbatim %}{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}<br>
-                {% endverbatim %}{% trans "Score" %}: {% verbatim %}<span v-if="promise"><strong>*</strong></span>:<br/>
-                {% endverbatim %}{% trans "High" %}: {% verbatim %}{{ high }} <br/>
-                {% endverbatim %}{% trans "Medium" %}: {% verbatim %}{{ medium }} <br/>
-                {% endverbatim %}{% trans "Low" %}: {% verbatim %}{{ low }} <br/>
-                {% endverbatim %}{% trans "congratulations" %}!
-                <br/>
-                {% trans "Report ask pentest leader" %} <a
-                    :href="'mailto:' + mailto + '?subject={% trans "Report ask pentest subject" %}' + name + '&body={% trans "Report ask pentest body" %}'">{% trans "Report ask request pentest" %}</a><br/>
-                {% trans "Report ask domains leader" %} <a
-                    :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-                {% verbatim %}
-                <br>
-                <div v-for="url in urls" class="perurl"
-                     :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255,.5));'">
-                    <div class="screenshotlist">
-                        <div v-for="endpoint in url.endpoints" class="servicelink">
-                            <!-- There is no support for different ip's/ipv6 in endpoint, only for protocols. -->
-                            <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port" target="_blank"
-                               :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port"></a>
-                            <div class="imagediv"
-                                 :style="'background-image: url(\'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png\');'"></div>
-                        </div>
+            <div>{% endverbatim %}
+               <!-- copy of report -->
+                {% trans "Report share result question" %} {% verbatim %}<span
+                        v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
+                    <br/>
+                    {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br/>
+                    {% trans "Score" %}<span v-if="promise"><strong>*</strong></span>:<br/>
+                    {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br/>
+                    {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br/>
+                    {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br/>
+                    {% trans "congratulations" %}!
+                    <br/>
+                    <br/>
+                    {% trans "Report ask pentest leader" %} <a
+                        :href="'mailto:' + mailto + '?subject={% trans "Report ask pentest subject" %}' + name + '&body={% trans "Report ask pentest body" %}'">{% trans "Report ask request pentest" %}</a><br/>
+                    {% trans "Report ask domains leader" %} <a
+                        :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+                    <br/>
+                    {% verbatim %}
+                    <div v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
                     </div>
-                    <div class="reportlist">
-                        <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                              :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br>
-                        <a :href="'mailto:' + mailto + '?subject=verkeerde%20bevinding%20op%20' + url.url + '&amp;body=Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een week afhankelijk van de test. Functionaliteit om snel een her-scan uit te voeren volgt. %0D%0A%0D%0A%0D%0ABeste Faalkaart, %0D%0A%0D%0AHet lijkt erop dat er een verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: %0D%0A- %0D%0A- %0D%0A- %0D%0A%0D%0ATip: Stuur ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A'"
-                           class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">Meld onjuiste
-                            bevinding</a>
+                    {% endverbatim %}
+                    <br/>
+                    {% verbatim %}
+                    <div v-for="url in urls" class="perurl"
+                         :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
+
+                        <div class="col-md-4">
+                            &nbsp;
+                        </div>
+                        <div class="col-md-8">
+                            <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                            <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
+                                  :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                            <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                               class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
+                                {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                        </div>
+
                         <div v-for="endpoint in url.endpoints">
-                            <br>
-                            &nbsp; Dienst: {{ endpoint_type(endpoint) }}
-                            <div v-for="rating in endpoint.ratings">
-                                <h3>
-                                    &nbsp; {{ create_header(rating) }}
-                                </h3>&nbsp; &nbsp;<span
-                                    v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                rating.explanation }}<br>
-                                &nbsp; &nbsp; Sinds: {{ humanize(rating.since) }}, Last Check: {{
-                                humanize(rating.last_scan) }}<br>
-                                &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                <br>
+                            <div class="col-md-4 giveroom">
+                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
+                                   target="_blank"
+                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                    <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
+                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                        :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
+                                    />
+                                </a>
+                            </div>
+                            <div class="col-md-8 giveroom">
+                                <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
+
+                                <div>
+                                    <div v-for="rating in endpoint.ratings">
+                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                        &nbsp; &nbsp; <span
+                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
+                                        translate(rating.explanation) }}<br/>
+                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
+                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
+                                        {{ humanize(rating.last_scan) }} <br/>
+                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
+                                        <br/>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                <!-- end copy of report -->
             </div>
         </div>
     </div>

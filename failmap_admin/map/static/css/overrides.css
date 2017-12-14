@@ -111,7 +111,8 @@ div#report {
     /* alternating rows, taking in account images. */
     padding-top: 15px;
     padding-left: 15px;
-    margin-bottom: 15px;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
     border-radius: 10px;
     background: #f1f1f1;
 }
@@ -127,6 +128,20 @@ div#report {
     background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px)
 }
 
+.clippedimage {
+    margin-top: 14px;
+    margin-left: 17px;
+    width: 320px; /* placeholder */
+    height: 200px; /* placeholder */
+    position: absolute;
+    clip: rect(0, 320px, 200px, 0);
+    border: 1px solid black;
+
+    /* If we can't find the image, would this then show? */
+    background-color: gainsboro;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px)
+}
+
 .servicelink {
     margin-bottom: 15px;
 }
@@ -135,9 +150,20 @@ div#report {
     font-size: 23px;
 }
 
+.giveroom {
+    margin-top: 12px;
+    min-height: 230px;
+}
+
 .reportlist {
     display: table;
     padding-bottom: 15px;
+}
+
+.servicelist {
+    display: table;
+    padding-bottom: 15px;
+    margin-left: 330px;
 }
 
 .screenshotlist {
@@ -489,7 +515,7 @@ path {
 /* End D3 JS */
 
 .changes .date {
-    width: 140px;
+    width: 173px;
 }
 
 .changes .explanation,

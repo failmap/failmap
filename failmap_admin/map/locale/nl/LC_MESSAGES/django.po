@@ -516,7 +516,7 @@ msgstr "Stuur hier domeinen in."
 
 #: failmap_admin/map/templates/map/index.html:603
 msgid "Visit service"
-msgstr "Bezoek adres van type"
+msgstr "Bezoek deze dienst."
 
 #: failmap_admin/map/templates/map/index.html:612
 msgid "Incorrect finding on mail subject"
