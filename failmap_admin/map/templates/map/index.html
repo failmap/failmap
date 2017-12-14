@@ -20,6 +20,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
 
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% if debug %}
         <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
@@ -29,26 +30,24 @@
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
-        <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
-        {% else %}{% compress js %}
-            <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
-            <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
-            <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
-            <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
-        {% endcompress %}{% endif %}
+    {% else %}{% compress js %}
+        <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+    {% endcompress %}{% endif %}
     <link rel="manifest" href="/manifest.json">
 </head>
 
