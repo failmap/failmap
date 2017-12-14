@@ -206,10 +206,8 @@ LANGUAGES = (
     ('🌈🦄', '🌈'),
 )
 
-# raise ValueError('invalid token in plural form: %s' % value) on 🌈🦄 language. A shame that the js translation
-# parser doesn't understand unicode yet. This is not fixed in Django 2.0 and will likely take half a year to be fixed.
-# so we had to rename the 🌈🦄 language to rp. For Rainbow and Pony :)
-LANGUAGE_CODE = '🌈🦄'
+# There is no 🌈🦄 translation for humanize. Instead you'll get the english fallback values.
+LANGUAGE_CODE = 'nl'
 
 TIME_ZONE = 'UTC'
 

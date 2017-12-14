@@ -11,6 +11,50 @@ function d3stats() {
         .style("top", "30px")
         .style("left", "55px");
 
+    // https://stackoverflow.com/questions/19274464/
+    // https://gist.github.com/woolfg/50b1ee17c8e4aa4c8a92
+    // https://github.com/d3/d3-time-format/blob/master/README.md#localeFormat
+    // these should be problems javascript should solve. Can we tell javascript what locale should be used?
+    // my eyes cry blood when doing this. People have been doing so since the dawn of computers... why now still?
+    var locale = d3.timeFormatLocale({
+        "dateTime": "%a %b %e %X %Y",
+        "date": "%%Y-m-%d/",
+        "time": "%H:%M:%S",
+        "periods": ["AM", "PM"],  // lol.
+        "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+        "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+
+        // afaik this software only uses months to show graphs, so don't translate the rest (yet).
+        "months": [
+            gettext("January"), gettext("February"), gettext("March"),
+            gettext("April"), gettext("May"), gettext("June"),
+            gettext("July"), gettext("August"), gettext("September"),
+            gettext("October"), gettext("November"), gettext("December")],
+        "shortMonths": [gettext("Jan"), gettext("Feb"), gettext("Mar"),
+            gettext("Apr"), gettext("May"), gettext("Jun"),
+            gettext("Jul"), gettext("Aug"), gettext("Sept"),
+            gettext("Oct"), gettext("Nov"), gettext("Dec")]
+    });
+
+    var formatMillisecond = locale.format(".%L"),
+    formatSecond = locale.format(":%S"),
+    formatMinute = locale.format("%I:%M"),
+    formatHour = locale.format("%I %p"),
+    formatDay = locale.format("%a %d"),
+    formatWeek = locale.format("%b %d"),
+    formatMonth = locale.format("%B"),
+    formatYear = locale.format("%Y");
+
+
+    function multiFormat(date) {
+          return (d3.timeSecond(date) < date ? formatMillisecond
+              : d3.timeMinute(date) < date ? formatSecond
+              : d3.timeHour(date) < date ? formatMinute
+              : d3.timeDay(date) < date ? formatHour
+              : d3.timeMonth(date) < date ? (d3.timeWeek(date) < date ? formatDay : formatWeek)
+              : d3.timeYear(date) < date ? formatMonth
+              : formatYear)(date);
+        }
 
     d3.json("data/vulnstats/0/index.json", function (error, data) {
         stacked_area_chart("tls_qualys", error, data.tls_qualys);
@@ -113,7 +157,7 @@ function d3stats() {
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + height + ")")
             //.ticks(d3.time.weeks);  Uncaught TypeError: Cannot read property 'weeks' of undefined
-            .call(d3.axisBottom(x).ticks(4));
+            .call(d3.axisBottom(x).ticks(4).tickFormat(multiFormat));
 
         //
         g.append("g")

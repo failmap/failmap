@@ -87,6 +87,11 @@ def manifest_json(request):
 
 @cache_page(ten_minutes)
 def organization_report(request, organization_id, weeks_back=0):
+
+    # urls with /data/report// (two slashes)
+    if not organization_id:
+        return JsonResponse({}, safe=False, encoder=JSEncoder)
+
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -1062,6 +1067,7 @@ def map_data(request, weeks_back=0):
 
 @cache_page(ten_minutes)
 def latest_scans(request, scan_type):
+    from django.contrib.humanize.templatetags.humanize import naturaltime
     scans = []
 
     dataset = {
@@ -1094,6 +1100,7 @@ def latest_scans(request, scan_type):
             "high": calculation["high"],
             "medium": calculation["medium"],
             "low": calculation["low"],
+            "last_scan_humanized": naturaltime(scan.last_scan_moment),
             "last_scan_moment": scan.last_scan_moment.isoformat()
         })
 

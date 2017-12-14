@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-12 17:27+0000\n"
+"POT-Creation-Date: 2017-12-14 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,9 +19,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: failmap_admin/map/static/js/failmap.js:68
-#: failmap_admin/map/static/js/views.js:405
-#: failmap_admin/map/static/js/views.js:410
-#: failmap_admin/map/static/js/views.js:413
+#: failmap_admin/map/static/js/views.js:398
+#: failmap_admin/map/static/js/views.js:403
+#: failmap_admin/map/static/js/views.js:406
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -46,19 +46,19 @@ msgstr "Laag"
 
 #: failmap_admin/map/static/js/failmap.js:188
 msgid "Url"
-msgstr ""
+msgstr "Url"
 
 #: failmap_admin/map/static/js/failmap.js:189
 msgid "H"
-msgstr ""
+msgstr "H"
 
 #: failmap_admin/map/static/js/failmap.js:190
 msgid "M"
-msgstr ""
+msgstr "M"
 
 #: failmap_admin/map/static/js/failmap.js:191
 msgid "L"
-msgstr ""
+msgstr "L"
 
 #: failmap_admin/map/static/js/failmap.js:210
 msgid "Good"
@@ -76,96 +76,336 @@ msgstr "Slecht"
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: failmap_admin/map/static/js/graphs.js:102
+#: failmap_admin/map/static/js/graphs.js:29
+msgid "January"
+msgstr "Januari"
+
+#: failmap_admin/map/static/js/graphs.js:29
+msgid "February"
+msgstr "Februari"
+
+#: failmap_admin/map/static/js/graphs.js:29
+msgid "March"
+msgstr "Maart"
+
+#: failmap_admin/map/static/js/graphs.js:30
+msgid "April"
+msgstr "April"
+
+#: failmap_admin/map/static/js/graphs.js:30
+#: failmap_admin/map/static/js/graphs.js:34
+msgid "May"
+msgstr "Mei"
+
+#: failmap_admin/map/static/js/graphs.js:30
+msgid "June"
+msgstr "Juni"
+
+#: failmap_admin/map/static/js/graphs.js:31
+msgid "July"
+msgstr "Juli"
+
+#: failmap_admin/map/static/js/graphs.js:31
+msgid "August"
+msgstr "Augustus"
+
+#: failmap_admin/map/static/js/graphs.js:31
+msgid "September"
+msgstr "September"
+
+#: failmap_admin/map/static/js/graphs.js:32
+msgid "October"
+msgstr "October"
+
+#: failmap_admin/map/static/js/graphs.js:32
+msgid "November"
+msgstr "November"
+
+#: failmap_admin/map/static/js/graphs.js:32
+msgid "December"
+msgstr "December"
+
+#: failmap_admin/map/static/js/graphs.js:33
+msgid "Jan"
+msgstr "Jan"
+
+#: failmap_admin/map/static/js/graphs.js:33
+msgid "Feb"
+msgstr "Feb"
+
+#: failmap_admin/map/static/js/graphs.js:33
+msgid "Mar"
+msgstr "Mar"
+
+#: failmap_admin/map/static/js/graphs.js:34
+msgid "Apr"
+msgstr "Apr"
+
+#: failmap_admin/map/static/js/graphs.js:34
+msgid "Jun"
+msgstr "Jun"
+
+#: failmap_admin/map/static/js/graphs.js:35
+msgid "Jul"
+msgstr "Jul"
+
+#: failmap_admin/map/static/js/graphs.js:35
+msgid "Aug"
+msgstr "Aug"
+
+#: failmap_admin/map/static/js/graphs.js:35
+msgid "Sept"
+msgstr "Sept"
+
+#: failmap_admin/map/static/js/graphs.js:36
+msgid "Oct"
+msgstr "Oct"
+
+#: failmap_admin/map/static/js/graphs.js:36
+msgid "Nov"
+msgstr "Nov"
+
+#: failmap_admin/map/static/js/graphs.js:36
+msgid "Dec"
+msgstr "Dec"
+
+#: failmap_admin/map/static/js/graphs.js:146
 msgid "low"
 msgstr "laag"
 
-#: failmap_admin/map/static/js/graphs.js:104
+#: failmap_admin/map/static/js/graphs.js:148
 msgid "medium"
 msgstr "midden"
 
-#: failmap_admin/map/static/js/graphs.js:106
+#: failmap_admin/map/static/js/graphs.js:150
 msgid "high"
 msgstr "hoog"
 
-#: failmap_admin/map/static/js/script.js:11
-msgid "2 weeks ago"
-msgstr ""
-
 #: failmap_admin/map/static/js/script.js:12
-msgid "3 weeks ago"
-msgstr ""
+msgid "2 weeks ago"
+msgstr "2 weken geleden"
 
 #: failmap_admin/map/static/js/script.js:13
-msgid "1 month ago"
-msgstr ""
+msgid "3 weeks ago"
+msgstr "3 weken geleden"
 
 #: failmap_admin/map/static/js/script.js:14
-msgid "2 months ago"
-msgstr ""
+msgid "1 month ago"
+msgstr "1 maand geleden"
 
 #: failmap_admin/map/static/js/script.js:15
-msgid "3 months ago"
-msgstr ""
+msgid "2 months ago"
+msgstr "2 maanden geleden"
 
 #: failmap_admin/map/static/js/script.js:16
-msgid "7 days ago"
-msgstr ""
+msgid "3 months ago"
+msgstr "3 maanden geleden"
 
 #: failmap_admin/map/static/js/script.js:17
-#, fuzzy
-#| msgid "Low"
+msgid "7 days ago"
+msgstr "7 dagen geleden"
+
+#: failmap_admin/map/static/js/script.js:18
 msgid "now"
-msgstr "Laag"
+msgstr "Op dit moment"
+
+#: failmap_admin/map/static/js/script.js:21
+msgid "Has a secure equivalent, which wasn't so in the past."
+msgstr "Biedt nu een beveiligd alternative, wat vroeger niet zo was."
+
+#: failmap_admin/map/static/js/script.js:23
+msgid ""
+"Site does not redirect to secure url, and has no secure alternative on a "
+"standard port."
+msgstr ""
+"Een beveiligd alternatief op het standaard poortnummer ontbreekt. De "
+"onbeveiligde website wijst niet door naar een beveiligde site."
+
+#: failmap_admin/map/static/js/script.js:24
+msgid ""
+"Redirects to a secure site, while a secure counterpart on the standard port "
+"is missing."
+msgstr ""
+"De onbeveiligde site wijst door naar een beveiligde site, maar niet op een "
+"standaard poort."
+
+#: failmap_admin/map/static/js/script.js:25
+msgid "Broken Transport Security, rated F"
+msgstr "Onvoldoende versleuteld (F)"
+
+#: failmap_admin/map/static/js/script.js:26
+msgid "Certificate not valid for domain name."
+msgstr "Certificaat niet geldig voor domeinnaam"
+
+#: failmap_admin/map/static/js/script.js:27
+msgid ""
+"Could not establish trust.  For the certificate installation: Less than "
+"optimal Transport Security, rated C."
+msgstr ""
+"Vertrouwen onbtreekt. De installatie van het certificaat zelf is matig (C)."
+
+#: failmap_admin/map/static/js/script.js:28
+msgid ""
+"Could not establish trust.  For the certificate installation: Less than "
+"optimal Transport Security, rated B."
+msgstr ""
+"Vertrouwen onbtreekt. De installatie van het certificaat zelf is redelijk "
+"(B)."
+
+#: failmap_admin/map/static/js/script.js:29
+msgid ""
+"Could not establish trust.  For the certificate installation: Good Transport "
+"Security, rated A-."
+msgstr ""
+"Vertrouwen onbtreekt. De installatie van het certificaat zelf is goed (A-)."
+
+#: failmap_admin/map/static/js/script.js:30
+msgid ""
+"Could not establish trust.  For the certificate installation: Good Transport "
+"Security, rated A."
+msgstr ""
+"Vertrouwen onbtreekt. De installatie van het certificaat zelf is goed (A)."
+
+#: failmap_admin/map/static/js/script.js:31
+msgid "Less than optimal Transport Security, rated C."
+msgstr "Matige versleuteling (C)"
+
+#: failmap_admin/map/static/js/script.js:32
+msgid "Less than optimal Transport Security, rated B."
+msgstr "Redeijke versleuteling (B)"
+
+#: failmap_admin/map/static/js/script.js:33
+msgid "Good Transport Security, rated A-."
+msgstr "Goede versleuteling (A-)"
+
+#: failmap_admin/map/static/js/script.js:34
+msgid "Good Transport Security, rated A."
+msgstr "Perfecte versleuteling (A)"
+
+#: failmap_admin/map/static/js/script.js:35
+msgid "Perfect Transport Security, rated A+."
+msgstr "Perfecte versleuteling (met extra's) (A+)"
+
+#: failmap_admin/map/static/js/script.js:36
+msgid "X-Content-Type-Options header present."
+msgstr "De X-Content-Type-Options header is aanwezig."
+
+#: failmap_admin/map/static/js/script.js:37
+msgid "Missing X-Content-Type-Options header."
+msgstr "De X-Content-Type-Options header ontbreekt."
+
+#: failmap_admin/map/static/js/script.js:38
+msgid "X-XSS-Protection header present."
+msgstr "De X-XSS-Protection header is aanwezig."
+
+#: failmap_admin/map/static/js/script.js:39
+msgid "Missing X-XSS-Protection header."
+msgstr "De X-XSS-Protection header ontbreekt."
+
+#: failmap_admin/map/static/js/script.js:40
+msgid "X-Frame-Options header present."
+msgstr "De X-Frame-Options header is aanwezig."
+
+#: failmap_admin/map/static/js/script.js:41
+msgid "Missing X-Frame-Options header."
+msgstr "De X-Frame-Options header ontbreekt."
+
+#: failmap_admin/map/static/js/script.js:42
+msgid "Strict-Transport-Security header present."
+msgstr "Strict-Transport-Security header is aanwezig."
+
+#: failmap_admin/map/static/js/script.js:43
+msgid "Missing Strict-Transport-Security header."
+msgstr "De Strict-Transport-Security header ontbreekt."
+
+#: failmap_admin/map/static/js/script.js:48
+msgid "report_header_tls_qualys"
+msgstr "Transport Layer Security (TLS)"
+
+#: failmap_admin/map/static/js/script.js:49
+msgid "report_header_plain_https"
+msgstr "Ontbrekende Transport Layer Security (TLS)"
+
+#: failmap_admin/map/static/js/script.js:50
+msgid "report_header_security_headers_x_xss_protection"
+msgstr "X-XSS-Protection Header"
+
+#: failmap_admin/map/static/js/script.js:51
+msgid "report_header_security_headers_x_frame_options"
+msgstr "X-Frame-Options Header (clickjacking)"
+
+#: failmap_admin/map/static/js/script.js:52
+msgid "report_header_security_headers_x_content_type_options"
+msgstr "X-Content-Type-Options"
+
+#: failmap_admin/map/static/js/script.js:53
+msgid "report_header_security_headers_strict_transport_security"
+msgstr "Strict-Transport-Security Header (HSTS)"
 
 #: failmap_admin/map/static/js/views.js:44
 msgid "week"
-msgstr ""
+msgstr "week"
 
-#: failmap_admin/map/static/js/views.js:211
+#: failmap_admin/map/static/js/views.js:178
+#: failmap_admin/map/static/js/views.js:181
+#: failmap_admin/map/static/js/views.js:184
+#: failmap_admin/map/static/js/views.js:186
+#: failmap_admin/map/static/js/views.js:188
+msgid "Documentation"
+msgstr "Documentatie"
+
+#: failmap_admin/map/static/js/views.js:179
+#: failmap_admin/map/static/js/views.js:182
+msgid "Second opinion"
+msgstr "Second opinion"
+
+#: failmap_admin/map/static/js/views.js:204
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap_admin/map/static/js/views.js:213
+#: failmap_admin/map/static/js/views.js:206
 msgid "score high"
 msgstr "hoog"
 
-#: failmap_admin/map/static/js/views.js:215
+#: failmap_admin/map/static/js/views.js:208
 msgid "score medium"
 msgstr "midden"
 
-#: failmap_admin/map/static/js/views.js:217
+#: failmap_admin/map/static/js/views.js:210
 msgid "score low"
 msgstr "laag"
 
-#: failmap_admin/map/static/js/views.js:411
+#: failmap_admin/map/static/js/views.js:404
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 
-#: failmap_admin/map/static/js/views.js:442
-#: failmap_admin/map/static/js/views.js:447
+#: failmap_admin/map/static/js/views.js:435
+#: failmap_admin/map/static/js/views.js:440
 msgid "top congratulations"
-msgstr ""
+msgstr "gefeliciteerd"
 
-#: failmap_admin/map/static/js/views.js:443
-#: failmap_admin/map/static/js/views.js:448
+#: failmap_admin/map/static/js/views.js:436
+#: failmap_admin/map/static/js/views.js:441
 msgid "top position"
-msgstr ""
+msgstr "positie"
 
-#: failmap_admin/map/static/js/views.js:444
+#: failmap_admin/map/static/js/views.js:437
 msgid "top fail on failmap"
-msgstr ""
+msgstr "beste organisaties op faalkaart"
 
-#: failmap_admin/map/static/js/views.js:445
-#: failmap_admin/map/static/js/views.js:450
+#: failmap_admin/map/static/js/views.js:438
+#: failmap_admin/map/static/js/views.js:443
 msgid "hastag fail"
-msgstr ""
+msgstr "faal"
 
-#: failmap_admin/map/static/js/views.js:445
-#: failmap_admin/map/static/js/views.js:450
+#: failmap_admin/map/static/js/views.js:438
+#: failmap_admin/map/static/js/views.js:443
 msgid "hastag failmap"
-msgstr ""
+msgstr "faalkaart"
 
-#: failmap_admin/map/static/js/views.js:449
+#: failmap_admin/map/static/js/views.js:442
 msgid "top win on failmap"
-msgstr ""
+msgstr "beste organisaties op faalkaart"
+
+#~ msgid "slechtste organisaties on failmap"
+#~ msgstr "op faalkaart"

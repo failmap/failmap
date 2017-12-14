@@ -166,33 +166,26 @@ function views() {
             humanize: function (date) {
                 return new Date(date).humanTimeStamp()
             },
-            create_header: function (rating) {
-                if (rating.type === "security_headers_strict_transport_security")
-                    return "Strict-Transport-Security Header (HSTS)";
-                if (rating.type === "tls_qualys")
-                    return "Transport Layer Security (TLS)";
-                if (rating.type === "plain_https")
-                    return "Missing transport security (TLS)";
-                if (rating.type === "security_headers_x_xss_protection")
-                    return "X-XSS-Protection Header";
-                if (rating.type === "security_headers_x_frame_options")
-                    return "X-Frame-Options Header (clickjacking)";
-                if (rating.type === "security_headers_x_content_type_options")
-                    return "X-Content-Type-Options";
+            translate: function(string){
+                return gettext(string);
             },
+            create_header: function (rating) {
+                return this.translate("report_header_" + rating.type);
+            },
+            // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
             second_opinion_links: function (rating, url) {
                 if (rating.type === "security_headers_strict_transport_security")
-                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">Second Opinion (securityheaders.io)</a>';
+                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
+                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">' + gettext('Second opinion') + ' (securityheaders.io)</a>';
                 if (rating.type === "tls_qualys")
-                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">Documentation (wikipedia)</a> - ' +
-                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">Second Opinion (Qualys)</a>';
+                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
+                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">' + gettext('Second opinion') + ' (qualys)</a>';
                 if (rating.type === "security_headers_x_xss_protection")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">Documentation (owasp)</a>';
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
                 if (rating.type === "security_headers_x_frame_options")
-                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">Documentation (wikipedia)</a>';
+                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>';
                 if (rating.type === "security_headers_x_content_type_options")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">Documentation (owasp)</a>';
+                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
             },
             total_awarded_points: function (high, medium, low) {
                 var marker = vueReport.make_marker(high, medium, low);
@@ -261,9 +254,9 @@ function views() {
             create_twitter_link: function (name, twitter_handle, points) {
                 if (twitter_handle) {
                     if (points) {
-                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
+                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
                     } else {
-                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" /> Tweet!</a>';
+                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
                     }
                 }
             },
@@ -491,6 +484,9 @@ function views() {
                     return "orangerow";
                 else
                     return "yellowrow";
+            },
+            translate: function(string){
+                return gettext(string);
             }
         },
         data: {

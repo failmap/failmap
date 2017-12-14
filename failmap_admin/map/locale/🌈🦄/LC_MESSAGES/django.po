@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-12 17:27+0000\n"
+"POT-Creation-Date: 2017-12-14 15:27+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -23,11 +23,11 @@ msgid "About Failmap"
 msgstr "🌈"
 
 #: failmap_admin/map/templates/map/faq.html:5
-#: failmap_admin/map/templates/map/index.html:110
-#: failmap_admin/map/templates/map/index.html:300
-#: failmap_admin/map/templates/map/index.html:343
-#: failmap_admin/map/templates/map/index.html:360
-#: failmap_admin/map/templates/map/index.html:405
+#: failmap_admin/map/templates/map/index.html:111
+#: failmap_admin/map/templates/map/index.html:444
+#: failmap_admin/map/templates/map/index.html:487
+#: failmap_admin/map/templates/map/index.html:504
+#: failmap_admin/map/templates/map/index.html:555
 msgid "back to map"
 msgstr "🌈"
 
@@ -40,7 +40,7 @@ msgid "Toggle navigation"
 msgstr "🌈"
 
 #: failmap_admin/map/templates/map/index.html:66
-#: failmap_admin/map/templates/map/index.html:99 failmap_admin/map/views.py:71
+#: failmap_admin/map/templates/map/index.html:100 failmap_admin/map/views.py:71
 #: failmap_admin/map/views.py:72
 msgid "Fail Map"
 msgstr "🌈"
@@ -54,12 +54,12 @@ msgid "Numbers"
 msgstr "🌈"
 
 #: failmap_admin/map/templates/map/index.html:72
-#: failmap_admin/map/templates/map/index.html:299
+#: failmap_admin/map/templates/map/index.html:443
 msgid "Graphs"
 msgstr "🌈"
 
 #: failmap_admin/map/templates/map/index.html:73
-#: failmap_admin/map/templates/map/index.html:340
+#: failmap_admin/map/templates/map/index.html:484
 msgid "Charts"
 msgstr "🌈"
 
@@ -68,7 +68,7 @@ msgid "Updates"
 msgstr "🌈"
 
 #: failmap_admin/map/templates/map/index.html:75
-#: failmap_admin/map/templates/map/index.html:404
+#: failmap_admin/map/templates/map/index.html:554
 msgid "Report"
 msgstr "🌈"
 
@@ -76,385 +76,432 @@ msgstr "🌈"
 msgid "Explanation"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:80
+#: failmap_admin/map/templates/map/index.html:81
 msgid "DEBUG"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:86
+#: failmap_admin/map/templates/map/index.html:87
 msgid "Admin"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:100 failmap_admin/map/views.py:73
+#: failmap_admin/map/templates/map/index.html:101 failmap_admin/map/views.py:73
 msgid "Fail Map Introduction"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:101
+#: failmap_admin/map/templates/map/index.html:102
 msgid "Send in subdomain adresses"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:109
+#: failmap_admin/map/templates/map/index.html:110
 msgid "The Numbers"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:114
+#: failmap_admin/map/templates/map/index.html:115
 msgid "Organizations"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:115
+#: failmap_admin/map/templates/map/index.html:116
 msgid "Organizations Explained"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:118
+#: failmap_admin/map/templates/map/index.html:119
 msgid "Internet addresses"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:119
+#: failmap_admin/map/templates/map/index.html:120
 msgid "Internet addresses Explained"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:126
+#: failmap_admin/map/templates/map/index.html:127
 msgid "stats remark green"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:129
+#: failmap_admin/map/templates/map/index.html:130
 msgid "stats remark orange"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:132
+#: failmap_admin/map/templates/map/index.html:133
 msgid "stats remark red"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:135
+#: failmap_admin/map/templates/map/index.html:136
 msgid "stats remark gray"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:142
-#: failmap_admin/map/templates/map/index.html:177
+#: failmap_admin/map/templates/map/index.html:143
+#: failmap_admin/map/templates/map/index.html:187
 msgid "When"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:143
-#: failmap_admin/map/templates/map/index.html:178
+#: failmap_admin/map/templates/map/index.html:144
+#: failmap_admin/map/templates/map/index.html:188
 msgid "Number"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:144
-#: failmap_admin/map/templates/map/index.html:179
+#: failmap_admin/map/templates/map/index.html:145
+#: failmap_admin/map/templates/map/index.html:189
 msgid "Good"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:145
-#: failmap_admin/map/templates/map/index.html:180
+#: failmap_admin/map/templates/map/index.html:146
+#: failmap_admin/map/templates/map/index.html:190
 msgid "Average"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:146
-#: failmap_admin/map/templates/map/index.html:181
+#: failmap_admin/map/templates/map/index.html:147
+#: failmap_admin/map/templates/map/index.html:191
 msgid "Bad"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:201
+#: failmap_admin/map/templates/map/index.html:220
 msgid "Technical TLS"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:202
+#: failmap_admin/map/templates/map/index.html:221
 msgid "Technical stats TLS explained"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:205
+#: failmap_admin/map/templates/map/index.html:224
 msgid "Technical stats headers"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:206
+#: failmap_admin/map/templates/map/index.html:225
 msgid "Technical stats headers explained"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:215
-#: failmap_admin/map/templates/map/index.html:247
+#: failmap_admin/map/templates/map/index.html:234
+#: failmap_admin/map/templates/map/index.html:336
 msgid "Technology"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:216
-#: failmap_admin/map/templates/map/index.html:248
+#: failmap_admin/map/templates/map/index.html:235
+#: failmap_admin/map/templates/map/index.html:337
 msgid "Result"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:217
-#: failmap_admin/map/templates/map/index.html:249
+#: failmap_admin/map/templates/map/index.html:236
+#: failmap_admin/map/templates/map/index.html:338
 msgid "Total"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:222
+#: failmap_admin/map/templates/map/index.html:242
 msgid "Application of encryption"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:223
+#: failmap_admin/map/templates/map/index.html:246
+#: failmap_admin/map/templates/map/index.html:252
 msgid "Not at all"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:224
+#: failmap_admin/map/templates/map/index.html:258
 msgid "Redirect from unsafe address"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:225
+#: failmap_admin/map/templates/map/index.html:263
 msgid "Encryption quality"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:226
+#: failmap_admin/map/templates/map/index.html:267
 msgid "Broken"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:227
+#: failmap_admin/map/templates/map/index.html:272
 msgid "No trust"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:228
+#: failmap_admin/map/templates/map/index.html:277
 msgid "No trust, C"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:229
+#: failmap_admin/map/templates/map/index.html:283
 msgid "No trust, B"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:230
+#: failmap_admin/map/templates/map/index.html:289
 msgid "No trust, A-"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:231
+#: failmap_admin/map/templates/map/index.html:295
 msgid "No trust, A"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:232
+#: failmap_admin/map/templates/map/index.html:301
 msgid "TLS rated C"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:233
+#: failmap_admin/map/templates/map/index.html:307
 msgid "TLS rated B"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:234
+#: failmap_admin/map/templates/map/index.html:313
 msgid "TLS rated A-"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:235
+#: failmap_admin/map/templates/map/index.html:318
 msgid "TLS rated A"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:236
+#: failmap_admin/map/templates/map/index.html:323
 msgid "TLS rated A+"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:254
+#: failmap_admin/map/templates/map/index.html:344
 msgid "Stats HSTS"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:255
-#: failmap_admin/map/templates/map/index.html:258
-#: failmap_admin/map/templates/map/index.html:261
-#: failmap_admin/map/templates/map/index.html:264
+#: failmap_admin/map/templates/map/index.html:348
+#: failmap_admin/map/templates/map/index.html:363
+#: failmap_admin/map/templates/map/index.html:378
+#: failmap_admin/map/templates/map/index.html:394
 msgid "Stats hasn't"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:256
-#: failmap_admin/map/templates/map/index.html:259
-#: failmap_admin/map/templates/map/index.html:262
-#: failmap_admin/map/templates/map/index.html:265
+#: failmap_admin/map/templates/map/index.html:354
+#: failmap_admin/map/templates/map/index.html:369
+#: failmap_admin/map/templates/map/index.html:384
+#: failmap_admin/map/templates/map/index.html:400
 msgid "Stats has"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:257
+#: failmap_admin/map/templates/map/index.html:359
 msgid "Stats X-Frame-Options"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:260
+#: failmap_admin/map/templates/map/index.html:374
 msgid "Stats X-XSS Protection"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:263
+#: failmap_admin/map/templates/map/index.html:389
 msgid "Stats X-Content Type Options"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:274
+#: failmap_admin/map/templates/map/index.html:412
 msgid "Services"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:275
+#: failmap_admin/map/templates/map/index.html:413
 msgid "Services explained"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:278
+#: failmap_admin/map/templates/map/index.html:416
 msgid "Number of service checked"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:280
-#: failmap_admin/map/templates/map/index.html:458
+#: failmap_admin/map/templates/map/index.html:419
+#: failmap_admin/map/templates/map/index.html:617
 msgid "Service"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:280
+#: failmap_admin/map/templates/map/index.html:420
 msgid "Amount"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:280
+#: failmap_admin/map/templates/map/index.html:421
 msgid "Percentage"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:290
+#: failmap_admin/map/templates/map/index.html:434
 msgid "Services faq"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:291
+#: failmap_admin/map/templates/map/index.html:435
 msgid "Services faq content"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:305
+#: failmap_admin/map/templates/map/index.html:449
 msgid "Encryption failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:309
+#: failmap_admin/map/templates/map/index.html:453
 msgid "Lack of encryption failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:316
+#: failmap_admin/map/templates/map/index.html:460
 msgid "Forcing of encryption failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:320
+#: failmap_admin/map/templates/map/index.html:464
 msgid "X-Frame Options failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:327
+#: failmap_admin/map/templates/map/index.html:471
 msgid "X-Content-Type-Options failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:331
+#: failmap_admin/map/templates/map/index.html:475
 msgid "X-XSS-Protection failure"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:341
+#: failmap_admin/map/templates/map/index.html:485
 msgid "Chart introduction"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:357
+#: failmap_admin/map/templates/map/index.html:501
 msgid "Latest changes"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:358
+#: failmap_admin/map/templates/map/index.html:502
 msgid "Latest changes explanation"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:364
+#: failmap_admin/map/templates/map/index.html:508
 msgid "Encryption updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:365
-#: failmap_admin/map/templates/map/index.html:370
-#: failmap_admin/map/templates/map/index.html:377
-#: failmap_admin/map/templates/map/index.html:382
-#: failmap_admin/map/templates/map/index.html:389
-#: failmap_admin/map/templates/map/index.html:394
+#: failmap_admin/map/templates/map/index.html:509
+#: failmap_admin/map/templates/map/index.html:515
+#: failmap_admin/map/templates/map/index.html:523
+#: failmap_admin/map/templates/map/index.html:529
+#: failmap_admin/map/templates/map/index.html:537
+#: failmap_admin/map/templates/map/index.html:543
 msgid "RSS feed teaser"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:365
-#: failmap_admin/map/templates/map/index.html:370
-#: failmap_admin/map/templates/map/index.html:377
-#: failmap_admin/map/templates/map/index.html:382
-#: failmap_admin/map/templates/map/index.html:389
-#: failmap_admin/map/templates/map/index.html:394
+#: failmap_admin/map/templates/map/index.html:510
+#: failmap_admin/map/templates/map/index.html:516
+#: failmap_admin/map/templates/map/index.html:524
+#: failmap_admin/map/templates/map/index.html:530
+#: failmap_admin/map/templates/map/index.html:538
+#: failmap_admin/map/templates/map/index.html:544
 msgid "rss feed"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:369
+#: failmap_admin/map/templates/map/index.html:514
 msgid "Lack of encryption updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:376
+#: failmap_admin/map/templates/map/index.html:522
 msgid "Forcing encryption updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:381
+#: failmap_admin/map/templates/map/index.html:528
 msgid "X-Frame-Options updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:388
+#: failmap_admin/map/templates/map/index.html:536
 msgid "X-Content-Type-Option updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:393
+#: failmap_admin/map/templates/map/index.html:542
 msgid "X-XSS-Protection updates"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:409
+#: failmap_admin/map/templates/map/index.html:559
 msgid "Show report for organization"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:421
+#: failmap_admin/map/templates/map/index.html:571
 msgid "Report share result question"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:423
-#: failmap_admin/map/templates/map/index.html:543
+#: failmap_admin/map/templates/map/index.html:574
+#: failmap_admin/map/templates/map/index.html:716
 msgid "Data from"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:424
-#: failmap_admin/map/templates/map/index.html:544
+#: failmap_admin/map/templates/map/index.html:575
+#: failmap_admin/map/templates/map/index.html:717
 msgid "Score"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:425
-#: failmap_admin/map/templates/map/index.html:545
+#: failmap_admin/map/templates/map/index.html:576
+#: failmap_admin/map/templates/map/index.html:718
 #: failmap_admin/map/templates/map/terrible_urls.html:16
 #: failmap_admin/map/templates/map/topfail.html:15
 #: failmap_admin/map/templates/map/topwin.html:13
 msgid "High"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:426
-#: failmap_admin/map/templates/map/index.html:546
+#: failmap_admin/map/templates/map/index.html:577
+#: failmap_admin/map/templates/map/index.html:719
 #: failmap_admin/map/templates/map/terrible_urls.html:17
 #: failmap_admin/map/templates/map/topfail.html:16
 #: failmap_admin/map/templates/map/topwin.html:14
 msgid "Medium"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:427
-#: failmap_admin/map/templates/map/index.html:547
+#: failmap_admin/map/templates/map/index.html:578
+#: failmap_admin/map/templates/map/index.html:720
 #: failmap_admin/map/templates/map/terrible_urls.html:18
 #: failmap_admin/map/templates/map/topfail.html:17
 #: failmap_admin/map/templates/map/topwin.html:15
 msgid "Low"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:428
-#: failmap_admin/map/templates/map/index.html:548
+#: failmap_admin/map/templates/map/index.html:579
+#: failmap_admin/map/templates/map/index.html:721
 msgid "congratulations"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:431
-#: failmap_admin/map/templates/map/index.html:550
-msgid "Report ask pentest"
+#: failmap_admin/map/templates/map/index.html:582
+#: failmap_admin/map/templates/map/index.html:723
+msgid "Report ask pentest leader"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:432
-#: failmap_admin/map/templates/map/index.html:551
-msgid "Report ask domains"
+#: failmap_admin/map/templates/map/index.html:583
+#: failmap_admin/map/templates/map/index.html:724
+msgid "Report ask pentest subject"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:462
+#: failmap_admin/map/templates/map/index.html:583
+#: failmap_admin/map/templates/map/index.html:724
+msgid "Report ask pentest body"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:583
+#: failmap_admin/map/templates/map/index.html:724
+msgid "Report ask request pentest"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:584
+#: failmap_admin/map/templates/map/index.html:725
+msgid "Report ask domains leader"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:585
+#: failmap_admin/map/templates/map/index.html:726
+msgid "Report ask domains subject"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:585
+#: failmap_admin/map/templates/map/index.html:726
+msgid "Report ask domains body"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:585
+#: failmap_admin/map/templates/map/index.html:726
+msgid "Report ask sendin domains"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:603
+msgid "Visit service"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:612
+msgid "Incorrect finding on mail subject"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:612
+msgid "Incorrect finding on mail body"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:614
+msgid "Report incorrect finding"
+msgstr "🌈"
+
+#: failmap_admin/map/templates/map/index.html:624
 msgid "Since"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:462
+#: failmap_admin/map/templates/map/index.html:625
 msgid "Last check"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:587
+#: failmap_admin/map/templates/map/index.html:772
 msgid "Scan moment"
 msgstr "🌈"
 
-#: failmap_admin/map/templates/map/index.html:588
+#: failmap_admin/map/templates/map/index.html:773
 #: failmap_admin/map/templates/map/terrible_urls.html:15
 msgid "Url"
 msgstr "🌈"
@@ -517,3 +564,6 @@ msgstr "🌈"
 #: failmap_admin/map/templates/map/topwin.html:5
 msgid "This is the top win from"
 msgstr "🌈"
+
+#~ msgid "Report ask domains"
+#~ msgstr "🌈"
