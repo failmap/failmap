@@ -341,6 +341,8 @@ def save_scan(url, data):
 
         message = qep['statusMessage']
 
+        rating = 0
+        rating_no_trust = 0
         if message in [
                 "Unable to connect to the server",
                 "Failed to communicate with the secure server",
@@ -365,25 +367,26 @@ def save_scan(url, data):
 
         # don't store "failures" as complete scans (with 0 scores).
         # storing failures increases the amount of "waste" data. Since so many things can be not resolvable etc.
-        if previous_scan and rating:
-            if all([previous_scan.qualys_rating == rating,
-                    previous_scan.qualys_rating_no_trust == rating_no_trust]):
-                log.info("Scan on %s did not alter the rating, updating scan date only." % failmap_endpoint)
-                previous_scan.last_scan_moment = datetime.now(pytz.utc)
-                previous_scan.scan_time = datetime.now(pytz.utc)
-                previous_scan.scan_date = datetime.now(pytz.utc)
-                previous_scan.qualys_message = message
-                previous_scan.save()
-                results.append('no-change')
+        if rating:
+            if previous_scan:
+                if all([previous_scan.qualys_rating == rating,
+                        previous_scan.qualys_rating_no_trust == rating_no_trust]):
+                    log.info("Scan on %s did not alter the rating, updating scan date only." % failmap_endpoint)
+                    previous_scan.last_scan_moment = datetime.now(pytz.utc)
+                    previous_scan.scan_time = datetime.now(pytz.utc)
+                    previous_scan.scan_date = datetime.now(pytz.utc)
+                    previous_scan.qualys_message = message
+                    previous_scan.save()
+                    results.append('no-change')
 
+                else:
+                    log.info("Rating changed on %s, we're going to save the scan to retain history" % failmap_endpoint)
+                    create_scan(failmap_endpoint, rating, rating_no_trust, message)
+                    results.append('rating-changed')
             else:
-                log.info("Rating changed on %s, we're going to save the scan to retain history" % failmap_endpoint)
+                log.info("This endpoint on %s was never scanned, creating a new scan." % failmap_endpoint)
                 create_scan(failmap_endpoint, rating, rating_no_trust, message)
-                results.append('rating-changed')
-        else:
-            log.info("This endpoint on %s was never scanned, creating a new scan." % failmap_endpoint)
-            create_scan(failmap_endpoint, rating, rating_no_trust, message)
-            results.append('first-scan')
+                results.append('first-scan')
 
     return results
 

@@ -1087,11 +1087,11 @@ def latest_scans(request, scan_type):
         return empty_response()
 
     if scan_type == "tls_qualys":
-        scans = list(TlsQualysScan.objects.order_by('-last_scan_moment')[0:6])
+        scans = list(TlsQualysScan.objects.order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                      "plain_https"]:
-        scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:6])
+        scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
         points, calculation = points_and_calculation(scan, scan_type)
@@ -1101,10 +1101,10 @@ def latest_scans(request, scan_type):
             "protocol": scan.endpoint.protocol,
             "port": scan.endpoint.port,
             "ip_version": scan.endpoint.ip_version,
-            "explanation": calculation["explanation"],
-            "high": calculation["high"],
-            "medium": calculation["medium"],
-            "low": calculation["low"],
+            "explanation": calculation.get("explanation", ""),
+            "high": calculation.get("high", 0),
+            "medium": calculation.get("medium", 0),
+            "low": calculation.get("low", 0),
             "last_scan_humanized": naturaltime(scan.last_scan_moment),
             "last_scan_moment": scan.last_scan_moment.isoformat()
         })
