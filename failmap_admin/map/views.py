@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 import pytz
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.syndication.views import Feed
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Count
 from django.http import JsonResponse
@@ -1065,9 +1067,12 @@ def map_data(request, weeks_back=0):
     return JsonResponse(data, encoder=JSEncoder)
 
 
+def empty_response():
+    return JsonResponse({}, encoder=JSEncoder)
+
+
 @cache_page(ten_minutes)
 def latest_scans(request, scan_type):
-    from django.contrib.humanize.templatetags.humanize import naturaltime
     scans = []
 
     dataset = {
@@ -1079,7 +1084,7 @@ def latest_scans(request, scan_type):
     if scan_type not in ["tls_qualys",
                          "Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                          "plain_https"]:
-        return JsonResponse(dataset, encoder=JSEncoder)
+        return empty_response()
 
     if scan_type == "tls_qualys":
         scans = list(TlsQualysScan.objects.order_by('-last_scan_moment')[0:6])
@@ -1107,11 +1112,122 @@ def latest_scans(request, scan_type):
     return JsonResponse(dataset, encoder=JSEncoder)
 
 
+def latest_updates(organization_id):
+    """
+
+    :param request:
+    :param organization_id: the id will always be "correct", whereas name will have all kinds of terribleness:
+    multiple organizations that have the same name in different branches, organizations with generic names etc.
+    Finding an organization by name is tricky. Therefore ID.
+
+    We're not filtering any further: given this might result in turning a blind eye to low or medium vulnerabilities.
+    :return:
+    """
+
+    try:
+        # todo: is dead etc.
+        # todo: does this only do an exact match?
+        organization = Organization.objects.all().filter(pk=organization_id).get()
+    except ObjectDoesNotExist:
+        return empty_response()
+
+    dataset = {
+        "scans": [],
+        "render_date": datetime.now(pytz.utc).isoformat(),
+        "remark": remark,
+    }
+
+    # semi-union, given not all columns are the same. (not python/django-esque solution)
+    tls_scans = list(TlsQualysScan.objects.all().filter(
+        endpoint__url__organization=organization).order_by('-rating_determined_on')[0:10])
+    generic_endpoint_scans = list(EndpointGenericScan.objects.filter(
+        endpoint__url__organization=organization).order_by('-rating_determined_on')[0:60])
+
+    scans = tls_scans + generic_endpoint_scans
+    # todo: sort them, currently assumes the rss reader will do the sorting
+    # scans = sorted(scans, key=lambda k: k.last_scan_moment, reverse=False)
+
+    for scan in scans:
+        scan_type = getattr(scan, "type", "tls_qualys")  # todo: should always be a property of scan
+        points, calculation = points_and_calculation(scan, scan_type)
+        dataset["scans"].append({
+            "organization": organization.name,
+            "organization_id": organization.pk,
+            "url": scan.endpoint.url.url,
+            "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+            "protocol": scan.endpoint.protocol,
+            "port": scan.endpoint.port,
+            "ip_version": scan.endpoint.ip_version,
+            "scan_type": scan_type,
+            "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
+            "high": calculation.get("high", 0),
+            "medium": calculation.get("medium", 0),
+            "low": calculation.get("low", 0),
+            "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
+            "rating_determined_on": scan.rating_determined_on,
+            "last_scan_humanized": naturaltime(scan.last_scan_moment),
+            "last_scan_moment": scan.last_scan_moment.isoformat()
+        })
+
+    return dataset
+
+
+@cache_page(ten_minutes)
+def updates_on_organization(request, organization_id):
+    if not organization_id:
+        return empty_response()
+
+    latest_updates(organization_id)
+    return JsonResponse(latest_updates(organization_id), encoder=JSEncoder)
+
+
+class UpdatesOnOrganizationFeed(Feed):
+
+    link = "/data/updates_on_organization_feed/"
+    description = "Update feed."
+
+    def title(self, organization_id):
+        try:
+            organization = Organization.objects.all().filter(pk=organization_id).get()
+        except ObjectDoesNotExist:
+            return "Organization Updates"
+
+        return "%s Updates" % organization.name
+
+    # it seems weird to do this.
+    def get_object(self, request, *args, **kwargs):
+        return kwargs['organization_id']
+
+    # second parameter via magic
+    def items(self, organization_id):
+        return latest_updates(organization_id).get("scans", [])
+
+    def item_title(self, item):
+        rating = _("Perfect") if not any([item['high'], item['medium'], item['low']]) else \
+            _("High") if item['high'] else _("Medium") if item['medium'] else _("Low")
+
+        badge = "✅" if not any([item['high'], item['medium'], item['low']]) else \
+            "🔴" if item['high'] else "🔶" if item['medium'] else "🍋"
+
+        return "%s %s - %s: %s" % (badge, rating, item["url"], item["service"])
+
+    def item_description(self, item):
+        return "%s: %s" % (_(item["scan_type"]), _(item.get("explanation", "")))
+
+    def item_pubdate(self, item):
+        return item["rating_determined_on"]
+
+    # item_link is only needed if NewsItem has no get_absolute_url method.
+    # unique links are required to properly display a feed.
+    def item_link(self, item):
+        return "https://faalkaart.nl/#report-%s/%s/%s/%s" % \
+               (item["organization_id"], item["url"], item["service"], item["rating_determined_on"])
+
+
+# @cache_page(ten_minutes), you can't cache this using the decorator.
 class LatestScanFeed(Feed):
 
-    title = "Tls Vulnerabilities"
-    link = "/data/feed/tls_qualys"
-    description = "Overview of the latest tls_qualys scans."
+    description = "Overview of the latest scans."
 
     # magic
     def get_object(self, request, *args, **kwargs):
@@ -1125,6 +1241,18 @@ class LatestScanFeed(Feed):
 
         return kwargs['scan_type']
 
+    def title(self, scan_type):
+        if scan_type:
+            return "%s Scan Updates" % scan_type
+        else:
+            return "Vulnerabilities Feed"
+
+    def link(self, scan_type):
+        if scan_type:
+            return "/data/feed/%s" % scan_type
+        else:
+            return "/data/feed/"
+
     # second parameter via magic
     def items(self, scan_type):
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
@@ -1134,15 +1262,25 @@ class LatestScanFeed(Feed):
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
-        return item.endpoint.url.url
+        points, calculation = points_and_calculation(item, self.scan_type)
+        if not calculation:
+            return ""
+
+        rating = _("Perfect") if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
+            _("High") if calculation['high'] else _("Medium") if calculation['medium'] else _("Low")
+
+        badge = "✅" if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
+            "🔴" if calculation['high'] else "🔶" if calculation['medium'] else "🍋"
+
+        return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
 
     def item_description(self, item):
         points, calculation = points_and_calculation(item, self.scan_type)
-        return calculation.get("explanation", "")
+        return _(calculation.get("explanation", ""))
 
     def item_pubdate(self, item):
         return item.last_scan_moment
 
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
-        return "https://faalkaart.nl/#updates"
+        return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)

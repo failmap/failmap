@@ -10,36 +10,34 @@ logger = logging.getLogger(__package__)
 
 
 def points_and_calculation(scan, scan_type):
-    if scan_type == "Strict-Transport-Security":
-        return security_headers_rating_based_on_scan(scan, scan_type)
-    if scan_type == "X-Content-Type-Options":
-        return security_headers_rating_based_on_scan(scan, scan_type)
-    if scan_type == "X-Frame-Options":
-        return security_headers_rating_based_on_scan(scan, scan_type)
-    if scan_type == "X-XSS-Protection":
-        return security_headers_rating_based_on_scan(scan, scan_type)
-    if scan_type == "plain_https":
-        return http_plain_rating_based_on_scan(scan)
-    if scan_type == "tls_qualys":
-        return tls_qualys_rating_based_on_scan(scan)
-    return 0, {}
+    # Can be probably more efficient by adding some methods to scan.
+    return calculation_methods[scan_type](scan)
 
 
 def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Security'):
-    security_headers_scores = {
+
+    # fasing out the header part. You can get this from the scan.
+    header = scan.type
+
+    """
+    Rationale for classifcation
+
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
         # prevents reflected xss
         'X-XSS-Protection': 100,
+        Classified as: Medium
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
         # prevents clickjacking
         'X-Frame-Options': 200,
+        Classified as: High
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
         # forces the content-type to be leading for defining a type of file (not the browser guess)
         # The browser guess could execute the file, for example with the wrong plugin.
         # Basically the server admin should fix the browser, instead of the other way around.
         'X-Content-Type-Options': 25,
+        Classified as: Low
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
         # Will be the browser default. Forces https, even if http resources are available.
@@ -52,6 +50,7 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         # governments have a once-a-year cycle for doing something requires. So HSTS should be
         # longer than a year, like one year and three months. Some site punish long hsts times.
         'Strict-Transport-Security': 200,
+        Classified as: High
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Public-Key-Pins
         # Has the potential to make your site unreachable if not properly (automatically) maintained
@@ -60,22 +59,27 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         # the transport.
         # header likely to be killed like p3p
         'Public-Key-Pins': 0,
+        Classified as: Ignored
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
         # Very complex header to specify what resources can be loaded from where. Especially useful
         # when loading in third party content such as horrible ads. Prevents against xss
         'Content-Security-Policy': 50,
+        Classified as: Low
 
         # Flash, PDF and other exploit prone things can be embedded. Should never happen:
         # the content should always be none(?).
         # if not set to none, it is 200 points for allowing flash and pdf to be embedded at all :)
         'X-Permitted-Cross-Domain-Policies': 25,
+        Classified as: Ignored
 
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
         # largely unsupported
         # What referrer should be allowed to access the resource. Security on referrer headers? No.
-        'Referrer-Policy': 0
-    }
+        'Referrer-Policy':
+        Classified as: Ignored
+        todo: should be enabled(?)
+    """
 
     high = 0
     medium = 0
@@ -86,7 +90,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         points = 0
         explanation = header + " header present."
     else:
-        points = security_headers_scores[scan.type]
+        # points = security_headers_scores[scan.type]
+        points = 0
         explanation = "Missing " + header + " header."
 
         if header in ["X-Frame-Options", "Strict-Transport-Security"]:
@@ -98,7 +103,7 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     calculation = {
         "type": "security_headers_%s" % header.lower().replace("-", "_"),
         "explanation": explanation,
-        "points": points,
+        "points": 0,
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
@@ -224,3 +229,14 @@ def tls_qualys_rating_based_on_scan(scan):
     }
 
     return gained_points, rating
+
+
+# don't re-create the dict every time.
+calculation_methods = {
+    'Strict-Transport-Security': security_headers_rating_based_on_scan,
+    'X-Content-Type-Options': security_headers_rating_based_on_scan,
+    'X-Frame-Options': security_headers_rating_based_on_scan,
+    'X-XSS-Protection': security_headers_rating_based_on_scan,
+    'plain_https': http_plain_rating_based_on_scan,
+    'tls_qualys': tls_qualys_rating_based_on_scan
+}

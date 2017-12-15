@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-14 15:27+0000\n"
+"POT-Creation-Date: 2017-12-15 12:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,9 +19,9 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: failmap_admin/map/static/js/failmap.js:68
-#: failmap_admin/map/static/js/views.js:398
-#: failmap_admin/map/static/js/views.js:403
-#: failmap_admin/map/static/js/views.js:406
+#: failmap_admin/map/static/js/views.js:404
+#: failmap_admin/map/static/js/views.js:409
+#: failmap_admin/map/static/js/views.js:412
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -235,7 +235,7 @@ msgstr "Onvoldoende versleuteld (F)"
 
 #: failmap_admin/map/static/js/script.js:26
 msgid "Certificate not valid for domain name."
-msgstr "Certificaat niet geldig voor domeinnaam"
+msgstr "Certificaat niet geldig voor domeinnaam."
 
 #: failmap_admin/map/static/js/script.js:27
 msgid ""
@@ -346,64 +346,64 @@ msgstr "Strict-Transport-Security Header (HSTS)"
 msgid "week"
 msgstr "week"
 
-#: failmap_admin/map/static/js/views.js:178
-#: failmap_admin/map/static/js/views.js:181
 #: failmap_admin/map/static/js/views.js:184
-#: failmap_admin/map/static/js/views.js:186
-#: failmap_admin/map/static/js/views.js:188
+#: failmap_admin/map/static/js/views.js:187
+#: failmap_admin/map/static/js/views.js:190
+#: failmap_admin/map/static/js/views.js:192
+#: failmap_admin/map/static/js/views.js:194
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap_admin/map/static/js/views.js:179
-#: failmap_admin/map/static/js/views.js:182
+#: failmap_admin/map/static/js/views.js:185
+#: failmap_admin/map/static/js/views.js:188
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap_admin/map/static/js/views.js:204
+#: failmap_admin/map/static/js/views.js:210
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap_admin/map/static/js/views.js:206
+#: failmap_admin/map/static/js/views.js:212
 msgid "score high"
 msgstr "hoog"
 
-#: failmap_admin/map/static/js/views.js:208
+#: failmap_admin/map/static/js/views.js:214
 msgid "score medium"
 msgstr "midden"
 
-#: failmap_admin/map/static/js/views.js:210
+#: failmap_admin/map/static/js/views.js:216
 msgid "score low"
 msgstr "laag"
 
-#: failmap_admin/map/static/js/views.js:404
+#: failmap_admin/map/static/js/views.js:410
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 
-#: failmap_admin/map/static/js/views.js:435
-#: failmap_admin/map/static/js/views.js:440
+#: failmap_admin/map/static/js/views.js:441
+#: failmap_admin/map/static/js/views.js:446
 msgid "top congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap_admin/map/static/js/views.js:436
-#: failmap_admin/map/static/js/views.js:441
+#: failmap_admin/map/static/js/views.js:442
+#: failmap_admin/map/static/js/views.js:447
 msgid "top position"
 msgstr "positie"
 
-#: failmap_admin/map/static/js/views.js:437
+#: failmap_admin/map/static/js/views.js:443
 msgid "top fail on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap_admin/map/static/js/views.js:438
-#: failmap_admin/map/static/js/views.js:443
+#: failmap_admin/map/static/js/views.js:444
+#: failmap_admin/map/static/js/views.js:449
 msgid "hastag fail"
 msgstr "faal"
 
-#: failmap_admin/map/static/js/views.js:438
-#: failmap_admin/map/static/js/views.js:443
+#: failmap_admin/map/static/js/views.js:444
+#: failmap_admin/map/static/js/views.js:449
 msgid "hastag failmap"
 msgstr "faalkaart"
 
-#: failmap_admin/map/static/js/views.js:442
+#: failmap_admin/map/static/js/views.js:448
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
 

@@ -567,15 +567,19 @@
                 </div>
                 <br/>
                 <div v-if="name">
-                    {% trans "Report share result question" %} {% verbatim %}<span
-                        v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-                    <br/>
+                    <p>{% trans "RSS change feed teaser" %}
+                        <a :href="'/data/updates_on_organization_feed/' + selected"
+                           target="_blank">{% trans "rss feed" %}</a>.</p>
+
                     {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br/>
                     {% trans "Score" %}<span v-if="promise"><strong>*</strong></span>:<br/>
                     {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br/>
                     {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br/>
                     {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br/>
                     {% trans "congratulations" %}!
+                    <br/>
+                    {% trans "Report share result question" %} {% verbatim %}<span
+                        v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
                     <br/>
                     <br/>
                     {% trans "Report ask pentest leader" %} <a
