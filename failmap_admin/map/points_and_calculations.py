@@ -9,8 +9,9 @@ import logging
 logger = logging.getLogger(__package__)
 
 
-def points_and_calculation(scan, scan_type):
+def points_and_calculation(scan):
     # Can be probably more efficient by adding some methods to scan.
+    scan_type = getattr(scan, "type", "tls_qualys")
     return calculation_methods[scan_type](scan)
 
 

@@ -2,8 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap_admin.map.rating import (add_organization_rating, create_timeline,
-                                      rerate_organizations, rerate_urls, show_timeline_console)
+from failmap_admin.map.rating import (add_organization_rating, create_timeline, rerate_urls,
+                                      show_timeline_console)
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint
 from failmap_admin.scanners.scanner_security_headers import scan as scan_headers
@@ -15,7 +15,9 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        test_can_connect_to_organization()
+        develop_rerate_urls_async()
+        # develop_determineratings()
+        # test_can_connect_to_organization()
         # as a task
         # develop_determineratings()
 
@@ -30,6 +32,11 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def develop_rerate_urls_async():
+    from failmap_admin.map.rating import rerate_urls_async
+    rerate_urls_async()
 
 
 def reset_onboard():
@@ -120,7 +127,12 @@ def develop_security_headers_scanner():
 def develop_determineratings():
     # DetermineRatings.default_ratings()
     # return
+    from datetime import datetime
+    import pytz
+    from failmap_admin.map.rating import relevant_endpoints_at_timepoint
 
+    u = Url.objects.all().filter(url='www.arnhem.nl').get()
+    relevant_endpoints_at_timepoint(url=u, when=datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc))
     # DetermineRatings.significant_times(organization=organization)
     # urls = Url.objects.all().filter(organization=organization)
     # for url in urls:
@@ -128,9 +140,9 @@ def develop_determineratings():
 
     # pyflakes when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
     # when = datetime.now(pytz.utc)
-    organization = Organization.objects.filter(name="Zederik").get()
+    # organization = Organization.objects.filter(name="Zederik").get()
     # rerate_urls(Url.objects.all().filter(organization=organization))
-    rerate_organizations(organizations=[organization])
+    # rerate_organizations(organizations=[organization])
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
     # add_organization_rating(organization, create_history=True)

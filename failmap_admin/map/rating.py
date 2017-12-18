@@ -3,8 +3,10 @@ from datetime import datetime
 from typing import List
 
 import pytz
+from celery import group
 from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 
 from failmap_admin.organizations.models import Organization, Url
 from failmap_admin.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
@@ -13,61 +15,14 @@ from ..celery import app
 from .models import OrganizationRating, UrlRating
 from .points_and_calculations import points_and_calculation
 
-# from functools import lru_cache
-
 logger = logging.getLogger(__package__)
 """
-python -m cProfile -s time `which failmap-admin` rebuild-ratings
-mainly SQL queries (still)
+failmap-python -m cProfile -o rebuild_complete_3 -s time `which failmap-admin` rebuild_ratings
 
-   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-   186699   50.724    0.000   61.517    0.000 base.py:324(execute)
-    30872   31.178    0.001   31.178    0.001 {method 'commit' of 'sqlite3.Connection' objects}
-6499892/6498375   11.051    0.000   11.676    0.000 {built-in method builtins.hasattr}
-6952977/6930265    9.602    0.000    9.632    0.000 {built-in method builtins.getattr}
-1832647/1419376    7.205    0.000   51.009    0.000 compiler.py:368(compile)
-   213054    6.303    0.000   11.092    0.000 query.py:266(clone)
-  2860662    6.152    0.000   10.844    0.000 compiler.py:351(quote_name_unless_alias)
-8490147/8489630    5.820    0.000    9.672    0.000 {built-in method builtins.isinstance}
-  1139637    4.941    0.000    5.813    0.000 operations.py:199(get_db_converters)
-   117238    4.884    0.000   15.216    0.000 compiler.py:523(get_default_columns)
-173027/173005    4.818    0.000   43.225    0.000 query.py:1122(build_filter)
-   186699    4.645    0.000   78.305    0.000 utils.py:77(execute)
-   125021    4.598    0.000   43.696    0.000 compiler.py:165(get_select)
-   170439    4.413    0.000    8.271    0.000 base.py:473(__init__)
-  1308273    4.337    0.000    7.837    0.000 __init__.py:353(get_col)
-     8322    4.188    0.001   80.269    0.010 rating.py:262(rate_timeline)
-   349379    3.985    0.000    7.710    0.000 query.py:1284(names_to_path)
-  1336234    3.972    0.000   14.358    0.000 expressions.py:693(as_sql)
-   175012    3.905    0.000    4.338    0.000 query.py:128(__init__)
-   124954    3.698    0.000   18.109    0.000 compiler.py:812(get_converters)
-125021/124955    3.487    0.000   85.670    0.001 compiler.py:413(as_sql)
-193674/129098    3.486    0.000   59.677    0.000 query.py:1255(_add_q)
-   265136    3.428    0.000  197.598    0.001 query.py:47(__iter__)
-   156383    3.403    0.000    3.404    0.000 {method 'sub' of '_sre.SRE_Pattern' objects}
-   247487    3.176    0.000    8.180    0.000 dateparse.py:85(parse_datetime)
-  2440240    3.124    0.000    4.241    0.000 __init__.py:471(__eq__)
-   155826    2.981    0.000    2.981    0.000 {method 'execute' of 'sqlite3.Cursor' objects}
-   133288    2.888    0.000  171.005    0.001 compiler.py:855(execute_sql)
-  1539350    2.870    0.000    4.268    0.000 operations.py:147(quote_name)
-  1131921    2.811    0.000    8.557    0.000 expressions.py:703(get_db_converters)
-   199980    2.748    0.000    6.912    0.000 {method 'fetchmany' of 'sqlite3.Cursor' objects}
-   200977    2.562    0.000   12.755    0.000 lookups.py:158(process_lhs)
-   513049    2.560    0.000    3.892    0.000 related.py:651(foreign_related_fields)
-   365765    2.280    0.000    2.280    0.000 {method 'replace' of 'datetime.datetime' objects}
-   214624    2.261    0.000  200.017    0.001 query.py:1116(_fetch_all)
-    45086    2.256    0.000    2.256    0.000 encoder.py:204(iterencode)
-   522577    2.193    0.000    3.852    0.000 abc.py:178(__instancecheck__)
-  8729938    2.179    0.000    2.179    0.000 {method 'append' of 'list' objects}
-    60022    2.170    0.000    3.349    0.000 __init__.py:145(__init__)
-   349455    2.046    0.000    5.804    0.000 query.py:161(__init__)
-   322815    2.032    0.000    2.784    0.000 query_utils.py:63(__init__)
-   346977    1.943    0.000    1.943    0.000 {method 'match' of '_sre.SRE_Pattern' objects}
-  1077582    1.873    0.000    1.873    0.000 tree.py:21(__init__)
-   205326    1.808    0.000   13.385    0.000 query.py:1102(_clone)
-   988849    1.799    0.000  135.076    0.000 related_descriptors.py:161(__get__)
-     8322    1.793    0.000  267.225    0.032 rating.py:167(create_timeline)
-
+Expensive are:
+Deepdiff,
+Json conversions
+Database queries (not so much anymore)
 """
 
 
@@ -118,28 +73,39 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
 
 @app.task
 def rerate_urls(urls: List[Url]=None):
-
     if not urls:
         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
 
     # to not have all ratings empty, do it per url
     for url in urls:
-        UrlRating.objects.all().filter(url=url).delete()
+        delete_url_rating(url)
         rate_timeline(create_timeline(url), url)
 
 
 @app.task
-def rerate_urls_async(urls: List[Url]=None):
+def delete_url_rating(url: Url):
+    UrlRating.objects.all().filter(url=url).delete()
+
+
+@app.task
+# 2.5 minutes and it's done :)
+def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
 
     if not urls:
         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
 
-    # to not have all ratings empty, do it per url
+    tasks = []
     for url in urls:
-        UrlRating.objects.all().filter(url=url).delete()
-        (create_timeline.s(url) | rate_timeline.s(url)).apply_async()
+        tasks.append((delete_url_rating.s(url) | create_timeline.si(url) | rate_timeline.s(url)))
+
+    task = group([task for task in tasks])
+    if execute_locally:
+        task.apply_async()
+    else:
+        return task
 
 
+@app.task
 def rerate_organizations(organizations: List[Organization]=None):
     if not organizations:
         organizations = list(Organization.objects.all().order_by('name'))
@@ -186,11 +152,24 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         logger.info("Could not find urls from organization or url.")
         return []
 
-    tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls)
+    # since we want to know all about these endpoints, get them at the same time, which is faster.
+    # Otherwise related objects where requested at create timeline.
+    # Difference:
+    # before prefetch: 878 calls in 23411 ms = 26.66 ms / call
+    # after prefetch: 1373 calls in 22636 ms = 16.48 ms / call
+    # test: 420 in 4629 = 11ms / call
+    # A nearly 40% performance increase :)
+    # the red flag was there was a lot of "__get__" operations going on inside create timeline, while it doesn't do sql
+    # after the update no calls to __get__ at all.
+    tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).\
+        prefetch_related("endpoint").defer("endpoint__url")
     tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
 
-    generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url__in=urls)
+    generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url__in=urls).\
+        prefetch_related("endpoint").defer("endpoint__url")
     generic_scan_dates = [x.rating_determined_on for x in generic_scans]
+    # this is not faster.
+    # generic_scan_dates = list(generic_scans.values_list("rating_determined_on", flat=True))
 
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
@@ -265,65 +244,96 @@ def create_timeline(url: Url):
 
     # reduce to date only, it's not useful to show 100 things on a day when building history.
     for moment in moments:
-        timeline[moment.date()] = {}
-        timeline[moment.date()]["endpoints"] = []
-        timeline[moment.date()]['scans'] = []
-        timeline[moment.date()]["dead_endpoints"] = []
+        moment_date = moment.date()
+        timeline[moment_date] = {}
+        timeline[moment_date]["endpoints"] = []
+        timeline[moment_date]['scans'] = []
+        timeline[moment_date]["dead_endpoints"] = []
 
     # sometimes there have been scans on dead endpoints. This is a problem in the database.
     # this code is correct with retrieving those endpoints again.
     # we could save a list of dead endpoints, but the catch is that an endpoint can start living
     # again over time. The scans with only dead endpoints should not be made.
 
-    # this code performs some date operations, which is much faster than using django's filter (as that hits the db)
-    for moment in [generic_scan.rating_determined_on for generic_scan in happenings['generic_scans']]:
-        moment = moment.date()
-        timeline[moment]["generic_scan"] = {}
-        timeline[moment]["generic_scan"]["scanned"] = True
-        scans = [x for x in happenings['generic_scans'] if x.rating_determined_on.date() == moment]
-        timeline[moment]["generic_scan"]['scans'] = list(scans)
-        endpoints = [x.endpoint for x in scans]
-        timeline[moment]["generic_scan"]["endpoints"] = endpoints
-        for endpoint in endpoints:
-            if endpoint not in timeline[moment]["endpoints"]:
-                timeline[moment]["endpoints"].append(endpoint)
-        timeline[moment]['scans'] += list(scans)
+    for scan in happenings['generic_scans']:
+        some_day = scan.rating_determined_on.date()
 
-    for moment in [tls_scan.rating_determined_on for tls_scan in happenings['tls_qualys_scans']]:
-        moment = moment.date()
-        timeline[moment]["tls_qualys"] = {}
-        timeline[moment]["tls_qualys"]["scanned"] = True
-        scans = [x for x in happenings['tls_qualys_scans'] if x.rating_determined_on.date() == moment]
-        timeline[moment]["tls_qualys"]['scans'] = scans
-        endpoints = [x.endpoint for x in scans]
-        timeline[moment]["tls_qualys"]["endpoints"] = endpoints
-        for endpoint in endpoints:
-            if endpoint not in timeline[moment]["endpoints"]:
-                timeline[moment]["endpoints"].append(endpoint)
-        timeline[moment]['scans'] += list(scans)
+        # can we create this set in an easier way?
+        if "generic_scan" not in timeline[some_day]:
+            timeline[some_day]["generic_scan"] = {'scans': [], 'endpoints': []}
+
+        # timeline[some_day]["generic_scan"]["scanned"] = True  # do we ever check on this? Seems not.
+        timeline[some_day]["generic_scan"]['scans'].append(scan)
+        timeline[some_day]["generic_scan"]["endpoints"].append(scan.endpoint)
+        timeline[some_day]["endpoints"].append(scan.endpoint)
+        timeline[some_day]['scans'].append(scan)
+
+    # this code performs some date operations, which is much faster than using django's filter (as that hits the db)
+    # for moment in [generic_scan.rating_determined_on for generic_scan in happenings['generic_scans']]:
+    #     moment_date = moment.date()
+    #     timeline[moment_date]["generic_scan"] = {}
+    #     timeline[moment_date]["generic_scan"]["scanned"] = True
+    #     scans = [x for x in happenings['generic_scans'] if x.rating_determined_on.date() == moment_date]
+    #     timeline[moment_date]["generic_scan"]['scans'] = list(scans)
+    #     endpoints = [x.endpoint for x in scans]
+    #     timeline[moment_date]["generic_scan"]["endpoints"] = endpoints
+    #     for endpoint in endpoints:
+    #         if endpoint not in timeline[moment_date]["endpoints"]:
+    #             timeline[moment_date]["endpoints"].append(endpoint)
+    #     timeline[moment_date]['scans'] += scans
+
+    for scan in happenings['tls_qualys_scans']:
+        some_day = scan.rating_determined_on.date()
+
+        # can we create this set in an easier way?
+        if "tls_qualys" not in timeline[some_day]:
+            timeline[some_day]["tls_qualys"] = {'scans': [], 'endpoints': []}
+
+        timeline[some_day]["tls_qualys"]['scans'].append(scan)
+        timeline[some_day]["tls_qualys"]["endpoints"].append(scan.endpoint)
+        timeline[some_day]["endpoints"].append(scan.endpoint)
+        timeline[some_day]['scans'].append(scan)
+
+    # for moment in [tls_scan.rating_determined_on for tls_scan in happenings['tls_qualys_scans']]:
+    #     moment_date = moment.date()
+    #     timeline[moment_date]["tls_qualys"] = {}
+    #     timeline[moment_date]["tls_qualys"]["scanned"] = True
+    #     scans = [x for x in happenings['tls_qualys_scans'] if x.rating_determined_on.date() == moment_date]
+    #     timeline[moment_date]["tls_qualys"]['scans'] = scans
+    #     endpoints = [x.endpoint for x in scans]
+    #     timeline[moment_date]["tls_qualys"]["endpoints"] = endpoints
+    #     for endpoint in endpoints:
+    #         if endpoint not in timeline[moment_date]["endpoints"]:
+    #             timeline[moment_date]["endpoints"].append(endpoint)
+    #     timeline[moment_date]['scans'] += scans
 
     # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
     # see there are gaps in using the url over time. Which is more truthful.
     for moment in [not_resolvable_url.not_resolvable_since for not_resolvable_url in happenings['non_resolvable_urls']]:
-        moment = moment.date()
-        timeline[moment]["url_not_resolvable"] = True
+        timeline[moment.date()]["url_not_resolvable"] = True
 
     for moment in [dead_url.is_dead_since for dead_url in happenings['dead_urls']]:
-        moment = moment.date()
-        timeline[moment]["url_is_dead"] = True
+        timeline[moment.date()]["url_is_dead"] = True
 
-    for moment in [dead_endpoint.is_dead_since for dead_endpoint in happenings['dead_endpoints']]:
-        moment = moment.date()
-        timeline[moment]["dead"] = True
-        # figure out what endpoints died this moment
-        for ep in happenings['dead_endpoints']:
-            if ep.is_dead_since.date() == moment:
-                if ep not in timeline[moment]["dead_endpoints"]:
-                    timeline[moment]["dead_endpoints"].append(ep)
+    for endpoint in happenings['dead_endpoints']:
+        some_day = endpoint.is_dead_since.date()
+        timeline[some_day]["dead"] = True
+        if endpoint not in timeline[moment_date]["dead_endpoints"]:
+            timeline[moment_date]["dead_endpoints"].append(endpoint)
+
+    # for moment in [dead_endpoint.is_dead_since for dead_endpoint in happenings['dead_endpoints']]:
+    #     moment_date = moment.date()
+    #     timeline[moment_date]["dead"] = True
+    #     # figure out what endpoints died this moment
+    #     for ep in happenings['dead_endpoints']:
+    #         if ep.is_dead_since.date() == moment:
+    #             if ep not in timeline[moment_date]["dead_endpoints"]:
+    #                 timeline[moment_date]["dead_endpoints"].append(ep)
 
     # unique endpoints only
     for moment in moments:
-        timeline[moment.date()]["endpoints"] = list(set(timeline[moment.date()]["endpoints"]))
+        some_day = moment.date()
+        timeline[some_day]["endpoints"] = list(set(timeline[some_day]["endpoints"]))
 
     # try to return dates in chronological order
     return timeline
@@ -439,7 +449,7 @@ def rate_timeline(timeline, url: Url):
             for scan_type in scan_types:
                 if scan_type in these_scans.keys():
                     if scan_type not in given_ratings[label]:
-                        points, calculation = points_and_calculation(these_scans[scan_type], scan_type)
+                        points, calculation = points_and_calculation(these_scans[scan_type])
                         if calculation:
                             calculations.append(calculation)
                             total_scores += points
@@ -539,30 +549,30 @@ def show_timeline_console(timeline, url: Url):
             for item in timeline[moment]['tls_qualys']['endpoints']:
                 message += "|  |  |- Endpoint %s" % item + newline
             for item in timeline[moment]['tls_qualys']['scans']:
-                score, json = points_and_calculation(item, 'tls_qualys')
+                score, calculation = points_and_calculation(item)
                 message += "|  |  |- %5s points: %s" % (score, item) + newline
 
         if 'generic_scan' in timeline[moment].keys():
             message += "|  |- generic_scan" + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "plain_https":
-                    score, json = points_and_calculation(item, 'plain_https')
-                    message += "|  |  |- %5s points: %s" % (score, item) + newline
+                    score, calculation = points_and_calculation(item)
+                    message += "|  |  |- %5s low: %s" % (score, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "Strict-Transport-Security":
-                    score, json = points_and_calculation(item, "Strict-Transport-Security")
+                    score, calculation = points_and_calculation(item)
                     message += "|  |  |- %5s points: %s" % (score, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-Frame-Options":
-                    score, json = points_and_calculation(item, "X-Frame-Options")
+                    score, calculation = points_and_calculation(item)
                     message += "|  |  |- %5s points: %s" % (score, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-Content-Type-Options":
-                    score, json = points_and_calculation(item, "X-Content-Type-Options")
+                    score, calculation = points_and_calculation(item)
                     message += "|  |  |- %5s points: %s" % (score, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-XSS-Protection":
-                    score, json = points_and_calculation(item, "X-XSS-Protection")
+                    score, calculation = points_and_calculation(item)
                     message += "|  |  |- %5s points: %s" % (score, item) + newline
 
         if 'dead' in timeline[moment].keys():
@@ -598,22 +608,29 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     total_high, total_medium, total_low = 0, 0, 0
 
     # todo: closing off urls, after no relevant endpoints, but still resolvable. Done.
-    urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
+    # if so, we don't need to check for existing endpoints anymore at a certain time...
+    # It seems we don't need the url object, only a flat list of pk's for urlratigns.
+    # urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
+    urls = relevant_urls_at_timepoint_allinone(organization=organization, when=when)
 
-    all_url_ratings = []
+    # testing if the lists are exactly the same.
+    # for url in urls:
+    #     if url not in urls_new:
+    #         logger.error(urls)
+    #         logger.error(urls_new)
+    #         raise ArithmeticError("Urls are not the same... your logic is wrong.")
+#
+    # for url in urls_new:
+    #     if url not in urls:
+    #         logger.error(urls)
+    #         logger.error(urls_new)
+    #         raise ArithmeticError("Urls are not the same... your logic is wrong.")
+
+    # Here used to be a lost of nested queries: getting the "last" one per url. This has been replaced with a
+    # custom query that is many many times faster.
+    all_url_ratings = get_latest_urlratings_fast(urls, when)
+
     url_calculations = []
-    for url in urls:
-        try:
-            urlratings = UrlRating.objects.filter(url=url, when__lte=when)
-            urlrating = urlratings.latest("when")  # kills the queryset, results 1
-            all_url_ratings.append(urlrating)
-        except UrlRating.DoesNotExist:
-            logger.warning("Url has no rating at this moment: %s %s" % (url, when))
-
-    # sort all_url_ratings on rating desc.
-    # https://stackoverflow.com/questions/403421/
-    all_url_ratings.sort(key=lambda x: (x.high, x.medium, x.low), reverse=True)
-
     for urlrating in all_url_ratings:
         total_rating += urlrating.rating
         total_high += urlrating.high
@@ -651,7 +668,75 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
         organizationrating.calculation = calculation
         organizationrating.save()
     else:
-        logger.warning("The calculation is still the same, not creating a new OrganizationRating")
+        # This happens because some urls are dead etc: our filtering already removes this from the relevant information
+        # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
+        logger.warning("The calculation on %s is the same as the previous one. Not saving." % when)
+
+
+def get_latest_urlratings(urls: List[Url], when):
+    # per item implementation, one query per item.
+    all_url_ratings = []
+
+    for url in urls:
+        try:
+            urlratings = UrlRating.objects.filter(url=url, when__lte=when)
+            urlrating = urlratings.latest("when")  # kills the queryset, results 1
+            all_url_ratings.append(urlrating)
+        except UrlRating.DoesNotExist:
+            logger.debug("Url has no rating at this moment: %s %s" % (url, when))
+
+    # https://stackoverflow.com/questions/403421/
+    all_url_ratings.sort(key=lambda x: (x.high, x.medium, x.low), reverse=True)
+
+    return all_url_ratings
+
+
+def get_latest_urlratings_fast(urls: List[Url], when):
+    # one query for all items. with sql injection feature.
+    # perhaps we can do UrlRating.objects.raw( to avoid json loading.
+
+    sql = '''SELECT
+                    id,
+                    rating,
+                    high,
+                    medium,
+                    low,
+                    calculation
+                FROM map_urlrating
+                INNER JOIN
+                  (SELECT MAX(id) as id2 FROM map_urlrating or2
+                  WHERE `when` <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
+                  GROUP BY url_id) as x
+                  ON x.id2 = map_urlrating.id
+                ORDER BY `high` DESC, `medium` DESC, `low` DESC, `url_id` ASC
+                '''
+    # print(sql)
+    # Doing this causes some delay. Would we add the calculation without the json conversion (which is 100% anyway)
+    # it would take 8 seconds to handle the first few.
+    # Would we add json loading via the standard json library it's 16 seconds.
+    # Doing it via the faster simplejson, it's 12 seconds.
+    # Via Urlrating.objects.raw it's 13 seconds.
+    # It's a bit waste to re-load a json string. Without it would be 25% to 50% faster.
+    # https://github.com/derek-schaefer/django-json-field
+    # https://docs.python.org/3/library/json.html#json.JSONEncoder
+    return UrlRating.objects.raw(sql)
+
+    # cursor.execute(sql)
+    # rows = cursor.fetchall()
+    # for row in rows:
+    #     data = {
+    #         "rating": row[0],
+    #         "high": row[1],
+    #         "medium": row[2],
+    #         "low": row[3],
+#
+    #         "calculation": json.loads(row[4]),
+    #         # "calculation": row[4],
+    #         "url": row[5],
+    #     }
+    #     all_url_ratings.append(data)
+    # # print(all_url_ratings)
+    # return all_url_ratings
 
 
 # but this will give the correct score, possibly on the wrong endpoints (why?)
@@ -675,6 +760,7 @@ def rate_url(url: Url, when: datetime=None):
     # avoid duplication. We think the explanation is the most unique identifier.
     # therefore the order in which URLs are grabbed (if there are new ones) is important.
     # it cannot be random, otherwise the explanation will be different every time.
+    # deepdiff is also extremely slow, logically, since the json objects are pretty large.
     if explanation and DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True):
         u = UrlRating()
         u.url = url
@@ -699,7 +785,7 @@ def get_url_score_modular(url: Url, when: datetime=None):
     Afterwards we'll check if at this time there also where dead endpoints.
     Dead endpoints add 0 points to the rating, but it can lower a rating.(?)
     """
-    endpoints = relevant_endpoints_at_timepoint([url], when)
+    endpoints = relevant_endpoints_at_timepoint(url=url, when=when)
 
     # We're not going to have duplicate endpoints. This might happen if someone accidentally adds an
     # endpoint with the same info.
@@ -834,12 +920,40 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
             scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when
                                                 ).latest('rating_determined_on')
 
-        points, calculation = points_and_calculation(scan, scan_type)
+        points, calculation = points_and_calculation(scan)
         logger.debug("On %s, Endpoint %s, Points %s" % (when, endpoint, points))
         return int(points), str(calculation)
     except ObjectDoesNotExist:
         logger.debug("No %s scan on endpoint %s." % (scan_type, endpoint))
         return 0, {}
+
+
+def relevant_urls_at_timepoint_allinone(organization: Organization, when: datetime):
+    # doing this, without the flat list results in about 40% faster execution, most notabily on large organizations
+    # if you want to see what's going on, see relevant_urls_at_timepoint
+    # removed the IN query to gain some extra speed
+    # returned a flat list of pk's, since we don't do anything else with these urls. It's not particulary faster.
+    both = Url.objects.filter(
+        organization=organization).filter(
+        # resolvable_in_the_past
+        Q(created_on__lte=when, not_resolvable=True, not_resolvable_since__gte=when)
+        |
+        # alive_in_the_past
+        Q(created_on__lte=when, is_dead=True, is_dead_since__gte=when)
+        |
+        # currently_alive_and_resolvable
+        Q(created_on__lte=when, not_resolvable=False, is_dead=False)
+    ).filter(
+        # relevant_endpoints_at_timepoint
+
+        # Alive then and still alive
+        Q(endpoint__discovered_on__lte=when, endpoint__is_dead=False)
+        |
+        # Alive then
+        Q(endpoint__discovered_on__lte=when, endpoint__is_dead=True, endpoint__is_dead_since__gte=when)
+    ).values_list("id", flat=True)
+    # print(both.query)
+    return list(set(both))
 
 
 # to save some database roundtrips
@@ -886,7 +1000,7 @@ def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime
         # complexity of history in queries and complexer ORM queries. It's slower, but easier to understand.
         # And using the lru_cache, it should be pretty fast (faster than having these subqueries executed
         # every time)
-        has_endpoints = relevant_endpoints_at_timepoint(urls=[url], when=when)
+        has_endpoints = relevant_endpoints_at_timepoint(url=url, when=when)
         if has_endpoints:
             logger.debug("The url %s is relevant on %s and has endpoints: " % (url, when))
             relevant_urls.append(url)
@@ -898,30 +1012,87 @@ def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime
 
 # to save some database roundtrips
 # @lru_cache(maxsize=None)  # TypeError: unhashable type: 'list'
-def relevant_endpoints_at_timepoint(urls: List[Url], when: datetime):
+def relevant_endpoints_at_timepoint(url: Url, when: datetime):
+    """
+    The IN query is of course (a little bit) slower, so the function is called with a URL directly.
+    Using two separate queries is also (a little bit) slower, so they are merged with a Q statement.
+
+    Alive then:
+    SELECT  "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
+            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
+            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
+    FROM
+            "scanners_endpoint"
+    WHERE ( "scanners_endpoint"."url_id" IN (131)
+    AND     "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00 AND "scanners_endpoint"."is_dead" = True
+    AND     "scanners_endpoint"."is_dead_since" >= 2016-12-31 00:00:00)
+
+    Still alive endpoints:
+    SELECT  "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
+            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
+            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
+    FROM    "scanners_endpoint"
+    WHERE ( "scanners_endpoint"."url_id" IN (131)
+    AND     "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
+    AND     "scanners_endpoint"."is_dead" = False)
+
+    Both, with a Q construct:
+    SELECT
+            "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
+            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
+            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
+    FROM    "scanners_endpoint"
+    WHERE   ("scanners_endpoint"."url_id" IN (131)
+    AND     (
+                (   "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
+                AND "scanners_endpoint"."is_dead" = False)
+            OR
+                (   "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
+                AND "scanners_endpoint"."is_dead" = True
+                AND "scanners_endpoint"."is_dead_since" >= 2016-12-31 00:00:00)))
+
+
+
+    :param url:
+    :param when:
+    :return:
+    """
     endpoints = Endpoint.objects.all()
 
     # Alive then
-    then_alive = endpoints.filter(
-        url__in=urls,
-        discovered_on__lte=when,
-        is_dead=True,
-        is_dead_since__gte=when,
-    )
+    # then_alive = endpoints.filter(
+    #     url=url,
+    #     discovered_on__lte=when,
+    #     is_dead=True,
+    #     is_dead_since__gte=when,
+    # )
+    # print(then_alive.query)
 
     # Alive then and still alive
-    still_alive_endpoints = endpoints.filter(
-        url__in=urls,
-        discovered_on__lte=when,
-        is_dead=False,
-    )
+    # still_alive_endpoints = endpoints.filter(
+    #     url=url,
+    #     discovered_on__lte=when,
+    #     is_dead=False,
+    # )
+    # print(still_alive_endpoints.query)
 
-    logger.debug("Endpoints alive back then:  %s, Still alive today: %s" % (
-        then_alive.count(), still_alive_endpoints.count()))
+    # let's mix both queries into a single one, saving a database roundtrip:
+    both = endpoints.filter(
+        url=url).filter(
+        # Alive then and still alive
+        Q(discovered_on__lte=when, is_dead=False)
+        |
+        # Alive then
+        Q(discovered_on__lte=when, is_dead=True, is_dead_since__gte=when))
+    # print(both.query)  # looks legit.
 
-    relevant_endpoints = list(then_alive) + list(still_alive_endpoints)
+    # logger.debug("Endpoints alive back then and today (together): %s, " % (both.count()))
 
-    [logger.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
+    # also saves on merging these:
+    # relevant_endpoints = list(then_alive) + list(still_alive_endpoints)
+    relevant_endpoints = list(both)
+
+    # [logger.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
 
     return relevant_endpoints
 

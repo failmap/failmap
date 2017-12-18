@@ -1,5 +1,4 @@
 import collections
-import json
 from datetime import datetime, timedelta
 
 import pytz
@@ -15,6 +14,7 @@ from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
+import simplejson as json
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Promise, Url
 from failmap_admin.scanners.models import EndpointGenericScan, TlsQualysScan
@@ -1094,7 +1094,7 @@ def latest_scans(request, scan_type):
         scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
-        points, calculation = points_and_calculation(scan, scan_type)
+        points, calculation = points_and_calculation(scan)
         dataset["scans"].append({
             "url": scan.endpoint.url.url,
             "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
@@ -1149,7 +1149,7 @@ def latest_updates(organization_id):
 
     for scan in scans:
         scan_type = getattr(scan, "type", "tls_qualys")  # todo: should always be a property of scan
-        points, calculation = points_and_calculation(scan, scan_type)
+        points, calculation = points_and_calculation(scan)
         dataset["scans"].append({
             "organization": organization.name,
             "organization_id": organization.pk,
@@ -1225,20 +1225,22 @@ class UpdatesOnOrganizationFeed(Feed):
 
 
 # @cache_page(ten_minutes), you can't cache this using the decorator.
+"""
+Setting a parameter such as self.scan_type in the get_object will cause concurrency problems.
+
+The manual is lacking how to get variables to the item_title and such functions: only to "items" it is somewhat
+clear. This is probably because i don't know enough python. Why would this extra parameter work at the "items"
+functions but not anywhere else? (signature issues).
+"""
+
+
 class LatestScanFeed(Feed):
 
     description = "Overview of the latest scans."
 
     # magic
     def get_object(self, request, *args, **kwargs):
-
-        # raunchy solution to get the scan_type to the item_description method
-        if kwargs['scan_type'] not in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
-                                       "X-XSS-Protection", "plain_https", "tls_qualys"]:
-            self.scan_type = "tls_qualys"
-        else:
-            self.scan_type = kwargs['scan_type']
-
+        print("args: %s" % kwargs['scan_type'])
         return kwargs['scan_type']
 
     def title(self, scan_type):
@@ -1255,6 +1257,7 @@ class LatestScanFeed(Feed):
 
     # second parameter via magic
     def items(self, scan_type):
+        print(scan_type)
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                          "plain_https"]:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
@@ -1262,7 +1265,7 @@ class LatestScanFeed(Feed):
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
-        points, calculation = points_and_calculation(item, self.scan_type)
+        points, calculation = points_and_calculation(item)
         if not calculation:
             return ""
 
@@ -1275,7 +1278,7 @@ class LatestScanFeed(Feed):
         return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
 
     def item_description(self, item):
-        points, calculation = points_and_calculation(item, self.scan_type)
+        points, calculation = points_and_calculation(item)
         return _(calculation.get("explanation", ""))
 
     def item_pubdate(self, item):
