@@ -33,9 +33,11 @@ def rebuild_ratings():
     rerate_organizations()
 
 
-def rebuild_ratings_async():
+@app.task
+def rebuild_ratings_async(execute_locally: bool=True):
     """Remove all organization and url ratings, then rebuild them from scratch."""
-    rerate_organizations()
+    task = (rerate_urls_async.s(execute_locally=True) | rerate_organizations_async.si(execute_locally=True))
+    task.apply_async()
 
 
 @app.task
@@ -88,6 +90,11 @@ def delete_url_rating(url: Url):
 
 
 @app.task
+def delete_organization_rating(organization: Organization):
+    OrganizationRating.objects.all().filter(organization=organization).delete()
+
+
+@app.task
 # 2.5 minutes and it's done :)
 def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
 
@@ -98,7 +105,26 @@ def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
     for url in urls:
         tasks.append((delete_url_rating.s(url) | create_timeline.si(url) | rate_timeline.s(url)))
 
-    task = group([task for task in tasks])
+    task = group(tasks)
+    if execute_locally:
+        task.apply_async()
+    else:
+        return task
+
+
+@app.task
+def rerate_organizations_async(organizations: List[Organization]=None, execute_locally: bool=True):
+    if not organizations:
+        organizations = list(Organization.objects.all().order_by('name'))
+
+    # to not clear the whole map at once, do this per organization.
+    # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
+    tasks = [(default_ratings.si()
+              | delete_organization_rating.si(organization)
+              | add_organization_rating.si(organizations=[organization], build_history=True))
+             for organization in organizations]
+
+    task = group(tasks)
     if execute_locally:
         task.apply_async()
     else:
@@ -116,10 +142,6 @@ def rerate_organizations(organizations: List[Organization]=None):
         OrganizationRating.objects.all().filter(organization=organization).delete()
         default_ratings()
         add_organization_rating(organizations=[organization], build_history=True)
-
-
-def rerate_urls_of_organizations(organizations: List[Organization]):
-    rerate_urls(Url.objects.filter(is_dead=False, organization__in=organizations).order_by('url'))
 
 
 def significant_moments(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -1098,6 +1120,7 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
 
 
 # todo: use the organization creation date for this.
+@app.task
 def default_ratings():
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents

@@ -2,7 +2,7 @@ import logging
 
 from failmap_admin.app.management.commands._private import TaskCommand
 
-from ...rating import rebuild_ratings
+from ...rating import rebuild_ratings_async
 
 log = logging.getLogger(__name__)
 
@@ -12,4 +12,6 @@ class Command(TaskCommand):
 
     help = __doc__
 
-    task = rebuild_ratings
+    # 6.5 minutes
+    # original: 1 hour
+    task = rebuild_ratings_async
