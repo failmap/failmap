@@ -2,6 +2,7 @@ import collections
 from datetime import datetime, timedelta
 
 import pytz
+import simplejson as json
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
@@ -14,7 +15,6 @@ from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
-import simplejson as json
 from failmap_admin.map.models import OrganizationRating, UrlRating
 from failmap_admin.organizations.models import Organization, Promise, Url
 from failmap_admin.scanners.models import EndpointGenericScan, TlsQualysScan
