@@ -72,6 +72,20 @@ check:
   # runs on merge requests, merge requests require rebase, no need to run on master again
   except: [master]
 
+# integration tests
+integration:
+  <<: *test_template
+  stage: test_build
+
+  services:
+    - redis
+
+  script:
+    - tox -e integration
+
+  # runs on merge requests, merge requests require rebase, no need to run on master again
+  except: [master]
+
 dataset:
   <<: *test_template
   script:

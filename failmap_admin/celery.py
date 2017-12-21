@@ -18,11 +18,18 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith
 
 # http://docs.celeryproject.org/en/master/whatsnew-4.0.html?highlight=priority#redis-priorities-reversed
 # http://docs.celeryproject.org/en/master/history/whatsnew-3.0.html?highlight=priority
+# priorities 0-9 are divided into 4 steps.
 # https://github.com/celery/celery/blob/a87ef75884e59c78da21b1482bb66cf649fbb7d3/docs/history/whatsnew-3.0.rst#redis-priority-support
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
-PRIO_HIGH = 9
-PRIO_NORMAL = 5
-PRIO_LOW = 3
+# contrary to 'documentation' in release notes the redis priorities do not seem aligned with rabbitmq
+if 'redis' in app.conf.broker_url:
+    PRIO_HIGH = 0
+    PRIO_NORMAL = 5
+    PRIO_LOW = 9
+else:
+    PRIO_HIGH = 9
+    PRIO_NORMAL = 5
+    PRIO_LOW = 0
 
 
 class DefaultTask(Task):
