@@ -7,6 +7,11 @@ from failmap_admin.celery import app
 @pytest.fixture()
 def celery_app():
     """Use project app and settings instead of generic test app for more reliable tests."""
+    # test connection(settings) as default behaviour is to verify initial connection
+    # indefinitely which is fine for production use but not when testing/debugging
+    with app.connection() as conn:
+        conn.ensure_connection(max_retries=1)
+
     return app
 
 
