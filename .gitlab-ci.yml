@@ -81,7 +81,7 @@ integration:
     - redis
 
   variables:
-    BROKER_URL: redis://redis:6379/0
+    BROKER: redis://redis:6379/0
 
   script:
     - tox -e integration
