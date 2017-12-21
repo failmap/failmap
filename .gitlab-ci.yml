@@ -14,7 +14,7 @@ test: &test_template
     - ~/.cache/pip/
 
   script:
-    - tox -e py34
+    - tox -e test
 
   retry: 1
 

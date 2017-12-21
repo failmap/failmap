@@ -4,7 +4,7 @@
 # install isort, experience it might have things different in tox :+
 # pkg_resources.DistributionNotFound? -> tox -r (rebuild)
 # running this test? env DJANGO_SETTINGS_MODULE=failmap_admin.settings
-#   .tox/py34/bin/pytest tests -k test_tls_scan_qualys
+#   .tox/default/bin/pytest tests -k test_tls_scan_qualys
 #
 
 # todo: create rate_limit mock

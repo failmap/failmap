@@ -235,13 +235,12 @@ To run only a specific test use:
 
     tox -- -k test_name
 
-To only run a specific test suite user for example:
+To only run a specific test suite use for example:
 
-    .tox/py34/bin/failmap-admin test tests/test_smarturl.py
+    .tox/default/bin/failmap-admin test tests/test_smarturl.py
 
-To generate coverage report after tests in HTML run:
+A coverage report is generated after running tests, on OSX it can be viewed using:
 
-    coverage html
     open htmlcov/index.html
 
 Pytest allows to drop into Python debugger when a tests fails. To enable run:
