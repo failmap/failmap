@@ -1,4 +1,4 @@
-"""Test/prove some assumtions about celery behaviour (eg: priorities)."""
+"""Test/prove some assumptions about celery behaviour (eg: priorities)."""
 
 # The concurrent nature of this test and the parts its testing can cause this
 # test to be 'flaky' (fail/succeed at random) and non-deterministic.
@@ -6,12 +6,10 @@
 # behaviour which invalidates the results of this test.
 # For example a to low number of samples might cause
 
-import time
-
 from celery.result import ResultSet
 from django.conf import settings
 
-from failmap_admin.celery import PRIO_HIGH, app
+from failmap_admin.celery import PRIO_HIGH, waitsome
 
 # amount of time the dummy task 'runs'
 SLEEP = 0.1
@@ -22,27 +20,19 @@ SAMPLES = settings.CELERY_WORKER_CONCURRENCY * settings.CELERY_WORKER_CONCURRENC
 
 assert SAMPLES > 10, 'with current settings this test might not provide reliable results!'
 
-
-@app.task
-def waitsome():
-    """Wait some time and return epoch at completion."""
-
-    time.sleep(SLEEP)
-    return time.time()
+TASK_EXPIRY_TIME = SAMPLES * SLEEP
 
 
 def test_high_priority(celery_app, celery_worker):
     """High prio tasks should be executed first."""
 
-    TASK_EXPIRY_TIME = SAMPLES * SLEEP
-
     # enqueue normal and high prio tasks alternately
     high, normal = [], []
     for index in range(SAMPLES):
         if index % 2:
-            normal.append(waitsome.apply_async(expires=TASK_EXPIRY_TIME))
+            normal.append(waitsome.apply_async([SLEEP], expires=TASK_EXPIRY_TIME))
         else:
-            high.append(waitsome.apply_async(expires=TASK_EXPIRY_TIME, priority=PRIO_HIGH))
+            high.append(waitsome.apply_async([SLEEP], expires=TASK_EXPIRY_TIME, priority=PRIO_HIGH))
 
     # wait for all tasks to complete
     print(ResultSet(results=high + normal).join(timeout=TASK_EXPIRY_TIME))

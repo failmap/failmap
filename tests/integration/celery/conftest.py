@@ -1,35 +1,30 @@
+import os
+import signal
+import subprocess
+import sys
+
 import pytest
-from django.conf import settings
 
 from failmap_admin.celery import app
 
 
 @pytest.fixture()
 def celery_app():
-    """Use project app and settings instead of generic test app for more reliable tests."""
-    # test connection(settings) as default behaviour is to verify initial connection
-    # indefinitely which is fine for production use but not when testing/debugging
-    with app.connection() as conn:
-        conn.ensure_connection(max_retries=1)
-
-    return app
+    yield app
 
 
 @pytest.fixture(scope='session')
-def celery_includes():
-    """Fix test worker behaviour lost due to using project app."""
-    return ['celery.contrib.testing.tasks']
+def celery_worker():
+    worker_command = ['failmap-admin', 'celery', 'worker', '-l', 'info']
+    worker_process = subprocess.Popen(worker_command,
+                                      stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
+                                      preexec_fn=os.setsid)
+    yield worker_process
+    worker_process.terminate()
+    os.killpg(os.getpgid(worker_process.pid), signal.SIGTERM)
 
 
 @pytest.fixture(scope='session')
 def celery_worker_pool():
     """Align test worker settings with project settings."""
     return 'prefork'
-
-
-@pytest.fixture(scope='session')
-def celery_worker_parameters():
-    """Align test worker settings with project settings."""
-    return {
-        'concurrency': settings.CELERY_WORKER_CONCURRENCY,
-    }

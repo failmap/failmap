@@ -4,6 +4,7 @@
 # http://docs.celeryproject.org/en/latest/userguide/security.html
 
 import os
+import time
 
 from celery import Celery, Task
 from django.conf import settings
@@ -41,11 +42,6 @@ class DefaultTask(Task):
 app.Task = DefaultTask
 
 
-@app.task(bind=True)
-def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
-
-
 class ParentFailed(Exception):
     """Error to indicate parent task has failed."""
 
@@ -54,3 +50,24 @@ class ParentFailed(Exception):
         if cause:
             self.__cause__ = cause
         super(ParentFailed, self).__init__(message, *args)
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print('Request: {0!r}'.format(self.request))
+
+
+@app.task
+def waitsome(sleep):
+    """Wait some time and return epoch at completion."""
+
+    time.sleep(sleep)
+    return time.time()
+
+
+@app.task(rate_limit='1/s')
+def rate_limited(sleep):
+    """Wait some time but limit to maximum tasks of 1 per second."""
+
+    time.sleep(sleep)
+    return time.time()
