@@ -1,10 +1,9 @@
 """Test assumptions about rate limiting."""
 
-import time
 
 from django.conf import settings
 
-from failmap_admin.celery import PRIO_HIGH, rate_limited, waitsome
+from failmap_admin.celery import rate_limited, waitsome
 
 SAMPLES = settings.CELERY_WORKER_CONCURRENCY * 1
 SLEEP = 1
