@@ -9,9 +9,13 @@ test: &test_template
 
   image: registry.gitlab.com/failmap/ci:latest
 
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
+
   cache:
     paths:
-    - ~/.cache/pip/
+      - "$CI_PROJECT_DIR/pip-cache"
+    key: "$CI_PROJECT_ID"
 
   script:
     - tox -e test
