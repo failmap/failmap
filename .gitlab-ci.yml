@@ -86,6 +86,8 @@ integration:
 
   variables:
     BROKER: redis://redis:6379/0
+    # required to run celery worker under docker 'root' user
+    C_FORCE_ROOT: 1
 
   script:
     - tox -e integration
