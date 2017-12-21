@@ -1,5 +1,5 @@
 # use full image for build (compile) dependencies
-FROM python:3 as build
+FROM python:3.6 as build
 
 # install app and dependencies in a artifact-able directory
 RUN pip install virtualenv
