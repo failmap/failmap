@@ -82,7 +82,7 @@ integration:
   stage: test_build
 
   services:
-    - redis
+    - redis:latest
 
   variables:
     BROKER: redis://redis:6379/0
