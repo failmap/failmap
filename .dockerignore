@@ -2,5 +2,3 @@
 .*
 # don't invalidate cache when Dockerfile changes
 Dockerfile
-# directorynames docker-compose can't handle
-**/🌈🦄
