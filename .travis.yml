@@ -1,6 +1,6 @@
 language: python
 python:
-  - 3.4
+  - 3.6
 
 # dependencies (pin coverage for codeclimate compat)
 # https://bitbucket.org/ned/coveragepy/issues/578/incomplete-file-path-in-xml-report
