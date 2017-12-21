@@ -2,10 +2,19 @@ import os
 import signal
 import subprocess
 import sys
+import time
 
 import pytest
 
-from failmap_admin.celery import app
+from failmap_admin.celery import app, waitsome
+
+TIMEOUT = 30
+
+
+@pytest.fixture()
+def queue():
+    """Generate a unique queue to isolate every test."""
+    yield 'queue-' + str(time.time())
 
 
 @pytest.fixture()
@@ -13,18 +22,16 @@ def celery_app():
     yield app
 
 
-@pytest.fixture(scope='session')
-def celery_worker():
-    worker_command = ['failmap-admin', 'celery', 'worker', '-l', 'info']
+@pytest.fixture()
+def celery_worker(queue):
+    worker_command = ['failmap-admin', 'celery', 'worker', '-l', 'info', '--queues', queue]
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid)
+    # wait for worker to start accepting tasks before turning to test function
+    assert waitsome.apply_async([0], queue=queue, expires=TIMEOUT).get(timeout=TIMEOUT)
+    print('worker ready', file=sys.stderr)
     yield worker_process
-    worker_process.terminate()
-    os.killpg(os.getpgid(worker_process.pid), signal.SIGTERM)
 
-
-@pytest.fixture(scope='session')
-def celery_worker_pool():
-    """Align test worker settings with project settings."""
-    return 'prefork'
+    # stop worker and all child threads
+    os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)

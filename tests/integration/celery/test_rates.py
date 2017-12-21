@@ -1,22 +1,25 @@
 """Test assumptions about rate limiting."""
 
+import time
+
 from django.conf import settings
 
-from failmap_admin.celery import rate_limited, waitsome
+from failmap_admin.celery import PRIO_HIGH, rate_limited, waitsome
 
-SAMPLES = settings.CELERY_WORKER_CONCURRENCY
+SAMPLES = settings.CELERY_WORKER_CONCURRENCY * 1
 SLEEP = 1
 
 TASK_EXPIRY_TIME = SAMPLES * SLEEP
 
 
-def test_rate_limits(celery_app, celery_worker):
+def test_rate_limits(celery_app, celery_worker, queue):
     """Rate limited tasks should not hold up worker queue for other tasks."""
     # fill queue with rate limited tasks
-    rated_tasks = [rate_limited.apply_async([SLEEP], expires=TASK_EXPIRY_TIME) for _ in range(SAMPLES)]
+    rated_tasks = [
+        rate_limited.apply_async([SLEEP], queue=queue, expires=TASK_EXPIRY_TIME) for _ in range(SAMPLES)]
 
     # add tasks that is not rate limited
-    task = waitsome.apply_async([SLEEP], expires=TASK_EXPIRY_TIME)
+    task = waitsome.apply_async([SLEEP], queue=queue, expires=TASK_EXPIRY_TIME)
 
     # make sure task is executed before all rate limited tasks are done
     assert task.get(timeout=SLEEP * 2)

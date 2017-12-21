@@ -23,7 +23,7 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith
 # https://github.com/celery/celery/blob/a87ef75884e59c78da21b1482bb66cf649fbb7d3/docs/history/whatsnew-3.0.rst#redis-priority-support
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
 # contrary to 'documentation' in release notes the redis priorities do not seem aligned with rabbitmq
-if 'redis' in app.conf.broker_url:
+if 'redis://' in app.conf.broker_url:
     PRIO_HIGH = 0
     PRIO_NORMAL = 5
     PRIO_LOW = 9

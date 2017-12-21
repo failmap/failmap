@@ -460,7 +460,8 @@ CELERY_BROKER_CONNECTION_RETRY = False
 
 # workaround to try and make rate limited tasks coexist on the same worker as non-rate limited whilst keeping
 # good throughput on non-rate limited tasks even though worker interal queue might be plugged with rate limited tasks
-CELERY_WORKER_PREFETCH_MULTIPLIER = 0
+# let worker consume as many tasks as it wants
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 
 # numer of tasks to be executed in parallel by celery
 CELERY_WORKER_CONCURRENCY = 10

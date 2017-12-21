@@ -23,16 +23,16 @@ assert SAMPLES > 10, 'with current settings this test might not provide reliable
 TASK_EXPIRY_TIME = SAMPLES * SLEEP
 
 
-def test_high_priority(celery_app, celery_worker):
+def test_high_priority(celery_app, celery_worker, queue):
     """High prio tasks should be executed first."""
 
     # enqueue normal and high prio tasks alternately
     high, normal = [], []
     for index in range(SAMPLES):
         if index % 2:
-            normal.append(waitsome.apply_async([SLEEP], expires=TASK_EXPIRY_TIME))
+            normal.append(waitsome.apply_async([SLEEP], queue=queue, expires=TASK_EXPIRY_TIME))
         else:
-            high.append(waitsome.apply_async([SLEEP], expires=TASK_EXPIRY_TIME, priority=PRIO_HIGH))
+            high.append(waitsome.apply_async([SLEEP], queue=queue, expires=TASK_EXPIRY_TIME, priority=PRIO_HIGH))
 
     # wait for all tasks to complete
     print(ResultSet(results=high + normal).join(timeout=TASK_EXPIRY_TIME))
