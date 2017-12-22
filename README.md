@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/failmap/admin/badges/gpa.svg)](https://codeclimate.com/github/failmap/admin) [![pipeline status](https://gitlab.com/failmap/admin/badges/master/pipeline.svg)](https://gitlab.com/failmap/admin/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/admin/badges/coverage.svg)](https://codeclimate.com/github/failmap/admin/coverage)
+[![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap) [![pipeline status](https://gitlab.com/failmap/failmap/badges/master/pipeline.svg)](https://gitlab.com/failmap/failmap/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/failmap/failmap/coverage)
 [![Badges](https://img.shields.io/badge/badges-4-yellowgreen.svg)](https://shields.io)
 
 
@@ -48,10 +48,10 @@ Download and install below system requirements to get started:
 In a directory of your choosing:
 
     # download the software
-    git clone --recursive https://gitlab.com/failmap/admin/
+    git clone --recursive https://gitlab.com/failmap/failmap/
 
     # enter the directory of the downloaded software
-    cd admin
+    cd failmap/
 
 Use Direnv to manage environment (see Direnv section below). This manages the Python Virtualenv and `DEBUG` setting required for local development.
 
@@ -87,21 +87,21 @@ To stop the entire stack run: `docker-compose down`
 
 There is a command-line application available to perform administrative tasks. To run it do:
 
-    docker-compose exec admin failmap
+    docker-compose exec failmap failmap
 
-Further in this documentation the `failmap` command is mentioned, when using the Docker environment always prepend `docker-compose exec admin` before the command.
+Further in this documentation the `failmap` command is mentioned, when using the Docker environment always prepend `docker-compose exec failmap` before the command.
 
 To see all running components:
 
     $ docker-compose ps
           Name                    Command               State                 Ports
     ---------------------------------------------------------------------------------------------
-    admin_admin_1      /usr/local/bin/autoreload  ...   Up       0.0.0.0:8000->8000/tcp
-    admin_broker_1     docker-entrypoint.sh redis ...   Up       0.0.0.0:5672->5672/tcp, 6379/tcp
-    admin_database_1   docker-entrypoint.sh mysqld      Up       0.0.0.0:3306->3306/tcp
-    admin_loaddata_1   /usr/local/bin/failmap-adm ...   Exit 0
-    admin_migrate_1    /usr/local/bin/failmap-adm ...   Exit 0
-    admin_worker_1     /usr/local/bin/autoreload  ...   Up       8000/tcp
+    failmap_admin_1      /usr/local/bin/autoreload  ...   Up       0.0.0.0:8000->8000/tcp
+    failmap_broker_1     docker-entrypoint.sh redis ...   Up       0.0.0.0:5672->5672/tcp, 6379/tcp
+    failmap_database_1   docker-entrypoint.sh mysqld      Up       0.0.0.0:3306->3306/tcp
+    failmap_loaddata_1   /usr/local/bin/failmap-adm ...   Exit 0
+    failmap_migrate_1    /usr/local/bin/failmap-adm ...   Exit 0
+    failmap_worker_1     /usr/local/bin/autoreload  ...   Up       8000/tcp
 
 The platform consists of 2 external dependencies `broker` (redis), `database` (mysql) and 2 main components `admin` (web frontend and administrative environment), `worker` (async task executor).
 
@@ -265,7 +265,7 @@ Be sure to active the environment before starting development every time:
 
 ## Docker installation
 
-### ERROR: for admin_database_1  Cannot start service database: Mounts denied:
+### ERROR: for failmap_database_1  Cannot start service database: Mounts denied:
 As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
 
 
@@ -273,11 +273,11 @@ As the error suggests, you're running the installation from a directory that is 
 
 Version for the project is losely semver with no specific release schedule or meaning to version numbers (eg: stable/unstable).
 
-Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated builds which will release the specified code under that version. Tags can be pushed from a local repository or created through the Gitlab interface: https://gitlab.com/failmap/admin/tags/new
+Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated builds which will release the specified code under that version. Tags can be pushed from a local repository or created through the Gitlab interface: https://gitlab.com/failmap/failmap/tags/new
 
 Informal releases are created by new commits pushed/merged to the master. The version number of the last formal release will be suffixed with the current short Git SHA.
 
-For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/admin/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
+For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
 
 For local development informal release or a special `dev0` build release is used which indicates a different state from the formal releases.
 

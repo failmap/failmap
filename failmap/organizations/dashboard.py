@@ -39,7 +39,7 @@ class CustomIndexDashboard(Dashboard):
                 },
                 {
                     'title': _('Admin repository'),
-                    'url': 'https://gitlab.com/failmap/admin',
+                    'url': 'https://gitlab.com/failmap/failmap',
                     'external': True,
                 },
                 {

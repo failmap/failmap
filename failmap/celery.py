@@ -1,5 +1,5 @@
 # https://realpython.com/blog/python/asynchronous-tasks-with-django-and-celery/
-# https://github.com/failmap/admin/pull/2/files
+# https://github.com/failmap/failmap/pull/2/files
 # http://oddbird.net/2017/03/20/serializing-things/
 # http://docs.celeryproject.org/en/latest/userguide/security.html
 

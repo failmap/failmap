@@ -1,5 +1,5 @@
 """
-WSGI config for admin project.
+This module is used by `uwsgi` to load this application in the WSGI runtime.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

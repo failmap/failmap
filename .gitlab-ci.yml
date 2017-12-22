@@ -137,13 +137,13 @@ build:
 
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:latest
-    - docker build -t registry.gitlab.com/failmap/admin:build .
-    - docker push registry.gitlab.com/failmap/admin:build
+    - docker pull registry.gitlab.com/failmap/failmap:latest
+    - docker build -t registry.gitlab.com/failmap/failmap:build .
+    - docker push registry.gitlab.com/failmap/failmap:build
 
     # push version tag to docker registry
-    - docker tag registry.gitlab.com/failmap/admin:build registry.gitlab.com/failmap/admin:$(cat version|tr + _)
-    - docker push registry.gitlab.com/failmap/admin:$(cat version|tr + _)
+    - docker tag registry.gitlab.com/failmap/failmap:build registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
+    - docker push registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
 
   only:
     - master
@@ -162,10 +162,10 @@ build_test:
     - apk add --no-cache curl
 
   script:
-    # build docker imageg to test building
+    # build docker image to test building
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:latest
-    - docker build . -t admin
+    - docker pull registry.gitlab.com/failmap/failmap:latest
+    - docker build . -t failmap
 
     # run simple smoketests to verify Docker image is sane
     - tests/docker.sh docker
@@ -208,17 +208,17 @@ staging:
     - python3 setup.py --version > version
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:$(cat version|tr + _)
-    - docker tag registry.gitlab.com/failmap/admin:$(cat version|tr + _) registry.gitlab.com/failmap/admin:staging
+    - docker pull registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
+    - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:staging
 
     # here is where I would put my staging integration tests, if I had one!!!
 
     # promote to staging after tests have succeeded
-    - docker push registry.gitlab.com/failmap/admin:staging
+    - docker push registry.gitlab.com/failmap/failmap:staging
 
     # until there is a CD staging environment
-    - docker tag registry.gitlab.com/failmap/admin:$(cat version|tr + _) registry.gitlab.com/failmap/admin:latest
-    - docker push registry.gitlab.com/failmap/admin:latest
+    - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:latest
+    - docker push registry.gitlab.com/failmap/failmap:latest
 
   only: [master]
   retry: 1
@@ -233,9 +233,9 @@ production:
     - export tag=$(git describe --exact-match --tags --abbrev=0)
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/admin:$tag
-    - docker tag registry.gitlab.com/failmap/admin:$tag registry.gitlab.com/failmap/admin:latest
-    - docker push registry.gitlab.com/failmap/admin:latest
+    - docker pull registry.gitlab.com/failmap/failmap:$tag
+    - docker tag registry.gitlab.com/failmap/failmap:$tag registry.gitlab.com/failmap/failmap:latest
+    - docker push registry.gitlab.com/failmap/failmap:latest
 
     # insert deploy magic here
 
