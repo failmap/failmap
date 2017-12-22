@@ -130,14 +130,15 @@ build:
   before_script:
     # required for quering python package version
     - apk add --no-cache python3
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/failmap:latest || true
 
   script:
     # store current version as artifact to copy into docker container
     - python3 setup.py --version > version
 
     # build docker image and push to registry
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/failmap:latest
     - docker build -t registry.gitlab.com/failmap/failmap:build .
     - docker push registry.gitlab.com/failmap/failmap:build
 
@@ -150,6 +151,7 @@ build:
     - tags
   retry: 1
 
+# test building image & run image smoketest
 build_test:
   stage: test_build
 
@@ -160,11 +162,12 @@ build_test:
 
   before_script:
     - apk add --no-cache curl
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    - docker pull registry.gitlab.com/failmap/failmap:latest || true
 
   script:
     # build docker image to test building
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/failmap:latest
     - docker build . -t failmap
 
     # run simple smoketests to verify Docker image is sane
