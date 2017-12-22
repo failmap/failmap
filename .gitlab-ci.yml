@@ -242,19 +242,3 @@ production:
   only:
     - tags
   retry: 1
-
-# mirror master on Github for better exposure
-github_mirror:
-  stage: test_build
-
-  image: docker:git
-  # https://gitlab.com/help/ci/ssh_keys/README.md#ssh-keys-when-using-the-docker-executor
-  before_script:
-    - eval $(ssh-agent -s)
-    - ssh-add <$(echo "$GITHUB_MIRROR_KEY")
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-  script:
-    - git push git@github.com:failmap/admin.git HEAD:master
-  only:
-    - master
