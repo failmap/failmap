@@ -3,9 +3,8 @@ import logging
 from django.core.management.base import BaseCommand
 
 from failmap.organizations.models import Organization
-from failmap.scanners.scanner_dns import (brute_dutch, brute_known_subdomains,
-                                                brute_three_letters, certificate_transparency, nsec,
-                                                search_engines, standard)
+from failmap.scanners.scanner_dns import (brute_dutch, brute_known_subdomains, brute_three_letters,
+                                          certificate_transparency, nsec, search_engines, standard)
 from failmap.scanners.state_manager import StateManager
 
 from .support.arguments import add_organization_argument

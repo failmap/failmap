@@ -7,8 +7,7 @@ import pytz
 import failmap.scanners.scanner_http as scanner_http
 import failmap.scanners.scanner_plain_http as scanner_plain_http
 from failmap.organizations.models import Url
-from failmap.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency,
-                                                nsec)
+from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
 
 from ..celery import app

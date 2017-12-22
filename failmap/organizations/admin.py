@@ -13,8 +13,7 @@ from failmap.map.rating import OrganizationRating, UrlRating, rate_organization_
 from failmap.scanners.admin import UrlIpInline
 from failmap.scanners.models import Endpoint
 from failmap.scanners.onboard import onboard_urls
-from failmap.scanners.scanner_dns import (brute_known_subdomains, certificate_transparency,
-                                                nsec)
+from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap.scanners.scanner_screenshot import screenshot_urls
 from failmap.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls

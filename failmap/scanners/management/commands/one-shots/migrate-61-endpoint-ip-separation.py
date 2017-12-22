@@ -2,8 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.scanners.models import (Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan,
-                                           UrlIp)
+from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan, UrlIp
 
 logger = logging.getLogger(__package__)
 

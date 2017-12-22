@@ -6,10 +6,8 @@ from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import (Coordinate, Organization, OrganizationType, Promise,
-                                                Url)
-from failmap.scanners.models import (Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan,
-                                           UrlIp)
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
+from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan, UrlIp
 
 log = logging.getLogger(__package__)
 

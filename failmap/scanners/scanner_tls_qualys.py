@@ -37,7 +37,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
-                                           TlsQualysScratchpad)
+                                     TlsQualysScratchpad)
 from failmap.scanners.scanner_http import store_url_ips
 from failmap.scanners.state_manager import StateManager
 

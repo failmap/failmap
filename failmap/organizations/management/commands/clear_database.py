@@ -4,9 +4,8 @@ from django.core.management.base import BaseCommand
 
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
-from failmap.scanners.models import (Endpoint, EndpointGenericScan,
-                                           EndpointGenericScanScratchpad, Screenshot, State,
-                                           TlsQualysScan, TlsQualysScratchpad, UrlIp)
+from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
+                                     Screenshot, State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
 logger = logging.getLogger(__package__)
 

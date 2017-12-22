@@ -5,8 +5,7 @@ import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
-from failmap.organizations.models import (Coordinate, Organization, OrganizationType, Promise,
-                                                Url)
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlIp
 
 log = logging.getLogger(__package__)
