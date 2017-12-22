@@ -44,6 +44,30 @@ class Organization(models.Model):
         validators=[validate_twitter]
     )
 
+    # stacking is_dead pattern
+    # postpone migration on production.
+    # todo: add default date for default ratings.
+    # created_on = models.DateTimeField(
+    #     blank=True,
+    #     null=True
+    # )
+
+    # is_dead = models.BooleanField(
+    #     default=False,
+    #     help_text="A dead organization is not shown on the map, depending on the dead_date."
+    # )
+
+    # is_dead_since = models.DateTimeField(
+    #     blank=True,
+    #     null=True
+    # )
+
+    # is_dead_reason = models.CharField(
+    #     max_length=255,
+    #     blank=True,
+    #     null=True
+    # )
+
     def __unicode__(self):
         return u'%s  - %s in %s' % (self.name, self.type, self.country, )
 
