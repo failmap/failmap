@@ -15,9 +15,11 @@ from pkg_resources import get_distribution
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
 
 # this application can run in 2 modes: admin and frontend
-# admin exposes all routes and uses no caching. It should be restricted in access
-# frontend only exposes the visitor facing routes and serves with cache headers
-APPNAME = os.environ.get('SERVICE_NAME', 'failmap')
+# 'admin' exposes all routes and uses no caching. It should be restricted in access.
+# 'frontend' only exposes the visitor facing routes and serves with cache headers.
+# The environment variable is borrowed from the docker environment where SERVICE_NAME
+# is used to set application name for discovery (consul).
+APPNAME = os.environ.get('SERVICE_NAME', 'failmap-admin')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -498,7 +500,7 @@ if DEBUG:
         pass
 
 # is administrative backend enabled on this instance
-ADMIN = bool(APPNAME == 'failmap')
+ADMIN = bool(APPNAME == 'failmap-admin')
 
 # general email address
 MAILTO = 'info@faalkaart.nl'
