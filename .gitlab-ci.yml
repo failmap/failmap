@@ -246,9 +246,10 @@ production:
 # mirror master on Github for better exposure
 github_mirror:
   stage: test_build
+
+  image: docker:git
   # https://gitlab.com/help/ci/ssh_keys/README.md#ssh-keys-when-using-the-docker-executor
   before_script:
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$GITHUB_MIRROR_KEY")
     - mkdir -p ~/.ssh
