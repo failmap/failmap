@@ -66,6 +66,7 @@ class Command(DumpDataCommand):
         De gemeenten Hoogezand-Sappemeer, Menterwolde en Slochteren hebben in november 2015 besloten om te fuseren
         tot de nieuwe gemeente Midden-Groningen.
         """
+
         # straightforward geographic move
         merge(["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"], "Midden-Groningen", merge_date)
 
