@@ -1,5 +1,5 @@
-# from failmap_admin.organizations.dashboard_modules import SmartAddUrl
-# from failmap_admin.organizations.models import Organization, Url
+# from failmap.organizations.dashboard_modules import SmartAddUrl
+# from failmap.organizations.models import Organization, Url
 #
 #
 # def test_adding_urls(db):

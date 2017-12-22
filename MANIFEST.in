@@ -1,6 +1,6 @@
 include version
 include requirements.txt
-recursive-include failmap_admin/*/templates *
-recursive-include failmap_admin/*/static *
-recursive-include failmap_admin/*/fixtures *.yaml *.json
-recursive-include failmap_admin/*/locale *.mo *.po
+recursive-include failmap/*/templates *
+recursive-include failmap/*/static *
+recursive-include failmap/*/fixtures *.yaml *.json
+recursive-include failmap/*/locale *.mo *.po

@@ -52,10 +52,10 @@ services:
       DEBUG: 1
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
-      - ./failmap_admin:/source/failmap_admin
+      - ./failmap:/source/failmap
       - ./tools:/source/tools
     # use watchdog to provide auto restart functionality on changed code
-    entrypoint: [ '/source/tools/autoreload.sh', 'failmap-admin']
+    entrypoint: [ '/source/tools/autoreload.sh', 'failmap']
     command: [ "celery", "worker", "-l", "info", "-c", "6" ]
 
   # web interface
@@ -78,12 +78,12 @@ services:
       UWSGI_STATIC_MAP:
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
-      - ./failmap_admin:/source/failmap_admin
+      - ./failmap:/source/failmap
       - ./tools:/source/tools
     ports:
       - 8000:8000
     # use watchdog to provide auto restart functionality on changed code
-    entrypoint: [ '/source/tools/autoreload.sh', 'failmap-admin']
+    entrypoint: [ '/source/tools/autoreload.sh', 'failmap']
     command: [ "runuwsgi" ]
 
   # migrate
@@ -95,7 +95,7 @@ services:
     links:
       - database:mysql
     volumes:
-      - ./failmap_admin:/source/failmap_admin
+      - ./failmap:/source/failmap
       - ./tools:/source/tools
     environment:
       DJANGO_DATABASE: production
@@ -113,7 +113,7 @@ services:
     links:
       - database:mysql
     volumes:
-      - ./failmap_admin:/source/failmap_admin
+      - ./failmap:/source/failmap
       - ./tools:/source/tools
     environment:
       DJANGO_DATABASE: production

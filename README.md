@@ -81,15 +81,15 @@ Notice: MySQL/Redis connection errors might be shown during startup. This is nor
 You can now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
 
-The environment is aware of code changes in the `failmap_admin` folder. Services are automatically restarted to reflect the latest changes.
+The environment is aware of code changes in the `failmap` folder. Services are automatically restarted to reflect the latest changes.
 
 To stop the entire stack run: `docker-compose down`
 
 There is a command-line application available to perform administrative tasks. To run it do:
 
-    docker-compose exec admin failmap-admin
+    docker-compose exec admin failmap
 
-Further in this documentation the `failmap-admin` command is mentioned, when using the Docker environment always prepend `docker-compose exec admin` before the command.
+Further in this documentation the `failmap` command is mentioned, when using the Docker environment always prepend `docker-compose exec admin` before the command.
 
 To see all running components:
 
@@ -124,7 +124,7 @@ To perform non-Docker development, make sure all Requirements are installed. Run
 After this run:
 
     # finally start the development server
-    failmap-admin runserver
+    failmap runserver
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
@@ -138,16 +138,16 @@ The setup script performs the following steps:
     pip3 install -r requirements.dev.txt
 
     # creates the database
-    failmap-admin migrate
+    failmap migrate
 
     # create a user to view the admin interface
-    failmap-admin load_dataset development
+    failmap load_dataset development
 
     # loads a series of sample data into the database
-    failmap-admin load_dataset testdata
+    failmap load_dataset testdata
 
     # calculate the scores that should be displayed on the map
-    failmap-admin rebuild_ratings
+    failmap rebuild_ratings
 
 # Scanning services (beta)
 
@@ -162,19 +162,19 @@ Each of the below commands requires their own command line window:
     redis-server
 
     # start a worker
-    failmap-admin celery worker -ldebug
+    failmap celery worker -ldebug
 
 These services help fill the database with accurate up to date information. Run each one of them in
 a separate command line window and keep them running.
 
     # handles all new urls with an initial (fast) scan
-    failmap-admin onboard_service
+    failmap onboard_service
 
     # slowly gets results from qualys
-    failmap-admin scan_tls_qualys_service
+    failmap scan_tls_qualys_service
 
     # makes many gigabytes of screenshots
-    failmap-admin screenshot_service
+    failmap screenshot_service
 
 # Using the software
 
@@ -237,7 +237,7 @@ To run only a specific test use:
 
 To only run a specific test suite use for example:
 
-    .tox/default/bin/failmap-admin test tests/test_smarturl.py
+    .tox/default/bin/failmap test tests/test_smarturl.py
 
 A coverage report is generated after running tests, on OSX it can be viewed using:
 

@@ -1,0 +1,25 @@
+- model: django_celery_beat.intervalschedule
+  pk: 1
+  fields: {every: 1, period: days}
+- model: django_celery_beat.intervalschedule
+  pk: 2
+  fields: {every: 3, period: days}
+- model: django_celery_beat.periodictask
+  pk: 1
+  fields: {name: Rebuild ratings, task: failmap.map.tasks.rebuild_ratings, interval: 1,
+    crontab: null, args: '[]', kwargs: '{}', queue: null, exchange: null, routing_key: null,
+    expires: null, enabled: true, last_run_at: null,
+    total_run_count: 8, date_changed: ! '2017-10-31 15:11:21+00:00',
+    description: ''}
+- model: django_celery_beat.periodictask
+  pk: 2
+  fields: {name: scan-security-headers, task: failmap.scanners.scanner_security_headers.scan,
+    interval: 1, crontab: null, solar: null, args: '[[]]', kwargs: '{}', queue: null,
+    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 38, date_changed: ! '2017-10-31 15:11:21+00:00',
+    description: ''}
+- model: django_celery_beat.periodictask
+  pk: 3
+  fields: {name: scan-tls-qualys, task: failmap.scanners.scanner_tls_qualys.scan,
+    interval: 2, crontab: null, solar: null, args: '[]', kwargs: '{}', queue: null,
+    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 38, date_changed: ! '2017-10-31 15:11:21+00:00',
+    description: ''}

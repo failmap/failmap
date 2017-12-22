@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from failmap_admin.celery import app, waitsome
+from failmap.celery import app, waitsome
 
 TIMEOUT = 30
 
@@ -24,7 +24,7 @@ def celery_app():
 
 @pytest.fixture()
 def celery_worker(queue):
-    worker_command = ['failmap-admin', 'celery', 'worker', '-l', 'info', '--queues', queue]
+    worker_command = ['failmap', 'celery', 'worker', '-l', 'info', '--queues', queue]
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid)

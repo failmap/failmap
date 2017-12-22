@@ -18,6 +18,6 @@ django-debug-toolbar-request-history
 pytest-mock
 
 # # dashboard for celery introspection
-# # run failmap-admin celery flower
+# # run failmap celery flower
 # # go to http://localhost:5555/
 # celery-flower

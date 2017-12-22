@@ -57,7 +57,7 @@ def requirements(extra=None):
 
 
 setup(
-    name='failmap-admin',
+    name='failmap',
     version=get_version(),
     packages=find_packages(),
     install_requires=requirements(),
@@ -68,7 +68,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'failmap-admin = failmap_admin.manage:main',
+            'failmap = failmap.manage:main',
         ],
     },
     include_package_data=True,

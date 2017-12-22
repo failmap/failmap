@@ -1,0 +1,404 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-15 12:28+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: failmap/map/static/js/failmap.js:68
+#: failmap/map/static/js/views.js:404
+#: failmap/map/static/js/views.js:409
+#: failmap/map/static/js/views.js:412
+msgid "View Full Screen"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:115
+msgid "Search organization"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:136
+#: failmap/map/static/js/failmap.js:140
+msgid "High"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:137
+#: failmap/map/static/js/failmap.js:141
+msgid "Medium"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:138
+#: failmap/map/static/js/failmap.js:142
+msgid "Low"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:188
+msgid "Url"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:189
+msgid "H"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:190
+msgid "M"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:191
+msgid "L"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:210
+msgid "Good"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:211
+msgid "Mediocre"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:212
+msgid "Bad"
+msgstr "🌈"
+
+#: failmap/map/static/js/failmap.js:213
+msgid "Unknown"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:29
+msgid "January"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:29
+msgid "February"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:29
+msgid "March"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:30
+msgid "April"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:30
+#: failmap/map/static/js/graphs.js:34
+msgid "May"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:30
+msgid "June"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:31
+msgid "July"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:31
+msgid "August"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:31
+msgid "September"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:32
+msgid "October"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:32
+msgid "November"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:32
+msgid "December"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:33
+msgid "Jan"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:33
+msgid "Feb"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:33
+msgid "Mar"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:34
+msgid "Apr"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:34
+msgid "Jun"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:35
+msgid "Jul"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:35
+msgid "Aug"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:35
+msgid "Sept"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:36
+msgid "Oct"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:36
+msgid "Nov"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:36
+msgid "Dec"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:146
+msgid "low"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:148
+msgid "medium"
+msgstr "🌈"
+
+#: failmap/map/static/js/graphs.js:150
+msgid "high"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:12
+msgid "2 weeks ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:13
+msgid "3 weeks ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:14
+msgid "1 month ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:15
+msgid "2 months ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:16
+msgid "3 months ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:17
+msgid "7 days ago"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:18
+msgid "now"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:21
+msgid "Has a secure equivalent, which wasn't so in the past."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:23
+msgid ""
+"Site does not redirect to secure url, and has no secure alternative on a "
+"standard port."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:24
+msgid ""
+"Redirects to a secure site, while a secure counterpart on the standard port "
+"is missing."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:25
+msgid "Broken Transport Security, rated F"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:26
+msgid "Certificate not valid for domain name."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:27
+msgid ""
+"Could not establish trust.  For the certificate installation: Less than "
+"optimal Transport Security, rated C."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:28
+msgid ""
+"Could not establish trust.  For the certificate installation: Less than "
+"optimal Transport Security, rated B."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:29
+msgid ""
+"Could not establish trust.  For the certificate installation: Good Transport "
+"Security, rated A-."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:30
+msgid ""
+"Could not establish trust.  For the certificate installation: Good Transport "
+"Security, rated A."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:31
+msgid "Less than optimal Transport Security, rated C."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:32
+msgid "Less than optimal Transport Security, rated B."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:33
+msgid "Good Transport Security, rated A-."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:34
+msgid "Good Transport Security, rated A."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:35
+msgid "Perfect Transport Security, rated A+."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:36
+msgid "X-Content-Type-Options header present."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:37
+msgid "Missing X-Content-Type-Options header."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:38
+msgid "X-XSS-Protection header present."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:39
+msgid "Missing X-XSS-Protection header."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:40
+msgid "X-Frame-Options header present."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:41
+msgid "Missing X-Frame-Options header."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:42
+msgid "Strict-Transport-Security header present."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:43
+msgid "Missing Strict-Transport-Security header."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:48
+msgid "report_header_tls_qualys"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:49
+msgid "report_header_plain_https"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:50
+msgid "report_header_security_headers_x_xss_protection"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:51
+msgid "report_header_security_headers_x_frame_options"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:52
+msgid "report_header_security_headers_x_content_type_options"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:53
+msgid "report_header_security_headers_strict_transport_security"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:44
+msgid "week"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:184
+#: failmap/map/static/js/views.js:187
+#: failmap/map/static/js/views.js:190
+#: failmap/map/static/js/views.js:192
+#: failmap/map/static/js/views.js:194
+msgid "Documentation"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:185
+#: failmap/map/static/js/views.js:188
+msgid "Second opinion"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:210
+msgid "score perfect"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:212
+msgid "score high"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:214
+msgid "score medium"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:216
+msgid "score low"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:410
+msgid "Exit Full Screen"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:441
+#: failmap/map/static/js/views.js:446
+msgid "top congratulations"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:442
+#: failmap/map/static/js/views.js:447
+msgid "top position"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:443
+msgid "top fail on failmap"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:444
+#: failmap/map/static/js/views.js:449
+msgid "hastag fail"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:444
+#: failmap/map/static/js/views.js:449
+msgid "hastag failmap"
+msgstr "🌈"
+
+#: failmap/map/static/js/views.js:448
+msgid "top win on failmap"
+msgstr "🌈"
+
+#~ msgid ""
+#~ "Site does not redirect to secure url, and has nosecure alternative on a "
+#~ "standard port."
+#~ msgstr "🌈"

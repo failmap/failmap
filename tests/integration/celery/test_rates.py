@@ -3,7 +3,7 @@
 
 from django.conf import settings
 
-from failmap_admin.celery import rate_limited, waitsome
+from failmap.celery import rate_limited, waitsome
 
 SAMPLES = settings.CELERY_WORKER_CONCURRENCY * 1
 SLEEP = 1

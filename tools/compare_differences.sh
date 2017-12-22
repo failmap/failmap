@@ -22,12 +22,12 @@ for index in "${!branches[@]}"; do
   # prepare database
   export DB_NAME="$index-$branch.sqlite3"
   test -f "$DB_NAME" && rm "$DB_NAME"
-  failmap-admin migrate -v0
+  failmap migrate -v0
 
   # load dataset and update ratings
-  failmap-admin load-dataset -v0 "$dataset"
+  failmap load-dataset -v0 "$dataset"
   # explictly set different random seed as gitlab CI environment don't seem random enought
-  failmap-admin rebuild-ratings -v0
+  failmap rebuild-ratings -v0
 
   # create output
   "$test_script" > "$index-$branch.txt"

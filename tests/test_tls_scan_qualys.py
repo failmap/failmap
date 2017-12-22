@@ -3,7 +3,7 @@
 
 # install isort, experience it might have things different in tox :+
 # pkg_resources.DistributionNotFound? -> tox -r (rebuild)
-# running this test? env DJANGO_SETTINGS_MODULE=failmap_admin.settings
+# running this test? env DJANGO_SETTINGS_MODULE=failmap.settings
 #   .tox/default/bin/pytest tests -k test_tls_scan_qualys
 #
 
@@ -16,8 +16,8 @@ from colorama import Fore, Style, init
 from freezegun import freeze_time
 from httmock import HTTMock, response
 
-from failmap_admin.scanners.models import Endpoint, TlsQualysScan
-from failmap_admin.scanners.scanner_tls_qualys import scan
+from failmap.scanners.models import Endpoint, TlsQualysScan
+from failmap.scanners.scanner_tls_qualys import scan
 
 try:
     # Python 3

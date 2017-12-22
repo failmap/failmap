@@ -9,7 +9,7 @@
 from celery.result import ResultSet
 from django.conf import settings
 
-from failmap_admin.celery import PRIO_HIGH, waitsome
+from failmap.celery import PRIO_HIGH, waitsome
 
 # amount of time the dummy task 'runs'
 SLEEP = 0.1

@@ -20,8 +20,8 @@ trap "docker logs admin;docker stop admin&" EXIT
 $timeout /bin/sh -c "while ! curl -sSIk http://$host:8000 | grep 200\ OK;do sleep 1;done"
 
 # setup database and implicitly test running commands
-docker exec admin failmap-admin migrate
-docker exec admin failmap-admin loaddata development
+docker exec admin failmap migrate
+docker exec admin failmap loaddata development
 
 # index page
 curl -s "http://$host:8000" |grep MSPAINT.EXE

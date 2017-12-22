@@ -1,1 +1,1 @@
-Scripts/tools/utilities that are not directly part Failmap-admin but support development or operations.
+Scripts/tools/utilities that are not directly part failmap but support development or operations.

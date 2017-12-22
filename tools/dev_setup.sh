@@ -10,9 +10,9 @@ if -z "$VIRTUAL_ENV"; then
 fi
 
 pip3 install -e .
-failmap-admin migrate
+failmap migrate
 # load development environment users/settings
-failmap-admin load-dataset development
+failmap load-dataset development
 # load a test data set
-failmap-admin load-dataset testdata -v0
-failmap-admin rebuild-ratings -v0
+failmap load-dataset testdata -v0
+failmap rebuild-ratings -v0
