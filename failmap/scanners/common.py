@@ -1,6 +1,6 @@
 from typing import List
 
-from failmap_admin.organizations.models import Organization
+from failmap.organizations.models import Organization
 
 
 def organizations_from_names(organization_names: List[str]) -> List[Organization]:
