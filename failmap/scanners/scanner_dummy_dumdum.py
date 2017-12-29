@@ -11,9 +11,9 @@ from typing import List
 
 from celery import Task, group
 
-from failmap_admin.celery import ParentFailed, app
-from failmap_admin.organizations.models import Organization, Url
-from failmap_admin.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap.celery import ParentFailed, app
+from failmap.organizations.models import Organization, Url
+from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 
 from .common import organizations_from_names
 from .models import Endpoint

@@ -1,7 +1,7 @@
 import logging
 
-from failmap_admin.app.management.commands._private import TaskCommand
-from failmap_admin.scanners.scanner_dummy_dumdum import scan
+from failmap.app.management.commands._private import TaskCommand
+from failmap.scanners.scanner_dummy_dumdum import scan
 
 log = logging.getLogger(__name__)
 
