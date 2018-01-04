@@ -8,7 +8,7 @@ import pytest
 
 from failmap.celery import app, waitsome
 
-TIMEOUT = 30
+TIMEOUT = 5
 
 
 @pytest.fixture()
@@ -28,10 +28,14 @@ def celery_worker(queue):
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid)
-    # wait for worker to start accepting tasks before turning to test function
-    assert waitsome.apply_async([0], queue=queue, expires=TIMEOUT).get(timeout=TIMEOUT)
-    print('worker ready', file=sys.stderr)
-    yield worker_process
-
-    # stop worker and all child threads
-    os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)
+    # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
+    try:
+        # wait for worker to start accepting tasks before turning to test function
+        assert waitsome.apply_async([0], queue=queue, expires=TIMEOUT).get(timeout=TIMEOUT), \
+            "Worker failed to become ready and execute test task."
+        # give worker stderr time to output into 'Captured stderr setup' and not spill over into 'Captured stderr call'
+        time.sleep(0.1)
+        yield worker_process
+    finally:
+        # stop worker and all child threads
+        os.killpg(os.getpgid(worker_process.pid), signal.SIGKILL)
