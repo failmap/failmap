@@ -39,7 +39,7 @@ Download and install below system requirements to get started:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3](https://www.python.org/downloads/) (download and install)
-- Tox (`pip3 install --user tox`)
+- [Tox](http://tox.readthedocs.io/) (`pip3 install --user tox`)
 - [direnv](https://direnv.net/) (optional, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (optional, recommended, follow instructions to install.)
 
@@ -53,9 +53,17 @@ In a directory of your choosing:
     # enter the directory of the downloaded software
     cd failmap/
 
-Use Direnv to manage environment (see Direnv section below). This manages the Python Virtualenv and `DEBUG` setting required for local development.
+Using Direnv & Tox to manage environment (see Direnv section below). This prepares the shell environment for local development.
 
     direnv allow
+
+Running Tox once creates a development Virtualenv in `.tox/default/` which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
+
+    tox
+
+After completing succesfully the application is available to run:
+
+    failmap -h
 
 # Quickstart
 
