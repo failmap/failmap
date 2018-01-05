@@ -31,13 +31,15 @@ EXPIRES = 5
 def scan(
     organizations: dict = None,
     urls: dict = None,
-    endpoints: dict = None
+    endpoints: dict = None,
+    execute=True
 ) -> Task:
     """Compose and execute taskset to scan specified organizations.
 
     :param organizations: dict: limit organizations to scan to these filters, see below
     :param urls: dict: limit urls to scan to these filters, see below
     :param endpoints: dict: limit endpoints to scan to these filters, see below
+    :param execute: bool: don't return task but execute task and return result
 
     Depending on the type of scanner (endpoint, domain level, etc) a list of scanable
     items will be generated and a taskset will be composed to allow scanning of these items.
@@ -62,7 +64,10 @@ def scan(
     """
     task = compose(organizations_from_names(organizations))
 
-    return task
+    if execute:
+        return task.apply_async()
+    else:
+        return task
 
 
 def compose(organizations: List[Organization]):
