@@ -12,6 +12,6 @@ NON_EXISTING_ORGANIZATION = 'faaloniet'
 def test_dummy(responses, db, faalonië):
     """Test running dummy scan."""
 
-    result = json.loads(call_command('scan-dummy-dumdum', '-v3', '-o', TEST_ORGANIZATION))
+    result = json.loads(call_command('scan_dummy', '-v3', '-o', TEST_ORGANIZATION))
 
     assert result[0]['status'] == 'success'
