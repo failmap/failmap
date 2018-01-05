@@ -16,7 +16,8 @@ TIMEOUT = 5
 def faalonië():
     """Load test organization fixtures."""
 
-    subprocess.call(['failmap', 'load_dataset', 'faalonië'])
+    subprocess.call(['failmap', 'migrate'])
+    subprocess.call(['failmap', 'load_dataset', 'faalonie'])
 
 
 @pytest.fixture(scope="session")
