@@ -38,12 +38,12 @@ Linux or MacOS capable of running Python3 and git.
 Download and install below system requirements to get started:
 
 - [git](https://git-scm.com/downloads) (download and install)
-- [python3](https://www.python.org/downloads/) (download and install)
+- [python3.6](https://www.python.org/downloads/) (download and install)
 - [Tox](http://tox.readthedocs.io/) (`pip3 install --user tox`)
-- [direnv](https://direnv.net/) (optional, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
+- [direnv](https://direnv.net/) (recommended, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (optional, recommended, follow instructions to install.)
 
-# Obtaining the software
+# Quickstart
 
 In a directory of your choosing:
 
@@ -65,9 +65,35 @@ After completing succesfully the application is available to run:
 
     failmap -h
 
-# Quickstart
+To perform non-Docker development, make sure all 'Requirements' are installed. Run the following command to setup a development instance:
 
-For the quickstart we assume the usage of Docker as it offers the most complete environment for development. This project aims to be environment agnostic and development without Docker is possible. See Development section below.
+    tox -e setup
+
+After this run to the following command to start a development server:
+
+    failmap runserver
+
+Now visit the [map website](http://127.0.0.1:8000/) and/or the
+[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
+
+The setup script performs the following steps:
+
+    # creates the database
+    failmap migrate
+
+    # create a user to view the admin interface
+    failmap load_dataset development
+
+    # loads a series of sample data into the database
+    failmap load_dataset testdata
+
+    # calculate the scores that should be displayed on the map
+    failmap rebuild_ratings
+
+
+# Using Docker [WIP]
+
+For the Docker Quickstart we assume the usage of Docker as it offers the most complete environment for development. This project aims to be environment agnostic and development without Docker is possible, but Docker allows for a more managable development environment and less 'need-to-know-what-you-are-doing'.
 
 Below commands result in a failmap installation that is suitable for testing and development. It is
 capable of handling thousands of urls and still be modestly responsive.
@@ -122,40 +148,6 @@ Most composer commands can be run against individual components, eg:
 For more information consult docker composer [documentation](https://docs.docker.com/compose/) or:
 
     docker-compose -h
-
-# Development
-
-To perform non-Docker development, make sure all Requirements are installed. Run the following script to setup a development instance:
-
-    tools/dev_setup.sh
-
-After this run:
-
-    # finally start the development server
-    failmap runserver
-
-Now visit the [map website](http://127.0.0.1:8000/) and/or the
-[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
-
-The setup script performs the following steps:
-
-    # download even more requirements needed to run this software
-    pip3 install -e .
-
-    # and download the development requirements
-    pip3 install -r requirements.dev.txt
-
-    # creates the database
-    failmap migrate
-
-    # create a user to view the admin interface
-    failmap load_dataset development
-
-    # loads a series of sample data into the database
-    failmap load_dataset testdata
-
-    # calculate the scores that should be displayed on the map
-    failmap rebuild_ratings
 
 # Scanning services (beta)
 
@@ -235,17 +227,21 @@ To run code quality checks and unit tests run:
 
     tox
 
+For a comprehensive test run:
+
+    tox -e check,test,datasets
+
 To make life easier you can use `autopep8`/`isort` before running `tox` to automatically fix most style issues:
 
     tox -e autofix
 
 To run only a specific test use:
 
-    tox -- -k test_name
+    tox -e test -- -k test_name
 
 To only run a specific test suite use for example:
 
-    .tox/default/bin/failmap test tests/test_smarturl.py
+    .tox/default/bin/failmap test tests/scanners/test_dummy.py
 
 A coverage report is generated after running tests, on OSX it can be viewed using:
 
@@ -258,13 +254,13 @@ Pytest allows to drop into Python debugger when a tests fails. To enable run:
 ## Direnv / Virtualenv
 
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python
-virtual environment. Install direnv and run `direnv allow` to enable.
+virtual environment. Install direnv and run `direnv allow` to enable it initially. After this the environment will by automatically loaded/unloaded every time you enter/leave the project directory.
 
 Alternatively you can manually create a virtualenv using:
 
     virtualenv venv
 
-Be sure to active the environment before starting development every time:
+Be sure to active the environment before starting development every time and see `.envrc` for other settings that are normally enabled by direnv:
 
     . venv/bin/activate
     export DEBUG=1
