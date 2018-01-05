@@ -1,0 +1,27 @@
+# fixture used in integrationtests
+- model: organizations.organizationtype
+  pk: 3
+  fields: {name: test}
+- model: organizations.organization
+  pk: 42
+  fields: {country: NL, type: 3, name: Faalonië}
+- model: organizations.url
+  pk: 9001
+  fields:
+    organization_old: 42
+    url: faalonië.example.com
+    created_on: 2016-05-17 10:25:35+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: ''
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-09-28 09:30:30+00:00
+    organization: [42]
+- model: scanners.endpoint
+  pk: 9001
+  fields: {url: 9001, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-09-14
+      09:20:17+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}

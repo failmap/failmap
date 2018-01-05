@@ -12,13 +12,16 @@ from failmap.celery import waitsome
 TIMEOUT = 5
 
 
-@pytest.fixture
-def unique_id():
-    """Unique ID for this test session to isolate test databases."""
+@pytest.fixture(scope="session")
+def faalonië():
+    """Load test organization fixtures."""
+
+    subprocess.call(['failmap', 'load_dataset', 'faalonië'])
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def worker():
+    """Run a task worker instance."""
     worker_command = ['failmap', 'celery', 'worker', '-l', 'info']
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
