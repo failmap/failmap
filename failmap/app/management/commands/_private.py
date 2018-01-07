@@ -6,7 +6,7 @@ import time
 from collections import Counter
 
 import kombu.exceptions
-from celery.result import ResultSet
+from celery.result import AsyncResult, ResultSet
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
@@ -80,11 +80,11 @@ class TaskCommand(BaseCommand):
         self.interval = options['interval']
 
         if options['task_id']:
-            # return self.wait_for_result(GroupResult(options['task_id']))
-            # this currently doesn't work
-            raise NotImplementedError('needs to be added')
+            result = self.wait_for_result(ResultSet([AsyncResult(options['task_id'])]))
+        else:
+            result = self.run_task(*args, **options)
 
-        return json.dumps(self.run_task(*args, **options), cls=ResultEncoder)
+        return json.dumps(result, cls=ResultEncoder)
 
     def run_task(self, *args, **options):
         # try to compose task if not specified
@@ -113,7 +113,7 @@ class TaskCommand(BaseCommand):
                 return self.wait_for_result(task_id)
             else:
                 # if async return taskid to allow query for status later on
-                return [task_id.id]
+                return [r.id for r in task_id.results]
         else:
             # By default execute the task directly without involving celery or a broker.
             # Return all results without raising exceptions.
