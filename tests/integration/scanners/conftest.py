@@ -9,7 +9,7 @@ import pytest
 
 from failmap.celery import waitsome
 
-TIMEOUT = 5
+TIMEOUT = 30
 
 
 @pytest.fixture(scope="session")
