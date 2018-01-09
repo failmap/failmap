@@ -21,15 +21,21 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
 
+from failmap.organizations.dashboard_modules import rebuild_ratings
+
 # Django 1.10 http://stackoverflow.com/questions/38744285/
 # django-urls-error-view-must-be-a-callable-or-a-list-tuple-in-the-case-of-includ#38744286
 
 admin_urls = [
-    url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
-    url(r'^jet/dashboard/', include('jet.dashboard.urls',
-                                    'jet-dashboard')),  # Django JET dashboard URLS
     url(r'^admin/', admin.site.urls),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^jet/', include('jet.urls', 'jet')),
+    url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+
+    # this is a terrible hacky solution, for Jet does not support inline forms.
+    # The example with urls (see bottom of page), shown here, does not work. So this is an alternative.
+    # https://jet.readthedocs.io/en/latest/dashboard_custom_module.html#
+    url(r'^admin/map/rebuild_ratings/', rebuild_ratings, name='rebuild-ratings'),
 ]
 frontend_urls = [
     url(r'^', include('failmap.map.urls')),

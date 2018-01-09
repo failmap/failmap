@@ -5,7 +5,6 @@ from jet.dashboard.dashboard import Dashboard
 from failmap.organizations import dashboard_modules
 
 
-# todo: add history to dashboard.
 class CustomIndexDashboard(Dashboard):
     columns = 2
 
@@ -14,17 +13,16 @@ class CustomIndexDashboard(Dashboard):
         self.available_children.append(modules.RecentActions)
         self.available_children.append(modules.Feed)
         self.available_children.append(modules.AppList)
-        self.available_children.append(dashboard_modules.SmartAddUrl)
 
         self.children.append(modules.RecentActions(
             _('Recent Actions'),
-            10,
+            40,
             column=0,
             order=1
         ))
 
-        self.children.append(dashboard_modules.SmartAddUrl(
-            _('Smart Add Url\'s'),
+        self.children.append(dashboard_modules.RebuildRatings(
+            _('Rebuild Ratings'),
             column=1,
             order=1
         ))
