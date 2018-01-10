@@ -54,7 +54,6 @@ class Job(models.Model):
     @app.task
     def store_result(result, job_id=None):
         """Celery task to store result of task after it has completed."""
-        print(result, job_id)
         job = Job.objects.get(id=job_id)
         if not result:
             result = '-- task generated no result object --'

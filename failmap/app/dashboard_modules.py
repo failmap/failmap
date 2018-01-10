@@ -28,9 +28,13 @@ class RebuildRatings(DashboardModule):
 def rebuild_ratings(request):
     """Create rebuild ratings task and dispatch using a Job to allow the user to track progress."""
     name = 'Rebuild ratings'
+    # create a Task signature for rebuilding ratings, wrap this inside a Job
+    # to have it trackable by the user in the admin interface
     task = rebuild_ratings_task.s()
     job = Job.create(task, name, request, priority=PRIO_HIGH)
-    link = reverse('admin:app_job_change', args=(job.id,))
 
+    # tell the user where to find the Job that was just created
+    link = reverse('admin:app_job_change', args=(job.id,))
     messages.success(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
-    return redirect(link)
+
+    return redirect(reverse('admin:index'))
