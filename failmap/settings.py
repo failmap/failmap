@@ -458,9 +458,18 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
 
-# workaround to try and make rate limited tasks coexist on the same worker as non-rate limited whilst keeping
-# good throughput on non-rate limited tasks even though worker interal queue might be plugged with rate limited tasks
-# let worker consume as many tasks as it wants
+# Use the value of 2 for celery prefetch multiplier. Previous was 1. The
+# assumption is that 1 will block a worker thread until the current (rate
+# limited) task is completed. When using 2 (or higher) the assumption is that
+# celery will drop further rate limited task from the internal worker queue and
+# fetch other tasks tasks that could be executed (spooling other rate limited
+# tasks through in the process but to no hard except for a slight drop in
+# overall throughput/performance). A to high value for the prefetch multiplier
+# might result in high priority tasks not being picked up as Celery does not
+# seem to do prioritisation in worker queues but only on the broker
+# queues. The value of 2 is currently selected because it higher than 1,
+# behaviour needs to be observed to decide if raising this results in
+# further improvements without impacting the priority feature.
 CELERY_WORKER_PREFETCH_MULTIPLIER = 2
 
 # numer of tasks to be executed in parallel by celery
