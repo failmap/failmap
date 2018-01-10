@@ -275,7 +275,13 @@ JET_THEMES = [
 # see: https://github.com/geex-arts/django-jet/blob/
 #   fea07040229d1b56800a7b8e6234e5f9419e2114/docs/config_file.rst
 # required for custom modules
-JET_APP_INDEX_DASHBOARD = 'failmap.organizations.dashboard.CustomIndexDashboard'
+JET_APP_INDEX_DASHBOARD = 'failmap.app.dashboard.CustomAppIndexDashboard'
+
+# Customize the Dashboard index page remove unneeded panels (eg: feeds) and add usefull stuff (actions).
+JET_INDEX_DASHBOARD = 'failmap.app.dashboard.CustomIndexDashboard'
+
+# expand menu items by default for quick access
+JET_SIDE_MENU_COMPACT = True
 
 LOGGING = {
     'version': 1,
