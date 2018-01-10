@@ -4,13 +4,17 @@
 # https://www.dabapps.com/blog/higher-level-query-api-django-orm/
 # https://docs.djangoproject.com/en/1.10/intro/overview/#enjoy-the-free-api
 # https://docs.djangoproject.com/en/1.10/topics/db/queries/
-from datetime import datetime
 
-import pytz
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
+from django.urls import reverse
 from jet.dashboard.modules import DashboardModule
+
+from failmap.map.rating import rebuild_ratings as rebuild_ratings_task
+
+from ..celery import PRIO_HIGH
+from .models import Job
 
 
 class RebuildRatings(DashboardModule):
@@ -22,8 +26,11 @@ class RebuildRatings(DashboardModule):
 
 @login_required
 def rebuild_ratings(request):
-    from failmap.map.rating import rebuild_ratings_async
-    rebuild_ratings_async()
+    """Create rebuild ratings task and dispatch using a Job to allow the user to track progress."""
+    name = 'Rebuild ratings'
+    task = rebuild_ratings_task.s()
+    job = Job.create(task, name, request, priority=PRIO_HIGH)
+    link = reverse('admin:app_job_change', args=(job.id,))
 
-    messages.success(request, 'A new task that rebuilds ratings has been added (%s).' % datetime.now(pytz.utc))
-    return redirect("/admin/")
+    messages.success(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
+    return redirect(link)
