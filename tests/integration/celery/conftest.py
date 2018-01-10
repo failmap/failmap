@@ -8,7 +8,7 @@ import pytest
 
 from failmap.celery import app, waitsome
 
-TIMEOUT = 5
+TIMEOUT = 30
 
 
 @pytest.fixture()
