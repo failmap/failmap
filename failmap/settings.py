@@ -388,15 +388,6 @@ TOOLS = {
     }
 }
 
-# Celery 4.0 settings
-# Pickle can work, but you need to use certificates to communicate (to verify the right origin)
-# It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
-# even serialize dicts.
-# http://docs.celeryproject.org/en/latest/userguide/configuration.html
-CELERY_accept_content = ['pickle', 'yaml']
-CELERY_task_serializer = 'pickle'
-CELERY_result_serializer = 'pickle'
-
 # Compression
 # Django-compressor is used to compress css and js files in production
 # During development this is disabled as it does not provide any feature there
@@ -437,6 +428,15 @@ COMPRESS_OFFLINE = not DEBUG
 # https://django-compressor.readthedocs.io/en/latest/settings/#django.conf.settings.COMPRESS_ENABLED
 # Enabled when debug is off by default.
 
+# Celery 4.0 settings
+# Pickle can work, but you need to use certificates to communicate (to verify the right origin)
+# It's preferable not to use pickle, yet it's overly convenient as the normal serializer can not
+# even serialize dicts.
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html
+CELERY_accept_content = ['pickle', 'yaml']
+CELERY_task_serializer = 'pickle'
+CELERY_result_serializer = 'pickle'
+
 # Celery config
 CELERY_BROKER_URL = os.environ.get('BROKER', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('RESULT_BACKEND', CELERY_BROKER_URL.replace('amqp://', 'rpc://'))
@@ -455,18 +455,18 @@ CELERY_TIMEZONE = 'UTC'
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"
-
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
 
 # workaround to try and make rate limited tasks coexist on the same worker as non-rate limited whilst keeping
 # good throughput on non-rate limited tasks even though worker interal queue might be plugged with rate limited tasks
 # let worker consume as many tasks as it wants
-CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_WORKER_PREFETCH_MULTIPLIER = 2
 
 # numer of tasks to be executed in parallel by celery
 CELERY_WORKER_CONCURRENCY = 10
+
+MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"
 
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
