@@ -7,14 +7,25 @@ from jet.dashboard import dashboard
 
 from failmap.map.rating import rebuild_ratings as rebuild_ratings_task
 
-from ..celery import PRIO_HIGH
+from ..celery import PRIO_HIGH, app
 from .models import Job
 
 
 def task_processing_status(request):
     """Return a JSON object with current status of task processing."""
 
-    status = {'workers': [{'hostname': 'localhost'}]}
+    inspect = app.control.inspect()
+
+    # query workforce statistics using control.inspect API and extract some relevant data from it
+    stats = inspect.stats() or {}
+    active = inspect.active()
+    workers = [{
+        'name': worker_name,
+        'tasks_processed': sum(worker_stats['total'].values()),
+        'tasks_active': len(active[worker_name]),
+    } for worker_name, worker_stats in stats.items()]
+
+    status = {'workers': workers}
 
     return JsonResponse(status)
 
