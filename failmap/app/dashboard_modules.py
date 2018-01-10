@@ -13,5 +13,3 @@ class RebuildRatings(DashboardModule):
     title_url = 'Rebuild Ratings'
 
     template = 'app/templates/admin/rebuild_ratings.html'
-
-
