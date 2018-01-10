@@ -1,6 +1,6 @@
 [submodule "vendor/dnsrecon"]
 	path = vendor/dnsrecon
-	url = https://github.com/stitch/dnsrecon.git
+	url = https://github.com/darkoperator/dnsrecon.git
 [submodule "vendor/theHarvester"]
 	path = vendor/theHarvester
 	url = https://github.com/laramies/theHarvester.git
