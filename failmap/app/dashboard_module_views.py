@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from jet.dashboard import dashboard
@@ -8,6 +9,23 @@ from failmap.map.rating import rebuild_ratings as rebuild_ratings_task
 
 from ..celery import PRIO_HIGH
 from .models import Job
+
+
+def task_processing_status(request):
+    """Return a JSON object with current status of task processing."""
+
+    status = {'workers': [{'hostname': 'localhost'}]}
+
+    return JsonResponse(status)
+
+
+dashboard.urls.register_urls([
+    url(
+        r'^task_processing_status/',
+        task_processing_status,
+        name='task-processing-status'
+    ),
+])
 
 
 def rebuild_ratings(request):

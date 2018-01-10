@@ -85,6 +85,12 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
             order=0
         ))
 
+        self.children.append(dashboard_modules.TaskProcessing(
+            _('Task Processing Status (WIP)'),
+            column=0,
+            order=0
+        ))
+
         self.children.append(modules.LinkList(
             _('Failmap resources'),
             children=[

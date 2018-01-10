@@ -83,9 +83,6 @@ class PromiseAdminInline(CompactInline):
 
 
 class OrganizationAdmin(admin.ModelAdmin):
-    class Media:
-        js = ('js/action_buttons.js', )
-
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
@@ -115,9 +112,6 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 
 class UrlAdmin(admin.ModelAdmin):
-    class Media:
-        js = ('js/action_buttons.js', )
-
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
     search_fields = ('url', )

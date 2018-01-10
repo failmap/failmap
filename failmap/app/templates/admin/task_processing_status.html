@@ -1,0 +1,35 @@
+<script type="text/javascript">
+  let api_url = '{% url "jet-dashboard:task-processing-status" %}';
+</script>
+
+{% verbatim %}
+<div id="task_processing_status">
+<p>Workers: {{workers.length}}</p>
+<p>Pending tasks: OVER 9000!!!!11111</p>
+<p>Runnign tasks: 10</p>
+</div>
+<script type="text/javascript">
+
+  var vm = new Vue({
+    el: '#task_processing_status',
+    data: {
+      "workers": [],
+    },
+    mounted () {
+      let self = this;
+      jQuery.ajax({
+        url: api_url,
+        method: 'GET',
+        success (data){
+          self.workers = data.workers;
+        },
+        error (error){
+          console.error('failed to load task processing status', error);
+          self.error = true;
+        },
+      })
+    }
+  });
+</script>
+
+{% endverbatim %}
