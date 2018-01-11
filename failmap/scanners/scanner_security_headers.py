@@ -11,7 +11,7 @@ import requests
 from celery import group
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
-from failmap.celery import ParentFailed, app
+from failmap.celery import IP_VERSION_QUEUE, ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap.scanners.models import EndpointGenericScanScratchpad
@@ -85,7 +85,11 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
 
     def compose_subtasks(endpoint):
         """Create a task chain of scan & store for a given endpoint."""
-        scan_task = get_headers.s(endpoint.uri_url())
+
+        # determine which queue this kind of task should end up in
+        queue = IP_VERSION_QUEUE[endpoint.ip_version]
+
+        scan_task = get_headers.signature((endpoint.uri_url(),), options={'queue': queue})
         store_task = analyze_headers.s(endpoint)
         return scan_task | store_task
 
@@ -95,7 +99,8 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
     return taskset
 
 
-@app.task
+# database related tasks should by default be handled by a worker connected to the database
+@app.task(queue="storage")
 def analyze_headers(result: requests.Response, endpoint):
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):

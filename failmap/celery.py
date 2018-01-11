@@ -8,6 +8,7 @@ import time
 
 from celery import Celery, Task
 from django.conf import settings
+from kombu import Queue
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
 
@@ -16,6 +17,18 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 # autodiscover all celery tasks in tasks.py files inside failmap modules
 appname = __name__.split('.', 1)[0]
 app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])
+
+
+# explicitly declare the queues that are in use
+app.conf.task_queues = {
+    # allow to differentiate on scan tasks that have network connectivity requirements
+    Queue('scanners.ipv4'),
+    Queue('scanners.ipv6'),
+    # for tasks that require a database connection
+    Queue('storage'),
+    # default queue for task with no explicit queue assigned
+    Queue('celery'),
+}
 
 # http://docs.celeryproject.org/en/master/whatsnew-4.0.html?highlight=priority#redis-priorities-reversed
 # http://docs.celeryproject.org/en/master/history/whatsnew-3.0.html?highlight=priority
@@ -31,6 +44,12 @@ else:
     PRIO_HIGH = 9
     PRIO_NORMAL = 5
     PRIO_LOW = 0
+
+# lookup table for routing keys for different IP versions
+IP_VERSION_QUEUE = {
+    4: 'scanners.ipv4',
+    6: 'scanners.ipv6',
+}
 
 
 class DefaultTask(Task):
