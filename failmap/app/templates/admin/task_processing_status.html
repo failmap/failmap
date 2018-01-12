@@ -5,29 +5,54 @@
 <div id="task_processing_status">
 <a href="#" v-on:click="update" class="float-right reset-dashboard-link-icon icon-reset" style="padding:8px 10px;"></a>
 <div v-if="loading" class="float-right"><ul><li>Loading</li></ul></div>
-<div v-if="workers">
+<div v-if="alerts.length">
   <ul>
-    <li class="contrast">Workers</li>
-    <li v-for="worker in workers" v-if="workers.length">
-      <p>{{ worker.name }}</p>
-      <ul>
-        <li>total processed tasks {{worker.tasks_processed}}</li>
-        <li>currently processing {{worker.tasks_active}}</li>
-      </ul>
-    </li>
-    <li v-if="!workers.length">No active workers!</li>
+    <li class="contrast">Alerts</li>
+    <li v-for="alert in alerts">{{alert}}</li>
   </ul>
 </div>
+<ul>
+  <li class="contrast">Workers</li>
+  <li v-for="worker in workers">
+    <p>{{ worker.name }}</p>
+    <ul>
+      <li>subscribed queues: <span v-for="queue in worker.queues">{{queue}} </span></li>
+      <li>prefetched tasks: {{worker.tasks_reserved}}/{{worker.prefetch_count}}</li>
+      <li>running tasks: {{worker.tasks_active}}/{{worker.concurrency}}</li>
+      <li>total processed tasks: {{worker.tasks_processed}}</li>
+    </ul>
+  </li>
+  <div v-if="!workers.length"><li>-</li></div>
+</ul>
+<ul>
+  <li class="contrast">Queues</li>
+  <li v-for="queue in queues">
+    <p>{{ queue.name }}</p>
+    <ul>
+      <li>pending tasks: {{queue.tasks_pending}}</li>
+    </ul>
+  </li>
+  <div v-if="!queues.length"><li>-</li></div>
+</ul>
 </div>
 <script type="text/javascript">
 
   var vm = new Vue({
     el: '#task_processing_status',
     data: {
-      "loading": true,
-      "workers": null,
+      "loading": false,
+      "workers": [],
+      "alerts": [],
+      "queues": []
     },
-    mounted () { this.update();},
+    mounted () {
+      // update from API
+      this.update();
+      // periodic poll update
+      setInterval(function () {
+        this.update();
+      }.bind(this), 10000);
+    },
     methods: {
       update (){
         this.loading = true;
@@ -39,6 +64,8 @@
           success (data){
             self.loading = false;
             self.workers = data.workers;
+            self.alerts = data.alerts;
+            self.queues = data.queues;
           },
           error (error){
             console.error('failed to load task processing status', error);

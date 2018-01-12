@@ -6,8 +6,11 @@
 import os
 import time
 
+import flower.utils.broker
 from celery import Celery, Task
 from django.conf import settings
+
+from .worker import WORKER_QUEUE_CONFIGURATION
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
 
@@ -23,14 +26,17 @@ app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith
 # https://github.com/celery/celery/blob/a87ef75884e59c78da21b1482bb66cf649fbb7d3/docs/history/whatsnew-3.0.rst#redis-priority-support
 # https://github.com/celery/celery/blob/f83b072fba7831f60106c81472e3477608baf289/docs/whatsnew-4.0.rst#redis-priorities-reversed
 # contrary to 'documentation' in release notes the redis priorities do not seem aligned with rabbitmq
+app.conf.broker_transport_options = {
+    'priority_steps': [1, 5, 9],
+}
 if 'redis://' in app.conf.broker_url:
-    PRIO_HIGH = 0
+    PRIO_HIGH = 1
     PRIO_NORMAL = 5
     PRIO_LOW = 9
 else:
     PRIO_HIGH = 9
     PRIO_NORMAL = 5
-    PRIO_LOW = 0
+    PRIO_LOW = 1
 
 # lookup table for routing keys for different IP versions
 IP_VERSION_QUEUE = {
@@ -77,3 +83,46 @@ def rate_limited(sleep):
 
     time.sleep(sleep)
     return time.time()
+
+
+def status():
+    """Return a dictionary with the status of the Celery task processing system."""
+    inspect = app.control.inspect()
+
+    # query workforce statistics using control.inspect API and extract some relevant data from it
+    stats = inspect.stats() or {}
+    active = inspect.active()
+    reserved = inspect.reserved()
+    active_queues = inspect.active_queues()
+    workers = [{
+        'name': worker_name,
+        'queues': [q['name'] for q in active_queues[worker_name]],
+        'tasks_processed': sum(worker_stats['total'].values()),
+        'tasks_active': len(active[worker_name]),
+        'tasks_reserved': len(reserved[worker_name]),
+        'prefetch_count': worker_stats['prefetch_count'],
+        'concurrency': worker_stats['pool']['max-concurrency'],
+    } for worker_name, worker_stats in stats.items()]
+
+    if 'redis://' in app.conf.broker_url:
+        queue_names = [q.name for q in WORKER_QUEUE_CONFIGURATION['default']]
+
+        # use flower to not reinvent the wheel on querying queue statistics
+        broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)
+        queue_stats = broker.queues(queue_names).result()
+
+        queues = [{'name': x['name'], 'tasks_pending': x['messages']} for x in queue_stats]
+    else:
+        raise NotImplementedError('Currently only Redis is supported!')
+
+    alerts = []
+    if not workers:
+        alerts.append('No active workers!')
+    if len(workers) > 9000:
+        alerts.append('Number of workers is OVER 9000!!!!1111')
+
+    return {
+        'alerts': alerts,
+        'workers': workers,
+        'queues': queues
+    }
