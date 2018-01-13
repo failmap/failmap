@@ -117,6 +117,7 @@ class TaskCommand(BaseCommand):
         else:
             # By default execute the task directly without involving celery or a broker.
             # Return all results without raising exceptions.
+            log.info('Executing task directly.')
             return self.task.apply(*self.args, **self.kwargs).get(propagate=False)
 
     def wait_for_result(self, task_id):
@@ -129,3 +130,28 @@ class TaskCommand(BaseCommand):
 
         # return final results, don't reraise exceptions
         return task_id.get(propagate=False)
+
+
+class ScannerTaskCommand(TaskCommand):
+    """Generic Task Command for scanners."""
+
+    scanner_module = None
+
+    def _add_arguments(self, parser):
+        """Add command specific arguments."""
+        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
+                                       help="Perform scans on these organizations (default is all).")
+
+    def compose(self, *args, **options):
+        """Compose set of tasks based on provided arguments."""
+
+        if not options['organization_names']:
+            # by default no filter means all organizations
+            organization_filter = dict()
+        else:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_names']) + ')$'
+            organization_filter = {'name__iregex': regex}
+
+        # compose set of tasks to be executed
+        return self.scanner_module.create_task(organization_filter)
