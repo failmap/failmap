@@ -3,7 +3,6 @@ from django.utils.html import format_html
 from jet.admin import CompactInline
 
 from failmap.map.rating import rate_url
-from failmap.scanners.scanner_tls_qualys import scan
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
                      State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
@@ -91,7 +90,8 @@ class EndpointAdmin(admin.ModelAdmin):
         for endpoint in queryset:
             urls_to_scan.append(endpoint.url.url)
 
-        scan(urls_to_scan)
+        # scan(urls_to_scan)
+        raise NotImplementedError('WIP deprecated TODO')
 
         self.message_user(request, "URL(s) have been scanned")
 

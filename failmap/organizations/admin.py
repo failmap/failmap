@@ -10,13 +10,12 @@ from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
 from failmap.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
-from failmap.scanners import scanner_plain_http, scanner_security_headers
+from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIpInline
 from failmap.scanners.models import Endpoint
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
-from failmap.scanners.scanner_tls_qualys import scan_urls as tls_qualys_scan_urls
 
 from ..app.models import Job
 from ..celery import PRIO_HIGH
@@ -98,16 +97,20 @@ class OrganizationAdmin(admin.ModelAdmin):
 
         self.message_user(request, "Organization(s) have been rated")
 
-    def scan_organization(self, request, queryset):
-        urls = Url.objects.filter(organization__in=list(queryset))
-        tls_qualys_scan_urls(list(urls))
-        self.message_user(request, "Organization(s) have been scanned")
+    # Should be refactored as this is a generic pattern, suggest a Mixin class
+    # that allows to generate admin actoins for every scanner/action (eg rebuild
+    # ratings), this class can potentially be shared by UrlAdmin and
+    # EndpointAdmin as the `create_task` function accepts either of 3 as
+    # selectors. def scan_organization(self, request, queryset):
+    #     urls = Url.objects.filter(organization__in=list(queryset))
+    #     tls_qualys_scan_urls(list(urls))
+    #     self.message_user(request, "Organization(s) have been scanned")
 
     rate_organization.short_description = \
         "Rate selected Organizations based on available scansresults"
 
-    scan_organization.short_description = \
-        "Scan selected Organizations"
+    # scan_organization.short_description = \
+    #     "Scan selected Organizations"
 
 
 class UrlAdmin(admin.ModelAdmin):
@@ -194,9 +197,8 @@ class UrlAdmin(admin.ModelAdmin):
 
     def scan_tls_qualys(self, request, queryset):
         # create a celery task and use Job object to keep track of the status
-        urls = list(queryset)
-        task = tls_qualys_scan_urls(urls=urls, execute=False)
-        name = "Scan TLS Qualys (%s) " % str(urls)
+        task = scanner_tls_qualys.create_task(urls_filter={'id__in': queryset.values_list('id')})
+        name = "Scan TLS Qualys (%s) " % ','.join(map(str, list(queryset)))
         job = Job.create(task, name, request, priority=PRIO_HIGH)
         link = reverse('admin:app_job_change', args=(job.id,))
         self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))

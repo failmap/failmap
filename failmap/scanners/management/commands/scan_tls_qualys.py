@@ -1,43 +1,15 @@
 import logging
 
-from django.core.management.base import BaseCommand
+from failmap.app.management.commands._private import ScannerTaskCommand
+from failmap.scanners import scanner_tls_qualys
 
-from failmap.celery import PRIO_HIGH
-from failmap.scanners.models import Url
-from failmap.scanners.scanner_tls_qualys import scan, scan_new_urls, scan_urls
-
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__name__)
 
 
-# https://docs.djangoproject.com/en/1.11/howto/custom-management-commands/
-class Command(BaseCommand):
-    help = 'Perform scans, start somewhere and just go!'
+class Command(ScannerTaskCommand):
+    """Demostrative NOOP scanner for example purposes."""
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--manual', '-m',
-            help="Give an url to scan via command line.",
-            nargs=1,
-            required=False,
-            default=False,
-            type=bool
-        )
+    help = __doc__
 
-        parser.add_argument(
-            '--new',
-            help="Only scan new urls.",
-            type=bool
-        )
+    scanner_module = scanner_tls_qualys
 
-    def handle(self, *args, **options):
-        if options['manual']:
-            value = input("Type the url, without protocol:")
-            url = Url.objects.all().filter(url=value).first()
-            scan_urls(urls=[url], priority=PRIO_HIGH)
-        else:
-
-            if options['new']:
-                scan_new_urls.apply()
-            else:
-                # removed the infinite loop, so to allow scheduling.
-                scan.apply()

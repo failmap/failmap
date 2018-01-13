@@ -26,77 +26,90 @@ import ipaddress
 import json
 import logging
 from datetime import date, datetime, timedelta
-from random import randint
 from time import sleep
-from typing import List
 
 import pytz
 import requests
-from celery import group
+from celery import Task, group
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                      TlsQualysScratchpad)
 from failmap.scanners.scanner_http import store_url_ips
-from failmap.scanners.state_manager import StateManager
 
-from ..celery import PRIO_HIGH, PRIO_NORMAL, app
+from ..celery import PRIO_HIGH, app
 
 log = logging.getLogger(__name__)
 
 
-def scan_url_list(urls: List[Url]):
-    urls = external_service_task_rate_limit(urls)
-    log.debug("Domains to scan: %s", len(urls))
+def create_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """Compose taskset to scan specified endpoints.
 
-    # warning: qualys allows 1 scan per minute (probably per IP)
-    for url in urls:
-        scan_task(url)
-        log.debug("Rate limit: +/- 70 seconds.")
-        sleep(60 + randint(0, 10))  # Start a new task, but don't pulsate too much.
+    :param organizations_filter: dict: limit organizations to scan to these filters, see below
+    :param urls_filter: dict: limit urls to scan to these filters, see below
+    :param endpoints_filter: dict: limit endpoints to scan to these filters, see below
 
+    Depending on the type of scanner (endpoint, domain level, etc) a list of scanable
+    items will be generated and a taskset will be composed to allow scanning of these items.
 
-@app.task
-def scan_urls(urls: List[Url], execute: bool=True, priority: int=PRIO_NORMAL):
-    urls = external_service_task_rate_limit(urls)
+    By default all elegible items will be scanned. Which means a complete scan of everything possible
+    with this scanner.
 
-    """Compose and execute taskset to scan specified urls."""
-    try:
-        task = compose(urls=urls)
-        return task.apply_async(priority=priority) if execute else task
-    except (ValueError, Endpoint.DoesNotExist):
-        log.error('Could not schedule scans, due to error reported above.')
+    By specifying filters the list of items to scan can be reduced. These filters are passed to
+    Django QuerySet filters on the respective models.
 
+    For example, to scan all urls/endpoints for one organization named 'example' run:
 
-def scan_multithreaded(urls: List[Url]):
-    from multiprocessing import Pool
-    pool = Pool(processes=4)
+    >>> task = create_task(organizations={'name__iexact': 'example'})
+    >>> result = task.apply_async()
+    >>> print(result.get())
 
-    for url in urls:
-        pool.apply_async(scan_task, [url])
-        sleep(60)
+    (`name__iexact` matches the name case-insensitive)
 
+    Multiple filters can be applied, to scan only port 80 for organizations added today run:
 
-def compose(organizations: List[Organization]=None, urls: List[Url]=None):
-    """Compose taskset to scan specified organizations or urls (not both)."""
+    >>> task = create_task(
+    ...     organizations={'date_added__day': datetime.datetime.today().day},
+    ...     endpoints={'port': 80}
+    ... )
 
-    if not any([organizations, urls]):
-        log.error('No organizations or urls supplied.')
-        raise ValueError("No organizations or urls supplied.")
+    """
 
-    # collect all scannable urls for provided organizations
-    if organizations:
-        urls_organizations = Url.objects.all().filter(is_dead=False,
-                                                      not_resolvable=False,
-                                                      organization__in=organizations)
+    # The dummy scanner is an example of a scanner that scans on an endpoint
+    # level. Meaning to create tasks for scanning, this function needs to be
+    # smart enough to translate (filtered) lists of organzations and urls into a
+    # (filtered) lists of endpoints (or use a url filter directly). This list of
+    # endpoints is then used to create a group of tasks which would perform the
+    # scan.
 
-        urls = list(urls_organizations) + urls if urls else list(urls_organizations)
+    # apply filter to organizations (or if no filter, all organizations)
+    organizations = Organization.objects.filter(**organizations_filter)
+    # apply filter to urls in organizations (or if no filter, all urls)
+    urls = Url.objects.filter(
+        is_dead=False,
+        not_resolvable=False,
+        organization__in=organizations, **urls_filter
+    )
 
-    # create a group of parallel executable scan&store tasks for all endpoints
-    taskset = group(scan_task.s(url) for url in urls)
+    if endpoints_filter:
+        raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
-    return taskset
+    if not urls:
+        raise Exception('Applied filters resulted in no tasks!')
+
+    log.info('Creating scan task for %s urls for %s organizations.',
+             len(urls), len(organizations))
+
+    # create tasks for scanning all selected urls as a single managable group
+    task = group(qualys_scan.s(url) | process_qualys_result.s(url) for url in urls)
+
+    return task
 
 
 @app.task(
@@ -106,66 +119,46 @@ def compose(organizations: List[Organization]=None, urls: List[Url]=None):
     # After starting a scan you can read it out as much as you want. The problem lies with rate limiting
     # of starting the task.
 
-    # Creating a new task means it will be placed somewhere on the queue.
-    rate_limit='1/m',
-)
-def scan_task(url):
+    # Celery will at most start 1 new qualys_scan per minute, the 'retry' at
+    # the end of this task will turn it from a rate_limited into a scheduled
+    # tasks which makes this work nicely with Qualys API restrictions.
 
-    # start the scan (or read out the cache, which is a bit inefficient)
-    # data = service_provider_scan_via_api(url.url)
-
-    log.info("Starting scan on: %s" % url.url)
-    readout = scan_readout_task.s(url)
-    # and so you're still waiting synchronously.
-    # this will create a new task, that should be read out pretty quickly (there is a deadline of about 10 minutes)
-    readout.apply_async()
-
-
-@app.task(
     # after starting a scan (1/m) you can read out every 20 seconds.
     # You can do so in the 10 minutes. If you don't, it will start a new scan which affects your rate limit.
-    bind=True
+
+    bind=True,
+    # this task should run on an internet connected, distributed worker
+    queue='scanners',
+    # start at most 1 new task per minute (per worker)
+    rate_limit='1/m',
 )
-def scan_readout_task(self, url):
-    """
-    Carries out a scan until the ERROR or READY is returned. There will be many checks performed
-    by the scanner, signalled by TESTING_ messages. There also are many DNS messages when
-    starting the scan.
+def qualys_scan(self, url):
+    """Acquire JSON scan result data for given URL from Qualys.
 
     A scan usually takes about two minutes. It _can_ take much longer depending on the amount
     of ip's qualys is able to find. Having eight different IP's is not special for some cloud
     hosters.
 
-    You can have about 25 scans running at the same time: with overlap. So you cannot start
-    25 scans at the same time(!).
-
     :param url: object representing an url
     :return:
     """
 
+    # Query Qualys API for information about this URL.
     data = service_provider_scan_via_api(url.url)
-    scratch(url.url, data)  # for debugging
-    report_to_console(url.url, data)  # for more debugging
+    # Create task for storage worker to store debug data in database (this
+    # task has no direct DB access due to scanners queue).
+    scratch.apply_async([url, data])
+
+    if settings.DEBUG:
+        report_to_console(url.url, data)  # for more debugging
 
     if 'status' in data.keys():
-        if data['status'] == "READY" and 'endpoints' in data.keys():
-            result = save_scan(url, data)
-            clean_endpoints(url, data['endpoints'])
-            return '%s %s' % (url, result)
-
-        if data['status'] == "ERROR":
-            """
-            Error is usually "unable to resolve domain". This should kill the endpoint(s).
-            """
-            scratch(url, data)  # we always want to see what happened.
-            clean_endpoints(url, [])
-            return
-
+        # Qualys has recently completed a scan of the url and has a result for us
+        return data
     else:
-        data['status'] = "FAILURE"  # stay in the loop
-        log.error("Unexpected result from API")
-        log.error(data)  # print for debugging purposes
-        scratch(url, data)  # we always want to see what happened.
+        # Qualys did not have a result for us, it created a new scan and the result will be there soon (retry below)
+        data['status'] = "FAILURE"
+        log.error("Unexpected result from API")  # TODO, aequitas, is this result really unexpected???
 
     """
     While the documentation says to check every 10 seconds, we'll do that between every
@@ -174,26 +167,28 @@ def scan_readout_task(self, url):
     """
     log.info('Still waiting for Qualys result. Retrying task in 20 seconds.')
     # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
+    # The 'retry' converts this task instance from a rate_limited into a
+    # scheduled task, so retrying tasks won't interfere with new tasks to be
+    # started
     raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30)
-    # sleep(20 + randint(0, 5))  # don't pulsate.
 
 
-def external_service_task_rate_limit(urls):
-    """
-    The fewer scans we run, the better. So try to limit the amount of domains we need to scan by:
-    - not scanning an url that has been scanned in the past 24 hours.
-    - removing duplicates
-    - really basic input validation
+@app.task(queue='storage')
+def process_qualys_result(data, url):
+    """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
-    todo: use tldextract to verify the correctness of domains. (not ip's)
+    if data['status'] == "READY" and 'endpoints' in data.keys():
+        result = save_scan(url, data)
+        clean_endpoints(url, data['endpoints'])
+        return '%s %s' % (url, result)
 
-    :param urls: list of domains
-    :return: unique set of domains that are alive
-    """
-
-    urls = [url for url in urls if len(url.url) > 3]  # fake input validation
-    urls = [url for url in urls if not endpoints_alive_in_past_24_hours(url)]
-    return list(set(urls))  # remove duplicates
+    if data['status'] == "ERROR":
+        """
+        Error is usually "unable to resolve domain". This should kill the endpoint(s).
+        """
+        scratch(url, data)  # we always want to see what happened.
+        clean_endpoints(url, [])
+        return '%s error' % url
 
 
 def report_to_console(domain, data):
@@ -511,6 +506,9 @@ def kill_alive_and_get_endpoint(protocol, url, port, ip_version, message):
         return failmap_endpoint
 
 
+@app.task(
+    queue='storage'
+)
 def scratch(domain, data):
     log.debug("Scratching data for %s", domain)
     scratchpad = TlsQualysScratchpad()
@@ -591,134 +589,3 @@ def revive_url_if_possible(url):
         url.is_deadsince = datetime.now(pytz.utc)
         url.is_dead_reason = "Endpoints discovered during TLS Qualys Scan"
         url.save()
-
-
-@app.task
-def scan():
-    # todo: sort the organizations on the oldest scanned first, or never scanned first.
-    # or make a separate part that first scans all never scanned stuff, per organization
-    # so new stuff has some priority.
-
-    # Not something that influenced from random scans from the admin interface.
-    # scan per organization, to lower the amount of time for updates on the map
-    # after the scan finished, update the ratings for the urls and then the organization.
-
-    # https://stackoverflow.com/questions/13694034/is-a-python-list-guaranteed-to-have-its-
-    # elements-stay-in-the-order-they-are-inse
-    resume = StateManager.create_resumed_organizationlist(scanner="ScannerTlsQualys")
-
-    for organization in resume:
-        StateManager.set_state("ScannerTlsQualys", organization.name)
-        scan_organization.s(organization).apply()
-
-
-@app.task
-def scan_organization(organization):
-    """
-
-    :return: list of url objects
-    """
-    # This scanner only scans urls with endpoints (because we inner join endpoint_is_dead)
-
-    # Using the HTTP scanner, it's very easy and quick to see if a url resolves.
-    # This is much faster than waiting 1.5 minutes for qualys to figure it out.
-    # So we're only scanning what we know works.
-    log.info("Scanning organization: %s" % organization)
-
-    urls = Url.objects.filter(organization=organization,
-                              is_dead=False,
-                              not_resolvable=False,
-                              endpoint__is_dead=False,
-                              endpoint__protocol="https",
-                              endpoint__port=443)
-
-    if not urls:
-        log.info("There are no alive https urls for this organization: %s" % organization)
-        return
-
-    # don't rebuild the ratings. It's hard to get right with chords and such.
-    # we want all scan_url tasks to be finished when running the other tasks (as immutable, with task.si).
-    # the "issue" now is that scan_urls says True because all urls have been added (but not read)
-    scan_urls(urls=urls, priority=PRIO_NORMAL)
-
-    # we have rebuild ratings done periodically. That works better.
-    # rerate_urls(myurls)
-    # add_organization_rating(organizations=[organization])
-
-
-# this is an anti-pattern: any new url should be scanned when added, not via a separate clunky process.
-# currently this should be run every hour. Prio should be higher than normal scans, but not highest.
-@app.task
-def scan_new_urls():
-    # find urls that don't have an qualys scan and are resolvable on https/443
-    # todo: perhaps find per organization, so there will be less ratings? (rebuilratings cleans)
-    # ah, this finds both ipv4 and 6 endpoints, since this is done in batches it doesn't
-    # really matter (yet).
-    urls = Url.objects.filter(is_dead=False,
-                              not_resolvable=False,
-                              endpoint__port=443,
-                              endpoint__protocol="https"
-                              ).exclude(endpoint__tlsqualysscan__isnull=False)
-
-    if urls.count() < 1:
-        log.info("There are no new urls.")
-        return
-
-    log.info("Good news! There are %s urls to scan!" % urls.count())
-    pie = """
-                                        (
-                   (
-           )                    )             (
-                   )           (o)    )
-           (      (o)    )     ,|,            )
-          (o)     ,|,          |~\    (      (o)
-          ,|,     |~\    (     \ |   (o)     ,|,
-          \~|     \ |   (o)    |`\   ,|,     |~\\
-          |`\     |`\@@@,|,@@@@\ |@@@\~|     \ |
-          \ | o@@@\ |@@@\~|@@@@|`\@@@|`\@@@o |`\\
-         o|`\@@@@@|`\@@@|`\@@@@\ |@@@\ |@@@@@\ |o
-       o@@\ |@@@@@\ |@@@\ |@@@@@@@@@@|`\@@@@@|`\@@o
-      @@@@|`\@@@@@@@@@@@|`\@@@@@@@@@@\ |@@@@@\ |@@@@
-      p@@@@@@@@@@@@@@@@@\ |@@@@@@@@@@|`\@@@@@@@@@@@q
-      @@o@@@@@@@@@@@@@@@|`\@@@@@@@@@@@@@@@@@@@@@@o@@
-      @:@@@o@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@o@@::@
-      ::@@::@@o@@@@@@@@@@@@@@@@@@@@@@@@@@@@o@@:@@::@
-      ::@@::@@@@::oo@@@@oo@@@@@ooo@@@@@o:::@@@::::::
-      %::::::@::::::@@@@:::@@@:::::@@@@:::::@@:::::%
-      %%::::::::::::@@::::::@:::::::@@::::::::::::%%
-      ::%%%::::::::::@::::::::::::::@::::::::::%%%::
-    .#::%::%%%%%%:::::::::::::::::::::::::%%%%%::%::#.
-  .###::::::%%:::%:%%%%%%%%%%%%%%%%%%%%%:%:::%%:::::###.
-.#####::::::%:::::%%::::::%%%%:::::%%::::%::::::::::#####.
-.######`:::::::::::%:::::::%:::::::::%::::%:::::::::'######.
-.#########``::::::::::::::::::::::::::::::::::::''#########.
-`.#############```::::::::::::::::::::::::'''#############.'
-`.######################################################.'
-  ` .###########,._.,,,. #######<_\##################. '
-     ` .#######,;:      `,/____,__`\_____,_________,_____
-        `  .###;;;`.   _,;>-,------,,--------,----------'
-            `  `,;' ~~~ ,'\######_/'#######  .  '
-                ''~`''''    -  .'/;  -    '       -Catalyst
-    """
-    log.info(pie)
-
-    log.debug("These are the new urls:")
-    for url in urls:
-        log.debug(url)
-
-    import math
-
-    # Scan the new urls per 30, which takes about 30 minutes.
-    # Why: so scans will still be multi threaded and the map updates frequently
-    #      and we have a little less ratings if multiple urls are from one organization
-    batch_size = 30
-    log.debug("Scanning new urls in batches of: %s" % batch_size)
-    i = 0
-    iterations = int(math.ceil(len(urls) / batch_size))
-    while i < iterations:
-        log.info("New batch %s: from %s to %s" % (i, i * batch_size, (i + 1) * batch_size))
-        myurls = urls[i * batch_size:(i + 1) * batch_size]
-        i = i + 1
-        scan_urls(myurls, priority=PRIO_HIGH)
-
-    return urls
