@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class Command(ScannerTaskCommand):
-    """Demostrative NOOP scanner for example purposes."""
+    """Perform security header scan on selected organizations."""
 
     help = __doc__
 

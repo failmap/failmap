@@ -30,11 +30,15 @@ def test_job(db, mock, celery):
     job = Job.create(dummy.s(), 'a-name', request)
 
     assert job.result_id
+    assert job.status == 'created'
+
+    # result after task has been processed by celery
+    job.refresh_from_db()
     assert job.status == 'completed'
     assert job.result == 'result'
     assert job.task == 'failmap.app.tests.dummy()'
     assert job.created_by == user
-    assert str(job) == job.result_id
+    assert str(job) == 'a-name'
 
 
 def test_job_no_result(db, celery):
@@ -43,6 +47,10 @@ def test_job_no_result(db, celery):
     job = Job.create(dummy.s(False), 'a-name', None)
 
     assert job.result_id
+    assert job.status == 'created'
+
+    # result after task has been processed by celery
+    job.refresh_from_db()
     assert job.status == 'completed'
     assert job.result == '-- task generated no result object --'
     assert job.task == 'failmap.app.tests.dummy(False)'

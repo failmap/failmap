@@ -41,16 +41,12 @@ class Job(models.Model):
         job.status = 'created'
         job.save()
 
-        # retrieve job object again with lock to prevent the `store_result` task from overwriting it before
-        # `create` has a chance to update the `result_id`. (common when Celery is fast or set to 'eager')
-        job = Job.objects.select_for_update().get(id=job.id)
-
         # publish original task which stores the result in this Job object
         result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
 
         # store the task async result ID for reference
         job.result_id = result_id.id
-        job.save()
+        job.save(update_fields=['result_id'])
 
         return job
 
@@ -64,10 +60,10 @@ class Job(models.Model):
         job.result = result
         job.status = 'completed'
         job.finished_on = datetime.datetime.now()
-        job.save()
+        job.save(update_fields=['result', 'status', 'finished_on'])
 
     def __str__(self):
-        return self.result_id or ''
+        return self.name
 
 
 @app.task

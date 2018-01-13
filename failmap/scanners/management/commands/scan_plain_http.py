@@ -1,14 +1,14 @@
 import logging
 
-from django.core.management.base import BaseCommand
+from failmap.app.management.commands._private import ScannerTaskCommand
+from failmap.scanners import scanner_plain_http
 
-from failmap.scanners.scanner_plain_http import scan_all_urls
-
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__name__)
 
 
-class Command(BaseCommand):
-    help = 'Scan for http sites that don\'t have https'
+class Command(ScannerTaskCommand):
+    """Perform plain http scan on selected organizations."""
 
-    def handle(self, *args, **options):
-        scan_all_urls()
+    help = __doc__
+
+    scanner_module = scanner_plain_http

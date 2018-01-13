@@ -76,6 +76,9 @@ def create_task(
         # also apply manditory filters to only select valid endpoints for this action
         is_dead=False, protocol__in=['http', 'https'])
 
+    if not endpoints:
+        raise Exception('Applied filters resulted in no tasks!')
+
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
