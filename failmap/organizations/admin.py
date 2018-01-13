@@ -10,13 +10,13 @@ from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
 from failmap.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
+from failmap.scanners import scanner_security_headers
 from failmap.scanners.admin import UrlIpInline
 from failmap.scanners.models import Endpoint
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_plain_http import scan_urls as plain_http_scan_urls
 from failmap.scanners.scanner_screenshot import screenshot_urls
-from failmap.scanners.scanner_security_headers import scan_urls as security_headers_scan_urls
 from failmap.scanners.scanner_tls_qualys import scan_urls as tls_qualys_scan_urls
 
 from ..app.models import Job
@@ -206,9 +206,8 @@ class UrlAdmin(admin.ModelAdmin):
 
     def security_headers(self, request, queryset):
         # create a celery task and use Job object to keep track of the status
-        urls = list(queryset)
-        task = security_headers_scan_urls(urls=urls, execute=False)
-        name = "Scan Security Headers (%s) " % str(urls)
+        task = scanner_security_headers.create_task(urls_filter={'id__in': queryset.values_list('id')})
+        name = "Scan Security Headers (%s) " % ','.join(map(str, list(queryset)))
         job = Job.create(task, name, request, priority=PRIO_HIGH)
         link = reverse('admin:app_job_change', args=(job.id,))
         self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))

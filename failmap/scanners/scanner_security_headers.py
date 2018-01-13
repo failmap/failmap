@@ -4,11 +4,10 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 """
 import logging
 from datetime import datetime
-from typing import List
 
 import pytz
 import requests
-from celery import group
+from celery import Task, group
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
 from failmap.celery import IP_VERSION_QUEUE, ParentFailed, app
@@ -18,85 +17,77 @@ from failmap.scanners.models import EndpointGenericScanScratchpad
 
 from .models import Endpoint
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
-def organizations_from_names(organization_names: List[str]) -> List[Organization]:
-    """Turn list of organization names into list of Organization objects.
+def create_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """Compose taskset to scan specified endpoints.
 
-    Will return all organizations if none are specified.
+    :param organizations_filter: dict: limit organizations to scan to these filters, see below
+    :param urls_filter: dict: limit urls to scan to these filters, see below
+    :param endpoints_filter: dict: limit endpoints to scan to these filters, see below
+
+    Depending on the type of scanner (endpoint, domain level, etc) a list of scanable
+    items will be generated and a taskset will be composed to allow scanning of these items.
+
+    By default all elegible items will be scanned. Which means a complete scan of everything possible
+    with this scanner.
+
+    By specifying filters the list of items to scan can be reduced. These filters are passed to
+    Django QuerySet filters on the respective models.
+
+    For example, to scan all urls/endpoints for one organization named 'example' run:
+
+    >>> task = create_task(organizations={'name__iexact': 'example'})
+    >>> result = task.apply_async()
+    >>> print(result.get())
+
+    (`name__iexact` matches the name case-insensitive)
+
+    Multiple filters can be applied, to scan only port 80 for organizations added today run:
+
+    >>> task = create_task(
+    ...     organizations={'date_added__day': datetime.datetime.today().day},
+    ...     endpoints={'port': 80}
+    ... )
+
     """
-    # select specified or all organizations to be scanned
-    if organization_names:
-        organizations = list()
-        for organization_name in organization_names:
-            try:
-                organizations.append(Organization.objects.get(name__iexact=organization_name))
-            except Organization.DoesNotExist as e:
-                raise Exception("Failed to find organization '%s' by name" % organization_name) from e
-    else:
-        organizations = Organization.objects.all()
 
-    return organizations
+    # The dummy scanner is an example of a scanner that scans on an endpoint
+    # level. Meaning to create tasks for scanning, this function needs to be
+    # smart enough to translate (filtered) lists of organzations and urls into a
+    # (filtered) lists of endpoints (or use a url filter directly). This list of
+    # endpoints is then used to create a group of tasks which would perform the
+    # scan.
 
+    # apply filter to organizations (or if no filter, all organizations)
+    organizations = Organization.objects.filter(**organizations_filter)
+    # apply filter to urls in organizations (or if no filter, all urls)
+    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
 
-@app.task
-def scan(organization_names: List[str], execute=True):
-    """Compose and execute taskset to scan specified organizations."""
-    task = compose(organizations=organizations_from_names(organization_names))
-    if execute:
-        return task.apply_async()
-    else:
-        return task
+    # select endpoints to scan based on filters
+    endpoints = Endpoint.objects.filter(
+        # apply filter to endpoints (or if no filter, all endpoints)
+        url__in=urls, **endpoints_filter,
+        # also apply manditory filters to only select valid endpoints for this action
+        is_dead=False, protocol__in=['http', 'https'])
 
+    log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
+             len(endpoints), len(urls), len(organizations))
 
-@app.task
-def scan_urls(urls: List[Url], execute=True):
-    """Compose and execute taskset to scan specified urls."""
-    try:
-        task = compose(urls=urls)
-        return task.apply_async() if execute else task
-    except (ValueError, Endpoint.DoesNotExist):
-        logger.error('Could not schedule scans, due to error reported above.')
+    # create tasks for scanning all selected endpoints as a single managable group
+    task = group(
+        get_headers.signature(
+            (endpoint.uri_url(),),
+            options={'queue': IP_VERSION_QUEUE[endpoint.ip_version]}
+        ) | analyze_headers.s(endpoint) for endpoint in endpoints
+    )
 
-
-def compose(organizations: List[Organization]=None, urls: List[Url]=None):
-    """Compose taskset to scan specified organizations or urls (not both)."""
-
-    if not any([organizations, urls]):
-        logger.error('No organizations or urls supplied.')
-        raise ValueError("No organizations or urls supplied.")
-
-    # collect all scannable urls for provided organizations
-    if organizations:
-        urls_organizations = Url.objects.all().filter(is_dead=False,
-                                                      not_resolvable=False,
-                                                      organization__in=organizations)
-
-        urls = list(urls_organizations) + urls if urls else list(urls_organizations)
-
-    endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=False, protocol__in=['http', 'https'])
-
-    if not endpoints:
-        logger.error('No endpoints exist for the selected urls.')
-        raise Endpoint.DoesNotExist("No endpoints exist for the selected urls.")
-
-    logger.debug('scanning %s endpoints for %s urls', len(endpoints), len(urls))
-
-    def compose_subtasks(endpoint):
-        """Create a task chain of scan & store for a given endpoint."""
-
-        # determine which queue this kind of task should end up in
-        queue = IP_VERSION_QUEUE[endpoint.ip_version]
-
-        scan_task = get_headers.signature((endpoint.uri_url(),), options={'queue': queue})
-        store_task = analyze_headers.s(endpoint)
-        return scan_task | store_task
-
-    # create a group of parallel executable scan&store tasks for all endpoints
-    taskset = group(compose_subtasks(endpoint) for endpoint in endpoints)
-
-    return taskset
+    return task
 
 
 # database related tasks should by default be handled by a worker connected to the database
@@ -136,13 +127,13 @@ def analyze_headers(result: requests.Response, endpoint):
 def generic_check(endpoint: Endpoint, headers, header):
     # this is case insensitive
     if header in headers.keys():
-        logger.debug('Has %s' % header)
+        log.debug('Has %s' % header)
         EndpointScanManager.add_scan(header,
                                      endpoint,
                                      'True',
                                      headers[header])
     else:
-        logger.debug('Has no %s' % header)
+        log.debug('Has no %s' % header)
         EndpointScanManager.add_scan(header,
                                      endpoint,
                                      'False',
@@ -202,7 +193,7 @@ def get_headers(self, uri_url):
         # response.raise_for_status()
 
         for header in response.headers:
-            logger.debug('Received header: %s' % header)
+            log.debug('Received header: %s' % header)
         return response
     except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
         # If an expected error is encountered put this task back on the queue to be retried.
