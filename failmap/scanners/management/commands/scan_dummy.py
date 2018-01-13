@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import TaskCommand
-from failmap.scanners.scanner_dummy import scan
+from failmap.scanners import scanner_dummy
 
 log = logging.getLogger(__name__)
 
@@ -19,5 +19,13 @@ class Command(TaskCommand):
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
+        if not options['organization_names']:
+            # by default no filter means all organizations
+            organization_filter = dict()
+        else:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_names']) + ')$'
+            organization_filter = {'name__iregex': regex}
+
         # compose set of tasks to be executed
-        return scan(options['organization_names'], execute=False)
+        return scanner_dummy.create_task(organization_filter)
