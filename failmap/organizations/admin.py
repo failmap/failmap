@@ -9,7 +9,7 @@ from django.utils.html import format_html
 from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
-from failmap.map.rating import OrganizationRating, UrlRating, rate_organization_on_moment
+from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIpInline
 from failmap.scanners.models import Endpoint
@@ -80,7 +80,45 @@ class PromiseAdminInline(CompactInline):
     )
 
 
-class OrganizationAdmin(admin.ModelAdmin):
+class ActionMixin:
+    """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions."""
+
+    actions = []
+
+    def scan_plain_http(self, *args, **kwargs):
+        return self.generic_action(scanner_plain_http.create_task, 'Scan Plain Http', *args, **kwargs)
+    scan_plain_http.short_description = '🔬  Scan Plain Http'
+    actions.append(scan_plain_http)
+
+    def scan_security_headers(self, *args, **kwargs):
+        return self.generic_action(scanner_security_headers.create_task, 'Scan Security Headers', *args, **kwargs)
+    scan_security_headers.short_description = '🔬  Scan Security Headers'
+    actions.append(scan_security_headers)
+
+    def scan_tls_qualys(self, *args, **kwargs):
+        return self.generic_action(scanner_tls_qualys.create_task, 'Scan TLS Qualys', *args, **kwargs)
+    scan_tls_qualys.short_description = '🔬  Scan TLS Qualys'
+    actions.append(scan_tls_qualys)
+
+    def generic_action(self, task_composer, name, request, queryset):
+        """Action that will create a Job of tasks."""
+
+        filters = {'x_filter': {'id__in': queryset.values_list('id')}}
+        if queryset.model == Organization:
+            filters['organizations_filter'] = filters.pop('x_filter')
+        elif queryset.model == Url:
+            filters['urls_filter'] = filters.pop('x_filter')
+        elif queryset.model == Endpoint:
+            filters['endpoints_filter'] = filters.pop('x_filter')
+
+        task = task_composer(**filters)
+        task_name = "%s (%s) " % (name, ','.join(map(str, list(queryset))))
+        job = Job.create(task, task_name, request, priority=PRIO_HIGH)
+        link = reverse('admin:app_job_change', args=(job.id,))
+        self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
+
+
+class OrganizationAdmin(ActionMixin, admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
@@ -88,32 +126,8 @@ class OrganizationAdmin(admin.ModelAdmin):
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
-    # actions = ['rate_organization', 'scan_organization']
 
-    def rate_organization(self, request, queryset):
-
-        for organization in queryset:
-            rate_organization_on_moment(organization=organization)
-
-        self.message_user(request, "Organization(s) have been rated")
-
-    # Should be refactored as this is a generic pattern, suggest a Mixin class
-    # that allows to generate admin actoins for every scanner/action (eg rebuild
-    # ratings), this class can potentially be shared by UrlAdmin and
-    # EndpointAdmin as the `create_task` function accepts either of 3 as
-    # selectors. def scan_organization(self, request, queryset):
-    #     urls = Url.objects.filter(organization__in=list(queryset))
-    #     tls_qualys_scan_urls(list(urls))
-    #     self.message_user(request, "Organization(s) have been scanned")
-
-    rate_organization.short_description = \
-        "Rate selected Organizations based on available scansresults"
-
-    # scan_organization.short_description = \
-    #     "Scan selected Organizations"
-
-
-class UrlAdmin(admin.ModelAdmin):
+class UrlAdmin(ActionMixin, admin.ModelAdmin):
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
     search_fields = ('url', )
@@ -194,36 +208,6 @@ class UrlAdmin(admin.ModelAdmin):
         self.message_user(request, "Discover http(s) endpoints: Done")
     discover_http_endpoints.short_description = "🗺  Discover http(s) endpoints"
     actions.append('discover_http_endpoints')
-
-    def scan_tls_qualys(self, request, queryset):
-        # create a celery task and use Job object to keep track of the status
-        task = scanner_tls_qualys.create_task(urls_filter={'id__in': queryset.values_list('id')})
-        name = "Scan TLS Qualys (%s) " % ','.join(map(str, list(queryset)))
-        job = Job.create(task, name, request, priority=PRIO_HIGH)
-        link = reverse('admin:app_job_change', args=(job.id,))
-        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
-    scan_tls_qualys.short_description = "🔬  Scan TLS Qualys"
-    actions.append('scan_tls_qualys')
-
-    def security_headers(self, request, queryset):
-        # create a celery task and use Job object to keep track of the status
-        task = scanner_security_headers.create_task(urls_filter={'id__in': queryset.values_list('id')})
-        name = "Scan Security Headers (%s) " % ','.join(map(str, list(queryset)))
-        job = Job.create(task, name, request, priority=PRIO_HIGH)
-        link = reverse('admin:app_job_change', args=(job.id,))
-        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
-    security_headers.short_description = "🔬  Scan Security Headers"
-    actions.append('security_headers')
-
-    def plain_http_scan(self, request, queryset):
-        # create a celery task and use Job object to keep track of the status
-        task = scanner_plain_http.create_task(urls_filter={'id__in': queryset.values_list('id')})
-        name = "Scan Plain Http (%s) " % ','.join(map(str, list(queryset)))
-        job = Job.create(task, name, request, priority=PRIO_HIGH)
-        link = reverse('admin:app_job_change', args=(job.id,))
-        self.message_user(request, '%s: job created, id: <a href="%s">%s</a>' % (name, link, str(job)))
-    plain_http_scan.short_description = "🔬  Scan Plain Http"
-    actions.append('plain_http_scan')
 
     def screenshots(self, request, queryset):
         screenshot_urls([url for url in queryset])
