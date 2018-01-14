@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from jet.dashboard import dashboard
 
-from failmap.map.rating import rebuild_ratings as rebuild_ratings_task
+from failmap.map import rating
 
 from ..celery import PRIO_HIGH, status
 from .models import Job
@@ -31,7 +31,7 @@ def rebuild_ratings(request):
     name = 'Rebuild ratings'
     # create a Task signature for rebuilding ratings, wrap this inside a Job
     # to have it trackable by the user in the admin interface
-    task = rebuild_ratings_task.s()
+    task = rating.create_task.s()
     job = Job.create(task, name, request, priority=PRIO_HIGH)
 
     # tell the user where to find the Job that was just created

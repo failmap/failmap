@@ -127,18 +127,18 @@ class TlsQualysScanAdmin(admin.ModelAdmin):
 
         self.message_user(request, "URL(s) have been rated")
 
-    def scan_url(self, request, queryset):
-
-        urls_to_scan = []
-        for tlsqualysscan in queryset:
-            urls_to_scan.append(tlsqualysscan.endpoint.url.url)
-
-        scan(urls_to_scan)
-
-        self.message_user(request, "URL(s) have been scanned")
+    # def scan_url(self, request, queryset):
+    #
+    #     urls_to_scan = []
+    #     for tlsqualysscan in queryset:
+    #         urls_to_scan.append(tlsqualysscan.endpoint.url.url)
+    #
+    #     scan(urls_to_scan)
+    #
+    #     self.message_user(request, "URL(s) have been scanned")
 
     rate_url.short_description = "Rate (url)"
-    scan_url.short_description = "Scan (url)"
+    # scan_url.short_description = "Scan (url)"
 
 
 class TlsQualysScratchpadAdmin(admin.ModelAdmin):

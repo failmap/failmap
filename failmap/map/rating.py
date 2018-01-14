@@ -11,26 +11,95 @@ from django.db.models import Q
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
-from ..celery import app
+from ..celery import Task, app
 from .models import OrganizationRating, UrlRating
 from .points_and_calculations import points_and_calculation
 
-logger = logging.getLogger(__package__)
-"""
-failmap-python -m cProfile -o rebuild_complete_3 -s time `which failmap` rebuild_ratings
+log = logging.getLogger(__package__)
 
-Expensive are:
-Deepdiff,
-Json conversions
-Database queries (not so much anymore)
-"""
+
+def create_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """Compose taskset to scan specified endpoints.
+
+    :param organizations_filter: dict: limit organizations to scan to these filters, see below
+    :param urls_filter: dict: limit urls to scan to these filters, see below
+    :param endpoints_filter: dict: limit endpoints to scan to these filters, see below
+
+    Depending on the type of scanner (endpoint, domain level, etc) a list of scanable
+    items will be generated and a taskset will be composed to allow scanning of these items.
+
+    By default all elegible items will be scanned. Which means a complete scan of everything possible
+    with this scanner.
+
+    By specifying filters the list of items to scan can be reduced. These filters are passed to
+    Django QuerySet filters on the respective models.
+
+    For example, to scan all urls/endpoints for one organization named 'example' run:
+
+    >>> task = create_task(organizations={'name__iexact': 'example'})
+    >>> result = task.apply_async()
+    >>> print(result.get())
+
+    (`name__iexact` matches the name case-insensitive)
+
+    Multiple filters can be applied, to scan only port 80 for organizations added today run:
+
+    >>> task = create_task(
+    ...     organizations={'date_added__day': datetime.datetime.today().day},
+    ...     endpoints={'port': 80}
+    ... )
+
+    """
+
+    if endpoints_filter:
+        raise NotImplementedError('This scanner does not work on a endpoint level.')
+
+    # apply filter to organizations (or if no filter, all organizations)
+    organizations = Organization.objects.filter(**organizations_filter)
+
+    # Create tasks for rebuilding ratings for selected organizations and urls.
+    # Wheneven a url has been (re)rated the organization for that url need to
+    # be (re)rated as well to propagate the result of the url rate. Tasks will
+    # be created per organization to first rebuild all of this organizations
+    # urls (depending on url filters) after which the organization rating will
+    # be rebuild.
+
+    tasks = []
+    for organization in organizations:
+        urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+        if not urls:
+            continue
+
+        tasks.append(rerate_urls.s(urls) | rerate_organizations.si([organization]))
+
+    if not tasks:
+        raise Exception('Applied filters resulted in no tasks!')
+
+    task = group(tasks)
+
+    return task
 
 
 @app.task
-def rebuild_ratings():
-    """Remove all organization and url ratings, then rebuild them from scratch."""
-    rerate_urls()
-    rerate_organizations()
+def rerate_urls(urls: List):
+    """Remove the rating of one url and rebuild anew."""
+
+    for url in urls:
+        delete_url_rating(url)
+        rate_timeline(create_timeline(url), url)
+
+
+@app.task
+def rerate_organizations(organizations: List):
+    """Remove organization rating and rebuild anew."""
+
+    for organization in organizations:
+        delete_organization_rating(organization)
+    add_organization_rating(organizations)
 
 
 @app.task
@@ -53,6 +122,7 @@ def add_organization_rating(organizations: List[Organization], build_history: bo
         isinstance(when, datetime)
 
     for organization in organizations:
+        log.info('Adding rating for organization %s', organization)
         if build_history:
             moments, happenings = significant_moments(organizations=[organization])
             for moment in moments:
@@ -73,15 +143,15 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
             rate_url(url, when)
 
 
-@app.task
-def rerate_urls(urls: List[Url]=None):
-    if not urls:
-        urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
-
-    # to not have all ratings empty, do it per url
-    for url in urls:
-        delete_url_rating(url)
-        rate_timeline(create_timeline(url), url)
+# @app.task
+# def rerate_urls(urls: List[Url]=None):
+#     if not urls:
+#         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
+#
+#     # to not have all ratings empty, do it per url
+#     for url in urls:
+#         delete_url_rating(url)
+#         rate_timeline(create_timeline(url), url)
 
 
 @app.task
@@ -131,17 +201,17 @@ def rerate_organizations_async(organizations: List[Organization]=None, execute_l
         return task
 
 
-@app.task
-def rerate_organizations(organizations: List[Organization]=None):
-    if not organizations:
-        organizations = list(Organization.objects.all().order_by('name'))
-
-    # to not clear the whole map at once, do this per organization.
-    # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
-    for organization in organizations:
-        OrganizationRating.objects.all().filter(organization=organization).delete()
-        default_ratings()
-        add_organization_rating(organizations=[organization], build_history=True)
+# @app.task
+# def rerate_organizations(organizations: List[Organization]=None):
+#     if not organizations:
+#         organizations = list(Organization.objects.all().order_by('name'))
+#
+#     # to not clear the whole map at once, do this per organization.
+#     # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
+#     for organization in organizations:
+#         OrganizationRating.objects.all().filter(organization=organization).delete()
+#         default_ratings()
+#         add_organization_rating(organizations=[organization], build_history=True)
 
 
 def significant_moments(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -165,13 +235,13 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         raise ValueError("Both URL and organization given, please supply one! %s %s" % (organizations, urls))
 
     if organizations:
-        logger.debug("Getting all urls from organization: %s" % organizations)
+        log.debug("Getting all urls from organization: %s" % organizations)
         urls = Url.objects.filter(organization__in=organizations)
     if urls:
-        logger.debug("Getting all url: %s" % urls)
+        log.debug("Getting all url: %s" % urls)
 
     if not urls:
-        logger.info("Could not find urls from organization or url.")
+        log.info("Could not find urls from organization or url.")
         return []
 
     # since we want to know all about these endpoints, get them at the same time, which is faster.
@@ -223,7 +293,7 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     if moments[-1] == latest_moment_of_datetime(datetime.now()):
         moments[-1] = datetime.now(pytz.utc)
 
-    logger.debug("Moments found: %s", len(moments))
+    log.debug("Moments found: %s", len(moments))
 
     # using scans, the query of "what scan happened when" doesn't need to be answered anymore.
     # the one thing is that scans have to be mapped to the moments (called a timeline)
@@ -367,7 +437,7 @@ def latest_moment_of_datetime(datetime_: datetime):
 
 @app.task()
 def rate_timeline(timeline, url: Url):
-    logger.info("Rebuilding ratings for for %s" % url)
+    log.info("Rebuilding ratings for url %s" % url)
 
     previous_ratings = {}
     previous_endpoints = []
@@ -380,8 +450,8 @@ def rate_timeline(timeline, url: Url):
 
         if ('url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys()) \
                 and url_was_once_rated:
-            logger.debug('Url became non-resolvable or dead. Adding an empty rating to lower the score of'
-                         'this domain if it had a score. It has been cleaned up. (hooray)')
+            log.debug('Url became non-resolvable or dead. Adding an empty rating to lower the score of'
+                      'this domain if it had a score. It has been cleaned up. (hooray)')
             # this is the end for the domain.
             default_calculation = {
                 "url": {
@@ -531,7 +601,7 @@ def rate_timeline(timeline, url: Url):
             "endpoints": sorted_endpoints
         }
 
-        logger.debug("On %s this would score: %s " % (moment, total_scores), )
+        log.debug("On %s this would score: %s " % (moment, total_scores), )
 
         save_url_rating(url, moment, total_scores, total_high, total_medium, total_low, url_rating_json)
 
@@ -624,7 +694,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     if not when:
         when = datetime.now(pytz.utc)
 
-    logger.debug("rating on: %s, Organization %s" % (when, organization))
+    log.debug("rating on: %s, Organization %s" % (when, organization))
 
     total_rating = 0
     total_high, total_medium, total_low = 0, 0, 0
@@ -638,14 +708,14 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     # testing if the lists are exactly the same.
     # for url in urls:
     #     if url not in urls_new:
-    #         logger.error(urls)
-    #         logger.error(urls_new)
+    #         log.error(urls)
+    #         log.error(urls_new)
     #         raise ArithmeticError("Urls are not the same... your logic is wrong.")
 #
     # for url in urls_new:
     #     if url not in urls:
-    #         logger.error(urls)
-    #         logger.error(urls_new)
+    #         log.error(urls)
+    #         log.error(urls_new)
     #         raise ArithmeticError("Urls are not the same... your logic is wrong.")
 
     # Here used to be a lost of nested queries: getting the "last" one per url. This has been replaced with a
@@ -664,7 +734,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
         last = OrganizationRating.objects.filter(
             organization=organization, when__lte=when).latest('when')
     except OrganizationRating.DoesNotExist:
-        logger.debug("Could not find the last organization rating, creating a dummy one.")
+        log.debug("Could not find the last organization rating, creating a dummy one.")
         last = OrganizationRating()  # create an empty one
 
     calculation = {
@@ -679,7 +749,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     }
 
     if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
-        logger.debug("The calculation (json) has changed, so we're saving this report, rating.")
+        log.debug("The calculation (json) has changed, so we're saving this report, rating.")
         organizationrating = OrganizationRating()
         organizationrating.organization = organization
         organizationrating.rating = total_rating
@@ -692,7 +762,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-        logger.warning("The calculation on %s is the same as the previous one. Not saving." % when)
+        log.warning("The calculation on %s is the same as the previous one. Not saving." % when)
 
 
 def get_latest_urlratings(urls: List[Url], when):
@@ -705,7 +775,7 @@ def get_latest_urlratings(urls: List[Url], when):
             urlrating = urlratings.latest("when")  # kills the queryset, results 1
             all_url_ratings.append(urlrating)
         except UrlRating.DoesNotExist:
-            logger.debug("Url has no rating at this moment: %s %s" % (url, when))
+            log.debug("Url has no rating at this moment: %s %s" % (url, when))
 
     # https://stackoverflow.com/questions/403421/
     all_url_ratings.sort(key=lambda x: (x.high, x.medium, x.low), reverse=True)
@@ -791,14 +861,14 @@ def rate_url(url: Url, when: datetime=None):
         u.calculation = explanation
         u.save()
     else:
-        logger.warning("The calculation is still the same, not creating a new UrlRating")
+        log.warning("The calculation is still the same, not creating a new UrlRating")
 
 
 def get_url_score_modular(url: Url, when: datetime=None):
     if not when:
         when = datetime.now(pytz.utc)
 
-    logger.debug("Calculating url score for %s on %s" % (url.url, when))
+    log.debug("Calculating url score for %s on %s" % (url.url, when))
 
     """
     A relevant endpoint is an endpoint that is still alive or was alive at the time.
@@ -860,10 +930,10 @@ def get_url_score_modular(url: Url, when: datetime=None):
             })
 
         else:
-            logger.debug('No tls or http rating at this moment. Not saving. %s %s' % (url, when))
+            log.debug('No tls or http rating at this moment. Not saving. %s %s' % (url, when))
 
     if not endpoints:
-        logger.error('No relevant endpoints at this time, probably didnt exist yet. %s %s' % (url, when))
+        log.error('No relevant endpoints at this time, probably didnt exist yet. %s %s' % (url, when))
         close_url_rating(url, when)
 
     if endpoint_calculations:
@@ -884,7 +954,7 @@ def get_url_score_modular(url: Url, when: datetime=None):
 
 
 def close_url_rating(url: Url, when: datetime):
-    logger.debug('Trying to close off the latest rating')
+    log.debug('Trying to close off the latest rating')
     """
     This creates url ratings for urls that have a rating, but where all endpoints went dead.
 
@@ -915,7 +985,7 @@ def close_url_rating(url: Url, when: datetime):
         urlratings = UrlRating.objects.filter(url=url, when__lte=when)
         urlrating = urlratings.latest("when")
         if DeepDiff(urlrating.calculation, default_calculation, ignore_order=True, report_repetition=True):
-            logger.debug('Added an empty zero rating. The url has probably been cleaned up.')
+            log.debug('Added an empty zero rating. The url has probably been cleaned up.')
             x = UrlRating()
             x.calculation = default_calculation
             x.when = when
@@ -923,9 +993,9 @@ def close_url_rating(url: Url, when: datetime):
             x.rating = 0
             x.save()
         else:
-            logger.debug('This was already cleaned up.')
+            log.debug('This was already cleaned up.')
     except ObjectDoesNotExist:
-        logger.debug('There where no prior ratings, so cannot close this url.')
+        log.debug('There where no prior ratings, so cannot close this url.')
 
 
 def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_type: str):
@@ -943,10 +1013,10 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
                                                 ).latest('rating_determined_on')
 
         points, calculation = points_and_calculation(scan)
-        logger.debug("On %s, Endpoint %s, Points %s" % (when, endpoint, points))
+        log.debug("On %s, Endpoint %s, Points %s" % (when, endpoint, points))
         return int(points), str(calculation)
     except ObjectDoesNotExist:
-        logger.debug("No %s scan on endpoint %s." % (scan_type, endpoint))
+        log.debug("No %s scan on endpoint %s." % (scan_type, endpoint))
         return 0, {}
 
 
@@ -996,21 +1066,21 @@ def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime
         not_resolvable=True,
         not_resolvable_since__gte=when,
     )
-    logger.debug("Resolvable in the past:  %s" % resolvable_in_the_past.count())
+    log.debug("Resolvable in the past:  %s" % resolvable_in_the_past.count())
 
     alive_in_the_past = urls.filter(
         created_on__lte=when,
         is_dead=True,
         is_dead_since__gte=when,
     )
-    logger.debug("Alive in the past:  %s" % alive_in_the_past.count())
+    log.debug("Alive in the past:  %s" % alive_in_the_past.count())
 
     currently_alive_and_resolvable = urls.filter(
         created_on__lte=when,
         not_resolvable=False,
         is_dead=False,
     )  # or is_dead=False,
-    logger.debug("Alive urls:  %s" % currently_alive_and_resolvable.count())
+    log.debug("Alive urls:  %s" % currently_alive_and_resolvable.count())
 
     possibly_relevant_urls = (list(resolvable_in_the_past) +
                               list(alive_in_the_past) +
@@ -1024,10 +1094,10 @@ def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime
         # every time)
         has_endpoints = relevant_endpoints_at_timepoint(url=url, when=when)
         if has_endpoints:
-            logger.debug("The url %s is relevant on %s and has endpoints: " % (url, when))
+            log.debug("The url %s is relevant on %s and has endpoints: " % (url, when))
             relevant_urls.append(url)
         else:
-            logger.debug("While the url %s was relevant on %s, it does not have any relevant endpoints." % (url, when))
+            log.debug("While the url %s was relevant on %s, it does not have any relevant endpoints." % (url, when))
 
     return relevant_urls
 
@@ -1108,13 +1178,13 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
         Q(discovered_on__lte=when, is_dead=True, is_dead_since__gte=when))
     # print(both.query)  # looks legit.
 
-    # logger.debug("Endpoints alive back then and today (together): %s, " % (both.count()))
+    # log.debug("Endpoints alive back then and today (together): %s, " % (both.count()))
 
     # also saves on merging these:
     # relevant_endpoints = list(then_alive) + list(still_alive_endpoints)
     relevant_endpoints = list(both)
 
-    # [logger.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
+    # [log.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
 
     return relevant_endpoints
 
@@ -1130,7 +1200,7 @@ def default_ratings():
     when = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
     organizations = Organization.objects.all().exclude(organizationrating__when=when)
     for organization in organizations:
-        logger.info("Giving organization a default rating: %s" % organization)
+        log.info("Giving organization a default rating: %s" % organization)
         r = OrganizationRating()
         r.when = when
         r.rating = -1

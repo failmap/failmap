@@ -12,4 +12,3 @@ class Command(ScannerTaskCommand):
     help = __doc__
 
     scanner_module = scanner_tls_qualys
-
