@@ -31,7 +31,7 @@ def rebuild_ratings(request):
     name = 'Rebuild ratings'
     # create a Task signature for rebuilding ratings, wrap this inside a Job
     # to have it trackable by the user in the admin interface
-    task = rating.create_task.s()
+    task = rating.create_task()
     job = Job.create(task, name, request, priority=PRIO_HIGH)
 
     # tell the user where to find the Job that was just created
