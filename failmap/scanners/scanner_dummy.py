@@ -25,7 +25,7 @@ RETRY_DELAY = 1
 EXPIRES = 5
 
 
-def create_task(
+def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
@@ -47,7 +47,7 @@ def create_task(
 
     For example, to scan all urls/endpoints for one organization named 'example' run:
 
-    >>> task = create_task(organizations={'name__iexact': 'example'})
+    >>> task = compose_task(organizations={'name__iexact': 'example'})
     >>> result = task.apply_async()
     >>> print(result.get())
 
@@ -55,7 +55,7 @@ def create_task(
 
     Multiple filters can be applied, to scan only port 80 for organizations added today run:
 
-    >>> task = create_task(
+    >>> task = compose_task(
     ...     organizations={'date_added__day': datetime.datetime.today().day},
     ...     endpoints={'port': 80}
     ... )

@@ -87,22 +87,22 @@ class ActionMixin:
     actions = []
 
     def scan_plain_http(self, *args, **kwargs):
-        return self.generic_action(scanner_plain_http.create_task, 'Scan Plain Http', *args, **kwargs)
+        return self.generic_action(scanner_plain_http.compose_task, 'Scan Plain Http', *args, **kwargs)
     scan_plain_http.short_description = '🔬  Scan Plain Http'
     actions.append(scan_plain_http)
 
     def scan_security_headers(self, *args, **kwargs):
-        return self.generic_action(scanner_security_headers.create_task, 'Scan Security Headers', *args, **kwargs)
+        return self.generic_action(scanner_security_headers.compose_task, 'Scan Security Headers', *args, **kwargs)
     scan_security_headers.short_description = '🔬  Scan Security Headers'
     actions.append(scan_security_headers)
 
     def scan_tls_qualys(self, *args, **kwargs):
-        return self.generic_action(scanner_tls_qualys.create_task, 'Scan TLS Qualys', *args, **kwargs)
+        return self.generic_action(scanner_tls_qualys.compose_task, 'Scan TLS Qualys', *args, **kwargs)
     scan_tls_qualys.short_description = '🔬  Scan TLS Qualys'
     actions.append(scan_tls_qualys)
 
     def rebuild_ratings(self, *args, **kwargs):
-        return self.generic_action(rating.create_task, 'Rebuild rating', *args, **kwargs)
+        return self.generic_action(rating.compose_task, 'Rebuild rating', *args, **kwargs)
     rebuild_ratings.short_description = '✅  Rebuild rating'
     actions.append(rebuild_ratings)
 

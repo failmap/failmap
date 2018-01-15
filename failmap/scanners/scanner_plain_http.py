@@ -20,7 +20,7 @@ from .models import Endpoint
 log = logging.getLogger(__package__)
 
 
-def create_task(
+def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
@@ -42,7 +42,7 @@ def create_task(
 
     For example, to scan all urls/endpoints for one organization named 'example' run:
 
-    >>> task = create_task(organizations={'name__iexact': 'example'})
+    >>> task = compose_task(organizations={'name__iexact': 'example'})
     >>> result = task.apply_async()
     >>> print(result.get())
 
@@ -50,7 +50,7 @@ def create_task(
 
     Multiple filters can be applied, to scan only port 80 for organizations added today run:
 
-    >>> task = create_task(
+    >>> task = compose_task(
     ...     organizations={'date_added__day': datetime.datetime.today().day},
     ...     endpoints={'port': 80}
     ... )
@@ -83,7 +83,7 @@ def create_task(
     return task
 
 
-# This needs to be refactored to move the Endpoint iteration to `create_task`
+# This needs to be refactored to move the Endpoint iteration to `compose_task`
 # and split this task up in a scan and store task so scans can be performed more
 # distributed. For examples see scan_dummy.py
 

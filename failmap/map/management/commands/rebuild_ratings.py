@@ -1,6 +1,6 @@
 from failmap.app.management.commands._private import TaskCommand
 
-from ...rating import create_task
+from ...rating import compose_task
 
 
 class Command(TaskCommand):
@@ -8,4 +8,4 @@ class Command(TaskCommand):
 
     help = __doc__
 
-    task = create_task()
+    task = compose_task()

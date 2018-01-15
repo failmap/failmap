@@ -154,4 +154,4 @@ class ScannerTaskCommand(TaskCommand):
             organization_filter = {'name__iregex': regex}
 
         # compose set of tasks to be executed
-        return self.scanner_module.create_task(organization_filter)
+        return self.scanner_module.compose_task(organization_filter)
