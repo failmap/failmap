@@ -70,7 +70,7 @@ def create_task(
 
     tasks = []
     for organization in organizations:
-        urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+        urls = Url.objects.filter(organization=organization, **urls_filter)
         if not urls:
             continue
 
