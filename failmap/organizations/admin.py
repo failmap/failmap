@@ -9,6 +9,7 @@ from django.utils.html import format_html
 from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
+from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIpInline
@@ -99,6 +100,11 @@ class ActionMixin:
         return self.generic_action(scanner_tls_qualys.create_task, 'Scan TLS Qualys', *args, **kwargs)
     scan_tls_qualys.short_description = '🔬  Scan TLS Qualys'
     actions.append(scan_tls_qualys)
+
+    def rebuild_ratings(self, *args, **kwargs):
+        return self.generic_action(rating.create_task, 'Rebuild rating', *args, **kwargs)
+    rebuild_ratings.short_description = '✅  Rebuild rating'
+    actions.append(rebuild_ratings)
 
     def generic_action(self, task_composer, name, request, queryset):
         """Action that will create a Job of tasks."""
@@ -214,23 +220,6 @@ class UrlAdmin(ActionMixin, admin.ModelAdmin):
         self.message_user(request, "Create screenshot: Done")
     screenshots.short_description = "📷  Create screenshot"
     actions.append('screenshots')
-
-    # suspended, since adding ratings and rebuild ratings don't produce 100% the same results.
-    # def rate_url(self, request, queryset):
-    #     add_url_rating([url for url in queryset])
-    #     self.message_user(request, "Rate Url: done")
-    # rate_url.short_description = "✅  Rate Url"
-    # actions.append('rate_url')
-
-    # suspended, since adding ratings and rebuild ratings don't produce 100% the same results.
-    # def rate_organization_(self, request, queryset):
-    #     # a queryset doesn't have the "name" property...
-    #     for url in queryset:
-    #         for organization in url.organization.all():
-    #             rate_organization_on_moment(organization)
-    #     self.message_user(request, "Rate Organization: done")
-    # rate_organization_.short_description = "✅  Rate Organization"
-    # actions.append('rate_organization_')
 
     def declare_dead(self, request, queryset):
         for url in queryset:
