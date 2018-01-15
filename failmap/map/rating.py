@@ -74,7 +74,8 @@ def compose_task(
         if not urls:
             continue
 
-        tasks.append(rerate_urls.s(urls) | rerate_organizations.si([organization]))
+        # make sure default organization rating is in place
+        tasks.append(default_ratings.s([organization]) | rerate_urls.si(urls) | rerate_organizations.si([organization]))
 
     if not tasks:
         raise Exception('Applied filters resulted in no tasks!')
@@ -103,13 +104,6 @@ def rerate_organizations(organizations: List):
 
 
 @app.task
-def rebuild_ratings_async(execute_locally: bool=True):
-    """Remove all organization and url ratings, then rebuild them from scratch."""
-    task = (rerate_urls_async.s(execute_locally=True) | rerate_organizations_async.si(execute_locally=True))
-    task.apply_async()
-
-
-@app.task
 def add_organization_rating(organizations: List[Organization], build_history: bool=False, when: datetime=None):
     """
     :param organizations: List of organization
@@ -119,7 +113,7 @@ def add_organization_rating(organizations: List[Organization], build_history: bo
     """
 
     if when:
-        isinstance(when, datetime)
+        assert isinstance(when, datetime)
 
     for organization in organizations:
         log.info('Adding rating for organization %s', organization)
@@ -154,51 +148,49 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
 #         rate_timeline(create_timeline(url), url)
 
 
-@app.task
 def delete_url_rating(url: Url):
     UrlRating.objects.all().filter(url=url).delete()
 
 
-@app.task
 def delete_organization_rating(organization: Organization):
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
 
-@app.task
-# 2.5 minutes and it's done :)
-def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
-
-    if not urls:
-        urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
-
-    tasks = []
-    for url in urls:
-        tasks.append((delete_url_rating.s(url) | create_timeline.si(url) | rate_timeline.s(url)))
-
-    task = group(tasks)
-    if execute_locally:
-        task.apply_async()
-    else:
-        return task
-
-
-@app.task
-def rerate_organizations_async(organizations: List[Organization]=None, execute_locally: bool=True):
-    if not organizations:
-        organizations = list(Organization.objects.all().order_by('name'))
-
-    # to not clear the whole map at once, do this per organization.
-    # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
-    tasks = [(default_ratings.si()
-              | delete_organization_rating.si(organization)
-              | add_organization_rating.si(organizations=[organization], build_history=True))
-             for organization in organizations]
-
-    task = group(tasks)
-    if execute_locally:
-        task.apply_async()
-    else:
-        return task
+# @app.task
+# # 2.5 minutes and it's done :)
+# def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
+#
+#     if not urls:
+#         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
+#
+#     tasks = []
+#     for url in urls:
+#         tasks.append((delete_url_rating.s(url) | create_timeline.si(url) | rate_timeline.s(url)))
+#
+#     task = group(tasks)
+#     if execute_locally:
+#         task.apply_async()
+#     else:
+#         return task
+#
+#
+# @app.task
+# def rerate_organizations_async(organizations: List[Organization]=None, execute_locally: bool=True):
+#     if not organizations:
+#         organizations = list(Organization.objects.all().order_by('name'))
+#
+#     # to not clear the whole map at once, do this per organization.
+#     # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
+#     tasks = [(default_ratings.si()
+#               | delete_organization_rating.si(organization)
+#               | add_organization_rating.si(organizations=[organization], build_history=True))
+#              for organization in organizations]
+#
+#     task = group(tasks)
+#     if execute_locally:
+#         task.apply_async()
+#     else:
+#         return task
 
 
 # @app.task
@@ -308,7 +300,6 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     return moments, happenings
 
 
-@app.task
 def create_timeline(url: Url):
     """
     Maps happenings to moments.
@@ -435,7 +426,6 @@ def latest_moment_of_datetime(datetime_: datetime):
     return datetime_.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
 
-@app.task()
 def rate_timeline(timeline, url: Url):
     log.info("Rebuilding ratings for url %s" % url)
 
@@ -1191,13 +1181,16 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
 
 # todo: use the organization creation date for this.
 @app.task
-def default_ratings():
+def default_ratings(organizations: List[Organization]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents
     empty spots / holes.
     :return:
     """
+
+    # 'epoch' date, n
     when = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
+    # skip organization that already have default rating
     organizations = Organization.objects.all().exclude(organizationrating__when=when)
     for organization in organizations:
         log.info("Giving organization a default rating: %s" % organization)
@@ -1212,5 +1205,4 @@ def default_ratings():
                 "urls": []
             }
         }
-
         r.save()
