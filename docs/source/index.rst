@@ -12,7 +12,7 @@ Failmap Documentation 🤣
 
    topics/getting_started
    topics/development
-   topics/scanners_scanning_and_ratings
+   topics/scanners_scanning_and_rating
    topics/running_a_remote_worker
    topics/deployment
    topics/translation
@@ -24,6 +24,8 @@ Failmap Documentation 🤣
    topics/user_guide
 
    topics/thanks
+
+   topics/stacking_pattern
 
 
 Indices and tables

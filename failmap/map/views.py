@@ -171,36 +171,6 @@ def terrible_urls(request, weeks_back=0):
 
     cursor = connection.cursor()
 
-    # 0.5 seconds
-    # sql_old = '''
-    #     SELECT
-    #         rating,
-    #         organization.name,
-    #         organizations_organizationtype.name,
-    #         organization.id,
-    #         `when`,
-    #         organization.twitter_handle,
-    #         url.url,
-    #         url.isdead,
-    #         url.not_resolvable
-    #     FROM map_urlrating
-    #     INNER JOIN
-    #       url on url.id = map_urlrating.url_id
-    #     LEFT OUTER JOIN
-    #       url_organization on url_organization.url_id = url.id
-    #     LEFT OUTER JOIN
-    #       organization on organization.id = url_organization.organization_id
-    #     INNER JOIN
-    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #     WHERE `when` <= '%s'
-    #     AND `when` = (select MAX(`when`) FROM map_urlrating or2
-    #           WHERE or2.url_id = map_urlrating.url_id AND `when` <= '%s')
-    #     GROUP BY url.url
-    #     HAVING(`rating`) > 999
-    #     ORDER BY `rating` DESC, `organization`.`name` ASC
-    #     ''' % (when, when)
-
-    # 0.3 seconds, to 0.00
     sql = '''
             SELECT
                 rating,
@@ -283,37 +253,6 @@ def topfail(request, weeks_back=0):
 
     cursor = connection.cursor()
 
-    """        INNER JOIN
-          (SELECT MAX(id) as id2 FROM map_organizationrating or2
-          WHERE `when` <= '%s' GROUP BY organization_id) as x
-          ON x.id2 = map_organizationrating.id
-    """
-
-    # 0.5 seconds
-    # sql = '''
-    #         SELECT
-    #             rating,
-    #             organization.name,
-    #             organizations_organizationtype.name,
-    #             organization.id,
-    #             `when`,
-    #             organization.twitter_handle
-    #         FROM map_organizationrating
-    #         INNER JOIN
-    #           organization on organization.id = map_organizationrating.organization_id
-    #         INNER JOIN
-    #           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #         INNER JOIN
-    #           coordinate ON coordinate.organization_id = organization.id
-    #         WHERE `when` <= '%s' AND rating > 0
-    #         AND `when` = (select MAX(`when`) FROM map_organizationrating or2
-    #               WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
-    #         GROUP BY organization.name
-    #         ORDER BY `rating` DESC, `organization`.`name` ASC
-    #         LIMIT 30
-    #         ''' % (when, when)
-
-    # 0.00 seconds :)
     sql = '''
             SELECT
                 rating,
@@ -368,15 +307,6 @@ def topfail(request, weeks_back=0):
 
 # @cache_page(cache_time)
 def topwin(request, weeks_back=0):
-    # todo: still no django solution for the time dimension discovered, doing a manual query... :(
-    # todo: add the twitter handle to the database etc...
-    # at least it's fast.
-
-    # This gets the organizations until a certain score that is seen as bad.
-    # From that everything with > 0 points.
-
-    # Would we reverse this, you'd get the top best. But honestly, only those with 0 points are good
-    # enough.
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -397,30 +327,6 @@ def topwin(request, weeks_back=0):
     }
 
     cursor = connection.cursor()
-
-    # 0.50 sec
-    # sql = '''
-    #     SELECT
-    #         rating,
-    #         organization.name,
-    #         organizations_organizationtype.name,
-    #         organization.id,
-    #         `when`,
-    #         organization.twitter_handle
-    #     FROM map_organizationrating
-    #     INNER JOIN
-    #       organization on organization.id = map_organizationrating.organization_id
-    #     INNER JOIN
-    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #     INNER JOIN
-    #       coordinate ON coordinate.organization_id = organization.id
-    #     WHERE `when` <= '%s' AND rating = 0
-    #     AND `when` = (select MAX(`when`) FROM map_organizationrating or2
-    #           WHERE or2.organization_id = map_organizationrating.organization_id AND `when` <= '%s')
-    #     GROUP BY organization.name
-    #     ORDER BY LENGTH(`calculation`) DESC, `organization`.`name` ASC
-    #     LIMIT 30
-    #     ''' % (when, when)
 
     sql = '''
             SELECT
@@ -751,42 +657,6 @@ def map_data(request, weeks_back=0):
     :return:
     """
 
-    """
-    This is left here as an artifact. With SQL you can write some great things, in one take without
-    any hassle of ORM limitations. There are some damn serious limitations in Django ORM when
-    it comes to simple things such as LEFT OUTER JOINS, GROUP BY, VIEW queries.
-
-    We try to write everything in Django ORM now, but the instantly gratifying taste of how nice
-    SQL is (but how terrible the differences between databases are) just keeps haunting you until
-    it takes you over and just drop the entire Django ORM because of it's limitations.
-
-    $sql = "SELECT
-              url.organization as organization,
-              area,
-              geoJsonType,
-              max(scans_ssllabs.rating) as rating
-            FROM `url`
-            left outer join scans_ssllabs ON url.url = scans_ssllabs.url
-            left outer join organization ON url.organization = organization.name
-            inner join coordinate ON coordinate.organization = organization.name
-            LEFT OUTER JOIN scans_ssllabs as t2 ON (
-              scans_ssllabs.url = t2.url
-              AND scans_ssllabs.ipadres = t2.ipadres
-              AND scans_ssllabs.poort = t2.poort
-              AND t2.scanmoment > scans_ssllabs.scanmoment
-              AND t2.scanmoment <= DATE_ADD(now(), INTERVAL -0 DAY))
-            WHERE t2.url IS NULL
-              AND url.organization <> ''
-              AND scans_ssllabs.scanmoment <= DATE_ADD(now(), INTERVAL -0 DAY)
-              AND url.isDead = 0
-              AND scans_ssllabs.isDead = 0
-            group by (area)
-            order by url.organization ASC, rating DESC"
-
-    But we also moved away from this since we want to do rating on a more general approach on one
-    location. Which is far better to understand.
-    """
-
     data = {
         "metadata": {
             "type": "FeatureCollection",
@@ -805,113 +675,7 @@ def map_data(request, weeks_back=0):
         ]
     }
 
-    # todo: add comment to point to gitlab repo
-    # todo: search for django server push, for instant updates sockjs?
-    # Unfortunately django ORM aggregate functions only work on a single column,
-    # you would think you're getting back OrganizaitonRating Objects. but thats not true.
-    # http://stackoverflow.com/questions/19923877/django-orm-get-latest-for-each-group
-    # http://stackoverflow.com/questions/17887075/django-orm-get-latest-record-for-group
-    # This just simply doesnt work. I want a set of latest records.
-    # q = OrganizationRating.objects.values('organization__name',
-    #                                       'organization__type__name',
-    #                                     'organization__coordinate__area',
-    #                                     'organization__coordinate__geojsontype',
-    #                                   'rating').aggregate(Count('organization__coordinate__area'))
-
-    # While the star joins are a pest, we can now do nice havings and such.
-    # this might be writable in Django... but the amount of time spent on it was not OK.
-    # This query works in SQLite, probably also MySQL and Postgres (we'll see that in staging)
-    # you can get older ratings via  WHERE `when` < '2017-03-17 16:27:00'
-
     cursor = connection.cursor()
-
-    """
-    A simple MySQL query like select * from x JOIN, Where, group by and having doesn't work:
-    mysql has a different way of grouping: it first groups and THEN does having. While sqllite first
-    does having THEn grouping. That is why in mysql all ratings where -1, because the grouping kills
-    off all other records in the HAVING.
-
-    The only way to fix that is using a subquery, unfortunately.
-
-    Old query: select ... from . inner joins... where when <= x, group by area, having max when
-    which is about 1000x slower. (new one takes about a second).
-
-    So instead of a subquery, we ask for the latest ratings and join on this:
-    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating GROUP BY organization_id;
-
-    IN or SELECT:
-
-    SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating WHERE `when` <=
-    '2017-08-14 18:21:36.984601+00:00' GROUP BY organization_id;
-    """
-
-    # original query, doesn't work in mysql due to ordering of having and group. works in sqlite
-    # was extremely fast
-    # sql = '''
-    #  SELECT
-    #         rating,
-    #         organization.name,
-    #         organizations_organizationtype.name,
-    #         coordinate.area,
-    #         coordinate.geoJsonType,
-    #         organization.id
-    #     FROM map_organizationrating
-    #     INNER JOIN
-    #       organization on organization.id = map_organizationrating.organization_id
-    #     INNER JOIN
-    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #     INNER JOIN
-    #       coordinate ON coordinate.organization_id = organization.id
-    #     WHERE `when` <= '%s'
-    #     GROUP BY coordinate.area
-    #     HAVING MAX(`when`)
-    #     ORDER BY `when` ASC'''  % (when, )
-
-    # takes about half a second, to 0.7 seconds
-    # sql = '''
-    #     SELECT
-    #         rating,
-    #         organization.name,
-    #         organizations_organizationtype.name,
-    #         coordinate.area,
-    #         coordinate.geoJsonType,
-    #         organization.id
-    #     FROM map_organizationrating
-    #     INNER JOIN
-    #       organization on organization.id = map_organizationrating.organization_id
-    #     INNER JOIN
-    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #     INNER JOIN
-    #       coordinate ON coordinate.organization_id = organization.id
-    #     WHERE `when` = (select MAX(`when`) FROM map_organizationrating or2
-    #           WHERE or2.organization_id = map_organizationrating.organization_id AND
-    #           `when` <= '2017-08-14 18:21:36.984601+00:00')
-    #     GROUP BY coordinate.area
-    #     ORDER BY `when` ASC
-    #     ''' % (when, )
-
-    # takes 389 rows in set, 3 warnings (2 min 4.54 sec) LOL
-    # sql = '''
-    #     SELECT
-    #         rating,
-    #         organization.name,
-    #         organizations_organizationtype.name,
-    #         coordinate.area,
-    #         coordinate.geoJsonType,
-    #         organization.id
-    #     FROM map_organizationrating
-    #     INNER JOIN
-    #       organization on organization.id = map_organizationrating.organization_id
-    #     INNER JOIN
-    #       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-    #     INNER JOIN
-    #       coordinate ON coordinate.organization_id = organization.id
-    #     WHERE map_organizationrating.id IN (
-    #       SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating
-    #       WHERE `when` <= '%s' GROUP BY organization_id)
-    #     GROUP BY coordinate.area
-    #     ORDER BY `when` ASC
-    #     ''' % (when, )
 
     # instant answer, 0.16 sec answer (mainly because of the WHEN <= date subquery.
     # This could be added to a standerd django query manager, with an extra join. It's fast.
