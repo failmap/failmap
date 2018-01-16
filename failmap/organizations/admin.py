@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from typing import Callable
 
 import pytz
 from django.contrib import admin
@@ -10,6 +9,7 @@ from django.utils.html import format_html
 from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
+from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
@@ -119,7 +119,7 @@ class ActionMixin:
     rebuild_ratings.short_description = '✅  Rebuild rating'
     actions.append(rebuild_ratings)
 
-    def generic_action(self, task_composer: Callable, name: str, request, queryset):
+    def generic_action(self, task_composer: types.compose_task, name: str, request, queryset):
         """Admin action that will create a Job of tasks."""
 
         filters = {'x_filter': {'id__in': queryset.values_list('id')}}
