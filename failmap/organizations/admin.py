@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from typing import Callable
 
 import pytz
 from django.contrib import admin
@@ -82,7 +83,19 @@ class PromiseAdminInline(CompactInline):
 
 
 class ActionMixin:
-    """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions."""
+    """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions.
+
+    This class is intended to be added to ModelAdmin classes so all Actions are available without duplicating code.
+
+    Action methods as described in:
+      https://docs.djangoproject.com/en/2.0/ref/contrib/admin/actions/#actions-as-modeladmin-methods
+
+    Most actions work on the same primary models (organization,url,endpoint). The Actions don't do any actual work but
+    rather compose a task with the provided Queryset. After which this task is scheduled using a Job. This generic
+    principle has been implemented in `generic_action` and the specific action implementations (eg; `scan_plain_http`)
+    just provide the correct metadata (name, icon) and task composer to call.
+
+    """
 
     actions = []
 
@@ -106,8 +119,8 @@ class ActionMixin:
     rebuild_ratings.short_description = '✅  Rebuild rating'
     actions.append(rebuild_ratings)
 
-    def generic_action(self, task_composer, name, request, queryset):
-        """Action that will create a Job of tasks."""
+    def generic_action(self, task_composer: Callable, name: str, request, queryset):
+        """Admin action that will create a Job of tasks."""
 
         filters = {'x_filter': {'id__in': queryset.values_list('id')}}
         if queryset.model == Organization:
