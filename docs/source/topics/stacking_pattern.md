@@ -18,25 +18,49 @@ requiring to update very old data to fit the latest version of the model
 .
 
 ## Why stacking?
-
 We needed a very quick way to retrieve historical data, preferably in a
 single query. For example: "What Urls exist on 1 january 2017?", with an
 anwer in a split second.
 
-Django itself does not support such queries: it does have latest and
-earliest for single record results. That does work but is much, much
-slower (although more readable). The best solution would be Django
-having support for returning the latest as a set, we're going to use our
-solution. (And ask the Django community to take a look at it, in the
-hope they annihilate our solution with something much easier and better.
-)
+Urls on the internet get published, pulled and republished with
+different content. We're able to show that using this solution.
+
+Do note that this is not a solution to see "ALL" changes ever made to
+the data: it is not an auditing system. That could still be implemented
+on top of this solution.
+
+There are several patterns that make it able to browse through history.
+Another obvious example would be "shadow tables" or a "shadow database".
+
+The biggest downside of a shadow solution is maintenance on these tables
+and actively creating a legacy codebase (or the ability to understand
+older models). We've decided that this would result in even more
+complications than stacking: we are forcing ourselves to work with a
+single model of a URL instead of several, all of which might
+have different formats.
+
+Another way to retain history is to use a stacking pattern where the
+administration is done in a separate table. Only by using a join you
+would be able to see what is the current information. This solution
+often uses similar begin and end datetime columns. It also has a status
+flag/column and given it's an extra table, some additional columns can
+be added for administrative purposes. Such a table should
+be made for every history entity.
+
+
+## Stacking / History Support in Django?
+Django itself does not support stacking queries: it does have latest and
+ earliest for single record results. An iterative approach does work
+perfectly but is much, much slower (although more readable).
+
+The best solution would be Django having support for returning the
+latest as a set, we're going to use our solution. (And ask the Django
+community to take a look at it, in the hope they annihilate our
+solution with something much easier, faster and overall better.)
 
 A runner-up to solve this problem is "Django Simple History". It does
 seem to have support for history, but it doesn't show if it also
 supports queries like the ones we're using here.
-
-Finally: Urls on the internet get published, pulled and republished with
-different content. We're able to show that using this solution.
 
 
 ## What is this stacking?
@@ -94,9 +118,9 @@ pattern.
 
 ## Queries
 
-Reading out historical data is fast when doing it right. As Django does
-not support this in their ORM, understandably, it means read-queries
-need to be created using "Raw" SQL.
+Reading out historical data is fast when doing it right. As explained
+before, this requires a manual implementation (as it is not in the ORM
+yet).
 
 After some experimentation (see below), this is the fastest solution
 that work in both MySQL and SQLite. It has
@@ -115,8 +139,6 @@ INNER JOIN
 
 It simply is a subquery on the "what are the newest on this moment", allowing you to filter on the
 result set outside this subquery.
-
-Exactly this solution is not supported using "Extra" in Django :).
 
 
 ## Speed improvements
