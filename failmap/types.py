@@ -14,6 +14,9 @@ def compose_task(
     :param urls_filter: dict: limit urls to these filters, see below
     :param endpoints_filter: dict: limit endpoints to these filters, see below
 
+    *This is an abstract of the `compose_task` function which is used throughout this codebase, search for
+    `compose_task` to find implementations which can be used as example.*
+
     Composition of a task is building a task from primitives (task, group, chain) and other composed tasks in order
     to create a 'collection' of work that as a whole can be scheduled for execution in the task processing system.
 
