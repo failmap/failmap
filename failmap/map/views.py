@@ -704,7 +704,8 @@ def map_data(request, weeks_back=0):
         INNER JOIN
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
         INNER JOIN
-          (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id FROM coordinate stacked_coordinate
+          (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
+          FROM coordinate stacked_coordinate
           WHERE stacked_coordinate.created_on <= '%s' GROUP BY organization_id) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
         GROUP BY coordinate_stack.area, organization.name

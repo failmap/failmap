@@ -7,9 +7,9 @@ from typing import Dict
 import pytz
 import requests
 from django.db import transaction
+from rdp import rdp
 
 from failmap.organizations.models import Coordinate, Organization
-from rdp import rdp
 
 from ..celery import app
 
@@ -31,11 +31,11 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
 
     for feature in data["features"]:
 
-        if not "properties" in feature.keys():
+        if "properties" not in feature.keys():
             log.debug("Feature misses property")
             continue
 
-        if not "name" in feature["properties"].keys():
+        if "name" not in feature["properties"].keys():
             log.debug("Feature does not contain a name, cannot relate feature to existing data.")
             continue
 
