@@ -47,6 +47,9 @@ flag/column and given it's an extra table, some additional columns can
 be added for administrative purposes. Such a table should
 be made for every history entity.
 
+Sample of another solution:
+https://stackoverflow.com/questions/3874199/how-to-store-historical-data
+
 
 ## Stacking / History Support in Django?
 Django itself does not support stacking queries: it does have latest and

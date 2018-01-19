@@ -687,8 +687,8 @@ def map_data(request, weeks_back=0):
             rating,
             organization.name,
             organizations_organizationtype.name,
-            coordinate.area,
-            coordinate.geoJsonType,
+            coordinate_stack.area,
+            coordinate_stack.geoJsonType,
             organization.id,
             calculation,
             high,
@@ -696,19 +696,23 @@ def map_data(request, weeks_back=0):
             low
         FROM map_organizationrating
         INNER JOIN
+          (SELECT MAX(id) as stacked_organization_id FROM map_organizationrating
+          WHERE `when` <= '%s' GROUP BY organization_id) as x
+          ON x.stacked_organization_id = map_organizationrating.id
+        INNER JOIN
           organization on organization.id = map_organizationrating.organization_id
         INNER JOIN
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
         INNER JOIN
-          coordinate ON coordinate.organization_id = organization.id
-        INNER JOIN
-          (SELECT MAX(id) as id2 FROM map_organizationrating or2
-          WHERE `when` <= '%s' GROUP BY organization_id) as x
-          ON x.id2 = map_organizationrating.id
-        GROUP BY coordinate.area, organization.name
+          (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id FROM coordinate stacked_coordinate
+          WHERE stacked_coordinate.created_on <= '%s' GROUP BY organization_id) as coordinate_stack
+          ON coordinate_stack.organization_id = map_organizationrating.organization_id
+        GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        ''' % (when, )
+        ''' % (when, when, )
     # print(sql)
+
+    # with the new solution, you only get just ONE result per organization...
     cursor.execute(sql)
 
     rows = cursor.fetchall()

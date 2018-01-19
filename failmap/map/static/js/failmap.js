@@ -364,30 +364,7 @@ var failmap = {
 
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
-                failmap.geojson.eachLayer(function (layer) {
-                    // overwrite some properties
-                    // a for loop is not ideal.
-                    for (i = 0; i < json.features.length; i++) {
-                        if (layer.feature.properties.organization_name === json.features[i].properties.organization_name) {
-                            // console.log(layer);
-                            layer.feature.properties.Overall = json.features[i].properties.Overall;
-                            layer.feature.properties.color = json.features[i].properties.color;
-                            // make the transition
-                            if (layer.feature.geometry.type === "MultiPolygon")
-                                layer.setStyle(failmap.style(layer.feature));
-                            if (layer.feature.geometry.type === "Point") {
-                                if (layer.feature.properties.color === "red")
-                                    layer.setIcon(failmap.redIcon);
-                                if (layer.feature.properties.color === "orange")
-                                    layer.setIcon(failmap.orangeIcon);
-                                if (layer.feature.properties.color === "green")
-                                    layer.setIcon(failmap.greenIcon);
-                                if (layer.feature.properties.color === "gray")
-                                    layer.setIcon(failmap.grayIcon);
-                            }
-                        }
-                    }
-                });
+                failmap.geojson.eachLayer(function (layer) {failmap.recolormap(json, layer)});
                 vueMap.loading = false;
             } else {
                 failmap.geojson = L.geoJson(json, {
@@ -400,6 +377,68 @@ var failmap = {
                 vueMap.loading = false;
             }
         });
+    },
+
+    recolormap: function (json, layer) {
+        // overwrite some properties
+        // a for loop is not ideal.
+
+        var existing_feature = layer.feature;
+        console.log("existing layer");
+        console.log(layer);
+
+
+        for (i = 0; i < json.features.length; i++) {
+            var new_feature = json.features[i];
+
+            if (existing_feature.properties.organization_name === new_feature.properties.organization_name) {
+
+                if (new_feature.geometry.coordinates !== existing_feature.geometry.coordinates){
+                    console.log("changed");
+                    console.log("old");
+                    console.log(existing_feature.geometry.coordinates);
+                    console.log("new");
+                    console.log(new_feature.geometry.coordinates);
+
+                    // it is not possible to change the shape of a layer :(
+                    // therefore we have to remove this layer and replace it with the new one.
+                    // removing doesn't work: you will still get the old layer(!)
+                    layer.removeFrom(failmap.map);
+                    layer.remove();
+                    failmap.map.removeLayer(layer);
+                    // failmap.geojson.removelayer(layer);
+                    failmap.geojson.removeLayer(layer);
+
+                    // the new item already has the color we need.
+                    var asdasd = L.geoJson(new_feature, {
+                        style: failmap.style,
+                        pointToLayer: failmap.pointToLayer,
+                        onEachFeature: failmap.onEachFeature
+                    }).addTo(failmap.map);
+
+                    // we should not manipulate anything else.
+                    continue;
+                }
+
+                // only color changed
+                // console.log(layer);
+                existing_feature.properties.Overall = new_feature.properties.Overall;
+                existing_feature.properties.color = new_feature.properties.color;
+                // make the transition
+                if (existing_feature.geometry.type === "MultiPolygon")
+                    layer.setStyle(failmap.style(layer.feature));
+                if (existing_feature.geometry.type === "Point") {
+                    if (layer.feature.properties.color === "red")
+                        layer.setIcon(failmap.redIcon);
+                    if (layer.feature.properties.color === "orange")
+                        layer.setIcon(failmap.orangeIcon);
+                    if (layer.feature.properties.color === "green")
+                        layer.setIcon(failmap.greenIcon);
+                    if (layer.feature.properties.color === "gray")
+                        layer.setIcon(failmap.grayIcon);
+                }
+            }
+        }
     },
 
     showreport: function (e) {

@@ -90,6 +90,7 @@ class PromiseAdminInline(CompactInline):
 class ActionMixin:
     """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions.
 
+<<<<<<< HEAD
     This class is intended to be added to ModelAdmin classes so all Actions are available without duplicating code.
 
     Action methods as described in:
@@ -143,7 +144,7 @@ class ActionMixin:
 
 
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('name', 'type', 'country')
+    list_display = ('name', 'type', 'country', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
     fields = ('name', 'type', 'country', 'twitter_handle')
@@ -349,9 +350,10 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', )
 
 
-class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('organization', 'geojsontype')
-    search_fields = ('organization', 'geojsontype')
+
+class CoordinateAdmin(admin.ModelAdmin):
+    list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
+    search_fields = ('organization__name', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
     fields = ('organization', 'geojsontype', 'area')
 

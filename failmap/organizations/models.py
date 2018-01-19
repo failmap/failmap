@@ -47,27 +47,27 @@ class Organization(models.Model):
 
     # stacking is_dead pattern
     # postpone migration on production.
-    # todo: add default date for default ratings.
-    # created_on = models.DateTimeField(
-    #     blank=True,
-    #     null=True
-    # )
+    created_on = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+    )
 
-    # is_dead = models.BooleanField(
-    #     default=False,
-    #     help_text="A dead organization is not shown on the map, depending on the dead_date."
-    # )
+    is_dead_since = models.DateTimeField(
+        blank=True,
+        null=True
+    )
 
-    # is_dead_since = models.DateTimeField(
-    #     blank=True,
-    #     null=True
-    # )
+    is_dead = models.BooleanField(
+        default=False,
+        help_text="A dead organization is not shown on the map, depending on the dead_date."
+    )
 
-    # is_dead_reason = models.CharField(
-    #     max_length=255,
-    #     blank=True,
-    #     null=True
-    # )
+    is_dead_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
     def __unicode__(self):
         return u'%s  - %s in %s' % (self.name, self.type, self.country, )
@@ -102,6 +102,30 @@ class Coordinate(models.Model):
         max_length=10000,
         help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to "
                   "reduce the amount of data to transfer."
+    )
+
+    # stacking pattern for coordinates.
+    created_on = models.DateTimeField(
+        blank=True,
+        null=True,
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+    )
+    creation_metadata = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True)
+    is_dead = models.BooleanField(
+        default=False,
+        help_text="Dead url's will not be rendered on the map. Scanners can set this check "
+                  "automatically (which might change in the future)")
+    is_dead_since = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+    is_dead_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
     )
 
     class Meta:
