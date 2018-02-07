@@ -69,15 +69,15 @@ class Organization(models.Model):
         null=True
     )
 
-    def __unicode__(self):
-        return u'%s  - %s in %s' % (self.name, self.type, self.country, )
-
     class Meta:
         managed = True
         db_table = 'organization'
 
     def __str__(self):
-        return self.name
+        if self.is_dead:
+            return "✝ %s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
+        else:
+            return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
 
 
 GEOJSON_TYPES = (

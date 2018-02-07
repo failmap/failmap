@@ -90,7 +90,6 @@ class PromiseAdminInline(CompactInline):
 class ActionMixin:
     """Generic Mixin to add Admin Button for Organization/Url/Endpoint Actions.
 
-<<<<<<< HEAD
     This class is intended to be added to ModelAdmin classes so all Actions are available without duplicating code.
 
     Action methods as described in:
@@ -144,12 +143,22 @@ class ActionMixin:
 
 
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('name', 'type', 'country', 'created_on', 'is_dead')
+    list_display = ('name_details', 'type', 'country', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
-    fields = ('name', 'type', 'country', 'twitter_handle')
+    fields = ('name', 'type', 'country', 'twitter_handle', 'is_dead', 'is_dead_since', 'is_dead_reason')
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
+
+
+    @staticmethod
+    def name_details(self):
+        if self.is_dead:
+            return "✝ %s, %s (%s - %s)" % (self.name, self.country,
+                                           self.created_on.strftime("%b %Y") if self.created_on else "",
+                                           self.is_dead_since.strftime("%b %Y") if self.is_dead_since else "")
+        else:
+            return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
@@ -181,6 +190,7 @@ class MyUrlAdminForm(forms.ModelForm):
             raise ValidationError("Url is missing suffix (.com, .net, ...)")
 
         return clean_url_string
+
 
     def clean(self):
         organizations = self.cleaned_data.get("organization")

@@ -13,6 +13,8 @@ from failmap.organizations.models import Coordinate, Organization
 
 from ..celery import app
 
+from django.conf import settings
+
 log = logging.getLogger(__package__)
 
 
@@ -29,14 +31,15 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
 
     resampling_resolution = get_sampling_resolution(country, organization_type)
 
+    log.info("Parsing features:")
     for feature in data["features"]:
 
         if "properties" not in feature.keys():
-            log.debug("Feature misses property")
+            log.debug("Feature misses 'properties' property :)")
             continue
 
         if "name" not in feature["properties"].keys():
-            log.debug("Feature does not contain a name, cannot relate feature to existing data.")
+            log.debug("This feature does not contain a name: it might be metadata or something else.")
             continue
 
         log.info("Resampling path for %s" % feature["properties"]["name"])
@@ -44,12 +47,9 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
         task = (resample.s(feature, resampling_resolution) | store_updates.s(country, organization_type))
         task.apply_async()
 
-        # feature = resample_data(feature, resampling_resolution)
-        # store_coordinates(feature, country, organization_type)
-
 
 @app.task
-def resample(feature: Dict, resampling_resolution: float=0.001):
+def resample(feature: Dict, resampling_resolution: float=0.01):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
     if feature["geometry"]["type"] == "Polygon":
@@ -177,37 +177,41 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     """
 
     filename = "%s_%s_%s.osm" % (country, organization_type, datetime.now().date())
+    filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
 
     # to test this, without connecting to a server but handle the data returned today(!)
-    download_and_convert = False
+    download_and_convert = True
 
     if country == "NL" and organization_type == "municipality":
 
-        if download_and_convert:
-            # returns an OSM file, you need to convert this
-            # while JSON is nearly instant, a large text file with even less data takes way more time.
-            response = requests.post("https://www.overpass-api.de/api/interpreter",
-                                     data={"data": 'area[name="Nederland"]->.gem; '
-                                           'relation(area.gem)["type"="boundary"][admin_level=8]; '
-                                           'out geom;',
-                                           "submit": "Query"}, stream=True)
+        # shorthand for debugging.
+        if not download_and_convert:
+            return json.load(open(filename + ".geojson"))
 
-            log.info("Writing recieved data to file.")
-            with open(filename, 'wb') as handle:
-                for block in response.iter_content(1024):
-                    handle.write(block)
+        # returns an OSM file, you need to convert this
+        # while JSON is nearly instant, a large text file with even less data takes way more time.
+        response = requests.post("https://www.overpass-api.de/api/interpreter",
+                                 data={"data": 'area[name="Nederland"]->.gem; '
+                                       'relation(area.gem)["type"="boundary"][admin_level=8]; '
+                                       'out geom;',
+                                       "submit": "Query"}, stream=True)
 
-            # convert the file:
-            log.info("Converting OSM to geojson")
+        log.info("Writing recieved data to file.")
+        with open(filename, 'wb') as handle:
+            for block in response.iter_content(1024):
+                handle.write(block)
 
-            try:
-                # shell is True can only be somewhat safe if all input is not susceptible to manipulation
-                # in this case the filename and all related info is verified.
-                subprocess.check_call("osmtogeojson %s > %s" % (filename, filename + ".geojson"), shell=True)
-            except subprocess.CalledProcessError:
-                log.info("Error while converting to geojson.")
-            except OSError:
-                log.info("osmtogeojson not found.")
+        # convert the file:
+        log.info("Converting OSM to geojson")
+
+        try:
+            # shell is True can only be somewhat safe if all input is not susceptible to manipulation
+            # in this case the filename and all related info is verified.
+            subprocess.check_call("osmtogeojson %s > %s" % (filename, filename + ".geojson"), shell=True)
+        except subprocess.CalledProcessError:
+            log.info("Error while converting to geojson.")
+        except OSError:
+            log.info("osmtogeojson not found.")
 
         return json.load(open(filename + ".geojson"))
 
