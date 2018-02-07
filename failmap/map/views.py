@@ -706,14 +706,18 @@ def map_data(request, weeks_back=0):
         INNER JOIN
           (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
           FROM coordinate stacked_coordinate
-          WHERE stacked_coordinate.created_on <= '%s' GROUP BY organization_id) as coordinate_stack
+          WHERE (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 0) 
+          OR
+          (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 1 AND 
+          stacked_coordinate.is_dead_since >= '%s')
+          GROUP BY area) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        ''' % (when, when, )
+        ''' % (when, when, when, when, )
     # print(sql)
 
-    # with the new solution, you only get just ONE result per organization...
+    # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
     cursor.execute(sql)
 
     rows = cursor.fetchall()

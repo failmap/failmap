@@ -354,20 +354,20 @@ var failmap = {
     /* Transition, which is much smoother. */
     loadmap: function (weeknumber) {
         vueMap.loading = true;
-        $.getJSON('/data/map/' + weeknumber, function (json) {
+        $.getJSON('/data/map/' + weeknumber, function (mapdata) {
             // make map features (organization data) available to other vues
             // do not update this attribute if an empty list is returned as currently
             // the map does not remove organizations for these kind of responses.
-            if (json.features.length > 0) {
-                vueMap.features = json.features;
+            if (mapdata.features.length > 0) {
+                vueMap.features = mapdata.features;
             }
 
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
-                failmap.geojson.eachLayer(function (layer) {failmap.recolormap(json, layer)});
+                failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
                 vueMap.loading = false;
             } else {
-                failmap.geojson = L.geoJson(json, {
+                failmap.geojson = L.geoJson(mapdata, {
                     style: failmap.style,
                     pointToLayer: failmap.pointToLayer,
                     onEachFeature: failmap.onEachFeature
@@ -379,63 +379,51 @@ var failmap = {
         });
     },
 
-    recolormap: function (json, layer) {
+    recolormap: function (mapdata, layer) {
         // overwrite some properties
         // a for loop is not ideal.
 
         var existing_feature = layer.feature;
-        console.log("existing layer");
-        console.log(layer);
 
-
-        for (i = 0; i < json.features.length; i++) {
-            var new_feature = json.features[i];
+        for (i = 0; i < mapdata.features.length; i++) {
+            var new_feature = mapdata.features[i];
 
             if (existing_feature.properties.organization_name === new_feature.properties.organization_name) {
 
-                if (new_feature.geometry.coordinates !== existing_feature.geometry.coordinates){
-                    console.log("changed");
-                    console.log("old");
-                    console.log(existing_feature.geometry.coordinates);
-                    console.log("new");
-                    console.log(new_feature.geometry.coordinates);
+                // No simple array comparison in JS
+                // So new_feature.geometry.coordinates !== existing_feature.geometry.coordinates will not work.
+                // https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript#19746771
+                if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)){
+                    console.log("Geometry changed, updating shape. Will not fade.");
+                    // console.log("Old: ");
+                    // console.log(JSON.stringify(new_feature.geometry.coordinates));
+                    // console.log("New: ");
+                    // console.log(JSON.stringify(existing_feature.geometry.coordinates));
 
-                    // it is not possible to change the shape of a layer :(
-                    // therefore we have to remove this layer and replace it with the new one.
-                    // removing doesn't work: you will still get the old layer(!)
-                    layer.removeFrom(failmap.map);
-                    layer.remove();
-                    failmap.map.removeLayer(layer);
-                    // failmap.geojson.removelayer(layer);
+                    // it is not possible to change the geometry of a layer.
+                    // eg: // layer.feature.geometry = new_feature.geometry;
+                    // remove the layer and addData instead:
                     failmap.geojson.removeLayer(layer);
+                    failmap.geojson.addData(new_feature);
 
-                    // the new item already has the color we need.
-                    var asdasd = L.geoJson(new_feature, {
-                        style: failmap.style,
-                        pointToLayer: failmap.pointToLayer,
-                        onEachFeature: failmap.onEachFeature
-                    }).addTo(failmap.map);
+                } else {
+                    // console.log("Colors changed");
 
-                    // we should not manipulate anything else.
-                    continue;
-                }
-
-                // only color changed
-                // console.log(layer);
-                existing_feature.properties.Overall = new_feature.properties.Overall;
-                existing_feature.properties.color = new_feature.properties.color;
-                // make the transition
-                if (existing_feature.geometry.type === "MultiPolygon")
-                    layer.setStyle(failmap.style(layer.feature));
-                if (existing_feature.geometry.type === "Point") {
-                    if (layer.feature.properties.color === "red")
-                        layer.setIcon(failmap.redIcon);
-                    if (layer.feature.properties.color === "orange")
-                        layer.setIcon(failmap.orangeIcon);
-                    if (layer.feature.properties.color === "green")
-                        layer.setIcon(failmap.greenIcon);
-                    if (layer.feature.properties.color === "gray")
-                        layer.setIcon(failmap.grayIcon);
+                    existing_feature.properties.Overall = new_feature.properties.Overall;
+                    existing_feature.properties.color = new_feature.properties.color;
+                    // make the transition
+                    if (existing_feature.geometry.type === "MultiPolygon")
+                        layer.setStyle(failmap.style(layer.feature));
+                    if (existing_feature.geometry.type === "Point") {
+                        if (layer.feature.properties.color === "red")
+                            layer.setIcon(failmap.redIcon);
+                        if (layer.feature.properties.color === "orange")
+                            layer.setIcon(failmap.orangeIcon);
+                        if (layer.feature.properties.color === "green")
+                            layer.setIcon(failmap.greenIcon);
+                        if (layer.feature.properties.color === "gray")
+                            layer.setIcon(failmap.grayIcon);
+                    }
                 }
             }
         }
