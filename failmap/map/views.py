@@ -223,8 +223,8 @@ def terrible_urls(request, weeks_back=0):
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_urlrating or2
-              WHERE `when` <= '%s' GROUP BY url_id) as x
+              (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+              WHERE `when` <= '%s' GROUP BY id2) as x
               ON x.id2 = map_urlrating.id
             GROUP BY url.url
             HAVING(`high`) > 0
@@ -331,8 +331,8 @@ def topfail(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2
-              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              (SELECT MAX(`when`), id as id2 FROM map_organizationrating or2
+              WHERE `when` <= '%s' GROUP BY id2) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
             HAVING rating > 0
@@ -439,8 +439,8 @@ def topwin(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2
-              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              (SELECT MAX(`when`), id as id2 FROM map_organizationrating or2
+              WHERE `when` <= '%s' GROUP BY id2) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
@@ -505,8 +505,8 @@ def stats(request, weeks_back=0):
         ratings = OrganizationRating.objects.raw("""SELECT * FROM
                                            map_organizationrating
                                        INNER JOIN
-                                       (SELECT MAX(id) as id2 FROM map_organizationrating or2
-                                       WHERE `when` <= '%s' GROUP BY organization_id) as x
+                                       (SELECT MAX(`when`), id as id2 FROM map_organizationrating or2
+                                       WHERE `when` <= '%s' GROUP BY id2) as x
                                        ON x.id2 = map_organizationrating.id""" % when)
 
         noduplicates = []
@@ -644,8 +644,8 @@ def vulnstats(request, weeks_back=0):
         urlratings = UrlRating.objects.raw("""SELECT * FROM
                                            map_urlrating
                                        INNER JOIN
-                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
-                                       WHERE `when` <= '%s' GROUP BY url_id) as x
+                                       (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+                                       WHERE `when` <= '%s' GROUP BY id2) as x
                                        ON x.id2 = map_urlrating.id""" % when)
 
         # group by vulnerability type
@@ -723,8 +723,8 @@ def urlstats(request, weeks_back=0):
         ratings = UrlRating.objects.raw("""SELECT * FROM
                                            map_urlrating
                                        INNER JOIN
-                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
-                                       WHERE `when` <= '%s' GROUP BY url_id) as x
+                                       (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+                                       WHERE `when` <= '%s' GROUP BY id2) as x
                                        ON x.id2 = map_urlrating.id
                                        """ % (when, ))
 
