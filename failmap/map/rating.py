@@ -767,7 +767,7 @@ def get_latest_urlratings_fast(urls: List[Url], when):
                 INNER JOIN
                   (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
                   WHERE `when` <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
-                  GROUP BY id2) as x
+                  GROUP BY url_id) as x
                   ON x.id2 = map_urlrating.id
                 ORDER BY `high` DESC, `medium` DESC, `low` DESC, `url_id` ASC
                 '''

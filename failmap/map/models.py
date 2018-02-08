@@ -47,6 +47,9 @@ class OrganizationRating(models.Model):
     class Meta:
         managed = True
         get_latest_by = "when"
+        index_together = [
+            ["when", "id"],
+        ]
 
     def __str__(self):
         return '%s  - %s' % (self.rating, self.when,)
