@@ -752,6 +752,10 @@ def get_latest_urlratings_fast(urls: List[Url], when):
     # one query for all items. with sql injection feature.
     # perhaps we can do UrlRating.objects.raw( to avoid json loading.
 
+    # prevent an empty IN query
+    if not urls:
+        return []
+
     sql = '''SELECT
                     id,
                     rating,
@@ -761,9 +765,9 @@ def get_latest_urlratings_fast(urls: List[Url], when):
                     calculation
                 FROM map_urlrating
                 INNER JOIN
-                  (SELECT MAX(id) as id2 FROM map_urlrating or2
+                  (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
                   WHERE `when` <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
-                  GROUP BY url_id) as x
+                  GROUP BY id2) as x
                   ON x.id2 = map_urlrating.id
                 ORDER BY `high` DESC, `medium` DESC, `low` DESC, `url_id` ASC
                 '''
