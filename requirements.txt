@@ -64,3 +64,6 @@ sphinx
 sphinx-autobuild
 recommonmark
 
+# Remote worker TLS
+pyopenssl
+certifi

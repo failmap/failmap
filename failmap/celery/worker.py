@@ -1,9 +1,17 @@
+import getpass
+import logging
 import os
+import ssl
+import tempfile
 
+import certifi
+import OpenSSL
+from django.conf import settings
 from kombu import Queue
 
-# define queues
+log = logging.getLogger(__name__)
 
+TLS_CLIENT_FILE = '/client.p12'
 
 # define roles for workers
 WORKER_QUEUE_CONFIGURATION = {
@@ -46,3 +54,41 @@ def worker_configuration(conf):
 
     # configure which queues should be consumed depending on assigned role for this worker
     conf.task_queues = WORKER_QUEUE_CONFIGURATION[role]
+
+
+def tls_client_certificate(conf):
+    """Configure certificates from PKCS12 file.
+
+    If client file is provided will extract key and certificate pem to files and
+    configure these with Celery. """
+
+    tls_client_file = os.path.abspath(os.path.expanduser(
+        os.environ.get('TLS_CLIENT_FILE', TLS_CLIENT_FILE)))
+
+    if os.path.exists(tls_client_file):
+        log.info('PKCS12 file found, configuring TLS for worker.')
+
+        # try to open PKCS12 file without passphrase, if it fails ask for passphrase and try again
+        try:
+            p12 = OpenSSL.crypto.load_pkcs12(open(tls_client_file, 'rb').read())
+        except OpenSSL.crypto.Error:
+            log.warning('Failed to decrypt without passphrase.')
+
+            passphrase = getpass.getpass('Please provide passphrase for %s: ' % tls_client_file)
+            p12 = OpenSSL.crypto.load_pkcs12(open(tls_client_file, 'rb').read(), passphrase)
+
+        # store extracted key and cert in temporary files that are deleted on exit of the worker
+        tls_client_cert_file = tempfile.NamedTemporaryFile(dir=settings.WORKER_TMPDIR, delete=False)
+        tls_client_key_file = tempfile.NamedTemporaryFile(dir=settings.WORKER_TMPDIR, delete=False)
+        tls_client_key_file.write(OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, p12.get_privatekey()))
+        tls_client_cert_file.write(OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, p12.get_certificate()))
+
+        # configure redis to use TLS
+        conf.broker_use_ssl = {
+            'ssl_keyfile': tls_client_key_file.name,
+            'ssl_certfile': tls_client_cert_file.name,
+            'ssl_ca_certs': certifi.where(),
+            'ssl_cert_reqs': ssl.CERT_REQUIRED
+        }
+    else:
+        log.info('no PKCS12 file found, not configuring TLS.')
