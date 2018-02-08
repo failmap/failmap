@@ -231,4 +231,4 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
     # raise NotImplemented
     # todo:
     # Update the map viewers, to only show the existing organizations at that time.
-    # Change the default rating algorithm to match the date in the organization and have a fallback.
+    # Change the default rating algorithm to match the date in the organization and have a fallback. - todo: check

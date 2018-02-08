@@ -364,7 +364,13 @@ var failmap = {
 
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
+                // here we add all features that are not part of the current map at all
+                // and delete the ones that are not in the current set
+                failmap.clean_map(mapdata);
+
+                // here we can update existing layers (and add ones with the same name)
                 failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
+
                 vueMap.loading = false;
             } else {
                 failmap.geojson = L.geoJson(mapdata, {
@@ -377,6 +383,53 @@ var failmap = {
                 vueMap.loading = false;
             }
         });
+    },
+
+    clean_map: function(mapdata) {
+
+
+        // add layers to the map that are only in the new dataset (new)
+        for (var i = 0; i < mapdata.features.length; i++) {
+            var found = false;
+            failmap.geojson.eachLayer(function bla(layer){
+                if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
+                    found = true;
+                }
+            });
+            console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
+
+            if (!found) {
+                console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
+                failmap.geojson.addData(mapdata.features[i]);
+            }
+        }
+
+        // remove existing layers that are not in the new dataset
+        failmap.geojson.eachLayer(function bla(layer){
+            var found = false;
+            for (var i = 0; i < mapdata.features.length; i++) {
+                if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
+                    found = true;
+                }
+            }
+
+            console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
+
+            if (!found){
+                failmap.geojson.removeLayer(layer);
+                // failmap.deleteLayerByName(mapdata.features[i].properties.organization_name);
+            }
+
+        });
+    },
+
+    deleteLayerByName: function (name) {
+        console.log("Deleting layer named: " + name);
+        failmap.geojson.eachLayer(function bla(layer) {
+            if (layer.feature.properties.organization_name === name) {
+                failmap.geojson.removeLayer(layer);
+            }
+        })
     },
 
     recolormap: function (mapdata, layer) {
