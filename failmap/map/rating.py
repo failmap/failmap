@@ -1169,8 +1169,8 @@ def default_ratings(organizations: List[Organization]):
 
     # 'epoch' date, n
     when = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
-    # skip organization that already have default rating
-    organizations = Organization.objects.all().exclude(organizationrating__when=when)
+    # skip organization that already have (default) rating
+    organizations = Organization.objects.filter(organizationrating__isnull=True)
     for organization in organizations:
         log.info("Giving organization a default rating: %s" % organization)
         r = OrganizationRating()
