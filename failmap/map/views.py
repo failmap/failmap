@@ -994,6 +994,8 @@ def map_data(request, weeks_back=0):
     # instant answer, 0.16 sec answer (mainly because of the WHEN <= date subquery.
     # This could be added to a standerd django query manager, with an extra join. It's fast.
     # sometimes 0.01 second :) And also works in sqlite. Hooray.
+
+    # ID Order should not matter, esp in async rebuild situations.
     sql = '''
         SELECT
             rating,
@@ -1014,9 +1016,9 @@ def map_data(request, weeks_back=0):
         INNER JOIN
           coordinate ON coordinate.organization_id = organization.id
         INNER JOIN
-          (SELECT MAX(id) as id2 FROM map_organizationrating or2
-          WHERE `when` <= '%s' GROUP BY organization_id) as x
-          ON x.id2 = map_organizationrating.id
+          (SELECT MAX(`when`), id FROM map_organizationrating or2
+          WHERE `when` <= '%s' GROUP BY id) as x
+          ON x.id = map_organizationrating.id
         GROUP BY coordinate.area, organization.name
         ORDER BY `when` ASC
         ''' % (when, )

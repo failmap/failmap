@@ -75,7 +75,7 @@ def rerate_organizations(organizations: List):
 
     for organization in organizations:
         delete_organization_rating(organization)
-    add_organization_rating(organizations)
+    add_organization_rating(organizations=organizations, build_history=True)
 
 
 @app.task
