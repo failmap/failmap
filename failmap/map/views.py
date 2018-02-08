@@ -1,7 +1,7 @@
 import collections
+import logging
 from datetime import datetime, timedelta
 
-import logging
 import pytz
 import simplejson as json
 from dateutil.relativedelta import relativedelta
