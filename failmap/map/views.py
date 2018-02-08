@@ -226,7 +226,7 @@ def terrible_urls(request, weeks_back=0):
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
-              (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+              (SELECT MAX(id) as id2 FROM map_urlrating or2
               WHERE `when` <= '%s' GROUP BY url_id) as x
               ON x.id2 = map_urlrating.id
             GROUP BY url.url
@@ -334,7 +334,7 @@ def topfail(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(`when`), id as id2 FROM map_organizationrating or2
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
@@ -442,7 +442,7 @@ def topwin(request, weeks_back=0):
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
-              (SELECT MAX(`when`), id as id2 FROM map_organizationrating or2
+              (SELECT MAX(id) as id2 FROM map_organizationrating or2
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
@@ -508,11 +508,11 @@ def stats(request, weeks_back=0):
         sql = """SELECT * FROM
                    map_organizationrating
                INNER JOIN
-               (SELECT MAX(`when`), id FROM map_organizationrating
+               (SELECT MAX(id) as id2 FROM map_organizationrating or2
                WHERE `when` <= '%s' GROUP BY organization_id) as x
-               ON x.id = map_organizationrating.id""" % when
+               ON x.id2 = map_organizationrating.id""" % when
 
-        log.debug(sql)
+        # log.debug(sql)
 
         ratings = OrganizationRating.objects.raw(sql)
 
@@ -651,7 +651,7 @@ def vulnstats(request, weeks_back=0):
         urlratings = UrlRating.objects.raw("""SELECT * FROM
                                            map_urlrating
                                        INNER JOIN
-                                       (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
                                        WHERE `when` <= '%s' GROUP BY url_id) as x
                                        ON x.id2 = map_urlrating.id""" % when)
 
@@ -730,7 +730,7 @@ def urlstats(request, weeks_back=0):
         ratings = UrlRating.objects.raw("""SELECT * FROM
                                            map_urlrating
                                        INNER JOIN
-                                       (SELECT MAX(`when`), id as id2 FROM map_urlrating or2
+                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
                                        WHERE `when` <= '%s' GROUP BY url_id) as x
                                        ON x.id2 = map_urlrating.id
                                        """ % (when, ))
@@ -1023,9 +1023,9 @@ def map_data(request, weeks_back=0):
         INNER JOIN
           coordinate ON coordinate.organization_id = organization.id
         INNER JOIN
-          (SELECT MAX(`when`), id FROM map_organizationrating or2
+          (SELECT MAX(id) as id2 FROM map_organizationrating or2
           WHERE `when` <= '%s' GROUP BY organization_id) as x
-          ON x.id = map_organizationrating.id
+          ON x.id2 = map_organizationrating.id
         GROUP BY coordinate.area, organization.name
         ORDER BY `when` ASC
         ''' % (when, )
