@@ -96,10 +96,10 @@ def status():
     active_queues = inspect.active_queues()
     workers = [{
         'name': worker_name,
-        'queues': [q['name'] for q in active_queues[worker_name]],
+        'queues': [q['name'] for q in active_queues.get(worker_name, [])],
         'tasks_processed': sum(worker_stats['total'].values()),
-        'tasks_active': len(active[worker_name]),
-        'tasks_reserved': len(reserved[worker_name]),
+        'tasks_active': len(active.get(worker_name, [])),
+        'tasks_reserved': len(reserved.get(worker_name, [])),
         'prefetch_count': worker_stats['prefetch_count'],
         'concurrency': worker_stats['pool']['max-concurrency'],
     } for worker_name, worker_stats in stats.items()]
