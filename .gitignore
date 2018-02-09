@@ -31,3 +31,4 @@ failmap_debug_dataset*
 temp/*
 *.out
 *.rdb
+.pytest_cache/

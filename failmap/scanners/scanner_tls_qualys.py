@@ -103,7 +103,8 @@ def compose_task(
 
     bind=True,
     # this task should run on an internet connected, distributed worker
-    queue='scanners',
+    # also because of rate limiting put in its own queue to prevent blocking other tasks
+    queue='scanners.qualys',
     # start at most 1 new task per minute (per worker)
     rate_limit='1/m',
 )

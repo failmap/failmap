@@ -22,6 +22,9 @@ WORKER_QUEUE_CONFIGURATION = {
         # allow to differentiate on scan tasks that have specific ip network family requirements
         Queue('scanners.ipv4'),
         Queue('scanners.ipv6'),
+        # a special queue for Qualys as it requires rate limiting and that causes other tasks in
+        # the same queue to stall.
+        Queue('scanners.qualys'),
         # for tasks that require a database connection
         Queue('storage'),
         # default queue for task with no explicit queue assigned
@@ -36,6 +39,7 @@ WORKER_QUEUE_CONFIGURATION = {
         Queue('scanners'),
         Queue('scanners.ipv4'),
         Queue('scanners.ipv6'),
+        Queue('scanners.qualys'),
     ],
     # scanner with no IPv6 connectivity
     # this is an initial concept and can later be replaced with universal
@@ -43,6 +47,7 @@ WORKER_QUEUE_CONFIGURATION = {
     'scanner_ipv4_only': [
         Queue('scanners'),
         Queue('scanners.ipv4'),
+        Queue('scanners.qualys'),
     ],
 }
 
