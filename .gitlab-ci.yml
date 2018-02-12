@@ -197,7 +197,7 @@ staging:
 
   before_script:
     # required for quering python package version
-    - apk add --no-cache python3
+    - apk add --no-cache python3 curl
     - pip3 install docker-compose
 
   script:
