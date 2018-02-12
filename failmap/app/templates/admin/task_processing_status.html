@@ -25,13 +25,8 @@
   <div v-if="!workers.length"><li>-</li></div>
 </ul>
 <ul>
-  <li class="contrast">Queues</li>
-  <li v-for="queue in queues">
-    <p>{{ queue.name }}</p>
-    <ul>
-      <li>pending tasks: {{queue.tasks_pending}}</li>
-    </ul>
-  </li>
+  <li class="contrast">Queues (pending tasks)</li>
+  <li v-for="queue in queues">{{ queue.name }} <div class="float-right">{{queue.tasks_pending}}</div></li>
   <div v-if="!queues.length"><li>-</li></div>
 </ul>
 </div>
