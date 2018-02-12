@@ -14,12 +14,13 @@
 <ul>
   <li class="contrast">Workers</li>
   <li v-for="worker in workers">
-    <p>{{ worker.name }}</p>
+    {{ worker.name }}:
     <ul>
-      <li>subscribed queues: <span v-for="queue in worker.queues">{{queue}} </span></li>
-      <li>prefetched tasks: {{worker.tasks_reserved}}/{{worker.prefetch_count}}</li>
-      <li>running tasks: {{worker.tasks_active}}/{{worker.concurrency}}</li>
-      <li>total processed tasks: {{worker.tasks_processed}}</li>
+      <li><strong>subscribed queues:</strong> <span v-for="queue in worker.queues">{{queue}} </span>
+        <strong>prefetched tasks:</strong> {{worker.tasks_reserved}}/{{worker.prefetch_count}},
+        <strong>running tasks:</strong> {{worker.tasks_active}}/{{worker.concurrency}},
+        <strong>total processed tasks:</strong> {{worker.tasks_processed}}
+      </li>
     </ul>
   </li>
   <div v-if="!workers.length"><li>-</li></div>
