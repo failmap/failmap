@@ -202,12 +202,14 @@ staging:
   script:
     # store current version as artifact to copy into docker container
     - python3 setup.py --version > version
+
     # build docker image and push to registry
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
     - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:staging
 
-    # here is where I would put my staging integration tests, if I had one!!!
+    # run provisional staging test suite using docker-composer
+    - tests/staging.sh
 
     # promote to staging after tests have succeeded
     - docker push registry.gitlab.com/failmap/failmap:staging

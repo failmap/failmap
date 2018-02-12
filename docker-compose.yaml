@@ -35,10 +35,7 @@ services:
 
   # task executer
   worker:
-    image: failmap/failmap
-    build:
-      context: .
-      dockerfile: "${PWD}/Dockerfile"
+    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
     links:
       - broker
       - database:mysql
@@ -49,54 +46,50 @@ services:
       DJANGO_DATABASE: production
       # let celery be a little more informative regarding console messages
       TERM: xterm-color
-      DEBUG: 1
     # mount current source into container to allow changes to propagate without container rebuild
     volumes:
       - ./failmap:/source/failmap
       - ./tools:/source/tools
-    # use watchdog to provide auto restart functionality on changed code
-    entrypoint: [ '/source/tools/autoreload.sh', 'failmap']
-    command: [ "celery", "worker", "-l", "info", "-c", "6" ]
+    command: [ "celery", "worker", "-l", "info", "--pool", "eventlet"]
 
-  # web interface
+  # web interfaces
   admin:
-    image: failmap/failmap
-    build:
-      context: .
-      dockerfile: "${PWD}/Dockerfile"
+    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
     links:
       - broker
       - database:mysql
     environment:
       BROKER: redis://broker:6379/0
       DJANGO_DATABASE: production
-      UWSGI_PYTHON_AUTORELOAD: "yes"
+      UWSGI_PYTHON_AUTORELOAD: "no"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost}"
       # django decides what to log based on type of console
       TERM: xterm-color
-      DEBUG: 1
-      # disable server static files from collectstatic during development, passthrough to django staticfiles urlpatterns
-      UWSGI_STATIC_MAP:
-    # mount current source into container to allow changes to propagate without container rebuild
-    volumes:
-      - ./failmap:/source/failmap
-      - ./tools:/source/tools
     ports:
-      - 8000:8000
-    # use watchdog to provide auto restart functionality on changed code
-    entrypoint: [ '/source/tools/autoreload.sh', 'failmap']
+      - "${ADMIN_PORT:-8000}:8000"
+    command: [ "runuwsgi" ]
+  frontend:
+    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    links:
+      - broker
+      - database:mysql
+    environment:
+      BROKER: redis://broker:6379/0
+      DJANGO_DATABASE: production
+      UWSGI_PYTHON_AUTORELOAD: "no"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost}"
+      # django decides what to log based on type of console
+      TERM: xterm-color
+      SERVICE_NAME: failmap-frontend
+    ports:
+      - "${FRONTEND_PORT:-8001}:8000"
     command: [ "runuwsgi" ]
 
   # migrate
   migrate:
-    image: failmap/failmap
-    build:
-      context: .
-      dockerfile: "${PWD}/Dockerfile"
+    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
     links:
       - database:mysql
-    volumes:
-      - ./failmap:/source/failmap
-      - ./tools:/source/tools
     environment:
       DJANGO_DATABASE: production
       # django decides what to log based on type of console
@@ -106,15 +99,9 @@ services:
     restart: on-failure
 
   loaddata:
-    image: failmap/failmap
-    build:
-      context: .
-      dockerfile: "${PWD}/Dockerfile"
+    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
     links:
       - database:mysql
-    volumes:
-      - ./failmap:/source/failmap
-      - ./tools:/source/tools
     environment:
       DJANGO_DATABASE: production
       # django decides what to log based on type of console
@@ -122,17 +109,3 @@ services:
     command: [ "load_dataset", "development", "testdata" ]
     # retry if action failes (ie: database container is not ready yet)
     restart: on-failure
-
-  flower:
-    image: failmap/failmap
-    build:
-      context: .
-      dockerfile: "${PWD}/Dockerfile"
-    links:
-      - broker
-    environment:
-      BROKER: redis://broker:6379/0
-      TERM: xterm-color
-    ports:
-      - 5555:5555
-    command: [ "celery", "flower" ]

@@ -61,65 +61,6 @@ The setup script performs the following steps:
     # calculate the scores that should be displayed on the map
     failmap rebuild_ratings
 
-
-## Using Docker [WIP]
-
-For the Docker Quickstart we assume the usage of Docker as it offers the most complete environment for development. This project aims to be environment agnostic and development without Docker is possible, but Docker allows for a more managable development environment and less 'need-to-know-what-you-are-doing'.
-
-Below commands result in a failmap installation that is suitable for testing and development. It is
-capable of handling thousands of urls and still be modestly responsive.
-
-If you need a faster, more robust installation, please [contact us](mailto:hosting@internetcleanup.foundation).
-
-Ensure Docker is installed and running. Execute the following command to bring up the environment:
-
-    docker-compose up -d --build
-
-This will build and start all required components and dependencies to run a complete instance of the Failmap project (grab some coffee the first time this takes a while).
-
-The containers are run in the background, to view logs for all containers run:
-
-    docker-compose logs -f
-
-Notice: MySQL/Redis connection errors might be shown during startup. This is normal as the database container takes some time to startup. All related actions will be retried until they succeed. To check everything is correct see the `docker-compose ps` command below for the expected output.
-
-You can now visit the [map website](http://127.0.0.1:8000/) and/or the
-[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
-
-The environment is aware of code changes in the `failmap` folder. Services are automatically restarted to reflect the latest changes.
-
-To stop the entire stack run: `docker-compose down`
-
-There is a command-line application available to perform administrative tasks. To run it do:
-
-    docker-compose exec failmap failmap
-
-Further in this documentation the `failmap` command is mentioned, when using the Docker environment always prepend `docker-compose exec failmap` before the command.
-
-To see all running components:
-
-    $ docker-compose ps
-          Name                    Command               State                 Ports
-    ---------------------------------------------------------------------------------------------
-    failmap_admin_1      /usr/local/bin/autoreload  ...   Up       0.0.0.0:8000->8000/tcp
-    failmap_broker_1     docker-entrypoint.sh redis ...   Up       0.0.0.0:5672->5672/tcp, 6379/tcp
-    failmap_database_1   docker-entrypoint.sh mysqld      Up       0.0.0.0:3306->3306/tcp
-    failmap_loaddata_1   /usr/local/bin/failmap-adm ...   Exit 0
-    failmap_migrate_1    /usr/local/bin/failmap-adm ...   Exit 0
-    failmap_worker_1     /usr/local/bin/autoreload  ...   Up       8000/tcp
-
-The platform consists of 2 external dependencies `broker` (redis), `database` (mysql) and 2 main components `admin` (web frontend and administrative environment), `worker` (async task executor).
-
-Two tasks are run at startup `migrate` (database schema management) and `loaddata` (test and development data loading). The status of `Exit 0` indicated they have completed without issues.
-
-Most composer commands can be run against individual components, eg:
-
-    docker-compose logs -f worker
-
-For more information consult docker composer [documentation](https://docs.docker.com/compose/) or:
-
-    docker-compose -h
-
 ## Scanning services (beta)
 
 Some scanners require redis to be installed. We're currently in transition from running scanners
