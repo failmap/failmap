@@ -7,9 +7,9 @@ set -ve
 host=${1:-localhost}
 
 if test -f /bin/busybox;then
-  timeout="timeout -t 15"
+  timeout="timeout -t 60"
 else
-  timeout="timeout 15"
+  timeout="timeout 60"
 fi
 
 # start complete failmap environment using docker-composer
@@ -20,7 +20,7 @@ docker-compose up -d
 trap "docker-compose logs;docker-compose down&" EXIT
 
 # wait for server to be ready
-$timeout /bin/sh -c "while ! curl -sSIk http://$host:$ADMIN_PORT | grep 200\ OK;do sleep 1;done"
+$timeout /bin/sh -c "while ! curl -sSIk http://$host:$ADMIN_PORT 2>/dev/null | grep 200\ OK;do sleep 1;done"
 
 
 # index page
