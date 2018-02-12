@@ -6,10 +6,13 @@ set -ve
 
 host=${1:-localhost}
 
+# 2 minute timeout for environment to get up and running
+TIMEOUT=120
+
 if test -f /bin/busybox;then
-  timeout="timeout -t 60"
+  timeout="timeout -t ${TIMEOUT}"
 else
-  timeout="timeout 60"
+  timeout="timeout ${TIMEOUT}"
 fi
 
 # start complete failmap environment using docker-composer
