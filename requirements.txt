@@ -1,3 +1,7 @@
+# This file contains all requirements for a release build of failmap.
+# Any testing/debug only requirements should to into requirements.dev.txt.
+# Requirements only needed for release should go in requirements.deploy.txt.
+
 # Django jet is blocking migration to 2.0
 # error:     from django.views.i18n import javascript_catalog
 # ImportError: cannot import name 'javascript_catalog'
@@ -5,45 +9,36 @@ django==1.11.8
 django-jet
 django-countries
 django-jsonfield
-pyyaml
-tldextract
-docutils
-typing
-# django-nested-admin (doesn't work with Django Jet).
 
-# scanners
-requests
+pyyaml
+typing
+
 # use mozzila certificate bundle by default
 certifi
 pytz
+
+# task processing framework
 celery[redis,eventlet]
-flower
 django-celery-beat
+flower  # used for queue statistics
+
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla
-Pillow  # screenshots
-python-resize-image  # screenshots
-untangle  # dns scans https://github.com/stchris/untangle
 django_uwsgi
 
+# scanner dependencies
+requests
 dnspython  # dnsrecon
 netaddr  # dnsrecon
-
-# tests (of scanners)
-httmock
-freezegun
-colorama
-
-django-silk
+untangle  # dns scans https://github.com/stchris/untangle
+python-resize-image  # screenshots
+Pillow  # screenshots
+tldextract
 
 # logging
 colorlog
 
-# website
-django_compressor  # bundle javascript and css
-csscompressor  # css compression
-# brotlipy  # doesn't work, some vague errors not worth the time: compression handled elsewhere
-# slimit does not work with vue.js
+# for proxying external requests (mapbox)
 django-proxy
 
 # sentry client
@@ -51,6 +46,7 @@ raven
 
 # allow recursive comparison of dictionaries
 deepdiff
+
 influxdb
 urllib3
 
@@ -59,11 +55,10 @@ urllib3
 # needed for mapping reasons.
 simplejson
 
-# docs / readthedocs.io
-sphinx
-sphinx-autobuild
-recommonmark
-
 # Remote worker TLS
 pyopenssl
 certifi
+
+# static file collection/generation
+django_compressor  # bundle javascript and css
+csscompressor  # css compression

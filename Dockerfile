@@ -18,10 +18,10 @@ COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
 
 # Install app by linking source into virtualenv. This is against convention
 # but allows the source to be overwritten by a volume during development.
-RUN /pyenv/bin/pip install -e /source/
+RUN /pyenv/bin/pip install -e /source/ --no-deps
 
 # switch to lightweight base image for distribution
-FROM python:3-slim
+FROM python:3.6-slim
 
 # hack for slim image to fix broken install of postgres
 RUN /bin/bash -c 'mkdir -p /usr/share/man/man{1..8}'

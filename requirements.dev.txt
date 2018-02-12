@@ -1,4 +1,4 @@
-# tools/dependencies required for development or running tests
+# Tools/dependencies required for development or running tests.
 autopep8
 autoflake
 isort
@@ -21,3 +21,19 @@ pytest-mock
 # # run failmap celery flower
 # # go to http://localhost:5555/
 # celery-flower
+
+# docs / readthedocs.io
+sphinx
+sphinx-autobuild
+recommonmark
+
+# brotlipy  # doesn't work, some vague errors not worth the time: compression handled elsewhere
+# slimit does not work with vue.js
+
+# profiling
+django-silk
+
+# tests (of scanners)
+httmock
+freezegun
+colorama
