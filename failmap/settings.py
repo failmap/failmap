@@ -205,7 +205,7 @@ LANGUAGES = (
     ('nl', 'Dutch'),
     # This helps to find missing translations. Using this language the goal is to replace all text
     # strings with a single rainbow. In the end there should be no text, only rainbows! 🌈
-    ('🌈🦄', '🌈'),
+    ('rainbowsandunicorns', '🌈'),
 )
 
 # There is no 🌈🦄 translation for humanize. Instead you'll get the english fallback values.
