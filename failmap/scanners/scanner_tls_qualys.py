@@ -146,7 +146,9 @@ def qualys_scan(self, url):
     # The 'retry' converts this task instance from a rate_limited into a
     # scheduled task, so retrying tasks won't interfere with new tasks to be
     # started
-    raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30)
+    # We use a different queue here as only initial requests count toward the rate limit
+    # set by Qualys.
+    raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30, queue='scanners')
 
 
 @app.task(queue='storage')

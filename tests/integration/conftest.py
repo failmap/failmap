@@ -1,3 +1,4 @@
+import logging
 import os
 import signal
 import subprocess
@@ -7,6 +8,9 @@ import time
 import pytest
 
 from failmap.celery import app, waitsome
+
+log = logging.getLogger(__name__)
+
 
 TIMEOUT = 30
 
@@ -22,9 +26,24 @@ def celery_app():
     yield app
 
 
-@pytest.fixture()
-def celery_worker(queues):
-    worker_command = ['failmap', 'celery', 'worker', '-l', 'info', '--queues', ','.join(queues)]
+@pytest.fixture(params=['prefork', 'eventlet'])
+def celery_worker(queues, request):
+    """Spawn celery worker to be used during test.
+
+    This worker only listens on specified queues to ensure test integrity!
+
+    Tests on both implementations of worker."""
+    pool = request.param
+
+    worker_command = [
+        'failmap',
+        'celery',
+        'worker',
+        '-l', 'info',
+        '--pool', pool,
+        '--queues', ','.join(queues)
+    ]
+    log.info('Running worker with: %s', ' '.join(worker_command))
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid)

@@ -59,7 +59,7 @@ WORKER_QUEUE_CONFIGURATION = {
 }
 
 
-def worker_configuration(conf):
+def worker_configuration():
     """Apply specific configuration for worker depending on environment."""
 
     role = os.environ.get('WORKER_ROLE', 'default')
@@ -67,10 +67,10 @@ def worker_configuration(conf):
     log.info('Configuring worker for role: %s', role)
 
     # configure which queues should be consumed depending on assigned role for this worker
-    conf.task_queues = WORKER_QUEUE_CONFIGURATION[role]
+    return {'task_queues': WORKER_QUEUE_CONFIGURATION[role]}
 
 
-def tls_client_certificate(conf):
+def tls_client_certificate():
     """Configure certificates from PKCS12 file.
 
     If client file is provided will extract key and certificate pem to files and
@@ -98,11 +98,14 @@ def tls_client_certificate(conf):
         tls_client_cert_file.write(OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, p12.get_certificate()))
 
         # configure redis to use TLS
-        conf.broker_use_ssl = {
-            'ssl_keyfile': tls_client_key_file.name,
-            'ssl_certfile': tls_client_cert_file.name,
-            'ssl_ca_certs': certifi.where(),
-            'ssl_cert_reqs': ssl.CERT_REQUIRED
+        return {
+            'broker_use_ssl': {
+                'ssl_keyfile': tls_client_key_file.name,
+                'ssl_certfile': tls_client_cert_file.name,
+                'ssl_ca_certs': certifi.where(),
+                'ssl_cert_reqs': ssl.CERT_REQUIRED,
+            }
         }
     else:
         log.info('no PKCS12 file found, not configuring TLS.')
+        return {}

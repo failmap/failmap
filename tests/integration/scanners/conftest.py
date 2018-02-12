@@ -20,10 +20,13 @@ def faalonië():
     subprocess.call(['failmap', 'load_dataset', 'faalonie'])
 
 
-@pytest.fixture(scope="session")
-def worker():
+@pytest.fixture(scope='session', params=['prefork', 'eventlet'])
+def worker(request):
     """Run a task worker instance."""
-    worker_command = ['failmap', 'celery', 'worker', '-l', 'info']
+
+    pool = request.param
+
+    worker_command = ['failmap', 'celery', 'worker', '-l', 'info', '--pool', pool]
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid)
