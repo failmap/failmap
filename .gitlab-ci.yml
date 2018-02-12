@@ -38,7 +38,6 @@ test_mysql: &test_mysql_template
     DJANGO_DATABASE: production
     # add mysqlclient to tox environment
     TOX_EXTRAS: deploy
-  only: [master]
   retry: 1
 
 # functional testing using postgres database instead of sqlite
@@ -73,9 +72,6 @@ check:
     - tox -e check
     - shellcheck tests/*.sh tools/*.sh
 
-  # runs on merge requests, merge requests require rebase, no need to run on master again
-  except: [master]
-
 # integration tests
 integration:
   <<: *test_template
@@ -100,9 +96,6 @@ dataset:
   script:
     - tox -e datasets
 
-  # runs on merge requests, merge requests require rebase, no need to run on master again
-  except: [master]
-
 dataset_mysql:
   <<: *test_mysql_template
   script:
@@ -115,8 +108,7 @@ dataset_postgres:
   script:
     - tox -e datasets
   # run long tests only on master
-  only:
-    - master
+  only: [master]
 
 # create distributable release
 build:
@@ -193,8 +185,7 @@ codequality:
     paths: [codeclimate.json]
   retry: 1
   # the container for this test is really slow to download, only run daily on master branch
-  only:
-    - schedules
+  only: [schedules]
 
 
 staging:
@@ -244,6 +235,5 @@ production:
 
     # insert deploy magic here
 
-  only:
-    - tags
+  only: [tags]
   retry: 1
