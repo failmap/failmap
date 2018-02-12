@@ -1,5 +1,15 @@
-# use full image for build (compile) dependencies
-FROM python:3.6 as build
+# base build on small footprint image
+FROM python:3.6-alpine as build
+
+RUN apk --no-cache add \
+  build-base \
+  zlib-dev \
+  jpeg-dev \
+  libffi-dev \
+  openssl-dev \
+  mariadb-dev \
+  postgresql-dev \
+  linux-headers
 
 # install app and dependencies in a artifact-able directory
 RUN pip install virtualenv
@@ -20,17 +30,19 @@ COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
 # but allows the source to be overwritten by a volume during development.
 RUN /pyenv/bin/pip install -e /source/ --no-deps
 
-# switch to lightweight base image for distribution
-FROM python:3.6-slim
+# restart with a clean image
+FROM python:3.6-alpine
 
-# hack for slim image to fix broken install of postgres
-RUN /bin/bash -c 'mkdir -p /usr/share/man/man{1..8}'
-
-# install dependent libraries (remove cache to prevent inclusion in layer)
-RUN apt-get update && \
-  apt-get install -yqq libxml2 libmysqlclient18 mysql-client postgresql \
-    postgresql-contrib mime-support python-watchdog python-setuptools && \
-  rm -rf /var/lib/apt/lists/*
+# mailcap includes mimetypes required by uwsgi
+RUN apk --no-cache add \
+  zlib\
+  libjpeg \
+  libffi \
+  openssl \
+  libxml2 \
+  mariadb-client-libs \
+  postgresql-libs \
+  mailcap
 
 # install build application
 COPY --from=build /pyenv /pyenv

@@ -131,7 +131,7 @@ build:
     - python3 setup.py --version > version
 
     # build docker image and push to registry
-    - docker build -t registry.gitlab.com/failmap/failmap:build .
+    - docker build . --tag registry.gitlab.com/failmap/failmap:build
     - docker push registry.gitlab.com/failmap/failmap:build
 
     # push version tag to docker registry
@@ -160,7 +160,7 @@ build_test:
 
   script:
     # build docker image to test building
-    - docker build . -t failmap
+    - docker build . --tag failmap
 
     # run simple smoketests to verify Docker image is sane
     - tests/docker.sh docker
