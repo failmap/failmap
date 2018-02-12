@@ -64,6 +64,8 @@ def worker_configuration(conf):
 
     role = os.environ.get('WORKER_ROLE', 'default')
 
+    log.info('Configuring worker for role: %s', role)
+
     # configure which queues should be consumed depending on assigned role for this worker
     conf.task_queues = WORKER_QUEUE_CONFIGURATION[role]
 
