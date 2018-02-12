@@ -30,8 +30,13 @@ WORKER_QUEUE_CONFIGURATION = {
         # default queue for task with no explicit queue assigned
         # these tasks should not expect network connectivity or database access!
         Queue('default'),
-
         # legacy default queue, can be removed after transition period to multiworkers
+        Queue('celery'),
+    ],
+    # worker with access to storage allowed to connect to databases
+    'storage': [
+        Queue('storage'),
+        Queue('default'),
         Queue('celery'),
     ],
     # universal scanner worker that has internet access for both IPv4 and IPv6
@@ -39,6 +44,9 @@ WORKER_QUEUE_CONFIGURATION = {
         Queue('scanners'),
         Queue('scanners.ipv4'),
         Queue('scanners.ipv6'),
+    ],
+    # special scanner worker for qualys rate limited tasks to not block queue for other tasks
+    'scanner_qualys': [
         Queue('scanners.qualys'),
     ],
     # scanner with no IPv6 connectivity
@@ -47,7 +55,6 @@ WORKER_QUEUE_CONFIGURATION = {
     'scanner_ipv4_only': [
         Queue('scanners'),
         Queue('scanners.ipv4'),
-        Queue('scanners.qualys'),
     ],
 }
 
