@@ -1,11 +1,12 @@
 stages:
-  - test_build
+  - test
+  - build
   - staging
   - production
 
 # functional testing
 test: &test_template
-  stage: test_build
+  stage: test
 
   image: registry.gitlab.com/failmap/ci:latest
 
@@ -65,7 +66,7 @@ test_postgres: &test_postgres_template
 # code quality checks
 check:
   <<: *test_template
-  stage: test_build
+  stage: test
 
   script:
     - tox -e check
@@ -74,7 +75,7 @@ check:
 # integration tests
 integration:
   <<: *test_template
-  stage: test_build
+  stage: test
 
   services:
     - redis:latest
@@ -86,9 +87,6 @@ integration:
 
   script:
     - tox -e integration
-
-  # runs on merge requests, merge requests require rebase, no need to run on master again
-  except: [master]
 
 dataset:
   <<: *test_template
@@ -111,7 +109,7 @@ dataset_postgres:
 
 # create distributable release
 build:
-  stage: test_build
+  stage: build
 
   services:
     - docker:dind
@@ -144,7 +142,7 @@ build:
 
 # test building image & run image smoketest
 build_test:
-  stage: test_build
+  stage: test
 
   services:
     - docker:dind
@@ -168,25 +166,6 @@ build_test:
   except: [master]
   retry: 1
 
-
-# provide codequality context for merge requests
-codequality:
-  stage: test_build
-
-  services:
-    - docker:dind
-
-  image: docker:latest
-  script:
-    # run code quality
-    - docker run --env CODECLIMATE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock --volume /tmp/cc:/tmp/cc codeclimate/codeclimate:latest analyze -f json > codeclimate.json
-  artifacts:
-    paths: [codeclimate.json]
-  retry: 1
-  # the container for this test is really slow to download, only run daily on master branch
-  only: [schedules]
-
-
 staging:
   stage: staging
 
@@ -196,8 +175,8 @@ staging:
 
   before_script:
     # required for quering python package version
-    - apk add --no-cache python3 curl
-    - pip3 install docker-compose
+    - apk add --no-cache python3
+    - pip3 install docker-compose tox
 
   script:
     # store current version as artifact to copy into docker container
@@ -208,8 +187,7 @@ staging:
     - docker pull registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
     - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:staging
 
-    # run provisional staging test suite using docker-composer
-    - tests/staging.sh
+    # here is where I would put my staging integration tests, if I had one!!!
 
     # promote to staging after tests have succeeded
     - docker push registry.gitlab.com/failmap/failmap:staging
