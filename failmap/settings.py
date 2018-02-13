@@ -146,6 +146,10 @@ DATABASE_OPTIONS = {
     'mysql': {'init_command': "SET sql_mode='STRICT_ALL_TABLES';"},
 
 }
+DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql')
+DATABASE_ENGINES = {
+    'mysql': 'failmap.app.backends.mysql',
+}
 DATABASES_SETTINGS = {
     # persisten local database used during development (runserver)
     'dev': {
@@ -159,7 +163,7 @@ DATABASES_SETTINGS = {
     },
     # for production get database settings from environment (eg: docker)
     'production': {
-        'ENGINE': 'django.db.backends.' + os.environ.get('DB_ENGINE', 'mysql'),
+        'ENGINE': DATABASE_ENGINES.get(DB_ENGINE, 'django.db.backends.' + DB_ENGINE),
         'NAME': os.environ.get('DB_NAME', 'failmap'),
         'USER': os.environ.get('DB_USER', 'failmap'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'failmap'),
@@ -301,7 +305,7 @@ LOGGING = {
             '()': 'colorlog.ColoredFormatter',
             'format': '%(log_color)s%(asctime)s\t%(levelname)-8s - '
                       '%(message)s',
-            'datefmt': '%Y%-m-%d %H:%M',
+            'datefmt': '%Y-%m-%d %H:%M',
             'log_colors': {
                 'DEBUG': 'green',
                 'INFO': 'white',
