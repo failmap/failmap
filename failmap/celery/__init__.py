@@ -16,6 +16,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
 
 app = Celery(__name__)
 app.config_from_object('django.conf:settings', namespace='CELERY')
+# use same result backend as we use for broker url
+app.conf.result_backend = app.conf.broker_url.replace('amqp://', 'rpc://')
+
 # autodiscover all celery tasks in tasks.py files inside failmap modules
 appname = __name__.split('.', 1)[0]
 app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])

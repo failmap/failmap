@@ -449,7 +449,6 @@ CELERY_result_serializer = 'pickle'
 
 # Celery config
 CELERY_BROKER_URL = os.environ.get('BROKER', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('RESULT_BACKEND', CELERY_BROKER_URL.replace('amqp://', 'rpc://'))
 ENABLE_UTC = True
 
 # Any data transfered with pickle needs to be over tls... you can inject arbitrary objects with

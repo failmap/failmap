@@ -2,38 +2,24 @@ import logging
 import os
 import re
 import subprocess
-import urllib
+import urllib.request
 
 import pytest
 from retry import retry
 
 log = logging.getLogger(__name__)
 
-TIMEOUT = 30
+TIMEOUT = os.environ.get('TIMEOUT', 30)
 
 
 @pytest.fixture(scope='session')
 def failmap(docker_ip, docker_services):
-
-    url = 'http://%s:%d' % (
-        docker_ip,
-        int(docker_services('port admin 8000').split(':')[-1]),
-    )
-
-    log.info('Waiting for url %s to be responsive.', url)
-
-    @retry(tries=TIMEOUT, delay=1, logger=log)
-    def check():
-        with urllib.request.urlopen(url) as f:
-            if f.status == 200:
-                return
-    check()
-
     class Failmap:
-        admin_url = url
+        admin_url = 'http://%s:%d' % (
+            docker_ip, int(docker_services('port admin 8000').split(':')[-1]),
+        )
         frontend_url = 'http://%s:%d' % (
-            docker_ip,
-            int(docker_services('port frontend 8000').split(':')[-1]),
+            docker_ip, int(docker_services('port frontend 8000').split(':')[-1]),
         )
 
         def get_admin(self, path):
@@ -66,9 +52,8 @@ def docker_ip():
 
 
 @pytest.fixture(scope='session')
-def docker_services(pytestconfig):
+def docker_services(pytestconfig, docker_ip):
     """Ensure all Docker-based services are up and running."""
-
     docker_compose_file = os.path.join(
         str(pytestconfig.rootdir),
         'tests',
@@ -81,14 +66,34 @@ def docker_services(pytestconfig):
             docker_compose_file, docker_compose_project_name, args
         )
         log.info('Running command: %s', command)
-        return subprocess.check_output(command, shell=True, universal_newlines=True)
+        env = dict(os.environ, ALLOWED_HOSTS=docker_ip)
+        return subprocess.check_output(command, env=env, shell=True, universal_newlines=True)
 
     docker_compose('up -d')
+
+    url = 'http://%s:%d' % (docker_ip, int(docker_compose('port admin 8000').split(':')[-1]))
+
+    log.info('Waiting for url %s to be responsive.', url)
+
+    @retry(tries=TIMEOUT, delay=1, logger=log)
+    def check():
+        with urllib.request.urlopen(url) as f:
+            assert f.status == 200
+            return
+
+    try:
+        check()
+    except BaseException:
+        for service in docker_compose('config --services').splitlines():
+            print(service)
+            for line in docker_compose('logs %s' % service).splitlines():
+                print(line)
+        docker_compose('down -v')
+        raise
 
     yield docker_compose
 
     for service in docker_compose('config --services').splitlines():
         for line in docker_compose('logs %s' % service).splitlines():
-            log.info(line)
-
+            print(line)
     docker_compose('down -v')

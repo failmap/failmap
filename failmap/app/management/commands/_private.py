@@ -1,15 +1,12 @@
 """Management command base classes."""
 import json
 import logging
-import os
-import sys
 import time
 from collections import Counter
 
 import kombu.exceptions
 from celery.result import AsyncResult, ResultSet
 from django.conf import settings
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from failmap.app.common import ResultEncoder
@@ -157,37 +154,3 @@ class ScannerTaskCommand(TaskCommand):
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_task(organization_filter)
-
-
-class RunWrapper(BaseCommand):
-    """UWSGI/runserver command wrapper."""
-
-    help = __doc__
-
-    command = None
-
-    def add_arguments(self, parser):
-        parser.add_argument('-m', '--migrate', action='store_true',
-                            help='Before starting server run Django migrations.')
-        parser.add_argument('-l', '--loaddata', default=None, type=str,
-                            help='Comma separated list of data fixtures to load.')
-
-        super().add_arguments(parser)
-
-    def handle(self, *args, **options):
-        """Optionally run migrations and load data."""
-
-        if options['migrate'] or options['loaddata']:
-            # detect if we run inside the autoreloader's second thread
-            inner_run = os.environ.get('RUN_MAIN', False)
-
-            if inner_run:
-                log.info('Inner run: skipping --migrate/--loaddata.')
-            else:
-                if options['migrate']:
-                    call_command('migrate')
-                if options['loaddata']:
-                    call_command('load_dataset', *options['loaddata'].split(','))
-
-        sys.stdout.flush()
-        call_command(self.command)

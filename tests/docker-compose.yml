@@ -10,7 +10,7 @@ services:
     # Not configuring persistent storage for broker. Restarting will cause all unfinished
     # tasks to be forgotten, instead of lingering around.
     ports:
-      - 6379:6379
+      - 6379
 
   # stateful storage
   database:
@@ -24,7 +24,7 @@ services:
       MYSQL_USER: "${DB_USER:-failmap}"
       MYSQL_PASSWORD: "${DB_PASSWORD:-failmap}"
     ports:
-      - 3306:3306
+      - 3306
     # Configure database to persist accross restarts of the development environment.
     volumes:
       # overwrite memory hungry default config for docker mysql

@@ -128,7 +128,7 @@ build:
     - python3 setup.py --version > version
 
     # build docker image and push to registry
-    - docker build . --tag registry.gitlab.com/failmap/failmap:build
+    - time docker build . --tag registry.gitlab.com/failmap/failmap:build
     - docker push registry.gitlab.com/failmap/failmap:build
 
     # push version tag to docker registry
@@ -148,10 +148,37 @@ image_test:
     - docker:dind
 
   image: registry.gitlab.com/failmap/ci:docker-git
-
   variables:
-    ALLOWED_HOSTS: docker
-    IMAGE: failmap
+    TIMEOUT: 120
+
+  before_script:
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
+  script:
+    # build docker image to test building
+    - time docker build . --tag registry.gitlab.com/failmap/failmap:latest
+
+    # run simple smoketests to verify Docker image is sane
+    - time tests/docker.sh docker
+
+    # run system tests against image
+    - time tox -e system
+
+  # run on merge request to determine if build will not break on master
+  except: [master]
+  retry: 1
+
+# compare difference in build time between this and image_test without pull
+image_test_with_pull:
+  stage: test
+
+  services:
+    - docker:dind
+
+  image: registry.gitlab.com/failmap/ci:docker-git
+  variables:
+    TIMEOUT: 120
 
   before_script:
     # login to docker and cache previous image if available
@@ -160,13 +187,13 @@ image_test:
 
   script:
     # build docker image to test building
-    - docker build . --tag failmap
+    - time docker build . --tag registry.gitlab.com/failmap/failmap:latest
 
     # run simple smoketests to verify Docker image is sane
-    - tests/docker.sh docker
+    - time tests/docker.sh docker
 
     # run system tests against image
-    - tox -e system
+    - time tox -e system
 
   # run on merge request to determine if build will not break on master
   except: [master]
@@ -180,7 +207,6 @@ test_system:
   - docker:dind
 
   variables:
-    ALLOWED_HOSTS: docker
     IMAGE: registry.gitlab.com/failmap/failmap:build
 
   before_script:
@@ -188,7 +214,7 @@ test_system:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
 
   script:
-    - tox -e system
+    - time tox -e system
 
   only: [master]
 

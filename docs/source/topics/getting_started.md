@@ -11,8 +11,8 @@ Download and install below system requirements to get started:
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3.6](https://www.python.org/downloads/) (download and install)
 - [Tox](http://tox.readthedocs.io/) (`pip3 install --user tox`)
-- [direnv](https://direnv.net/) (recommended, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
-- [Docker](https://docs.docker.com/engine/installation/) (optional, recommended, follow instructions to install.)
+- [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
+- [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
 
 ## Quickstart
 
@@ -36,57 +36,12 @@ After completing succesfully the application is available to run:
 
     failmap -h
 
-To perform non-Docker development, make sure all 'Requirements' are installed. Run the following command to setup a development instance:
+The following commands will start a complete developer instance of failmap with all required services.
 
-    tox -e setup
-
-After this run to the following command to start a development server:
-
-    failmap runserver
+    failmap devserver
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
-
-The setup script performs the following steps:
-
-    # creates the database
-    failmap migrate
-
-    # create a user to view the admin interface
-    failmap load_dataset development
-
-    # loads a series of sample data into the database
-    failmap load_dataset testdata
-
-    # calculate the scores that should be displayed on the map
-    failmap rebuild_ratings
-
-## Scanning services (beta)
-
-Some scanners require redis to be installed. We're currently in transition from running scanners
-manually to supporting both manual scans and redis.
-
-Read more about installing redis, [here](https://redis.io/topics/quickstart)
-
-Each of the below commands requires their own command line window:
-
-    # start redis
-    redis-server
-
-    # start a worker
-    failmap celery worker -ldebug
-
-These services help fill the database with accurate up to date information. Run each one of them in
-a separate command line window and keep them running.
-
-    # handles all new urls with an initial (fast) scan
-    failmap onboard_service
-
-    # slowly gets results from qualys
-    failmap scan_tls_qualys_service
-
-    # makes many gigabytes of screenshots
-    failmap screenshot_service
 
 ## Using the software
 
@@ -181,14 +136,9 @@ or
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python
 virtual environment. Install direnv and run `direnv allow` to enable it initially. After this the environment will by automatically loaded/unloaded every time you enter/leave the project directory.
 
-Alternatively you can manually create a virtualenv using:
+If you don't want to use Direnv be sure to source the `.envrc` file manually every time you want to work on the project:
 
-    virtualenv venv
-
-Be sure to active the environment before starting development every time and see `.envrc` for other settings that are normally enabled by direnv:
-
-    . venv/bin/activate
-    export DEBUG=1
+    . .envrc
 
 # Known Issues
 

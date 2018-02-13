@@ -14,6 +14,7 @@ So much fail, so little documentation 🤣
    topics/gis_and_map_information
    topics/scanners_scanning_and_ratings
    topics/task_processing_system
+   topics/deployment
 
 
 Indices and tables
