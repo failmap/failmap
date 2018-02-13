@@ -5,9 +5,8 @@ services:
   # message broker to distribute tasks
   broker:
     image: redis
-    # this containers logging is not really that interesting during development
-    logging:
-      driver: none
+    stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
+    logging: {driver: none}
     # Not configuring persistent storage for broker. Restarting will cause all unfinished
     # tasks to be forgotten, instead of lingering around.
     ports:
@@ -16,9 +15,8 @@ services:
   # stateful storage
   database:
     image: mysql
-    # this containers logging is not really that interesting during development
-    logging:
-      driver: none
+    stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
+    logging: {driver: none}
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD:
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-secret}"
@@ -29,13 +27,13 @@ services:
       - 3306:3306
     # Configure database to persist accross restarts of the development environment.
     volumes:
-      - ./dev_db/:/var/lib/mysql/
       # overwrite memory hungry default config for docker mysql
       - ./etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf
 
   # task executer
   worker:
     image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker
       - database:mysql
@@ -46,66 +44,40 @@ services:
       DJANGO_DATABASE: production
       # let celery be a little more informative regarding console messages
       TERM: xterm-color
-    # mount current source into container to allow changes to propagate without container rebuild
-    volumes:
-      - ./failmap:/source/failmap
-      - ./tools:/source/tools
     command: [ "celery", "worker", "-l", "info", "--pool", "eventlet"]
 
   # web interfaces
   admin:
     image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker
       - database:mysql
     environment:
       BROKER: redis://broker:6379/0
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1,::1}"
       DJANGO_DATABASE: production
-      UWSGI_PYTHON_AUTORELOAD: "no"
-      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost}"
       # django decides what to log based on type of console
       TERM: xterm-color
     ports:
-      - "${ADMIN_PORT:-8000}:8000"
-    command: [ "runuwsgi" ]
+      - "8000"
+    volumes:
+      - ../failmap:/source/failmap
+    command: production --migrate --loaddata development
+
   frontend:
     image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker
       - database:mysql
     environment:
-      BROKER: redis://broker:6379/0
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1,::1}"
       DJANGO_DATABASE: production
       UWSGI_PYTHON_AUTORELOAD: "no"
-      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost}"
       # django decides what to log based on type of console
       TERM: xterm-color
       SERVICE_NAME: failmap-frontend
     ports:
-      - "${FRONTEND_PORT:-8001}:8000"
-    command: [ "runuwsgi" ]
-
-  # migrate
-  migrate:
-    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
-    links:
-      - database:mysql
-    environment:
-      DJANGO_DATABASE: production
-      # django decides what to log based on type of console
-      TERM: xterm-color
-    command: [ "migrate" ]
-    # retry if action failes (ie: database container is not ready yet)
-    restart: on-failure
-
-  loaddata:
-    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
-    links:
-      - database:mysql
-    environment:
-      DJANGO_DATABASE: production
-      # django decides what to log based on type of console
-      TERM: xterm-color
-    command: [ "load_dataset", "development", "testdata" ]
-    # retry if action failes (ie: database container is not ready yet)
-    restart: on-failure
+      - "8000"
+    command: production

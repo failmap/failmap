@@ -114,7 +114,7 @@ build:
   services:
     - docker:dind
 
-  image: docker:git
+  image: registry.gitlab.com/failmap/ci:docker-git
 
   before_script:
     # required for quering python package version
@@ -141,16 +141,19 @@ build:
   retry: 1
 
 # test building image & run image smoketest
-build_test:
+image_test:
   stage: test
 
   services:
     - docker:dind
 
-  image: docker:git
+  image: registry.gitlab.com/failmap/ci:docker-git
+
+  variables:
+    ALLOWED_HOSTS: docker
+    IMAGE: failmap
 
   before_script:
-    - apk add --no-cache curl
     # login to docker and cache previous image if available
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/failmap/failmap:latest || true
@@ -162,30 +165,52 @@ build_test:
     # run simple smoketests to verify Docker image is sane
     - tests/docker.sh docker
 
+    # run system tests against image
+    - tox -e system
+
   # run on merge request to determine if build will not break on master
   except: [master]
   retry: 1
 
+test_system:
+  stage: staging
+
+  image: registry.gitlab.com/failmap/ci:docker-git
+  services:
+  - docker:dind
+
+  variables:
+    ALLOWED_HOSTS: docker
+    IMAGE: registry.gitlab.com/failmap/failmap:build
+
+  before_script:
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
+  script:
+    - tox -e system
+
+  only: [master]
+
 staging:
   stage: staging
 
-  image: docker:git
+  image: registry.gitlab.com/failmap/ci:docker-git
   services:
   - docker:dind
 
   before_script:
-    # required for quering python package version
-    - apk add --no-cache python3
-    - pip3 install docker-compose tox
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
 
   script:
     # store current version as artifact to copy into docker container
     - python3 setup.py --version > version
+    - export tag=$(cat version|tr + _)
 
-    # build docker image and push to registry
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull registry.gitlab.com/failmap/failmap:$(cat version|tr + _)
-    - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:staging
+    # pull latest version and tag as staging
+    - docker pull registry.gitlab.com/failmap/failmap:$tag
+    - docker tag registry.gitlab.com/failmap/failmap:$tag registry.gitlab.com/failmap/failmap:staging
 
     # here is where I would put my staging integration tests, if I had one!!!
 
@@ -193,7 +218,7 @@ staging:
     - docker push registry.gitlab.com/failmap/failmap:staging
 
     # until there is a CD staging environment
-    - docker tag registry.gitlab.com/failmap/failmap:$(cat version|tr + _) registry.gitlab.com/failmap/failmap:latest
+    - docker tag registry.gitlab.com/failmap/failmap:$tag registry.gitlab.com/failmap/failmap:latest
     - docker push registry.gitlab.com/failmap/failmap:latest
 
   only: [master]
@@ -202,13 +227,17 @@ staging:
 production:
   stage: production
 
-  image: docker:git
+  image: registry.gitlab.com/failmap/ci:docker-git
   services:
   - docker:dind
+
+  before_script:
+    # login to docker and cache previous image if available
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
   script:
     - export tag=$(git describe --exact-match --tags --abbrev=0)
     # build docker image and push to registry
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     - docker pull registry.gitlab.com/failmap/failmap:$tag
     - docker tag registry.gitlab.com/failmap/failmap:$tag registry.gitlab.com/failmap/failmap:latest
     - docker push registry.gitlab.com/failmap/failmap:latest

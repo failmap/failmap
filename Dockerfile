@@ -21,15 +21,6 @@ RUN /pyenv/bin/pip install -r /source/requirements.txt
 COPY requirements.deploy.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
 
-# copy all relevant files for python installation
-COPY ./failmap/ /source/failmap/
-# add wildcard to version file as it may not exists (eg: local development)
-COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
-
-# Install app by linking source into virtualenv. This is against convention
-# but allows the source to be overwritten by a volume during development.
-RUN /pyenv/bin/pip install -e /source/ --no-deps
-
 # restart with a clean image
 FROM python:3.6-alpine
 
@@ -44,14 +35,23 @@ RUN apk --no-cache add \
   postgresql-libs \
   mailcap
 
-# install build application
-COPY --from=build /pyenv /pyenv
-COPY --from=build /source /source
-
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
+
+# install build application
+COPY --from=build /pyenv /pyenv
+COPY --from=build /source /source
+
+# copy all relevant files for python installation
+COPY ./failmap/ /source/failmap/
+# add wildcard to version file as it may not exists (eg: local development)
+COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
+
+# Install app by linking source into virtualenv. This is against convention
+# but allows the source to be overwritten by a volume during development.
+RUN /pyenv/bin/pip install -e /source/ --no-deps
 
 WORKDIR /
 

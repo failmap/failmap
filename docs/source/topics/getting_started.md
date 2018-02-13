@@ -163,6 +163,19 @@ Pytest allows to drop into Python debugger when a tests fails. To enable run:
 
     tox -- --pdb
 
+### Integration/system tests
+Besides quality checks and unit tests there are also integration and system testing frameworks available.
+
+These frameworks will run in the CI system but not by default when running `tox` due to their dependencies.
+
+To run these testsuites make sure Docker is installed and running and run either:
+
+    tox -e integration
+
+or
+
+    tox -e system
+
 ### Direnv / Virtualenv
 
 This project has [direnv](https://direnv.net/) configuration to automatically manage the Python

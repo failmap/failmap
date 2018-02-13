@@ -16,6 +16,7 @@ django-extensions
 django-debug-toolbar
 django-debug-toolbar-request-history
 pytest-mock
+pytest-docker
 
 # # dashboard for celery introspection
 # # run failmap celery flower

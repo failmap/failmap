@@ -12,16 +12,19 @@ else
   timeout="timeout 15"
 fi
 
+handle_exception(){
+  docker logs failmap;
+  docker stop failmap&
+}
+
 # start docker container
-docker run --rm --name failmap -e "ALLOWED_HOSTS=$host" -p 8000:8000 -d failmap runuwsgi
-trap "docker logs failmap;docker stop failmap&" EXIT
+docker run --rm --name failmap -e "ALLOWED_HOSTS=$host" -p 8000:8000 -d \
+  "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}" \
+  production --migrate --loaddata development
+trap "handle_exception" EXIT
 
 # wait for server to be ready
 $timeout /bin/sh -c "while ! curl -sSIk http://$host:8000 | grep 200\ OK;do sleep 1;done"
-
-# setup database and implicitly test running commands
-docker exec failmap failmap migrate
-docker exec failmap failmap loaddata development
 
 # index page
 curl -s "http://$host:8000" |grep MSPAINT.EXE
@@ -32,5 +35,10 @@ curl -sI "http://$host:8000/static/$(curl -s "http://$host:8000/static/CACHE/man
 # admin login
 curl -si --cookie-jar cookie --cookie cookie "http://$host:8000/admin/login/"|grep 200\ OK
 curl -si --cookie-jar cookie --cookie cookie --data "csrfmiddlewaretoken=$(grep csrftoken cookie | cut -f 7)&username=admin&password=faalkaart" "http://$host:8000/admin/login/"|grep 302\ Found
+
+trap "" EXIT
+
+# cleanup
+docker stop failmap&
 
 echo "All good!"

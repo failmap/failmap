@@ -9,7 +9,6 @@ import logging
 import os
 
 from django.db.backends.mysql.base import DatabaseWrapper as MysqlDatabaseWrapper
-
 from retry import retry
 
 TRIES = os.environ.get('DB_CONNECT_RETRIES', 10)

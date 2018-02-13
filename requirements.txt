@@ -62,3 +62,5 @@ certifi
 # static file collection/generation
 django_compressor  # bundle javascript and css
 csscompressor  # css compression
+
+retry
