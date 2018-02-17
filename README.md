@@ -37,6 +37,8 @@ The documentation for this project is hosted at [ReadTheDocs](http://failmap.rea
 
 Documentation is also included on our [Gitlab Repo](https://gitlab.com/failmap/failmap/blob/master/docs/index.rst).
 
+# Get involved
+We are an open organisation run by volunteers, if you like to join and contribute e-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl), come by for a chat at: [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#), or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/failmap/failmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/failmap/failmap.org/merge_requests/new).
 
 # Thanks to
 This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
