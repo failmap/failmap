@@ -3,6 +3,8 @@
 
 
 # Introduction
+
+[![Join the chat at https://gitter.im/internet-cleanup-foundation/Lobby](https://badges.gitter.im/internet-cleanup-foundation/Lobby.svg)](https://gitter.im/internet-cleanup-foundation/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Failmap is a web application that continuously scans and evaluates (government) organization websites for security best practices and allows these results to be published on a map.
 
 This repository contains the main application of Failmap, it consists of a public web frontend, a administrative interface and scanners.
