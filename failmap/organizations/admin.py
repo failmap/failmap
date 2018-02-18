@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.urls import reverse
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
 import failmap.scanners.scanner_http as scanner_http
@@ -137,7 +138,7 @@ class ActionMixin:
         self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
 
 
-class OrganizationAdmin(ActionMixin, admin.ModelAdmin):
+class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'type', 'country')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
@@ -146,7 +147,7 @@ class OrganizationAdmin(ActionMixin, admin.ModelAdmin):
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
 
-class UrlAdmin(ActionMixin, admin.ModelAdmin):
+class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
     search_fields = ('url', )
@@ -259,21 +260,21 @@ class UrlAdmin(ActionMixin, admin.ModelAdmin):
     actions.append('timeline_debug')
 
 
-class OrganizationTypeAdmin(admin.ModelAdmin):
+class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', )
     search_fields = ('name', )
     list_filter = ('name', )
     fields = ('name', )
 
 
-class CoordinateAdmin(admin.ModelAdmin):
+class CoordinateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('organization', 'geojsontype')
     search_fields = ('organization', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
     fields = ('organization', 'geojsontype', 'area')
 
 
-class PromiseAdmin(admin.ModelAdmin):
+class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('organization', 'created_on', 'expires_on')
     search_fields = ('organization',)
     list_filter = ('organization',)

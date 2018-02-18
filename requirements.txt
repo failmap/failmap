@@ -9,6 +9,7 @@ django==1.11.8
 django-jet
 django-countries
 django-jsonfield
+django-import-export
 
 pyyaml
 typing

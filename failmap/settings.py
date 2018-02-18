@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'import_export',
     'failmap.fail',
     'failmap.organizations',
     'failmap.scanners',
@@ -548,3 +549,6 @@ SENTRY_PROJECT_URL = 'https://sentry.io/%s/%s' % (SENTRY_ORGANIZATION, SENTRY_PR
 # The defaults stem from our live environment, where we've set IPv4 being present on all containers and workers.
 NETWORK_SUPPORTS_IPV4 = os.environ.get('NETWORK_SUPPORTS_IPV4', True)
 NETWORK_SUPPORTS_IPV6 = os.environ.get('NETWORK_SUPPORTS_IPV6', False)
+
+# atomic imports: fail completely, not half
+IMPORT_EXPORT_USE_TRANSACTIONS = True

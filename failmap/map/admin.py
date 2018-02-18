@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from import_export.admin import ImportExportModelAdmin
 
 from .models import OrganizationRating, UrlRating
 
 
-class OrganizationRatingAdmin(admin.ModelAdmin):
+class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_organization(self, obj):
         return format_html(
             '<a href="../../organizations/organization/{id}/change">inspect organization</a>',
@@ -20,7 +21,7 @@ class OrganizationRatingAdmin(admin.ModelAdmin):
     save_as = True
 
 
-class UrlRatingAdmin(admin.ModelAdmin):
+class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
                            id=format(obj.url_id))
