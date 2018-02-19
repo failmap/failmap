@@ -27,11 +27,11 @@ Lastly:
 can be seen as an attack.
 
 
-# Getting Coding
+## Getting Coding
 Failmap is written in Python. Easiest for everyone is to use dependencies that are in Python modules or standalone code.
 
 
-## Creating a new scanner and scanner command
+### Creating a new scanner and scanner command
 Scanners are located here:
 ```
 /failmap/scanners/scanner_*.py
@@ -44,7 +44,7 @@ via the failmap command line tool. This might help development a bit.
 /failmap/scanners/management/commands/scan_*.py
 ```
 
-## Example and dummy implementation
+### Example and dummy implementation
 In the scanners directory there are example scanners that help you. Steal code from them.
 
 If you like to think abstract, start with scanner_dummy.py. If you're more into copy-pasting and looking
@@ -55,7 +55,7 @@ at practical implementations, look around in the other scanners.
 ```
 
 
-## Storing results
+### Storing results
 The dummy shows that it's easy to store information on endpoints. A result is stored as a value and a message
 that explains how the value was discovered. Using EndpointScanManager only new / changed results are stored. This
 saves a lot of data, as your scan will be run every day.
@@ -83,10 +83,12 @@ This is the Failmap data model:
 
 ![Data Model](data_model/failmap_models.png)
 
-## Writing and admin action
+### Writing and admin action
+
+Todo.
 
 
-## Make sure it's used in the ratings
+### Make sure it's used on the map
 Failmap uses a process of "building ratings". This is a cache of all discovered findings, so the map can
 quickly query the current state. Ratings are in sequential order and built frequently.
 
@@ -108,7 +110,7 @@ and impelent the routine that returns a result. Note that we're phasing out the 
 
 
 
-## Translate the results
+### Translate the results
 We're using some trickery to translate your results. To do so, add your messages and their translations
 to the following file:
 
@@ -139,9 +141,9 @@ failmap translate
 ```
 
 
-# Additional how to's:
+## Additional how to's:
 
-## Storing temporary files
+### Storing temporary files
 As you don't know where files will be located, add paths to the django settings file. This is located at:
 
 ```bash
