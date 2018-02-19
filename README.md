@@ -1,45 +1,96 @@
 [![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap) [![pipeline status](https://gitlab.com/failmap/failmap/badges/master/pipeline.svg)](https://gitlab.com/failmap/failmap/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/failmap/failmap/coverage)
 [![Badges](https://img.shields.io/badge/badges-5-yellowgreen.svg)](https://shields.io) [![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl)
 
-# Introduction
-Failmap is a web application that continuously scans and evaluates (government) organization websites for security best practices and allows these results to be published on a map.
+Why Failmap
+===========
+We believe privacy and information integrity are the basics of a resilient information society.
 
-This repository contains the main application of Failmap, it consists of a public web frontend, a administrative interface and scanners.
+By providing unprecedented transparency on the most basic levels of information security, insight in
+the quality and capability of organizations regarding their responsibilities is displayed.
 
-To run a local testing/development instance see the instructions below.
+Failmap uses the complexity of a traffic light anyone is able to determine if organizations that are responsible
+for safeguarding information are doing what they are supposed to do.
 
-For a public production installation please refer to: https://gitlab.com/failmap/server
+It is perfectly possible to run Failmap software for yourself, allowing you to independently verify the
+state of information security basics. All our products are open source.
+
+
+What is it
+----------
+Failmap is an open source web application that continuously evaluates the implementation of security standards and
+best practices at (governmental) organizations.
+
+This repository contains the mapping application fo Failmap: the public frontend, an administrative interface and scanners.
 
 ![screenshot](docs/screenshot.png)
 
-# Support fail map
-We keep organizations on their toes to protect everyone's data. Do you like this? Your donation insures continuous support, updates,
-and new features.
 
-The Internet Cleanup Foundation helps cleaning up bad stuff on the web.
+Getting started
+===============
+Keywords: quickstart, installation
 
-Donate to this project safely, easily and quickly by clicking on an amount below.
+System requirements
+-------------------
 
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5" target="_blank">&euro;5</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10" target="_blank">&euro;10</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25" target="_blank">&euro;20</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50" target="_blank">&euro;50</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100" target="_blank">&euro;100</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200" target="_blank">&euro;200</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500" target="_blank">&euro;500</a>
-<a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa" target="_blank">&euro;other</a>
+Linux or MacOS capable of running Python3 and git.
 
-# Documentation
-The documentation includes a quickstart guide, installation instructions, system requirements and much more.
+Software Requirements
+---------------------
 
-The documentation for this project is hosted at [ReadTheDocs](http://failmap.readthedocs.io/en/latest/).
+Download and install below system requirements to get started:
 
-Documentation is also included on our [Gitlab Repo](https://gitlab.com/failmap/failmap/blob/master/docs/index.rst).
+- [git](https://git-scm.com/downloads) (download and install)
+- [python3.6](https://www.python.org/downloads/) (download and install)
+- [Tox](http://tox.readthedocs.io/) (`pip3 install --user tox`)
+- [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
+- [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
 
-# Get involved
-We are an open organisation run by volunteers, if you like to join and contribute e-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl), come by for a chat at: [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#), or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/failmap/failmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/failmap/failmap.org/merge_requests/new).
+Quickstart
+----------
 
-# Thanks to
+In a directory of your choosing:
+
+    # download the software
+    git clone --recursive https://gitlab.com/failmap/failmap/
+
+    # enter the directory of the downloaded software
+    cd failmap/
+
+Using Direnv & Tox to manage environment (see Direnv section below). This prepares the shell environment for local development.
+
+    direnv allow
+
+Running Tox once creates a development Virtualenv in `.tox/default/` which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
+
+    tox
+
+After completing succesfully the application is available to run:
+
+    failmap -h
+
+The following commands will start a complete developer instance of failmap with all required services.
+
+    failmap devserver
+
+Now visit the [map website](http://127.0.0.1:8000/) and/or the
+[admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
+
+
+Documentation
+=============
+Documentation is provided at [ReadTheDocs](http://failmap.readthedocs.io/).
+
+Get involved
+============
+
+Failmap is open organisation run by volunteers.
+
+- Talk to us via [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#).
+- E-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl),
+- Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/failmap/failmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/failmap/failmap.org/merge_requests/new).
+
+Thanks to
+=========
 This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
 Special thanks to the SIDN Fonds for believing in this method of improving privacy.
 
