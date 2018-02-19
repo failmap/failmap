@@ -65,3 +65,4 @@ django_compressor  # bundle javascript and css
 csscompressor  # css compression
 
 retry
+sphinx_rtd_theme
