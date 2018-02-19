@@ -15,6 +15,8 @@ So much fail, so little documentation 🤣
    topics/scanners_scanning_and_ratings
    topics/task_processing_system
    topics/deployment
+   topics/writing_a_scanner
+   topics/thanks
 
 
 Indices and tables

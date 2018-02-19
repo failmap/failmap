@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'failmap'
-copyright = '2018, Elger Jonker, Johan Bloemberg'
+copyright = 'Internet Cleanup Foundation'
 author = 'Elger Jonker, Johan Bloemberg'
 
 # The version info for the project you're documenting, acts as replacement for

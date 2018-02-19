@@ -140,7 +140,7 @@ If you don't want to use Direnv be sure to source the `.envrc` file manually eve
 
     . .envrc
 
-# Known Issues
+## Known Issues
 
 ### Docker installation
 
@@ -148,7 +148,7 @@ If you don't want to use Direnv be sure to source the `.envrc` file manually eve
 As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
 
 
-# Versioning
+## Versioning
 
 Version for the project is losely semver with no specific release schedule or meaning to version numbers (eg: stable/unstable).
 
@@ -159,9 +159,3 @@ Informal releases are created by new commits pushed/merged to the master. The ve
 For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
 
 For local development informal release or a special `dev0` build release is used which indicates a different state from the formal releases.
-
-# Thanks to
-This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
-Special thanks to the SIDN Fonds for believing in this method of improving privacy.
-
-Thanks to the many authors contributing to open software.

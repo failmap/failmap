@@ -1,4 +1,4 @@
-# Scanners, scanning and ratings
+# Available scanners
 
 ## Supported scans
 

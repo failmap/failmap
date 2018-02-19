@@ -1,5 +1,5 @@
-Mapping Information / GeoJSON
-=============================
+Maps, GIS, GeoJSON
+==================
 Please go through the resources in order to understand how to add districts, points and lines of interest to the map.
 
 1. Learn about how maps work: https://www.youtube.com/watch?v=2lR7s1Y6Zig
@@ -20,6 +20,9 @@ Any map you'll download will probably contain way too much details. Next steps d
 8. Import the data into the database, a procedure not yet described.
 
 ### Wish: OSM only solution.
+
+Currently being developed.
+
 OSM uses the administrative regions etc, and it's possible to determine addresses and such. 
 
 There are API's that let one search through the data and export the right things. Yet this was not implemented yet. This would be the easiest way to have updated mapping data from all around the world that requires a lesser amount of special steps. (the data is always there, from everywhere =)
