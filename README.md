@@ -1,6 +1,5 @@
 [![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap) [![pipeline status](https://gitlab.com/failmap/failmap/badges/master/pipeline.svg)](https://gitlab.com/failmap/failmap/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/failmap/failmap/coverage)
-[![Badges](https://img.shields.io/badge/badges-4-yellowgreen.svg)](https://shields.io)
-
+[![Badges](https://img.shields.io/badge/badges-5-yellowgreen.svg)](https://shields.io) [![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl)
 
 # Introduction
 Failmap is a web application that continuously scans and evaluates (government) organization websites for security best practices and allows these results to be published on a map.
