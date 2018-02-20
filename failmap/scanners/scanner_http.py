@@ -346,7 +346,8 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
         strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
         if any(["BadStatusLine" in strerror,
                 "CertificateError" in strerror,
-                "certificate verify failed" in strerror]):
+                "certificate verify failed" in strerror,
+                "bad handshake" in strerror]):
             logger.debug("Exception indicates that there is a server, but we're not able to "
                          "communicate with it correctly. Error: %s" % strerror)
             return True

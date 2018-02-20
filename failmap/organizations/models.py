@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django_countries.fields import CountryField
 from jsonfield import JSONField
+from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__package__)
 
@@ -138,13 +139,18 @@ class Url(models.Model):
     is_dead = models.BooleanField(
         default=False,
         help_text="Dead url's will not be rendered on the map. Scanners can set this check "
-                  "automatically (which might change in the future)")
+                  "automatically (which might change in the future)"
+    )
+
     is_dead_since = models.DateTimeField(
-        blank=True, null=True)
+        blank=True, null=True
+    )
+
     is_dead_reason = models.CharField(
         max_length=255,
         blank=True,
-        null=True)
+        null=True
+    )
 
     uses_dns_wildcard = models.BooleanField(
         default=False,
@@ -176,6 +182,13 @@ class Url(models.Model):
         self.not_resolvable_reason = message
         self.not_resolvable_since = date
         self.save()
+
+
+    def clean(self):
+
+        if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
+            raise ValidationError(_('When telling this is dead, also enter the date and reason for it.'))
+
 
     def is_top_level(self):
         # count the number of dots. Should be one.
