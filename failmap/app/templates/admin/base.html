@@ -5,6 +5,16 @@
 <script type="text/javascript" src="{% static 'js/vendor/action_buttons.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/sparkles.js' %}"></script>
+<!-- add some CSS to make sure the action buttons are not overlapping the list of items -->
+<!-- this is a really ugly hack and will probably not be a solution for all resolutions.
+This hack assumes three rows or less of buttons, unless the "smartphone" resolution is used.
+It "works" given the page never reaches the bottom (and the scroll-to-bottom style is applied) -->
+<style>
+.results {
+    margin-bottom: 225px !important;
+}
+
+</style>
 {% endblock %}
 <!-- Override user message logic to allow html in messages (Admin Action Job Links) -->
 {% block messages %}
