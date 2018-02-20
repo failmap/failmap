@@ -193,7 +193,15 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def current_rating(obj):
-        return UrlRating.objects.filter(url=obj).latest('when').rating
+        x = UrlRating.objects.filter(url=obj).latest('when')
+
+        if not any([x.high, x.medium, x.low]):
+            return "✅ Perfect"
+
+        label = "🔴" if x.high else "🔶" if x.medium else "🍋"
+
+        return format_html("%s <span style='color: red'>%s</span> <span style='color: orange'>%s</span> "
+                           "<span style='color: yellow'>%s</span>" % (label, x.high, x.medium, x.low))
 
     inlines = [EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
 
