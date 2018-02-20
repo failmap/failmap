@@ -21,14 +21,17 @@ on top of the django ORM, close to the database. As such the presentation contai
 Please create an issue here: https://gitlab.com/failmap/failmap/issues
 
 ## Admin Actions
-Admin actions help with
+Admin actions make it easier to run scanners. They are visible at the bottom of lists.
+
+![admin actions](administration/admin_actions.png)
 
 
 ### Scan Plain HTTP
+Scans for lack of HTTPS. If there is only HTTP and no HTTPS on the standard ports, this will show a high risk issues.
 
 
 ### Scan Security Headers
-
+Scans for HTTP server headers. Results in medium and low risk issues.
 
 ###
 
