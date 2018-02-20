@@ -33,7 +33,31 @@ Scans for lack of HTTPS. If there is only HTTP and no HTTPS on the standard port
 ### Scan Security Headers
 Scans for HTTP server headers. Results in medium and low risk issues.
 
-###
+### Scan TLS Qualys
+Runs a TLS scan
+
+
+### Rebuild Rating
+
+
+### Onboard
+
+
+
+### Subdomains (Certificate Transparency)
+
+### Subdomains (NSEC)
+
+
+### Discover HTTP(S) Endpoints
+
+
+### Create Screenshot
+Doesn't work.
+
+### Declare dead
+
+
 
 
 
@@ -54,6 +78,11 @@ Server access (server managers only):
 ssh -A user@faalserver.faalkaart.nl
 sudo su -
 journalctl -u docker-failmap-<tab><tab>
+
+or
+
+journalctl -f -u docker-failmap*
+failmap-logtail
 ```
 
 This will allow you to see the output of running services.

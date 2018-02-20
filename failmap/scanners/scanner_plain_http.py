@@ -12,7 +12,8 @@ from celery import Task, group
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner_http import redirects_to_safety, verify_is_secure
+from failmap.scanners.scanner_http import (redirects_to_safety, resolves_on_v4, resolves_on_v6,
+                                           verify_is_secure)
 
 from ..celery import app
 from .models import Endpoint
@@ -85,6 +86,7 @@ def scan_url(url: Url):
     saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on the standard port is missing."
     no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
     cleaned_up = "Has a secure equivalent, which wasn't so in the past."
+    not_resolvable_at_all = "Cannot be resolved anymore, seems to be cleaned up."
 
     # The default ports matter for normal humans. All services on other ports are special services.
     # we only give points if there is not a normal https site when there is a normal http site.
@@ -125,35 +127,49 @@ def scan_url(url: Url):
     # Some organizations redirect the http site to a non-standard https port.
     # occurs more than once... you still have to follow redirects?
     if has_http_v4 and not has_https_v4:
-        log.debug("This url seems to have no https at all: %s" % url)
-        log.debug("Checking if they exist, to be sure there is nothing.")
 
-        # todo: doesn't work anymore, as it's async
-        # quick fix: run it again after the discovery tasks have finished.
-        if not verify_is_secure(http_v4_endpoint):
+        # fixing https://sentry.io/internet-cleanup-foundation/faalkaart/issues/435116126/
+        if not resolves_on_v4(url.url):
+            # the endpoint scanner will probably find there is no endpoint anymore as well...
+            log.debug("Does not resolve at all, so has no insecure endpoints. %s" % url)
+            scan_manager.add_scan("plain_https", http_v4_endpoint, "0", not_resolvable_at_all)
+        else:
+            log.debug("This url seems to have no https at all: %s" % url)
+            log.debug("Checking if they exist, to be sure there is nothing.")
 
-            log.info("Checking if the URL redirects to a secure url: %s" % url)
-            if redirects_to_safety(http_v4_endpoint):
-                log.info("%s redirects to safety, saved by the bell." % url)
-                scan_manager.add_scan("plain_https", http_v4_endpoint, "25", saved_by_the_bell)
+            # todo: doesn't work anymore, as it's async
+            # quick fix: run it again after the discovery tasks have finished.
+            if not verify_is_secure(http_v4_endpoint):
 
-            else:
-                log.info("%s does not have a https site. Saving/updating scan." % url)
-                scan_manager.add_scan("plain_https", http_v4_endpoint, "1000", no_https_at_all)
+                log.info("Checking if the URL redirects to a secure url: %s" % url)
+                if redirects_to_safety(http_v4_endpoint):
+                    log.info("%s redirects to safety, saved by the bell." % url)
+                    scan_manager.add_scan("plain_https", http_v4_endpoint, "25", saved_by_the_bell)
+
+                else:
+                    log.info("%s does not have a https site. Saving/updating scan." % url)
+                    scan_manager.add_scan("plain_https", http_v4_endpoint, "1000", no_https_at_all)
     else:
         # it is secure, and if there was a rating, then reduce it to 0 (with a new rating).
         if scan_manager.had_scan_with_points("plain_https", http_v4_endpoint):
             scan_manager.add_scan("plain_https", http_v4_endpoint, "0", cleaned_up)
 
     if has_http_v6 and not has_https_v6:
-        if not verify_is_secure(http_v6_endpoint):
-            if redirects_to_safety(http_v6_endpoint):
-                scan_manager.add_scan("plain_https", http_v6_endpoint, "25", saved_by_the_bell)
-            else:
-                scan_manager.add_scan("plain_https", http_v6_endpoint, "1000", no_https_at_all)
+
+        # fixing https://sentry.io/internet-cleanup-foundation/faalkaart/issues/435116126/
+        if not resolves_on_v6(url.url):
+            # the endpoint scanner will probably find there is no endpoint anymore as well...
+            log.debug("Does not resolve at all, so has no insecure endpoints. %s" % url)
+            scan_manager.add_scan("plain_https", http_v6_endpoint, "0", not_resolvable_at_all)
+        else:
+            if not verify_is_secure(http_v6_endpoint):
+                if redirects_to_safety(http_v6_endpoint):
+                    scan_manager.add_scan("plain_https", http_v6_endpoint, "25", saved_by_the_bell)
+                else:
+                    scan_manager.add_scan("plain_https", http_v6_endpoint, "1000", no_https_at_all)
     else:
         # it is secure, and if there was a rating, then reduce it to 0 (with a new rating).
         if scan_manager.had_scan_with_points("plain_https", http_v6_endpoint):
             scan_manager.add_scan("plain_https", http_v6_endpoint, "0", cleaned_up)
 
-    return 'done'
+    return

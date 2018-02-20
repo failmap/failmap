@@ -377,6 +377,20 @@ def resolves(url: str):
     return False
 
 
+def resolves_on_v4(url: str):
+    (ip4, ip6) = get_ips(url)
+    if ip4:
+        return True
+    return False
+
+
+def resolves_on_v6(url: str):
+    (ip4, ip6) = get_ips(url)
+    if ip6:
+        return True
+    return False
+
+
 def has_internet_connection(host: str="8.8.8.8", port: int=53, connection_timeout: int=10):
     """
     https://stackoverflow.com/questions/3764291/checking-network-connection#3764660

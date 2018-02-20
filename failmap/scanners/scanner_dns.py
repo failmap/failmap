@@ -142,7 +142,7 @@ def dnsrecon_default(urls):
         logger.debug("DNS results will be stored in file: %s" % path)
 
         # never continue with wildcard domains
-        p = subprocess.Popen(['python2', dnsrecon,
+        p = subprocess.Popen(['python', dnsrecon,
                               '--type', '"rvl,srv,axfr,snoop,zonewalk"'
                               '--domain', url.url,
                               '-j', path], stdin=subprocess.PIPE)
@@ -217,8 +217,9 @@ def discover_wildcard_scan(url: Url):
     logger.debug("DNS results will be stored in file: %s" % path)
 
     # never continue with wildcard domains
+    # solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/467465408/
     randomize_nonsense_subdomains_wordlist()
-    command = ['python2', dnsrecon,
+    command = ['python', dnsrecon,
                '--domain', url.url,
                '-t', 'brt',
                '--iw',  # --iw: # always try wild card domains.
@@ -358,7 +359,7 @@ def bruteforce_scan(urls: List[Url], wordlist: str):
         logger.debug("DNS results will be stored in file: %s" % path)
 
         # never continue with wildcard domains
-        p = subprocess.Popen(['python2', dnsrecon,
+        p = subprocess.Popen(['python', dnsrecon,
                               '--domain', url.url,
                               '-t', 'brt',
                               '-D', wordlist,
@@ -448,7 +449,7 @@ def nsec_scan(urls: List[Url]):
     added = []
     for url in urls:
         file = settings.TOOLS['dnsrecon']['output_dir'] + "%s_nsec.json" % url.url
-        command = ['python2', dnsrecon, '-t', 'zonewalk', '-d', url.url, '-z', '-j', file]
+        command = ['python', dnsrecon, '-t', 'zonewalk', '-d', url.url, '-z', '-j', file]
         try:
             subprocess.check_output(command)
             added += import_dnsrecon_report(url, file)

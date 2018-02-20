@@ -7,6 +7,7 @@ from datetime import datetime
 
 import pytz
 import requests
+import urllib3
 from celery import Task, group
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
@@ -173,7 +174,25 @@ def get_headers(self, uri_url):
         for header in response.headers:
             log.debug('Received header: %s' % header)
         return response
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
+
+    # The amount of possible return states is overwhelming :)
+
+    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895712/
+    #         https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895699/
+    # ValueError, really don't know how to further handle it.
+    #
+    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425503689/
+    # requests.TooManyRedirects
+    #
+    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425507209/
+    # LocationValueError - No host specified.
+    # it redirects to something like https:/// (with three slashes) and then somewhere it crashes
+    # possibly an error in requests.
+    #
+    # Possibly tooManyRedirects could be plotted on the map, given this is a configuration error
+
+    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, ValueError,
+            requests.TooManyRedirects, urllib3.exceptions.LocationValueError) as e:
         # If an expected error is encountered put this task back on the queue to be retried.
         # This will keep the chained logic in place (saving result after successful scan).
         # Retry delay and total number of attempts is configured in the task decorator.
