@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__package__)
 
 
-def points_and_calculation(scan):
+def get_calculation(scan):
     # Can be probably more efficient by adding some methods to scan.
     scan_type = getattr(scan, "type", "tls_qualys")
     return calculation_methods[scan_type](scan)
@@ -88,11 +88,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
 
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "True":
-        points = 0
         explanation = header + " header present."
     else:
-        # points = security_headers_scores[scan.type]
-        points = 0
         explanation = "Missing " + header + " header."
 
         if header in ["X-Frame-Options", "Strict-Transport-Security"]:
@@ -104,7 +101,6 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     calculation = {
         "type": "security_headers_%s" % header.lower().replace("-", "_"),
         "explanation": explanation,
-        "points": 0,
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
@@ -112,30 +108,24 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         "low": low,
     }
 
-    return points, calculation
+    return calculation
 
 
 def http_plain_rating_based_on_scan(scan):
     high = 0
     medium = 0
 
-    # scan.rating is "True" or "False", we re-determine the value in this function:
-    scan.rating = 0
-
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
     if scan.explanation == "Site does not redirect to secure url, and has no secure alternative on a standard port.":
-        scan.rating = 1000
         high += 1
 
     # wrong spelling (history)
     if scan.explanation == "Site does not redirect to secure url, and has nosecure alternative on a standard port.":
-        scan.rating = 1000
         high += 1
 
     # And have redirects looked at: why is there no secure alternative on the standard counterpart port?
     if scan.explanation == "Redirects to a secure site, while a secure counterpart on the standard port is missing.":
-        scan.rating = 200
         medium += 1
 
     # also here: the last scan moment increases with every scan. When you have a set of
@@ -143,7 +133,6 @@ def http_plain_rating_based_on_scan(scan):
     calculation = {
         "type": "plain_https",
         "explanation": scan.explanation,
-        "points": int(scan.rating),  # generic scans use strings for this field.
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
@@ -151,7 +140,7 @@ def http_plain_rating_based_on_scan(scan):
         "low": 0,
     }
 
-    return int(scan.rating), calculation
+    return calculation
 
 
 def tls_qualys_rating_based_on_scan(scan):
@@ -177,21 +166,6 @@ def tls_qualys_rating_based_on_scan(scan):
         "0": "-",
     }
 
-    # 0? that's port 443 without using TLS. That is extremely rare. In that case...
-    # 0 is many cases a "not connect to server" error currently. But there is more.
-    # Now checking messages returned from qualys. Certificate invalid for domain name now
-    # is awarded points.
-    points = {"T": 200,
-              "F": 1000,
-              "D": 400,
-              "I": 200,
-              "C": 100,
-              "B": 50,
-              "A-": 0,
-              "A": 0,
-              "A+": 0,
-              "0": 0}
-
     # configuration errors, has the rating of 0.
     # Should not happen in new scans anymore. Kept for legacy reasons.
     if scan.qualys_message == "Certificate not valid for domain name":
@@ -199,14 +173,12 @@ def tls_qualys_rating_based_on_scan(scan):
 
     if scan.qualys_rating == '0':
         logger.debug("TLS: This tls scan resulted in no https. Not returning a score.")
-        return 0, {}
+        return {}
 
     if scan.qualys_rating == "T":
-        gained_points = points[scan.qualys_rating] + points[scan.qualys_rating_no_trust]
         explanation = "%s For the certificate installation: %s" % (
             explanations[scan.qualys_rating], explanations[scan.qualys_rating_no_trust])
     else:
-        gained_points = points[scan.qualys_rating]
         explanation = explanations[scan.qualys_rating]
 
     if scan.qualys_rating in ["T", "F"]:
@@ -218,10 +190,9 @@ def tls_qualys_rating_based_on_scan(scan):
     if scan.qualys_rating in ["B", "C"]:
         low += 1
 
-    rating = {
+    calculation = {
         "type": "tls_qualys",
         "explanation": explanation,
-        "points": gained_points,
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
@@ -229,7 +200,7 @@ def tls_qualys_rating_based_on_scan(scan):
         "low": low,
     }
 
-    return gained_points, rating
+    return calculation
 
 
 # don't re-create the dict every time.

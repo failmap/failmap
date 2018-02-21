@@ -12,10 +12,14 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
 
 from ..celery import Task, app
+from .calculate import get_calculation
 from .models import OrganizationRating, UrlRating
-from .points_and_calculations import points_and_calculation
 
 log = logging.getLogger(__package__)
+
+"""
+Warning: Make sure the output of a rebuild has ID's in chronological order.
+"""
 
 
 def compose_task(
@@ -50,7 +54,9 @@ def compose_task(
             continue
 
         # make sure default organization rating is in place
-        tasks.append(default_ratings.s([organization]) | rerate_urls.si(urls) | rerate_organizations.si([organization]))
+        tasks.append(default_ratings.s([organization])
+                     | rerate_urls.si(urls)
+                     | rerate_organizations.si([organization]))
 
     if not tasks:
         raise Exception('Applied filters resulted in no tasks!')
@@ -112,73 +118,12 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
             rate_url(url, when)
 
 
-# @app.task
-# def rerate_urls(urls: List[Url]=None):
-#     if not urls:
-#         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
-#
-#     # to not have all ratings empty, do it per url
-#     for url in urls:
-#         delete_url_rating(url)
-#         rate_timeline(create_timeline(url), url)
-
-
 def delete_url_rating(url: Url):
     UrlRating.objects.all().filter(url=url).delete()
 
 
 def delete_organization_rating(organization: Organization):
     OrganizationRating.objects.all().filter(organization=organization).delete()
-
-
-# @app.task
-# # 2.5 minutes and it's done :)
-# def rerate_urls_async(urls: List[Url]=None, execute_locally: bool=True):
-#
-#     if not urls:
-#         urls = list(Url.objects.all().filter(is_dead=False).order_by('url'))
-#
-#     tasks = []
-#     for url in urls:
-#         tasks.append((delete_url_rating.s(url) | create_timeline.si(url) | rate_timeline.s(url)))
-#
-#     task = group(tasks)
-#     if execute_locally:
-#         task.apply_async()
-#     else:
-#         return task
-#
-#
-# @app.task
-# def rerate_organizations_async(organizations: List[Organization]=None, execute_locally: bool=True):
-#     if not organizations:
-#         organizations = list(Organization.objects.all().order_by('name'))
-#
-#     # to not clear the whole map at once, do this per organization.
-#     # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
-#     tasks = [(default_ratings.si()
-#               | delete_organization_rating.si(organization)
-#               | add_organization_rating.si(organizations=[organization], build_history=True))
-#              for organization in organizations]
-#
-#     task = group(tasks)
-#     if execute_locally:
-#         task.apply_async()
-#     else:
-#         return task
-
-
-# @app.task
-# def rerate_organizations(organizations: List[Organization]=None):
-#     if not organizations:
-#         organizations = list(Organization.objects.all().order_by('name'))
-#
-#     # to not clear the whole map at once, do this per organization.
-#     # could be more efficient, but since the process is so slow, you'll end up with people looking at empty maps.
-#     for organization in organizations:
-#         OrganizationRating.objects.all().filter(organization=organization).delete()
-#         default_ratings()
-#         add_organization_rating(organizations=[organization], build_history=True)
 
 
 def significant_moments(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -260,7 +205,7 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     if moments[-1] == latest_moment_of_datetime(datetime.now()):
         moments[-1] = datetime.now(pytz.utc)
 
-    log.debug("Moments found: %s", len(moments))
+    # log.debug("Moments found: %s", len(moments))
 
     # using scans, the query of "what scan happened when" doesn't need to be answered anymore.
     # the one thing is that scans have to be mapped to the moments (called a timeline)
@@ -326,20 +271,6 @@ def create_timeline(url: Url):
         timeline[some_day]["endpoints"].append(scan.endpoint)
         timeline[some_day]['scans'].append(scan)
 
-    # this code performs some date operations, which is much faster than using django's filter (as that hits the db)
-    # for moment in [generic_scan.rating_determined_on for generic_scan in happenings['generic_scans']]:
-    #     moment_date = moment.date()
-    #     timeline[moment_date]["generic_scan"] = {}
-    #     timeline[moment_date]["generic_scan"]["scanned"] = True
-    #     scans = [x for x in happenings['generic_scans'] if x.rating_determined_on.date() == moment_date]
-    #     timeline[moment_date]["generic_scan"]['scans'] = list(scans)
-    #     endpoints = [x.endpoint for x in scans]
-    #     timeline[moment_date]["generic_scan"]["endpoints"] = endpoints
-    #     for endpoint in endpoints:
-    #         if endpoint not in timeline[moment_date]["endpoints"]:
-    #             timeline[moment_date]["endpoints"].append(endpoint)
-    #     timeline[moment_date]['scans'] += scans
-
     for scan in happenings['tls_qualys_scans']:
         some_day = scan.rating_determined_on.date()
 
@@ -351,19 +282,6 @@ def create_timeline(url: Url):
         timeline[some_day]["tls_qualys"]["endpoints"].append(scan.endpoint)
         timeline[some_day]["endpoints"].append(scan.endpoint)
         timeline[some_day]['scans'].append(scan)
-
-    # for moment in [tls_scan.rating_determined_on for tls_scan in happenings['tls_qualys_scans']]:
-    #     moment_date = moment.date()
-    #     timeline[moment_date]["tls_qualys"] = {}
-    #     timeline[moment_date]["tls_qualys"]["scanned"] = True
-    #     scans = [x for x in happenings['tls_qualys_scans'] if x.rating_determined_on.date() == moment_date]
-    #     timeline[moment_date]["tls_qualys"]['scans'] = scans
-    #     endpoints = [x.endpoint for x in scans]
-    #     timeline[moment_date]["tls_qualys"]["endpoints"] = endpoints
-    #     for endpoint in endpoints:
-    #         if endpoint not in timeline[moment_date]["endpoints"]:
-    #             timeline[moment_date]["endpoints"].append(endpoint)
-    #     timeline[moment_date]['scans'] += scans
 
     # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
     # see there are gaps in using the url over time. Which is more truthful.
@@ -379,15 +297,6 @@ def create_timeline(url: Url):
         if endpoint not in timeline[moment_date]["dead_endpoints"]:
             timeline[moment_date]["dead_endpoints"].append(endpoint)
 
-    # for moment in [dead_endpoint.is_dead_since for dead_endpoint in happenings['dead_endpoints']]:
-    #     moment_date = moment.date()
-    #     timeline[moment_date]["dead"] = True
-    #     # figure out what endpoints died this moment
-    #     for ep in happenings['dead_endpoints']:
-    #         if ep.is_dead_since.date() == moment:
-    #             if ep not in timeline[moment_date]["dead_endpoints"]:
-    #                 timeline[moment_date]["dead_endpoints"].append(ep)
-
     # unique endpoints only
     for moment in moments:
         some_day = moment.date()
@@ -402,7 +311,7 @@ def latest_moment_of_datetime(datetime_: datetime):
 
 
 def rate_timeline(timeline, url: Url):
-    log.info("Rebuilding ratings for url %s" % url)
+    log.info("Rebuilding ratings for url %s on %s moments" % (url, len(timeline)))
 
     previous_ratings = {}
     previous_endpoints = []
@@ -410,7 +319,7 @@ def rate_timeline(timeline, url: Url):
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
-        total_scores, total_high, total_medium, total_low = 0, 0, 0, 0
+        total_high, total_medium, total_low = 0, 0, 0
         given_ratings = {}
 
         if ('url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys()) \
@@ -421,12 +330,11 @@ def rate_timeline(timeline, url: Url):
             default_calculation = {
                 "url": {
                     "url": url.url,
-                    "points": 0,
                     "endpoints": []
                 }
             }
 
-            save_url_rating(url, moment, 0, 0, 0, 0, default_calculation)
+            save_url_rating(url, moment, 0, 0, 0, default_calculation)
             return
 
         # reverse the relation: so we know all ratings per endpoint.
@@ -501,16 +409,14 @@ def rate_timeline(timeline, url: Url):
             if label not in given_ratings:
                 given_ratings[label] = []
 
-            endpoint_scores, endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0, 0
+            endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
 
             for scan_type in scan_types:
                 if scan_type in these_scans.keys():
                     if scan_type not in given_ratings[label]:
-                        points, calculation = points_and_calculation(these_scans[scan_type])
+                        calculation = get_calculation(these_scans[scan_type])
                         if calculation:
                             calculations.append(calculation)
-                            total_scores += points
-                            endpoint_scores += points
                             endpoint_high += calculation["high"]
                             endpoint_medium += calculation["medium"]
                             endpoint_low += calculation["low"]
@@ -524,7 +430,6 @@ def rate_timeline(timeline, url: Url):
                             "type": scan_type,
                             "explanation": "Repeated finding. Probably because this url changed IP adresses or has "
                                            "multiple IP adresses (common for failover / load-balancing).",
-                            "points": 0,
                             "high": 0,
                             "medium": 0,
                             "low": 0,
@@ -541,7 +446,6 @@ def rate_timeline(timeline, url: Url):
                 "port": endpoint.port,
                 "protocol": endpoint.protocol,
                 "v4": endpoint.is_ipv4(),
-                "points": endpoint_scores,
                 "high": endpoint_high,
                 "medium": endpoint_medium,
                 "low": endpoint_low,
@@ -557,21 +461,21 @@ def rate_timeline(timeline, url: Url):
 
         sorted_endpoints = sorted(endpoint_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
-        url_rating_json = {
+        calculation = {
             "url": url.url,
-            "points": total_scores,
             "high": total_high,
             "medium": total_medium,
             "low": total_low,
             "endpoints": sorted_endpoints
         }
 
-        log.debug("On %s this would score: %s " % (moment, total_scores), )
+        log.debug("On %s %s has %s endpoints and %s high, %s medium and %s low vulnerabilities" %
+                  (moment, url, len(sorted_endpoints), total_high, total_medium, total_low))
 
-        save_url_rating(url, moment, total_scores, total_high, total_medium, total_low, url_rating_json)
+        save_url_rating(url, moment, total_high, total_medium, total_low, calculation)
 
 
-def save_url_rating(url: Url, date: datetime, points: int, high: int, medium: int, low: int, calculation):
+def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, calculation):
     u = UrlRating()
     u.url = url
 
@@ -583,7 +487,8 @@ def save_url_rating(url: Url, date: datetime, points: int, high: int, medium: in
     else:
         u.when = datetime(year=date.year, month=date.month, day=date.day,
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
-    u.rating = points
+
+    u.rating = 0
     u.high = high
     u.medium = medium
     u.low = low
@@ -606,31 +511,31 @@ def show_timeline_console(timeline, url: Url):
             for item in timeline[moment]['tls_qualys']['endpoints']:
                 message += "|  |  |- Endpoint %s" % item + newline
             for item in timeline[moment]['tls_qualys']['scans']:
-                score, calculation = points_and_calculation(item)
-                message += "|  |  |- %5s points: %s" % (score, item) + newline
+                calculation = get_calculation(item)
+                message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
 
         if 'generic_scan' in timeline[moment].keys():
             message += "|  |- generic_scan" + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "plain_https":
-                    score, calculation = points_and_calculation(item)
-                    message += "|  |  |- %5s low: %s" % (score, item) + newline
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s low: %s" % (calculation.high, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "Strict-Transport-Security":
-                    score, calculation = points_and_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (score, item) + newline
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-Frame-Options":
-                    score, calculation = points_and_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (score, item) + newline
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-Content-Type-Options":
-                    score, calculation = points_and_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (score, item) + newline
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-XSS-Protection":
-                    score, calculation = points_and_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (score, item) + newline
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
 
         if 'dead' in timeline[moment].keys():
             message += "|  |- dead endpoints" + newline
@@ -714,7 +619,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     }
 
     if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
-        log.debug("The calculation (json) has changed, so we're saving this report, rating.")
+        log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
         organizationrating = OrganizationRating()
         organizationrating.organization = organization
         organizationrating.rating = total_rating
@@ -727,7 +632,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-        log.warning("The calculation on %s is the same as the previous one. Not saving." % when)
+        log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
 
 
 def get_latest_urlratings(urls: List[Url], when):
@@ -854,11 +759,9 @@ def get_url_score_modular(url: Url, when: datetime=None):
     # are connected to an endpoint. Reduction/merging of duplicate endpoints should take place elsewhere.
     processed_endpoints = []
 
-    overall_points = 0
     overall_high, overall_medium, overall_low = 0, 0, 0
     endpoint_calculations = []
     for endpoint in endpoints:
-        endpoint_points = 0
         endpoint_highs, endpoint_mediums, endpoint_lows = 0, 0, 0
 
         # protect from rating the same endpoints, if someone made a mistake and added a copy. See above comment.
@@ -873,15 +776,13 @@ def get_url_score_modular(url: Url, when: datetime=None):
 
         calculations = []
         for scan_type in scan_types:
-            points, calculation = endpoint_to_points_and_calculation(endpoint, when, scan_type)
+            calculation = endpoint_to_points_and_calculation(endpoint, when, scan_type)
             if calculation:
                 calculations.append(calculation)
-                endpoint_points += points
                 endpoint_highs += calculation["high"]
                 endpoint_mediums += calculation["medium"]
                 endpoint_lows += calculation["low"]
 
-        overall_points += endpoint_points
         overall_high += endpoint_highs
         overall_medium += endpoint_mediums
         overall_low += endpoint_lows
@@ -891,7 +792,6 @@ def get_url_score_modular(url: Url, when: datetime=None):
                 "ip": endpoint.ip_version,
                 "port": endpoint.port,
                 "protocol": endpoint.protocol,
-                "points": endpoint_points,
                 "high": endpoint_highs,
                 "medium": endpoint_mediums,
                 "low": endpoint_lows,
@@ -909,7 +809,6 @@ def get_url_score_modular(url: Url, when: datetime=None):
         url_rating_calculation = {
             "url": {
                 "url": url.url,
-                "points": overall_points,
                 "high": overall_high,
                 "medium": overall_medium,
                 "low": overall_low,
@@ -917,7 +816,7 @@ def get_url_score_modular(url: Url, when: datetime=None):
             }
         }
 
-        return url_rating_calculation, overall_points
+        return url_rating_calculation, 0
     else:
         return {}, 0
 
@@ -942,7 +841,6 @@ def close_url_rating(url: Url, when: datetime):
         "url":
         {
             "url": url.url,
-            "points": 0,
             "high": 0,
             "medium": 0,
             "low": 0,
@@ -981,12 +879,12 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
             scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when
                                                 ).latest('rating_determined_on')
 
-        points, calculation = points_and_calculation(scan)
-        log.debug("On %s, Endpoint %s, Points %s" % (when, endpoint, points))
-        return int(points), str(calculation)
+        calculation = get_calculation(scan)
+        log.debug("On %s, Endpoint %s" % (when, endpoint))
+        return calculation
     except ObjectDoesNotExist:
         log.debug("No %s scan on endpoint %s." % (scan_type, endpoint))
-        return 0, {}
+        return {}
 
 
 def relevant_urls_at_timepoint_allinone(organization: Organization, when: datetime):
@@ -1120,24 +1018,6 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
     """
     endpoints = Endpoint.objects.all()
 
-    # Alive then
-    # then_alive = endpoints.filter(
-    #     url=url,
-    #     discovered_on__lte=when,
-    #     is_dead=True,
-    #     is_dead_since__gte=when,
-    # )
-    # print(then_alive.query)
-
-    # Alive then and still alive
-    # still_alive_endpoints = endpoints.filter(
-    #     url=url,
-    #     discovered_on__lte=when,
-    #     is_dead=False,
-    # )
-    # print(still_alive_endpoints.query)
-
-    # let's mix both queries into a single one, saving a database roundtrip:
     both = endpoints.filter(
         url=url).filter(
         # Alive then and still alive

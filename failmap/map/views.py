@@ -22,7 +22,7 @@ from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
 from ..app.common import JSEncoder
-from .points_and_calculations import points_and_calculation
+from .calculate import get_calculation
 
 log = logging.getLogger(__package__)
 
@@ -1103,7 +1103,7 @@ def latest_scans(request, scan_type):
         scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
-        points, calculation = points_and_calculation(scan)
+        calculation = get_calculation(scan)
         dataset["scans"].append({
             "url": scan.endpoint.url.url,
             "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
@@ -1158,7 +1158,7 @@ def latest_updates(organization_id):
 
     for scan in scans:
         scan_type = getattr(scan, "type", "tls_qualys")  # todo: should always be a property of scan
-        points, calculation = points_and_calculation(scan)
+        calculation = get_calculation(scan)
         dataset["scans"].append({
             "organization": organization.name,
             "organization_id": organization.pk,
@@ -1274,7 +1274,7 @@ class LatestScanFeed(Feed):
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
-        points, calculation = points_and_calculation(item)
+        calculation = get_calculation(item)
         if not calculation:
             return ""
 
@@ -1287,7 +1287,7 @@ class LatestScanFeed(Feed):
         return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
 
     def item_description(self, item):
-        points, calculation = points_and_calculation(item)
+        calculation = get_calculation(item)
         return _(calculation.get("explanation", ""))
 
     def item_pubdate(self, item):
