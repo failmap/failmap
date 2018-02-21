@@ -51,7 +51,7 @@ class Job(models.Model):
         return job
 
     @staticmethod
-    @app.task
+    @app.task(queue='storage')
     def store_result(result, job_id=None):
         """Celery task to store result of wrapped task after it has completed."""
         job = Job.objects.get(id=job_id)
@@ -66,7 +66,7 @@ class Job(models.Model):
         return self.name
 
 
-@app.task
+@app.task(queue='storage')
 def create_job(task_module: str):
     """Helper to allow Jobs to be created using Celery Beat.
 

@@ -70,7 +70,7 @@ def compose_task(
     return task
 
 
-@app.task
+@app.task(queue='storage')
 def store_dummy(result, endpoint):
     """
 
@@ -98,7 +98,8 @@ class SomeError(Exception):
     """Just some expectable error."""
 
 
-@app.task(bind=True,
+@app.task(queue='scanners',
+          bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
           expires=EXPIRES)

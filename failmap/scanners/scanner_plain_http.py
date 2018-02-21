@@ -64,6 +64,7 @@ def compose_task(
 # distributed. For examples see scan_dummy.py
 
 # http://185.3.211.120:80: Host: demo3.data.amsterdam.nl Status: 301
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def scan_url(url: Url):
     """

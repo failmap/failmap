@@ -180,6 +180,8 @@ def scan_real_url(url, port=443):
 
     return out
 
+# TODO: make queue explicit, split functionality in storage and scanner
+
 
 @app.task
 def scan_endpoint(endpoint, IPv6=False):
@@ -223,6 +225,7 @@ def test_real(url='faalkaart.nl', port=443):
     debug_grade(rating, trust_rating)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def determine_grade(report, url):
     """
@@ -479,6 +482,7 @@ def debug_grade(ratings, trust_ratings):
     logger.debug('')
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def store_grade(ratings, trust_ratings, endpoint):
     lowest_rating = 'A'

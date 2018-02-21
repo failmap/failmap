@@ -47,10 +47,6 @@ IP_VERSION_QUEUE = {
     6: 'scanners.ipv6',
 }
 
-# default queue for all scanner tasks (can be overwritten by setting queue per task)
-# http://docs.celeryproject.org/en/latest/userguide/routing.html#automatic-routing
-app.conf.task_routes = {'failmap.scanners.*': {'queue': 'scanners'}}
-
 
 class DefaultTask(Task):
     """Default settings for all failmap tasks."""
@@ -71,12 +67,12 @@ class ParentFailed(Exception):
         super(ParentFailed, self).__init__(message, *args)
 
 
-@app.task(bind=True)
+@app.task(queue='default', bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
 
-@app.task
+@app.task(queue='default')
 def waitsome(sleep):
     """Wait some time and return epoch at completion."""
 
@@ -84,7 +80,7 @@ def waitsome(sleep):
     return time.time()
 
 
-@app.task(rate_limit='1/s')
+@app.task(queue='default', rate_limit='1/s')
 def rate_limited(sleep):
     """Wait some time but limit to maximum tasks of 1 per second."""
 

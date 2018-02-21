@@ -15,6 +15,7 @@ from ..celery import app
 logger = logging.getLogger(__package__)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def onboard_new_urls():
     never_onboarded = Url.objects.all().filter(onboarded=False)
@@ -43,6 +44,7 @@ def onboard_new_urls():
     onboard_urls(never_onboarded)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def onboard_urls(urls: List[Url]):
     for url in urls:

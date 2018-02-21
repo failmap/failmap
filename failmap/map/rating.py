@@ -66,7 +66,7 @@ def compose_task(
     return task
 
 
-@app.task
+@app.task(queue='storage')
 def rerate_urls(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
@@ -75,7 +75,7 @@ def rerate_urls(urls: List):
         rate_timeline(create_timeline(url), url)
 
 
-@app.task
+@app.task(queue='storage')
 def rerate_organizations(organizations: List):
     """Remove organization rating and rebuild anew."""
 
@@ -84,7 +84,7 @@ def rerate_organizations(organizations: List):
     add_organization_rating(organizations=organizations, build_history=True)
 
 
-@app.task
+@app.task(queue='storage')
 def add_organization_rating(organizations: List[Organization], build_history: bool=False, when: datetime=None):
     """
     :param organizations: List of organization
@@ -1039,7 +1039,7 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
 
 
 # todo: use the organization creation date for this.
-@app.task
+@app.task(queue='storage')
 def default_ratings(organizations: List[Organization]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents

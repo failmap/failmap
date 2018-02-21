@@ -12,7 +12,7 @@ def celery(settings):
     settings.CELERY_TASK_ALWAYS_EAGER = True
 
 
-@app.task
+@app.task(queue='scanners')
 def dummy(result=True):
     """Dummy celery task for testing."""
     if result:

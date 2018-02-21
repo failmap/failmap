@@ -155,6 +155,7 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
         scan_url(endpoint.protocol, endpoint.url, endpoint.port)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
                        organizations: List[Organization]=None):
@@ -228,7 +229,7 @@ def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
                 scan_url(protocol, url, port)
 
 
-@app.task
+# TODO: make queue explicit, split functionality in storage and scanner
 def scan_url(protocol: str, url: Url, port: int):
     resolve_task = resolve_and_scan.s(protocol, url, port)
     resolve_task.apply_async()
@@ -242,6 +243,7 @@ def scan_url_direct(protocol: str, url: Url, port: int):
 # also rate limited for the same reason as can_connect is rate limited.
 # would this be faster the ip discovery and actual scan grow to far apart.
 # also it would mean an intense series of questions to the dns server.
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def resolve_and_scan(protocol: str, url: Url, port: int):
     ips = get_ips(url.url)
@@ -330,6 +332,7 @@ def get_ips(url: str):
     # on the development machine it scans all within 10 minutes. About 20/s.
 
     rate_limit='6/s',
+    # queue needs to be set based on ip, either scanners.endpoint_discovery.ipv4 or scanners.endpoint_discovery.ipv4
 )
 def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     """
@@ -634,7 +637,7 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         ep.save()
 
 
-@app.task()
+@app.task(queue='scanners')
 def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,

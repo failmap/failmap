@@ -484,9 +484,7 @@ def kill_alive_and_get_endpoint(protocol, url, port, ip_version, message):
         return failmap_endpoint
 
 
-@app.task(
-    queue='storage'
-)
+@app.task(queue='storage')
 def scratch(domain, data):
     log.debug("Scratching data for %s", domain)
     scratchpad = TlsQualysScratchpad()

@@ -45,12 +45,14 @@ from failmap.scanners.timeout import timeout
 logger = logging.getLogger(__package__)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def screenshot_urls(urls):
     for url in urls:
         screenshot_url(url)
 
 
+# TODO: make queue explicit, split functionality in storage and scanner
 @app.task
 def screenshot_url(url):
     """
