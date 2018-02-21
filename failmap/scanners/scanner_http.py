@@ -263,16 +263,15 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
     (ipv4, ipv6) = ips
     if ipv4:
         # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-        # todo move options to .set()
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4,
-                                     queue='scanners.endpoint_discovery.ipv4')
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4).set(
+            queue='scanners.endpoint_discovery.ipv4')
         result_task = connect_result.s(protocol, url, port, 4)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
 
     if ipv6:
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6,
-                                     queue='scanners.endpoint_discovery.ipv6')
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6).set(
+            queue='scanners.endpoint_discovery.ipv6')
         result_task = connect_result.s(protocol, url, port, 6)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
