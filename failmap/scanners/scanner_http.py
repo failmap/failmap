@@ -43,10 +43,51 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
 
 from .timeout import timeout
+from celery import Task, group
+from failmap.celery import app
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__package__)
+
+STANDARD_HTTP_PORTS = [80, 443, 8008, 8080, 8088, 8443, 8888]
+STANDARD_HTTP_PROTOCOLS = ['http', 'https']
+
+# Discover Endpoints generic task
+def compose_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """Compose taskset to scan specified endpoints.
+
+    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
+    examples of usage refer to `compose_task` in `types.py`.*
+
+    """
+
+    # apply filter to organizations (or if no filter, all organizations)
+    organizations = Organization.objects.filter(**organizations_filter)
+    # apply filter to urls in organizations (or if no filter, all urls)
+    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+
+    if endpoints_filter:
+        raise ValueError("No filtering available for endpoints: this method discovers new "
+                         "endpoints based on Url or Organization.")
+
+    logger.info('Creating scan task for %s urls for %s organizations.',
+                len(urls), len(organizations))
+
+    # make sure we're dealing with a list for the coming random function
+    urls = list(urls)
+    # randomize the endpoints to better spread load over urls.
+    random.shuffle(urls)
+
+    # create tasks for scanning all selected endpoints as a single managable group
+    task = discover_endpoints.signature(urls=list(urls), options={'queue': 'scanners'})
+
+    return task
 
 
 def validate_port(port: int):
@@ -70,6 +111,8 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
 
     The only result this scanner has is the same or less endpoints than we currently have.
 
+    Existing endpoints might be marked as unresolvable.
+
     :return: None
     """
     if not urls:
@@ -88,7 +131,7 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
     if protocol:
         endpoints = endpoints.filter(protocol=protocol)
     else:
-        endpoints = endpoints.filter(protocol__in=['http', 'https'])
+        endpoints = endpoints.filter(protocol__in=STANDARD_HTTP_PROTOCOLS)
 
     if organizations:
         endpoints = endpoints.filter(url__organization__in=organizations)
@@ -101,10 +144,26 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
         scan_url(endpoint.protocol, endpoint.url, endpoint.port)
 
 
+@app.task
 def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
                        organizations: List[Organization]=None):
     """
+    Contact each URL (or each url of organizations) to determine if there are endpoints.
+    Do so both over HTTP, HTTPS on various ports and with both IPv4 and IPv6.
 
+    A healthy set of endpoints in 2018 is:
+
+
+    IPv4 80  Redirects to 443
+    IPv4 443 Content
+    IPv6 80  Redirects to 443
+    IPv6 443 Content
+
+    Port 80 websites will be deprecated in the coming years by all popular browsers. They will begin to
+    disappear, which will be in full force in mid 2019.
+
+    Existing endpoints might be marked as unresolvable.
+    Existing URLS might also be marked as unresolvable: the is_dead will not be set, this is a OSI layer 8 option.
 
     :return: None
     """
@@ -117,24 +176,25 @@ def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
     if protocol:
         protocols = [protocol]
     else:
-        protocols = ['http', 'https']
+        protocols = STANDARD_HTTP_PROTOCOLS
 
     if port:
         ports = [port]
     else:
         # Yes, HTTP sites on port 443 exist, we've seen many of them. Not just warnings(!).
         # Don't underestimate the flexibility of the internet.
-        ports = [80, 443, 8008, 8080, 8088, 8443, 8888]
+        ports = STANDARD_HTTP_PORTS
 
-    # randomize the endpoints to better spread load.
+    # make sure we're dealing with a list for the coming random function
     urls = list(urls)
+    # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
 
     scan_urls(protocols, urls, ports)
 
 
 def scan_urls_on_standard_ports(urls: List[Url]):
-    scan_urls(['http', 'https'], urls, [80, 443, 8008, 8080, 8088, 8443, 8888])
+    scan_urls(STANDARD_HTTP_PROTOCOLS, urls, STANDARD_HTTP_PORTS)
 
 
 def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
@@ -219,7 +279,17 @@ def get_ips(url: str):
             # dig AAAA faalkaart.nl +short (might be used for debugging)
             x = socket.getaddrinfo(url, None, socket.AF_INET6)
             ipv6 = x[0][4][0]
-            logger.debug("%s has IPv6 address: %s" % (url, ipv6))
+
+            # six to four addresses make no sense
+            if str(ipv6).startswith("::ffff:"):
+                logger.error("Six-to-Four address %s discovered on %s, "
+                               "did you configure IPv6 connectivity correctly? "
+                               "Removing this IPv6 address from result to prevent "
+                               "database pollution." %
+                               (ipv6, url))
+                ipv6 = ""
+            else:
+                logger.debug("%s has IPv6 address: %s" % (url, ipv6))
         except Exception as ex:
             # when not known: [Errno 8nodename nor servname provided, or not known
             logger.debug("Get IPv6 error: %s" % ex)
@@ -433,6 +503,9 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
 @app.task
 def revive_url(url: Url):
     """
+    Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
+
+    Todo:
     This does not revive all endpoints... There should be new ones to better match with actual
     happenings with servers.
 
@@ -450,6 +523,12 @@ def revive_url(url: Url):
 
 @app.task
 def kill_url(url: Url):
+    """
+    Sets a URL as not resolvable. Does not touches the is_dead (layer 8) field.
+
+    :param url:
+    :return:
+    """
     url.not_resolvable = True
     url.not_resolvable_since = datetime.now(pytz.utc)
     url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
