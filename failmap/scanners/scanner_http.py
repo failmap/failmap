@@ -34,7 +34,7 @@ import pytz
 import requests
 # suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
-from celery import Task
+from celery import Task, group
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
@@ -49,7 +49,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__package__)
 
-STANDARD_HTTP_PORTS = [80, 443, 8008, 8080, 8088, 8443, 8888]
+STANDARD_HTTP_PORTS = [80, 443, 8008, 8080, 8443]
 STANDARD_HTTP_PROTOCOLS = ['http', 'https']
 
 # Discover Endpoints generic task
@@ -83,9 +83,20 @@ def compose_task(
     urls = list(urls)
     # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
+    tasks = []
 
-    # create tasks for scanning all selected endpoints as a single managable group
-    task = discover_endpoints.signature(urls=list(urls), options={'queue': 'scanners'})
+    # even with a randomized url order, still try to add as much time as possible between contacting
+    # the same url, to not disrupt running services.
+    for port in STANDARD_HTTP_PORTS:
+        for protocol in STANDARD_HTTP_PROTOCOLS:
+            for url in urls:
+                tasks.append(scan_url.s(protocol=protocol, url=url, port=port))
+    task = group(tasks)
+
+    amount_of_scans = len(STANDARD_HTTP_PORTS) * len(STANDARD_HTTP_PROTOCOLS) * len(urls) * 2
+    logger.info('Ports: %s * Protocols: %s * (IPv4, IPv6) * Urls: %s = %s scans, With 6/sec this takes %s hours.',
+                len(STANDARD_HTTP_PORTS), len(STANDARD_HTTP_PROTOCOLS), len(urls),
+                amount_of_scans, amount_of_scans / (6*60*60))
 
     return task
 
@@ -217,6 +228,7 @@ def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
                 scan_url(protocol, url, port)
 
 
+@app.task
 def scan_url(protocol: str, url: Url, port: int):
     resolve_task = resolve_and_scan.s(protocol, url, port)
     resolve_task.apply_async()
