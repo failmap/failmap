@@ -244,7 +244,7 @@ def get_ips(url: str):
 
     # on the development machine it scans all within 10 minutes. About 20/s.
 
-    rate_limit='3/s',
+    rate_limit='6/s',
 )
 def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     """
