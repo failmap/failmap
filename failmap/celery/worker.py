@@ -32,6 +32,15 @@ WORKER_QUEUE_CONFIGURATION = {
         Queue('default'),
         # legacy default queue, can be removed after transition period to multiworkers
         Queue('celery'),
+        # endpoint discovery
+        Queue('scanners.endpoint_discovery.ipv4'),
+        Queue('scanners.endpoint_discovery.ipv6'),
+    ],
+    # special queue for handling tons of tasks that are rate limited (we don't want to broadcast
+    # hundreds of thousands of tasks at the same time since that looks like hostile internet traffic)
+    'scanner_endpoint_discovery': [
+        Queue('scanners.endpoint_discovery.ipv4'),
+        Queue('scanners.endpoint_discovery.ipv6'),
     ],
     # worker with access to storage allowed to connect to databases
     'storage': [

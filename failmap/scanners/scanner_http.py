@@ -90,7 +90,7 @@ def compose_task(
     for port in STANDARD_HTTP_PORTS:
         for protocol in STANDARD_HTTP_PROTOCOLS:
             for url in urls:
-                tasks.append(scan_url.s(protocol=protocol, url=url, port=port))
+                tasks.append(resolve_and_scan.s(protocol=protocol, url=url, port=port))
     task = group(tasks)
 
     amount_of_scans = len(STANDARD_HTTP_PORTS) * len(STANDARD_HTTP_PROTOCOLS) * len(urls) * 2
@@ -262,13 +262,15 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
 
     (ipv4, ipv6) = ips
     if ipv4:
-        connect_task = can_connect.s(protocol, url, port, ipv4)  # Network task
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4,
+                                     options={'queue': 'scanners.endpoint_discovery.ipv4'})
         result_task = connect_result.s(protocol, url, port, 4)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
 
     if ipv6:
-        connect_task = can_connect.s(protocol, url, port, ipv6)  # Network task
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6,
+                                     options={'queue': 'scanners.endpoint_discovery.ipv6'})
         result_task = connect_result.s(protocol, url, port, 6)  # administrative task
         task = (connect_task | result_task)
         task.apply_async()
