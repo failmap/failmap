@@ -34,6 +34,7 @@ import pytz
 import requests
 # suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
+from celery import Task
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
@@ -43,9 +44,6 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
 
 from .timeout import timeout
-from celery import Task, group
-from failmap.celery import app
-
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -55,6 +53,8 @@ STANDARD_HTTP_PORTS = [80, 443, 8008, 8080, 8088, 8443, 8888]
 STANDARD_HTTP_PROTOCOLS = ['http', 'https']
 
 # Discover Endpoints generic task
+
+
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -283,10 +283,10 @@ def get_ips(url: str):
             # six to four addresses make no sense
             if str(ipv6).startswith("::ffff:"):
                 logger.error("Six-to-Four address %s discovered on %s, "
-                               "did you configure IPv6 connectivity correctly? "
-                               "Removing this IPv6 address from result to prevent "
-                               "database pollution." %
-                               (ipv6, url))
+                             "did you configure IPv6 connectivity correctly? "
+                             "Removing this IPv6 address from result to prevent "
+                             "database pollution." %
+                             (ipv6, url))
                 ipv6 = ""
             else:
                 logger.debug("%s has IPv6 address: %s" % (url, ipv6))
