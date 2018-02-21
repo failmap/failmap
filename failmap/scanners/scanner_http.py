@@ -96,7 +96,7 @@ def compose_task(
     amount_of_scans = len(STANDARD_HTTP_PORTS) * len(STANDARD_HTTP_PROTOCOLS) * len(urls) * 2
     logger.info('Ports: %s * Protocols: %s * (IPv4, IPv6) * Urls: %s = %s scans, With 6/sec this takes %s hours.',
                 len(STANDARD_HTTP_PORTS), len(STANDARD_HTTP_PROTOCOLS), len(urls),
-                amount_of_scans, amount_of_scans / (6*60*60))
+                amount_of_scans, amount_of_scans / (6 * 60 * 60))
 
     return task
 
@@ -441,7 +441,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
             return False
 
 
-@app.task
+@app.task(queue='storage')
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     logger.info("%s %s" % (url, result))
     # logger.info("%s %s" % (url, url))
@@ -515,7 +515,7 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
     return
 
 
-@app.task
+@app.task(queue='storage')
 def revive_url(url: Url):
     """
     Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
@@ -536,7 +536,7 @@ def revive_url(url: Url):
         url.save()
 
 
-@app.task
+@app.task(queue='storage')
 def kill_url(url: Url):
     """
     Sets a URL as not resolvable. Does not touches the is_dead (layer 8) field.
@@ -560,7 +560,7 @@ def kill_url(url: Url):
     )
 
 
-@app.task
+@app.task(queue='storage')
 def store_url_ips(url: Url, ips):
     """
     Todo: method should be stored in manager
