@@ -30,7 +30,7 @@
     exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
     description: ''}
 - model: django_celery_beat.periodictask
-  pk: 3
+  pk: 5
   fields: {name: scan-http-endpoint-discovery, task: failmap.app.models.create_job,
     interval: 2, crontab: null, solar: null, args: '["failmap.scanners.scanner_http"]', kwargs: '{}', queue: 'storage',
     exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
