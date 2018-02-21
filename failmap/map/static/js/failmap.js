@@ -167,7 +167,7 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             dataslider_control = " <div id=\"historycontrol\">" +
-                "    <h4>{{ visibleweek }}<span v-if='loading'> (' + gettext('Loading') + '...)</span></h4>" +
+                "    <h4>{{ visibleweek }}<span v-if='loading'> (" + gettext('Loading') + "...)</span></h4>" +
                 "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
                 "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
                 "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +

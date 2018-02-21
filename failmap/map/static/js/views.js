@@ -459,13 +459,13 @@ function views() {
         mixins: [top_mixin]
     });
 
-    window.vueTopfail = new Vue({
+    window.vueTopwin = new Vue({
         el: '#topwin',
         data: {data_url: "/data/topwin/"},
         mixins: [top_mixin]
     });
 
-    window.vueTopfail = new Vue({
+    window.vueTerribleurls = new Vue({
         el: '#terrible_urls',
         data: {data_url: "/data/terrible_urls/"},
         mixins: [top_mixin]
