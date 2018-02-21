@@ -47,6 +47,10 @@ IP_VERSION_QUEUE = {
     6: 'scanners.ipv6',
 }
 
+# default queue for all scanner tasks (can be overwritten by setting queue per task)
+# http://docs.celeryproject.org/en/latest/userguide/routing.html#automatic-routing
+app.conf.task_routes = {'failmap.scanners.*': {'queue': 'scanners'}}
+
 
 class DefaultTask(Task):
     """Default settings for all failmap tasks."""
