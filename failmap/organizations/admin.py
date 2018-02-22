@@ -2,10 +2,14 @@ import logging
 from datetime import datetime
 
 import pytz
+import tldextract
+from django import forms
 from django.contrib import admin
 from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
@@ -147,7 +151,77 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
 
+# https://docs.djangoproject.com/en/2.0/ref/forms/validation/
+class MyUrlAdminForm(forms.ModelForm):
+
+    def clean_url(self):
+
+        url_string = self.data.get("url")
+
+        # urls must be lowercase
+        url_string = url_string.lower()
+
+        # todo: remove invalid characters
+        # Currently assume that there is some sense in adding this data.
+
+        # see if the url is complete, and remove the http(s):// and paths parts:
+        result = tldextract.extract(url_string)
+
+        if result.subdomain:
+            clean_url_string = "%s.%s.%s" % (result.subdomain, result.domain, result.suffix)
+        else:
+            clean_url_string = "%s.%s" % (result.domain, result.suffix)
+
+        # also place the cleaned data back into the form, in case of errors.
+        # this does not work this way it seems.
+        # self.data.url = clean_url_string
+
+        if not result.suffix:
+            raise ValidationError("Url is missing suffix (.com, .net, ...)")
+
+        return clean_url_string
+
+    def clean(self):
+        organizations = self.cleaned_data.get("organization")
+
+        # mandatoryness error will already be triggered, don't interfere with that.
+        if not organizations:
+            return
+
+        # make sure the URL is not added if it is already alive and matched to the selected organization.
+        for organization in organizations:
+            if Url.objects.all().filter(
+                    url=self.cleaned_data.get("url"), is_dead=False, organization=organization).count():
+
+                # format_html = XSS :)
+                raise ValidationError(format_html(_(
+                    'Url %s is already matched to "%s", and is alive. '
+                    'Please add any remaining organizations to the existing version of this url. '
+                    'Search for <a href="../?url=%s&is_dead=False">🔍 %s</a>.'
+                    % (self.cleaned_data.get("url"), organization,
+                       self.cleaned_data.get("url"), self.cleaned_data.get("url")))))
+
+        # make sure the Url is not added if it is still alive: the existing url should be edited and the
+        # organization should be added. (we might be able to do this automatically since we know the url is not
+        # already matched to an organization) - In that case all other fields have to be ignored and
+        # this form still closes succesfully.
+        # This url already exists and the selected organization(s) have been added to it.
+
+        if Url.objects.all().filter(
+                url=self.data.get("url"), is_dead=False).count():
+
+            # format_html = XSS :)
+            raise ValidationError(format_html(_(
+                'This url %s already exists and is alive. Please add the desired organizations to the existing url. '
+                'This was not done automatically because it might be possible specific other data was entered in this '
+                'form that cannot blindly be copied (as it might interfere with the existing url). '
+                'Search for <a href="../?url=%s&is_dead=False">🔍 %s</a>.'
+                % (self.data.get("url"), self.data.get("url"), self.data.get("url")))))
+
+
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
+    form = MyUrlAdminForm
+
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
     search_fields = ('url', )

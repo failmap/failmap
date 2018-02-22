@@ -188,6 +188,21 @@ class Url(models.Model):
         if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
             raise ValidationError(_('When telling this is dead, also enter the date and reason for it.'))
 
+        # urls must be lowercase
+        self.url = self.url.lower()
+
+        # !!!! below validation was placed in the admin interface.
+        # We're adding the URL before we know it's allowed. This due to the missing docs on how to clean
+        # many to many relationships. The URL needs to have an ID when querying a many to many for it, otherwise
+        # you'll get an exception.
+        # If it already exists, the url will be deleted still.
+        # https://code.djangoproject.com/ticket/12938 - NOPE, not going to happen...
+        # so we use plain old SQL and then it works fine :)
+        # And that also won't work because organization is empty. Which is a total bummer. You'd expect
+        # this field to be here somehow, but it isn't.
+        # a warning might be possible after the insert, but then you've got two urls already.
+        # this is really a shortcoming of Django.
+
     def is_top_level(self):
         # count the number of dots. Should be one.
         # allows your own extension on a lan. there are thousands of extensions today.
