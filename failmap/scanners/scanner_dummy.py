@@ -13,6 +13,7 @@ from celery import Task, group
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
+from django.conf import settings
 
 from .models import Endpoint
 
@@ -62,7 +63,14 @@ def compose_task(
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
+    # make sure we're dealing with a list for the coming random function
+    endpoints = list(endpoints)
+    # randomize the endpoints so hosts are contacted in random order (less pressure)
+    random.shuffle(endpoints)
+
     # create tasks for scanning all selected endpoints as a single managable group
+    # Sending entire objects is possible. How signatures (.s and .si) work is documented:
+    # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
         scan_dummy.s(endpoint.uri_url()) | store_dummy.s(endpoint) for endpoint in endpoints
     )
@@ -82,13 +90,22 @@ def store_dummy(result, endpoint):
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
 
+
+    # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
+    # Run "failmap translate" to have the messages added to:
+    # /failmap/map/locale/*/djangojs.po
+    # /failmap/map/locale/*/django.po
+    # translate them and then run "failmap translate" again.
+    message_result_ok = 'Because the result was True'
+    message_result_false = 'Because the result was False'
+
     log.debug('Storing result: %s, for endpoint: %s.', result, endpoint)
+    # You can save any (string) value and any (string) message.
+    # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        EndpointScanManager.add_scan(
-            'Dummy', endpoint, 'True', 'Because the result was True')
+        EndpointScanManager.add_scan('Dummy', endpoint, 'True', message_result_ok)
     else:
-        EndpointScanManager.add_scan(
-            'Dummy', endpoint, 'False', 'Because the result was False')
+        EndpointScanManager.add_scan('Dummy', endpoint, 'False', message_result_false)
 
     # return something informative
     return {'status': 'success', 'result': result}
@@ -106,20 +123,40 @@ class SomeError(Exception):
 def scan_dummy(self, uri_url):
     """
 
+    Before committing your scanner, verify the following:
+    [ ] the scanner does not keep connections open (resource claim on both our and their servers)
+    [ ] a series of exceptions are handled: keep in mind the high probability of network errors
+    [ ] does not try to authenticate _ever_ (== filling in usernames / passwords)
+    [ ] does only one thing very well
+
     :param uri_url:
 
     """
     try:
         log.info('Start scanning %s', uri_url)
 
-        # sometimes a task fails
+        # Tools and output for this scan are registered in /failmap/settings.py
+        # We prefer tools written in python, limiting the amount of dependencies used in the project.
+        # Another tool is fine too, but please announce so in chat etc.
+        # Example:
+        # TOOLS = {
+        #    'yourtool': {
+        #        'executable': VENDOR_DIR + os.environ.get('YOURTOOL_EXECUTABLE', "yourtool/yourtool.py"),
+        #        'output_dir': OUTPUT_DIR + os.environ.get('YOURTOOL_OUTPUT_DIR', "scanners/resources/output/yourtool/"),
+        #    },
+        # mytool = settings.TOOLS['youtool']['executable']
+        # Below demonstrates the usage of settings.
+        sample_settings_usage = len(settings.TOOLS)
+        log.debug("%s are registered." % sample_settings_usage)
+
+        # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
         if not random.randint(0, 5):
             raise SomeError('some error occured')
 
-        # often tasks take different times to execute
+        # simulation: often tasks take different times to execute
         time.sleep(random.randint(1, 10) / 10)
 
-        # the result can be different
+        # simulation: the result can be different
         result = bool(random.randint(0, 1))
 
         log.info('Done scanning: %s, result: %s', uri_url, result)
