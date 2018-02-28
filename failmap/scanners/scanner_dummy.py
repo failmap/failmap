@@ -9,11 +9,11 @@ import random
 import time
 
 from celery import Task, group
+from django.conf import settings
 
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-from django.conf import settings
 
 from .models import Endpoint
 
@@ -90,7 +90,6 @@ def store_dummy(result, endpoint):
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
 
-
     # Messages are translated for display. Add the exact messages in: /failmap/map/static/js/script.js
     # Run "failmap translate" to have the messages added to:
     # /failmap/map/locale/*/djangojs.po
@@ -142,7 +141,8 @@ def scan_dummy(self, uri_url):
         # TOOLS = {
         #    'yourtool': {
         #        'executable': VENDOR_DIR + os.environ.get('YOURTOOL_EXECUTABLE', "yourtool/yourtool.py"),
-        #        'output_dir': OUTPUT_DIR + os.environ.get('YOURTOOL_OUTPUT_DIR', "scanners/resources/output/yourtool/"),
+        #        'output_dir': OUTPUT_DIR + os.environ.get('YOURTOOL_OUTPUT_DIR',
+        #                                                  "scanners/resources/output/yourtool/"),
         #    },
         # mytool = settings.TOOLS['youtool']['executable']
         # Below demonstrates the usage of settings.
