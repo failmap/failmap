@@ -35,6 +35,10 @@ RUN apk --no-cache add \
   postgresql-libs \
   mailcap
 
+# include relevant external tools and export this path for settings.py
+COPY vendor /vendor/
+ENV VENDOR_DIR /vendor/
+
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
