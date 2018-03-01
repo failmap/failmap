@@ -63,6 +63,8 @@ def compose_task(
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
+
+    # todo: this is a poor mans solution for queue randomization, will be implemented in the queue manager
     # make sure we're dealing with a list for the coming random function
     endpoints = list(endpoints)
     # randomize the endpoints so hosts are contacted in random order (less pressure)
@@ -123,10 +125,15 @@ def scan_dummy(self, uri_url):
     """
 
     Before committing your scanner, verify the following:
-    [ ] the scanner does not keep connections open (resource claim on both our and their servers)
-    [ ] a series of exceptions are handled: keep in mind the high probability of network errors
-    [ ] does not try to authenticate _ever_ (== filling in usernames / passwords)
-    [ ] does only one thing very well
+    [ ] the scanner does not keep connections open. Doing otherwise claims resources on our and their
+        machines. This can lead to resource depletion and possible denial of service.
+    [ ] network connection errors are common, especially if you don't know if a service really exists. Be aware
+        that there are many types of network errors: you can see examples in our other scanners.
+    [ ] authentication on a service when you're not allowed to is seen as a crime in many places, therefore
+        a scanner cannot do any form of authentication (even admin/admin).
+    [ ] try to do only one thing pretty well: you'll find that there is so much stuff involved just to do one thing
+        very well... even the most simplest of tasks will fail and give exceptions in the most unexpected and
+        spectacular ways.
 
     :param uri_url:
 
