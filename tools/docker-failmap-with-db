@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e -o pipefail
-set -vx
+
 # run failmap in a docker container
 
 database=$(realpath ${DB_NAME:-db.sqlite3})
