@@ -71,5 +71,8 @@ setup(
             'failmap = failmap.manage:main',
         ],
     },
+    scripts=[
+        'tools/dnssec.pl'
+    ],
     include_package_data=True,
 )

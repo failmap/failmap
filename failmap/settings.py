@@ -332,6 +332,10 @@ LOGGING = {
 OUTPUT_DIR = os.environ.get('OUTPUT_DIR', os.path.abspath(os.path.dirname(__file__)) + '/')
 VENDOR_DIR = os.environ.get('VENDOR_DIR', os.path.abspath(os.path.dirname(__file__) + '/../vendor/') + '/')
 
+# the tools dir in this case are very small tools that build upon external dependencies, such as dnscheck.
+# only use this if the vendor dir does not provide the needed command(s) in a simple way
+TOOLS_DIR = os.environ.get('TOOLS_DIR', os.path.abspath(os.path.dirname(__file__) + '/../tools/') + '/')
+
 # A number of tools and outputs are grouped to easier have access to all of them.
 # Our vendor directory contains a number of small tools that are hard to install otherwise.
 
@@ -396,6 +400,9 @@ TOOLS = {
             'Darwin': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-darwin',
             'Linux': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-linux',
         }
+    },
+    'dnscheck': {
+        'executable': TOOLS_DIR + 'dnssec.pl'
     }
 }
 

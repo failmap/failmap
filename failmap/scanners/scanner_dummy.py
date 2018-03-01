@@ -63,7 +63,6 @@ def compose_task(
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
-
     # todo: this is a poor mans solution for queue randomization, will be implemented in the queue manager
     # make sure we're dealing with a list for the coming random function
     endpoints = list(endpoints)
