@@ -75,7 +75,7 @@ def compose_task(
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.s(endpoint.uri_url()) | store_dnssec.s(endpoint) for endpoint in endpoints
+        scan_dnssec.s(endpoint.url.url) | store_dnssec.s(endpoint) for endpoint in endpoints
     )
 
     return task
@@ -124,24 +124,23 @@ def store_dnssec(result: List[str], endpoint: Endpoint):
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
           expires=EXPIRES)
-def scan_dnssec(self, uri_url: str):
+def scan_dnssec(self, url: str):
     """
     Uses the dnssec scanner of dotse, which works pretty well.
 
-    :param uri_url:
+    :param url:
 
     Possible problems as seen on: https://github.com/stjernstedt/Interlan/blob/master/script/functions
     Timeout of 240 seconds. Nothing more (oh wow).
 
     """
     try:
-        log.info('Start scanning %s', uri_url)
+        log.info('Start scanning %s', url)
 
-        command = "%s %s" % (settings.TOOLS['dnscheck']['executable'], uri_url)
-        output = subprocess.check_output(command).decode("UTF-8")
+        output = subprocess.check_output([settings.TOOLS['dnscheck']['executable'], url]).decode("UTF-8")
         content = output.splitlines()
 
-        log.info('Done scanning: %s, result: %s', uri_url, content)
+        log.info('Done scanning: %s, result: %s', url, content)
         return content
 
     # errors:
