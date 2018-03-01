@@ -43,6 +43,7 @@ RUN apk --no-cache add \
   libxml2 \
   mariadb-client-libs \
   postgresql-libs \
+  sqlite \
   mailcap \
   # runtime dependencies for dnscheck perl module
   perl \

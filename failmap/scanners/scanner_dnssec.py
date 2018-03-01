@@ -104,7 +104,7 @@ def store_dnssec(result: List[str], endpoint: Endpoint):
     messages = {
         'ERROR': 'DNSSEC is incorrectly or not configured. Use below information to debug: %s',
         'WARNING': 'DNSSEC is incorrectly configured. Use below information to debug: %s',
-        'INFO_NOTICE': 'DNSSEC seems to be implemented sufficiently. %s'
+        'INFO': 'DNSSEC seems to be implemented sufficiently. %s'
     }
 
     log.debug('Storing result: %s, for endpoint: %s.', result, endpoint)

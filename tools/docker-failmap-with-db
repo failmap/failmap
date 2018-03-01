@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+set -vx
+# run failmap in a docker container
+
+database=$(realpath ${DB_NAME:-db.sqlite3})
+
+docker run -ti -v "$database:/db.sqlite3" registry.gitlab.com/failmap/failmap:latest "$@"
