@@ -210,6 +210,7 @@ def analyze_result(result: List[str]):
         35.422: INFO Done testing DNSSEC for gratiz.nl.
         """
 
+        # translations for the english language files
         if line.startswith("%s" % "INFO Did not find DS record"):
             strings["ERROR"].append(line)
 
@@ -220,6 +221,19 @@ def analyze_result(result: List[str]):
             strings["ERROR"].append(line)
 
         if line.startswith("%s" % "INFO No DNSKEY(s) found at child"):
+            strings["ERROR"].append(line)
+
+        # in case the language files are not installed:
+        if line.startswith("%s" % "INFO [DNSSEC:NO_DS_FOUND]"):
+            strings["ERROR"].append(line)
+
+        if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
+            strings["ERROR"].append(line)
+
+        if line.startswith("%s" % "INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
+            strings["ERROR"].append(line)
+
+        if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
             strings["ERROR"].append(line)
 
     highest_level = "ERROR" if strings["ERROR"] \
@@ -280,6 +294,22 @@ def test_analyze_result():
         3.349: INFO Parent DS(faalkaart.nl) refers to secure entry point (SEP) at child: DS(faalkaart.nl/7/2/52353)
         3.349: INFO Did not find DS record something something darkside.
         3.349: INFO Done testing DNSSEC for faalkaart.nl."""
+
+    result = result.splitlines()
+    level, relevant = analyze_result(result)
+
+    assert level == "ERROR"
+
+    # missing translation files
+    result = """
+    0.000: INFO [DNSSEC:BEGIN] nu.nl
+    1.969: INFO [DNSSEC:NO_DS_FOUND] nu.nl
+    2.995: INFO [DNSSEC:CONSISTENT_EXTRA_PROCESSING] nu.nl
+    3.058: INFO [DNSSEC:NSEC_NOT_FOUND] nu.nl
+    3.091: INFO [DNSSEC:DNSKEY_NOT_FOUND] nu.nl
+    3.091: INFO [DNSSEC:SKIPPED_NO_KEYS] nu.nl
+    3.091: INFO [DNSSEC:END] nu.nl
+    """
 
     result = result.splitlines()
     level, relevant = analyze_result(result)
