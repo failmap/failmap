@@ -6,4 +6,4 @@
 	url = https://github.com/laramies/theHarvester.git
 [submodule "vendor/dnscheck"]
 	path = vendor/dnscheck
-	url = https://github.com/stitch/dnscheck
+	url = https://github.com/stitch/dnscheck.git
