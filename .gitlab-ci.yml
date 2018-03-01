@@ -114,6 +114,9 @@ build:
   services:
     - docker:dind
 
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
   image: registry.gitlab.com/failmap/ci:docker-git
 
   before_script:
@@ -150,6 +153,7 @@ image_test:
   image: registry.gitlab.com/failmap/ci:docker-git
   variables:
     TIMEOUT: 120
+    GIT_SUBMODULE_STRATEGY: recursive
 
   before_script:
     # login to docker and cache previous image if available
@@ -179,6 +183,7 @@ image_test_with_pull:
   image: registry.gitlab.com/failmap/ci:docker-git
   variables:
     TIMEOUT: 120
+    GIT_SUBMODULE_STRATEGY: recursive
 
   before_script:
     # login to docker and cache previous image if available

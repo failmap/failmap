@@ -4,3 +4,6 @@
 [submodule "vendor/theHarvester"]
 	path = vendor/theHarvester
 	url = https://github.com/laramies/theHarvester.git
+[submodule "vendor/dnscheck"]
+	path = vendor/dnscheck
+	url = https://github.com/dotse/dnscheck
