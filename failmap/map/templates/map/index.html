@@ -74,18 +74,18 @@
                 <li><a href="#report">{% trans "Report" %}</a></li>
                 <li><a href="#explanation">{% trans "Explanation" %}</a></li>
             </ul>
+            <ul class="nav navbar-nav navbar-right">
             {% if debug %}
-                <ul class="nav navbar-nav navbar-right">
-                    <li><span style="margin-top:10px;"
-                              class='btn btn-danger btn-sm btn-block'>{% trans "DEBUG" %}</span></li>
-                </ul>
+                <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>{% trans "DEBUG" %}</span></li>
             {% endif %}
             {% if admin %}
-                <ul class="nav navbar-nav pull-right">
-                    <li><span class="navbar-text"><span class="label label-default">{{ version }}</span></span></li>
-                    <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                </ul>
+                <li><span class="navbar-text"><span class="label label-default">{{ version }}</span></span></li>
+                <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+						{% else %}
+								<li><a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" width="24px" class="d-inline-block align-top"/></a></li>
+                <li><a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo.png' %}" width="24px" class="d-inline-block align-top"/></a></li>
             {% endif %}
+            </ul>
         </div><!--/.nav-collapse -->
     </div>
 </nav>
