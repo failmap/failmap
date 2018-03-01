@@ -67,6 +67,7 @@ RUN apk --no-cache add \
 RUN ln -s /pyenv/bin/failmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
+RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
 
 # install build application
 COPY --from=build /pyenv /pyenv
