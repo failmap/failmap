@@ -216,7 +216,7 @@ class EndpointGenericScan(models.Model):
         help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent."
     )
     explanation = models.CharField(
-        max_length=255,
+        max_length=9001,
         default=0,
         help_text="Short explanation from the scanner on how the rating came to be."
     )
