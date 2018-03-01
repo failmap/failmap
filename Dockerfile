@@ -71,12 +71,16 @@ RUN ln -s /pyenv/bin/celery /usr/local/bin/
 # install build application
 COPY --from=build /pyenv /pyenv
 COPY --from=build /source /source
+
 # copy artifacts from dnscheck build
 COPY --from=build /usr/local/share/perl5 /usr/local/share/perl5
 COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
 
+
 # copy all relevant files for python installation
 COPY ./failmap/ /source/failmap/
+COPY /tools/dnssec.pl /source/tools/dnssec.pl
+
 # add wildcard to version file as it may not exists (eg: local development)
 COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
 
