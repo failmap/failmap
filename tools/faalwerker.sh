@@ -2,7 +2,12 @@
 
 set -e -o pipefail
 
-# this will start a remote worker using docker
+# stop de resultaten van deze scriptie in een logbestand
+logfile=faalwerker-$$.log
+exec 3>&1
+exec > $logfile 2>&1
+
+set -x
 
 faalcontainernaamvoorvoegsel=failmap-worker
 faalcontainerfaalimagenaam=registry.gitlab.com/failmap/failmap:latest
@@ -12,7 +17,7 @@ faallogfaallevel=info
 faalaantalprocessen=10
 faalaantalprocessenvoorqualys=1
 faalgeheim=geheim
-
+faalrol=scanner
 faalrolqualys=scanner_qualys
 
 kloptalles? (){
@@ -32,28 +37,34 @@ kloptalles? (){
   fi
 }
 
+wegmetdieouwezooi (){
+  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f || true
+}
+
 startmetfalen (){
   if ping6 faalkaart.nl -c3 &>/dev/null;then
-    faalrol=scanner
+    faalipv6=
   else
-    faalrol=scanner_ipv4_only
+    faalipv6=_ipv4_only
   fi
 
   # (stop en) verwijder huidige faalcontainers (voor de zekerheid)
-  docker rm -f $faalcontainernaamvoorvoegsel-$faalrol $faalcontainernaamvoorvoegsel-$faalrolqualys &>/dev/null || true
+  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f &>/dev/null || true
 
   # haal nieuwe faalcontainerfaalimage op vanuit de server
   docker pull $faalcontainerfaalimagenaam
 
   # start nieuwe faalcontainers
-  echo $faalgeheim | docker run -d --rm -ti --name $faalcontainernaamvoorvoegsel-$faalrol -u nobody:nogroup \
-    -e WORKER_ROLE=$faalrol \
+  docker run -d --rm -ti -u nobody:nogroup \
+    --name $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 \
+    -e WORKER_ROLE=$faalrol$faalipv6 \
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
     -v "$faalp12bestand:/client.p12" \
     $faalcontainerfaalimagenaam \
     celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessen
-  echo $faalgeheim | docker run -d --rm -ti --name $faalcontainernaamvoorvoegsel-$faalrolqualys -u nobody:nogroup \
+  docker run -d --rm -ti -u nobody:nogroup \
+    --name $faalcontainernaamvoorvoegsel-$faalrolqualys \
     -e WORKER_ROLE=$faalrolqualys \
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
@@ -62,19 +73,29 @@ startmetfalen (){
     celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessenvoorqualys
 
   echo "Begonnen met falen"
-  docker wait $faalcontainernaamvoorvoegsel-$faalrol $faalcontainernaamvoorvoegsel-$faalrolqualys
+  docker logs -f $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 | sed -l "s/^/$faalrol$faalipv6 /" &
+  docker logs -f $faalcontainernaamvoorvoegsel-$faalrolqualys | sed -l "s/^/$faalrolqualys /" &
+  faalcontainers=($(docker ps -aq --filter name=$faalcontainernaamvoorvoegsel))
+  docker wait "${faalcontainers[@]}"
+
 }
 
 faalafsluiten (){
-  docker rm -f $faalcontainernaamvoorvoegsel-$faalrol $faalcontainernaamvoorvoegsel-$faalrolqualys &>/dev/null || true
+  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f || true
   echo "Klaar met falen"
 }
 
-trap faalafsluiten EXIT
-
 kloptalles?
+
+wegmetdieouwezooi
 
 # blijf net zo lang doorgaan als we willen
 while sleep 5;do
+  trap faalafsluiten EXIT
+  echo "Poging to falen begonnen"
   startmetfalen
-done
+done &
+
+echo "Falen in de achtergrond is gestart." 1>&3
+
+tail -f $logfile 1>&3
