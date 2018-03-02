@@ -97,7 +97,11 @@ def tls_client_certificate():
         except OpenSSL.crypto.Error:
             log.warning('Failed to decrypt without passphrase.')
 
-            passphrase = getpass.getpass('Please provide passphrase for %s: ' % tls_client_file)
+            passphrase = os.environ.get('PASSPHRASE')
+            if passphrase:
+                log.info('Got passphrase from environment')
+            else:
+                passphrase = getpass.getpass('Please provide passphrase for %s: ' % tls_client_file)
             p12 = OpenSSL.crypto.load_pkcs12(open(tls_client_file, 'rb').read(), passphrase)
 
         # store extracted key and cert in temporary files that are deleted on exit of the worker
