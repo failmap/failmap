@@ -76,8 +76,8 @@ startmetfalen (){
     celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessenvoorqualys
 
   echo "Begonnen met falen"
-  docker logs -f $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 | sed -l "s/^/$faalrol$faalipv6 /" &
-  docker logs -f $faalcontainernaamvoorvoegsel-$faalrolqualys | sed -l "s/^/$faalrolqualys /" &
+  docker logs -f $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 &
+  docker logs -f $faalcontainernaamvoorvoegsel-$faalrolqualys &
   faalcontainers=($(docker ps -aq --filter name=$faalcontainernaamvoorvoegsel))
   docker wait "${faalcontainers[@]}"
 
