@@ -111,13 +111,15 @@ def tls_client_certificate():
         tls_client_cert_file.write(OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, p12.get_certificate()))
 
         # configure redis to use TLS
+        ssl_options = {
+            'ssl_keyfile': tls_client_key_file.name,
+            'ssl_certfile': tls_client_cert_file.name,
+            'ssl_ca_certs': certifi.where(),
+            'ssl_cert_reqs': ssl.CERT_REQUIRED,
+        }
         return {
-            'broker_use_ssl': {
-                'ssl_keyfile': tls_client_key_file.name,
-                'ssl_certfile': tls_client_cert_file.name,
-                'ssl_ca_certs': certifi.where(),
-                'ssl_cert_reqs': ssl.CERT_REQUIRED,
-            }
+            'broker_use_ssl': ssl_options,
+            'redis_backend_use_ssl': ssl_options,
         }
     else:
         log.info('no PKCS12 file found, not configuring TLS.')
