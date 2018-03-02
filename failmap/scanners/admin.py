@@ -6,7 +6,7 @@ from jet.admin import CompactInline
 from failmap.map.rating import rate_url
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
-                     State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
+                     State, TlsQualysScan, TlsQualysScratchpad, UrlGenericScan, UrlIp)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -167,17 +167,29 @@ class StateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('endpoint', 'type', 'domain', 'rating',
+    list_display = ('endpoint', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on')
-    search_fields = ('endpoint__url__url', 'type', 'domain', 'rating',
+    search_fields = ('endpoint__url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
-    list_filter = ('type', 'domain', 'rating',
+    list_filter = ('type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')
-    fields = ('endpoint', 'type', 'domain', 'rating',
+    fields = ('endpoint', 'type', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
 
-    # see tlsqualysscan why endpoint is here.
     readonly_fields = ['last_scan_moment', 'endpoint']
+
+
+class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('url', 'domain', 'type', 'rating',
+                    'explanation', 'last_scan_moment', 'rating_determined_on')
+    search_fields = ('url__url', 'type', 'rating',
+                     'explanation', 'last_scan_moment', 'rating_determined_on')
+    list_filter = ('type', 'rating',
+                   'explanation', 'last_scan_moment', 'rating_determined_on')
+    fields = ('url', 'type', 'rating',
+              'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
+
+    readonly_fields = ['last_scan_moment', 'url']
 
 
 class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -193,5 +205,6 @@ admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(Screenshot, ScreenshotAdmin)
 admin.site.register(State, StateAdmin)
 admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)
+admin.site.register(UrlGenericScan, UrlGenericScanAdmin)
 admin.site.register(EndpointGenericScanScratchpad, EndpointGenericScanScratchpadAdmin)
 admin.site.register(UrlIp, UrlIpAdmin)

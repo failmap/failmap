@@ -190,7 +190,8 @@ class TlsQualysScan(models.Model):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
-class EndpointGenericScan(models.Model):
+# https://docs.djangoproject.com/en/dev/topics/db/models/#id6
+class GenericScanMixin(models.Model):
     """
     This is a fact, a point in time.
     """
@@ -199,26 +200,20 @@ class EndpointGenericScan(models.Model):
         db_index=True,
         help_text="The type of scan that was performed. Instead of having different tables for each"
                   "scan, this label separates the scans.")
-    endpoint = models.ForeignKey(
-        Endpoint,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
-    domain = models.CharField(
-        max_length=255,
-        help_text="Deprecated. Used when there is no known endpoint.",
-        blank=True
-    )
     rating = models.CharField(
         max_length=6,
         default=0,
         help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent."
     )
     explanation = models.CharField(
-        max_length=9001,
+        max_length=255,
         default=0,
         help_text="Short explanation from the scanner on how the rating came to be."
+    )
+    evidence = models.TextField(
+        max_length=9001,
+        default=0,
+        help_text="Content that might help understanding the result."
     )
     last_scan_moment = models.DateTimeField(
         auto_now_add=True,
@@ -231,9 +226,51 @@ class EndpointGenericScan(models.Model):
                   "another rating or explanation (which might have the same rating). This date "
                   "cannot change once it's set."
     )
+    domain = models.CharField(
+        max_length=255,
+        help_text="Deprecated. Text value representing the url scanned."
+    )
+
+    class Meta:
+        """
+        From the docs:
+
+        Django does make one adjustment to the Meta class of an abstract base class: before installing the Meta
+        attribute, it sets abstract=False. This means that children of abstract base classes don’t automatically
+        become abstract classes themselves. Of course, you can make an abstract base class that inherits from
+        another abstract base class. You just need to remember to explicitly set abstract=True each time.
+        """
+        abstract = True
+
+
+class EndpointGenericScan(GenericScanMixin):
+    """
+    Only changes are saved as a scan.
+    """
+    endpoint = models.ForeignKey(
+        Endpoint,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.endpoint)
+
+
+class UrlGenericScan(GenericScanMixin):
+    """
+    Only changes are saved as a scan.
+    """
+    url = models.ForeignKey(
+        Url,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "%s: %s %s on %s" % (self.rating_determined_on.date(), self.type, self.rating, self.url)
 
 
 class EndpointGenericScanScratchpad(models.Model):

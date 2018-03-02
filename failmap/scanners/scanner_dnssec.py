@@ -17,7 +17,6 @@ todo: You'll end up with DNSCheck missing in $... forget it, use docker!
 """
 
 import logging
-import random
 import subprocess
 from typing import List
 
@@ -26,7 +25,7 @@ from django.conf import settings
 
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.url_scan_manager import UrlScanManager
 
 from .models import Endpoint
 
@@ -44,45 +43,52 @@ def compose_task(
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
+    """ Compose taskset to scan toplevel domains.
 
+    DNSSEC is implemented on a (top level) url. It's useless to scan per-endpoint.
+    This is the first scanner that uses the UrlGenericScan table, which looks nearly the same as the
+    endpoint variant.
     """
-    # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
-    # apply filter to urls in organizations (or if no filter, all urls)
-    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
 
-    # select endpoints to scan based on filters
-    endpoints = Endpoint.objects.filter(
-        # apply filter to endpoints (or if no filter, all endpoints)
-        url__in=urls, **endpoints_filter,
-        # also apply manditory filters to only select valid endpoints for this action
-        is_dead=False, protocol__in=['http', 'https'])
+    # DNSSEC only works on top level urls
+    urls_filter = dict(urls_filter, **{"url__iregex": "^[^.]*\.[^.]*$"})
 
-    if not endpoints:
+    urls = []
+
+    # gather urls from organizations
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        urls += Url.objects.filter(organization__in=organizations, **urls_filter)
+    elif endpoints_filter:
+        # and now retrieve urls from endpoints
+        endpoints = Endpoint.objects.filter(**endpoints_filter)
+        urls += Url.objects.filter(endpoint__in=endpoints, **urls_filter)
+    else:
+        # now urls directly
+        urls += Url.objects.filter(**urls_filter)
+
+    if not urls:
         raise Exception('Applied filters resulted in no tasks!')
 
-    log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
-             len(endpoints), len(urls), len(organizations))
+    # only unique urls
+    urls = list(set(urls))
 
-    # todo: this is a poor mans solution for queue randomization, will be implemented in the queue manager
-    # make sure we're dealing with a list for the coming random function
-    endpoints = list(endpoints)
-    # randomize the endpoints so hosts are contacted in random order (less pressure)
-    random.shuffle(endpoints)
+    log.info('Creating scan task for %s urls.', len(urls))
+
+    # The number of top level urls is negligible, so randomization is not needed.
 
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.s(endpoint.url.url) | store_dnssec.s(endpoint) for endpoint in endpoints
+        scan_dnssec.s(url.url) | store_dnssec.s(url) for url in urls
     )
 
     return task
 
 
 @app.task(queue='storage')
-def store_dnssec(result: List[str], endpoint: Endpoint):
+def store_dnssec(result: List[str], url: Url):
     """
 
     :param result: param endpoint:
@@ -102,18 +108,16 @@ def store_dnssec(result: List[str], endpoint: Endpoint):
     # /failmap/map/locale/*/django.po
     # translate them and then run "failmap translate" again.
     messages = {
-        'ERROR': 'DNSSEC is incorrectly or not configured. Use below information to debug: %s',
-        'WARNING': 'DNSSEC is incorrectly configured. Use below information to debug: %s',
-        'INFO': 'DNSSEC seems to be implemented sufficiently. %s'
+        'ERROR': 'DNSSEC is incorrectly or not configured (errors found).',
+        'WARNING': 'DNSSEC is incorrectly configured (warnings found).',
+        'INFO': 'DNSSEC seems to be implemented sufficiently.'
     }
 
-    log.debug('Storing result: %s, for endpoint: %s.', result, endpoint)
+    log.debug('Storing result: %s, for url: %s.', result, url)
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        EndpointScanManager.add_scan('DNSSEC', endpoint, level, messages[level] % relevant)
-    else:
-        EndpointScanManager.add_scan('DNSSEC', endpoint, level, messages[level] % "")
+        UrlScanManager.add_scan('DNSSEC', url, level, messages[level], evidence=",\n".join(relevant))
 
     # return something informative
     return {'status': 'success', 'result': level}
@@ -143,8 +147,7 @@ def scan_dnssec(self, url: str):
         log.info('Done scanning: %s, result: %s', url, content)
         return content
 
-    # errors:
-    # subprocess.CalledProcessError non zero exit status
+    # subprocess.CalledProcessError: non zero exit status
     # OSError: Incorrect permission, file doesn't exist, etc
     except (subprocess.CalledProcessError, OSError) as e:
         # If an expected error is encountered put this task back on the queue to be retried.

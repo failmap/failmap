@@ -66,3 +66,5 @@ csscompressor  # css compression
 
 retry
 sphinx_rtd_theme
+
+IPython # make shell_plus better
