@@ -9,10 +9,11 @@ exec > $logfile 2>&1
 
 set -x
 
+faalgastnaam="$(hostname -f)"
 faalcontainernaamvoorvoegsel=failmap-worker
 faalcontainerfaalimagenaam=registry.gitlab.com/failmap/failmap:latest
 faalredis=redis://faalkaart.nl:1337/0
-faalp12bestand=$(realpath client.p12)
+faalp12bestand="$(realpath client.p12)"
 faallogfaallevel=info
 faalaantalprocessen=10
 faalaantalprocessenvoorqualys=1
@@ -60,6 +61,7 @@ startmetfalen (){
     -e WORKER_ROLE=$faalrol$faalipv6 \
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
+    -e HOST_HOSTNAME="$faalgastnaam" \
     -v "$faalp12bestand:/client.p12" \
     $faalcontainerfaalimagenaam \
     celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessen
@@ -68,6 +70,7 @@ startmetfalen (){
     -e WORKER_ROLE=$faalrolqualys \
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
+    -e HOST_HOSTNAME="$faalgastnaam" \
     -v "$faalp12bestand:/client.p12" \
     $faalcontainerfaalimagenaam \
     celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessenvoorqualys
