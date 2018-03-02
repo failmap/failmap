@@ -8,6 +8,7 @@ exec 3>&1
 exec > $logfile 2>&1
 
 set -x
+tail -f $logfile 1>&3 &
 
 faalgastnaam="$(hostname -f)"
 faalcontainernaamvoorvoegsel=failmap-worker
@@ -38,7 +39,7 @@ kloptalles? (){
 
 wegmetdieouwezooi (){
   pkill -f "docker logs -f $faalcontainernaamvoorvoegsel" || true
-  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f || true
+  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs -L1 docker rm -f || true
 }
 
 startmetfalen (){
@@ -95,5 +96,3 @@ while sleep 5;do
 done &
 
 echo "Falen in de achtergrond is gestart." 1>&3
-
-tail -f $logfile 1>&3
