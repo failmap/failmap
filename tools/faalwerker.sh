@@ -16,10 +16,8 @@ faalredis=redis://faalkaart.nl:1337/0
 faalp12bestand="$(realpath client.p12)"
 faallogfaallevel=info
 faalaantalprocessen=10
-faalaantalprocessenvoorqualys=1
+faalaantalprocessenqualys=1
 faalgeheim=geheim
-faalrol=scanner
-faalrolqualys=scanner_qualys
 
 kloptalles? (){
   if ! test -f "$faalp12bestand";then
@@ -39,48 +37,34 @@ kloptalles? (){
 }
 
 wegmetdieouwezooi (){
+  pkill -f "docker logs -f $faalcontainernaamvoorvoegsel"
   docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f || true
 }
 
 startmetfalen (){
-  if ping6 faalkaart.nl -c3 &>/dev/null;then
-    faalipv6=
-  else
-    faalipv6=_ipv4_only
-  fi
+  faalrol=$1
+  faalaantalprocessen=$2
 
   # (stop en) verwijder huidige faalcontainers (voor de zekerheid)
-  docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f &>/dev/null || true
+  docker rm -f "$faalcontainernaamvoorvoegsel-$faalrol" &>/dev/null || true
 
   # haal nieuwe faalcontainerfaalimage op vanuit de server
   docker pull $faalcontainerfaalimagenaam
 
   # start nieuwe faalcontainers
   docker run -d --rm -ti -u nobody:nogroup \
-    --name $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 \
-    -e WORKER_ROLE=$faalrol$faalipv6 \
+    --name "$faalcontainernaamvoorvoegsel-$faalrol" \
+    -e WORKER_ROLE="$faalrol" \
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
     -e HOST_HOSTNAME="$faalgastnaam" \
     -v "$faalp12bestand:/client.p12" \
     $faalcontainerfaalimagenaam \
-    celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessen
-  docker run -d --rm -ti -u nobody:nogroup \
-    --name $faalcontainernaamvoorvoegsel-$faalrolqualys \
-    -e WORKER_ROLE=$faalrolqualys \
-    -e BROKER=$faalredis \
-    -e PASSPHRASE=$faalgeheim \
-    -e HOST_HOSTNAME="$faalgastnaam" \
-    -v "$faalp12bestand:/client.p12" \
-    $faalcontainerfaalimagenaam \
-    celery worker --loglevel $faallogfaallevel --concurrency=$faalaantalprocessenvoorqualys
+    celery worker --loglevel $faallogfaallevel --pool eventlet --concurrency="$faalaantalprocessen"
 
   echo "Begonnen met falen"
-  docker logs -f $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 &
-  docker logs -f $faalcontainernaamvoorvoegsel-$faalrolqualys &
-  faalcontainers=($(docker ps -aq --filter name=$faalcontainernaamvoorvoegsel))
-  docker wait "${faalcontainers[@]}" || true
-
+  docker logs -f "$faalcontainernaamvoorvoegsel-$faalrol" || ret=$?
+  test $ret -eq 143 && exit 1
 }
 
 faalafsluiten (){
@@ -92,11 +76,22 @@ kloptalles?
 
 wegmetdieouwezooi
 
-# blijf net zo lang doorgaan als we willen
+while sleep 5;do
+  if ping6 faalkaart.nl -c3 &>/dev/null;then
+    faalipv6=
+  else
+    faalipv6=_ipv4_only
+  fi
+
+  trap faalafsluiten EXIT
+  echo "Poging to falen begonnen"
+  startmetfalen "scanner$faalipv6" "$faalaantalprocessen"
+done &
+
 while sleep 5;do
   trap faalafsluiten EXIT
   echo "Poging to falen begonnen"
-  startmetfalen
+  startmetfalen scanner_qualys "$faalaantalprocessenqualys"
 done &
 
 echo "Falen in de achtergrond is gestart." 1>&3
