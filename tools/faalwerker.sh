@@ -65,7 +65,7 @@ startmetfalen (){
 
   echo "Begonnen met falen"
   docker logs -f "$faalcontainernaamvoorvoegsel-$faalrol" || ret=$?
-  test $ret -eq 143 && exit 1
+  test "0$ret" -eq 143 && exit 1
 }
 
 faalafsluiten (){
