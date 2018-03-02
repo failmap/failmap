@@ -79,7 +79,7 @@ startmetfalen (){
   docker logs -f $faalcontainernaamvoorvoegsel-$faalrol$faalipv6 &
   docker logs -f $faalcontainernaamvoorvoegsel-$faalrolqualys &
   faalcontainers=($(docker ps -aq --filter name=$faalcontainernaamvoorvoegsel))
-  docker wait "${faalcontainers[@]}"
+  docker wait "${faalcontainers[@]}" || true
 
 }
 
