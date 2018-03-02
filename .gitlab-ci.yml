@@ -222,6 +222,7 @@ test_system:
     - time tox -e system
 
   only: [master]
+  retry: 1
 
 staging:
   stage: staging
