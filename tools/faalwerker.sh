@@ -37,7 +37,7 @@ kloptalles? (){
 }
 
 wegmetdieouwezooi (){
-  pkill -f "docker logs -f $faalcontainernaamvoorvoegsel"
+  pkill -f "docker logs -f $faalcontainernaamvoorvoegsel" || true
   docker ps -aq --filter name=$faalcontainernaamvoorvoegsel | xargs docker rm -f || true
 }
 
