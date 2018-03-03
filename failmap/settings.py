@@ -9,6 +9,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
+from datetime import timedelta
 
 from pkg_resources import get_distribution
 
@@ -474,6 +475,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 CELERY_BROKER_CONNECTION_MAX_RETRIES = 1
 CELERY_BROKER_CONNECTION_RETRY = False
+CELERY_RESULT_EXPIRES = timedelta(hours=4)
 
 # Use the value of 2 for celery prefetch multiplier. Previous was 1. The
 # assumption is that 1 will block a worker thread until the current (rate

@@ -128,7 +128,9 @@ class TaskCommand(BaseCommand):
             time.sleep(self.interval)
 
         # return final results, don't reraise exceptions
-        return task_id.get(propagate=False)
+        result = task_id.get(propagate=False)
+        task_id.forget()
+        return result
 
 
 class ScannerTaskCommand(TaskCommand):
