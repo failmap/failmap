@@ -40,6 +40,9 @@ from failmap.scanners.scanner_http import store_url_ips
 
 from ..celery import PRIO_HIGH, app
 
+API_NETWORK_TIMEOUT = 30
+API_SERVER_TIMEOUT = 30
+
 log = logging.getLogger(__name__)
 
 
@@ -119,7 +122,16 @@ def qualys_scan(self, url):
     """
 
     # Query Qualys API for information about this URL.
-    data = service_provider_scan_via_api(url.url)
+    try:
+        data = service_provider_scan_via_api(url.url)
+    except requests.RequestException as e:
+        # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+        # ex: EOF occurred in violation of protocol (_ssl.c:749)
+        log.warning("Error when contacting Qualys for scan on %s", url.url)
+        log.exception(e)
+        # Initial scan (with rate limiting) has not been received yet, so add to the qualys queue again.
+        raise self.retry(countdown=60, priorty=PRIO_HIGH, max_retries=30, queue='scanners.qualys')
+
     # Create task for storage worker to store debug data in database (this
     # task has no direct DB access due to scanners queue).
     scratch.apply_async([url, data])
@@ -145,8 +157,9 @@ def qualys_scan(self, url):
     # The 'retry' converts this task instance from a rate_limited into a
     # scheduled task, so retrying tasks won't interfere with new tasks to be
     # started
-    # We use a different queue here as only initial requests count toward the rate limit
-    # set by Qualys.
+    # We use a different queue here as only initial requests count toward the rate limit set by Qualys.
+    # Do note: this really needs to be picked up within the first five minutes of starting the scan. If you don't
+    # a new scan is started on this url and you'll run into rate limiting problems.
     raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30, queue='scanners')
 
 
@@ -214,38 +227,32 @@ def report_to_console(domain, data):
 
 
 def service_provider_scan_via_api(domain):
-    try:
-        # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-        payload = {
-            'host': domain,  # host that will be scanned for tls
-            'publish': "off",  # will not be published on the front page of the ssllabs site
-            'startNew': "off",  # that's done automatically when needed by service provider
-            'fromCache': "off",  # cache can have mismatches, but is ignored when startnew
-            'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
-            'all': "done"  # ?
-        }
+    # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+    payload = {
+        'host': domain,  # host that will be scanned for tls
+        'publish': "off",  # will not be published on the front page of the ssllabs site
+        'startNew': "off",  # that's done automatically when needed by service provider
+        'fromCache': "off",  # cache can have mismatches, but is ignored when startnew
+        'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
+        'all': "done"  # ?
+    }
 
-        response = requests.get(
-            "https://api.ssllabs.com/api/v2/analyze",
-            params=payload,
-            timeout=(30, 30),  # 30 seconds network, 30 seconds server.
-            headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                                   "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
-        )
+    response = requests.get(
+        "https://api.ssllabs.com/api/v2/analyze",
+        params=payload,
+        timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
+        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
+    )
 
-        # log.debug(vars(response))  # extreme debugging
-        log.debug("Running assessments: max: %s, current: %s, client: %s" % (
-            response.headers['X-Max-Assessments'],
-            response.headers['X-Current-Assessments'],
-            response.headers['X-ClientMaxAssessments']
-        ))
+    # log.debug(vars(response))  # extreme debugging
+    log.debug("Running assessments: max: %s, current: %s, client: %s" % (
+        response.headers['X-Max-Assessments'],
+        response.headers['X-Current-Assessments'],
+        response.headers['X-ClientMaxAssessments']
+    ))
 
-        return response.json()
-    except requests.RequestException as e:
-        # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
-        # ex: EOF occurred in violation of protocol (_ssl.c:749)
-        log.error("something went wrong when scanning domain %s", domain)
-        log.error(e)
+    return response.json()
 
 
 def extract_ips(url, data):
