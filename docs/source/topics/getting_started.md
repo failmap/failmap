@@ -1,12 +1,30 @@
 # Getting Started
 
-## System requirements
+This quickstart results in this:
+![Web Application](shared/screenshot.png)
 
-Linux or MacOS capable of running Python3 and git.
+Including a nice admin interface:
+![Admin Interface](shared/admin_interface.png)
 
-## Software Requirements
+## 1: Install dependencies on your system
+Setup your system to run this software using your favourite package manager.
 
-Download and install below system requirements to get started:
+**MacOS (brew)**
+```bash
+brew install git python3 direnv
+```
+
+**Debian Linux (apt)**
+```bash
+apt-get install git python3 direnv
+```
+
+**Redhat/CentOS (yum)**
+```bash
+yum install git python3 direnv
+```
+
+Or download and install each package seperately:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3.6](https://www.python.org/downloads/) (download and install)
@@ -14,92 +32,151 @@ Download and install below system requirements to get started:
 - [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
 
-## Quickstart
+## 2: Install direnv correctly
+Then set up direnv, the right command depends on your shell:
+
+**BASH**
+Add the following line at the end of the ~/.bashrc file:
+```bash
+eval "$(direnv hook bash)"
+```
+
+Make sure it appears even after rvm, git-prompt and other shell extensions that manipulate the prompt.
+
+**ZSH**
+Add the following line at the end of the ~/.zshrc file:
+```bash
+eval "$(direnv hook zsh)"
+```
+
+**FISH**
+Add the following line at the end of the ~/.config/fish/config.fish file:
+
+```bash
+eval (direnv hook fish)
+```
+
+**TCSH**
+Add the following line at the end of the ~/.cshrc file:
+
+```bash
+eval `direnv hook tcsh`
+```
+
+
+## 3: Generic install steps
+Install Tox, which helps to install the rest of the dependancies of this project:
+
+```bash
+pip3 install --user tox
+```
 
 In a directory of your choosing:
 
-    # download the software
-    git clone --recursive https://gitlab.com/failmap/failmap/
+download the software
 
-    # enter the directory of the downloaded software
-    cd failmap/
+```bash
+git clone --recursive https://gitlab.com/failmap/failmap/
+```
 
-Using Direnv & Tox to manage environment (see Direnv section below). This prepares the shell environment for local development.
+enter the directory of the downloaded software
 
-    direnv allow
+```bash
+cd failmap/
+```
 
-Running Tox once creates a development Virtualenv in `.tox/default/` which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
+This prepares the shell environment for local development.
 
-    tox
+```bash
+direnv allow
+```
 
-After completing succesfully the application is available to run:
+Running Tox once creates a development Virtualenv in .tox/default/ which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
 
-    failmap -h
+```bash
+tox
+```
 
-The following commands will start a complete developer instance of failmap with all required services.
+After completing succesfully Failmap is available to run. For example, to show a list of commands:
 
-    failmap devserver
+```bash
+failmap help
+```
+Now run the following command to start a full development server.
+
+```bash
+failmap devserver
+```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
 
-## Using the software
+## 4. Optional Steps
+This shows the current data on the map:
 
-### The map website
+```bash
+failmap rebuild_ratings
+```
 
-The website is the site intended for humans. There are some controls on the website, such as the
-time slider, twitter links and the possibilities to inspect organizations by clicking on them.
+It is possible to start the server without redis and without (re)loading data:
 
-Using the map website should be straightforward.
-
-### The admin website
-
-Use the admin website to perform standard [data-operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete),
-run a series of actions on the data and read documentation of the internal workings of the failmap software.
-
-The admin website is split up in four key parts:
-1. Authentication and Authorization
-This stores information about who can enter the admin interface and what they can do.
-
-2. Map
-Contains all information that is presented to normal humans.
-This information is automatically filled based on the scans that have been performed over time.
-
-3. Organizations
-Lists of organizations, coordinates and internet adresses.
-
-4. Scanners
-Lists of endpoints and assorted scans on these endpoints.
+```bash
+failmap devserver --no-backend --no-data
+```
 
 
-## Troubleshooting getting started
+Give everyone an F rating!
 
-If you need a specific branch, for example "mapwebsite"
+```bash
+https://www.youtube.com/watch?v=a14Y2V5zJlY
+```
 
-    git checkout mapwebsite
+```bash
+https://www.youtube.com/watch?v=eAwq2QV7f1k
+```
 
+
+## Troubleshooting
 This repository uses [submodules](https://git-scm.com/docs/git-submodule) to pull in
 external dependencies. If you have not cloned the repository with `--recursive` or you need to
 restore the submodules to the expected state run:
 
-    git submodule update
+```bash
+git submodule update
+```
 
+Git submodules are an unreliable mess if you already have the system up and running. Updating submodules by force can be
+done using this command:
 
-## Versioning
+```bash
+git submodule update --init --force --remote
+```
+
+## About Versioning
 
 Version for the project is losely semver with no specific release schedule or meaning to version numbers (eg: stable/unstable).
 
-Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated builds which will release the specified code under that version. Tags can be pushed from a local repository or created through the Gitlab interface: https://gitlab.com/failmap/failmap/tags/new
+Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated
+builds which will release the specified code under that version. Tags can be pushed from a local repository or created
+through the Gitlab interface: https://gitlab.com/failmap/failmap/tags/new
 
-Informal releases are created by new commits pushed/merged to the master. The version number of the last formal release will be suffixed with the current short Git SHA.
+Informal releases are created by new commits pushed/merged to the master. The version number of the last formal release
+will be suffixed with the current short Git SHA.
 
-For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
+For all releases artifacts will be created. Currently only Docker containers are pushed into the
+[registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate
+version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker
+build/staging/latest tags).
 
-For local development informal release or a special `dev0` build release is used which indicates a different state from the formal releases.
+For local development informal release or a special `dev0` build release is used which indicates a different state
+from the formal releases.
+
 
 ## Known Issues
 
 ### Docker installation
 
 #### ERROR: for failmap_database_1  Cannot start service database: Mounts denied:
-As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
+As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the
+docker configuration or run the installation from your user directory. You might receive this error if you run
+`docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.

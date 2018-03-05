@@ -24,20 +24,31 @@ This repository contains the mapping application fo Failmap: the public frontend
 
 ![screenshot](docs/screenshot.png)
 
+![screenshot](docs/admin_interface.png)
+
 
 Getting started
 ===============
 Keywords: quickstart, installation
+## 1: Install dependencies on your system
+Setup your system to run this software using your favourite package manager.
 
-System requirements
--------------------
+**MacOS (brew)**
+```bash
+brew install git python3 direnv
+```
 
-Linux or MacOS capable of running Python3 and git.
+**Debian Linux (apt)**
+```bash
+apt-get install git python3 direnv
+```
 
-Software Requirements
----------------------
+**Redhat/CentOS (yum)**
+```bash
+yum install git python3 direnv
+```
 
-Download and install below system requirements to get started:
+Or download and install each package seperately:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3.6](https://www.python.org/downloads/) (download and install)
@@ -45,35 +56,108 @@ Download and install below system requirements to get started:
 - [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
 
-Quickstart
-----------
+## 2: Install direnv correctly
+Then set up direnv, the right command depends on your shell:
+
+**BASH**
+Add the following line at the end of the ~/.bashrc file:
+```bash
+eval "$(direnv hook bash)"
+```
+
+Make sure it appears even after rvm, git-prompt and other shell extensions that manipulate the prompt.
+
+**ZSH**
+Add the following line at the end of the ~/.zshrc file:
+```bash
+eval "$(direnv hook zsh)"
+```
+
+**FISH**
+Add the following line at the end of the ~/.config/fish/config.fish file:
+
+```bash
+eval (direnv hook fish)
+```
+
+**TCSH**
+Add the following line at the end of the ~/.cshrc file:
+
+```bash
+eval `direnv hook tcsh`
+```
+
+
+## 3: Generic install steps
+Install Tox, which helps to install the rest of the dependancies of this project:
+
+```bash
+pip3 install --user tox
+```
 
 In a directory of your choosing:
 
-    # download the software
-    git clone --recursive https://gitlab.com/failmap/failmap/
+download the software
 
-    # enter the directory of the downloaded software
-    cd failmap/
+```bash
+git clone --recursive https://gitlab.com/failmap/failmap/
+```
 
-Using Direnv & Tox to manage environment (see Direnv section below). This prepares the shell environment for local development.
+enter the directory of the downloaded software
 
-    direnv allow
+```bash
+cd failmap/
+```
 
-Running Tox once creates a development Virtualenv in `.tox/default/` which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
+This prepares the shell environment for local development.
 
-    tox
+```bash
+direnv allow
+```
 
-After completing succesfully the application is available to run:
+Running Tox once creates a development Virtualenv in .tox/default/ which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
 
-    failmap -h
+```bash
+tox
+```
 
-The following commands will start a complete developer instance of failmap with all required services.
+After completing succesfully Failmap is available to run. For example, to show a list of commands:
 
-    failmap devserver
+```bash
+failmap help
+```
+Now run the following command to start a full development server.
+
+```bash
+failmap devserver
+```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
+
+## 4. Optional Steps
+This shows the current data on the map:
+
+```bash
+failmap rebuild_ratings
+```
+
+It is possible to start the server without redis and without (re)loading data:
+
+```bash
+failmap devserver --no-backend --no-data
+```
+
+
+Give everyone an F rating!
+
+```bash
+https://www.youtube.com/watch?v=a14Y2V5zJlY
+```
+
+```bash
+https://www.youtube.com/watch?v=eAwq2QV7f1k
+```
 
 
 Documentation
