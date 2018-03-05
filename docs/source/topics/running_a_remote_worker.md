@@ -9,14 +9,19 @@ willing to run code from us on your machine. You'll also be able to access parts
 be secured very well or inject fake results (or other terrible things :)).
 
 ## How to start the worker
-1: Install Docker, see here: https://docs.docker.com/install/
+1: Install Docker, see here: https://docs.docker.com/install/.
+1 (optional): If you don't want to run the script as root, install docker with the option not to require root to start containers.
 
 2: Obtain a .p12 file from us, you can do so by asking here: https://gitter.im/internet-cleanup-foundation/Lobby or
 sending a mail to info@faalkaart.nl
 
-3: Go to a directory of your choosing, and place the .p12 file there. Logs will be created in this directory.
+3: Go to a directory of your choosing, and place the .p12 file there.
 
-4: Start the worker:
+4: Rename the .p12 file to client.p12.
+
+5: Logs will be created in this directory.
+
+6: Start the worker:
 ```bash
 curl -s https://gitlab.com/failmap/failmap/raw/master/tools/faalwerker.sh | /bin/bash
 ```
@@ -25,6 +30,12 @@ This starts a worker in the background. It will give a lot of output.
 
 Do note that you're piping to bash whatever we send you. So better check the code first, which can change any moment.
 Here is exactly where the trust thing starts :)
+
+## How to verify your worker is running
+Two ways:
+1: You can see your computer name pop up in the workers on https://admin.faalkaart.nl/admin/
+2: You can see the amount of tasks processed increase on https://grafana.faalkaart.nl
+
 
 ## How to stop the worker
 Run this command:
