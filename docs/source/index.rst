@@ -3,20 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-So much fail, so little documentation 🤣
-========================================
+Failmap Documentation 🤣
+========================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    topics/getting_started
-   topics/gis_and_map_information
    topics/scanners_scanning_and_ratings
    topics/running_a_remote_worker
-   topics/task_processing_system
    topics/deployment
+
+   topics/gis_and_map_information
    topics/writing_a_scanner
+   topics/docker
+   topics/task_processing_system
+
    topics/thanks
 
 
