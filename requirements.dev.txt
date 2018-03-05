@@ -38,3 +38,5 @@ django-silk
 httmock
 freezegun
 colorama
+
+IPython # make shell_plus better
