@@ -135,6 +135,7 @@ def qualys_scan(self, url):
         # Qualys did not have a result for us, it created a new scan and the result will be there soon (retry below)
         data['status'] = "FAILURE"
         log.error("Unexpected result from API")  # TODO, aequitas, is this result really unexpected???
+        log.error(str(data)) # for debugging.
 
     """
     While the documentation says to check every 10 seconds, we'll do that between every
@@ -252,7 +253,7 @@ def service_provider_scan_via_api(domain):
         except requests.RequestException as e:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
             # ex: EOF occurred in violation of protocol (_ssl.c:749)
-            log.error("something when wrong when scanning domain %s", domain)
+            log.error("something went wrong when scanning domain %s", domain)
             log.error(e)
             log.error("Retrying %s times, next in 20 seconds.", retries)
             sleep(20)
