@@ -1,0 +1,1847 @@
+- model: organizations.organizationtype
+  pk: 1
+  fields: {name: municipality}
+- model: organizations.organizationtype
+  pk: 2
+  fields: {name: cyber}
+- model: organizations.organization
+  pk: 391
+  fields: {country: NL, type: 2, name: Internet Cleanup Foundation, twitter_handle: '@faalkaart'}
+- model: organizations.coordinate
+  pk: 1188
+  fields:
+    organization: 391
+    geojsontype: Point
+    area: [5.0691784, 52.3644913]
+- model: organizations.url
+  pk: 7251
+  fields:
+    organization_old: 391
+    url: faalkaart.nl
+    created_on: 2017-10-27 09:18:22+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:27:21+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7252
+  fields:
+    organization_old: 391
+    url: internetcleanup.foundation
+    created_on: 2017-10-27 09:18:22+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:27:33+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7253
+  fields:
+    organization_old: null
+    url: admin.faalkaart.nl
+    created_on: 2017-10-27 09:18:57+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:28:16+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7254
+  fields:
+    organization_old: null
+    url: www.faalkaart.nl
+    created_on: 2017-10-27 09:18:58+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:29:14+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7255
+  fields:
+    organization_old: null
+    url: demo.faalkaart.nl
+    created_on: 2017-10-27 09:18:58+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:35.977383+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:30:01+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7256
+  fields:
+    organization_old: null
+    url: demo-faalkaart.nl.faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:58+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:30.678920+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:30:28+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7257
+  fields:
+    organization_old: null
+    url: admin-faalkaart.nl.faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:58+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:45.397050+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:30:51+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7258
+  fields:
+    organization_old: null
+    url: status.faalkaart.nl
+    created_on: 2017-10-27 09:18:58+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:31:04+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7259
+  fields:
+    organization_old: null
+    url: grafana.faalkaart.nl
+    created_on: 2017-10-27 09:18:59+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:31:54+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7260
+  fields:
+    organization_old: null
+    url: grafana-faalkaart.nl.faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:59+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:36.478093+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:32:19+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7261
+  fields:
+    organization_old: null
+    url: faalkaart-nl.faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:59+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:31.383510+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:32:51+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7262
+  fields:
+    organization_old: null
+    url: www.faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:59+00:00
+    not_resolvable: true
+    not_resolvable_since: 2018-03-05 08:23:35.322102+00:00
+    not_resolvable_reason: No IPv4 or IPv6 address found in http scanner.
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:33:11+00:00
+    organization: [391]
+- model: organizations.url
+  pk: 7263
+  fields:
+    organization_old: null
+    url: faalserver.faalkaart.nl
+    created_on: 2017-10-27 09:18:59+00:00
+    not_resolvable: false
+    not_resolvable_since: null
+    not_resolvable_reason: null
+    is_dead: false
+    is_dead_since: null
+    is_dead_reason: null
+    uses_dns_wildcard: false
+    onboarded: true
+    onboarded_on: 2017-10-27 09:33:32+00:00
+    organization: [391]
+- model: scanners.urlip
+  pk: 1
+  fields: {url: 7251, ip: 37.97.164.72, rdns_name: '(''37-97-164-72.colo.transip.net'',
+      [''72.164.97.37.in-addr.arpa''], [''37.97.164.72''])', discovered_on: !!timestamp '2018-03-02
+      20:26:00.527683+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 2
+  fields: {url: 7251, ip: '2a01:7c8:aac0:56b:5054:ff:fe1f:cce8', rdns_name: '(''faalserver.faalkaart.nl'',
+      [''8.e.c.c.f.1.e.f.f.f.0.0.4.5.0.5.b.6.5.0.0.c.a.a.8.c.7.0.1.0.a.2.ip6.arpa''],
+      [''2a01:7c8:aac0:56b:5054:ff:fe1f:cce8''])', discovered_on: !!timestamp '2018-03-02
+      20:26:00.578931+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 3
+  fields: {url: 7252, ip: 149.210.226.68, rdns_name: '(''149-210-226-68.colo.transip.net'',
+      [''68.226.210.149.in-addr.arpa''], [''149.210.226.68''])', discovered_on: !!timestamp '2018-03-02
+      20:26:01.773612+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 4
+  fields: {url: 7253, ip: 37.97.164.72, rdns_name: '(''37-97-164-72.colo.transip.net'',
+      [''72.164.97.37.in-addr.arpa''], [''37.97.164.72''])', discovered_on: !!timestamp '2018-03-02
+      20:26:03.064435+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 5
+  fields: {url: 7253, ip: '2a01:7c8:aac0:56b:5054:ff:fe1f:cce8', rdns_name: '(''faalserver.faalkaart.nl'',
+      [''8.e.c.c.f.1.e.f.f.f.0.0.4.5.0.5.b.6.5.0.0.c.a.a.8.c.7.0.1.0.a.2.ip6.arpa''],
+      [''2a01:7c8:aac0:56b:5054:ff:fe1f:cce8''])', discovered_on: !!timestamp '2018-03-02
+      20:26:03.070757+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 6
+  fields: {url: 7254, ip: 37.97.164.72, rdns_name: '(''37-97-164-72.colo.transip.net'',
+      [''72.164.97.37.in-addr.arpa''], [''37.97.164.72''])', discovered_on: !!timestamp '2018-03-02
+      20:26:04.343139+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 7
+  fields: {url: 7254, ip: '2a01:7c8:aac0:56b:5054:ff:fe1f:cce8', rdns_name: '(''faalserver.faalkaart.nl'',
+      [''8.e.c.c.f.1.e.f.f.f.0.0.4.5.0.5.b.6.5.0.0.c.a.a.8.c.7.0.1.0.a.2.ip6.arpa''],
+      [''2a01:7c8:aac0:56b:5054:ff:fe1f:cce8''])', discovered_on: !!timestamp '2018-03-02
+      20:26:04.348344+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 8
+  fields: {url: 7258, ip: 69.162.67.141, rdns_name: '(''141-67-162-69.static.reverse.lstn.net'',
+      [''141.67.162.69.in-addr.arpa''], [''69.162.67.141''])', discovered_on: !!timestamp '2018-03-02
+      20:26:07.330107+00:00', is_unused: 1, is_unused_since: !!timestamp '2018-03-05
+      08:23:30.520927+00:00', is_unused_reason: cleanup at storing new endpoints}
+- model: scanners.urlip
+  pk: 21
+  fields: {url: 7258, ip: 69.162.67.140, rdns_name: '(''140-67-162-69.static.reverse.lstn.net'',
+      [''140.67.162.69.in-addr.arpa''], [''69.162.67.140''])', discovered_on: !!timestamp '2018-03-05
+      08:23:30.377107+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 9
+  fields: {url: 7259, ip: 37.97.164.72, rdns_name: '(''37-97-164-72.colo.transip.net'',
+      [''72.164.97.37.in-addr.arpa''], [''37.97.164.72''])', discovered_on: !!timestamp '2018-03-02
+      20:26:08.679308+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 10
+  fields: {url: 7259, ip: '2a01:7c8:aac0:56b:5054:ff:fe1f:cce8', rdns_name: '(''faalserver.faalkaart.nl'',
+      [''8.e.c.c.f.1.e.f.f.f.0.0.4.5.0.5.b.6.5.0.0.c.a.a.8.c.7.0.1.0.a.2.ip6.arpa''],
+      [''2a01:7c8:aac0:56b:5054:ff:fe1f:cce8''])', discovered_on: !!timestamp '2018-03-02
+      20:26:08.684815+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.urlip
+  pk: 11
+  fields: {url: 7263, ip: 37.97.164.72, rdns_name: '(''37-97-164-72.colo.transip.net'',
+      [''72.164.97.37.in-addr.arpa''], [''37.97.164.72''])', discovered_on: !!timestamp '2018-03-02
+      20:26:12.068658+00:00', is_unused: 0, is_unused_since: null, is_unused_reason: null}
+- model: scanners.endpoint
+  pk: 14214
+  fields: {url: 7251, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:18:59+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14215
+  fields: {url: 7251, ip_version: 6, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:18:59+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14216
+  fields: {url: 7251, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:19:00+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14217
+  fields: {url: 7251, ip_version: 6, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:19:00+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14629
+  fields: {url: 7251, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:26.102875+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14630
+  fields: {url: 7251, ip_version: 6, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:26.113965+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14636
+  fields: {url: 7251, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.318937+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14640
+  fields: {url: 7251, ip_version: 6, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.335644+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14218
+  fields: {url: 7252, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:27:23+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14219
+  fields: {url: 7252, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:27:23+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14638
+  fields: {url: 7252, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.326852+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14645
+  fields: {url: 7252, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.361359+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14220
+  fields: {url: 7253, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:27:33+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14221
+  fields: {url: 7253, ip_version: 6, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:27:33+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14222
+  fields: {url: 7253, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:27:33+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14223
+  fields: {url: 7253, ip_version: 6, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:27:33+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14624
+  fields: {url: 7253, ip_version: 6, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:26.079917+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14631
+  fields: {url: 7253, ip_version: 6, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:26.114063+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14635
+  fields: {url: 7253, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.305147+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14643
+  fields: {url: 7253, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.340058+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14224
+  fields: {url: 7254, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:28:16+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14225
+  fields: {url: 7254, ip_version: 6, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:28:16+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14226
+  fields: {url: 7254, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:28:17+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14227
+  fields: {url: 7254, ip_version: 6, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:28:17+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14625
+  fields: {url: 7254, ip_version: 6, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:26.088092+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14628
+  fields: {url: 7254, ip_version: 6, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:26.093911+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14633
+  fields: {url: 7254, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.304922+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14642
+  fields: {url: 7254, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.339558+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14228
+  fields: {url: 7255, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:29:14+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.019739+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14229
+  fields: {url: 7255, ip_version: 6, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:29:14+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.019739+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14230
+  fields: {url: 7255, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:29:14+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.019739+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14231
+  fields: {url: 7255, ip_version: 6, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:29:14+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.019739+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14232
+  fields: {url: 7256, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:30:02+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:30.683660+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14233
+  fields: {url: 7256, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:30:02+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:30.683660+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14234
+  fields: {url: 7257, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:30:28+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:45.402533+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14235
+  fields: {url: 7257, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:30:28+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:45.402533+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14236
+  fields: {url: 7258, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:30:52+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14237
+  fields: {url: 7258, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:30:53+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14634
+  fields: {url: 7258, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.311159+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14644
+  fields: {url: 7258, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.351653+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14238
+  fields: {url: 7259, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:31:04+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14239
+  fields: {url: 7259, ip_version: 6, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:31:04+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14240
+  fields: {url: 7259, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:31:04+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14241
+  fields: {url: 7259, ip_version: 6, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:31:04+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14626
+  fields: {url: 7259, ip_version: 6, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:26.088606+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14627
+  fields: {url: 7259, ip_version: 6, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:26.093893+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14632
+  fields: {url: 7259, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:26.114199+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14639
+  fields: {url: 7259, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.332117+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14242
+  fields: {url: 7260, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:31:55+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.483556+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14243
+  fields: {url: 7260, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:31:55+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:36.483556+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14244
+  fields: {url: 7261, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:32:19+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:31.390464+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14245
+  fields: {url: 7261, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:32:19+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:31.390464+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14246
+  fields: {url: 7262, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:32:52+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:35.327331+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14247
+  fields: {url: 7262, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:32:52+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-05 08:23:35.327331+00:00',
+    is_dead_reason: Url was killed}
+- model: scanners.endpoint
+  pk: 14248
+  fields: {url: 7263, ip_version: 4, port: 443, protocol: https, discovered_on: !!timestamp '2017-10-27
+      09:33:11+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-02 20:33:27.390569+00:00',
+    is_dead_reason: Not found in HTTP Scanner anymore.}
+- model: scanners.endpoint
+  pk: 14249
+  fields: {url: 7263, ip_version: 4, port: 80, protocol: http, discovered_on: !!timestamp '2017-10-27
+      09:33:11+00:00', is_dead: true, is_dead_since: !!timestamp '2018-03-02 20:33:26.102830+00:00',
+    is_dead_reason: Not found in HTTP Scanner anymore.}
+- model: scanners.endpoint
+  pk: 14637
+  fields: {url: 7263, ip_version: 4, port: 443, protocol: http, discovered_on: !!timestamp '2018-03-02
+      20:33:27.319711+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.endpoint
+  pk: 14641
+  fields: {url: 7263, ip_version: 4, port: 80, protocol: https, discovered_on: !!timestamp '2018-03-02
+      20:33:27.336008+00:00', is_dead: false, is_dead_since: null, is_dead_reason: null}
+- model: scanners.tlsqualysscan
+  pk: 16226
+  fields: {endpoint: 14214, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:41:11', last_scan_moment: !!timestamp '2017-11-09
+      15:41:11+00:00', rating_determined_on: !!timestamp '2017-10-27 09:35:37+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16227
+  fields: {endpoint: 14215, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:41:11', last_scan_moment: !!timestamp '2017-11-09
+      15:41:11+00:00', rating_determined_on: !!timestamp '2017-10-27 09:35:37+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16223
+  fields: {endpoint: 14218, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:34:31', last_scan_moment: !!timestamp '2017-11-09
+      15:34:31+00:00', rating_determined_on: !!timestamp '2017-10-27 09:32:46+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16221
+  fields: {endpoint: 14220, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:32:36', last_scan_moment: !!timestamp '2017-10-27
+      09:32:36+00:00', rating_determined_on: !!timestamp '2017-10-27 09:32:36+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17850
+  fields: {endpoint: 14220, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:03.079346', last_scan_moment: !!timestamp '2018-03-02
+      20:26:03.079331+00:00', rating_determined_on: !!timestamp '2017-11-09 15:10:22+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16222
+  fields: {endpoint: 14221, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:32:36', last_scan_moment: !!timestamp '2017-10-27
+      09:32:36+00:00', rating_determined_on: !!timestamp '2017-10-27 09:32:36+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17851
+  fields: {endpoint: 14221, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:03.087703', last_scan_moment: !!timestamp '2018-03-02
+      20:26:03.087691+00:00', rating_determined_on: !!timestamp '2017-11-09 15:10:23+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16224
+  fields: {endpoint: 14224, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:04.356317', last_scan_moment: !!timestamp '2018-03-02
+      20:26:04.356305+00:00', rating_determined_on: !!timestamp '2017-10-27 09:33:21+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16225
+  fields: {endpoint: 14225, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:04.362773', last_scan_moment: !!timestamp '2018-03-02
+      20:26:04.362762+00:00', rating_determined_on: !!timestamp '2017-10-27 09:33:21+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16236
+  fields: {endpoint: 14228, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:53:27', last_scan_moment: !!timestamp '2017-10-27
+      09:53:27+00:00', rating_determined_on: !!timestamp '2017-10-27 09:53:27+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17857
+  fields: {endpoint: 14228, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:31:35', last_scan_moment: !!timestamp '2017-11-09
+      15:31:35+00:00', rating_determined_on: !!timestamp '2017-11-09 15:31:35+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16237
+  fields: {endpoint: 14229, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:53:27', last_scan_moment: !!timestamp '2017-10-27
+      09:53:27+00:00', rating_determined_on: !!timestamp '2017-10-27 09:53:27+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17858
+  fields: {endpoint: 14229, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:31:35', last_scan_moment: !!timestamp '2017-11-09
+      15:31:35+00:00', rating_determined_on: !!timestamp '2017-11-09 15:31:35+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16239
+  fields: {endpoint: 14232, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:53:54', last_scan_moment: !!timestamp '2017-10-27
+      09:53:54+00:00', rating_determined_on: !!timestamp '2017-10-27 09:53:54+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17849
+  fields: {endpoint: 14232, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:02:57', last_scan_moment: !!timestamp '2017-11-09
+      15:02:57+00:00', rating_determined_on: !!timestamp '2017-11-09 15:02:57+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16229
+  fields: {endpoint: 14234, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:46:05', last_scan_moment: !!timestamp '2017-10-27
+      09:46:05+00:00', rating_determined_on: !!timestamp '2017-10-27 09:46:05+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17852
+  fields: {endpoint: 14234, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:13:16', last_scan_moment: !!timestamp '2017-11-09
+      15:13:16+00:00', rating_determined_on: !!timestamp '2017-11-09 15:13:16+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16238
+  fields: {endpoint: 14236, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:07.491260', last_scan_moment: !!timestamp '2018-03-02
+      20:26:07.491251+00:00', rating_determined_on: !!timestamp '2017-10-27 09:53:52+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16233
+  fields: {endpoint: 14238, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:51:00', last_scan_moment: !!timestamp '2017-10-27
+      09:51:00+00:00', rating_determined_on: !!timestamp '2017-10-27 09:51:00+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17853
+  fields: {endpoint: 14238, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:08.692182', last_scan_moment: !!timestamp '2018-03-02
+      20:26:08.692171+00:00', rating_determined_on: !!timestamp '2017-11-09 15:18:05+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16234
+  fields: {endpoint: 14239, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:51:00', last_scan_moment: !!timestamp '2017-10-27
+      09:51:00+00:00', rating_determined_on: !!timestamp '2017-10-27 09:51:00+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17854
+  fields: {endpoint: 14239, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:08.698195', last_scan_moment: !!timestamp '2018-03-02
+      20:26:08.698184+00:00', rating_determined_on: !!timestamp '2017-11-09 15:18:05+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16232
+  fields: {endpoint: 14242, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:50:32', last_scan_moment: !!timestamp '2017-10-27
+      09:50:32+00:00', rating_determined_on: !!timestamp '2017-10-27 09:50:32+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17826
+  fields: {endpoint: 14242, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:05:54', last_scan_moment: !!timestamp '2017-11-09
+      15:05:54+00:00', rating_determined_on: !!timestamp '2017-11-08 23:11:03+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16230
+  fields: {endpoint: 14244, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:47:09', last_scan_moment: !!timestamp '2017-10-27
+      09:47:09+00:00', rating_determined_on: !!timestamp '2017-10-27 09:47:09+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17856
+  fields: {endpoint: 14244, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:27:01', last_scan_moment: !!timestamp '2017-11-09
+      15:27:01+00:00', rating_determined_on: !!timestamp '2017-11-09 15:27:01+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16235
+  fields: {endpoint: 14246, qualys_rating: T, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2017-11-09, scan_time: '15:23:54', last_scan_moment: !!timestamp '2017-11-09
+      15:23:54+00:00', rating_determined_on: !!timestamp '2017-10-27 09:52:44+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 16231
+  fields: {endpoint: 14248, qualys_rating: A+, qualys_rating_no_trust: A+, qualys_message: Ready,
+    scan_date: 2017-10-27, scan_time: '09:48:27', last_scan_moment: !!timestamp '2017-10-27
+      09:48:27+00:00', rating_determined_on: !!timestamp '2017-10-27 09:48:27+00:00'}
+- model: scanners.tlsqualysscan
+  pk: 17855
+  fields: {endpoint: 14248, qualys_rating: A, qualys_rating_no_trust: A, qualys_message: Ready,
+    scan_date: 2018-03-02, scan_time: '20:26:12.078952', last_scan_moment: !!timestamp '2018-03-02
+      20:26:12.078945+00:00', rating_determined_on: !!timestamp '2017-11-09 15:20:59+00:00'}
+- model: scanners.endpointgenericscan
+  pk: 34799
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.739840+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:27+00:00', domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 34800
+  fields: {type: X-Frame-Options, rating: 'True', explanation: ALLOWALL, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:27+00:00', domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 34801
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.747166+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:28+00:00', domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 34802
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 35015
+  fields: {type: X-Frame-Options, rating: 'True', explanation: 'SAMEORIGIN, DENY',
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-07 17:03:47+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:02+00:00', domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 35016
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:39.751031+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:02+00:00',
+    domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 35755
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.743280+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14214}
+- model: scanners.endpointgenericscan
+  pk: 35017
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.845933+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:02+00:00', domain: '', endpoint: 14215}
+- model: scanners.endpointgenericscan
+  pk: 35018
+  fields: {type: X-Frame-Options, rating: 'True', explanation: 'SAMEORIGIN, DENY',
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-07 17:03:47+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:02+00:00', domain: '', endpoint: 14215}
+- model: scanners.endpointgenericscan
+  pk: 35019
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.855080+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:02+00:00', domain: '', endpoint: 14215}
+- model: scanners.endpointgenericscan
+  pk: 35020
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:39.859739+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:03+00:00',
+    domain: '', endpoint: 14215}
+- model: scanners.endpointgenericscan
+  pk: 35756
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:39.850848+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14215}
+- model: scanners.endpointgenericscan
+  pk: 34803
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 34804
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 34805
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 34806
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 35021
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.007887+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 35022
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:47+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 35023
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.014969+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 35757
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.011091+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14216}
+- model: scanners.endpointgenericscan
+  pk: 35024
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.200671+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14217}
+- model: scanners.endpointgenericscan
+  pk: 35025
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14217}
+- model: scanners.endpointgenericscan
+  pk: 35026
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.209197+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14217}
+- model: scanners.endpointgenericscan
+  pk: 35758
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.204831+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14217}
+- model: scanners.endpointgenericscan
+  pk: 35027
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.667327+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14218}
+- model: scanners.endpointgenericscan
+  pk: 35028
+  fields: {type: X-Frame-Options, rating: 'True', explanation: deny, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.671691+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14218}
+- model: scanners.endpointgenericscan
+  pk: 35029
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.676270+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:03+00:00', domain: '', endpoint: 14218}
+- model: scanners.endpointgenericscan
+  pk: 35030
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=10886400;,
+    evidence: '0', last_scan_moment: !!timestamp '2018-03-05 08:23:40.680026+00:00',
+    rating_determined_on: !!timestamp '2017-11-04 10:30:03+00:00', domain: '', endpoint: 14218}
+- model: scanners.endpointgenericscan
+  pk: 35031
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-08
+      17:02:27+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:03+00:00',
+    domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 35032
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-08
+      17:02:27+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:03+00:00',
+    domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 35033
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-08
+      17:02:27+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:03+00:00',
+    domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 43208
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.774171+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 43209
+  fields: {type: X-Frame-Options, rating: 'True', explanation: deny, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.778907+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 43210
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.783676+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14219}
+- model: scanners.endpointgenericscan
+  pk: 43211
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.114175+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14220}
+- model: scanners.endpointgenericscan
+  pk: 43212
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.118013+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14220}
+- model: scanners.endpointgenericscan
+  pk: 43213
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.122633+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14220}
+- model: scanners.endpointgenericscan
+  pk: 43214
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:41.126913+00:00', rating_determined_on: !!timestamp '2017-11-09 05:09:15+00:00',
+    domain: '', endpoint: 14220}
+- model: scanners.endpointgenericscan
+  pk: 43215
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.212359+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14221}
+- model: scanners.endpointgenericscan
+  pk: 43216
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.215948+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14221}
+- model: scanners.endpointgenericscan
+  pk: 43217
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.220160+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14221}
+- model: scanners.endpointgenericscan
+  pk: 43218
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:41.224785+00:00', rating_determined_on: !!timestamp '2017-11-09 05:09:15+00:00',
+    domain: '', endpoint: 14221}
+- model: scanners.endpointgenericscan
+  pk: 35034
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.329323+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14222}
+- model: scanners.endpointgenericscan
+  pk: 35035
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14222}
+- model: scanners.endpointgenericscan
+  pk: 35036
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.338250+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14222}
+- model: scanners.endpointgenericscan
+  pk: 35759
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.333905+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14222}
+- model: scanners.endpointgenericscan
+  pk: 35037
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.452454+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14223}
+- model: scanners.endpointgenericscan
+  pk: 35038
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14223}
+- model: scanners.endpointgenericscan
+  pk: 35039
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.459523+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14223}
+- model: scanners.endpointgenericscan
+  pk: 35760
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.455867+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14223}
+- model: scanners.endpointgenericscan
+  pk: 35040
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.985852+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14224}
+- model: scanners.endpointgenericscan
+  pk: 35041
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14224}
+- model: scanners.endpointgenericscan
+  pk: 35042
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.998713+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14224}
+- model: scanners.endpointgenericscan
+  pk: 35043
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:42.004279+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:04+00:00',
+    domain: '', endpoint: 14224}
+- model: scanners.endpointgenericscan
+  pk: 35761
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.991694+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14224}
+- model: scanners.endpointgenericscan
+  pk: 35044
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.271818+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14225}
+- model: scanners.endpointgenericscan
+  pk: 35045
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14225}
+- model: scanners.endpointgenericscan
+  pk: 35046
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.280066+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14225}
+- model: scanners.endpointgenericscan
+  pk: 35047
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:42.283754+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:04+00:00',
+    domain: '', endpoint: 14225}
+- model: scanners.endpointgenericscan
+  pk: 35763
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.275816+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14225}
+- model: scanners.endpointgenericscan
+  pk: 35048
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.437313+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14226}
+- model: scanners.endpointgenericscan
+  pk: 35049
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14226}
+- model: scanners.endpointgenericscan
+  pk: 35050
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.445094+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14226}
+- model: scanners.endpointgenericscan
+  pk: 35762
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.441215+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14226}
+- model: scanners.endpointgenericscan
+  pk: 34807
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 34808
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 34809
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 34810
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 35051
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.614183+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 35052
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:48+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 35053
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.622515+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:04+00:00', domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 35764
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.618207+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:27+00:00', domain: '', endpoint: 14227}
+- model: scanners.endpointgenericscan
+  pk: 35075
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04
+      11:56:37+00:00', domain: '', endpoint: 14229}
+- model: scanners.endpointgenericscan
+  pk: 35076
+  fields: {type: X-Frame-Options, rating: 'True', explanation: 'SAMEORIGIN, DENY',
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04
+      11:56:37+00:00', domain: '', endpoint: 14229}
+- model: scanners.endpointgenericscan
+  pk: 35077
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04
+      11:56:37+00:00', domain: '', endpoint: 14229}
+- model: scanners.endpointgenericscan
+  pk: 35078
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2017-11-04
+      11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04 11:56:37+00:00',
+    domain: '', endpoint: 14229}
+- model: scanners.endpointgenericscan
+  pk: 34811
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 34812
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 34813
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:28+00:00', domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 34814
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:28+00:00',
+    domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 35054
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:05+00:00', domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 35055
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:05+00:00', domain: '', endpoint: 14230}
+- model: scanners.endpointgenericscan
+  pk: 34815
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 34816
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:22+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 34817
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 34818
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 35056
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:05+00:00', domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 35057
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:05+00:00', domain: '', endpoint: 14231}
+- model: scanners.endpointgenericscan
+  pk: 34819
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 34820
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 34821
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 34822
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 35079
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04
+      11:56:37+00:00', domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 35080
+  fields: {type: X-Frame-Options, rating: 'True', explanation: 'SAMEORIGIN, DENY',
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-04 11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04
+      11:56:37+00:00', domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 35081
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2017-11-04
+      11:56:37+00:00', rating_determined_on: !!timestamp '2017-11-04 11:56:37+00:00',
+    domain: '', endpoint: 14232}
+- model: scanners.endpointgenericscan
+  pk: 34823
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 34824
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 34825
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 34826
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 35058
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:06+00:00', domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 35059
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 12:32:40+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:06+00:00', domain: '', endpoint: 14233}
+- model: scanners.endpointgenericscan
+  pk: 34827
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14234}
+- model: scanners.endpointgenericscan
+  pk: 34828
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14234}
+- model: scanners.endpointgenericscan
+  pk: 34829
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14234}
+- model: scanners.endpointgenericscan
+  pk: 34830
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14234}
+- model: scanners.endpointgenericscan
+  pk: 34831
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 34832
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 34833
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:06+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 34834
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 35060
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:06+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:06+00:00', domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 35061
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:06+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:06+00:00', domain: '', endpoint: 14235}
+- model: scanners.endpointgenericscan
+  pk: 34835
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:43.574779+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14236}
+- model: scanners.endpointgenericscan
+  pk: 34836
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:43.578399+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14236}
+- model: scanners.endpointgenericscan
+  pk: 34837
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:43.582374+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14236}
+- model: scanners.endpointgenericscan
+  pk: 34838
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14236}
+- model: scanners.endpointgenericscan
+  pk: 35062
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubDomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:43.586019+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:07+00:00',
+    domain: '', endpoint: 14236}
+- model: scanners.endpointgenericscan
+  pk: 34839
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:44.412036+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 34840
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:44.415375+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 34841
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      10:22:29+00:00', domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 34842
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 35063
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-08
+      17:02:28+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:07+00:00',
+    domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 43226
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:44.418766+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14237}
+- model: scanners.endpointgenericscan
+  pk: 34843
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 34844
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 34845
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 34846
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 43219
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.790741+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 43220
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.794477+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 43221
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.797909+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 43222
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:46.801299+00:00', rating_determined_on: !!timestamp '2017-11-09 05:09:15+00:00',
+    domain: '', endpoint: 14238}
+- model: scanners.endpointgenericscan
+  pk: 34847
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 34848
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 34849
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 34850
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 10:22:29+00:00',
+    domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 43223
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.914279+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 43224
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.917667+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 43225
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:46.921457+00:00', rating_determined_on: !!timestamp '2017-11-09
+      05:09:15+00:00', domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 43227
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2018-03-05
+      08:23:46.925468+00:00', rating_determined_on: !!timestamp '2017-11-09 05:09:15+00:00',
+    domain: '', endpoint: 14239}
+- model: scanners.endpointgenericscan
+  pk: 34868
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.042108+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 34869
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 34870
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.050547+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 34871
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 35064
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:49+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:07+00:00', domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 35765
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.046532+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:28+00:00', domain: '', endpoint: 14240}
+- model: scanners.endpointgenericscan
+  pk: 34872
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.232747+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 34873
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 34874
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.239469+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 34875
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000
+      ; includeSubDomains, evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 35065
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-07 17:03:49+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:07+00:00', domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 35766
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.236137+00:00', rating_determined_on: !!timestamp '2017-11-08
+      17:02:28+00:00', domain: '', endpoint: 14241}
+- model: scanners.endpointgenericscan
+  pk: 34876
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14242}
+- model: scanners.endpointgenericscan
+  pk: 34877
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14242}
+- model: scanners.endpointgenericscan
+  pk: 34878
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14242}
+- model: scanners.endpointgenericscan
+  pk: 34879
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14242}
+- model: scanners.endpointgenericscan
+  pk: 34880
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14243}
+- model: scanners.endpointgenericscan
+  pk: 34881
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14243}
+- model: scanners.endpointgenericscan
+  pk: 34882
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:13+00:00', domain: '', endpoint: 14243}
+- model: scanners.endpointgenericscan
+  pk: 34883
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:13+00:00',
+    domain: '', endpoint: 14243}
+- model: scanners.endpointgenericscan
+  pk: 35066
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:08+00:00', domain: '', endpoint: 14243}
+- model: scanners.endpointgenericscan
+  pk: 34884
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 34885
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 34886
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 34887
+  fields: {type: Strict-Transport-Security, rating: 'False', explanation: 'Security
+      Header not present: Strict-Transport-Security', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 35067
+  fields: {type: X-Frame-Options, rating: 'True', explanation: 'SAMEORIGIN, DENY',
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:08+00:00', domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 35068
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=31536000;
+      includeSubdomains, evidence: '0', last_scan_moment: !!timestamp '2017-11-04
+      10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-04 10:30:08+00:00',
+    domain: '', endpoint: 14244}
+- model: scanners.endpointgenericscan
+  pk: 34888
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 34889
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 34890
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 34891
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=0,
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 35069
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:08+00:00', domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 35070
+  fields: {type: X-Frame-Options, rating: 'True', explanation: DENY, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-04 10:30:08+00:00', rating_determined_on: !!timestamp '2017-11-04
+      10:30:08+00:00', domain: '', endpoint: 14245}
+- model: scanners.endpointgenericscan
+  pk: 34892
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14246}
+- model: scanners.endpointgenericscan
+  pk: 34893
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14246}
+- model: scanners.endpointgenericscan
+  pk: 34894
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14246}
+- model: scanners.endpointgenericscan
+  pk: 34895
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=0,
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14246}
+- model: scanners.endpointgenericscan
+  pk: 34896
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14247}
+- model: scanners.endpointgenericscan
+  pk: 34897
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14247}
+- model: scanners.endpointgenericscan
+  pk: 34898
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14247}
+- model: scanners.endpointgenericscan
+  pk: 34899
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=0,
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14247}
+- model: scanners.endpointgenericscan
+  pk: 34900
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14248}
+- model: scanners.endpointgenericscan
+  pk: 34901
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14248}
+- model: scanners.endpointgenericscan
+  pk: 34902
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14248}
+- model: scanners.endpointgenericscan
+  pk: 34903
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=0,
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14248}
+- model: scanners.endpointgenericscan
+  pk: 34904
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '0', last_scan_moment: !!timestamp '2017-11-03
+      17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02 17:36:14+00:00',
+    domain: '', endpoint: 14249}
+- model: scanners.endpointgenericscan
+  pk: 34905
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14249}
+- model: scanners.endpointgenericscan
+  pk: 34906
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
+    last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14249}
+- model: scanners.endpointgenericscan
+  pk: 34907
+  fields: {type: Strict-Transport-Security, rating: 'True', explanation: max-age=0,
+    evidence: '0', last_scan_moment: !!timestamp '2017-11-03 17:07:23+00:00', rating_determined_on: !!timestamp '2017-11-02
+      17:36:14+00:00', domain: '', endpoint: 14249}
+- model: scanners.endpointgenericscan
+  pk: 45013
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.507475+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.128769+00:00', domain: '', endpoint: 14624}
+- model: scanners.endpointgenericscan
+  pk: 45014
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.510849+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.132072+00:00', domain: '', endpoint: 14624}
+- model: scanners.endpointgenericscan
+  pk: 45015
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.514264+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.135140+00:00', domain: '', endpoint: 14624}
+- model: scanners.endpointgenericscan
+  pk: 45019
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.660721+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.219799+00:00', domain: '', endpoint: 14625}
+- model: scanners.endpointgenericscan
+  pk: 45020
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.664419+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.224763+00:00', domain: '', endpoint: 14625}
+- model: scanners.endpointgenericscan
+  pk: 45021
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:42.669161+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.229498+00:00', domain: '', endpoint: 14625}
+- model: scanners.endpointgenericscan
+  pk: 45025
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.409216+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.146640+00:00', domain: '', endpoint: 14627}
+- model: scanners.endpointgenericscan
+  pk: 45026
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.412562+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.154793+00:00', domain: '', endpoint: 14627}
+- model: scanners.endpointgenericscan
+  pk: 45027
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.415886+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.159567+00:00', domain: '', endpoint: 14627}
+- model: scanners.endpointgenericscan
+  pk: 45004
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.401087+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.103692+00:00', domain: '', endpoint: 14630}
+- model: scanners.endpointgenericscan
+  pk: 45005
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.405669+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.108546+00:00', domain: '', endpoint: 14630}
+- model: scanners.endpointgenericscan
+  pk: 45006
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.410723+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.114248+00:00', domain: '', endpoint: 14630}
+- model: scanners.endpointgenericscan
+  pk: 45016
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.689436+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.311796+00:00', domain: '', endpoint: 14635}
+- model: scanners.endpointgenericscan
+  pk: 45017
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.693720+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.314975+00:00', domain: '', endpoint: 14635}
+- model: scanners.endpointgenericscan
+  pk: 45018
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:41.697759+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:33.320493+00:00', domain: '', endpoint: 14635}
+- model: scanners.endpointgenericscan
+  pk: 45007
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.447010+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.152965+00:00', domain: '', endpoint: 14636}
+- model: scanners.endpointgenericscan
+  pk: 45008
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.450237+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.157338+00:00', domain: '', endpoint: 14636}
+- model: scanners.endpointgenericscan
+  pk: 45009
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:40.454066+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:32.162149+00:00', domain: '', endpoint: 14636}
+- model: scanners.endpointgenericscan
+  pk: 45031
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:47.654760+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:39.374235+00:00',
+    domain: '', endpoint: 14637}
+- model: scanners.endpointgenericscan
+  pk: 45032
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:47.658299+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:39.378375+00:00',
+    domain: '', endpoint: 14637}
+- model: scanners.endpointgenericscan
+  pk: 45033
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:47.661581+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:39.382666+00:00',
+    domain: '', endpoint: 14637}
+- model: scanners.endpointgenericscan
+  pk: 45028
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.609546+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.322137+00:00', domain: '', endpoint: 14639}
+- model: scanners.endpointgenericscan
+  pk: 45029
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.613126+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.325521+00:00', domain: '', endpoint: 14639}
+- model: scanners.endpointgenericscan
+  pk: 45030
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:47.617224+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:39.330211+00:00', domain: '', endpoint: 14639}
+- model: scanners.endpointgenericscan
+  pk: 45022
+  fields: {type: X-XSS-Protection, rating: 'True', explanation: 1; mode=block, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:43.013406+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.546707+00:00', domain: '', endpoint: 14642}
+- model: scanners.endpointgenericscan
+  pk: 45023
+  fields: {type: X-Frame-Options, rating: 'True', explanation: SAMEORIGIN, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:43.016938+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.551802+00:00', domain: '', endpoint: 14642}
+- model: scanners.endpointgenericscan
+  pk: 45024
+  fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '',
+    last_scan_moment: !!timestamp '2018-03-05 08:23:43.021115+00:00', rating_determined_on: !!timestamp '2018-03-05
+      08:23:34.560733+00:00', domain: '', endpoint: 14642}
+- model: scanners.endpointgenericscan
+  pk: 45010
+  fields: {type: X-XSS-Protection, rating: 'False', explanation: 'Security Header
+      not present: X-XSS-Protection', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:40.955024+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:32.632551+00:00',
+    domain: '', endpoint: 14645}
+- model: scanners.endpointgenericscan
+  pk: 45011
+  fields: {type: X-Frame-Options, rating: 'False', explanation: 'Security Header not
+      present: X-Frame-Options', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:40.960468+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:32.636202+00:00',
+    domain: '', endpoint: 14645}
+- model: scanners.endpointgenericscan
+  pk: 45012
+  fields: {type: X-Content-Type-Options, rating: 'False', explanation: 'Security Header
+      not present: X-Content-Type-Options', evidence: '', last_scan_moment: !!timestamp '2018-03-05
+      08:23:40.965882+00:00', rating_determined_on: !!timestamp '2018-03-05 08:23:32.639992+00:00',
+    domain: '', endpoint: 14645}

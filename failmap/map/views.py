@@ -338,7 +338,7 @@ def topfail(request, weeks_back=0):
               WHERE `when` <= '%s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
             GROUP BY organization.name
-            HAVING rating > 0
+            HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
             LIMIT 10
             ''' % (when,)
@@ -519,7 +519,6 @@ def stats(request, weeks_back=0):
         noduplicates = []
         for rating in ratings:
             measurement["total_organizations"] += 1
-            measurement["total_score"] += rating.rating
 
             if rating.high:
                 measurement["red"] += 1
@@ -687,90 +686,6 @@ def vulnstats(request, weeks_back=0):
                                          })
 
     return JsonResponse(stats, encoder=JSEncoder)
-
-
-# this function doesn't give the relevant urls at the moment, it needs to select stuff better.
-def urlstats(request, weeks_back=0):
-
-    stats = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0, '1 month ago': 0,
-             '2 months ago': 0, '3 months ago': 0}
-    # reduce the numbers a bit, just scroll through time using the slider if you want to look back.
-    # ,  '4 months ago': 0, '5 months ago': 0, '6 months ago': 0,
-    #   '12 months ago': 0
-
-    # todo: remove some empty url ratings / don't store that nonsense as it skews the stats
-    # No: those have been added to close off url ratings...???
-    # the stats should only contiain some meaningful data.
-    # { "url": { "url": "legacy.gemeentewestland.nl", "points": "0", "endpoints": [] } }
-
-    for stat in stats:
-        # confusing decomposition to comply with mccabe
-        when = stats_determine_when(stat, weeks_back)
-
-        # Next to measurements in hard numbers, we also derive a conclusion in three categories:
-        # red, orange and green. This is done to simplify the data, so it can be better understood.
-        measurement = {'red': 0, 'orange': 0, 'green': 0,
-                       'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
-                       'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
-                       'included_organizations': 0}
-
-        """
-        What makes the difference from organizationratings? Why are there more urls?
-        Does this have to do with dead endpoints? Or dead urls? Probably.
-
-        now	            5144	243 (5%)	4422 (86%)	479 (9%)
-        7 days ago	    5149	241 (5%)	4420 (86%)	488 (9%)
-        2 weeks ago	    5143	3729 (73%)	1331 (26%)	83 (2%)
-        3 weeks ago	    5042	3729 (74%)	1235 (24%)	78 (2%)
-        1 month ago	    2342	1804 (77%)	496 (21%)	42 (2%)
-        2 months ago	2357	1818 (77%)	496 (21%)	43 (2%)
-        3 months ago	2357	1818 (77%)	496 (21%)	43 (2%)
-        """
-
-        ratings = UrlRating.objects.raw("""SELECT * FROM
-                                           map_urlrating
-                                       INNER JOIN
-                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
-                                       WHERE `when` <= '%s' GROUP BY url_id) as x
-                                       ON x.id2 = map_urlrating.id
-                                       """ % (when, ))
-
-        measurement["explained"] = {}
-        for rating in ratings:
-            measurement["total_urls"] += 1
-            measurement["total_score"] += rating.rating
-
-            if rating.rating < 200:
-                measurement["green"] += 1
-
-            if 199 < rating.rating < 1000:
-                measurement["orange"] += 1
-
-            if rating.rating > 999:
-                measurement["red"] += 1
-
-            # make stats on what kind of vulnerabilities:
-            calculation = rating.calculation
-            for e in calculation['url']['endpoints']:
-                for r in e['ratings']:
-                    if r['type'] not in measurement["explained"].keys():
-                        measurement["explained"][r['type']] = {}
-                    if r['explanation'] not in measurement["explained"][r['type']].keys():
-                        measurement["explained"][r['type']][r['explanation']] = 0
-
-                    measurement["explained"][r['type']][r['explanation']] += 1
-
-        measurement["red percentage"] = round((measurement["red"] /
-                                               measurement["total_urls"]) * 100)
-        measurement["orange percentage"] = round((measurement["orange"] /
-                                                  measurement["total_urls"]) * 100)
-        measurement["green percentage"] = round((measurement["green"] /
-                                                 measurement["total_urls"]) * 100)
-
-        stats[stat] = measurement
-
-    return JsonResponse({"data": stats}, encoder=JSEncoder)
-
 
 @cache_page(one_day)
 def wanted_urls(request):
