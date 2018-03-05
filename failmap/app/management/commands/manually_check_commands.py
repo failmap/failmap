@@ -1,6 +1,8 @@
 """Basic tests to check nothing major is broken."""
 from __future__ import absolute_import, unicode_literals
+
 import logging
+
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 

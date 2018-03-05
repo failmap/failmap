@@ -687,6 +687,7 @@ def vulnstats(request, weeks_back=0):
 
     return JsonResponse(stats, encoder=JSEncoder)
 
+
 @cache_page(one_day)
 def wanted_urls(request):
     """
