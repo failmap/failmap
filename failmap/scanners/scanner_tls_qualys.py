@@ -36,7 +36,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                      TlsQualysScratchpad)
-from failmap.scanners.scanner_http import get_random_user_agent, store_url_ips
+from failmap.scanners.scanner_http import store_url_ips
 
 from ..celery import PRIO_HIGH, app
 
@@ -230,7 +230,7 @@ def service_provider_scan_via_api(domain):
             params=payload,
             timeout=(30, 30),  # 30 seconds network, 30 seconds server.
             headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                                   "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",}
+                                   "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
         )
 
         # log.debug(vars(response))  # extreme debugging
