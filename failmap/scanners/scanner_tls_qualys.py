@@ -67,10 +67,14 @@ def compose_task(
 
     # apply filter to organizations (or if no filter, all organizations)
     organizations = Organization.objects.filter(**organizations_filter)
+
+    # Discover Endpoints will figure out if there is https and if port 443 is open.
     # apply filter to urls in organizations (or if no filter, all urls)
     urls = Url.objects.filter(
         is_dead=False,
         not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
         organization__in=organizations, **urls_filter
     )
 
