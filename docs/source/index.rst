@@ -11,6 +11,7 @@ Failmap Documentation 🤣
    :caption: Contents:
 
    topics/getting_started
+   topics/development
    topics/scanners_scanning_and_ratings
    topics/running_a_remote_worker
    topics/deployment

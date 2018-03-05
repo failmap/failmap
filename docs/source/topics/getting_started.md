@@ -84,69 +84,6 @@ restore the submodules to the expected state run:
 
     git submodule update
 
-## Development
-
-### Code quality / Testing
-
-This project sticks to default pycodestyle/pyflakes configuration to maintain code quality.
-
-To run code quality checks and unit tests run:
-
-    tox
-
-For a comprehensive test run:
-
-    tox -e check,test,datasets
-
-To make life easier you can use `autopep8`/`isort` before running `tox` to automatically fix most style issues:
-
-    tox -e autofix
-
-To run only a specific test use:
-
-    tox -e test -- -k test_name
-
-To only run a specific test suite use for example:
-
-    .tox/default/bin/failmap test tests/scanners/test_dummy.py
-
-A coverage report is generated after running tests, on OSX it can be viewed using:
-
-    open htmlcov/index.html
-
-Pytest allows to drop into Python debugger when a tests fails. To enable run:
-
-    tox -- --pdb
-
-### Integration/system tests
-Besides quality checks and unit tests there are also integration and system testing frameworks available.
-
-These frameworks will run in the CI system but not by default when running `tox` due to their dependencies.
-
-To run these testsuites make sure Docker is installed and running and run either:
-
-    tox -e integration
-
-or
-
-    tox -e system
-
-### Direnv / Virtualenv
-
-This project has [direnv](https://direnv.net/) configuration to automatically manage the Python
-virtual environment. Install direnv and run `direnv allow` to enable it initially. After this the environment will by automatically loaded/unloaded every time you enter/leave the project directory.
-
-If you don't want to use Direnv be sure to source the `.envrc` file manually every time you want to work on the project:
-
-    . .envrc
-
-## Known Issues
-
-### Docker installation
-
-#### ERROR: for failmap_database_1  Cannot start service database: Mounts denied:
-As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
-
 
 ## Versioning
 
@@ -159,3 +96,10 @@ Informal releases are created by new commits pushed/merged to the master. The ve
 For all releases artifacts will be created. Currently only Docker containers are pushed into the [registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker build/staging/latest tags).
 
 For local development informal release or a special `dev0` build release is used which indicates a different state from the formal releases.
+
+## Known Issues
+
+### Docker installation
+
+#### ERROR: for failmap_database_1  Cannot start service database: Mounts denied:
+As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the docker configuration or run the installation from your user directory. You might receive this error if you run `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.
