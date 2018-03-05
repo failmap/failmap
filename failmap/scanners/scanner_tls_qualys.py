@@ -135,7 +135,7 @@ def qualys_scan(self, url):
         # Qualys did not have a result for us, it created a new scan and the result will be there soon (retry below)
         data['status'] = "FAILURE"
         log.error("Unexpected result from API")  # TODO, aequitas, is this result really unexpected???
-        log.error(str(data)) # for debugging.
+        log.error(str(data))  # for debugging.
 
     """
     While the documentation says to check every 10 seconds, we'll do that between every
