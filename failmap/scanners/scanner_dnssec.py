@@ -1,19 +1,23 @@
 """Scans DNSSEC using the dotSE DNSCHECK tool.
 
-Installing this tool may be a bit difficult if you've never tried. So just use docker.
-https://github.com/dotse/dnscheck/tree/master/engine
+This is also a reference implementation of a standardized scanner. This scanner works on Url level, not on endpoint
+level. Therefore we use UrlScanManager and not EndpointScanManager. Both have similar similar signatures.
 
-On a mac you might first want to:
+
+It's a nightmare to get the tool running on your system so use the one in docker:
+docker-build
+docker-failmap-with-db scan dnssec
+
+If you must run the DNSSEC scanner yourself, we wish you good luck. To get you started:
 brew install perl
 
 CPAN install TAP::Harness::Env
 CPAN install File::ShareDir::Install
 
-and then follow the installation instructions.
+and then follow the installation instructions here:
+https://github.com/dotse/dnscheck/tree/master/engine
 
-todo: You'll end up with DNSCheck missing in $... forget it, use docker!
-
-
+We strongly recomend using the docker approach.
 """
 
 import logging
