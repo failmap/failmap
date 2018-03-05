@@ -37,6 +37,9 @@ If you want to see that failmap is processing the result, there are two ways:
 1: You can see your computer name pop up in the workers on https://admin.faalkaart.nl/admin/
 2: You can see the amount of tasks processed increase on https://grafana.faalkaart.nl
 
+Errors of these workers are logged here:
+https://sentry.io/internet-cleanup-foundation/remote-workers/
+
 ## How to stop the worker
 Run this command:
 ```
@@ -66,9 +69,8 @@ mkdir ~/failtasks
 
 Make sure the .p12 file is also in this directory.
 
-Start docker
-```bash
-
+``` bash
+... todo
 ```
 
 todo: docker as user, aka, pl0x don't run it as root.
