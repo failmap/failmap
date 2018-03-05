@@ -26,7 +26,6 @@ import ipaddress
 import json
 import logging
 from datetime import date, datetime, timedelta
-from time import sleep
 
 import pytz
 import requests
@@ -37,7 +36,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
                                      TlsQualysScratchpad)
-from failmap.scanners.scanner_http import store_url_ips
+from failmap.scanners.scanner_http import get_random_user_agent, store_url_ips
 
 from ..celery import PRIO_HIGH, app
 
@@ -133,7 +132,6 @@ def qualys_scan(self, url):
         return data
     else:
         # Qualys did not have a result for us, it created a new scan and the result will be there soon (retry below)
-        data['status'] = "FAILURE"
         log.error("Unexpected result from API")  # TODO, aequitas, is this result really unexpected???
         log.error(str(data))  # for debugging.
 
@@ -216,48 +214,37 @@ def report_to_console(domain, data):
 
 
 def service_provider_scan_via_api(domain):
-    """
-    Qualys parameters
+    try:
+        # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+        payload = {
+            'host': domain,  # host that will be scanned for tls
+            'publish': "off",  # will not be published on the front page of the ssllabs site
+            'startNew': "off",  # that's done automatically when needed by service provider
+            'fromCache': "off",  # cache can have mismatches, but is ignored when startnew
+            'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
+            'all': "done"  # ?
+        }
 
-    https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+        response = requests.get(
+            "https://api.ssllabs.com/api/v2/analyze",
+            params=payload,
+            timeout=(30, 30),  # 30 seconds network, 30 seconds server.
+            headers={'User-Agent': get_random_user_agent()}
+        )
 
-    # publish: off, it's friendlier to the domains scanned
-    # startnew: off, that's done automatically when needed by service provider
-    # fromcache: on: they are chached for a few hours only.
-    # ignoreMismatch: on: continue a scan, even if the certificate is for another domain
+        # log.debug(vars(response))  # extreme debugging
+        log.debug("Running assessments: max: %s, current: %s, client: %s" % (
+            response.headers['X-Max-Assessments'],
+            response.headers['X-Current-Assessments'],
+            response.headers['X-ClientMaxAssessments']
+        ))
 
-    :param domain:
-    :return:
-    """
-    log.debug("Requesting cached data from qualys for %s", domain)
-    payload = {'host': domain,
-               'publish': "off",
-               'startNew': "off",
-               'fromCache': "off",  # cache can have mismatches, but is ignored when startnew
-               'ignoreMismatch': "on",
-               'all': "done"}
-
-    retries = 3
-
-    # todo: this can lead up to too many scans at the same time... or does the pool limit this?
-    while retries > 0:
-        try:
-            response = requests.get("https://api.ssllabs.com/api/v2/analyze", params=payload)
-            # log.debug(vars(response))  # extreme debugging
-            log.debug("Running assessments: max: %s, current: %s, client: %s" % (
-                response.headers['X-Max-Assessments'],
-                response.headers['X-Current-Assessments'],
-                response.headers['X-ClientMaxAssessments']
-            ))
-            return response.json()
-        except requests.RequestException as e:
-            # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
-            # ex: EOF occurred in violation of protocol (_ssl.c:749)
-            log.error("something went wrong when scanning domain %s", domain)
-            log.error(e)
-            log.error("Retrying %s times, next in 20 seconds.", retries)
-            sleep(20)
-            retries = retries - 1
+        return response.json()
+    except requests.RequestException as e:
+        # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+        # ex: EOF occurred in violation of protocol (_ssl.c:749)
+        log.error("something went wrong when scanning domain %s", domain)
+        log.error(e)
 
 
 def extract_ips(url, data):
