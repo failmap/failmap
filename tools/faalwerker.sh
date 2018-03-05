@@ -59,6 +59,7 @@ startmetfalen (){
     -e BROKER=$faalredis \
     -e PASSPHRASE=$faalgeheim \
     -e HOST_HOSTNAME="$faalgastnaam" \
+    -e SENTRY_DSN="$SENTRY_DSN" \
     -v "$faalp12bestand:/client.p12" \
     $faalcontainerfaalimagenaam \
     celery worker --loglevel $faallogfaallevel --pool eventlet --concurrency="$faalaantalprocessen"
