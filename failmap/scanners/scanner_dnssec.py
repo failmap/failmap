@@ -37,9 +37,11 @@ log = logging.getLogger(__name__)
 
 # how often a task should be retried when encountering an expectable exception
 MAX_RETRIES = 3
-RETRY_DELAY = 1
-# after which time a pending task should no longer be accepted by a worker
-EXPIRES = 5
+RETRY_DELAY = 10
+
+# after which time (seconds) a pending task should no longer be accepted by a worker
+# can also be a datetime.
+EXPIRES = 3600  # one hour is more then enough
 
 
 def compose_task(
