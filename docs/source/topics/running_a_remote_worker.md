@@ -1,16 +1,16 @@
 # Running a remote worker
-By running such a worker you can contribute to this project with very little effort.
+Running a worker is an easy way to contribute to this project.
 
-Failmap performs thousands of scans daily. This comes with rate limitations and the need to spread out tasks over
-various workers.
+Workers help run our thousands of daily scans over various connections and additional capacity.
 
-Running a worker currently requires we have to trust you, and you have to trust us. This is because you're
-willing to run code from us on your machine. You'll also be able to access parts of the system that might not
-be secured very well or inject fake results (or other terrible things :)).
+Running a worker comes with mutual trust: you'll run code from us (mostly in a container) and we're processing the
+results without question. Additionally you'll be able to view some systems that might not be secure enough and your
+responsible disclosure is welcome.
 
 ## How to start the worker
 1: Install Docker, see here: https://docs.docker.com/install/.
-1 (optional): If you don't want to run the script as root, install docker with the option not to require root to start containers.
+
+(optional): If you don't want to run the script as root, install docker with the option not to require root to start containers.
 
 2: Obtain a .p12 file from us, you can do so by asking here: https://gitter.im/internet-cleanup-foundation/Lobby or
 sending a mail to info@faalkaart.nl
@@ -26,16 +26,16 @@ sending a mail to info@faalkaart.nl
 curl -s https://gitlab.com/failmap/failmap/raw/master/tools/faalwerker.sh | /bin/bash
 ```
 
-This starts a worker in the background. It will give a lot of output.
+This starts a worker in the background. It will generate a lot of output.
 
 Do note that you're piping to bash whatever we send you. So better check the code first, which can change any moment.
-Here is exactly where the trust thing starts :)
 
 ## How to verify your worker is running
-Two ways:
+You'll probably see a lot of output: the container starting, celery running, the task being performed and such.
+
+If you want to see that failmap is processing the result, there are two ways:
 1: You can see your computer name pop up in the workers on https://admin.faalkaart.nl/admin/
 2: You can see the amount of tasks processed increase on https://grafana.faalkaart.nl
-
 
 ## How to stop the worker
 Run this command:
