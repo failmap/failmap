@@ -38,7 +38,7 @@ from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysSca
                                      TlsQualysScratchpad)
 from failmap.scanners.scanner_http import store_url_ips
 
-from ..celery import PRIO_HIGH, app
+from ..celery import PRIO_HIGH, PRIO_NORMAL, app
 
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30
@@ -127,10 +127,9 @@ def qualys_scan(self, url):
     except requests.RequestException as e:
         # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
         # ex: EOF occurred in violation of protocol (_ssl.c:749)
-        log.warning("Error when contacting Qualys for scan on %s", url.url)
-        log.exception(e)
+        log.exception("(Network or Server) Error when contacting Qualys for scan on %s", url.url)
         # Initial scan (with rate limiting) has not been received yet, so add to the qualys queue again.
-        raise self.retry(countdown=60, priorty=PRIO_HIGH, max_retries=30, queue='scanners.qualys')
+        raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=30, queue='scanners.qualys')
 
     # Create task for storage worker to store debug data in database (this
     # task has no direct DB access due to scanners queue).
@@ -139,13 +138,23 @@ def qualys_scan(self, url):
     if settings.DEBUG:
         report_to_console(url.url, data)  # for more debugging
 
+    # Qualys has completed the scan of the url and has a result for us. Continue the chain.
     if 'status' in data.keys():
-        # Qualys has recently completed a scan of the url and has a result for us
         return data
-    else:
-        # Qualys did not have a result for us, it created a new scan and the result will be there soon (retry below)
-        log.error("Unexpected result from API")  # TODO, aequitas, is this result really unexpected???
-        log.error(str(data))  # for debugging.
+
+    # The API is in error state, let's see if we can recover...
+    if "errors" in data:
+        # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
+        if data['errors'][0]['message'] == "Running at full capacity. Please try again later.":
+            log.info("Re-queued scan, qualys is at full capacity.")
+            raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=30, queue='scanners.qualys')
+        # We have no clue, but we certainly don't want this running on the normal queue.
+        # The amount of retries has been lowered, as this is a situation we don't know yet, we don't have to
+        # keep on making the same mistakes at the API.
+        else:
+            log.exception("Unexpected error from API on %s: %s", url.url, str(data))
+            # We don't have to keep on failing... lowering the amount of retries.
+            raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=5, queue='scanners.qualys')
 
     """
     While the documentation says to check every 10 seconds, we'll do that between every
@@ -246,11 +255,11 @@ def service_provider_scan_via_api(domain):
     )
 
     # log.debug(vars(response))  # extreme debugging
-    log.debug("Running assessments: max: %s, current: %s, client: %s" % (
-        response.headers['X-Max-Assessments'],
-        response.headers['X-Current-Assessments'],
-        response.headers['X-ClientMaxAssessments']
-    ))
+    log.debug("Running assessments: max: %s, current: %s, client: %s",
+              response.headers['X-Max-Assessments'],
+              response.headers['X-Current-Assessments'],
+              response.headers['X-ClientMaxAssessments']
+              )
 
     return response.json()
 
