@@ -229,7 +229,8 @@ def service_provider_scan_via_api(domain):
             "https://api.ssllabs.com/api/v2/analyze",
             params=payload,
             timeout=(30, 30),  # 30 seconds network, 30 seconds server.
-            headers={'User-Agent': get_random_user_agent()}
+            headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+                                   "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",}
         )
 
         # log.debug(vars(response))  # extreme debugging
