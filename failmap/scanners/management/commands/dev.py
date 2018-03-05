@@ -6,7 +6,6 @@ from failmap.map.rating import (add_organization_rating, create_timeline, rerate
                                 show_timeline_console)
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanner_security_headers import scan as scan_headers
 
 logger = logging.getLogger(__package__)
 
@@ -15,7 +14,7 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        develop_rerate_urls_async()
+        return
         # develop_determineratings()
         # test_can_connect_to_organization()
         # as a task
@@ -32,11 +31,6 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
-
-
-def develop_rerate_urls_async():
-    from failmap.map.rating import rerate_urls_async
-    rerate_urls_async()
 
 
 def reset_onboard():
@@ -116,12 +110,6 @@ def develop_celery_advanced():
 
     # for endpoint in eps:
     #     dispatch_scan_security_headers(endpoint)
-
-
-def develop_security_headers_scanner():
-    u = Url.objects.all().filter(url='zoeken.haarlemmermeer.nl').get()
-    u = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
-    scan_headers(u)
 
 
 def develop_determineratings():
