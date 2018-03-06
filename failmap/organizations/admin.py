@@ -17,7 +17,8 @@ import failmap.scanners.scanner_http as scanner_http
 from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
-from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
+from failmap.scanners import (scanner_dummy, scanner_plain_http, scanner_security_headers,
+                              scanner_tls_qualys)
 from failmap.scanners.admin import UrlIpInline
 from failmap.scanners.models import Endpoint
 from failmap.scanners.onboard import onboard_urls
@@ -118,6 +119,11 @@ class ActionMixin:
         return self.generic_action(scanner_tls_qualys.compose_task, 'Scan TLS Qualys', *args, **kwargs)
     scan_tls_qualys.short_description = '🔬  Scan TLS Qualys'
     actions.append(scan_tls_qualys)
+
+    def scan_dummy(self, *args, **kwargs):
+        return self.generic_action(scanner_dummy.compose_task, 'Dummy/test scanner', *args, **kwargs)
+    scan_dummy.short_description = '💥  Dummy/test scanner'
+    actions.append(scan_dummy)
 
     def rebuild_ratings(self, *args, **kwargs):
         return self.generic_action(rating.compose_task, 'Rebuild rating', *args, **kwargs)

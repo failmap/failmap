@@ -8,10 +8,10 @@ import logging
 import random
 import time
 
-from celery import Task, group
 from django.conf import settings
 
-from failmap.celery import ParentFailed, app
+from failmap.celery import ParentFailed
+from failmap.dramatiq import dramatiq
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 
@@ -30,7 +30,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
-) -> Task:
+) -> dramatiq.group:
     """Compose taskset to scan specified endpoints.
 
     *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
@@ -72,21 +72,22 @@ def compose_task(
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-    task = group(
-        scan_dummy.s(endpoint.uri_url()) | store_dummy.s(endpoint) for endpoint in endpoints
+    task = dramatiq.group(
+        scan_dummy.message(endpoint.uri_url()) | store_dummy.message(endpoint) for endpoint in endpoints
     )
 
     return task
 
 
-@app.task(queue='storage')
-def store_dummy(result, endpoint):
+@dramatiq.actor(queue_name='storage', store_results=True)
+def store_dummy(endpoint, result):
     """
 
     :param result: param endpoint:
     :param endpoint:
 
     """
+
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
@@ -115,12 +116,8 @@ class SomeError(Exception):
     """Just some expectable error."""
 
 
-@app.task(queue='scanners',
-          bind=True,
-          default_retry_delay=RETRY_DELAY,
-          retry_kwargs={'max_retries': MAX_RETRIES},
-          expires=EXPIRES)
-def scan_dummy(self, uri_url):
+@dramatiq.actor(queue_name='scanners', store_results=True)
+def scan_dummy(uri_url):
     """
 
     Before committing your scanner, verify the following:
@@ -137,45 +134,32 @@ def scan_dummy(self, uri_url):
     :param uri_url:
 
     """
-    try:
-        log.info('Start scanning %s', uri_url)
+    log.info('Start scanning %s', uri_url)
 
-        # Tools and output for this scan are registered in /failmap/settings.py
-        # We prefer tools written in python, limiting the amount of dependencies used in the project.
-        # Another tool is fine too, but please announce so in chat etc.
-        # Example:
-        # TOOLS = {
-        #    'yourtool': {
-        #        'executable': VENDOR_DIR + os.environ.get('YOURTOOL_EXECUTABLE', "yourtool/yourtool.py"),
-        #        'output_dir': OUTPUT_DIR + os.environ.get('YOURTOOL_OUTPUT_DIR',
-        #                                                  "scanners/resources/output/yourtool/"),
-        #    },
-        # mytool = settings.TOOLS['youtool']['executable']
-        # Below demonstrates the usage of settings.
-        sample_settings_usage = len(settings.TOOLS)
-        log.debug("%s are registered." % sample_settings_usage)
+    # Tools and output for this scan are registered in /failmap/settings.py
+    # We prefer tools written in python, limiting the amount of dependencies used in the project.
+    # Another tool is fine too, but please announce so in chat etc.
+    # Example:
+    # TOOLS = {
+    #    'yourtool': {
+    #        'executable': VENDOR_DIR + os.environ.get('YOURTOOL_EXECUTABLE', "yourtool/yourtool.py"),
+    #        'output_dir': OUTPUT_DIR + os.environ.get('YOURTOOL_OUTPUT_DIR',
+    #                                                  "scanners/resources/output/yourtool/"),
+    #    },
+    # mytool = settings.TOOLS['youtool']['executable']
+    # Below demonstrates the usage of settings.
+    sample_settings_usage = len(settings.TOOLS)
+    log.debug("%s are registered." % sample_settings_usage)
 
-        # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
-        if not random.randint(0, 5):
-            raise SomeError('some error occured')
+    # simulation: sometimes a task fails, for example with network errors etcetera. The task will be retried.
+    if not random.randint(0, 5):
+        raise SomeError('some error occured')
 
-        # simulation: often tasks take different times to execute
-        time.sleep(random.randint(1, 10) / 10)
+    # simulation: often tasks take different times to execute
+    time.sleep(random.randint(1, 10) / 10)
 
-        # simulation: the result can be different
-        result = bool(random.randint(0, 1))
+    # simulation: the result can be different
+    result = bool(random.randint(0, 1))
 
-        log.info('Done scanning: %s, result: %s', uri_url, result)
-        return result
-    except SomeError as e:
-        # If an expected error is encountered put this task back on the queue to be retried.
-        # This will keep the chained logic in place (saving result after successful scan).
-        # Retry delay and total number of attempts is configured in the task decorator.
-        try:
-            # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=e)
-        except BaseException:
-            # If this task still fails after maximum retries the last
-            # error will be passed as result to the next task.
-            log.exception('Retried %s times and it still failed', MAX_RETRIES)
-            return e
+    log.info('Done scanning: %s, result: %s', uri_url, result)
+    return result
