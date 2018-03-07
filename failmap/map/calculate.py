@@ -89,11 +89,19 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "True":
         explanation = header + " header present."
+
     else:
         explanation = "Missing " + header + " header."
 
         if header in ["X-Frame-Options", "Strict-Transport-Security"]:
-            medium += 1
+
+            # special case when no insecure alternatives are offered
+            if scan.explanation == "Security Header not present: Strict-Transport-Security, " \
+                                   "yet offers no insecure http service.":
+                explanation = "Missing " + header + " header. Offers no insecure alternative service."
+                medium += 0
+            else:
+                medium += 1
 
         if header in ["Content-Security-Policy", "X-Content-Type-Options", "X-XSS-Protection"]:
             low += 1

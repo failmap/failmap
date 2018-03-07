@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 12:27+0000\n"
+"POT-Creation-Date: 2018-03-07 13:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -164,8 +164,8 @@ msgid "Toggle navigation"
 msgstr ""
 
 #: failmap/map/templates/map/index.html:65
-#: failmap/map/templates/map/index.html:99 failmap/map/views.py:71
-#: failmap/map/views.py:72
+#: failmap/map/templates/map/index.html:99 failmap/map/views.py:76
+#: failmap/map/views.py:77
 msgid "Fail Map"
 msgstr ""
 
@@ -200,15 +200,15 @@ msgstr ""
 msgid "Explanation"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:80
+#: failmap/map/templates/map/index.html:79
 msgid "DEBUG"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:86
+#: failmap/map/templates/map/index.html:83
 msgid "Admin"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:100 failmap/map/views.py:73
+#: failmap/map/templates/map/index.html:100 failmap/map/views.py:78
 msgid "Fail Map Introduction"
 msgstr ""
 
@@ -534,8 +534,8 @@ msgstr ""
 #: failmap/map/templates/map/index.html:730
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:15
-#: failmap/map/templates/map/topwin.html:13
-#: failmap/map/views.py:1197
+#: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:1132
+#: failmap/map/views.py:1198
 msgid "High"
 msgstr ""
 
@@ -543,8 +543,8 @@ msgstr ""
 #: failmap/map/templates/map/index.html:731
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:16
-#: failmap/map/templates/map/topwin.html:14
-#: failmap/map/views.py:1197
+#: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:1132
+#: failmap/map/views.py:1198
 msgid "Medium"
 msgstr ""
 
@@ -552,8 +552,8 @@ msgstr ""
 #: failmap/map/templates/map/index.html:732
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:17
-#: failmap/map/templates/map/topwin.html:15
-#: failmap/map/views.py:1197
+#: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:1132
+#: failmap/map/views.py:1198
 msgid "Low"
 msgstr ""
 
@@ -700,6 +700,6 @@ msgstr ""
 msgid "This is the top win from"
 msgstr ""
 
-#: failmap/map/views.py:1196
+#: failmap/map/views.py:1131 failmap/map/views.py:1197
 msgid "Perfect"
 msgstr ""

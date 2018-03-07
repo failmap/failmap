@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-12 15:13+0000\n"
+"POT-Creation-Date: 2018-03-07 13:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,124 +18,41 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: static/admin/js/actions.js:48 static/admin/js/actions.min.js:2
-msgid "%(sel)s of %(cnt)s selected"
-msgid_plural "%(sel)s of %(cnt)s selected"
-msgstr[0] ""
-msgstr[1] ""
+#: docs/build/html/_static/doctools.js:191
+msgid "Permalink to this headline"
+msgstr ""
 
-#: static/admin/js/actions.js:117 static/admin/js/actions.min.js:4
+#: docs/build/html/_static/doctools.js:197
+msgid "Permalink to this definition"
+msgstr ""
+
+#: docs/build/html/_static/doctools.js:230
+msgid "Hide Search Matches"
+msgstr ""
+
+#: docs/build/html/_static/searchtools.js:400
+msgid "Searching"
+msgstr ""
+
+#: docs/build/html/_static/searchtools.js:405
+msgid "Preparing search..."
+msgstr ""
+
+#: docs/build/html/_static/searchtools.js:569
+msgid "Search Results"
+msgstr ""
+
+#: docs/build/html/_static/searchtools.js:571
 msgid ""
-"You have unsaved changes on individual editable fields. If you run an "
-"action, your unsaved changes will be lost."
+"Your search did not match any documents. Please make sure that all words are "
+"spelled correctly and that you've selected enough categories."
 msgstr ""
 
-#: static/admin/js/actions.js:129 static/admin/js/actions.min.js:5
-msgid ""
-"You have selected an action, but you haven't saved your changes to "
-"individual fields yet. Please click OK to save. You'll need to re-run the "
-"action."
+#: docs/build/html/_static/searchtools.js:573
+#, javascript-format
+msgid "Search finished, found %s page(s) matching the search query."
 msgstr ""
 
-#: static/admin/js/actions.js:131 static/admin/js/actions.min.js:5
-msgid ""
-"You have selected an action, and you haven't made any changes on individual "
-"fields. You're probably looking for the Go button rather than the Save "
-"button."
-msgstr ""
-
-#: static/admin/js/calendar.js:12
-msgid "January"
-msgstr ""
-
-#: static/admin/js/calendar.js:13
-msgid "February"
-msgstr ""
-
-#: static/admin/js/calendar.js:14
-msgid "March"
-msgstr ""
-
-#: static/admin/js/calendar.js:15
-msgid "April"
-msgstr ""
-
-#: static/admin/js/calendar.js:16
-msgid "May"
-msgstr ""
-
-#: static/admin/js/calendar.js:17
-msgid "June"
-msgstr ""
-
-#: static/admin/js/calendar.js:18
-msgid "July"
-msgstr ""
-
-#: static/admin/js/calendar.js:19
-msgid "August"
-msgstr ""
-
-#: static/admin/js/calendar.js:20
-msgid "September"
-msgstr ""
-
-#: static/admin/js/calendar.js:21
-msgid "October"
-msgstr ""
-
-#: static/admin/js/calendar.js:22
-msgid "November"
-msgstr ""
-
-#: static/admin/js/calendar.js:23
-msgid "December"
-msgstr ""
-
-#: static/admin/js/calendar.js:26
-msgctxt "one letter Sunday"
-msgid "S"
-msgstr ""
-
-#: static/admin/js/calendar.js:27
-msgctxt "one letter Monday"
-msgid "M"
-msgstr ""
-
-#: static/admin/js/calendar.js:28
-msgctxt "one letter Tuesday"
-msgid "T"
-msgstr ""
-
-#: static/admin/js/calendar.js:29
-msgctxt "one letter Wednesday"
-msgid "W"
-msgstr ""
-
-#: static/admin/js/calendar.js:30
-msgctxt "one letter Thursday"
-msgid "T"
-msgstr ""
-
-#: static/admin/js/calendar.js:31
-msgctxt "one letter Friday"
-msgid "F"
-msgstr ""
-
-#: static/admin/js/calendar.js:32
-msgctxt "one letter Saturday"
-msgid "S"
-msgstr ""
-
-#: static/admin/js/collapse.js:10 static/admin/js/collapse.js:21
-#: static/admin/js/collapse.min.js:1
-msgid "Show"
-msgstr ""
-
-#: static/admin/js/collapse.js:18 static/admin/js/collapse.min.js:1
-msgid "Hide"
-msgstr ""
-
-#: static/jet/js/build/bundle.min.js:3
-msgid "'"
+#: docs/build/html/_static/searchtools.js:626
+msgid ", in "
 msgstr ""

@@ -114,8 +114,8 @@ def compose_task(
     # start at most 1 new task per minute (per worker)
 
     # 7 march 2018, qualys has new rate limits due to service outage.
-    # We used to do 1/m which was fine, but we're now doing 1 every 1.3 minutes.
-    rate_limit='0.7/m',
+    # We used to do 1/m which was fine, but we're now doing 1 every 2 minutes.
+    rate_limit='0.5/m',
 )
 def qualys_scan(self, url):
     """Acquire JSON scan result data for given URL from Qualys.
@@ -164,7 +164,7 @@ def qualys_scan(self, url):
         # keep on making the same mistakes at the API.
         if data['errors'][0]['message'].startswith("Concurrent assessment limit reached "):
             log.info("Too many concurrent assessments: Are you running multiple scans from the same IP? "
-                     "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. Slow down."
+                     "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. Slow down. "
                      "%s" % data['errors'][0]['message'])
             raise self.retry(countdown=120, priorty=PRIO_NORMAL, max_retries=30, queue='scanners.qualys')
         else:

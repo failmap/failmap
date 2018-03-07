@@ -16,7 +16,7 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap.scanners.models import EndpointGenericScanScratchpad
 
-from .models import Endpoint
+from failmap.scanners.models import Endpoint
 
 log = logging.getLogger(__name__)
 
@@ -96,9 +96,44 @@ def analyze_headers(result: requests.Response, endpoint):
     this is because an attacker may intercept HTTP connections and inject the header or remove it.  When your
     site is accessed over HTTPS with no certificate errors, the browser knows your site is HTTPS capable and will
     honor the Strict-Transport-Security header.
+    
+    7 march 2018
+    After a series of complaints of products designed specifically to run on port 443 (without any non-secured port) 
+    we've decided that HSTS is only required if there are no unsecured (http) endpoints on this url.
+    This means: if you still run (another) service on an unsecured http port, we're still demanding hsts. We're not
+    able to see what product runs on what port (and it should be like that).
+    
+    The HSTS header is a sloppy patch job anyway, it will be phased out after browsers require sites to run on 443 and
+    just start blocking port 80 for websites alltogether. On that day preloading also goes out the window.
+    
+    It basically works like this:
+    A downgrade attack is not dependent on missing hsts. It's depending on who operates the network and if they employ
+    DNS cache poisoning and use sslstrip etc. Then it comes down to your browser not accepting http at all either via
+    preloading or the HSTS header (or design). The user may also trust your injected certificate given HPKP is removed
+    everywhere and users will certainly click OK if they can.
+    
+    If you think it works differently, just file an issue or make a pull request. We want to get it right.
     """
     if endpoint.protocol == "https":
-        generic_check(endpoint, response.headers, 'Strict-Transport-Security')
+
+        # runs any unsecured http service? (on ANY port).
+        unsecure_services = Endpoint.objects.all().filter(url=endpoint.url, protocol="http", is_dead=False).exists()
+        if unsecure_services:
+            generic_check(endpoint, response.headers, 'Strict-Transport-Security')
+        else:
+            if 'Strict-Transport-Security' in response.headers:
+                log.debug('Has Strict-Transport-Security')
+                EndpointScanManager.add_scan('Strict-Transport-Security' ,
+                                             endpoint,
+                                             'True',
+                                             response.headers['Strict-Transport-Security'])
+            else:
+                log.debug('Has no Strict-Transport-Security, yet offers no insecure http service.')
+                EndpointScanManager.add_scan('Strict-Transport-Security' ,
+                                             endpoint,
+                                             'False',
+                                             "Security Header not present: Strict-Transport-Security, "
+                                             "yet offers no insecure http service.")
 
     return {'status': 'success'}
 

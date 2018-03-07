@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 12:27+0000\n"
+"POT-Creation-Date: 2018-03-07 13:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,26 +17,24 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: failmap/organizations/dashboard.py:20
-msgid "Recent Actions"
+#: failmap/organizations/admin.py:198
+#, python-format
+msgid ""
+"Url %s is already matched to \"%s\", and is alive. Please add any remaining "
+"organizations to the existing version of this url. Search for <a href=\"../?"
+"url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/dashboard.py:27
-msgid "Smart Add Url's"
+#: failmap/organizations/admin.py:215
+#, python-format
+msgid ""
+"This url %s already exists and is alive. Please add the desired "
+"organizations to the existing url. This was not done automatically because "
+"it might be possible specific other data was entered in this form that "
+"cannot blindly be copied (as it might interfere with the existing url). "
+"Search for <a href=\"../?url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/dashboard.py:33
-msgid "Failmap resources"
-msgstr ""
-
-#: failmap/organizations/dashboard.py:36
-msgid "Gitlab Repository"
-msgstr ""
-
-#: failmap/organizations/dashboard.py:41
-msgid "Admin repository"
-msgstr ""
-
-#: failmap/organizations/dashboard.py:46
-msgid "Failmap Website"
+#: failmap/organizations/models.py:189
+msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""

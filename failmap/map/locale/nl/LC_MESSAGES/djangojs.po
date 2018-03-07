@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-15 12:28+0000\n"
+"POT-Creation-Date: 2018-03-07 13:25+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,10 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:68
-#: failmap/map/static/js/views.js:404
-#: failmap/map/static/js/views.js:409
-#: failmap/map/static/js/views.js:412
+#: failmap/map/static/js/failmap.js:68 failmap/map/static/js/views.js:404
+#: failmap/map/static/js/views.js:409 failmap/map/static/js/views.js:412
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -29,20 +27,21 @@ msgstr "Volledig scherm"
 msgid "Search organization"
 msgstr "Zoek op gemeente..."
 
-#: failmap/map/static/js/failmap.js:136
-#: failmap/map/static/js/failmap.js:140
+#: failmap/map/static/js/failmap.js:136 failmap/map/static/js/failmap.js:140
 msgid "High"
 msgstr "Hoog"
 
-#: failmap/map/static/js/failmap.js:137
-#: failmap/map/static/js/failmap.js:141
+#: failmap/map/static/js/failmap.js:137 failmap/map/static/js/failmap.js:141
 msgid "Medium"
 msgstr "Midden"
 
-#: failmap/map/static/js/failmap.js:138
-#: failmap/map/static/js/failmap.js:142
+#: failmap/map/static/js/failmap.js:138 failmap/map/static/js/failmap.js:142
 msgid "Low"
 msgstr "Laag"
+
+#: failmap/map/static/js/failmap.js:170
+msgid "Loading"
+msgstr ""
 
 #: failmap/map/static/js/failmap.js:188
 msgid "Url"
@@ -92,8 +91,7 @@ msgstr "Maart"
 msgid "April"
 msgstr "April"
 
-#: failmap/map/static/js/graphs.js:30
-#: failmap/map/static/js/graphs.js:34
+#: failmap/map/static/js/graphs.js:30 failmap/map/static/js/graphs.js:34
 msgid "May"
 msgstr "Mei"
 
@@ -318,27 +316,35 @@ msgstr "Strict-Transport-Security header is aanwezig."
 msgid "Missing Strict-Transport-Security header."
 msgstr "De Strict-Transport-Security header ontbreekt."
 
-#: failmap/map/static/js/script.js:48
+#: failmap/map/static/js/script.js:44
+msgid ""
+"Missing Strict-Transport-Security header. Offers no insecure alternative "
+"service."
+msgstr ""
+"De Strict-Transport-Security header ontbreekt, maar er wordt geen "
+"alternatieve onbeveiligde http dienst aangeboden op dit adres."
+
+#: failmap/map/static/js/script.js:47
 msgid "report_header_tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:49
+#: failmap/map/static/js/script.js:48
 msgid "report_header_plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:50
+#: failmap/map/static/js/script.js:49
 msgid "report_header_security_headers_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
-#: failmap/map/static/js/script.js:51
+#: failmap/map/static/js/script.js:50
 msgid "report_header_security_headers_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
-#: failmap/map/static/js/script.js:52
+#: failmap/map/static/js/script.js:51
 msgid "report_header_security_headers_x_content_type_options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js:53
+#: failmap/map/static/js/script.js:52
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
@@ -346,16 +352,13 @@ msgstr "Strict-Transport-Security Header (HSTS)"
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js:184
-#: failmap/map/static/js/views.js:187
-#: failmap/map/static/js/views.js:190
-#: failmap/map/static/js/views.js:192
+#: failmap/map/static/js/views.js:184 failmap/map/static/js/views.js:187
+#: failmap/map/static/js/views.js:190 failmap/map/static/js/views.js:192
 #: failmap/map/static/js/views.js:194
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js:185
-#: failmap/map/static/js/views.js:188
+#: failmap/map/static/js/views.js:185 failmap/map/static/js/views.js:188
 msgid "Second opinion"
 msgstr "Second opinion"
 
@@ -379,13 +382,11 @@ msgstr "laag"
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 
-#: failmap/map/static/js/views.js:441
-#: failmap/map/static/js/views.js:446
+#: failmap/map/static/js/views.js:441 failmap/map/static/js/views.js:446
 msgid "top congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap/map/static/js/views.js:442
-#: failmap/map/static/js/views.js:447
+#: failmap/map/static/js/views.js:442 failmap/map/static/js/views.js:447
 msgid "top position"
 msgstr "positie"
 
@@ -393,13 +394,11 @@ msgstr "positie"
 msgid "top fail on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:444
-#: failmap/map/static/js/views.js:449
+#: failmap/map/static/js/views.js:444 failmap/map/static/js/views.js:449
 msgid "hastag fail"
 msgstr "faal"
 
-#: failmap/map/static/js/views.js:444
-#: failmap/map/static/js/views.js:449
+#: failmap/map/static/js/views.js:444 failmap/map/static/js/views.js:449
 msgid "hastag failmap"
 msgstr "faalkaart"
 

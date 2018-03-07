@@ -41,10 +41,9 @@ var dynamic_translations = function(){
     gettext('Missing X-Frame-Options header.');
     gettext('Strict-Transport-Security header present.');
     gettext('Missing Strict-Transport-Security header.');
-
+    gettext('Missing Strict-Transport-Security header. Offers no insecure alternative service.');
 
     // vulnerabilities:
-
     gettext('report_header_tls_qualys');
     gettext('report_header_plain_https');
     gettext('report_header_security_headers_x_xss_protection');
