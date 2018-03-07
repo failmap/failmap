@@ -112,7 +112,10 @@ def compose_task(
     # also because of rate limiting put in its own queue to prevent blocking other tasks
     queue='scanners.qualys',
     # start at most 1 new task per minute (per worker)
-    rate_limit='1/m',
+
+    # 7 march 2018, qualys has new rate limits due to service outage.
+    # We used to do 1/m which was fine, but we're now doing 1 every 1.3 minutes.
+    rate_limit='0.7/m',
 )
 def qualys_scan(self, url):
     """Acquire JSON scan result data for given URL from Qualys.
@@ -142,11 +145,15 @@ def qualys_scan(self, url):
     if settings.DEBUG:
         report_to_console(url.url, data)  # for more debugging
 
-    # Qualys has completed the scan of the url and has a result for us. Continue the chain.
-    if 'status' in data.keys():
-        return data
+    # Qualys is running a scan...
+    if 'status' in data:
+        # Qualys has completed the scan of the url and has a result for us. Continue the chain.
+        # Qualys has found an error while scanning. Continue the chain.
+        if data['status'] in ["READY", "ERROR"]:
+            return data
 
     # The API is in error state, let's see if we can recover...
+    # This is on API level, and not the content of the API
     if "errors" in data:
         # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
         if data['errors'][0]['message'] == "Running at full capacity. Please try again later.":
@@ -155,6 +162,11 @@ def qualys_scan(self, url):
         # We have no clue, but we certainly don't want this running on the normal queue.
         # The amount of retries has been lowered, as this is a situation we don't know yet, we don't have to
         # keep on making the same mistakes at the API.
+        if data['errors'][0]['message'].startswith("Concurrent assessment limit reached "):
+            log.info("Too many concurrent assessments: Are you running multiple scans from the same IP? "
+                     "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. Slow down."
+                     "%s" % data['errors'][0]['message'])
+            raise self.retry(countdown=120, priorty=PRIO_NORMAL, max_retries=30, queue='scanners.qualys')
         else:
             log.exception("Unexpected error from API on %s: %s", url.url, str(data))
             # We don't have to keep on failing... lowering the amount of retries.
@@ -180,14 +192,23 @@ def qualys_scan(self, url):
 def process_qualys_result(data, url):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
+    # a normal completed scan.
     if data['status'] == "READY" and 'endpoints' in data.keys():
         result = save_scan(url, data)
         clean_endpoints(url, data['endpoints'])
         return '%s %s' % (url, result)
 
+    # missing endpoints: url propably resolves but has no TLS?
+    elif data['status'] == "READY":
+        # no endpoints whut?
+        log.error("Found no endpoints in ready scan. Todo: How to handle this?")
+        scratch(url, data)
+
+    # Not resolving
     if data['status'] == "ERROR":
         """
         Error is usually "unable to resolve domain". This should kill the endpoint(s).
+        todo: actually check on this.
         """
         scratch(url, data)  # we always want to see what happened.
         clean_endpoints(url, [])
@@ -529,7 +550,6 @@ def clean_endpoints(url, endpoints):
     ipv4 = sum([True for endpoint in endpoints if ":" not in endpoint['ipAddress']])
 
     # if there are both ipv4 and ipv6 endpoints, then both have been created and nothing has to be set to dead.
-
     if ipv6 and not ipv4:
         endpoints = Endpoint.objects.all().filter(
             protocol="https",
