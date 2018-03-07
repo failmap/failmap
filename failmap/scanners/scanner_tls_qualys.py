@@ -70,13 +70,15 @@ def compose_task(
 
     # Discover Endpoints will figure out if there is https and if port 443 is open.
     # apply filter to urls in organizations (or if no filter, all urls)
+    # do not scan the same url within 24 hours.
+    # we assume all endpoints are scanned at the same time (this is what qualys does)
     urls = Url.objects.filter(
         is_dead=False,
         not_resolvable=False,
         endpoint__protocol="https",
         endpoint__port=443,
-        organization__in=organizations, **urls_filter
-    )
+        organization__in=organizations, **urls_filter,
+    ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(1))
 
     if endpoints_filter:
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
@@ -185,7 +187,7 @@ def qualys_scan(self, url):
     # We use a different queue here as only initial requests count toward the rate limit set by Qualys.
     # Do note: this really needs to be picked up within the first five minutes of starting the scan. If you don't
     # a new scan is started on this url and you'll run into rate limiting problems.
-    raise self.retry(countdown=20, priorty=PRIO_HIGH, max_retries=30, queue='scanners')
+    raise self.retry(countdown=30, priorty=PRIO_HIGH, max_retries=30, queue='scanners')
 
 
 @app.task(queue='storage')
@@ -528,7 +530,7 @@ def endpoints_alive_in_past_24_hours(url):
     x = TlsQualysScan.objects.filter(endpoint__url=url,
                                      endpoint__port=443,
                                      endpoint__protocol__in=["https"],
-                                     scan_date__gt=date.today() - timedelta(1)).exists()
+                                     scan_date__gt=date().today() - timedelta(1)).exists()
     if x:
         log.debug("Scanned in past 24 hours: yes: %s", url.url)
     else:
