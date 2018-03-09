@@ -229,7 +229,7 @@ msgstr ""
 msgid "Send in subdomain adresses"
 msgstr ""
 "Stuur nieuwe subdomeinen in via twitter:<a href=\"https://twitter.com/"
-"faalkaart\" target=\"_blank\">@faalkaart</a>of mail <a href=\"mailto:"
+"faalkaart\" target=\"_blank\">@faalkaart</a> of mail <a href=\"mailto:"
 "info@faalkaart.nl?subject=subdomeinen\">info@faalkaart.nl</a>"
 
 #: failmap/map/templates/map/index.html:109
