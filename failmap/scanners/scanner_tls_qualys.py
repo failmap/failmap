@@ -72,13 +72,21 @@ def compose_task(
     # apply filter to urls in organizations (or if no filter, all urls)
     # do not scan the same url within 24 hours.
     # we assume all endpoints are scanned at the same time (this is what qualys does)
+
+    # scan only once in seven days. an emergency fix to make sure everything is scanned.
+    # todo: force re-scan, where days is < 7, with 5000 scanning takes a while and a lot still goes wrong.
     urls = Url.objects.filter(
         is_dead=False,
         not_resolvable=False,
         endpoint__protocol="https",
         endpoint__port=443,
         organization__in=organizations, **urls_filter,
-    ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(1))
+    ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
+              ).order_by("?")  # used to be endpoint__tlsqualysscan__last_scan_moment
+
+    # ordered randomly: i didn't get a distinct set of urls due to the inner join on endpoint. Would like to do
+    # oldest first to make sure everything is scanned more recently. To remove the join.
+    urls = list(set(urls))
 
     if endpoints_filter:
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
