@@ -15,11 +15,13 @@ Failmap Documentation 🤣
    topics/scanners_scanning_and_ratings
    topics/running_a_remote_worker
    topics/deployment
+   topics/translation
 
    topics/gis_and_map_information
    topics/writing_a_scanner
    topics/docker
    topics/task_processing_system
+   topics/user_guide
 
    topics/thanks
 

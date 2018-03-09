@@ -1,7 +1,80 @@
 # Development
-Please follow the quickstart to get failmap on your system.
+Please follow the [quickstart](getting_started.md) to get failmap on your system.
 
-Additionally the Docker page could be very helpful.
+Additionally the [Docker](docker.md) page could be very helpful.
+
+## A normal change to the software
+This is an illustration to show a normal development practices.
+
+We use git, which comes with many pitfalls. Just search your answer on stack exchange first and ask in the group later.
+
+Make sure failmap is up and running, by following the [getting started](getting_started.md) instructions. Then make a
+branch that describes what you are doing. For example:
+
+```
+git branch documentation_upgrade
+```
+
+Then make any changes to the source code. You'll see that the devserver automatically restarts after every save.
+
+Once you're happy with your changes, and you've tested it on your environment using a meaningful dataset
+(eg productiondata), then you can verify (and autofix) the code to our code standards:
+
+```
+tox -e autofix
+```
+
+Fix any of the remarks it gives, otherwise your changes will not be added to the master branch.
+
+When you are happy, review your changes and remove any temporary files using the instructions given.
+
+```
+git status
+```
+
+If you like the files that are changed, add all changes to be merged:
+
+```
+git add -A
+```
+
+Then commit them:
+
+```
+git commit -m "a short description why you changed something"
+```
+
+Then push them to the server
+
+```
+git push
+```
+
+The push command will give you a link to file a merge request. Meanwhile the build servers are checking your code
+before merging.
+
+Follow the merge request link to create the actual merge request. Share it on the chat.failmap.org channel for review
+and feedback.
+
+Once the feedback is processed (if needed at all) you can merge the code. If you can't, other members of the project can.
+So ask.
+
+## FAQ
+
+### The failmap command won't start and i get some weird errors...?
+Make sure you've got an up to date development environment. You can do so by running the following commands:
+
+Rebuild the environment:
+
+```
+tox -r
+```
+
+Get all requirements and development requirements:
+```
+pip install -r requirements.txt
+pip install -r requirements.dev.txt
+```
 
 ## Code quality / Testing
 

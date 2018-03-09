@@ -24,3 +24,6 @@ Lists of organizations, coordinates and internet adresses.
 
 4. Scanners
 Lists of endpoints and assorted scans on these endpoints.
+
+All data in the scanners section of the admin interface is auto-generated. Changing data here makes no sense as it will
+be overwritten by a scanner.
