@@ -80,6 +80,7 @@ def compose_task(
         not_resolvable=False,
         endpoint__protocol="https",
         endpoint__port=443,
+        endpoint__is_dead=False,
         organization__in=organizations, **urls_filter,
     ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
               ).order_by("?")  # used to be endpoint__tlsqualysscan__last_scan_moment
