@@ -22,9 +22,13 @@ This will create the language files for your languages here:
 * /failmap/map/locale/'iso code'/django.po
 * /failmap/map/locale/'iso code'/djangojs.po
 
-You can edit the .po files.
+And for other "django apps" like "map" accordingly.
 
-After you're done, run:
+You can edit the .po files, they will be converted to those .mo files for some reason.
+
+After you're done editing, run:
 ```
 failmap translate
 ```
+
+Translations should then shown up on the website.

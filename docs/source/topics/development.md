@@ -26,7 +26,15 @@ tox -e autofix
 
 Fix any of the remarks it gives, otherwise your changes will not be added to the master branch.
 
-When you are happy, review your changes and remove any temporary files using the instructions given.
+You can only commit files to the master branch if you're up to date with it's code:
+
+```
+git pull --rebase origin master
+```
+
+Follow the instructions on screen to fix merge conflicts if any.
+
+When you are happy, review your changes and remove any temporary files using the instructions given:
 
 ```
 git status
@@ -44,7 +52,7 @@ Then commit them:
 git commit -m "a short description why you changed something"
 ```
 
-Then push them to the server
+Then push them to the server:
 
 ```
 git push
