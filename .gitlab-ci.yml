@@ -173,37 +173,6 @@ image_test:
   except: [master]
   retry: 1
 
-# compare difference in build time between this and image_test without pull
-image_test_with_pull:
-  stage: test
-
-  services:
-    - docker:dind
-
-  image: registry.gitlab.com/failmap/ci:docker-git
-  variables:
-    TIMEOUT: 120
-    GIT_SUBMODULE_STRATEGY: recursive
-
-  before_script:
-    # login to docker and cache previous image if available
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-    - docker pull $CI_REGISTRY_IMAGE:latest || true
-
-  script:
-    # build docker image to test building
-    - time docker build . --tag $CI_REGISTRY_IMAGE:latest
-
-    # run simple smoketests to verify Docker image is sane
-    - time tests/docker.sh docker
-
-    # run system tests against image
-    - time tox -e system
-
-  # run on merge request to determine if build will not break on master
-  except: [master]
-  retry: 1
-
 test_system:
   stage: staging
 
