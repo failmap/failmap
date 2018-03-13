@@ -18,6 +18,12 @@ from django.conf import settings
 log = logging.getLogger(__package__)
 
 
+# the map should look seemless when you're looking at the entire country, region etc. If it doesn't, increase
+# the resolution.
+resampling_resolutions = {
+    'NL': {'municipality': 0.001}
+}
+
 @transaction.atomic
 def update_coordinates(country: str = "NL", organization_type: str="municipality"):
 
@@ -28,8 +34,6 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
 
     import json
     log.info("Recieved coordinate data. Starting with: %s" % json.dumps(data)[0:200])
-
-    resampling_resolution = get_sampling_resolution(country, organization_type)
 
     log.info("Parsing features:")
     for feature in data["features"]:
@@ -42,16 +46,22 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
             log.debug("This feature does not contain a name: it might be metadata or something else.")
             continue
 
-        log.info("Resampling path for %s" % feature["properties"]["name"])
 
-        task = (resample.s(feature, resampling_resolution) | store_updates.s(country, organization_type))
+
+        resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
+        task = (resample.s(feature, resolution) | store_updates.s(country, organization_type))
         task.apply_async()
+
+    log.info("Resampling and update tasks have been created.")
 
 
 @app.task
-def resample(feature: Dict, resampling_resolution: float=0.01):
+def resample(feature: Dict, resampling_resolution: float=0.001):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
+
+    log.info("Resampling path for %s" % feature["properties"]["name"])
+
     if feature["geometry"]["type"] == "Polygon":
         log.debug("Original length: %s" % len(feature["geometry"]["coordinates"][0]))
         i = 0
@@ -72,14 +82,6 @@ def resample(feature: Dict, resampling_resolution: float=0.01):
             i += 1
 
     return feature
-
-
-def get_sampling_resolution(country: str="NL", organization_type: str="municipality") -> float:
-
-    if country == "NL" and organization_type == "municipality":
-        return 0.0001
-
-    return 0.0001
 
 
 @app.task
@@ -114,7 +116,9 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
     except Organization.DoesNotExist:
         log.info("Organization from OSM does not exist in failmap, create it using the admin interface: '%s'" %
                  properties["name"])
-        log.info("This might happen with neighboring countries (and the antilles for the Netherlands).")
+        log.info("This might happen with neighboring countries (and the antilles for the Netherlands) or new regions.")
+        log.info("If you are missing regions: did you create them in the admin interface or with an organization "
+                 "merge script?")
         log.info("Developers might experience this error using testdata etc.")
         log.info(properties)
         return
@@ -145,7 +149,7 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
                   "New coordinates will be created."
 
     if old_coordinate.count() == 1:
-        message = "New data received in automated import. DEAL WITH IT!"
+        message = "New data received in automated import."
 
         log.info(message)
 

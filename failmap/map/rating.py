@@ -1054,7 +1054,7 @@ def default_ratings(organizations: List[Organization]):
 
         when = organization.created_on if organization.created_on else datetime(
             year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
-        
+
         r = OrganizationRating()
         r.when = when
         r.rating = -1

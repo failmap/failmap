@@ -85,6 +85,20 @@ The regions need to be reduced or simplified to have less data transferred.
 Would overpass be able to do this?
 
 
+### Running Dutch municipality merge of 2018
+
+First make sure the organizations have been created and merged.
+```
+failmap merge_organizations_2018
+```
+
+Then import the new regions for these organizations:
+```
+failmap update_coordinates
+```
+
+
+
 
 
 ### Other things

@@ -267,8 +267,7 @@ var failmap = {
             opacity: 1,
             color: 'white',
             dashArray: '0',
-            fillOpacity: 0.7,
-            fillColor: 'lightblue'
+            fillOpacity: 0.1
         };
     },
 
@@ -325,7 +324,7 @@ var failmap = {
         x = x.toLowerCase();
         if (!x || x === "")
             return false;
-        return (feature.properties.organization_name.toLowerCase().indexOf(x) !== -1)
+        return (feature.properties.organization_name.toLowerCase().indexOf(x) === -1)
     },
 
     search: function (query) {
@@ -339,7 +338,7 @@ var failmap = {
         } else {
             // text match
             failmap.geojson.eachLayer(function (layer) {
-                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) !== -1) {
+                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     if (layer.feature.geometry.type === "MultiPolygon")
                         layer.setStyle(failmap.searchResultStyle(layer.feature))
                 } else {
