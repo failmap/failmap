@@ -316,7 +316,7 @@ var failmap = {
             if (e.target.feature.geometry.type === "Polygon")
                 e.target.setStyle(failmap.searchResultStyle(e.target.feature));
         } else {
-            failmap.geojson.resetStyle(e.target);
+            failmap.geojson.resetresetStyleStyle(e.target);
         }
         failmap.info.update();
     },
@@ -335,6 +335,8 @@ var failmap = {
             // reset
             failmap.geojson.eachLayer(function (layer) {
                 if (layer.feature.geometry.type === "MultiPolygon")
+                    layer.setStyle(failmap.style(layer.feature))
+                if (layer.feature.geometry.type === "Polygon")
                     layer.setStyle(failmap.style(layer.feature))
             });
         } else {
