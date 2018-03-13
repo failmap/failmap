@@ -221,7 +221,6 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
     new_organization.save()
 
-
     for source_organizations_name in source_organizations_names:
         log.info("Trying to add %s to the merge with %s." % (source_organizations_name, new_organization))
 
