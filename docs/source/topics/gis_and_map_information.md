@@ -116,9 +116,11 @@ failmap update_coordinates --date=2018-01-01
 
 The new organizations (of course) do not have a rating, the rating needs to be rebuilt:
 ```
-failmap rebuild_ratings
+failmap rebuild_ratings -m async
 ```
 
+
+failmap clear_database; and failmap load_dataset dataset_12mar2018.json; and failmap merge_organizations_2018; and failmap update_coordinates --date=2018-01-01; and failmap rebuild_ratings -m async
 
 
 ### Other things

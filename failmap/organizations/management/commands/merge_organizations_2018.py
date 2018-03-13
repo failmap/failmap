@@ -192,7 +192,6 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
     # Get the currently existing organization
     # implies that name + country + organization_type is unique.
-    # Might result in an Organization.DoesNotExist, which means the transactions is rolled back.
     try:
         original_target = Organization.objects.get(
             name=target_organization_name, country=country, type=type, is_dead=False)
@@ -205,7 +204,10 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
                                          "+ the old data."
         original_target.save()
 
-        # copy all urls of the old organization to the new one.
+        # save the clone of the organization. Because autherwise the above "get" will get two.
+        new_organization.save()
+
+        # copy all urls of the old organization to the new one. The new one has to be saved due to many to many rules.
         urls = Url.objects.all().filter(organization=original_target)
         for url in urls:
             url.organization.add(new_organization)
@@ -214,11 +216,11 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
         # don't take the promises, they are from another organization and management
 
     except Organization.DoesNotExist:
-        # well, it's not problem the old organization didnt exist.
+        # well, it's not problem the old organization didnt exist. We're creating a new one.
         pass
 
-    # save the clone of the organization.
     new_organization.save()
+
 
     for source_organizations_name in source_organizations_names:
         log.info("Trying to add %s to the merge with %s." % (source_organizations_name, new_organization))
