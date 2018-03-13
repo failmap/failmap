@@ -86,6 +86,23 @@ Would overpass be able to do this?
 
 
 ### Running Dutch municipality merge of 2018
+Get the latest dataset from the server, get it to your dev environment
+
+```
+# DEVELOPMENT ONLY: failmap create_dataset -o -> dataset_12mar2018.json
+```
+
+Place the dataset in the fixture folder.
+
+Then flush the database:
+```
+# DEVELOPMENT ONLY: failmap clear_database
+```
+
+Load the data into the application
+```
+# DEVELOPMENT ONLY: failmap load_dataset dataset_12mar2018.json
+```
 
 First make sure the organizations have been created and merged.
 ```
@@ -94,7 +111,12 @@ failmap merge_organizations_2018
 
 Then import the new regions for these organizations:
 ```
-failmap update_coordinates
+failmap update_coordinates --date=2018-01-01
+```
+
+The new organizations (of course) do not have a rating, the rating needs to be rebuilt:
+```
+failmap rebuild_ratings
 ```
 
 

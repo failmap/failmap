@@ -700,9 +700,9 @@ def map_data(request, weeks_back=0):
           (SELECT id as stacked_organization_id
           FROM organization stacked_organization
           WHERE (stacked_organization.created_on <= '%s' AND stacked_organization.is_dead == 0) 
-          OR
-          (stacked_organization.created_on <= '%s' AND stacked_organization.is_dead == 1 AND 
-          stacked_organization.is_dead_since >= '%s')) as organization_stack
+          OR (
+          '%s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
+          AND stacked_organization.is_dead == 1)) as organization_stack
           ON organization_stack.stacked_organization_id = map_organizationrating.organization_id
           
         INNER JOIN
@@ -716,9 +716,8 @@ def map_data(request, weeks_back=0):
           FROM coordinate stacked_coordinate
           WHERE (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 0) 
           OR
-          (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 1 AND 
-          stacked_coordinate.is_dead_since >= '%s')
-          GROUP BY area) as coordinate_stack
+          ('%s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
+          AND stacked_coordinate.is_dead == 1) GROUP BY area, organization_id) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
         
         INNER JOIN
@@ -728,7 +727,7 @@ def map_data(request, weeks_back=0):
           
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        ''' % (when, when, when, when, when, when, when, )
+        ''' % (when, when, when, when, when, )
     print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)

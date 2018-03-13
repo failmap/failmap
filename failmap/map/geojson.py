@@ -25,7 +25,7 @@ resampling_resolutions = {
 }
 
 @transaction.atomic
-def update_coordinates(country: str = "NL", organization_type: str="municipality"):
+def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
 
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
@@ -38,18 +38,18 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
     log.info("Parsing features:")
     for feature in data["features"]:
 
-        if "properties" not in feature.keys():
+        if "properties" not in feature:
             log.debug("Feature misses 'properties' property :)")
             continue
 
-        if "name" not in feature["properties"].keys():
+        if "name" not in feature["properties"]:
             log.debug("This feature does not contain a name: it might be metadata or something else.")
             continue
 
 
 
         resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
-        task = (resample.s(feature, resolution) | store_updates.s(country, organization_type))
+        task = (resample.s(feature, resolution) | store_updates.s(country, organization_type, when))
         task.apply_async()
 
     log.info("Resampling and update tasks have been created.")
@@ -85,7 +85,7 @@ def resample(feature: Dict, resampling_resolution: float=0.001):
 
 
 @app.task
-def store_updates(feature: Dict, country: str="NL", organization_type: str="municipality"):
+def store_updates(feature: Dict, country: str="NL", organization_type: str="municipality", when=None):
     properties = feature["properties"]
     coordinates = feature["geometry"]
 
@@ -114,12 +114,10 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
                                                          type__name=organization_type,
                                                          is_dead=False)
     except Organization.DoesNotExist:
-        log.info("Organization from OSM does not exist in failmap, create it using the admin interface: '%s'" %
-                 properties["name"])
-        log.info("This might happen with neighboring countries (and the antilles for the Netherlands) or new regions.")
-        log.info("If you are missing regions: did you create them in the admin interface or with an organization "
-                 "merge script?")
-        log.info("Developers might experience this error using testdata etc.")
+        log.info("Organization from OSM does not exist in failmap, create it using the admin interface: '%s' "
+                 "This might happen with neighboring countries (and the antilles for the Netherlands) or new regions."
+                 "If you are missing regions: did you create them in the admin interface or with an organization "
+                 "merge script? Developers might experience this error using testdata etc.", properties["name"])
         log.info(properties)
         return
 
@@ -155,12 +153,12 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
 
     for old_coord in old_coordinate:
         old_coord.is_dead = True
-        old_coord.is_dead_since = datetime.now(pytz.utc)
+        old_coord.is_dead_since = when if when else datetime.now(pytz.utc)
         old_coord.is_dead_reason = message
         old_coord.save()
 
     new_coordinate = Coordinate()
-    new_coordinate.created_on = datetime.now(pytz.utc)
+    new_coordinate.created_on = when if when else datetime.now(pytz.utc)
     new_coordinate.organization = matching_organization
     new_coordinate.creation_metadata = "Automated import via OSM."
     new_coordinate.geojsontype = coordinates["type"]  # polygon or multipolygon
@@ -180,7 +178,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     :return: dictionary
     """
 
-    filename = "%s_%s_%s.osm" % (country, organization_type, datetime.now().date())
+    filename = "%s_%s_%s.osm" % (country, organization_type, datetime.now(pytz.utc).date())
     filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
 
     # to test this, without connecting to a server but handle the data returned today(!)

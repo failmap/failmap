@@ -32,19 +32,32 @@ class Command(DumpDataCommand):
         """
         De gemeenten Menaldumadeel, Franekeradeel en Het Bildt zullen opgaan in een nieuwe gemeente Waadhoeke.
         """
-        merge(["Menaldumadeel", "Franekeradeel", "Het Bildt"], "Waadhoeke", merge_date)
+
+        #We use the frysian name: Menameradiel instead of Menaldumadeel
+        # we should probably change that here, so the update_coordinates also works.
+        merge(source_organizations_names=["Menameradiel", "Franekeradeel", "Het Bildt"],
+              target_organization_name="Waadhoeke",
+              when=merge_date,
+              organization_type="municipality",
+              country="NL"
+              )
 
         """
         Ook de dorpen Welsrijp, Winsum, Baijum en Spannum van gemeente Littenseradiel,
         sluiten zich bij deze nieuwe gemeente aan.
         """
-        # todo: do a geographic move. This is done via "update_coordinates".
+        # todo: do a geographic move. This is done via "update_coordinates"
+        # todo: add the geographic updates using update_coordinates on a certain date...
 
         """
         De gemeenteraad van Leeuwarderadeel heeft na een referendum in maart 2013 besloten dat de gemeente zal
         opgaan in de gemeente Leeuwarden.
         """
-        merge(["Leeuwarderadeel"], "Leeuwarden", merge_date)
+        merge(source_organizations_names=["Leeuwarderadeel"],
+              target_organization_name="Leeuwarden",
+              when=merge_date,
+              organization_type="municipality",
+              country="NL")
 
         """
         Ook zullen tien dorpen van Littenseradiel aan de nieuwe fusiegemeente toegevoegd worden.
@@ -60,14 +73,22 @@ class Command(DumpDataCommand):
         De gemeenten Rijnwaarden en Zevenaar hebben in mei 2016 besloten om te fuseren tot de nieuwe gemeente Zevenaar.
         """
         # straightforward geographic move
-        merge(["Rijnwaarden"], "Zevenaar", merge_date)
+        merge(source_organizations_names=["Rijnwaarden"],
+              target_organization_name="Zevenaar",
+              when=merge_date,
+              organization_type="municipality",
+              country="NL")
 
         """
         De gemeenten Vlagtwedde en Bellingwedde hebben in oktober 2015 besloten om te fuseren tot de
         nieuwe gemeente Westerwolde.
         """
         # straightforward geographic move
-        merge(["Vlagtwedde", "Bellingwedde"], "Westerwolde", merge_date)
+        merge(source_organizations_names=["Vlagtwedde", "Bellingwedde"],
+              target_organization_name="Westerwolde",
+              when=merge_date,
+              organization_type="municipality",
+              country="NL")
 
         """
         De gemeenten Hoogezand-Sappemeer, Menterwolde en Slochteren hebben in november 2015 besloten om te fuseren
@@ -75,7 +96,11 @@ class Command(DumpDataCommand):
         """
 
         # straightforward geographic move
-        merge(["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"], "Midden-Groningen", merge_date)
+        merge(source_organizations_names=["Hoogezand-Sappemeer", "Menterwolde", "Slochteren"],
+              target_organization_name="Midden-Groningen",
+              when=merge_date,
+              organization_type="municipality",
+              country="NL")
 
 
 # implies that name + country + organization_type is unique.
@@ -177,18 +202,32 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
     for source_organizations_name in source_organizations_names:
         log.info("Trying to add %s to the merge with %s." % (source_organizations_name, new_organization))
-        source_organization = Organization.objects.get(
-                name=source_organizations_name,
-                country=country,
-                type=type,
-                is_dead=False)
+
+        try:
+            source_organization = Organization.objects.get(
+                    name=source_organizations_name,
+                    country=country,
+                    type=type,
+                    is_dead=False)
+        except Organization.DoesNotExist:
+            # New organizations don't exist... so nothing to migrate.
+            log.exception("Organization %s does not exist. Tried to merge it with %s. Are you using a different "
+                          "translation for this organization (for example a local dialect)?",
+                          source_organizations_name, target_organization_name)
 
         # copy todays used coordinates from all to-be-merged organizations into the target
         for coordinate in Coordinate.objects.all().filter(organization=source_organization, is_dead=False):
             cloned_coordinate = deepcopy(coordinate)
             cloned_coordinate.id = None
+            cloned_coordinate.created_on = when
             cloned_coordinate.organization = new_organization
             cloned_coordinate.save()
+            # should the original coordinate die now? As it has been superseeded.
+            # Would otherwise retrieve multiple coordinates.
+            coordinate.is_dead = True
+            coordinate.is_dead_since = when
+            coordinate.is_dead_reason = "Merged with %s" % new_organization
+
 
         # still active promises
         for promise in Promise.objects.all().filter(

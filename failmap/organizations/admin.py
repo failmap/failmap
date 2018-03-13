@@ -146,7 +146,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name_details', 'type', 'country', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
-    fields = ('name', 'type', 'country', 'twitter_handle', 'is_dead', 'is_dead_since', 'is_dead_reason')
+    fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'is_dead', 'is_dead_since', 'is_dead_reason')
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
@@ -360,12 +360,11 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', )
 
 
-
 class CoordinateAdmin(admin.ModelAdmin):
     list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
     search_fields = ('organization__name', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
-    fields = ('organization', 'geojsontype', 'area')
+    fields = ('organization', 'created_on', 'is_dead', 'is_dead_since', 'is_dead_reason', 'geojsontype', 'area')
 
 
 class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
