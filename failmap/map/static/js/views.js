@@ -104,7 +104,7 @@ function views() {
             },
             show_week: debounce(function (e) {
                 if (e)
-                    this.week = e.target.value;
+                    this.week = parseInt(e.target.value);
 
                 // doesn't really work, as everything async.
                 vueMap.load(this.week);
