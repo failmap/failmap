@@ -273,9 +273,7 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
         # add the target to all urls managed by the source_organization
         # A weird bug in Django Jet doesn't show the urls in the new organization.
-        # While in the database the relations are correct. They are not displayed in the INLINE on the
-        # new organization, but they are displayed in the inline of the old organization. That is a bit annoying.
-        # the dropdown on the url shows the correct info.
+        # WRONG: you where looking at the old relation, not the many to many field(!).
         for url in Url.objects.all().filter(organization=source_organization):
             log.debug("Adding new organization to existing Url %s" % url)
             url.organization.add(new_organization)

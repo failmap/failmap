@@ -44,8 +44,13 @@ handfull of days.</p>
 """
 
 
+# todo: the through solution has two challenges:
+# 1: the name of the objects listed
+# 2: cannot auto-complete these with django-jet it seems, so an enormous amount of data
+# it might be solved using an explicit relation?
+# perhaps ask the django jet forum
 class UrlAdminInline(CompactInline):
-    model = Url
+    model = Url.organization.through
     extra = 0
     show_change_link = True
 
@@ -142,13 +147,16 @@ class ActionMixin:
         self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
 
 
+# http://jet.readthedocs.io/en/latest/autocomplete.html?highlight=many
+# for many values in the admin interface... for example endpoints.
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name_details', 'type', 'country', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
+
     fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'is_dead', 'is_dead_since', 'is_dead_reason')
 
-    inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
+    inlines = [CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
     @staticmethod
     def name_details(self):
