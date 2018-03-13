@@ -720,10 +720,15 @@ def map_data(request, weeks_back=0):
           stacked_coordinate.is_dead_since >= '%s')
           GROUP BY area) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
+        
+        INNER JOIN
+          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating 
+          WHERE `when` <= '%s' GROUP BY organization_id) as stacked_organizationrating
+          ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
           
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        ''' % (when, when, when, when, when, when, )
+        ''' % (when, when, when, when, when, when, when, )
     print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
