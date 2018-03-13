@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'proxy',
     'django_statsd',
+    'constance',
+    'constance.backends.database',
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light
@@ -561,3 +563,14 @@ NETWORK_SUPPORTS_IPV6 = os.environ.get('NETWORK_SUPPORTS_IPV6', False)
 
 # atomic imports: fail completely, not half
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+# 'runtime' settings
+# https://django-constance.readthedocs.io/en/latest/
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+CONSTANCE_CONFIG = {
+    # TODO: make this work without restart, https://django-constance.readthedocs.io/en/latest/#signals
+    'SENTRY_DSN': (os.environ.get('SENTRY_DSN', ''), 'DSN for Sentry.io error reporting (required restart).'),
+    'HYPER_ACCESS_KEY': (os.environ.get('HYPER_ACCESS_KEY', ''), 'Hyper.sh API access key.'),
+    'HYPER_SECRET_KEY': (os.environ.get('HYPER_SECRET_KEY', ''), 'Hyper.sh API secret key.'),
+}

@@ -10,6 +10,7 @@ django-jet
 django-countries
 django-jsonfield
 django-import-export
+django-constance[database]
 
 pyyaml
 typing
