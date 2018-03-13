@@ -46,16 +46,15 @@ class Command(DumpDataCommand):
         """
         Ook de dorpen Welsrijp, Winsum, Baijum en Spannum van gemeente Littenseradiel,
         sluiten zich bij deze nieuwe gemeente aan.
-        
+
         Littenseradiel verdwijnt dus. (en waar moeten die heen dan?) De nieuwe gemeenten mogen de erfenis opruimen.
         """
         dissolve(dissolved_organization_name="Littenseradiel",
-              target_organization_names=["Waadhoeke", "Leeuwarden", "Súdwest-Fryslân"],
-              when=merge_date,
-              organization_type="municipality",
-              country="NL"
-              )
-
+                 target_organization_names=["Waadhoeke", "Leeuwarden", "Súdwest-Fryslân"],
+                 when=merge_date,
+                 organization_type="municipality",
+                 country="NL"
+                 )
 
         # todo: do a geographic move. This is done via "update_coordinates"
         # todo: add the geographic updates using update_coordinates on a certain date...
@@ -294,7 +293,7 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
 @transaction.atomic
 def dissolve(dissolved_organization_name: str, target_organization_names: List[str], when: datetime,
-          organization_type: str="municipality", country: str="NL"):
+             organization_type: str="municipality", country: str="NL"):
     """
     Dissolving organizations leave behind a set of urls. Those urls should be taken care off by other existing
     organizations. This is not always the case unfortunately (but who will solve these issues otherwise?)

@@ -1,14 +1,14 @@
 import logging
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url, Promise
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
                                      Screenshot, State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
 logger = logging.getLogger(__package__)
-from django.conf import settings
 
 
 class Command(BaseCommand):
