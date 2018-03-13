@@ -410,6 +410,7 @@ def stats(request, weeks_back=0):
                        'included_organizations': 0, 'endpoints': 0,
                        "endpoint": collections.OrderedDict(), "explained": {}}
 
+        # todo: filter out dead organizations and make sure it's the correct category.
         sql = """SELECT * FROM
                    map_organizationrating
                INNER JOIN
