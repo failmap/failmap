@@ -340,10 +340,14 @@ var failmap = {
             failmap.geojson.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     if (layer.feature.geometry.type === "MultiPolygon")
-                        layer.setStyle(failmap.searchResultStyle(layer.feature))
+                        layer.setStyle(failmap.searchResultStyle(layer.feature));
+                    if (layer.feature.geometry.type === "Polygon")
+                        layer.setStyle(failmap.searchResultStyle(layer.feature));
                 } else {
                     if (layer.feature.geometry.type === "MultiPolygon")
-                        layer.setStyle(failmap.style(layer.feature))
+                        layer.setStyle(failmap.style(layer.feature));
+                    if (layer.feature.geometry.type === "Polygon")
+                        layer.setStyle(failmap.style(layer.feature));
                 }
             });
         }
