@@ -312,7 +312,9 @@ var failmap = {
         // todo: make this type of thing cleaner.
         if (failmap.isSearchedFor(e.target.feature)) {
             if (e.target.feature.geometry.type === "MultiPolygon")
-                e.target.setStyle(failmap.searchResultStyle(e.target.feature))
+                e.target.setStyle(failmap.searchResultStyle(e.target.feature));
+            if (e.target.feature.geometry.type === "Polygon")
+                e.target.setStyle(failmap.searchResultStyle(e.target.feature));
         } else {
             failmap.geojson.resetStyle(e.target);
         }
