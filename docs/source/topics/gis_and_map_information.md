@@ -121,8 +121,6 @@ failmap rebuild_ratings
 
 
 
-
-
 ### Other things
 Additionally there is an awesome world map in GeoJSON, available here:
 https://github.com/datasets/geo-countries/blob/master/data/countries.geojson

@@ -695,36 +695,30 @@ def map_data(request, weeks_back=0):
             medium,
             low
         FROM map_organizationrating
-        
         INNER JOIN
           (SELECT id as stacked_organization_id
           FROM organization stacked_organization
-          WHERE (stacked_organization.created_on <= '%s' AND stacked_organization.is_dead == 0) 
+          WHERE (stacked_organization.created_on <= '%s' AND stacked_organization.is_dead == 0)
           OR (
           '%s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
           AND stacked_organization.is_dead == 1)) as organization_stack
           ON organization_stack.stacked_organization_id = map_organizationrating.organization_id
-          
         INNER JOIN
           organization on organization.id = stacked_organization_id
-          
         INNER JOIN
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
-          
         INNER JOIN
           (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
           FROM coordinate stacked_coordinate
-          WHERE (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 0) 
+          WHERE (stacked_coordinate.created_on <= '%s' AND stacked_coordinate.is_dead == 0)
           OR
           ('%s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
           AND stacked_coordinate.is_dead == 1) GROUP BY area, organization_id) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
-        
         INNER JOIN
-          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating 
+          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
           WHERE `when` <= '%s' GROUP BY organization_id) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
-          
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
         ''' % (when, when, when, when, when, )

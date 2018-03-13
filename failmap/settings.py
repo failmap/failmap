@@ -380,7 +380,8 @@ TOOLS = {
         'wordlist_dir': OUTPUT_DIR + os.environ.get('DNSRECON_WORDLIST_DIR', "scanners/resources/wordlists/"),
     },
     'openstreetmap': {
-        'output_dir': OUTPUT_DIR + os.environ.get('OPENSTREETMAP_OUTPUT_DIR', "scanners/resources/output/openstreetmap/"),
+        'output_dir': OUTPUT_DIR + os.environ.get('OPENSTREETMAP_OUTPUT_DIR',
+                                                  "scanners/resources/output/openstreetmap/"),
     },
     'sslscan': {
         # this is beta functionality and not supported in production

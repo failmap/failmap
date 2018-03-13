@@ -1,9 +1,8 @@
 import logging
+from argparse import ArgumentTypeError
+from datetime import datetime
 
 from django.core.management.base import BaseCommand
-
-from datetime import datetime
-from argparse import ArgumentTypeError
 
 from ...geojson import update_coordinates
 

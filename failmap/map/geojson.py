@@ -6,14 +6,13 @@ from typing import Dict
 
 import pytz
 import requests
+from django.conf import settings
 from django.db import transaction
 from rdp import rdp
 
 from failmap.organizations.models import Coordinate, Organization
 
 from ..celery import app
-
-from django.conf import settings
 
 log = logging.getLogger(__package__)
 
@@ -23,6 +22,7 @@ log = logging.getLogger(__package__)
 resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
+
 
 @transaction.atomic
 def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
@@ -45,8 +45,6 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
         if "name" not in feature["properties"]:
             log.debug("This feature does not contain a name: it might be metadata or something else.")
             continue
-
-
 
         resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
         task = (resample.s(feature, resolution) | store_updates.s(country, organization_type, when))

@@ -7,7 +7,7 @@ import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.db import transaction
 
-from failmap.organizations.models import Coordinate, Organization, Promise, Url, OrganizationType
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 
 log = logging.getLogger(__package__)
 
@@ -33,8 +33,9 @@ class Command(DumpDataCommand):
         De gemeenten Menaldumadeel, Franekeradeel en Het Bildt zullen opgaan in een nieuwe gemeente Waadhoeke.
         """
 
-        #We use the frysian name: Menameradiel instead of Menaldumadeel
-        # we should probably change that here, so the update_coordinates also works.
+        # We use the frysian name: Menameradiel instead of Menaldumadeel
+        # we should probably change that here, so the update_coordinates also works. (no, it disappears, so who cares)
+        # there is no data of this in OSM etc (afaik).
         merge(source_organizations_names=["Menameradiel", "Franekeradeel", "Het Bildt"],
               target_organization_name="Waadhoeke",
               when=merge_date,
@@ -45,7 +46,17 @@ class Command(DumpDataCommand):
         """
         Ook de dorpen Welsrijp, Winsum, Baijum en Spannum van gemeente Littenseradiel,
         sluiten zich bij deze nieuwe gemeente aan.
+        
+        Littenseradiel verdwijnt dus. (en waar moeten die heen dan?) De nieuwe gemeenten mogen de erfenis opruimen.
         """
+        dissolve(dissolved_organization_name="Littenseradiel",
+              target_organization_names=["Waadhoeke", "Leeuwarden", "Súdwest-Fryslân"],
+              when=merge_date,
+              organization_type="municipality",
+              country="NL"
+              )
+
+
         # todo: do a geographic move. This is done via "update_coordinates"
         # todo: add the geographic updates using update_coordinates on a certain date...
 
@@ -191,8 +202,18 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
         log.info("Creating a new %s, with information from the merged organization." % target_organization_name)
         original_target.is_dead = True
         original_target.is_dead_since = when
-        original_target.is_dead_reason = "Merged with other organizations, reusing the same name but different data."
+        original_target.is_dead_reason = "Merged with other organizations, reusing the same name but different data" \
+                                         "+ the old data."
         original_target.save()
+
+        # copy all urls of the old organization to the new one.
+        urls = Url.objects.all().filter(organization=original_target)
+        for url in urls:
+            url.organization.add(new_organization)
+            url.save()
+
+        # don't take the promises, they are from another organization and management
+
     except Organization.DoesNotExist:
         # well, it's not problem the old organization didnt exist.
         pass
@@ -205,10 +226,10 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
         try:
             source_organization = Organization.objects.get(
-                    name=source_organizations_name,
-                    country=country,
-                    type=type,
-                    is_dead=False)
+                name=source_organizations_name,
+                country=country,
+                type=type,
+                is_dead=False)
         except Organization.DoesNotExist:
             # New organizations don't exist... so nothing to migrate.
             log.exception("Organization %s does not exist. Tried to merge it with %s. Are you using a different "
@@ -227,7 +248,6 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
             coordinate.is_dead = True
             coordinate.is_dead_since = when
             coordinate.is_dead_reason = "Merged with %s" % new_organization
-
 
         # still active promises
         for promise in Promise.objects.all().filter(
@@ -270,4 +290,78 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
     # raise NotImplemented
     # todo:
     # Update the map viewers, to only show the existing organizations at that time.
-    # Change the default rating algorithm to match the date in the organization and have a fallback. - todo: check
+
+
+@transaction.atomic
+def dissolve(dissolved_organization_name: str, target_organization_names: List[str], when: datetime,
+          organization_type: str="municipality", country: str="NL"):
+    """
+    Dissolving organizations leave behind a set of urls. Those urls should be taken care off by other existing
+    organizations. This is not always the case unfortunately (but who will solve these issues otherwise?)
+
+    :param source_organization_name:
+    :param target_organization_names:
+    :param when:
+    :param organization_type:
+    :param country:
+    :return:
+    """
+
+    log.info("Dissolving %s into %s.", dissolved_organization_name, target_organization_names)
+
+    type = OrganizationType.objects.get(name=organization_type)
+    dissolved_organization = Organization.objects.get(
+        name=dissolved_organization_name, country=country, type=type, is_dead=False)
+    dissolved_organization.is_dead = True
+    dissolved_organization.is_dead_since = when
+    dissolved_organization.is_dead_reason = "Disolved into other organizations (%s)" % target_organization_names
+    dissolved_organization.save()
+
+    # the urls of this organization are shared to it's targets :) ENJOY! :)
+    # but... "since when"? We don't store the date since when an url is relevant for an organization (yet) due to
+    # administrative overhead. So we have to create a new organization with the merged urls. Otherwise
+    # the history of the organization is poisoned. It seems we need this date field... :(
+
+    for target_organization_name in target_organization_names:
+        target_organization = Organization.objects.get(
+            name=target_organization_name,
+            country=country,
+            type=type,
+            is_dead=False)
+
+        clone_target = deepcopy(target_organization)
+
+        target_organization.is_dead = True
+        target_organization.is_dead_since = when
+        target_organization.is_dead_reason = "Received heritage of dissolved organization %s" % \
+                                             dissolved_organization_name
+        target_organization.save()
+
+        clone_target.id = None
+        clone_target.created_on = when
+        clone_target.save()
+
+        # copy the urls and promises to the clone.
+        for url in Url.objects.all().filter(organization=target_organization):
+            url.organization.add(clone_target)
+            url.save()
+
+        for promise in Promise.objects.all().filter(
+                organization=target_organization,
+                expires_on__gte=datetime.now(pytz.utc)):
+            cloned_promise = deepcopy(promise)
+            cloned_promise.id = None
+            cloned_promise.organization = clone_target
+            cloned_promise.save()
+
+        # enjoy solving the stuff of the other organizations...
+        # they also get the dead urls, supposed they get back to life for some weird reason...
+        # this includes cooperation urls and whatnot... good luck! This might result ins ome issues.
+        urls = Url.objects.all().filter(organization=dissolved_organization)
+        for url in urls:
+            url.organization.add(clone_target)
+            url.save()
+
+        # don't take the promises, they are from another organization and management
+
+    return

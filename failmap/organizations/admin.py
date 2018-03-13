@@ -150,7 +150,6 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     inlines = [UrlAdminInline, CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
-
     @staticmethod
     def name_details(self):
         if self.is_dead:
@@ -190,7 +189,6 @@ class MyUrlAdminForm(forms.ModelForm):
             raise ValidationError("Url is missing suffix (.com, .net, ...)")
 
         return clean_url_string
-
 
     def clean(self):
         organizations = self.cleaned_data.get("organization")
