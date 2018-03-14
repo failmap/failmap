@@ -10,17 +10,12 @@ import pytest
 def test_scan_method(method, worker, faalonië):
     """Runs the scanner using each of the three methods."""
 
-    if method == 'direct':
-        pytest.skip("direct execution method currently not supported with dramatiq")
-
     output_json = check_output(
         'failmap scan_dummy -m {method} -o faalonië'.format(method=method).split(' '), encoding='utf8')
     output = json.loads(output_json)
 
     # async required extra command to wait for and retrieve result
     if method == 'async':
-        pytest.skip("async result fetching currently not supported with dramatiq")
-
         task_id = output[0]
 
         output_json = check_output(

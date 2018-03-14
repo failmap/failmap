@@ -6,13 +6,11 @@ import time
 import warnings
 from uuid import uuid1
 
-import dramatiq
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.commands.runserver import Command as RunserverCommand
 from retry import retry
 
-import failmap.dramatiq
 from failmap.celery import app
 
 log = logging.getLogger(__name__)
@@ -51,13 +49,6 @@ def start_borker(uuid):
 
 def start_worker(broker_port, silent=True):
     worker_command = 'failmap celery worker -l info --pool eventlet -c 1 --broker redis://localhost:%d/0' % broker_port
-    worker_process = subprocess.Popen(worker_command.split(), stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
-
-    return worker_process
-
-
-def start_drama_worker(broker_port, silent=True):
-    worker_command = 'failmap worker --processes 1 --broker redis://localhost:%d/0' % broker_port
     worker_process = subprocess.Popen(worker_command.split(), stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
 
     return worker_process
@@ -130,33 +121,19 @@ class Command(RunserverCommand):
             broker_process, broker_port = start_borker(uuid)
             log.info('Starting broker')
             self.processes.append(broker_process)
-            log.info('Starting workers')
+            log.info('Starting worker')
             self.processes.append(start_worker(broker_port, options['verbosity'] < 2))
-            self.processes.append(start_drama_worker(broker_port, options['verbosity'] < 2))
 
             # set celery broker url
             settings.CELERY_BROKER_URL = 'redis://localhost:%d/0' % broker_port
             # set as environment variable for the inner_run
-            os.environ['BROKER'] = 'redis://localhost:%d/0' % broker_port
+            os.environ['BROKER'] = settings.CELERY_BROKER_URL
 
-            # wait for celery worker to be ready
+            # wait for worker to be ready
             log.info('Waiting for worker to be ready')
             for _ in range(TIMEOUT * 2):
                 if app.control.ping(timeout=0.5):
                     break
-
-            # required to make this dramatiq task pickup new broker settings in this instance
-            failmap.dramatiq.setbroker()
-            broker = dramatiq.get_broker()
-
-            # wait for dramatiq worker to be ready
-            message = dramatiq.Message(
-                queue_name='default',
-                actor_name="ping",
-                args=(), kwargs={}, options={})
-            broker.enqueue(message)
-            message.get_result(block=True, timeout=TIMEOUT * 1000)
-
             log.info('Worker ready')
 
         if not options['no_data']:

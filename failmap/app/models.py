@@ -3,10 +3,8 @@
 
 import datetime
 import importlib
-from typing import Union
 
 import celery
-import dramatiq
 from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
@@ -33,8 +31,7 @@ class Job(models.Model):
     created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,)
 
     @classmethod
-    def create(cls, task: Union[celery.Task, celery.canvas.Signature, dramatiq.group],
-               name: str, request, *args, **kwargs) -> 'Job':
+    def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':
         """Create job object and publish task on celery queue."""
         # create database object
         job = cls(task=str(task))
@@ -44,15 +41,12 @@ class Job(models.Model):
         job.status = 'created'
         job.save()
 
-        if isinstance(task, celery.Task) or isinstance(task, celery.canvas.Signature):
-            # publish original task which stores the result in this Job object
-            result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
+        # publish original task which stores the result in this Job object
+        result_id = (task | cls.store_result.s(job_id=job.id)).apply_async(*args, **kwargs)
 
-            # store the task async result ID for reference
-            job.result_id = result_id.id
-            job.save(update_fields=['result_id'])
-        else:
-            task.run()
+        # store the task async result ID for reference
+        job.result_id = result_id.id
+        job.save(update_fields=['result_id'])
 
         return job
 

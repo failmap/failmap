@@ -24,10 +24,6 @@ celery[redis,eventlet]
 django-celery-beat
 flower  # used for queue statistics
 
-# dramatiq task handling
-dramatiq[redis,watch]
-django_dramatiq
-
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla
 django_uwsgi

@@ -83,10 +83,7 @@ class TaskCommand(BaseCommand):
         else:
             result = self.run_task(*args, **options)
 
-        if result:
-            return json.dumps(result, cls=ResultEncoder)
-        else:
-            return
+        return json.dumps(result, cls=ResultEncoder)
 
     def run_task(self, *args, **options):
         # try to compose task if not specified
@@ -159,33 +156,3 @@ class ScannerTaskCommand(TaskCommand):
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_task(organization_filter)
-
-
-class DramaScannerTaskCommand(ScannerTaskCommand):
-    def run_task(self, *args, **options):
-        # try to compose task if not specified
-        if not self.task:
-            self.task = self.compose(*args, **options)
-
-        # execute task based on selected method
-        if options['method'] in ['sync', 'async']:
-            self.task.run()
-
-            if options['method'] == 'sync':
-                log.info('Task scheduled for execution, waiting for it to complete.')
-
-                while not self.task.completed:
-                    # show intermediate status
-                    log.info('Task execution status: %s/%s completed',
-                             self.task.completed_count, len(self.task.children))
-                    time.sleep(self.interval)
-
-                return [r for r in self.task.get_results(block=True, timeout=60 * 60 * 1000)]
-            else:
-                log.info('Task scheduled for execution.')
-                return str(self.task)
-        else:
-            raise NotImplementedError("Dramatiq task backend does not support direct execution.")
-
-    def wait_for_result(self, task_id):
-        raise NotImplementedError()

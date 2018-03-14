@@ -2,14 +2,12 @@
 
 import json
 
-import pytest
 from django.core.management import call_command
 
 TEST_ORGANIZATION = 'faalonië'
 NON_EXISTING_ORGANIZATION = 'faaloniet'
 
 
-@pytest.mark.skip("Dramatiq currently doesn't support direct execution.")
 def test_dummy(responses, db, faalonië):
     """Test running dummy scan."""
 
