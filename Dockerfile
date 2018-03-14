@@ -14,7 +14,10 @@ RUN apk --no-cache add \
   perl \
   perl-utils \
   perl-file-sharedir-install \
-  make
+  make \
+  # required to install osmtogeojson module
+  nodejs \
+  nodejs-npm
 
 # install app and dependencies in a artifact-able directory
 RUN pip install virtualenv
@@ -26,10 +29,13 @@ RUN /pyenv/bin/pip install -r /source/requirements.txt
 COPY requirements.deploy.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
 
+# install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
 COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
 
+# install osmtogeojson
+RUN npm install osmtogeojson
 
 # restart with a clean image
 FROM python:3.6-alpine3.7
@@ -64,7 +70,10 @@ RUN apk --no-cache add \
   perl-net-dns \
   perl-net-dns-sec \
   perl-net-ip \
-  perl-yaml
+  perl-yaml \
+  # runtime dependencies for osmtogeojson
+  nodejs \
+  nodejs-npm
 
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/failmap /usr/local/bin/
@@ -80,6 +89,9 @@ COPY --from=build /source /source
 COPY --from=build /usr/local/share/perl5 /usr/local/share/perl5
 COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
 
+# copy artifacts from osmtogeojson install
+COPY --from=build /node_modules /node_modules
+RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
 
 # copy all relevant files for python installation
 COPY ./failmap/ /source/failmap/
