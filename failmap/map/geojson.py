@@ -1,8 +1,8 @@
 import json
 import logging
 import subprocess
-from subprocess import CalledProcessError
 from datetime import datetime
+from subprocess import CalledProcessError
 from typing import Dict
 
 import pytz
@@ -28,6 +28,7 @@ log = logging.getLogger(__package__)
 resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
+
 
 def osmtogeojson_available():
     try:
