@@ -62,24 +62,31 @@ if settings.DEBUG:
 
 # set a different page for 500 errors to include sentry event ID.
 # https://docs.sentry.io/clients/python/integrations/django/#message-references
-if settings.SENTRY_DSN:
-    def handler500(request):
-        """500 error handler which includes ``request`` in the context.
 
-        Templates: `500.html`
-        Context: None
-        """
 
-        context = {
-            'request': request,
-            'admin_instance': settings.ADMIN,
-            'sentry_project_url': settings.SENTRY_PROJECT_URL,
-        }
+def handler500(request):
+    """500 error handler which includes ``request`` in the context.
 
-        # on privileged instance show the actual error message to hopefully be useful for the user
-        if settings.ADMIN:
-            _, value, _ = sys.exc_info()
-            context['exception_message'] = value
+    Templates: `500.html`
+    Context: None
+    """
 
-        template_name = '500.html'  # You need to create a 500.html template.
-        return TemplateResponse(request, template_name, context, status=500)
+    context = {
+        'request': request,
+        'admin_instance': settings.ADMIN,
+    }
+
+    # on privileged instance show the actual error message to hopefully be useful for the user
+    if settings.ADMIN:
+        _, value, _ = sys.exc_info()
+        context['exception_message'] = value
+
+    template_name = '500.html'  # You need to create a 500.html template.
+    return TemplateResponse(request, template_name, context, status=500)
+
+
+if settings.DEBUG:
+    urlpatterns = [
+        # test urls for error pages (cause normally we don't have them, ahum)
+        url(r'^500/$', handler500),
+    ] + urlpatterns

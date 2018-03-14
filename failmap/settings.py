@@ -129,6 +129,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'constance.context_processors.config',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -532,9 +533,6 @@ if DEBUG:
 # is administrative backend enabled on this instance
 ADMIN = bool(APPNAME == 'failmap-admin')
 
-# general email address
-MAILTO = 'info@faalkaart.nl'
-
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
 if SENTRY_DSN:
@@ -564,13 +562,18 @@ NETWORK_SUPPORTS_IPV6 = os.environ.get('NETWORK_SUPPORTS_IPV6', False)
 # atomic imports: fail completely, not half
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
-# 'runtime' settings
+# runtime configuration from database
 # https://django-constance.readthedocs.io/en/latest/
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
-    # TODO: make this work without restart, https://django-constance.readthedocs.io/en/latest/#signals
-    'SENTRY_DSN': (os.environ.get('SENTRY_DSN', ''), 'DSN for Sentry.io error reporting (required restart).'),
+    'MAILTO': ('info@faalkaart.nl', 'General email address.'),
     'HYPER_ACCESS_KEY': (os.environ.get('HYPER_ACCESS_KEY', ''), 'Hyper.sh API access key.'),
     'HYPER_SECRET_KEY': (os.environ.get('HYPER_SECRET_KEY', ''), 'Hyper.sh API secret key.'),
+}
+
+# required until fixed: https://github.com/jazzband/django-constance/issues/263
+CONSTANCE_CONFIG_FIELDSETS = {
+    'General': ('MAILTO', ),
+    'Remote workers': ('HYPER_SECRET_KEY', 'HYPER_ACCESS_KEY'),
 }

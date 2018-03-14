@@ -48,7 +48,6 @@ def index(request):
     return render(request, 'map/index.html', {
         'version': __version__,
         'admin': settings.ADMIN,
-        'mailto': settings.MAILTO,
         'sentry_token': settings.SENTRY_TOKEN,
     })
 
@@ -1007,14 +1006,14 @@ def latest_scans(request, scan_type):
     }
 
     if scan_type not in ["tls_qualys",
-                         "Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
+                         "Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                          "plain_https"]:
         return empty_response()
 
     if scan_type == "tls_qualys":
         scans = list(TlsQualysScan.objects.order_by('-rating_determined_on')[0:6])
 
-    if scan_type in ["Strict-Transport-Security",  "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
+    if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                      "plain_https"]:
         scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-rating_determined_on')[0:6])
 
