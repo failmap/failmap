@@ -1,6 +1,7 @@
 import json
 import logging
 import subprocess
+from subprocess import CalledProcessError
 from datetime import datetime
 from typing import Dict
 
@@ -28,16 +29,31 @@ resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
 
+def osmtogeojson_available():
+    try:
+        subprocess.check_output(["osmtogeojson", "tesfile.osm"], stderr=subprocess.STDOUT, )
+    except CalledProcessError as e:
+        if "no such file or directory, open 'tesfile.osm'" in str(e.output):
+            return True
+        else:
+            return False
+    except FileNotFoundError:
+        return False
+
 
 def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
+
+    if not osmtogeojson_available():
+        raise FileNotFoundError("osmtogeojson was not found. Please install it and make sure python can access it. "
+                                "Cannot continue.")
+
+    log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
     update_coordinates_task.s(country, organization_type, when).apply_async()
 
 
 @app.task
 @transaction.atomic
 def update_coordinates_task(country: str = "NL", organization_type: str="municipality", when=None):
-
-    log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
     # you are about to load 50 megabyte of data. Or MORE! :)
     data = get_osm_data(country, organization_type)

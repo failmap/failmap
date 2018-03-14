@@ -86,7 +86,10 @@ Would overpass be able to do this?
 
 
 ### Running Dutch municipality merge of 2018
-Get the latest dataset from the server, get it to your dev environment
+Get the latest dataset from the server, get it to your dev environment.
+
+This requires the node package [osmtogeojson](https://github.com/tyrasd/osmtogeojson) which does an awesome job at
+polygon detection and is being well maintained. There is no python alternative.
 
 ```
 # DEVELOPMENT ONLY: failmap create_dataset -o -> dataset_12mar2018.json
