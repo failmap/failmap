@@ -70,12 +70,16 @@ class CoordinateAdminInline(CompactInline):
 class OrganizationRatingAdminInline(CompactInline):
     model = OrganizationRating
     extra = 0
+    readonly_fields = ('organization', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    can_delete = False
     ordering = ["-when"]
 
 
 class UrlRatingAdminInline(CompactInline):
     model = UrlRating
     extra = 0
+    readonly_fields = ('url', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    can_delete = False
     ordering = ["-when"]
 
 

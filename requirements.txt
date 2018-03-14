@@ -70,8 +70,6 @@ retry
 sphinx_rtd_theme
 
 # docs / readthedocs.io
-sphinx
-sphinx-autobuild
 recommonmark
 
 # map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)

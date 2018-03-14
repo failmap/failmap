@@ -17,23 +17,32 @@ from ..celery import app
 log = logging.getLogger(__package__)
 
 
-# the map should look seemless when you're looking at the entire country, region etc. If it doesn't, increase
+# Updates in dataset before doing this in 2018:
+# s-Hertogenbosch -> 's-Hertogenbosch
+# Bergen (Noord-Holland) -> Bergen (NH)
+# Bergen (Limburg) -> Bergen
+
+# the map should look seamless when you're looking at the entire country, region etc. If it doesn't, increase
 # the resolution.
 resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
 
 
-@transaction.atomic
 def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
+    update_coordinates_task.s(country, organization_type, when).apply_async()
+
+
+@app.task
+@transaction.atomic
+def update_coordinates_task(country: str = "NL", organization_type: str="municipality", when=None):
 
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
     # you are about to load 50 megabyte of data. Or MORE! :)
     data = get_osm_data(country, organization_type)
 
-    import json
-    log.info("Recieved coordinate data. Starting with: %s" % json.dumps(data)[0:200])
+    log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
 
     log.info("Parsing features:")
     for feature in data["features"]:
@@ -46,14 +55,13 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
             log.debug("This feature does not contain a name: it might be metadata or something else.")
             continue
 
+        # slower, but in a task. Still atomic this way.
         resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
-        task = (resample.s(feature, resolution) | store_updates.s(country, organization_type, when))
-        task.apply_async()
+        store_updates(resample(feature, resolution), country, organization_type, when)
 
     log.info("Resampling and update tasks have been created.")
 
 
-@app.task
 def resample(feature: Dict, resampling_resolution: float=0.001):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
@@ -75,14 +83,12 @@ def resample(feature: Dict, resampling_resolution: float=0.001):
                 feature["geometry"]["coordinates"][i][j] = rdp(nested_coordinate, epsilon=resampling_resolution)
                 j += 1
 
-            # feature["geometry"]["coordinates"][i] = rdp(coordinate, epsilon=resampling_resolution)
             j = 0
             i += 1
 
     return feature
 
 
-@app.task
 def store_updates(feature: Dict, country: str="NL", organization_type: str="municipality", when=None):
     properties = feature["properties"]
     coordinates = feature["geometry"]
@@ -106,17 +112,44 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
     Coordinates: [[[x,y], [a,b]]]
     """
     # check if organization is part of the database
+    # first try using it's OSM name
+    matching_organization = None
     try:
         matching_organization = Organization.objects.get(name=properties["name"],
                                                          country=country,
                                                          type__name=organization_type,
                                                          is_dead=False)
     except Organization.DoesNotExist:
-        log.info("Organization from OSM does not exist in failmap, create it using the admin interface: '%s' "
-                 "This might happen with neighboring countries (and the antilles for the Netherlands) or new regions."
-                 "If you are missing regions: did you create them in the admin interface or with an organization "
-                 "merge script? Developers might experience this error using testdata etc.", properties["name"])
-        log.info(properties)
+        log.debug("Could not find organization by property 'name', trying another way.")
+
+    if not matching_organization and "official_name" in properties:
+        try:
+            matching_organization = Organization.objects.get(name=properties["official_name"],
+                                                             country=country,
+                                                             type__name=organization_type,
+                                                             is_dead=False)
+        except Organization.DoesNotExist:
+            log.debug("Could not find organization by property 'official_name', trying another way.")
+
+    if not matching_organization and "alt_name" in properties:
+        try:
+            matching_organization = Organization.objects.get(name=properties["alt_name"],
+                                                             country=country,
+                                                             type__name=organization_type,
+                                                             is_dead=False)
+        except Organization.DoesNotExist:
+            # out of options...
+            # This happens sometimes, as you might get areas that are outside the country or not on the map yet.
+            log.debug("Could not find organization by property 'alt_name', we're out of options.")
+            log.info("Organization from OSM does not exist in failmap, create it using the admin interface: '%s' "
+                     "This might happen with neighboring countries (and the antilles for the Netherlands) or new "
+                     "regions."
+                     "If you are missing regions: did you create them in the admin interface or with an organization "
+                     "merge script? Developers might experience this error using testdata etc.", properties["name"])
+            log.info(properties)
+
+    if not matching_organization:
+        log.info("No matching organization found, no name, official_name or alt_name matches.")
         return
 
     # check if we're dealing with the right Feature:
@@ -155,18 +188,17 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
         old_coord.is_dead_reason = message
         old_coord.save()
 
-    new_coordinate = Coordinate()
-    new_coordinate.created_on = when if when else datetime.now(pytz.utc)
-    new_coordinate.organization = matching_organization
-    new_coordinate.creation_metadata = "Automated import via OSM."
-    new_coordinate.geojsontype = coordinates["type"]  # polygon or multipolygon
-    new_coordinate.area = coordinates["coordinates"]
-    new_coordinate.save()
+    Coordinate(
+        created_on=when if when else datetime.now(pytz.utc),
+        organization=matching_organization,
+        creation_metadata="Automated import via OSM.",
+        geojsontype=coordinates["type"],  # polygon or multipolygon
+        area=coordinates["coordinates"],
+    ).save()
 
     log.info("Stored new coordinates!")
 
 
-# todo: storage dir for downloaded file (can be temp)
 def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     """
     Runs an overpass query that results in a set with administrative borders and points with metadata.
@@ -176,6 +208,8 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     :return: dictionary
     """
 
+    # could be tempfile.mkdtemp() -> no, that makes debugging harder.
+    # currently saving the download files for debugging and inspection.
     filename = "%s_%s_%s.osm" % (country, organization_type, datetime.now(pytz.utc).date())
     filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
 
@@ -196,7 +230,9 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
                                        'out geom;',
                                        "submit": "Query"}, stream=True)
 
-        log.info("Writing recieved data to file.")
+        response.raise_for_status()
+
+        log.info("Writing received data to file.")
         with open(filename, 'wb') as handle:
             for block in response.iter_content(1024):
                 handle.write(block)
@@ -207,11 +243,15 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         try:
             # shell is True can only be somewhat safe if all input is not susceptible to manipulation
             # in this case the filename and all related info is verified.
+            # todo: where are the requirements this command is available?
+            # todo: why write to an intermediate file using shell redirects when you can just take
+            # the output from the command directly?
+            # this can lead to double memory usage, so therefore it might not be really helpful.
             subprocess.check_call("osmtogeojson %s > %s" % (filename, filename + ".geojson"), shell=True)
         except subprocess.CalledProcessError:
-            log.info("Error while converting to geojson.")
+            log.exception("Error while converting to geojson.")
         except OSError:
-            log.info("osmtogeojson not found.")
+            log.exception("osmtogeojson tool not found.")
 
         return json.load(open(filename + ".geojson"))
 

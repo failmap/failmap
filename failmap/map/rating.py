@@ -17,6 +17,9 @@ from .models import OrganizationRating, UrlRating
 
 log = logging.getLogger(__package__)
 
+
+FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
+
 """
 Warning: Make sure the output of a rebuild has ID's in chronological order.
 """
@@ -1052,8 +1055,7 @@ def default_ratings(organizations: List[Organization]):
     for organization in organizations:
         log.info("Giving organization a default rating: %s" % organization)
 
-        when = organization.created_on if organization.created_on else datetime(
-            year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
+        when = organization.created_on if organization.created_on else FAILMAP_STARTED
 
         r = OrganizationRating()
         r.when = when

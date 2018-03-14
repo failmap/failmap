@@ -582,7 +582,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'Remote workers': ('HYPER_SECRET_KEY', 'HYPER_ACCESS_KEY'),
 }
 
-# https://docs.djangoproject.com/en/1.11/ref/settings/
+# https://docs.djangoproject.com/en/1.11/ref/settings/#data-upload-max-number-fields
 # The default is far too low with various inlines (even on the test dataset).
 # Yes, we happily exceed 1000 fields anyday. No problem :)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4242

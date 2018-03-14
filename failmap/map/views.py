@@ -723,7 +723,7 @@ def map_data(request, weeks_back=0):
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
         ''' % (when, when, when, when, when, )
-    print(sql)
+    # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
     cursor.execute(sql)

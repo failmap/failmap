@@ -52,7 +52,7 @@ class OrganizationRating(models.Model):
         ]
 
     def __str__(self):
-        return '%s  - %s' % (self.rating, self.when,)
+        return '🔴%s 🔶%s 🍋%s | %s' % (self.high, self.medium, self.low, self.when.date(),)
 
 
 class UrlRating(models.Model):
@@ -83,4 +83,4 @@ class UrlRating(models.Model):
         managed = True
 
     def __str__(self):
-        return '%s  - %s' % (self.rating, self.when,)
+        return '%s,%s,%s  - %s' % (self.high, self.medium, self.low, self.when.date(),)
