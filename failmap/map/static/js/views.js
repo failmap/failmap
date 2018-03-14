@@ -106,21 +106,25 @@ function views() {
                 if (e)
                     this.week = parseInt(e.target.value);
 
-                // doesn't really work, as everything async.
                 vueMap.load(this.week);
-                vueTopfail.load(this.week);
-                vueTopwin.load(this.week);
-                vueTerribleurls.load(this.week);
+
+                // nobody understands that when you drag the map slider, the rest
+                // of the site and all reports are also old.
+                // so don't.
+                // vueTopfail.load(this.week);
+                // vueTopwin.load(this.week);
+                // vueTerribleurls.load(this.week);
+
 
                 if (vueMap.selected_organization > -1) {
                     // todo: requests the "report" page 3x.
                     // due to asyncronous it's hard to just "copy" results.
-                    vueReport.load(vueMap.selected_organization, this.week);
-                    vueFullScreenReport.load(vueMap.selected_organization, this.week);
+                    // vueReport.load(vueMap.selected_organization, this.week);
+                    // vueFullScreenReport.load(vueMap.selected_organization, this.week);
                     vueDomainlist.load(vueMap.selected_organization, this.week);
                 }
 
-                vueStatistics.load(this.week);
+                // vueStatistics.load(this.week);
                 vueMap.weeksback = this.week;
             }, 100)
         }
