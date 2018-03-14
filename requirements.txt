@@ -67,7 +67,7 @@ django_compressor  # bundle javascript and css
 csscompressor  # css compression
 
 retry
-sphinx_rtd_theme
+sphinx_rtd_theme  # readthedocs.io only looks at requirements.txt (default) and thus it's better to have it here.
 
 # docs / readthedocs.io
 recommonmark
