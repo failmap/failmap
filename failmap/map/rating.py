@@ -333,6 +333,9 @@ def rate_timeline(timeline, url: Url):
             default_calculation = {
                 "url": {
                     "url": url.url,
+                    "high": 0,
+                    "medium": 0,
+                    "low": 0,
                     "endpoints": []
                 }
             }
@@ -1065,6 +1068,9 @@ def default_organization_rating(organizations: List[Organization]):
             "organization": {
                 "name": organization.name,
                 "rating": "-1",
+                "high": "0",
+                "medium": "0",
+                "low": "0",
                 "urls": []
             }
         }

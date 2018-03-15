@@ -49,12 +49,11 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__package__)
 
-STANDARD_HTTP_PORTS = [80, 443, 8008, 8080, 8443]
-STANDARD_HTTP_PROTOCOLS = ['http', 'https']
+# don't contact http/443 and https/80. You can, but that is 99.99 waste data.
+STANDARD_HTTP_PORTS = [80, 8008, 8080]
+STANDARD_HTTPS_PORTS = [443, 8443]
 
 # Discover Endpoints generic task
-
-
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -87,16 +86,17 @@ def compose_task(
 
     # even with a randomized url order, still try to add as much time as possible between contacting
     # the same url, to not disrupt running services.
-    for port in STANDARD_HTTP_PORTS:
-        for protocol in STANDARD_HTTP_PROTOCOLS:
-            for url in urls:
-                tasks.append(resolve_and_scan.s(protocol=protocol, url=url, port=port))
-    task = group(tasks)
 
-    amount_of_scans = len(STANDARD_HTTP_PORTS) * len(STANDARD_HTTP_PROTOCOLS) * len(urls) * 2
-    logger.info('Ports: %s * Protocols: %s * (IPv4, IPv6) * Urls: %s = %s scans, With 6/sec this takes %s hours.',
-                len(STANDARD_HTTP_PORTS), len(STANDARD_HTTP_PROTOCOLS), len(urls),
-                amount_of_scans, amount_of_scans / (6 * 60 * 60))
+    # We found we're getting useless endpoints that contain little to no data when
+    # opening non-tls port 443 and tls port 80. We're not doing that anymore.
+    for port in STANDARD_HTTP_PORTS:
+        for url in urls:
+            tasks.append(resolve_and_scan.s(protocol="http", url=url, port=port))
+
+    for port in STANDARD_HTTPS_PORTS:
+        for url in urls:
+            tasks.append(resolve_and_scan.s(protocol="https", url=url, port=port))
+    task = group(tasks)
 
     return task
 
@@ -142,7 +142,7 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
     if protocol:
         endpoints = endpoints.filter(protocol=protocol)
     else:
-        endpoints = endpoints.filter(protocol__in=STANDARD_HTTP_PROTOCOLS)
+        endpoints = endpoints.filter(protocol__in=["http", "https"])
 
     if organizations:
         endpoints = endpoints.filter(url__organization__in=organizations)
@@ -188,14 +188,14 @@ def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
     if protocol:
         protocols = [protocol]
     else:
-        protocols = STANDARD_HTTP_PROTOCOLS
+        protocols = ["https"]
 
     if port:
         ports = [port]
     else:
         # Yes, HTTP sites on port 443 exist, we've seen many of them. Not just warnings(!).
         # Don't underestimate the flexibility of the internet.
-        ports = STANDARD_HTTP_PORTS
+        ports = STANDARD_HTTPS_PORTS
 
     # make sure we're dealing with a list for the coming random function
     urls = list(urls)
@@ -206,7 +206,8 @@ def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
 
 
 def scan_urls_on_standard_ports(urls: List[Url]):
-    scan_urls(STANDARD_HTTP_PROTOCOLS, urls, STANDARD_HTTP_PORTS)
+    scan_urls(["http"], urls, STANDARD_HTTP_PORTS)
+    scan_urls(["https"], urls, STANDARD_HTTPS_PORTS)
 
 
 def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):

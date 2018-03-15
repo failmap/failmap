@@ -458,6 +458,12 @@ def stats(request, weeks_back=0):
 
         noduplicates = []
         for rating in ratings:
+
+            # do not create stats over empty organizations. That would count empty organizations.
+            # you can't really filter them out above? todo: Figure that out at a next release.
+            if rating.rating == -1:
+                continue
+
             measurement["total_organizations"] += 1
 
             if rating.high:
