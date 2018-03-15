@@ -316,7 +316,7 @@ var failmap = {
             if (e.target.feature.geometry.type === "Polygon")
                 e.target.setStyle(failmap.searchResultStyle(e.target.feature));
         } else {
-            failmap.geojson.resetresetStyleStyle(e.target);
+            failmap.geojson.resetStyle(e.target);
         }
         failmap.info.update();
     },
