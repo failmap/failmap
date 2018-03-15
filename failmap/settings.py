@@ -571,14 +571,11 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 CONSTANCE_CONFIG = {
     'MAILTO': ('info@faalkaart.nl', 'General email address.'),
-    'HYPER_ACCESS_KEY': (os.environ.get('HYPER_ACCESS_KEY', ''), 'Hyper.sh API access key.'),
-    'HYPER_SECRET_KEY': (os.environ.get('HYPER_SECRET_KEY', ''), 'Hyper.sh API secret key.'),
 }
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
-    'Remote workers': ('HYPER_SECRET_KEY', 'HYPER_ACCESS_KEY'),
 }
 
 # https://docs.djangoproject.com/en/1.11/ref/settings/#data-upload-max-number-fields
