@@ -239,6 +239,9 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         if not download_and_convert:
             return json.load(open(filename + ".geojson"))
 
+        # next iteration, add progress bar. Make sure it is only viisble when there is a terminal, otherwise logs are
+        # polluted.
+        # https://stackoverflow.com/questions/15644964/python-progress-bar-and-downloads
         # returns an OSM file, you need to convert this
         # while JSON is nearly instant, a large text file with even less data takes way more time.
         # https handshake error at time of release, downgrading to http... :')

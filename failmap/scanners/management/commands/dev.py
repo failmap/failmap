@@ -113,7 +113,7 @@ def develop_celery_advanced():
 
 
 def develop_determineratings():
-    # DetermineRatings.default_ratings()
+    # DetermineRatings.default_organization_rating()
     # return
     from datetime import datetime
     import pytz

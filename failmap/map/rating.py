@@ -57,8 +57,7 @@ def compose_task(
             continue
 
         # make sure default organization rating is in place
-        tasks.append(default_ratings.s([organization])
-                     | rerate_urls.si(urls)
+        tasks.append(rerate_urls.si(urls)
                      | rerate_organizations.si([organization]))
 
     if not tasks:
@@ -74,7 +73,7 @@ def rerate_urls(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
     for url in urls:
-        delete_url_rating(url)
+        delete_url_ratings(url)
         rate_timeline(create_timeline(url), url)
 
 
@@ -83,8 +82,8 @@ def rerate_organizations(organizations: List):
     """Remove organization rating and rebuild anew."""
 
     for organization in organizations:
-        delete_organization_rating(organization)
-    add_organization_rating(organizations=organizations, build_history=True)
+        delete_organization_ratings(organization)
+        add_organization_rating(organizations=[organization], build_history=True)
 
 
 @app.task(queue='storage')
@@ -102,6 +101,7 @@ def add_organization_rating(organizations: List[Organization], build_history: bo
     for organization in organizations:
         log.info('Adding rating for organization %s', organization)
         if build_history:
+            default_organization_rating(organizations=[organization])
             moments, happenings = significant_moments(organizations=[organization])
             for moment in moments:
                 rate_organization_on_moment(organization, moment)
@@ -121,11 +121,11 @@ def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=No
             rate_url(url, when)
 
 
-def delete_url_rating(url: Url):
+def delete_url_ratings(url: Url):
     UrlRating.objects.all().filter(url=url).delete()
 
 
-def delete_organization_rating(organization: Organization):
+def delete_organization_ratings(organization: Organization):
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
 
@@ -1042,7 +1042,7 @@ def relevant_endpoints_at_timepoint(url: Url, when: datetime):
 
 
 @app.task(queue='storage')
-def default_ratings(organizations: List[Organization]):
+def default_organization_rating(organizations: List[Organization]):
     """
     Generate default ratings so all organizations are on the map (as being grey). This prevents
     empty spots / holes.
