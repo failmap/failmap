@@ -54,6 +54,8 @@ STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
 
 # Discover Endpoints generic task
+
+
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
