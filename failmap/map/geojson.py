@@ -49,7 +49,7 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
                                 "Cannot continue.")
 
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
-    update_coordinates_task.s(country, organization_type, when).apply_async()
+    update_coordinates_task(country, organization_type, when)
 
 
 @app.task
@@ -241,11 +241,16 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
 
         # returns an OSM file, you need to convert this
         # while JSON is nearly instant, a large text file with even less data takes way more time.
-        response = requests.post("https://www.overpass-api.de/api/interpreter",
+        # https handshake error at time of release, downgrading to http... :')
+        log.info("Connecting to overpass to download data. Downloading can take a while!")
+        response = requests.post("http://www.overpass-api.de/api/interpreter",
                                  data={"data": 'area[name="Nederland"]->.gem; '
                                        'relation(area.gem)["type"="boundary"][admin_level=8]; '
                                        'out geom;',
-                                       "submit": "Query"}, stream=True)
+                                       "submit": "Query"},
+                                 stream=True,
+                                 timeout=(600, 600))
+        # 30 seconds to connect? nope, is somethign else, 10 minutes to retrieve the data.)
 
         response.raise_for_status()
 
