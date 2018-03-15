@@ -325,7 +325,7 @@ def rate_timeline(timeline, url: Url):
         total_high, total_medium, total_low = 0, 0, 0
         given_ratings = {}
 
-        if ('url_not_resolvable' in timeline[moment].keys() or 'url_is_dead' in timeline[moment].keys()) \
+        if ('url_not_resolvable' in timeline[moment] or 'url_is_dead' in timeline[moment]) \
                 and url_was_once_rated:
             log.debug('Url became non-resolvable or dead. Adding an empty rating to lower the score of'
                       'this domain if it had a score. It has been cleaned up. (hooray)')
@@ -357,7 +357,7 @@ def rate_timeline(timeline, url: Url):
 
         # remove dead endpoints
         # we don't need to remove the previous ratings, unless we want to save memory (Nah :))
-        if "dead_endpoints" in timeline[moment].keys():
+        if "dead_endpoints" in timeline[moment]:
             for dead_endpoint in timeline[moment]["dead_endpoints"]:
                 # endpoints can die this moment
                 if dead_endpoint in relevant_endpoints:
@@ -374,7 +374,7 @@ def rate_timeline(timeline, url: Url):
 
             calculations = []
             these_scans = {}
-            if endpoint.id in endpoint_scans.keys():
+            if endpoint.id in endpoint_scans:
                 for scan in endpoint_scans[endpoint.id]:
                     if isinstance(scan, TlsQualysScan):
                         these_scans['tls_qualys'] = scan
@@ -385,9 +385,9 @@ def rate_timeline(timeline, url: Url):
 
             # enrich the ratings with previous ratings, without overwriting them.
             for scan_type in scan_types:
-                if scan_type not in these_scans.keys():
-                    if endpoint.id in previous_ratings.keys():
-                        if scan_type in previous_ratings[endpoint.id].keys():
+                if scan_type not in these_scans:
+                    if endpoint.id in previous_ratings:
+                        if scan_type in previous_ratings[endpoint.id]:
                             these_scans[scan_type] = previous_ratings[endpoint.id][scan_type]
 
             # propagate the ratings to the next iteration.
@@ -415,7 +415,7 @@ def rate_timeline(timeline, url: Url):
             endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
 
             for scan_type in scan_types:
-                if scan_type in these_scans.keys():
+                if scan_type in these_scans:
                     if scan_type not in given_ratings[label]:
                         calculation = get_calculation(these_scans[scan_type])
                         if calculation:
@@ -507,9 +507,9 @@ def show_timeline_console(timeline, url: Url):
     for moment in timeline:
 
         message += "|" + newline
-        message += "|- %s: %s" % (moment, timeline[moment].keys()) + newline
+        message += "|- %s: %s" % (moment, timeline[moment]) + newline
 
-        if 'tls_qualys' in timeline[moment].keys():
+        if 'tls_qualys' in timeline[moment]:
             message += "|  |- tls_qualys" + newline
             for item in timeline[moment]['tls_qualys']['endpoints']:
                 message += "|  |  |- Endpoint %s" % item + newline
@@ -517,7 +517,7 @@ def show_timeline_console(timeline, url: Url):
                 calculation = get_calculation(item)
                 message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
 
-        if 'generic_scan' in timeline[moment].keys():
+        if 'generic_scan' in timeline[moment]:
             message += "|  |- generic_scan" + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "plain_https":
@@ -540,15 +540,15 @@ def show_timeline_console(timeline, url: Url):
                     calculation = get_calculation(item)
                     message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
 
-        if 'dead' in timeline[moment].keys():
+        if 'dead' in timeline[moment]:
             message += "|  |- dead endpoints" + newline
             for endpoint in timeline[moment]['dead_endpoints']:
                 message += "|  |  |- %s" % endpoint + newline
 
-        if 'url_not_resolvable' in timeline[moment].keys():
+        if 'url_not_resolvable' in timeline[moment]:
             message += "|  |- url became not resolvable" + newline
 
-        if 'url_is_dead' in timeline[moment].keys():
+        if 'url_is_dead' in timeline[moment]:
             message += "|  |- url died" + newline
 
     message += "" + newline
