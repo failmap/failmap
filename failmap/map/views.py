@@ -11,13 +11,13 @@ from django.contrib.syndication.views import Feed
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Count
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import Organization, Promise, Url
+from failmap.organizations.models import Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
@@ -58,12 +58,13 @@ def d3(request):
 
 @cache_page(one_day)
 def robots_txt(request):
-    return render(request, 'map/robots.txt', content_type="text/plain")
+    return HttpResponse("User-Agent: *\nDisallow:", content_type="text/plain")
 
 
 @cache_page(one_day)
 def security_txt(request):
-    return render(request, 'map/security.txt', content_type="text/plain")
+    return HttpResponse("Contact: info@internetcleanup.foundation\nEncryption: none\nAcknowledgements:",
+                        content_type="text/plain")
 
 
 @cache_page(one_day)
@@ -121,6 +122,23 @@ def manifest_json(request):
         ],
     }
     return JsonResponse(manifest, encoder=JSEncoder)
+
+
+def set_category(request, category_name):
+
+    category_name = category_name.lower()
+
+    if OrganizationType.objects.all().filter(name=category_name).exists():
+        request.session['OrganizationTypeId'] = OrganizationType.objects.all().filter(name=category_name).get().id
+        return JsonResponse({"set": True}, encoder=JSEncoder)
+
+    return JsonResponse({"set": False}, encoder=JSEncoder)
+
+
+def get_catgory(request):
+    # this is not translated(!)
+    ot = OrganizationType.objects.all().filter(pk=request.session.get('OrganizationTypeId', 1)).get()
+    return JsonResponse({"name": ot.name}, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -230,13 +248,14 @@ def terrible_urls(request, weeks_back=0):
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               (SELECT MAX(id) as id2 FROM map_urlrating or2
-              WHERE `when` <= '%s' GROUP BY url_id) as x
+              WHERE `when` <= '%(when)s' GROUP BY url_id) as x
               ON x.id2 = map_urlrating.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
             GROUP BY url.url
             HAVING(`high`) > 0
             ORDER BY `high` DESC, `medium` DESC, `low` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % (when, )
+            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
     # print(sql)
     cursor.execute(sql)
 
@@ -265,7 +284,7 @@ def terrible_urls(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def topfail(request, weeks_back=0):
+def top_fail(request, weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -307,13 +326,15 @@ def topfail(request, weeks_back=0):
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
               (SELECT MAX(id) as id2 FROM map_organizationrating or2
-              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % (when,)
+            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+
     cursor.execute(sql)
     # print(sql)
     rows = cursor.fetchall()
@@ -340,7 +361,7 @@ def topfail(request, weeks_back=0):
 
 
 # @cache_page(cache_time)
-def topwin(request, weeks_back=0):
+def top_win(request, weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -382,13 +403,14 @@ def topwin(request, weeks_back=0):
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
               (SELECT MAX(id) as id2 FROM map_organizationrating or2
-              WHERE `when` <= '%s' GROUP BY organization_id) as x
+              WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationrating.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % (when,)
+            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
     cursor.execute(sql)
 
     rows = cursor.fetchall()
@@ -449,8 +471,11 @@ def stats(request, weeks_back=0):
                    map_organizationrating
                INNER JOIN
                (SELECT MAX(id) as id2 FROM map_organizationrating or2
-               WHERE `when` <= '%s' GROUP BY organization_id) as x
-               ON x.id2 = map_organizationrating.id""" % when
+               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+               ON x.id2 = map_organizationrating.id
+               INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+               WHERE organization.type_id = '%(OrganizationTypeId)s'
+               """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
 
         # log.debug(sql)
 
@@ -569,7 +594,7 @@ def stats(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def vulnstats(request, weeks_back=0):
+def vulnerability_graphs(request, weeks_back=0):
 
     # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
     # they might.
@@ -593,12 +618,18 @@ def vulnstats(request, weeks_back=0):
         measurement = {}
         when = stats_determine_when(stat, weeks_back)
         print("%s: %s" % (stat, when))
-        urlratings = UrlRating.objects.raw("""SELECT * FROM
-                                           map_urlrating
-                                       INNER JOIN
-                                       (SELECT MAX(id) as id2 FROM map_urlrating or2
-                                       WHERE `when` <= '%s' GROUP BY url_id) as x
-                                       ON x.id2 = map_urlrating.id""" % when)
+        urlratings = UrlRating.objects.raw(
+            """SELECT map_urlrating.id as id, calculation FROM
+                   map_urlrating
+               INNER JOIN
+               (SELECT MAX(id) as id2 FROM map_urlrating or2
+               WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+               ON x.id2 = map_urlrating.id
+               INNER JOIN url ON map_urlrating.url_id = url.id
+               INNER JOIN url_organization on url.id = url_organization.url_id
+               INNER JOIN organization ON url_organization.organization_id = organization.id
+                WHERE organization.type_id = '%(OrganizationTypeId)s'
+            """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')})
 
         # group by vulnerability type
         for urlrating in urlratings:
@@ -760,9 +791,10 @@ def map_data(request, weeks_back=0):
           (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
           WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
+        WHERE organization.type_id = '%(OrganizationTypeId)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        """ % {"when": when}
+        """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
     # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
@@ -832,11 +864,16 @@ def latest_scans(request, scan_type):
         return empty_response()
 
     if scan_type == "tls_qualys":
-        scans = list(TlsQualysScan.objects.order_by('-rating_determined_on')[0:6])
+        scans = list(TlsQualysScan.objects.filter(
+            endpoint__url__organization__type=request.session.get("OrganizationTypeId", '1')
+        ).order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                      "plain_https"]:
-        scans = list(EndpointGenericScan.objects.filter(type=scan_type).order_by('-rating_determined_on')[0:6])
+        scans = list(EndpointGenericScan.objects.filter(
+            type=scan_type,
+            endpoint__url__organization__type=request.session.get("OrganizationTypeId", '1')
+        ).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
         calculation = get_calculation(scan)
