@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-19 15:22+0000\n"
+"POT-Creation-Date: 2018-03-19 15:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr "Volledig scherm"
 
 #: failmap/map/static/js/failmap.js:116
 msgid "Search organization"
-msgstr "Zoek op gemeente..."
+msgstr "Zoek organisatie..."
 
 #: failmap/map/static/js/failmap.js:137 failmap/map/static/js/failmap.js:141
 msgid "High"
@@ -412,7 +412,7 @@ msgstr "positie"
 
 #: failmap/map/static/js/views.js:274
 msgid "top fail on failmap"
-msgstr "beste organisaties op faalkaart"
+msgstr "slechtste organisaties op faalkaart"
 
 #: failmap/map/static/js/views.js:275 failmap/map/static/js/views.js:280
 msgid "hastag fail"
