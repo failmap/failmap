@@ -110,6 +110,27 @@
         </div><!--/.nav-collapse -->
     </div>
 </nav>
+<nav class="navbar navbar-default navbar-static-top" id="categorynavbar">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target=".navbar-collapse">
+                <span class="sr-only">{% trans "Toggle navigation" %}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">{% trans "Category" %}</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-center">
+                <li><a v-on:click="set_category('municipality')">{% trans "Municipality" %}</a></li>
+                <li><a v-on:click="set_category('cyber')">{% trans "Cyber" %}</a></li>
+                <li><a v-on:click="set_category('unknown')">{% trans "Unknown" %}</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
 
 <a name="" class="jumptonav"></a>
 <div id='map'></div>

@@ -48,88 +48,6 @@ Date.prototype.humanTimeStamp = function () {
 
 function views() {
 
-// there are some issues with having the map in a Vue. Somehow the map doesn't
-// render. So we're currently not using that feature over there.
-// It's also hard, since then we have to have themap, historycontrol, fullscreenreport, domainlist
-// it's just too much in single vue.
-// also: the fullscreen report only loads from something ON the map.
-// and all of this for a loading indicator per vue :))
-// knowing fullscreen here would be nice...
-    window.vueMap = new Vue({
-        el: '#historycontrol',
-        data: {
-            // # historyslider
-            weeksback: 0,
-            loading: false,
-            week: 0,
-            selected_organization: -1,
-            features: null,
-        },
-        computed: {
-            visibleweek: function () {
-                x = new Date();
-                x.setDate(x.getDate() - this.weeksback * 7);
-                return x.humanTimeStamp();
-            }
-        },
-        methods: {
-            load: function (week) {
-                failmap.loadmap(week);
-            },
-            // perhaps make it clear in the gui that it auto-updates? Who wants a stale map for an hour?
-            // a stop/play doesn't work, as there is no immediate reaction, countdown perhaps? bar emptying?
-            update_hourly: function () {
-                setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
-            },
-            hourly_update: function () {
-                vueMap.load(0);
-                vueTopfail.load(0);
-                vueTopwin.load(0);
-                vueStatistics.load(0);
-                vueMap.week = 0;
-                setTimeout(vueMap.hourly_update(), 60 * 60 * 1000);
-            },
-            next_week: function () {
-                if (this.week > 0) {
-                    this.week = parseInt(this.week) - 1; // 1, 11, 111... glitch.
-                    this.show_week();
-                }
-            },
-            previous_week: function () {
-                // caused 1, 11, 111 :) lol
-                if (this.week < 52) {
-                    this.week += 1;
-                    this.show_week();
-                }
-            },
-            show_week: debounce(function (e) {
-                if (e)
-                    this.week = parseInt(e.target.value);
-
-                vueMap.load(this.week);
-
-                // nobody understands that when you drag the map slider, the rest
-                // of the site and all reports are also old.
-                // so don't.
-                // vueTopfail.load(this.week);
-                // vueTopwin.load(this.week);
-                // vueTerribleurls.load(this.week);
-
-
-                if (vueMap.selected_organization > -1) {
-                    // todo: requests the "report" page 3x.
-                    // due to asyncronous it's hard to just "copy" results.
-                    // vueReport.load(vueMap.selected_organization, this.week);
-                    // vueFullScreenReport.load(vueMap.selected_organization, this.week);
-                    vueDomainlist.load(vueMap.selected_organization, this.week);
-                }
-
-                // vueStatistics.load(this.week);
-                vueMap.weeksback = this.week;
-            }, 100)
-        }
-    });
-
     var report_mixin = {
         data: {
             calculation: '',
@@ -276,45 +194,18 @@ function views() {
         }
     };
 
-    window.vueReport = new Vue({
-        el: '#report',
-        mixins: [report_mixin],
+    window.vueCategoryNavbar = new Vue({
+        el: '#categorynavbar',
+        mounted: function () {
 
-        computed: {
-            // load list of organizations from map features
-            organizations: function () {
-                if (vueMap.features != null) {
-                    let organizations = vueMap.features.map(function (feature) {
-                        return {
-                            "id": feature.properties.organization_id,
-                            "name": feature.properties.organization_name,
-                        }
-                    });
-                    return organizations.sort(function (a, b) {
-                        if (a['name'] > b['name']) return 1;
-                        if (a['name'] < b['name']) return -1;
-                        return 0;
-                    });
-                }
+        },
+
+        methods: {
+            set_category: function (category_name) {
+                // all validation is done server side, all parameters are optional and have fallbacks.
+                vueMap.category = category_name;
             }
-        },
-        watch: {
-            selected: function () {
-                // load selected organization id
-                this.load(this.selected);
-            }
-        },
-
-    });
-
-    window.vueFullScreenReport = new Vue({
-        el: '#fullscreenreport',
-        mixins: [report_mixin],
-
-        filters: {
-            // you cannot run filters in rawHtml, so this doesn't work.
-            // therefore we explicitly do this elsewhere
-        },
+        }
     });
 
     window.vueStatistics = new Vue({
@@ -541,6 +432,159 @@ function views() {
         data: {data_url: "/data/latest_scans/X-XSS-Protection/"}
     });
 
+// there are some issues with having the map in a Vue. Somehow the map doesn't
+// render. So we're currently not using that feature over there.
+// It's also hard, since then we have to have themap, historycontrol, fullscreenreport, domainlist
+// it's just too much in single vue.
+// also: the fullscreen report only loads from something ON the map.
+// and all of this for a loading indicator per vue :))
+// knowing fullscreen here would be nice...
+// state is managed here.
+    window.vueMap = new Vue({
+        mounted: function () {
+            this.load(this.category, this.week)
+        },
+        el: '#historycontrol',
+        data: {
+            // # historyslider
+            loading: false,
+            week: 0,
+            selected_organization: -1,
+            features: null,
+            category: "municipality"
+        },
+        computed: {
+            visibleweek: function () {
+                x = new Date();
+                x.setDate(x.getDate() - this.week * 7);
+                return x.humanTimeStamp();
+            }
+        },
+        watch: {
+            category: function (newCategory, oldCategory) {
+                // refresh the views :)
+                vueMap.show_week();
+            }
+        },
+        methods: {
+            // slowly moving the failmap into a vue.
+            load: function (category, week) {
+                self = this;
+                self.loading = true;
+                $.getJSON('/data/map/' + category + '/' + week, function (mapdata) {
+                    self.loading = true;
+                    // if there is one already, overwrite the attributes...
+                    if (failmap.geojson) {
+                        // here we add all features that are not part of the current map at all
+                        // and delete the ones that are not in the current set
+                        failmap.clean_map(mapdata);
+
+                        // here we can update existing layers (and add ones with the same name)
+                        failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
+                    } else {
+                        // first time load.
+                        failmap.geojson = L.geoJson(mapdata, {
+                            style: failmap.style,
+                            pointToLayer: failmap.pointToLayer,
+                            onEachFeature: failmap.onEachFeature
+                        }).addTo(failmap.map); // only if singleton, its somewhat dirty.
+                        // fit the map automatically, regardless of the initial positions
+                        failmap.map.fitBounds(failmap.geojson.getBounds());
+                    }
+
+                    // make map features (organization data) available to other vues
+                    // do not update this attribute if an empty list is returned as currently
+                    // the map does not remove organizations for these kind of responses.
+                    if (failmap.geojson.features > 0) {
+                        self.features = failmap.geojson.features;
+                    }
+                    self.loading = false;
+                });
+
+            },
+            next_week: function () {
+                if (this.week > 0) {
+                    this.week -= 1;
+                    this.show_week();
+                }
+            },
+            previous_week: function () {
+                // caused 1, 11, 111 :) lol
+                if (this.week <= 52) {
+                    this.week += 1;
+                    this.show_week();
+                }
+            },
+            show_week: debounce(function (e) {
+                if (e) {
+                    this.week = parseInt(e.target.value);
+                }
+
+                this.load(this.category, this.week);
+                console.log("Showing week: " + this.week + " | category: " + this.category);
+
+                // nobody understands that when you drag the map slider, the rest
+                // of the site and all reports are also old.
+                // so don't. Add matching UI elsewhere...
+                // vueTopfail.load(this.week);
+                // vueTopwin.load(this.week);
+                // vueTerribleurls.load(this.week);
+
+
+                if (vueMap.selected_organization > -1) {
+                    // todo: requests the "report" page 3x.
+                    // due to asyncronous it's hard to just "copy" results.
+                    // vueReport.load(vueMap.selected_organization, this.week);
+                    // vueFullScreenReport.load(vueMap.selected_organization, this.week);
+                    vueDomainlist.load(vueMap.selected_organization, this.week);
+                }
+
+                // vueStatistics.load(this.week);
+            }, 10)
+        }
+    });
+
+
+    window.vueReport = new Vue({
+        el: '#report',
+        mixins: [report_mixin],
+
+        computed: {
+            // load list of organizations from map features
+            organizations: function () {
+                if (vueMap.features != null) {
+                    let organizations = vueMap.features.map(function (feature) {
+                        return {
+                            "id": feature.properties.organization_id,
+                            "name": feature.properties.organization_name,
+                        }
+                    });
+                    return organizations.sort(function (a, b) {
+                        if (a['name'] > b['name']) return 1;
+                        if (a['name'] < b['name']) return -1;
+                        return 0;
+                    });
+                }
+            }
+        },
+        watch: {
+            selected: function () {
+                // load selected organization id
+                this.load(this.selected);
+            }
+        },
+
+    });
+
+    window.vueFullScreenReport = new Vue({
+        el: '#fullscreenreport',
+        mixins: [report_mixin],
+
+        filters: {
+            // you cannot run filters in rawHtml, so this doesn't work.
+            // therefore we explicitly do this elsewhere
+        },
+    });
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
-    vueMap.load(0);
+    // vueMap.load(0);
 }

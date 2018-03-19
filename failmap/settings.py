@@ -98,21 +98,17 @@ try:
 except ImportError:
     pass
 
-MIDDLEWARE_CLASSES = [
-    # statsd metrics collection
+MIDDLEWARE = [
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
-    # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.admindocs.middleware.XViewMiddleware',  # admindocs
-    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'failmap.urls'
@@ -520,7 +516,7 @@ if DEBUG:
         import debug_toolbar
 
         INSTALLED_APPS.append('debug_toolbar')
-        MIDDLEWARE_CLASSES.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
 
         import debug_toolbar.settings
 
@@ -547,7 +543,7 @@ if SENTRY_DSN:
     }
     # add sentry ID to request for inclusion in templates
     # https://docs.sentry.io/clients/python/integrations/django/#message-references
-    MIDDLEWARE_CLASSES.insert(0, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
+    MIDDLEWARE.insert(0, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
 
 # set javascript sentry token if provided
 SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')

@@ -33,6 +33,9 @@ ten_minutes = 60 * 10
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
 
+# contains the OrganizationTypes table, an extra query is weirdly expensive.
+ORGANIZATION_TYPES = {"municipality": 1, "cyber": 2}
+
 
 @cache_page(one_hour)
 def index(request):
@@ -124,21 +127,12 @@ def manifest_json(request):
     return JsonResponse(manifest, encoder=JSEncoder)
 
 
-def set_category(request, category_name):
+def organizationtype_exists(request, organization_type_name):
 
-    category_name = category_name.lower()
-
-    if OrganizationType.objects.all().filter(name=category_name).exists():
-        request.session['OrganizationTypeId'] = OrganizationType.objects.all().filter(name=category_name).get().id
+    if organization_type_name in ORGANIZATION_TYPES:
         return JsonResponse({"set": True}, encoder=JSEncoder)
 
     return JsonResponse({"set": False}, encoder=JSEncoder)
-
-
-def get_catgory(request):
-    # this is not translated(!)
-    ot = OrganizationType.objects.all().filter(pk=request.session.get('OrganizationTypeId', 1)).get()
-    return JsonResponse({"name": ot.name}, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -198,7 +192,7 @@ def string_to_delta(string_delta):
 
 
 @cache_page(one_day)
-def terrible_urls(request, weeks_back=0):
+def terrible_urls(request, organization_type="municipality", weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
     # currently this goes wrong when the endpoints are dead but the url still resolves.
     # then there should be an url rating of 0 (as no endpoints). But we don't save that yet.
@@ -255,7 +249,7 @@ def terrible_urls(request, weeks_back=0):
             HAVING(`high`) > 0
             ORDER BY `high` DESC, `medium` DESC, `low` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
     # print(sql)
     cursor.execute(sql)
 
@@ -284,7 +278,7 @@ def terrible_urls(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def top_fail(request, weeks_back=0):
+def top_fail(request, organization_type="municipality", weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -333,7 +327,7 @@ def top_fail(request, weeks_back=0):
             HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
 
     cursor.execute(sql)
     # print(sql)
@@ -361,7 +355,7 @@ def top_fail(request, weeks_back=0):
 
 
 # @cache_page(cache_time)
-def top_win(request, weeks_back=0):
+def top_win(request, organization_type="municipality", weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -410,7 +404,7 @@ def top_win(request, weeks_back=0):
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
     cursor.execute(sql)
 
     rows = cursor.fetchall()
@@ -452,7 +446,7 @@ def stats_determine_when(stat, weeks_back=0):
 
 
 @cache_page(one_hour)
-def stats(request, weeks_back=0):
+def stats(request, organization_type="municipality", weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
                   '1 month ago': 0, '2 months ago': 0, '3 months ago': 0}
 
@@ -475,7 +469,7 @@ def stats(request, weeks_back=0):
                ON x.id2 = map_organizationrating.id
                INNER JOIN organization ON map_organizationrating.organization_id = organization.id
                WHERE organization.type_id = '%(OrganizationTypeId)s'
-               """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+               """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
 
         # log.debug(sql)
 
@@ -594,7 +588,7 @@ def stats(request, weeks_back=0):
 
 
 @cache_page(one_hour)
-def vulnerability_graphs(request, weeks_back=0):
+def vulnerability_graphs(request, organization_type="municipality", weeks_back=0):
 
     # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
     # they might.
@@ -629,7 +623,7 @@ def vulnerability_graphs(request, weeks_back=0):
                INNER JOIN url_organization on url.id = url_organization.url_id
                INNER JOIN organization ON url_organization.organization_id = organization.id
                 WHERE organization.type_id = '%(OrganizationTypeId)s'
-            """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')})
+            """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)})
 
         # group by vulnerability type
         for urlrating in urlratings:
@@ -714,7 +708,7 @@ def wanted_urls(request):
 
 
 @cache_page(ten_minutes)
-def map_data(request, weeks_back=0):
+def map_data(request, organization_type="municipality", weeks_back=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -794,7 +788,7 @@ def map_data(request, weeks_back=0):
         WHERE organization.type_id = '%(OrganizationTypeId)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        """ % {"when": when, "OrganizationTypeId": request.session.get("OrganizationTypeId", '1')}
+        """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
     # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
@@ -849,7 +843,7 @@ def empty_response():
 
 
 @cache_page(ten_minutes)
-def latest_scans(request, scan_type):
+def latest_scans(request, scan_type, organization_type="municipality"):
     scans = []
 
     dataset = {
@@ -865,14 +859,14 @@ def latest_scans(request, scan_type):
 
     if scan_type == "tls_qualys":
         scans = list(TlsQualysScan.objects.filter(
-            endpoint__url__organization__type=request.session.get("OrganizationTypeId", '1')
+            endpoint__url__organization__type=ORGANIZATION_TYPES.get(organization_type, 1)
         ).order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                      "plain_https"]:
         scans = list(EndpointGenericScan.objects.filter(
             type=scan_type,
-            endpoint__url__organization__type=request.session.get("OrganizationTypeId", '1')
+            endpoint__url__organization__type=ORGANIZATION_TYPES.get(organization_type, 1)
         ).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:

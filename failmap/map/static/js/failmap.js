@@ -359,16 +359,8 @@ var failmap = {
     },
 
     /* Transition, which is much smoother. */
-    loadmap: function (weeknumber) {
-        vueMap.loading = true;
-        $.getJSON('/data/map/' + weeknumber, function (mapdata) {
-            // make map features (organization data) available to other vues
-            // do not update this attribute if an empty list is returned as currently
-            // the map does not remove organizations for these kind of responses.
-            if (mapdata.features.length > 0) {
-                vueMap.features = mapdata.features;
-            }
-
+    loadmap: function (category, weeknumber) {
+        $.getJSON('/data/map/' + category + '/' + weeknumber, function (mapdata) {
             // if there is one already, overwrite the attributes...
             if (failmap.geojson) {
                 // here we add all features that are not part of the current map at all
@@ -377,8 +369,6 @@ var failmap = {
 
                 // here we can update existing layers (and add ones with the same name)
                 failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
-
-                vueMap.loading = false;
             } else {
                 failmap.geojson = L.geoJson(mapdata, {
                     style: failmap.style,
@@ -387,7 +377,6 @@ var failmap = {
                 }).addTo(failmap.map); // only if singleton, its somewhat dirty.
                 // fit the map automatically, regardless of the initial positions
                 failmap.map.fitBounds(failmap.geojson.getBounds());
-                vueMap.loading = false;
             }
         });
     },
@@ -403,10 +392,11 @@ var failmap = {
                     found = true;
                 }
             });
-            console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
+
+            //console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
 
             if (!found) {
-                console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
+                // console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
                 failmap.geojson.addData(mapdata.features[i]);
             }
         }
@@ -420,7 +410,7 @@ var failmap = {
                 }
             }
 
-            console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
+            // console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
 
             if (!found){
                 failmap.geojson.removeLayer(layer);
@@ -454,7 +444,7 @@ var failmap = {
                 // So new_feature.geometry.coordinates !== existing_feature.geometry.coordinates will not work.
                 // https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript#19746771
                 if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)){
-                    console.log("Geometry changed, updating shape. Will not fade.");
+                    // console.log("Geometry changed, updating shape. Will not fade.");
                     // console.log("Old: ");
                     // console.log(JSON.stringify(new_feature.geometry.coordinates));
                     // console.log("New: ");
@@ -472,6 +462,8 @@ var failmap = {
                     existing_feature.properties.Overall = new_feature.properties.Overall;
                     existing_feature.properties.color = new_feature.properties.color;
                     // make the transition
+                    if (existing_feature.geometry.type === "Polygon")
+                        layer.setStyle(failmap.style(layer.feature));
                     if (existing_feature.geometry.type === "MultiPolygon")
                         layer.setStyle(failmap.style(layer.feature));
                     if (existing_feature.geometry.type === "Point") {

@@ -5,7 +5,7 @@
 # Django jet is blocking migration to 2.0
 # error:     from django.views.i18n import javascript_catalog
 # ImportError: cannot import name 'javascript_catalog'
-django==1.11.8
+django
 django-jet
 django-countries
 django-jsonfield
