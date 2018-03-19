@@ -4,11 +4,11 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.i18n import JavaScriptCatalog
 
-from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, index,
-                               latest_scans, manifest_json, map_data, organization_report,
-                               robots_txt, security_txt, organizationtype_exists, stats, terrible_urls,
-                               top_fail, top_win, updates_on_organization, vulnerability_graphs,
-                               wanted_urls)
+from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, index, latest_scans,
+                               manifest_json, map_data, organization_report,
+                               organizationtype_exists, robots_txt, security_txt, stats,
+                               terrible_urls, top_fail, top_win, updates_on_organization,
+                               vulnerability_graphs, wanted_urls)
 
 urlpatterns = [
     url(r'^$', index, name='failmap'),

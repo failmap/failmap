@@ -17,7 +17,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import Organization, OrganizationType, Promise, Url
+from failmap.organizations.models import Organization, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
