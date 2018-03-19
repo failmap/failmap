@@ -56,19 +56,10 @@ function d3stats() {
               : formatYear)(date);
         }
 
-    d3.json("data/vulnstats/0/index.json", function (error, data) {
-        stacked_area_chart("tls_qualys", error, data.tls_qualys);
-        stacked_area_chart("plain_https", error, data.plain_https);
-        stacked_area_chart("security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
-        stacked_area_chart("security_headers_x_frame_options", error, data.security_headers_x_frame_options);
-        stacked_area_chart("security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
-        stacked_area_chart("security_headers_x_xss_protection", error, data.security_headers_x_xss_protection);
-    });
-
     // tooltip value.
     // this is declared globally, otherwise the value would be overwritten by the many "gaps" that are automatically
     // filled by SVG (see below)
-    pro = 0;
+    var pro = 0;
 
     function stacked_area_chart(element, error, data) {
         // chart layout
@@ -77,11 +68,19 @@ function d3stats() {
             width = svg.attr("width") - margin.left - margin.right,
             height = svg.attr("height") - margin.top - margin.bottom;
 
+        // remove anything that's already on there, needed when new data is loaded.
+        svg.selectAll("*").remove();
+
         var parseDate = d3.timeParse("%Y-%m-%d");
 
         var x = d3.scaleTime().range([0, width]),
             y = d3.scaleLinear().range([height, 0]),
             z = d3.scaleOrdinal(['yellow', 'orange', 'red']);
+
+        // it's possible the data is empty, in that case render nothing
+        if (!data)
+            return;
+
 
         var stack = d3.stack();
 
@@ -243,4 +242,8 @@ function d3stats() {
 
 
     }
+
+    // make function publicly available
+    // https://stackoverflow.com/questions/8817872/javascript-call-nested-function
+    d3stats.stacked_area_chart = stacked_area_chart;
 }

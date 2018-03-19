@@ -50,13 +50,20 @@ var dynamic_translations = function(){
     gettext('report_header_security_headers_x_frame_options');
     gettext('report_header_security_headers_x_content_type_options');
     gettext('report_header_security_headers_strict_transport_security');
+
+    // some categories:
+    gettext('category_menu_municipality');
+    gettext('category_menu_cyber');
+    gettext('category_menu_unknown');
+    gettext('category_menu_water_board');
+    gettext('category_menu_province');
+    gettext('category_menu_hacking');
 };
 
 $(document).ready(function () {
     failmap.initializemap("nl");
-    views();
-    lazyload();
-    d3stats();
+    views(); // start all vues
+    lazyload(); // allow for lazy loading of images
 
     // if browser contains report anchor with organization id load that organization
     let match = RegExp('report-([0-9]+)').exec(location.hash);

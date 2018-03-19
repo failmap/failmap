@@ -522,3 +522,13 @@ path {
 .changes .service {
     font-size: 12px;
 }
+
+.selected_category {
+    background-color: lightblue;
+    border-bottom: 4px solid blue;
+    color: black;
+}
+
+#categorynavbar {
+    margin-bottom: 0 !important;
+}

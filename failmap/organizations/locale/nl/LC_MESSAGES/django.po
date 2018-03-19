@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-07 13:25+0000\n"
+"POT-Creation-Date: 2018-03-19 15:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/organizations/admin.py:198
+#: failmap/organizations/admin.py:219
 #, python-format
 msgid ""
 "Url %s is already matched to \"%s\", and is alive. Please add any remaining "
@@ -26,7 +26,7 @@ msgid ""
 "url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:215
+#: failmap/organizations/admin.py:236
 #, python-format
 msgid ""
 "This url %s already exists and is alive. Please add the desired "
@@ -36,6 +36,6 @@ msgid ""
 "Search for <a href=\"../?url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/models.py:189
+#: failmap/organizations/models.py:213
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""

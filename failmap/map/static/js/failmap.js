@@ -27,6 +27,7 @@ var failmap = {
     dataslider: L.control(),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
+    hovered_organization: "",
     proxy_tiles: true,
 
     initializemap: function (country_code) {

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-07 13:25+0000\n"
+"POT-Creation-Date: 2018-03-19 15:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,60 +18,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:68 failmap/map/static/js/views.js:404
-#: failmap/map/static/js/views.js:409 failmap/map/static/js/views.js:412
+#: failmap/map/static/js/failmap.js:69 failmap/map/static/js/views.js:436
+#: failmap/map/static/js/views.js:441 failmap/map/static/js/views.js:444
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
-#: failmap/map/static/js/failmap.js:115
+#: failmap/map/static/js/failmap.js:116
 msgid "Search organization"
 msgstr "Zoek op gemeente..."
 
-#: failmap/map/static/js/failmap.js:136 failmap/map/static/js/failmap.js:140
+#: failmap/map/static/js/failmap.js:137 failmap/map/static/js/failmap.js:141
 msgid "High"
 msgstr "Hoog"
 
-#: failmap/map/static/js/failmap.js:137 failmap/map/static/js/failmap.js:141
+#: failmap/map/static/js/failmap.js:138 failmap/map/static/js/failmap.js:142
 msgid "Medium"
 msgstr "Midden"
 
-#: failmap/map/static/js/failmap.js:138 failmap/map/static/js/failmap.js:142
+#: failmap/map/static/js/failmap.js:139 failmap/map/static/js/failmap.js:143
 msgid "Low"
 msgstr "Laag"
 
-#: failmap/map/static/js/failmap.js:170
+#: failmap/map/static/js/failmap.js:171
 msgid "Loading"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:188
+#: failmap/map/static/js/failmap.js:189
 msgid "Url"
 msgstr "Url"
 
-#: failmap/map/static/js/failmap.js:189
+#: failmap/map/static/js/failmap.js:190
 msgid "H"
 msgstr "H"
 
-#: failmap/map/static/js/failmap.js:190
+#: failmap/map/static/js/failmap.js:191
 msgid "M"
 msgstr "M"
 
-#: failmap/map/static/js/failmap.js:191
+#: failmap/map/static/js/failmap.js:192
 msgid "L"
 msgstr "L"
 
-#: failmap/map/static/js/failmap.js:210
+#: failmap/map/static/js/failmap.js:211
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/static/js/failmap.js:211
+#: failmap/map/static/js/failmap.js:212
 msgid "Mediocre"
 msgstr "Matig"
 
-#: failmap/map/static/js/failmap.js:212
+#: failmap/map/static/js/failmap.js:213
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/static/js/failmap.js:213
+#: failmap/map/static/js/failmap.js:214
 msgid "Unknown"
 msgstr "Onbekend"
 
@@ -167,15 +167,15 @@ msgstr "Nov"
 msgid "Dec"
 msgstr "Dec"
 
-#: failmap/map/static/js/graphs.js:146
+#: failmap/map/static/js/graphs.js:145
 msgid "low"
 msgstr "laag"
 
-#: failmap/map/static/js/graphs.js:148
+#: failmap/map/static/js/graphs.js:147
 msgid "medium"
 msgstr "midden"
 
-#: failmap/map/static/js/graphs.js:150
+#: failmap/map/static/js/graphs.js:149
 msgid "high"
 msgstr "hoog"
 
@@ -348,63 +348,87 @@ msgstr "X-Content-Type-Options"
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
+#: failmap/map/static/js/script.js:55
+msgid "category_menu_municipality"
+msgstr "Gemeenten"
+
+#: failmap/map/static/js/script.js:56
+msgid "category_menu_cyber"
+msgstr "Cyber"
+
+#: failmap/map/static/js/script.js:57
+msgid "category_menu_unknown"
+msgstr "Onbekend"
+
+#: failmap/map/static/js/script.js:58
+msgid "category_menu_water_board"
+msgstr "Waterschappen"
+
+#: failmap/map/static/js/script.js:59
+msgid "category_menu_province"
+msgstr "Provincies"
+
+#: failmap/map/static/js/script.js:60
+msgid "category_menu_hacking"
+msgstr "Hackers"
+
 #: failmap/map/static/js/views.js:44
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js:184 failmap/map/static/js/views.js:187
-#: failmap/map/static/js/views.js:190 failmap/map/static/js/views.js:192
-#: failmap/map/static/js/views.js:194
+#: failmap/map/static/js/views.js:114 failmap/map/static/js/views.js:117
+#: failmap/map/static/js/views.js:120 failmap/map/static/js/views.js:122
+#: failmap/map/static/js/views.js:124
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js:185 failmap/map/static/js/views.js:188
+#: failmap/map/static/js/views.js:115 failmap/map/static/js/views.js:118
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap/map/static/js/views.js:210
+#: failmap/map/static/js/views.js:140
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap/map/static/js/views.js:212
+#: failmap/map/static/js/views.js:142
 msgid "score high"
 msgstr "hoog"
 
-#: failmap/map/static/js/views.js:214
+#: failmap/map/static/js/views.js:144
 msgid "score medium"
 msgstr "midden"
 
-#: failmap/map/static/js/views.js:216
+#: failmap/map/static/js/views.js:146
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:410
-msgid "Exit Full Screen"
-msgstr "Sluit volledig scherm"
-
-#: failmap/map/static/js/views.js:441 failmap/map/static/js/views.js:446
+#: failmap/map/static/js/views.js:272 failmap/map/static/js/views.js:277
 msgid "top congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap/map/static/js/views.js:442 failmap/map/static/js/views.js:447
+#: failmap/map/static/js/views.js:273 failmap/map/static/js/views.js:278
 msgid "top position"
 msgstr "positie"
 
-#: failmap/map/static/js/views.js:443
+#: failmap/map/static/js/views.js:274
 msgid "top fail on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:444 failmap/map/static/js/views.js:449
+#: failmap/map/static/js/views.js:275 failmap/map/static/js/views.js:280
 msgid "hastag fail"
 msgstr "faal"
 
-#: failmap/map/static/js/views.js:444 failmap/map/static/js/views.js:449
+#: failmap/map/static/js/views.js:275 failmap/map/static/js/views.js:280
 msgid "hastag failmap"
 msgstr "faalkaart"
 
-#: failmap/map/static/js/views.js:448
+#: failmap/map/static/js/views.js:279
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
+
+#: failmap/map/static/js/views.js:442
+msgid "Exit Full Screen"
+msgstr "Sluit volledig scherm"
 
 #~ msgid "slechtste organisaties on failmap"
 #~ msgstr "op faalkaart"

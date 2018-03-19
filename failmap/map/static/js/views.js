@@ -44,171 +44,302 @@ Date.prototype.humanTimeStamp = function () {
     return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
 };
 
+var category_mixin = {
+    data: {
+        category: "municipality"
+    },
+    watch: {
+        category: function (newCategory, oldCategory) {
+            // refresh the views :)
+            this.load()
+        }
+    }
+};
 
+var report_mixin = {
+    data: {
+        calculation: '',
+        rating: 0,
+        points: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+        when: 0,
+        twitter_handle: '',
+        name: "",
+        urls: Array,
+        mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
+        selected: null,
+        loading: false,
+        visible: false,  // fullscreenreport
+        promise: false,
+    },
+    // https://vuejs.org/v2/api/#updated
+    updated: function () {
+      this.$nextTick(function () {
+          lazyload()
+      })
+    },
+    methods: {
+        colorize: function (high, medium, low) {
+            if (high > 0) return "red";
+            if (medium > 0) return "orange";
+            return "green";
+        },
+        colorizebg: function (high, medium, low) {
+            if (high > 0) return "#fbeaea";
+            if (medium > 0) return "#ffefd3";
+            return "#dff9d7";
+        },
+        idize: function (url) {
+            url = url.toLowerCase();
+            return url.replace(/[^0-9a-z]/gi, '')
+        },
+        idizetag: function (url) {
+            url = url.toLowerCase();
+            return "#" + url.replace(/[^0-9a-z]/gi, '')
+        },
+        humanize: function (date) {
+            return new Date(date).humanTimeStamp()
+        },
+        translate: function(string){
+            return gettext(string);
+        },
+        create_header: function (rating) {
+            return this.translate("report_header_" + rating.type);
+        },
+        // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
+        second_opinion_links: function (rating, url) {
+            if (rating.type === "security_headers_strict_transport_security")
+                return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
+                    '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">' + gettext('Second opinion') + ' (securityheaders.io)</a>';
+            if (rating.type === "tls_qualys")
+                return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
+                    '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">' + gettext('Second opinion') + ' (qualys)</a>';
+            if (rating.type === "security_headers_x_xss_protection")
+                return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
+            if (rating.type === "security_headers_x_frame_options")
+                return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>';
+            if (rating.type === "security_headers_x_content_type_options")
+                return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
+        },
+        total_awarded_points: function (high, medium, low) {
+            var marker = vueReport.make_marker(high, medium, low);
+            return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
+        },
+        organization_points: function (high, medium, low) {
+            var marker = vueReport.make_marker(high, medium, low);
+            return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
+        },
+        awarded_points: function (high, medium, low) {
+            var marker = vueReport.make_marker(high, medium, low);
+            return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
+        },
+        make_marker: function (high, medium, low) {
+            if (high === 0 && medium === 0 && low === 0)
+                return gettext("score perfect");
+            else if (high > 0)
+                return gettext("score high");
+            else if (medium > 0)
+                return gettext("score medium");
+            else
+                return gettext("score low");
+        },
+        // fullscreen report
+        show: function () {
+            this.visible = true;
+        },
+        hide: function () {
+            this.visible = false;
+        },
+        // end fullscreen report
+        endpoint_type: function (endpoint) {
+            return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
+        },
+        load: function (organization_id, weeks_ago) {
+
+            if (!weeks_ago) {
+                weeks_ago = 0;
+            }
+            vueReport.loading = true;
+            vueReport.name = null;
+            var self = this;
+            $.getJSON('/data/report/' + organization_id + '/' + weeks_ago, function (data) {
+                self.loading = false;
+                self.urls = data.calculation["organization"]["urls"];
+                self.points = data.rating;
+                self.high = data.calculation["organization"]["high"];
+                self.medium = data.calculation["organization"]["medium"];
+                self.low = data.calculation["organization"]["low"];
+                self.when = data.when;
+                self.name = data.name;
+                self.twitter_handle = data.twitter_handle;
+                self.promise = data.promise;
+
+                // include id in anchor to allow url sharing
+                let newHash = 'report-' + organization_id;
+                $('a#report-anchor').attr('name', newHash)
+                history.replaceState({}, '', '#' + newHash);
+            });
+        },
+        show_in_browser: function () {
+            // you can only jump once to an anchor, unless you use a dummy
+            location.hash = "#loading";
+            location.hash = "#report";
+        },
+        create_twitter_link: function (name, twitter_handle, points) {
+            if (twitter_handle) {
+                if (points) {
+                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
+                } else {
+                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
+                }
+            }
+        },
+        formatDate: function (date) {
+            return new Date(date).toISOString().substring(0, 10)
+        }
+    }
+};
+
+
+// 6 requests is expensive. Could be one with increased complexity.
+var latest_mixin = {
+    template: '#latest_table',
+    mounted: function () {
+        this.load()
+    },
+    methods: {
+        load: function(){
+            var self = this;
+            $.getJSON( this.data_url + this.category + '/' + this.scan, function (data) {
+                self.scans = data.scans;
+            });
+        },
+        rowcolor: function (scan) {
+            if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
+                return "greenrow";
+            else if (scan.high > 0)
+                return "redrow";
+            else if (scan.medium > 0)
+                return "orangerow";
+            else
+                return "yellowrow";
+        },
+        translate: function(string){
+            return gettext(string);
+        }
+    },
+    data: {
+        scans: Array,
+        data_url: "/data/latest_scans/"
+    }
+};
+
+
+var translation_mixin = {
+    methods: {
+        translate: function (string) {
+            return gettext(string);
+        }
+    }
+};
+
+
+var top_mixin = {
+    mounted: function () {
+        this.load(0)
+    },
+    data: {top: Array},
+    methods: {
+        showReport: function (organization_id) {
+            vueReport.show_in_browser();
+            vueReport.load(organization_id, vueMap.week);
+            vueDomainlist.load(organization_id, vueMap.week);
+        },
+        humanize: function (date) {
+            return new Date(date).humanTimeStamp()
+        },
+        load: function (weeknumber) {
+            var self = this;
+            $.getJSON(this.$data.data_url + this.category + '/' + weeknumber, function (data) {
+                self.top = data;
+            });
+        },
+        twitter_message: function (chart, rank){
+            message = "https://twitter.com/intent/tweet?screen_name=" + rank.organization_twitter + "&text=";
+            if (chart === 'fail') {
+                message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
+                    + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
+                    + gettext("top fail on failmap") + ' 🥀' +
+                    '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
+            } else {
+                message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
+                    + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
+                    + gettext("top win on failmap") + ' 🌹' +
+                    '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
+            }
+            return message
+        }
+    }
+};
 
 function views() {
 
-    var report_mixin = {
-        data: {
-            calculation: '',
-            rating: 0,
-            points: 0,
-            high: 0,
-            medium: 0,
-            low: 0,
-            when: 0,
-            twitter_handle: '',
-            name: "",
-            urls: Array,
-            mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
-            selected: null,
-            loading: false,
-            visible: false,  // fullscreenreport
-            promise: false,
-        },
-        // https://vuejs.org/v2/api/#updated
-        updated: function () {
-          this.$nextTick(function () {
-              lazyload()
-          })
-        },
-        methods: {
-            colorize: function (high, medium, low) {
-                if (high > 0) return "red";
-                if (medium > 0) return "orange";
-                return "green";
-            },
-            colorizebg: function (high, medium, low) {
-                if (high > 0) return "#fbeaea";
-                if (medium > 0) return "#ffefd3";
-                return "#dff9d7";
-            },
-            idize: function (url) {
-                url = url.toLowerCase();
-                return url.replace(/[^0-9a-z]/gi, '')
-            },
-            idizetag: function (url) {
-                url = url.toLowerCase();
-                return "#" + url.replace(/[^0-9a-z]/gi, '')
-            },
-            humanize: function (date) {
-                return new Date(date).humanTimeStamp()
-            },
-            translate: function(string){
-                return gettext(string);
-            },
-            create_header: function (rating) {
-                return this.translate("report_header_" + rating.type);
-            },
-            // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
-            second_opinion_links: function (rating, url) {
-                if (rating.type === "security_headers_strict_transport_security")
-                    return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
-                        '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">' + gettext('Second opinion') + ' (securityheaders.io)</a>';
-                if (rating.type === "tls_qualys")
-                    return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
-                        '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">' + gettext('Second opinion') + ' (qualys)</a>';
-                if (rating.type === "security_headers_x_xss_protection")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
-                if (rating.type === "security_headers_x_frame_options")
-                    return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>';
-                if (rating.type === "security_headers_x_content_type_options")
-                    return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
-            },
-            total_awarded_points: function (high, medium, low) {
-                var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
-            },
-            organization_points: function (high, medium, low) {
-                var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
-            },
-            awarded_points: function (high, medium, low) {
-                var marker = vueReport.make_marker(high, medium, low);
-                return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
-            },
-            make_marker: function (high, medium, low) {
-                if (high === 0 && medium === 0 && low === 0)
-                    return gettext("score perfect");
-                else if (high > 0)
-                    return gettext("score high");
-                else if (medium > 0)
-                    return gettext("score medium");
-                else
-                    return gettext("score low");
-            },
-            // fullscreen report
-            show: function () {
-                this.visible = true;
-            },
-            hide: function () {
-                this.visible = false;
-            },
-            // end fullscreen report
-            endpoint_type: function (endpoint) {
-                return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
-            },
-            load: function (organization_id, weeks_ago) {
-
-                if (!weeks_ago) {
-                    weeks_ago = 0;
-                }
-                vueReport.loading = true;
-                vueReport.name = null;
-                self = this;
-                $.getJSON('/data/report/' + organization_id + '/' + weeks_ago, function (data) {
-                    self.loading = false;
-                    self.urls = data.calculation["organization"]["urls"];
-                    self.points = data.rating;
-                    self.high = data.calculation["organization"]["high"];
-                    self.medium = data.calculation["organization"]["medium"];
-                    self.low = data.calculation["organization"]["low"];
-                    self.when = data.when;
-                    self.name = data.name;
-                    self.twitter_handle = data.twitter_handle;
-                    self.promise = data.promise;
-
-                    // include id in anchor to allow url sharing
-                    let newHash = 'report-' + organization_id;
-                    $('a#report-anchor').attr('name', newHash)
-                    history.replaceState({}, '', '#' + newHash);
-                });
-            },
-            show_in_browser: function () {
-                // you can only jump once to an anchor, unless you use a dummy
-                location.hash = "#loading";
-                location.hash = "#report";
-            },
-            create_twitter_link: function (name, twitter_handle, points) {
-                if (twitter_handle) {
-                    if (points) {
-                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
-                    } else {
-                        return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
-                    }
-                }
-            },
-            formatDate: function (date) {
-                return new Date(date).toISOString().substring(0, 10)
-            }
-        }
-    };
-
+    // You can try with:
+    // vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"]
     window.vueCategoryNavbar = new Vue({
-        el: '#categorynavbar',
-        mounted: function () {
+        mixins: [translation_mixin],
 
+        el: '#categorynavbar',
+
+        data: {
+            categories: ["municipality"],
+            selected: "municipality"
         },
 
         methods: {
             set_category: function (category_name) {
                 // all validation is done server side, all parameters are optional and have fallbacks.
                 vueMap.category = category_name;
+                this.selected = category_name;
+            }
+        }
+    });
+
+    window.vueGraphs = new Vue({
+        mixins: [category_mixin],
+
+        // the mixin requires data to exist, otherwise massive warnings.
+        data: {
+            nothing: "",
+            d3stats: d3stats
+        },
+
+        el: '#graphs',
+
+        mounted: function() {
+            this.load(0)
+        },
+
+        methods: {
+            load: function () {
+                var self = this;
+                d3.json("data/vulnstats/" + this.category + "/0/index.json", function (error, data) {
+                    d3stats();
+                    self.d3stats.stacked_area_chart("tls_qualys", error, data.tls_qualys);
+                    self.d3stats.stacked_area_chart("plain_https", error, data.plain_https);
+                    self.d3stats.stacked_area_chart("security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
+                    self.d3stats.stacked_area_chart("security_headers_x_frame_options", error, data.security_headers_x_frame_options);
+                    self.d3stats.stacked_area_chart("security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
+                    self.d3stats.stacked_area_chart("security_headers_x_xss_protection", error, data.security_headers_x_xss_protection);
+                });
             }
         }
     });
 
     window.vueStatistics = new Vue({
+        mixins: [category_mixin],
         el: '#statistics',
         mounted: function () {
             this.load(0)
@@ -254,12 +385,13 @@ function views() {
                     return roundTo(score, 2) + "%";
                 }
                 return 0
-            },
+            }
         },
         methods: {
             load: function (weeknumber) {
-                $.getJSON('/data/stats/' + weeknumber, function (data) {
-                    vueStatistics.data = data;
+                var self = this;
+                $.getJSON('/data/stats/' + this.category + '/' + weeknumber, function (data) {
+                    self.data = data;
                 });
             },
             perc: function (data, amount, total) {
@@ -283,13 +415,18 @@ function views() {
                 return "green";
             },
             load: debounce(function (organization, weeks_back) {
+
+                // only load if you're still on something.
+                if (organization !== failmap.hovered_organization)
+                    return;
+
                 if (!weeks_back)
                     weeks_back = 0;
 
                 $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
                     vueDomainlist.urls = data.calculation["organization"]["urls"];
                 });
-            }, 100)
+            }, 42)
         }
     });
 
@@ -310,126 +447,60 @@ function views() {
         }
     });
 
-    var top_mixin = {
-        mounted: function () {
-            this.load(0)
-        },
-        data: {top: Array},
-        methods: {
-            showReport: function (organization_id) {
-                vueReport.show_in_browser();
-                vueReport.load(organization_id, vueMap.week);
-                vueDomainlist.load(organization_id, vueMap.week);
-            },
-            humanize: function (date) {
-                return new Date(date).humanTimeStamp()
-            },
-            load: function (weeknumber) {
-                var self = this;
-                $.getJSON(this.$data.data_url + weeknumber, function (data) {
-                    self.top = data;
-                });
-            },
-            twitter_message: function (chart, rank){
-                message = "https://twitter.com/intent/tweet?screen_name=" + rank.organization_twitter + "&text=";
-                if (chart === 'fail') {
-                    message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
-                        + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
-                        + gettext("top fail on failmap") + ' 🥀' +
-                        '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
-                } else {
-                    message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
-                        + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
-                        + gettext("top win on failmap") + ' 🌹' +
-                        '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
-                }
-                return message
-            }
-        }
-    };
-
     window.vueTopfail = new Vue({
         el: '#topfail',
         data: {data_url: "/data/topfail/"},
-        mixins: [top_mixin]
+        mixins: [top_mixin, category_mixin]
     });
 
     window.vueTopwin = new Vue({
         el: '#topwin',
         data: {data_url: "/data/topwin/"},
-        mixins: [top_mixin]
+        mixins: [top_mixin, category_mixin]
     });
 
     window.vueTerribleurls = new Vue({
         el: '#terrible_urls',
         data: {data_url: "/data/terrible_urls/"},
-        mixins: [top_mixin]
+        mixins: [top_mixin, category_mixin]
     });
 
-// 6 requests is expensive. Could be one with increased complexity.
-    var latest_mixin = {
-        template: '#latest_table',
-        mounted: function () {
-            var self = this;
-            $.getJSON(this.$data.data_url, function (data) {
-                self.scans = data.scans;
-            });
-        },
-        methods: {
-            rowcolor: function (scan) {
-                if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
-                    return "greenrow";
-                else if (scan.high > 0)
-                    return "redrow";
-                else if (scan.medium > 0)
-                    return "orangerow";
-                else
-                    return "yellowrow";
-            },
-            translate: function(string){
-                return gettext(string);
-            }
-        },
-        data: {
-            scans: Array,
-        }
-    };
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
-        mixins: [latest_mixin],
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_tls_qualys',
-        data: {data_url: "/data/latest_scans/tls_qualys/"}
+        data: {scan: "tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
-        mixins: [latest_mixin],
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_plain_https',
-        data: {data_url: "/data/latest_scans/plain_https/"}
+        data: {scan: "plain_https"}
     });
 
-    window.vueLatestTlsQualys = new Vue({
-        mixins: [latest_mixin],
+    window.vueLatestHSTS = new Vue({
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_security_headers_strict_transport_security',
-        data: {data_url: "/data/latest_scans/Strict-Transport-Security/"}
+        data: {scan: "Strict-Transport-Security"}
     });
 
-    window.vueLatestPlainHttps = new Vue({
-        mixins: [latest_mixin],
+    window.vueLatestXContentTypeOptions = new Vue({
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_security_headers_x_frame_options',
-        data: {data_url: "/data/latest_scans/X-Content-Type-Options/"}
+        data: {scan: "X-Content-Type-Options"}
     });
 
-    window.vueLatestTlsQualys = new Vue({
-        mixins: [latest_mixin],
+    window.vueLatestXFrameOptions = new Vue({
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_security_headers_x_content_type_options',
-        data: {data_url: "/data/latest_scans/X-Frame-Options/"}
+        data: {scan: "X-Frame-Options"}
     });
 
-    window.vueLatestPlainHttps = new Vue({
-        mixins: [latest_mixin],
+    window.vueLatestXXSSProtection = new Vue({
+        mixins: [latest_mixin, category_mixin],
         el: '#latest_security_headers_x_xss_protection',
-        data: {data_url: "/data/latest_scans/X-XSS-Protection/"}
+        data: {scan: "X-XSS-Protection"}
     });
 
 // there are some issues with having the map in a Vue. Somehow the map doesn't
@@ -455,7 +526,7 @@ function views() {
         },
         computed: {
             visibleweek: function () {
-                x = new Date();
+                var x = new Date();
                 x.setDate(x.getDate() - this.week * 7);
                 return x.humanTimeStamp();
             }
@@ -464,12 +535,26 @@ function views() {
             category: function (newCategory, oldCategory) {
                 // refresh the views :)
                 vueMap.show_week();
+
+                // unfortunately(?) we can't set the mixin to trigger updates everywhere.
+                // ... subclass everything?
+                vueTopfail.category = newCategory;
+                vueTopwin.category = newCategory;
+                vueTerribleurls.category = newCategory;
+                vueStatistics.category = newCategory;
+                vueLatestPlainHttps.category = newCategory;
+                vueLatestTlsQualys.category = newCategory;
+                vueLatestXContentTypeOptions.category = newCategory;
+                vueLatestHSTS.category = newCategory;
+                vueLatestXFrameOptions.category = newCategory;
+                vueLatestXXSSProtection.category = newCategory;
+                vueGraphs.category = newCategory;
             }
         },
         methods: {
             // slowly moving the failmap into a vue.
             load: function (category, week) {
-                self = this;
+                var self = this;
                 self.loading = true;
                 $.getJSON('/data/map/' + category + '/' + week, function (mapdata) {
                     self.loading = true;
@@ -495,8 +580,8 @@ function views() {
                     // make map features (organization data) available to other vues
                     // do not update this attribute if an empty list is returned as currently
                     // the map does not remove organizations for these kind of responses.
-                    if (failmap.geojson.features > 0) {
-                        self.features = failmap.geojson.features;
+                    if (mapdata.features.length > 0) {
+                        self.features = mapdata.features;
                     }
                     self.loading = false;
                 });
@@ -515,13 +600,12 @@ function views() {
                     this.show_week();
                 }
             },
-            show_week: debounce(function (e) {
+            show_week: function (e) {
                 if (e) {
                     this.week = parseInt(e.target.value);
                 }
 
                 this.load(this.category, this.week);
-                console.log("Showing week: " + this.week + " | category: " + this.category);
 
                 // nobody understands that when you drag the map slider, the rest
                 // of the site and all reports are also old.
@@ -531,16 +615,15 @@ function views() {
                 // vueTerribleurls.load(this.week);
 
 
-                if (vueMap.selected_organization > -1) {
+                if (this.selected_organization > -1) {
+                    console.log(selected_organization);
                     // todo: requests the "report" page 3x.
                     // due to asyncronous it's hard to just "copy" results.
                     // vueReport.load(vueMap.selected_organization, this.week);
                     // vueFullScreenReport.load(vueMap.selected_organization, this.week);
-                    vueDomainlist.load(vueMap.selected_organization, this.week);
+                    vueDomainlist.load(this.selected_organization, this.week);
                 }
-
-                // vueStatistics.load(this.week);
-            }, 10)
+            }
         }
     });
 
@@ -556,7 +639,7 @@ function views() {
                     let organizations = vueMap.features.map(function (feature) {
                         return {
                             "id": feature.properties.organization_id,
-                            "name": feature.properties.organization_name,
+                            "name": feature.properties.organization_name
                         }
                     });
                     return organizations.sort(function (a, b) {
@@ -572,7 +655,7 @@ function views() {
                 // load selected organization id
                 this.load(this.selected);
             }
-        },
+        }
 
     });
 
@@ -583,7 +666,7 @@ function views() {
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.
             // therefore we explicitly do this elsewhere
-        },
+        }
     });
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
     // vueMap.load(0);

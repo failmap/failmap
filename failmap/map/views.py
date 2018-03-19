@@ -611,9 +611,10 @@ def vulnerability_graphs(request, organization_type="municipality", weeks_back=0
     for stat in timeframes:
         measurement = {}
         when = stats_determine_when(stat, weeks_back)
-        print("%s: %s" % (stat, when))
-        urlratings = UrlRating.objects.raw(
-            """SELECT map_urlrating.id as id, calculation FROM
+        # print("%s: %s" % (stat, when))
+
+        # about 1 second per query, while it seems to use indexes.
+        sql = """SELECT map_urlrating.id as id, calculation FROM
                    map_urlrating
                INNER JOIN
                (SELECT MAX(id) as id2 FROM map_urlrating or2
@@ -623,7 +624,11 @@ def vulnerability_graphs(request, organization_type="municipality", weeks_back=0
                INNER JOIN url_organization on url.id = url_organization.url_id
                INNER JOIN organization ON url_organization.organization_id = organization.id
                 WHERE organization.type_id = '%(OrganizationTypeId)s'
-            """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)})
+            """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+
+        # print(sql)
+
+        urlratings = UrlRating.objects.raw(sql)
 
         # group by vulnerability type
         for urlrating in urlratings:
