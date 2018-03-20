@@ -154,11 +154,12 @@ class ActionMixin:
 # http://jet.readthedocs.io/en/latest/autocomplete.html?highlight=many
 # for many values in the admin interface... for example endpoints.
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('name_details', 'type', 'country', 'created_on', 'is_dead')
+    list_display = ('name_details', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
 
-    fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'is_dead', 'is_dead_since', 'is_dead_reason')
+    fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
+              'is_dead', 'is_dead_since', 'is_dead_reason')
 
     inlines = [CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
@@ -170,6 +171,15 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
                                            self.is_dead_since.strftime("%b %Y") if self.is_dead_since else "")
         else:
             return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
+
+
+    @staticmethod
+    def wikidata_(self):
+        return format_html("<a href='https://www.wikidata.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikidata, self.wikidata))
+
+    @staticmethod
+    def wikipedia_(self):
+        return format_html("<a href='https://www.wikipedia.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikipedia, self.wikipedia))
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/

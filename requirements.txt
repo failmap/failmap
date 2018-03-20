@@ -74,3 +74,6 @@ recommonmark
 
 # map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)
 rdp
+
+clint  # downloading stuff from overpass
+wikidata  # downloading data from wikidata

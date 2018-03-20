@@ -4,15 +4,15 @@ from typing import List
 
 import pytz
 
-import failmap.scanners.scanner_http as scanner_http
-import failmap.scanners.scanner_plain_http as scanner_plain_http
 from failmap.organizations.models import Url
+from failmap.scanners import (scanner_security_headers, scanner_plain_http, scanner_http, scanner_dnssec,
+                              scanner_tls_qualys, scanner_screenshot)
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
-from failmap.scanners.scanner_screenshot import screenshot_urls
+from celery import group, chain, chord
 
 from ..celery import app
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 # TODO: make queue explicit, split functionality in storage and scanner
@@ -37,43 +37,51 @@ def onboard_new_urls():
     .......-::::::.........-:........-::::::::-......::::::::::::.....:-.......::...
     ................................................................................
             """
-        logger.info("There are %s new urls to onboard! %s" % (never_onboarded.count(), cyber))
+        log.info("There are %s new urls to onboard! %s" % (never_onboarded.count(), cyber))
     else:
-        logger.info("No new urls to onboard.")
+        log.info("No new urls to onboard.")
 
-    onboard_urls(never_onboarded)
+    onboard_urls(never_onboarded[0:8])
+
+
+@app.task(queue='storage')
+def finish_onboarding(url):
+    url.onboarded = True
+    url.onboarded_on = datetime.now(pytz.utc)
+    url.save()
 
 
 # TODO: make queue explicit, split functionality in storage and scanner
-@app.task
+@app.task(queue='storage')
 def onboard_urls(urls: List[Url]):
-    for url in urls:
-        logger.info("Onboarding %s" % url)
 
-        if url.is_top_level():
-            logger.debug("Brute known subdomains: %s" % url)
-            brute_known_subdomains(urls=[url])
+    # is this executed per group, and do we wait to start with another group when everything in a certain group is done?
+    # Chaining a group together with another task will automatically upgrade it to be a chord
+    # all tasks per group of urls: url(a), url(b), url(c)...
+    # saved since it documents another approach...
+    # tasks = (group(nsec.si(urls=[url]) for url in urls)
+    #          | group(certificate_transparency.si(urls=[url]) for url in urls)
+    #          | group(brute_known_subdomains.si(urls=[url]) for url in urls)
+    #          | group(scanner_http.discover_endpoints_on_standard_ports.si(urls=[url]) for url in urls)
+    #          | group(scanner_plain_http.scan_url.si(url=url) for url in urls)
+    #          | group(scanner_security_headers.compose_task.si(urls_filter={"url": url}) for url in urls)
+    #          | group(finish_onboarding.si(url=url) for url in urls)
+    #          )
 
-            logger.debug("Certificate transparency: %s" % url)
-            certificate_transparency(urls=[url])
+    # all tasks sequentially per url... url(a,b,c).
+    tasks = chain(chain(certificate_transparency.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
+                        , nsec.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
+                        , brute_known_subdomains.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
+                        , scanner_dnssec.compose_task.si(urls_filter={"url": url}) if url.is_top_level() else ignore_hack.si()
+                        , scanner_http.discover_endpoints_on_standard_ports.si(urls=[url])
+                        , scanner_plain_http.scan_url.si(url=url)
+                        , scanner_screenshot.screenshot_url.si(url=url)
+                        , scanner_security_headers.compose_task.si(urls_filter={"url": url})
+                        , scanner_tls_qualys.compose_task.si(urls_filter={"url": url})
+                        , finish_onboarding.si(url=url)) for url in urls)
+    tasks.apply_async()
 
-            logger.debug("nsec: %s" % url)
-            nsec(urls=[url])
 
-        # tasks
-        logger.debug("Discover endpoints: %s" % url)
-        scanner_http.discover_endpoints(urls=[url])
-
-        # requires endpoints to be discovered, how to run groups of tasks sequentially?
-        logger.debug("Plain_http: %s" % url)
-        scanner_plain_http.scan_urls(urls=[url])
-
-        # requires endpoints to be discovered
-        logger.debug("Screenshots: %s" % url)
-        screenshot_urls(urls=[url])
-
-        # security headers and new urls are handled elsewhere.
-
-        url.onboarded = True
-        url.onboarded_on = datetime.now(pytz.utc)
-        url.save()
+@app.task
+def ignore_hack():
+    return True

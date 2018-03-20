@@ -19,6 +19,8 @@ from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
 log = logging.getLogger(__name__)
 
 
+# this (should) be the normal entrypoint to start a scan.
+@app.task(queue="storage")
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

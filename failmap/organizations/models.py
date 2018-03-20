@@ -69,6 +69,21 @@ class Organization(models.Model):
         null=True
     )
 
+    wikidata = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Reference to the wikidata project. Example:Q9928"
+    )
+
+    wikipedia = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Reference to the wikipedia article, including the correct wiki. "
+                  "Example: nl:Heemstede (Noord-Holland)"
+    )
+
     class Meta:
         managed = True
         db_table = 'organization'
@@ -91,7 +106,7 @@ GEOJSON_TYPES = (
 
 
 class Coordinate(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.PROTECT)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     geojsontype = models.CharField(
         db_column='geoJsonType',
         max_length=20,
@@ -212,6 +227,9 @@ class Url(models.Model):
         if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
             raise ValidationError(_('When telling this is dead, also enter the date and reason for it.'))
 
+        if Url.objects.all().filter(url=self.url, is_dead=False, not_resolvable=False).exists():
+            raise ValidationError(_('Url already exists, existing url is alive and resolvable.'))
+
         # urls must be lowercase
         self.url = self.url.lower()
 
@@ -251,11 +269,12 @@ class Url(models.Model):
 
         u = Url()
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
-        u.save()
-        u.organization = self.organization.all()
         u.url = new_url
         u.save()
-        logger.info("Added domain to database: %s" % new_url)
+        for organization in self.organization.all():
+            u.organization.add(organization)
+            u.save()
+            logger.info("Added url: %s to organization: %s" % (new_url, organization))
 
         # run standard checks, so you know the
         # discover_wildcards([u])

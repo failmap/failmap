@@ -46,6 +46,7 @@ API_SERVER_TIMEOUT = 30
 log = logging.getLogger(__name__)
 
 
+@app.task
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

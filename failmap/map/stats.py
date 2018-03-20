@@ -75,8 +75,8 @@ def todays_relevant_url_rating(dt, url_ratings):
 
     rev_url_ratings = reversed(url_ratings)
     for url_rating in rev_url_ratings:
-        # logger.debug("%s %s", dt, url_rating.when)
-        # logger.debug("%s", url_rating.when - dt)
+        # log.debug("%s %s", dt, url_rating.when)
+        # log.debug("%s", url_rating.when - dt)
         if url_rating.when <= dt:
             return url_rating
 
@@ -143,7 +143,7 @@ def metrics_per_url(url):
 
                         if 'low' not in rating.keys():
                             # When an url still is resolvable, but all endpoints themselves don't exist anymore.
-                            # logger.info("No (low) rating in this endpoint. Is it a repeated finding? Those should "
+                            # log.info("No (low) rating in this endpoint. Is it a repeated finding? Those should "
                             #             "have been all gone by now. What went wrong? %s" % endpoint)
                             continue
 

@@ -46,14 +46,14 @@ logger = logging.getLogger(__package__)
 
 
 # TODO: make queue explicit, split functionality in storage and scanner
-@app.task
+@app.task(queue='scanners')
 def screenshot_urls(urls):
     for url in urls:
         screenshot_url(url)
 
 
 # TODO: make queue explicit, split functionality in storage and scanner
-@app.task
+@app.task(queue='scanners')
 def screenshot_url(url):
     """
     Contains a pointer to the most accurate and fastes screenshot method.
@@ -137,7 +137,7 @@ def screenshot_with_firefox(endpoint, skip_if_latest=False):
 # working with processes also results into the same sorts of troubles.
 # maybe chrome shares some state for the cwd in their processes?
 # as long as we can't specify the filename for chrome headless, it's not going to work.
-@timeout(30, 'Took too long to make screenshot')
+@timeout(30, 'Took too long to make screenshot.')
 def screenshot_with_chrome(endpoint, skip_if_latest=False):
     """
     Chrome headless, albeit single threaded, is pretty reliable and fast for existing urls.

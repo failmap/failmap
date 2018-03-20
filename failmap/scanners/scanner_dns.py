@@ -24,6 +24,7 @@ from typing import List
 import untangle
 from django.conf import settings
 
+from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 
 logger = logging.getLogger(__package__)
@@ -71,11 +72,13 @@ def search_engines(organizations: List[Organization]=None, urls: List[Url]=None)
     return [new_url for new_url in search_engines_scan(urls)]
 
 
+@app.task(ignore_result=True, queue="scanners")
 def nsec(organizations: List[Organization]=None, urls: List[Url]=None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in nsec_scan(urls)]
 
 
+@app.task(ignore_result=True, queue="scanners")
 def certificate_transparency(organizations: List[Organization]=None, urls: List[Url]=None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in certificate_transparency_scan(urls)]
@@ -91,6 +94,7 @@ def brute_three_letters(organizations: List[Organization]=None, urls: List[Url]=
     return bruteforce_scan(urls, str(wordlists["three_letters"]["path"]))
 
 
+@app.task(ignore_result=True, queue="scanners")
 def brute_known_subdomains(organizations: List[Organization]=None, urls: List[Url]=None):
     if organizations:
         for organization in organizations:
@@ -468,7 +472,8 @@ def nsec_scan(urls: List[Url]):
                 for rdata in answers:
                     UnboundLocalError: local variable 'answers' referenced before assignment
             """
-            logger.error('DNSRecon error: %s' % str(message))
+            logger.error('DNSRecon process error: %s' % str(message))
+
     return added
 
 

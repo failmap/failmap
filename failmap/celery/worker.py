@@ -35,6 +35,7 @@ WORKER_QUEUE_CONFIGURATION = {
         # endpoint discovery
         Queue('scanners.endpoint_discovery.ipv4'),
         Queue('scanners.endpoint_discovery.ipv6'),
+        Queue('scanners.dns'),
     ],
     # special queue for handling tons of tasks that are rate limited (we don't want to broadcast
     # hundreds of thousands of tasks at the same time since that looks like hostile internet traffic)
@@ -57,6 +58,11 @@ WORKER_QUEUE_CONFIGURATION = {
     # special scanner worker for qualys rate limited tasks to not block queue for other tasks
     'scanner_qualys': [
         Queue('scanners.qualys'),
+    ],
+    # special scanner worker to handle tons of dns queries
+    'scanner_dns': [
+        Queue('scanners'),
+        Queue('scanners.dns'),
     ],
     # scanner with no IPv6 connectivity
     # this is an initial concept and can later be replaced with universal

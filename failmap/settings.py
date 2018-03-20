@@ -318,7 +318,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console'],  # used when there is no logger defined or loaded.
+            'handlers': ['console'],  # used when there is no log defined or loaded.
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
         'django': {

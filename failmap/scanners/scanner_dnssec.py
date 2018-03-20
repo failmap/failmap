@@ -44,6 +44,7 @@ RETRY_DELAY = 10
 EXPIRES = 3600  # one hour is more then enough
 
 
+@app.task(queue='storage')
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

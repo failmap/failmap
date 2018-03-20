@@ -212,6 +212,12 @@ def scan_urls_on_standard_ports(urls: List[Url]):
     scan_urls(["https"], urls, STANDARD_HTTPS_PORTS)
 
 
+@app.task
+def discover_endpoints_on_standard_ports(urls: List[Url]):
+    scan_urls(["http"], urls, STANDARD_HTTP_PORTS)
+    scan_urls(["https"], urls, STANDARD_HTTPS_PORTS)
+
+
 def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
 
     if not has_internet_connection():
@@ -450,10 +456,10 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
 @app.task(queue='storage')
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     logger.info("%s %s" % (url, result))
-    # logger.info("%s %s" % (url, url))
-    # logger.info("%s %s" % (url, port))
-    # logger.info("%s %s" % (url, protocol))
-    # logger.info("%s %s" % (url, ip_version))
+    # log.info("%s %s" % (url, url))
+    # log.info("%s %s" % (url, port))
+    # log.info("%s %s" % (url, protocol))
+    # log.info("%s %s" % (url, ip_version))
 
     if result:
         save_endpoint(protocol, url, port, ip_version)
