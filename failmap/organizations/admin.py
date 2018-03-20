@@ -172,14 +172,15 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         else:
             return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
 
-
     @staticmethod
     def wikidata_(self):
-        return format_html("<a href='https://www.wikidata.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikidata, self.wikidata))
+        return format_html("<a href='https://www.wikidata.org/wiki/%s' target='_blank'>🔍 %s</a>" %
+                           (self.wikidata, self.wikidata))
 
     @staticmethod
     def wikipedia_(self):
-        return format_html("<a href='https://www.wikipedia.org/wiki/%s' target='_blank'>🔍 %s</a>" % (self.wikipedia, self.wikipedia))
+        return format_html("<a href='https://www.wikipedia.org/wiki/%s' target='_blank'>🔍 %s</a>" %
+                           (self.wikipedia, self.wikipedia))
 
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/

@@ -1,26 +1,24 @@
 import json
 import logging
+import os.path
 import subprocess
+import time
 from datetime import datetime
 from subprocess import CalledProcessError
 from typing import Dict
 
 import pytz
 import requests
+import tldextract
+from clint.textui import progress
 from django.conf import settings
 from django.db import transaction
 from rdp import rdp
-import tldextract
 from wikidata.client import Client
 
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
-from ..celery import app
-
 log = logging.getLogger(__package__)
-import os.path
-import time
-from clint.textui import progress
 
 
 # the map should look seamless when you're looking at the entire country, region etc. If it doesn't, increase
@@ -339,7 +337,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         More on overpass can be found here: https://wiki.openstreetmap.org/wiki/Overpass_API
 
         The OSM file needs to be converted to paths etc.
-        
+
         How administrative boundaries work, with a list of admin levels:
         https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
     """

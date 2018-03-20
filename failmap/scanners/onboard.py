@@ -3,12 +3,12 @@ from datetime import datetime
 from typing import List
 
 import pytz
+from celery import chain
 
 from failmap.organizations.models import Url
-from failmap.scanners import (scanner_security_headers, scanner_plain_http, scanner_http, scanner_dnssec,
-                              scanner_tls_qualys, scanner_screenshot)
+from failmap.scanners import (scanner_dnssec, scanner_http, scanner_plain_http, scanner_screenshot,
+                              scanner_security_headers, scanner_tls_qualys)
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
-from celery import group, chain, chord
 
 from ..celery import app
 
@@ -69,16 +69,18 @@ def onboard_urls(urls: List[Url]):
     #          )
 
     # all tasks sequentially per url... url(a,b,c).
-    tasks = chain(chain(certificate_transparency.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
-                        , nsec.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
-                        , brute_known_subdomains.si(urls=[url]) if url.is_top_level() else ignore_hack.si()
-                        , scanner_dnssec.compose_task.si(urls_filter={"url": url}) if url.is_top_level() else ignore_hack.si()
-                        , scanner_http.discover_endpoints_on_standard_ports.si(urls=[url])
-                        , scanner_plain_http.scan_url.si(url=url)
-                        , scanner_screenshot.screenshot_url.si(url=url)
-                        , scanner_security_headers.compose_task.si(urls_filter={"url": url})
-                        , scanner_tls_qualys.compose_task.si(urls_filter={"url": url})
-                        , finish_onboarding.si(url=url)) for url in urls)
+    tasks = chain(
+        chain(
+            certificate_transparency.si(urls=[url]) if url.is_top_level() else ignore_hack.si(),
+            nsec.si(urls=[url]) if url.is_top_level() else ignore_hack.si(),
+            brute_known_subdomains.si(urls=[url]) if url.is_top_level() else ignore_hack.si(),
+            scanner_dnssec.compose_task.si(urls_filter={"url": url}) if url.is_top_level() else ignore_hack.si(),
+            scanner_http.discover_endpoints_on_standard_ports.si(urls=[url]),
+            scanner_plain_http.scan_url.si(url=url),
+            scanner_screenshot.screenshot_url.si(url=url),
+            scanner_security_headers.compose_task.si(urls_filter={"url": url}),
+            scanner_tls_qualys.compose_task.si(urls_filter={"url": url}),
+            finish_onboarding.si(url=url)) for url in urls)
     tasks.apply_async()
 
 

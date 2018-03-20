@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='wikidata',
-            field=models.CharField(blank=True, help_text='Reference to the wikidata project. Example:Q9928', max_length=255, null=True),
+            field=models.CharField(
+                blank=True, help_text='Reference to the wikidata project. Example:Q9928', max_length=255, null=True),
         ),
         migrations.AddField(
             model_name='organization',
             name='wikipedia',
-            field=models.CharField(blank=True, help_text='Reference to the wikipedia article, including the correct wiki. Example: nl:Heemstede (Noord-Holland)', max_length=255, null=True),
+            field=models.CharField(
+                blank=True, help_text='Reference to the wikipedia article, including the correct wiki. Example: nl:Heemstede (Noord-Holland)', max_length=255, null=True),
         ),
     ]
