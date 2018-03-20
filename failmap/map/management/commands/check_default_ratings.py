@@ -11,4 +11,4 @@ class Command(BaseCommand):
     help = 'Gives a default rating to organizations. If they don\'t have one.'
 
     def handle(self, *args, **options):
-        default_organization_rating()
+        default_organization_rating([])

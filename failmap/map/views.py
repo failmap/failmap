@@ -17,7 +17,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import Organization, Promise, Url
+from failmap.organizations.models import Organization, Promise, Url, OrganizationType
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
@@ -33,8 +33,14 @@ ten_minutes = 60 * 10
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
 
-# contains the OrganizationTypes table, an extra query is weirdly expensive.
-ORGANIZATION_TYPES = {"municipality": 1, "cyber": 2}
+
+# even while this might be a bit expensive (caching helps), it still is more helpful then
+# defining everything by hand.
+def get_organization_type(name: str):
+    try:
+        return OrganizationType.objects.get(name=name).id
+    except OrganizationType.DoesNotExist:
+        return 1
 
 
 @cache_page(one_hour)
@@ -129,10 +135,11 @@ def manifest_json(request):
 
 def organizationtype_exists(request, organization_type_name):
 
-    if organization_type_name in ORGANIZATION_TYPES:
-        return JsonResponse({"set": True}, encoder=JSEncoder)
-
-    return JsonResponse({"set": False}, encoder=JSEncoder)
+    try:
+        if OrganizationType.objects.get(name=organization_type_name).id:
+            return JsonResponse({"set": True}, encoder=JSEncoder)
+    except OrganizationType.DoesNotExist:
+        return JsonResponse({"set": False}, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)
@@ -249,7 +256,7 @@ def terrible_urls(request, organization_type="municipality", weeks_back=0):
             HAVING(`high`) > 0
             ORDER BY `high` DESC, `medium` DESC, `low` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+            ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
     # print(sql)
     cursor.execute(sql)
 
@@ -327,7 +334,7 @@ def top_fail(request, organization_type="municipality", weeks_back=0):
             HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+            ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
 
     cursor.execute(sql)
     # print(sql)
@@ -404,7 +411,7 @@ def top_win(request, organization_type="municipality", weeks_back=0):
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
             LIMIT 10
-            ''' % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+            ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
     cursor.execute(sql)
 
     rows = cursor.fetchall()
@@ -469,7 +476,7 @@ def stats(request, organization_type="municipality", weeks_back=0):
                ON x.id2 = map_organizationrating.id
                INNER JOIN organization ON map_organizationrating.organization_id = organization.id
                WHERE organization.type_id = '%(OrganizationTypeId)s'
-               """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+               """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
 
         # log.debug(sql)
 
@@ -624,7 +631,7 @@ def vulnerability_graphs(request, organization_type="municipality", weeks_back=0
                INNER JOIN url_organization on url.id = url_organization.url_id
                INNER JOIN organization ON url_organization.organization_id = organization.id
                 WHERE organization.type_id = '%(OrganizationTypeId)s'
-            """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+            """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
 
         # print(sql)
 
@@ -793,7 +800,7 @@ def map_data(request, organization_type="municipality", weeks_back=0):
         WHERE organization.type_id = '%(OrganizationTypeId)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        """ % {"when": when, "OrganizationTypeId": ORGANIZATION_TYPES.get(organization_type, 1)}
+        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
     # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
@@ -864,14 +871,14 @@ def latest_scans(request, scan_type, organization_type="municipality"):
 
     if scan_type == "tls_qualys":
         scans = list(TlsQualysScan.objects.filter(
-            endpoint__url__organization__type=ORGANIZATION_TYPES.get(organization_type, 1)
+            endpoint__url__organization__type=get_organization_type(organization_type)
         ).order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                      "plain_https"]:
         scans = list(EndpointGenericScan.objects.filter(
             type=scan_type,
-            endpoint__url__organization__type=ORGANIZATION_TYPES.get(organization_type, 1)
+            endpoint__url__organization__type=get_organization_type(organization_type)
         ).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
