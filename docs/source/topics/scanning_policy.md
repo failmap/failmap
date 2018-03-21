@@ -11,13 +11,16 @@ Daily scans:
 
 - Endpoint discovery (looking for new endpoints and cleaning up old ones)
 - HTTP headers
-- Endpoints missing encryption
+- Missing encryption
 - DNSSEC
 
 Weekly scans:
 
 - New subdomains (using various methods)
 - TLS quality using Qualys SSL Labs
+
+
+Not all scans are published and a variety of scans will be implemented in the coming weeks.
 
 
 **Endpoint discovery**
@@ -34,7 +37,53 @@ Since it's possible to host a website on any port, failmap also scans for the ex
 The existence of an endpoint in itself is not rated. This is implicit: the more endpoints, the more risk.
 
 **HTTP Headers**
+The following HTTP headers are scanned:
 
+- HTTP Strict Transport Security
+Documented here:
+Maximum severity: medium / orange
+
+- X-Frame Options
+Documented here:
+Maximum severity: medium / orange
+
+- X-XSS-Options:
+Documented here:
+Maximum severity: low / green
+
+- X-Content-Type-Options:
+Documented here:
+Maximum severity: low / green
+
+**Missing encryption**
+Offering encryption is a must.
+
+There are two sides to encryption: first it aims to make it impossible
+to see what is being transmitted, second: it guarantees the integrity of the data during transport. This is also a
+valuable property on public data that is often overlooked.
+
+In discussion the confidentiality argument is often dismissed when "public" or "open" data is published. Yet, the act
+of accessing this data (who, when) in itself is in itself an act that is private. Thus not providing encryption for
+the "open" data means deciding to sacrifice the privacy of the user of that data.
+
+In the case of "open" data offering both an encrypted and non-encrypted endpoint might be a solution for people and
+devices that don't have access to encryption.
+
+Maximum severity: high / red
+
+**DNSSEC**
+Documented here:
+Maximum severity: -not published on the map yet-, probably orange or red.
+
+
+**New subdomains**
+Every week urls are scanned for new subdomains using various methods.
+
+**Transport Layer Security (Qualys)**
+Qualys offers the excellent tool SSL Labs, which does a very comprehensive scan of the TLS connection and the associated
+trust. They have documented their scanning procedure here:
+
+Maximum severity: high / red
 
 
 ## Special cases
@@ -81,82 +130,14 @@ Similarly, since a redirect is a flag not to render the content, the content can
 This also means no X-XSS-Protection or X-Content-Type-Options are needed. So just follow all redirects.
 
 
+## Decency
+Failmap scans a lot of domains, subdomains and ulitmately endpoints. It tries to do so with minimum contact, as to
+never interfere with operations.
+
+Failmap does not publish issues that can lead to additional risk for either organizations
+as for users of those websites. Any more severe issues are handled on a case by case base using responsible disclosure.
 
 
-
-## Supported scans
-
-| Scan                | Port(s)     | IPv Support | Protocols | Rate limit | Rotation               |
-| :------------------ | :---------- | :---------- | :-------- | :--------- | :---------             |
-| DNS                 | A/AAAA      | -           | DNS       | No         | Not yet automated      |
-| Endpoint discovery  | Defaults    | 4           | http(s)   | No         | Per 3 days             |
-| TLS (qualys)        | 443         | 4, 6        | TLS       | 1/minute   | Per 3 days             |
-| Headers             | Any http(s) | 4           | http(s)   | No         | Daily                  |
-| Screenshots         | Any http(s) | 4           | http(s)   | 1 thread   | Not yet automated      |
-| Plain HTTPS         | Any http(s) | 4           | http(s)   | No         | Daily                  |
-| DNSSEC              | -           | -           | DNS       | No         | Daily                  |
-
-
-### DNS
-The DNS scanner tries to find hostnames using various strategies:
-- Brute force on a subdomain list (existing subdomains only)
-- Looking at NSEC1 hashes
-- Looking at Certificate transparency
-
-Less popular, not fully automated, but also implemented:
-- brute forcing dictionaries
-- looking in search engines
-
-### Endpoint Discovery
-Tries to find HTTP(s) endpoints on standard HTTP(s) ports. A normal website currently has about four endpoints:
-- IPv6 port 80, redirect to port 443
-- IPv6 port 443, actual website
-- IPv4 port 80, redirect to port 443
-- IPv4 port 443, actual website
-
-We store them separately as implementation mistakes might occur on any of these endpoints.
-
-### TLS (qualys)
-Runs a scan on ssllabs from Qualys and incorporates the result.
-
-### Headers
-Contacts an endpoint and verifies HTTP headers for various security settings. (HSTS etc)
-
-### Screenshots
-Uses chrome headless to contact a website and make a screenshot for it. This screenshow it displayed next to the results
-in the report.
-
-### Plain HTTPS
-Checks if a website that only has a site on port 80 also has a secure equivalent. No port-80-only sites should exist.
-
-### DNSSEC
-Checks if the toplevel domain implements DNSSEC correctly. Uses the dotSE scanner which is included.
-
-## Scheduling
-Scanners are scheduled as periodic tasks in Django admin. They are disabled by default and might not all be included in
-the source distribution. Creating a scan is actually easy. For example:
-
-- General/Name: discover-endpoints
-- General/Enabled: Yes
-- General/Task: discover-endpoints
-- Schedule/Interval: every 3 days
-- Arguments/Arguments: ["failmap.scanners.scanner_http"]
-- Execution Options/Queue: storage
-
-## Manual scans
-
-### Command line
-The Scan command can help you:
-
-```bash
-failmap scan 'scanner name'
-```
-
-The message returned will tell you what scanners you can run manually. All scanners have the same set of options.
-
-### Admin interface
-It's possible to run manual scans, at the bottom of a selection.
-Note that this is beta functionality and please don't do this too much as the "priority" scanning queue is not functioning.
-You can try out a scan or two, some take a lot of time.
-
-![admin_actions](scanners_scanning_and_ratings/admin_actions.png)
+## Extra scans
+Admins of failmap may choose to run any scan at any moment. For example when handling tickets or on request by the
+organization (a re-scan). This doesn't happen too often.

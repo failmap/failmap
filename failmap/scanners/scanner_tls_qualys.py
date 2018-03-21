@@ -127,7 +127,8 @@ def compose_task(
 
     # 7 march 2018, qualys has new rate limits due to service outage.
     # We used to do 1/m which was fine, but we're now doing 1 every 2 minutes.
-    rate_limit='0.5/m',
+    # perhaps 0.5/m doesn't work... should maybe be.
+    rate_limit='30/h',
 )
 def qualys_scan(self, url):
     """Acquire JSON scan result data for given URL from Qualys.
