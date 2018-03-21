@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
+from djgeojson.fields import GeoJSONField
 from jsonfield import JSONField
 
 logger = logging.getLogger(__package__)
@@ -113,10 +114,21 @@ class Coordinate(models.Model):
         blank=True,
         null=True,
         choices=GEOJSON_TYPES)
+
     area = JSONField(
         max_length=10000,
+        blank=True,
         help_text="GeoJson using the WGS84 (EPSG 4326) projection. Use simplified geometries to "
-                  "reduce the amount of data to transfer."
+                  "reduce the amount of data to transfer. Editing both this and the edit_area, this will take "
+                  "preference."
+    )
+
+    edit_area = GeoJSONField(
+        max_length=10000,
+        null=True,
+        blank=True,
+        help_text="The results of this field are saved in the area and geojsontype. It's possible to edit the area"
+                  " field directly, which overwrites this field. Changing both the manual option takes preference."
     )
 
     # stacking pattern for coordinates.

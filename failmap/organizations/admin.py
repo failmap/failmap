@@ -12,6 +12,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
+from leaflet.admin import LeafletGeoAdminMixin
 
 import failmap.scanners.scanner_http as scanner_http
 from failmap import types
@@ -381,11 +382,24 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', )
 
 
-class CoordinateAdmin(admin.ModelAdmin):
+class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
     list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
     search_fields = ('organization__name', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
-    fields = ('organization', 'created_on', 'is_dead', 'is_dead_since', 'is_dead_reason', 'geojsontype', 'area')
+
+    # We wanted to place these on another tab, otherwise leaflet blocks mouse scrolling (which is annoying).
+    # But then leaflet doesn't initialize properly, making the map unworkable. So they're on the first tab anyway.
+    fieldsets = (
+        (None, {
+            'description': "The Edit area makes it easier to manipulate the Area and Geojsontype. Yet: when both are "
+                           "changed, the Area/GeoJsontype takes precedence.",
+            'fields': ('organization', 'geojsontype', 'area', 'edit_area')
+        }),
+
+        ('Life cycle', {
+            'fields': ('created_on', 'is_dead', 'is_dead_since', 'is_dead_reason'),
+        }),
+    )
 
 
 class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):

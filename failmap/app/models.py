@@ -9,7 +9,6 @@ from django.contrib.auth.models import User
 from django.db import models
 from jsonfield import JSONField
 
-from ..app.common import ResultEncoder
 from ..celery import app
 
 
@@ -21,7 +20,8 @@ class Job(models.Model):
     result_id = models.CharField(unique=True, null=True, blank=True, max_length=255,
                                  help_text="celery asyncresult ID for tracing task")
     status = models.CharField(max_length=255, help_text="status of the job")
-    result = JSONField(help_text="output of the task as JSON", encoder_class=ResultEncoder)
+    result = JSONField(help_text="output of the task as JSON")  # JSONfield (not django-jsonfield) does not
+    # encoder_class=ResultEncoder
 
     created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True, help_text="when task was created")
     finished_on = models.DateTimeField(blank=True, null=True, help_text="when task ended")

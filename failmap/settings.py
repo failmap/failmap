@@ -72,6 +72,8 @@ INSTALLED_APPS = [
     'django_statsd',
     'constance',
     'constance.backends.database',
+    'leaflet',
+    'djgeojson'
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light

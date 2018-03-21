@@ -8,7 +8,9 @@
 django
 django-jet
 django-countries
-django-jsonfield
+django-leaflet  # geojson editor in admin
+django-geojson [field]  # geojson editor in admin
+# django-jsonfield
 django-import-export
 django-constance[database]
 
