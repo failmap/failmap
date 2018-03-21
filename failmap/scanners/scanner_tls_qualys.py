@@ -196,7 +196,8 @@ def qualys_scan(self, url):
     20 to 25, simply because it matters very little when scans are ran parralel.
     https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     """
-    log.info('Still waiting for Qualys result. Retrying task in 15 seconds. Status: %s' % data.get('status', "unknown"))
+    log.info('Still waiting for Qualys result on %s. Retrying task in 120 seconds. Status: %s' %
+             url.url, data.get('status', "unknown"))
     # not tested yet: report_to_console(url.url, data)
     # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
     # The 'retry' converts this task instance from a rate_limited into a
@@ -208,7 +209,7 @@ def qualys_scan(self, url):
     # the more often you try to get the status, on the more workers it will run (increasing concurrency)
     # so if we check after two minutes, there will be a lot less workers with increasing concurrency as the
     # scan will probably be finished by then.
-    raise self.retry(countdown=180, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
+    raise self.retry(countdown=120, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
 
 
 @app.task(queue='storage')

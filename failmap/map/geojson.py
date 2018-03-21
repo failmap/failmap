@@ -48,6 +48,7 @@ queries = {
     "DE": {
         # Don't even try to translate (or understand) German regions. Just take it as it is, name it like they do.
         # https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
+        # Here is a nice image to help you: https://en.wikipedia.org/wiki/Districts_of_Germany
         "bundesland":
             'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
         "regierungsbezirk":

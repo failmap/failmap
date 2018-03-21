@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-19 15:58+0000\n"
+"POT-Creation-Date: 2018-03-21 20:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,60 +18,60 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:69 failmap/map/static/js/views.js:436
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:436
 #: failmap/map/static/js/views.js:441 failmap/map/static/js/views.js:444
 msgid "View Full Screen"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:116
+#: failmap/map/static/js/failmap.js:118
 msgid "Search organization"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:137 failmap/map/static/js/failmap.js:141
+#: failmap/map/static/js/failmap.js:139 failmap/map/static/js/failmap.js:143
 msgid "High"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:138 failmap/map/static/js/failmap.js:142
+#: failmap/map/static/js/failmap.js:140 failmap/map/static/js/failmap.js:144
 msgid "Medium"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:139 failmap/map/static/js/failmap.js:143
+#: failmap/map/static/js/failmap.js:141 failmap/map/static/js/failmap.js:145
 msgid "Low"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:171
+#: failmap/map/static/js/failmap.js:173
 msgid "Loading"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:189
+#: failmap/map/static/js/failmap.js:191
 msgid "Url"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:190
+#: failmap/map/static/js/failmap.js:192
 msgid "H"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:191
+#: failmap/map/static/js/failmap.js:193
 msgid "M"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:192
+#: failmap/map/static/js/failmap.js:194
 msgid "L"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:211
+#: failmap/map/static/js/failmap.js:213
 msgid "Good"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:212
+#: failmap/map/static/js/failmap.js:214
 msgid "Mediocre"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:213
+#: failmap/map/static/js/failmap.js:215
 msgid "Bad"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:214
+#: failmap/map/static/js/failmap.js:216
 msgid "Unknown"
 msgstr ""
 

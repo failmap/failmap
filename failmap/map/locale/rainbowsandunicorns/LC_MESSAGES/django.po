@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-19 15:58+0000\n"
+"POT-Creation-Date: 2018-03-21 20:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -164,8 +164,8 @@ msgid "Toggle navigation"
 msgstr "🌈"
 
 #: failmap/map/templates/map/index.html:86
-#: failmap/map/templates/map/index.html:131 failmap/map/views.py:79
-#: failmap/map/views.py:80
+#: failmap/map/templates/map/index.html:131 failmap/map/views.py:85
+#: failmap/map/views.py:86
 msgid "Fail Map"
 msgstr "🌈"
 
@@ -208,7 +208,7 @@ msgstr "🌈"
 msgid "Admin"
 msgstr "🌈"
 
-#: failmap/map/templates/map/index.html:132 failmap/map/views.py:81
+#: failmap/map/templates/map/index.html:132 failmap/map/views.py:87
 msgid "Fail Map Introduction"
 msgstr "🌈"
 
@@ -534,8 +534,8 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html:762
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:15
-#: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:988
-#: failmap/map/views.py:1054
+#: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:995
+#: failmap/map/views.py:1061
 msgid "High"
 msgstr "🌈"
 
@@ -543,8 +543,8 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html:763
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:16
-#: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:988
-#: failmap/map/views.py:1054
+#: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:995
+#: failmap/map/views.py:1061
 msgid "Medium"
 msgstr "🌈"
 
@@ -552,8 +552,8 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html:764
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:17
-#: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:988
-#: failmap/map/views.py:1054
+#: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:995
+#: failmap/map/views.py:1061
 msgid "Low"
 msgstr "🌈"
 
@@ -700,6 +700,6 @@ msgstr "🌈"
 msgid "This is the top win from"
 msgstr "🌈"
 
-#: failmap/map/views.py:987 failmap/map/views.py:1053
+#: failmap/map/views.py:994 failmap/map/views.py:1060
 msgid "Perfect"
 msgstr "🌈"
