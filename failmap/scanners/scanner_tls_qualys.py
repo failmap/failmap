@@ -208,7 +208,7 @@ def qualys_scan(self, url):
     # the more often you try to get the status, on the more workers it will run (increasing concurrency)
     # so if we check after two minutes, there will be a lot less workers with increasing concurrency as the
     # scan will probably be finished by then.
-    raise self.retry(countdown=120, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
+    raise self.retry(countdown=180, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
 
 
 @app.task(queue='storage')
