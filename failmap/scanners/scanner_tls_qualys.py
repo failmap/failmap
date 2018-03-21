@@ -29,7 +29,7 @@ from datetime import date, datetime, timedelta
 
 import pytz
 import requests
-from celery import Task, group
+from celery import Task, group, states
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -141,6 +141,12 @@ def qualys_scan(self, url):
     :return:
     """
 
+    state = self.AsyncResult(self.request.id).state
+    if state in [states.PENDING, states.STARTED]:
+        log.info("Started attempt to scan %s. State: %s " % (url, state))
+    if state == states.RETRY:
+        log.info("Scan on %s continued..." % url)
+
     # Query Qualys API for information about this URL.
     try:
         data = service_provider_scan_via_api(url.url)
@@ -183,14 +189,15 @@ def qualys_scan(self, url):
         else:
             log.exception("Unexpected error from API on %s: %s", url.url, str(data))
             # We don't have to keep on failing... lowering the amount of retries.
-            raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=5, queue='scanners.qualys')
+            raise self.retry(countdown=120, priorty=PRIO_NORMAL, max_retries=5, queue='scanners.qualys')
 
     """
     While the documentation says to check every 10 seconds, we'll do that between every
     20 to 25, simply because it matters very little when scans are ran parralel.
     https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     """
-    log.info('Still waiting for Qualys result. Retrying task in 15 seconds.')
+    log.info('Still waiting for Qualys result. Retrying task in 15 seconds. Status: %s' % data.get('status', "unknown"))
+    # not tested yet: report_to_console(url.url, data)
     # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
     # The 'retry' converts this task instance from a rate_limited into a
     # scheduled task, so retrying tasks won't interfere with new tasks to be
@@ -198,7 +205,10 @@ def qualys_scan(self, url):
     # We use a different queue here as only initial requests count toward the rate limit set by Qualys.
     # Do note: this really needs to be picked up within the first five minutes of starting the scan. If you don't
     # a new scan is started on this url and you'll run into rate limiting problems.
-    raise self.retry(countdown=15, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
+    # the more often you try to get the status, on the more workers it will run (increasing concurrency)
+    # so if we check after two minutes, there will be a lot less workers with increasing concurrency as the
+    # scan will probably be finished by then.
+    raise self.retry(countdown=120, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
 
 
 @app.task(queue='storage')
@@ -241,36 +251,22 @@ def report_to_console(domain, data):
     :param data:
     :return:
     """
-    if 'status' in data.keys():
-        if data['status'] == "READY":
-            for endpoint in data['endpoints']:
-                if 'grade' in endpoint.keys():
-                    log.debug("%s (%s) = %s" % (domain, endpoint['ipAddress'], endpoint['grade']))
-                else:
-                    log.debug("%s = No TLS (0)" % domain)
-                    log.debug("Message: %s" % endpoint['statusMessage'])
 
-        if data['status'] == "DNS" or data['status'] == "ERROR":
-            if 'statusMessage' in data.keys():
-                log.debug("%s: Got message: %s", data['status'], data['statusMessage'])
-            else:
-                log.debug("%s: Got message: %s", data['status'], data)
+    status = data.get('status', 'unknown')
 
-        if data['status'] == "IN_PROGRESS":
-            for endpoint in data['endpoints']:
-                if 'statusMessage' in endpoint.keys():
-                    log.debug(
-                        "Domain %s in progress. Endpoint: %s. Msgs: %s "
-                        % (domain, endpoint['ipAddress'], endpoint['statusMessage']))
-                else:
-                    log.debug(
-                        "Domain %s in progress. Endpoint: %s. "
-                        % (domain, endpoint['ipAddress']))
-    else:
-        # no idea how to handle this, so dumping the data...
-        # ex: {'errors': [{'message': 'Concurrent assessment limit reached (7/7)'}]}
-        log.error("Unexpected data received for domain: %s" % domain)
-        log.error(data)
+    if status == "READY":
+        for endpoint in data['endpoints']:
+            log.debug("%s (IP: %s) = %s" % (domain, endpoint['ipAddress'], endpoint.get('grade', 'No TLS')))
+
+    if status in ['DNS', 'ERROR']:
+        log.debug("%s %s: Got message: %s", domain, data['status'], data.get('statusMessage', 'unknown'))
+
+    if data['status'] == "IN_PROGRESS":
+        for endpoint in data['endpoints']:
+            log.debug("%s, ep: %s. status: %s" % (domain, endpoint['ipAddress'], endpoint.get('statusMessage', '0')))
+
+    if status == 'unknown':
+        log.error("Unexpected data received for domain: %s, %s" % (domain, data))
 
 
 def service_provider_scan_via_api(domain):

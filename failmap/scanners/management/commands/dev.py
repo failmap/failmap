@@ -14,6 +14,7 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
+        do_a_few_things()
         return
         # develop_determineratings()
         # test_can_connect_to_organization()
@@ -31,6 +32,15 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def do_a_few_things():
+    from failmap.scanners.tasks import every_two_minutes
+    i = 30
+
+    while i > 0:
+        i -= 1
+        every_two_minutes.s(i).apply_async()
 
 
 def reset_onboard():
