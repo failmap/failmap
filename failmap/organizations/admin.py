@@ -383,6 +383,15 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
+
+    # show Europe as default. Will probably change over time.
+    # http://django-leaflet.readthedocs.io/en/latest/advanced.html
+    # If you copy this setting from a point, be sure to switch x and y when pasting in default center.
+    settings_overrides = {
+        'DEFAULT_CENTER': (51.376378068613406, 13.223944902420046),
+        'DEFAULT_ZOOM': 4
+    }
+
     list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
     search_fields = ('organization__name', 'geojsontype')
     list_filter = ('organization', 'geojsontype')
@@ -392,7 +401,11 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
     fieldsets = (
         (None, {
             'description': "The Edit area makes it easier to manipulate the Area and Geojsontype. Yet: when both are "
-                           "changed, the Area/GeoJsontype takes precedence.",
+                           "changed, the Area/GeoJsontype takes precedence."
+                           ""
+                           "If you want to move the coordinate, preferably do so by creating a new one and setting the"
+                           " current one as dead (+date etc). Then the map will show coordinates over time, which is "
+                           "pretty neat.",
             'fields': ('organization', 'geojsontype', 'area', 'edit_area')
         }),
 
@@ -400,6 +413,41 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
             'fields': ('created_on', 'is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
+
+    def save_model(self, request, obj, form, change):
+
+        logger.info(form.changed_data)
+        # grrr, both area and edit_area are ALWAYS changed... even if you didn't change the values in these
+        # fields... this is obviously a bug or "optimization". We now have to resort to queries to figure out
+        # if anything changed at all. Evil bugs.
+
+        if obj.pk:
+            # we're changing the object
+            current = Coordinate.objects.get(pk=obj.pk)
+
+            if current.area != obj.area or current.geojsontype != obj.geojsontype:
+                # if 'area' in form.changed_data or 'geojsontype' in form.changed_data: doesn't work.
+                logger.info("area changed")
+                edit_area = {"type": form.cleaned_data['geojsontype'],
+                             "coordinates": form.cleaned_data['area']}
+                obj.edit_area = edit_area
+
+            elif current.edit_area != obj.edit_area:
+                logger.info("edit area changed")
+                logger.info(form.cleaned_data["edit_area"])
+                obj.geojsontype = form.cleaned_data["edit_area"]["type"]
+                obj.area = form.cleaned_data["edit_area"]["coordinates"]
+        else:
+            # new object... see if there are empty fields we can ammend:
+            if (not obj.area or not obj.geojsontype) and obj.edit_area:
+                obj.geojsontype = form.cleaned_data["edit_area"]["type"]
+                obj.area = form.cleaned_data["edit_area"]["coordinates"]
+            elif not obj.edit_area:
+                edit_area = {"type": form.cleaned_data['geojsontype'],
+                             "coordinates": form.cleaned_data['area']}
+                obj.edit_area = edit_area
+
+        super().save_model(request, obj, form, change)
 
 
 class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
