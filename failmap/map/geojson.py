@@ -5,7 +5,7 @@ import subprocess
 import time
 from datetime import datetime
 from subprocess import CalledProcessError
-from typing import Dict
+from typing import Dict, List
 
 import pytz
 import requests
@@ -27,30 +27,159 @@ resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
 
+queries = {
+    "NL": {
+        # 4: province, 5: water board, 8: municipality, 9: stadsdelen, 10: settlements, 11: neighborhoods (wijken)
+        "municipality":
+            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+        # empty :(
+        "water board":
+            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
+        "province":
+            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
+    },
+    "SE": {
+        # 3: "landsdeel", 7: municipality,  8: district, 4: province,
+        "municipality":
+            'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+        "province":
+            'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
+    },
+    "DE": {
+        # Don't even try to translate (or understand) German regions. Just take it as it is, name it like they do.
+        # https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
+        "bundesland":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
+        "regierungsbezirk":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
+        "landkreis_kreis_kreisfreie_stadt":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+        "samtgemeinde_verwaltungsgemeinschaft":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+        "stadt_gemeinde":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+        "stadtbezirk_gemeindeteil_mit_selbstverwaltung":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=9]; out geom;',
+        "stadtteil_gemeindeteil_ohne_selbstverwaltung":
+            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=10]; out geom;',
+    },
+    "FR": {
+        # Communes
+        # Use name=* to indicate the name of the commune, and
+        # ref:INSEE=* to indicate the unique identifier given by INSEE (COG).
+        "municipality":
+            'area[name="France"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+    },
+    "NO": {
+        # Muncipiality (Kommue) (430) Example: Stavanger, Sandnes etc
+        "municipality":
+            'area[name="Norge"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+    },
+    "FI": {
+        # Kunnat / Kaupungit, LAU 2, for ref=*, see Väestörekisterikeskus, kuntaluettelo): Helsinki
+        # municipality
+        "municipality":
+            'area[name="Suomi"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+    },
+    "UK": {
+        # parishes / communities, probably not a municipality?
+        "municipality":
+            'area[name="United Kingdom"]->.gem; relation(area.gem)["type"="boundary"][admin_level=10]; out geom;',
+    },
+    "BE": {
+        # Municipalities
+        "municipality":
+            'area[name="België"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+    },
+    "ES": {
+        "municipality":
+            'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+        "province":
+            'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+    },
+    "PT": {
+        "municipality":
+            'area[name="Portugal"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+    },
+    "LU": {
+        "municipality":
+            'area[name="Luxembourg"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+    },
+    "DK": {
+        "municipality":
+            'area[name="Danmark"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+    },
+    "CH": {
+        "municipality":
+            'area[name="Schweiz/Suisse/Svizzera/Svizra"]->.gem; '
+            'relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+    },
+    "AT": {
+        "municipality":
+            'area[name="Österreich"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+    },
+    "IT": {
+        "municipality":
+            'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+        "province":
+            'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+    },
+    "IE": {
+        "municipality":
+            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+        "county":
+            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+        "province":
+            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
+    },
+    "IS": {
+        "municipality":
+            'area[name="Iceland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
+    },
+}
+
 
 @transaction.atomic
-def import_from_scratch(country: str = "NL", organization_type: str="municipality", when=None):
+def import_from_scratch(countries: List[str]=None, organization_types: List[str]=None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
     certain region.
 
-    :param country:
-    :param organization_type:
+    :param countries: uppercase list of 2-letter country codes.
+    :param organization_types: the types you want to import.
     :param when:
     :return:
     """
 
-    data = get_osm_data(country, organization_type)
-    for feature in data["features"]:
+    log.info("Countries: %s" % countries)
+    log.info("Region(s): %s" % organization_types)
 
-        if "properties" not in feature:
-            continue
+    if not countries or countries == [None]:
+        countries = ["NL"]
 
-        if "name" not in feature["properties"]:
-            continue
+    # paramter hate causes organization_types == [None]
+    if not organization_types or organization_types == [None]:
+        log.info("Going to get all existing organization types, and try to import them all.")
+        organization_types = list(OrganizationType.objects.all().values_list('name', flat=True))
 
-        resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
-        store_new(resample(feature, resolution), country, organization_type, when)
+    for country in countries:
+        for organization_type in organization_types:
+
+            if not queries.get(country, {}).get(organization_type, None):
+                log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
+                continue
+
+            data = get_osm_data(country, organization_type)
+            for feature in data["features"]:
+
+                if "properties" not in feature:
+                    continue
+
+                if "name" not in feature["properties"]:
+                    continue
+
+                resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
+                store_new(resample(feature, resolution), country, organization_type, when)
 
     log.info("Import finished.")
 
@@ -181,7 +310,7 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
     if "wikidata" in properties:
         client = Client()  # Q9928
         entity = client.get(properties["wikidata"], load=True)
-        website = str(entity[client.get("P856")])  # P856 == Official Website.
+        website = str(entity.get(client.get("P856"), None))  # P856 == Official Website.
 
         if not website:
             return
@@ -342,111 +471,6 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
     """
 
-    queries = {
-        "NL": {
-            # 4: province, 5: water board, 8: municipality, 9: stadsdelen, 10: settlements, 11: neighborhoods (wijken)
-            "municipality":
-                'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-            # empty :(
-            "water board":
-                'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-            "province":
-                'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
-        },
-        "SE": {
-            # 3: "landsdeel", 7: municipality,  8: district, 4: province,
-            "municipality":
-                'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-            "province":
-                'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
-        },
-        "DE": {
-            # bundesland, NUTS 1
-            "federal state":
-                'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=3]; out geom;',
-            # county borders, NUTS 3 (Landkreis / Kreis / kreisfreie Stadt / Stadtkreis)
-            # probably not a province this time?
-            "province":
-                'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-            # Towns, Municipalities / City-districts (Stadt, Gemeinde) (LAU 2), because... yeah
-            "municipality":
-                'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "FR": {
-            # Communes
-            # Use name=* to indicate the name of the commune, and
-            # ref:INSEE=* to indicate the unique identifier given by INSEE (COG).
-            "municipality":
-                'area[name="France"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "NO": {
-            # Muncipiality (Kommue) (430) Example: Stavanger, Sandnes etc
-            "municipality":
-                'area[name="Norge"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        },
-        "FI": {
-            # Kunnat / Kaupungit, LAU 2, for ref=*, see Väestörekisterikeskus, kuntaluettelo): Helsinki
-            # municipality
-            "municipality":
-                'area[name="Suomi"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "UK": {
-            # parishes / communities, probably not a municipality?
-            "municipality":
-                'area[name="United Kingdom"]->.gem; relation(area.gem)["type"="boundary"][admin_level=10]; out geom;',
-        },
-        "BE": {
-            # Municipalities
-            "municipality":
-                'area[name="België"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "ES": {
-            "municipality":
-                'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-            "province":
-                'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        },
-        "PT": {
-            "municipality":
-                'area[name="Portugal"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        },
-        "LU": {
-            "municipality":
-                'area[name="Luxembourg"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        },
-        "DK": {
-            "municipality":
-                'area[name="Danmark"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        },
-        "CH": {
-            "municipality":
-                'area[name="Schweiz/Suisse/Svizzera/Svizra"]->.gem; '
-                'relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "AT": {
-            "municipality":
-                'area[name="Österreich"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        },
-        "IT": {
-            "municipality":
-                'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-            "province":
-                'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        },
-        "IE": {
-            "municipality":
-                'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-            "county":
-                'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-            "province":
-                'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-        },
-        "IS": {
-            "municipality":
-                'area[name="Iceland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        },
-    }
-
     query = queries.get(country, {}).get(organization_type, None)
 
     if not query:
@@ -457,12 +481,9 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     response = requests.post("http://www.overpass-api.de/api/interpreter",
                              data={"data": query, "submit": "Query"},
                              stream=True,
-                             timeout=(600, 600))
+                             timeout=(1200, 1200))
 
     response.raise_for_status()
-
-    print(response.headers)
-    dir(response.headers)
 
     with open(filename, 'wb') as f:
         # total_length = int(response.headers.get('content-length'))
@@ -472,7 +493,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         # 'Transfer-Encoding': 'chunked', 'Content-Type': 'application/osm3s+xml'}
         # overpass turbo does know this, probably _after_ downloading.
         # Assume 100 megabyte, NL = 40 MB. So give or take...
-        for block in progress.bar(response.iter_content(chunk_size=1024), expected_size=(102400000 / 1024) + 1):
+        for block in progress.bar(response.iter_content(chunk_size=1024), expected_size=(10240000 / 1024) + 1):
             if block:
                 f.write(block)
                 f.flush()

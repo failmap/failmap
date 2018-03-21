@@ -416,7 +416,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
 
     def save_model(self, request, obj, form, change):
 
-        logger.info(form.changed_data)
+        # logger.info(form.changed_data)
         # grrr, both area and edit_area are ALWAYS changed... even if you didn't change the values in these
         # fields... this is obviously a bug or "optimization". We now have to resort to queries to figure out
         # if anything changed at all. Evil bugs.
