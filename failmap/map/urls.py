@@ -8,7 +8,7 @@ from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, index,
                                manifest_json, map_data, organization_report,
                                organizationtype_exists, robots_txt, security_txt, stats,
                                terrible_urls, top_fail, top_win, updates_on_organization,
-                               vulnerability_graphs, wanted_urls)
+                               vulnerability_graphs, wanted_urls, changes)
 
 urlpatterns = [
     url(r'^$', index, name='failmap'),
@@ -36,6 +36,7 @@ urlpatterns = [
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
     url(r'^data/terrible_urls/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         terrible_urls, name='terrible urls'),
+    url(r'^data/changes/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/', changes, name='changes'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),

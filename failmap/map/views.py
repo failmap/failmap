@@ -535,11 +535,11 @@ def stats(request, organization_type="municipality", weeks_back=0):
 
                     for r in endpoint['ratings']:
                         # stats over all different ratings
-                        if r['type'] not in measurement["explained"].keys():
+                        if r['type'] not in measurement["explained"]:
                             measurement["explained"][r['type']] = {}
                             measurement["explained"][r['type']]['total'] = 0
                         if not r['explanation'].startswith("Repeated finding."):
-                            if r['explanation'] not in measurement["explained"][r['type']].keys():
+                            if r['explanation'] not in measurement["explained"][r['type']]:
                                 measurement["explained"][r['type']][r['explanation']] = 0
 
                             measurement["explained"][r['type']][r['explanation']] += 1
@@ -554,7 +554,7 @@ def stats(request, organization_type="municipality", weeks_back=0):
                                 added_endpoint = True
                                 endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
                                                                ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"))
-                                if endpointtype not in measurement["endpoint"].keys():
+                                if endpointtype not in measurement["endpoint"]:
                                     measurement["endpoint"][endpointtype] = 0
                                 measurement["endpoint"][endpointtype] += 1
                                 measurement["endpoints"] += 1
@@ -641,12 +641,12 @@ def vulnerability_graphs(request, organization_type="municipality", weeks_back=0
         for urlrating in urlratings:
 
             # rare occasions there are no endpoints.
-            if "endpoints" not in urlrating.calculation.keys():
+            if "endpoints" not in urlrating.calculation:
                 continue
 
             for endpoint in urlrating.calculation['endpoints']:
                 for rating in endpoint['ratings']:
-                    if rating['type'] not in measurement.keys():
+                    if rating['type'] not in measurement:
                         measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
 
                     if rating['type'] not in scan_types:
@@ -657,11 +657,11 @@ def vulnerability_graphs(request, organization_type="municipality", weeks_back=0
                     measurement[rating['type']]['low'] += rating['low']
 
         for scan_type in scan_types:
-            if scan_type not in stats.keys():
+            if scan_type not in stats:
                 stats[scan_type] = []
 
         for scan_type in scan_types:
-            if scan_type in measurement.keys():
+            if scan_type in measurement:
                 stats[scan_type].append({'date': when.date(),
                                          'high': measurement[scan_type]['high'],
                                          'medium': measurement[scan_type]['medium'],
@@ -717,6 +717,123 @@ def wanted_urls(request):
         data["organizations"].append(od)
 
     return JsonResponse(data, encoder=JSEncoder)
+
+
+@cache_page(ten_minutes)
+def changes(request, organization_type="municipality"):
+    # todo: adjustable timespan
+    # todo: adjustable weeks_back
+
+    # looks a lot like graphs, but then just subtract/add some values and done (?)
+
+    # compare the first urlrating to the last urlrating
+    # but do not include urls that don't exist.
+
+    sql = """SELECT map_urlrating.id as id, calculation FROM
+               map_urlrating
+           INNER JOIN
+           (SELECT MAX(id) as id2 FROM map_urlrating or2
+           WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+           ON x.id2 = map_urlrating.id
+           INNER JOIN url ON map_urlrating.url_id = url.id
+           INNER JOIN url_organization on url.id = url_organization.url_id
+           INNER JOIN organization ON url_organization.organization_id = organization.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
+        """ % {"when": datetime.now(pytz.utc), "OrganizationTypeId": get_organization_type(organization_type)}
+
+    newest_urlratings = UrlRating.objects.raw(sql)
+
+    # this of course doesn't work with the first day, as then we didn't measure
+    # everything (and the ratings for several issues are 0...
+    sql = """SELECT map_urlrating.id as id, calculation FROM
+               map_urlrating
+           INNER JOIN
+           (SELECT MAX(id) as id2 FROM map_urlrating or2
+           WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+           ON x.id2 = map_urlrating.id
+           INNER JOIN url ON map_urlrating.url_id = url.id
+           INNER JOIN url_organization on url.id = url_organization.url_id
+           INNER JOIN organization ON url_organization.organization_id = organization.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
+        """ % {"when": datetime.now(pytz.utc) - timedelta(days=31), "OrganizationTypeId": get_organization_type(organization_type)}
+
+    oldest_urlratings = UrlRating.objects.raw(sql)
+
+    old_measurement = {}
+    new_measurement = {}
+    scan_types = []
+
+    # stats for the newest, should be made a function:
+    for urlrating in newest_urlratings:
+
+        if "endpoints" not in urlrating.calculation:
+            continue
+
+        for endpoint in urlrating.calculation['endpoints']:
+            for rating in endpoint['ratings']:
+                if rating['type'] not in new_measurement:
+                    new_measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                if rating['type'] not in scan_types:
+                    scan_types.append(rating['type'])
+
+                new_measurement[rating['type']]['high'] += rating['high']
+                new_measurement[rating['type']]['medium'] += rating['medium']
+                new_measurement[rating['type']]['low'] += rating['low']
+
+    # and the oldest stats, which should be the same function
+    for urlrating in oldest_urlratings:
+
+        if "endpoints" not in urlrating.calculation:
+            continue
+
+        for endpoint in urlrating.calculation['endpoints']:
+            for rating in endpoint['ratings']:
+                if rating['type'] not in old_measurement:
+                    old_measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                if rating['type'] not in scan_types:
+                    scan_types.append(rating['type'])
+
+                old_measurement[rating['type']]['high'] += rating['high']
+                old_measurement[rating['type']]['medium'] += rating['medium']
+                old_measurement[rating['type']]['low'] += rating['low']
+
+    # and now do some magic to see the changes in this timespan:
+    changes = {}
+    for scan_type in scan_types:
+        if scan_type not in changes:
+            changes[scan_type] = []
+
+        if scan_type not in old_measurement:
+            old_measurement[scan_type] = {}
+
+        if scan_type not in new_measurement:
+            new_measurement[scan_type] = {}
+
+        changes[scan_type].append({
+            'old':
+                {'date': datetime.now(pytz.utc) - timedelta(days=31),
+                 'high': old_measurement[scan_type].get('high', 0),
+                 'medium': old_measurement[scan_type].get('medium', 0),
+                 'low': old_measurement[scan_type].get('low', 0),
+                 },
+            'new':
+                {'date': datetime.now(pytz.utc),
+                 'high': new_measurement[scan_type].get('high', 0),
+                 'medium': new_measurement[scan_type].get('medium', 0),
+                 'low': new_measurement[scan_type].get('low', 0),
+                 },
+            'improvements':
+                {'high': old_measurement[scan_type].get('high', 0) - new_measurement[scan_type].get('high', 0),
+                 'medium': old_measurement[scan_type].get('medium', 0) - new_measurement[scan_type].get('medium', 0),
+                 'low': old_measurement[scan_type].get('low', 0) - new_measurement[scan_type].get('low', 0),
+                 },
+        })
+
+    return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2})
+
+
 
 
 @cache_page(ten_minutes)
