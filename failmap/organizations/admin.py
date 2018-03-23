@@ -20,7 +20,7 @@ from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIp
-from failmap.scanners.models import Endpoint
+from failmap.scanners.models import Endpoint, EndpointGenericScan
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
@@ -61,6 +61,15 @@ class EndpointAdminInline(CompactInline):
     extra = 0
     show_change_link = True
     ordering = ["is_dead"]
+
+
+# A highly limiting feature of the django admin interface is that inlines only
+# go one level deep. Instead of N levels, and that nested inlines are not supported
+# by default and all other support is experimental (or provides a severely reduced interface.
+class EndpointGenericScanInline(CompactInline):
+    model = EndpointGenericScan
+    extra = 0
+    through = Endpoint
 
 
 class CoordinateAdminInline(CompactInline):
