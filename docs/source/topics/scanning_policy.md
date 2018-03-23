@@ -86,7 +86,7 @@ trust. They have documented their scanning procedure here:
 Maximum severity: high / red
 
 
-## Special cases
+## Special cases / Edge cases
 
 Since failmap is completely automated, there are some special cases that could help improving the result.
 
@@ -128,6 +128,22 @@ into other pages or frames.
 
 Similarly, since a redirect is a flag not to render the content, the content can't be manipulated.
 This also means no X-XSS-Protection or X-Content-Type-Options are needed. So just follow all redirects.
+
+
+**Wildcard domains cause certificate mismatches**
+It's impossible to automatically see what domains are / aren't used on wildcard DNS records. We often get requests
+to delete results because "the url has been deleted". Those requests are processed slowly and might affect the score
+presented for your organization for a while. We hear the major reason to use wildcards is to make it easier adding
+new services.
+
+Using a wildcard can have [unexpected side effects](https://security.stackexchange.com/questions/106728/is-lack-of-wildcard-dns-entry-a-security-vulnerability)
+but more importantly, it makes it harder to know/manage what outward facing IT your organization is managing: this
+might result in services running longer than expected.
+
+We don't recommend solving wildcard subdomains with wildcard certificates for [security reasons](https://www.whatissslcertificate.com/what-are-the-pros-and-cons-of-the-wildcard-ssl-certificate/),
+while technically you can.
+
+We recommend the automation in managing domains, certificates and IT in general.
 
 
 ## Decency

@@ -22,6 +22,7 @@ Failmap Documentation 🤣
    topics/docker
    topics/task_processing_system
    topics/user_guide
+   topics/scanning_policy
 
    topics/thanks
 
