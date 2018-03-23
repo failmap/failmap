@@ -80,3 +80,5 @@ rdp
 
 clint  # downloading stuff from overpass
 wikidata  # downloading data from wikidata
+
+django-nested-admin  # going deeper underground

@@ -32,6 +32,7 @@ admin_urls = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^jet/', include('jet.urls', 'jet')),
     url(r'^jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    url(r'^nested_admin/', include('nested_admin.urls')),
 ]
 frontend_urls = [
     url(r'^', include('failmap.map.urls')),

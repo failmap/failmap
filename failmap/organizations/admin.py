@@ -20,7 +20,7 @@ from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIp
-from failmap.scanners.models import Endpoint, EndpointGenericScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, TlsQualysScan
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
@@ -28,6 +28,7 @@ from failmap.scanners.scanner_screenshot import screenshot_urls
 from ..app.models import Job
 from ..celery import PRIO_HIGH
 from .models import Coordinate, Organization, OrganizationType, Promise, Url
+import nested_admin
 
 logger = logging.getLogger(__name__)
 
@@ -56,20 +57,75 @@ class UrlAdminInline(CompactInline):
     show_change_link = True
 
 
-class EndpointAdminInline(CompactInline):
+# A highly limiting feature of the django admin interface is that inlines only
+# go one level deep. Instead of N levels, and that nested inlines are not supported
+# by default and all other support is experimental (or provides a severely reduced interface.
+# https://github.com/theatlantic/django-nested-admin/ solves this, but misses support for the awesome compactinline
+# a bug is that three empty values are added in the list below.
+# perhaps the inline is fixable with some days of engineering, and might be worth while, but for now...
+# and for some reason that
+class EndpointGenericScanInline(nested_admin.NestedTabularInline):
+    model = EndpointGenericScan
+
+    can_delete = False
+
+    exclude = ['domain', 'evidence', 'rating_determined_on', 'last_scan_moment']
+
+    # this is purely informational, to save clicks when debugging.
+    readonly_fields = ('endpoint', 'type', 'rating', 'explanation', 'rating_determined_on_date',
+                       'last_scan_moment_date')
+
+    ordering = ['-rating_determined_on']
+
+    verbose_name = "Generic scan"
+    verbose_name_plural = "Generic scans"
+
+    @staticmethod
+    def rating_determined_on_date(obj):
+        # todo: should be formatted in humanized form.
+        return obj.rating_determined_on
+
+    @staticmethod
+    def last_scan_moment_date(obj):
+        return obj.last_scan_moment
+
+    def has_add_permission(self, request):
+        return False
+
+
+class TlsQualysScanInline(nested_admin.NestedTabularInline):
+    model = TlsQualysScan
+
+    can_delete = False
+
+    exclude = ['scan_date', 'scan_time']
+
+    # this is purely informational, to save clicks when debugging.
+    readonly_fields = ('qualys_rating', 'qualys_rating_no_trust', 'qualys_message', 'rating_determined_on',
+                       'last_scan_moment')
+
+    ordering = ['-rating_determined_on']
+
+    verbose_name = "Qualys TLS scan"
+    verbose_name_plural = "Qualys TLS scans"
+
+    def has_add_permission(self, request):
+        return False
+
+
+class EndpointAdminInline(nested_admin.NestedStackedInline):
     model = Endpoint
     extra = 0
     show_change_link = True
     ordering = ["is_dead"]
+    inlines = [EndpointGenericScanInline, TlsQualysScanInline]
 
 
-# A highly limiting feature of the django admin interface is that inlines only
-# go one level deep. Instead of N levels, and that nested inlines are not supported
-# by default and all other support is experimental (or provides a severely reduced interface.
-class EndpointGenericScanInline(CompactInline):
-    model = EndpointGenericScan
+class UrlGenericScanAdminInline(CompactInline):
+    model = UrlGenericScan
     extra = 0
-    through = Endpoint
+    show_change_link = True
+    ordering = ["-rating_determined_on"]
 
 
 class CoordinateAdminInline(CompactInline):
@@ -269,7 +325,7 @@ class MyUrlAdminForm(forms.ModelForm):
                 % (self.data.get("url"), self.data.get("url"), self.data.get("url")))))
 
 
-class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
+class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
     form = MyUrlAdminForm
 
     list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
@@ -331,7 +387,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         return format_html("%s <span style='color: red'>%s</span> <span style='color: orange'>%s</span> "
                            "<span style='color: yellow'>%s</span>" % (label, x.high, x.medium, x.low))
 
-    inlines = [EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
+    inlines = [UrlGenericScanAdminInline, EndpointAdminInline, UrlRatingAdminInline, UrlIpInline]
 
     actions = []
 

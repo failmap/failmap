@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # Jet admin dashboard
     'jet.dashboard',
     'jet',
+    'nested_admin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
