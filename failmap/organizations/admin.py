@@ -278,9 +278,13 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
             'fields': ('uses_dns_wildcard', ),
         }),
         ('Resolvability', {
+            'description': 'Non resolving urls cannot be reached anymore.',
             'fields': ('not_resolvable', 'not_resolvable_since', 'not_resolvable_reason'),
         }),
         ('dead URL management', {
+            'description': "Dead urls are not show on the map. They can be dead on layer 8 (for example when a "
+                           "wildcard DNS is used, but not a matching TLS certificate as wildcard certificates "
+                           "are rarely used due to drawbacks).",
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
