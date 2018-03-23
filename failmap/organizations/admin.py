@@ -19,7 +19,7 @@ from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
-from failmap.scanners.admin import UrlIpInline
+from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
@@ -82,6 +82,14 @@ class UrlRatingAdminInline(CompactInline):
     readonly_fields = ('url', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
     can_delete = False
     ordering = ["-when"]
+
+
+class UrlIpInline(CompactInline):
+    model = UrlIp
+    extra = 0
+    readonly_fields = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused', 'is_unused_since', 'is_unused_reason')
+    show_change_link = True
+    ordering = ["-discovered_on"]
 
 
 class PromiseAdminInline(CompactInline):

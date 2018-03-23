@@ -28,12 +28,6 @@ class EndpointGenericScanInline(CompactInline):
 #    model = TlsQualysScratchpad
 #    extra = 0
 
-class UrlIpInline(CompactInline):
-    model = UrlIp
-    extra = 0
-    show_change_link = True
-    ordering = ["-discovered_on"]
-
 
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
