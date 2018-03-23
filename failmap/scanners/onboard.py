@@ -6,7 +6,7 @@ import pytz
 from celery import chain
 
 from failmap.organizations.models import Url
-from failmap.scanners import (scanner_dnssec, scanner_http, scanner_plain_http, scanner_screenshot,
+from failmap.scanners import (scanner_dnssec, scanner_http, scanner_plain_http,
                               scanner_security_headers, scanner_tls_qualys)
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 

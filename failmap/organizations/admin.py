@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+import nested_admin
 import pytz
 import tldextract
 from django import forms
@@ -20,7 +21,7 @@ from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
 from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIp
-from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, TlsQualysScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
@@ -28,7 +29,6 @@ from failmap.scanners.scanner_screenshot import screenshot_urls
 from ..app.models import Job
 from ..celery import PRIO_HIGH
 from .models import Coordinate, Organization, OrganizationType, Promise, Url
-import nested_admin
 
 logger = logging.getLogger(__name__)
 
