@@ -69,25 +69,24 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):
 
     can_delete = False
 
-    exclude = ['domain', 'evidence', 'rating_determined_on', 'last_scan_moment']
+    exclude = ['domain', 'evidence']
 
     # this is purely informational, to save clicks when debugging.
-    readonly_fields = ('endpoint', 'type', 'rating', 'explanation', 'rating_determined_on_date',
-                       'last_scan_moment_date')
+    readonly_fields = ('endpoint', 'type', 'rating', 'explanation', 'rating_determined_on', 'last_scan_moment')
 
     ordering = ['-rating_determined_on']
 
     verbose_name = "Generic scan"
     verbose_name_plural = "Generic scans"
 
-    @staticmethod
-    def rating_determined_on_date(obj):
-        # todo: should be formatted in humanized form.
-        return obj.rating_determined_on
+    # @staticmethod
+    # def rating_determined_on_date(obj):
+    #     # todo: should be formatted in humanized form.
+    #     return obj.rating_determined_on
 
-    @staticmethod
-    def last_scan_moment_date(obj):
-        return obj.last_scan_moment
+    # @staticmethod
+    # def last_scan_moment_date(obj):
+    #     return obj.last_scan_moment
 
     def has_add_permission(self, request):
         return False

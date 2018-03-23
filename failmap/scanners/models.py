@@ -100,6 +100,12 @@ class Endpoint(models.Model):
     def is_ipv6(self):
         return self.ip_version == 6
 
+    @staticmethod
+    # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.
+    # jet only feature: http://jet.readthedocs.io/en/latest/autocomplete.html
+    def autocomplete_search_fields():
+        return 'url__url',
+
 
 class UrlIp(models.Model):
     """

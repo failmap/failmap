@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
+from jet.filters import RelatedFieldAjaxListFilter
 
 from failmap.map.rating import rate_url
 
@@ -165,8 +166,9 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     'explanation', 'last_scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
-    list_filter = ('type', 'rating',
+    list_filter = (('endpoint', RelatedFieldAjaxListFilter), 'type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')
+
     fields = ('endpoint', 'type', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
 
