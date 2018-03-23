@@ -77,7 +77,6 @@ def onboard_urls(urls: List[Url]):
             scanner_dnssec.compose_task.si(urls_filter={"url": url}) if url.is_top_level() else ignore_hack.si(),
             scanner_http.discover_endpoints_on_standard_ports.si(urls=[url]),
             scanner_plain_http.scan_url.si(url=url),
-            scanner_screenshot.screenshot_url.si(url=url),
             scanner_security_headers.compose_task.si(urls_filter={"url": url}),
             scanner_tls_qualys.compose_task.si(urls_filter={"url": url}),
             finish_onboarding.si(url=url)) for url in urls)
