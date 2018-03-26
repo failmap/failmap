@@ -532,3 +532,53 @@ path {
 #categorynavbar {
     margin-bottom: 0 !important;
 }
+
+.improvements_good {
+    color: green;
+    font-size: 40px;
+}
+
+.improvements_bad {
+    color: red;
+    font-size: 40px;
+}
+
+.improvements_good_large {
+    color: green;
+    font-size: 100px;
+}
+
+.improvements_bad_large {
+    color: red;
+    font-size: 100px;
+}
+
+.improvements_good:before {
+   content: "+";
+}
+
+.improvements_good_large:before {
+   content: "+";
+}
+
+.number-sm {
+    text-align: center;
+    background-color: #efefef;
+    border-radius: 10px;
+    border: 2px silver;
+    min-width: 112px;
+}
+
+.improvementstable {
+    border-spacing: 10px;
+    border-collapse: separate;
+    width: 100%;
+}
+
+.improvement_severity{
+    border-bottom: 2px solid silver;
+}
+
+[v-cloak] {
+  display: none;
+}

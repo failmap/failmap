@@ -659,6 +659,77 @@ function views() {
 
     });
 
+    /*
+    * {
+          "tls_qualys": [
+            {
+              "old": {
+                "date": "2018-02-23T08:02:52.779740+00:00",
+                "high": 1277,
+                "medium": 18,
+                "low": 783
+              },
+              "new": {
+                "date": "2018-03-26T08:02:52.779774+00:00",
+                "high": 916,
+                "medium": 3,
+                "low": 730
+              },
+              "improvements": {
+                "high": 361,
+                "medium": 15,
+                "low": 53
+              }
+            }
+          ],
+          "security_headers_strict_transport_security": [
+    * */
+    window.vueImprovements = new Vue({
+        el: '#issue_improvements',
+        mixins: [category_mixin],
+
+        mounted: function () {
+            this.load(0)
+        },
+
+        data: {
+            data: null,
+            tls_qualys: {high: 0, medium:0, low: 0},
+            security_headers_strict_transport_security: {high: 0, medium:0, low: 0},
+            security_headers_x_content_type_options: {high: 0, medium:0, low: 0},
+            security_headers_x_xss_protection: {high: 0, medium:0, low: 0},
+            security_headers_x_frame_options: {high: 0, medium:0, low: 0},
+            plain_https: {high: 0, medium:0, low: 0},
+            overall: {high: 0, medium:0, low: 0}
+        },
+
+        methods: {
+            load: function (weeks_ago) {
+
+                if (!weeks_ago) {
+                    weeks_ago = 0;
+                }
+
+                var self = this;
+                $.getJSON('/data/changes/' + this.category + '/' + weeks_ago + '/0', function (data) {
+                    self.data = data;
+                    self.tls_qualys = data.tls_qualys.improvements;
+                    self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
+                    self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
+                    self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
+                    self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
+                    self.plain_https = data.plain_https.improvements;
+                    self.overall = data.overall.improvements;
+                });
+            },
+            goodbad: function (value) {
+                if (value > -1)
+                    return "improvements_good";
+                return "improvements_bad"
+            }
+        }
+    });
+
     window.vueFullScreenReport = new Vue({
         el: '#fullscreenreport',
         mixins: [report_mixin],

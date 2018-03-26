@@ -720,9 +720,20 @@ def wanted_urls(request):
 
 
 @cache_page(ten_minutes)
-def changes(request, organization_type="municipality"):
+def changes(request, organization_type: str="municipality", weeks_back: int=0, weeks_duration: int=0):
     # todo: adjustable timespan
     # todo: adjustable weeks_back
+
+    weeks_back = int(weeks_back)
+    weeks_duration = int(weeks_duration)
+
+    if not weeks_duration:
+        weeks_duration = 4
+
+    if not weeks_back:
+        when = datetime.now(pytz.utc)
+    else:
+        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
     # looks a lot like graphs, but then just subtract/add some values and done (?)
 
@@ -739,7 +750,7 @@ def changes(request, organization_type="municipality"):
            INNER JOIN url_organization on url.id = url_organization.url_id
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
-        """ % {"when": datetime.now(pytz.utc), "OrganizationTypeId": get_organization_type(organization_type)}
+        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
 
     newest_urlratings = UrlRating.objects.raw(sql)
 
@@ -755,7 +766,7 @@ def changes(request, organization_type="municipality"):
            INNER JOIN url_organization on url.id = url_organization.url_id
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
-        """ % {"when": datetime.now(pytz.utc) - timedelta(days=31), "OrganizationTypeId": get_organization_type(organization_type)}
+        """ % {"when": when - timedelta(days=(weeks_duration*7)), "OrganizationTypeId": get_organization_type(organization_type)}
 
     oldest_urlratings = UrlRating.objects.raw(sql)
 
@@ -803,7 +814,7 @@ def changes(request, organization_type="municipality"):
     changes = {}
     for scan_type in scan_types:
         if scan_type not in changes:
-            changes[scan_type] = []
+            changes[scan_type] = {}
 
         if scan_type not in old_measurement:
             old_measurement[scan_type] = {}
@@ -811,15 +822,15 @@ def changes(request, organization_type="municipality"):
         if scan_type not in new_measurement:
             new_measurement[scan_type] = {}
 
-        changes[scan_type].append({
+        changes[scan_type] = {
             'old':
-                {'date': datetime.now(pytz.utc) - timedelta(days=31),
+                {'date': datetime.now(pytz.utc) - timedelta(days=(weeks_duration*7)),
                  'high': old_measurement[scan_type].get('high', 0),
                  'medium': old_measurement[scan_type].get('medium', 0),
                  'low': old_measurement[scan_type].get('low', 0),
                  },
             'new':
-                {'date': datetime.now(pytz.utc),
+                {'date': when,
                  'high': new_measurement[scan_type].get('high', 0),
                  'medium': new_measurement[scan_type].get('medium', 0),
                  'low': new_measurement[scan_type].get('low', 0),
@@ -829,11 +840,29 @@ def changes(request, organization_type="municipality"):
                  'medium': old_measurement[scan_type].get('medium', 0) - new_measurement[scan_type].get('medium', 0),
                  'low': old_measurement[scan_type].get('low', 0) - new_measurement[scan_type].get('low', 0),
                  },
-        })
+        }
+
+    # and now for overall changes, what everyone is coming for...
+    for scan_type in scan_types:
+        changes['overall'] = {
+            'old': {
+                'high': changes.get('overall', {}).get('old', {}).get('high', 0) + changes[scan_type]['old']['high'],
+                'medium': changes.get('overall', {}).get('old', {}).get('medium', 0) + changes[scan_type]['old']['medium'],
+                'low': changes.get('overall', {}).get('old', {}).get('low', 0) + changes[scan_type]['old']['low'],
+            },
+            'new': {
+                'high': changes.get('overall', {}).get('new', {}).get('high', 0) + changes[scan_type]['new']['high'],
+                'medium': changes.get('overall', {}).get('new', {}).get('medium', 0) + changes[scan_type]['new']['medium'],
+                'low': changes.get('overall', {}).get('new', {}).get('low', 0) + changes[scan_type]['new']['low'],
+            },
+            'improvements': {
+                'high': changes.get('overall', {}).get('improvements', {}).get('high', 0) + changes[scan_type]['improvements']['high'],
+                'medium': changes.get('overall', {}).get('improvements', {}).get('medium', 0) + changes[scan_type]['improvements']['medium'],
+                'low': changes.get('overall', {}).get('improvements', {}).get('low', 0) + changes[scan_type]['improvements']['low'],
+            }
+        }
 
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2})
-
-
 
 
 @cache_page(ten_minutes)

@@ -36,7 +36,9 @@ urlpatterns = [
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
     url(r'^data/terrible_urls/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         terrible_urls, name='terrible urls'),
-    url(r'^data/changes/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/', changes, name='changes'),
+    url(r'^data/changes/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/'
+        r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',
+        changes, name='changes'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),

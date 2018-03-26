@@ -111,7 +111,7 @@
     </div>
 </nav>
 
-<nav class="navbar navbar-default navbar-static-top" id="categorynavbar" v-if="categories.length > 1">
+<nav class="navbar navbar-default navbar-static-top" id="categorynavbar" v-if="categories.length > 1" v-cloak>
     <div class="container">
         <div class="navbar-collapse">
             <ul class="nav navbar-nav navbar-center">
@@ -135,7 +135,73 @@
 
     {% include "map/target_audience.html" %}
 
-    <div id="statistics">
+    <div id="issue_improvements" v-cloak>
+        <div class="page-header">
+            <a name="improvements" class="jumptonav"></a>
+            <h2>{% trans "Improvements" %}</h2>
+            <p>{% trans "Improvements explained" %}</p>
+            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+        </div>
+        <div class="row">
+            <div class="col-md-4" style="text-align:center">
+                <h4>{% trans "High" %}</h4>
+                {% verbatim %}
+                    <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
+                {% endverbatim %}
+
+            </div>
+            <div class="col-md-4" style="text-align:center">
+                <h4>{% trans "Medium" %}</h4>
+                {% verbatim %}
+                    <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
+                {% endverbatim %}
+            </div>
+            <div class="col-md-4" style="text-align:center">
+                <h4>{% trans "Low" %}</h4>
+                {% verbatim %}
+                    <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
+                {% endverbatim %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>{% trans "Improvements Details" %}</h4>
+                <table class="improvementstable">
+                    <tr><th colspan="2" class="improvement_severity">{% trans "High" %}</th>
+                        <th colspan="4" class="improvement_severity">{% trans "Medium" %}</th>
+                        <th colspan="3" class="improvement_severity">{% trans "Low" %}</th>
+                    </tr>
+                    {% verbatim %}
+                    <tr>
+                        <td :class="'number-sm ' + goodbad(tls_qualys.high)">{{ tls_qualys.high }}</td>
+                        <td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>
+                        <td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>
+                        <td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>
+                        <td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>
+                        <td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>
+                        <td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>
+                        <td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>
+                        <td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>
+                    </tr>
+                    {% endverbatim %}
+                    <tr>
+                        <td>{% trans "Encryption" %}</td>
+                        <td>{% trans "Missing encryption" %}</td>
+                        <td>{% trans "Encryption" %}</td>
+                        <td>{% trans "Missing encryption" %}</td>
+                        <td>{% trans "HSTS Header" %}</td>
+                        <td>{% trans "XFO Header" %}</td>
+                        <td>{% trans "Encryption" %}</td>
+                        <td>{% trans "X-XSS" %}</td>
+                        <td>{% trans "X-Content" %}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="statistics" v-cloak>
         <div class="page-header">
             <a name="numbers" class="jumptonav"></a>
             <h2>{% trans "The Numbers" %}</h2>
@@ -468,7 +534,7 @@
         </div>
     </div>
 
-    <div id="graphs">
+    <div id="graphs" v-cloak>
         <div class="page-header">
             <a name="graphs" class="jumptonav"></a>
             <h2>{% trans "Graphs" %}</h2>
@@ -509,7 +575,7 @@
         </div>
     </div>
 
-    <div id="charts">
+    <div id="charts" v-cloak>
         <div class="page-header">
             <a name="charts" class="jumptonav"></a>
             <h2>{% trans "Charts" %}</h2>
