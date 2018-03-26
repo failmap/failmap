@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-26 12:03+0000\n"
+"POT-Creation-Date: 2018-03-26 15:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:476
-#: failmap/map/static/js/views.js:481 failmap/map/static/js/views.js:484
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:485
+#: failmap/map/static/js/views.js:490 failmap/map/static/js/views.js:493
 msgid "View Full Screen"
 msgstr ""
 
@@ -364,31 +364,37 @@ msgid "category_menu_hacking"
 msgstr "Hackers"
 
 #: failmap/map/static/js/script.js:62
-msgid "bundesland"
-msgstr ""
+#, fuzzy
+#| msgid "category_menu_unknown"
+msgid "category_menu_bundesland"
+msgstr "Unknown"
 
 #: failmap/map/static/js/script.js:63
-msgid "regierungsbezirk"
-msgstr ""
+#, fuzzy
+#| msgid "category_menu_cyber"
+msgid "category_menu_regierungsbezirk"
+msgstr "Cyber"
 
 #: failmap/map/static/js/script.js:64
-msgid "landkreis_kreis_kreisfreie_stadt"
+msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr ""
 
 #: failmap/map/static/js/script.js:65
-msgid "samtgemeinde_verwaltungsgemeinschaft"
+msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
 #: failmap/map/static/js/script.js:66
-msgid "stadt_gemeinde"
-msgstr ""
+#, fuzzy
+#| msgid "category_menu_hacking"
+msgid "category_menu_stadt_gemeinde"
+msgstr "Hackers"
 
 #: failmap/map/static/js/script.js:67
-msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr ""
 
 #: failmap/map/static/js/script.js:68
-msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr ""
 
 #: failmap/map/static/js/script.js:71
@@ -461,6 +467,6 @@ msgstr ""
 msgid "top win on failmap"
 msgstr ""
 
-#: failmap/map/static/js/views.js:482
+#: failmap/map/static/js/views.js:491
 msgid "Exit Full Screen"
 msgstr ""

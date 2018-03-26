@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-26 12:03+0000\n"
+"POT-Creation-Date: 2018-03-26 15:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:476
-#: failmap/map/static/js/views.js:481 failmap/map/static/js/views.js:484
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:485
+#: failmap/map/static/js/views.js:490 failmap/map/static/js/views.js:493
 msgid "View Full Screen"
 msgstr "🌈"
 
@@ -41,7 +41,7 @@ msgstr "🌈"
 
 #: failmap/map/static/js/failmap.js:173
 msgid "Loading"
-msgstr ""
+msgstr "🌈"
 
 #: failmap/map/static/js/failmap.js:191
 msgid "Url"
@@ -362,31 +362,45 @@ msgid "category_menu_hacking"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:62
-msgid "bundesland"
+#, fuzzy
+#| msgid "category_menu_unknown"
+msgid "category_menu_bundesland"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:63
-msgid "regierungsbezirk"
+#, fuzzy
+#| msgid "regierungsbezirk"
+msgid "category_menu_regierungsbezirk"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:64
-msgid "landkreis_kreis_kreisfreie_stadt"
+#, fuzzy
+#| msgid "landkreis_kreis_kreisfreie_stadt"
+msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:65
-msgid "samtgemeinde_verwaltungsgemeinschaft"
+#, fuzzy
+#| msgid "samtgemeinde_verwaltungsgemeinschaft"
+msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:66
-msgid "stadt_gemeinde"
+#, fuzzy
+#| msgid "category_menu_hacking"
+msgid "category_menu_stadt_gemeinde"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:67
-msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+#, fuzzy
+#| msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:68
-msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
+#, fuzzy
+#| msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:71
@@ -459,9 +473,15 @@ msgstr "🌈"
 msgid "top win on failmap"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:482
+#: failmap/map/static/js/views.js:491
 msgid "Exit Full Screen"
 msgstr "🌈"
+
+#~ msgid "bundesland"
+#~ msgstr "🌈"
+
+#~ msgid "stadt_gemeinde"
+#~ msgstr "🌈"
 
 #~ msgid ""
 #~ "Site does not redirect to secure url, and has nosecure alternative on a "

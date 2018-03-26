@@ -59,13 +59,13 @@ var dynamic_translations = function(){
     gettext('category_menu_province');
     gettext('category_menu_hacking');
     // and germany
-    gettext('bundesland');
-    gettext('regierungsbezirk');
-    gettext('landkreis_kreis_kreisfreie_stadt');
-    gettext('samtgemeinde_verwaltungsgemeinschaft');
-    gettext('stadt_gemeinde');
-    gettext('stadtbezirk_gemeindeteil_mit_selbstverwaltung');
-    gettext('stadtteil_gemeindeteil_ohne_selbstverwaltung');
+    gettext('category_menu_bundesland');
+    gettext('category_menu_regierungsbezirk');
+    gettext('category_menu_landkreis_kreis_kreisfreie_stadt');
+    gettext('category_menu_samtgemeinde_verwaltungsgemeinschaft');
+    gettext('category_menu_stadt_gemeinde');
+    gettext('category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung');
+    gettext('category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung');
 
     // some countries:
     gettext('country_NL');

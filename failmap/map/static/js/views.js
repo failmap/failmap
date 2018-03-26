@@ -307,8 +307,10 @@ function extra() {
 function germany() {
     vueCountryNavbar.countries = ["NL", "DE"];
     vueCategoryNavbar.categories = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
-    "samtgemeinde_verwaltungsgemeinschaft", "stadt_gemeinde", "stadtbezirk_gemeindeteil_mit_selbstverwaltung",
-    "stadtbezirk_gemeindeteil_mit_selbstverwaltung", "stadtteil_gemeindeteil_ohne_selbstverwaltung"];
+    "samtgemeinde_verwaltungsgemeinschaft"];
+    // too big to import, too detailed?
+    // "stadt_gemeinde", "stadtbezirk_gemeindeteil_mit_selbstverwaltung",
+    // "stadtbezirk_gemeindeteil_mit_selbstverwaltung", "stadtteil_gemeindeteil_ohne_selbstverwaltung"
 }
 
 

@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from subprocess import CalledProcessError
 from typing import Dict, List
+from urllib.error import HTTPError
 
 import pytz
 import requests
@@ -57,6 +58,22 @@ queries = {
             'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
         "samtgemeinde_verwaltungsgemeinschaft":
             'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
+        # huge!
+        """
+        A bit too huge?
+        FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
+         1: node::Abort() [/usr/local/bin/node]
+         2: node::FatalException(v8::Isolate*, v8::Local<v8::Value>, v8::Local<v8::Message>) [/usr/local/bin/node]
+         3: v8::Utils::ReportOOMFailure(char const*, bool) [/usr/local/bin/node]
+         4: v8::internal::V8::FatalProcessOutOfMemory(char const*, bool) [/usr/local/bin/node]
+         5: v8::internal::Factory::NewFillerObject(int, bool, v8::internal::AllocationSpace) [/usr/local/bin/node]
+         6: v8::internal::Runtime_AllocateInTargetSpace(int, v8::internal::Object**, v8::internal::Isolate*)
+         [/usr/local/bin/node]
+         7: 0x2fb7fb8ed46
+         8: 0x2fb7fcf4e76
+         9: 0x2fb7fcdd264
+        10: 0x2fb7fb85cd5
+        """
         "stadt_gemeinde":
             'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
         "stadtbezirk_gemeindeteil_mit_selbstverwaltung":
@@ -181,6 +198,8 @@ def import_from_scratch(countries: List[str]=None, organization_types: List[str]
 
                 resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
                 store_new(resample(feature, resolution), country, organization_type, when)
+
+                # can't do multiprocessing.pool, given non global functions.
 
     log.info("Import finished.")
 
@@ -309,11 +328,20 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
 
     # try to find official urls for this organization, as it's empty now. All those will then be onboarded and scanned.
     if "wikidata" in properties:
-        client = Client()  # Q9928
-        entity = client.get(properties["wikidata"], load=True)
-        website = str(entity.get(client.get("P856"), None))  # P856 == Official Website.
+        website = ""
+        try:
+            client = Client()  # Q9928
+            entity = client.get(properties["wikidata"], load=True)
+            website = str(entity.get(client.get("P856"), None))  # P856 == Official Website.
+        except HTTPError as e:
+            # No entity with ID Q15111448 was found... etc.
+            # perfectly possible. In that case, no website, and thus continue.
+            pass
+        except Exception as e:
+            # don't cause problems here... if the service is down, bad luck, try an import later etc...
+            pass
 
-        if not website:
+        if not website or website == "None":
             return
 
         extract = tldextract.extract(website)
@@ -459,6 +487,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     four_hours_ago = time.time() - 14400
     if os.path.isfile(filename + ".geojson") and four_hours_ago < os.path.getmtime(filename):
         log.debug("Already downloaded a coordinate file in the past four hours. Using that one.")
+        log.debug(filename + ".geojson")
         return json.load(open(filename + ".geojson"))
 
     """
@@ -513,6 +542,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
 
 def osmtogeojson_available():
     try:
+        # todo: node --max_old_space_size=4000, for larger imprts... we don't even call node... :(
         subprocess.check_output(["osmtogeojson", "tesfile.osm"], stderr=subprocess.STDOUT, )
     except CalledProcessError as e:
         if "no such file or directory, open 'tesfile.osm'" in str(e.output):
