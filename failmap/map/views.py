@@ -753,7 +753,7 @@ def wanted_urls(request):
 
 @cache_page(ten_minutes)
 def improvements(request, country: str="NL", organization_type: str="municipality",
-            weeks_back: int=0, weeks_duration: int=0):
+                 weeks_back: int=0, weeks_duration: int=0):
     # todo: adjustable timespan
     # todo: adjustable weeks_back
 

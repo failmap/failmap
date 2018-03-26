@@ -31,7 +31,8 @@ urlpatterns = [
         top_fail, name='top fail'),
     url(r'^data/topwin/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         top_win, name='top win'),
-    url(r'^data/latest_scans/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<scan_type>[a-zA-Z_-]{0,100})',
+    url(r'^data/latest_scans/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
+        r'(?P<scan_type>[a-zA-Z_-]{0,100})',
         latest_scans, name='latest scans'),
     url(r'^data/feed/(?P<scan_type>[a-zA-Z_-]{0,100})$', LatestScanFeed()),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
