@@ -225,7 +225,7 @@ var latest_mixin = {
     methods: {
         load: function(){
             var self = this;
-            $.getJSON( this.data_url + this.category + '/' + this.scan, function (data) {
+            $.getJSON( this.data_url + this.country + '/' + this.category + '/' + this.scan, function (data) {
                 self.scans = data.scans;
             });
         },
@@ -275,7 +275,7 @@ var top_mixin = {
         },
         load: function (weeknumber) {
             var self = this;
-            $.getJSON(this.$data.data_url + this.category + '/' + weeknumber, function (data) {
+            $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                 self.top = data;
             });
         },
@@ -359,7 +359,7 @@ function views() {
     });
 
     window.vueGraphs = new Vue({
-        mixins: [category_mixin],
+        mixins: [category_mixin, country_mixin],
 
         // the mixin requires data to exist, otherwise massive warnings.
         data: {
@@ -376,7 +376,7 @@ function views() {
         methods: {
             load: function () {
                 var self = this;
-                d3.json("data/vulnstats/" + this.category + "/0/index.json", function (error, data) {
+                d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0/index.json", function (error, data) {
                     d3stats();
                     self.d3stats.stacked_area_chart("tls_qualys", error, data.tls_qualys);
                     self.d3stats.stacked_area_chart("plain_https", error, data.plain_https);
@@ -390,7 +390,7 @@ function views() {
     });
 
     window.vueStatistics = new Vue({
-        mixins: [category_mixin],
+        mixins: [category_mixin, country_mixin],
         el: '#statistics',
         mounted: function () {
             this.load(0)
@@ -441,7 +441,7 @@ function views() {
         methods: {
             load: function (weeknumber) {
                 var self = this;
-                $.getJSON('/data/stats/' + this.category + '/' + weeknumber, function (data) {
+                $.getJSON('/data/stats/' + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                     self.data = data;
                 });
             },
@@ -501,55 +501,55 @@ function views() {
     window.vueTopfail = new Vue({
         el: '#topfail',
         data: {data_url: "/data/topfail/"},
-        mixins: [top_mixin, category_mixin]
+        mixins: [top_mixin, category_mixin, country_mixin]
     });
 
     window.vueTopwin = new Vue({
         el: '#topwin',
         data: {data_url: "/data/topwin/"},
-        mixins: [top_mixin, category_mixin]
+        mixins: [top_mixin, category_mixin, country_mixin]
     });
 
     window.vueTerribleurls = new Vue({
         el: '#terrible_urls',
         data: {data_url: "/data/terrible_urls/"},
-        mixins: [top_mixin, category_mixin]
+        mixins: [top_mixin, category_mixin, country_mixin]
     });
 
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_tls_qualys',
         data: {scan: "tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_plain_https',
         data: {scan: "plain_https"}
     });
 
     window.vueLatestHSTS = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_security_headers_strict_transport_security',
         data: {scan: "Strict-Transport-Security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_security_headers_x_frame_options',
         data: {scan: "X-Content-Type-Options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_security_headers_x_content_type_options',
         data: {scan: "X-Frame-Options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
-        mixins: [latest_mixin, category_mixin],
+        mixins: [latest_mixin, category_mixin, country_mixin],
         el: '#latest_security_headers_x_xss_protection',
         data: {scan: "X-XSS-Protection"}
     });
@@ -601,12 +601,26 @@ function views() {
                 vueLatestXFrameOptions.category = newCategory;
                 vueLatestXXSSProtection.category = newCategory;
                 vueGraphs.category = newCategory;
+                vueImprovements.category = newCategory;
             },
             country: function (newCountry, oldCountry) {
                 // retoggle map focus in an ugly way,
                 // it was never meant to work with multiple countries, so cutting corners here...
                 failmap.geojson.clearLayers();
                 failmap.geojson = null;
+
+                vueTopfail.country = newCountry;
+                vueTopwin.country = newCountry;
+                vueTerribleurls.country = newCountry;
+                vueStatistics.country = newCountry;
+                vueLatestPlainHttps.country = newCountry;
+                vueLatestTlsQualys.country = newCountry;
+                vueLatestXContentTypeOptions.country = newCountry;
+                vueLatestHSTS.country = newCountry;
+                vueLatestXFrameOptions.country = newCountry;
+                vueLatestXXSSProtection.country = newCountry;
+                vueGraphs.country = newCountry;
+                vueImprovements.country = newCountry;
             }
         },
         methods: {
@@ -632,7 +646,10 @@ function views() {
                             onEachFeature: failmap.onEachFeature
                         }).addTo(failmap.map); // only if singleton, its somewhat dirty.
                         // fit the map automatically, regardless of the initial positions
-                        failmap.map.fitBounds(failmap.geojson.getBounds());
+
+                        if (mapdata.features.length > 0) {
+                            failmap.map.fitBounds(failmap.geojson.getBounds());
+                        }
                     }
 
                     // make map features (organization data) available to other vues
@@ -744,7 +761,7 @@ function views() {
     * */
     window.vueImprovements = new Vue({
         el: '#issue_improvements',
-        mixins: [category_mixin],
+        mixins: [category_mixin, country_mixin],
 
         mounted: function () {
             this.load(0)
@@ -769,15 +786,26 @@ function views() {
                 }
 
                 var self = this;
-                $.getJSON('/data/changes/' + this.category + '/' + weeks_ago + '/0', function (data) {
-                    self.data = data;
-                    self.tls_qualys = data.tls_qualys.improvements;
-                    self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
-                    self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
-                    self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
-                    self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
-                    self.plain_https = data.plain_https.improvements;
-                    self.overall = data.overall.improvements;
+                $.getJSON('/data/improvements/' + this.country + '/' + this.category + '/' + weeks_ago + '/0', function (data) {
+                    if ($.isEmptyObject(data)) {
+                        self.data = null,
+                        self.tls_qualys = {high: 0, medium:0, low: 0},
+                        self.security_headers_strict_transport_security = {high: 0, medium:0, low: 0},
+                        self.security_headers_x_content_type_options = {high: 0, medium:0, low: 0},
+                        self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0},
+                        self.security_headers_x_frame_options = {high: 0, medium:0, low: 0},
+                        self.plain_https = {high: 0, medium:0, low: 0},
+                        self.overall = {high: 0, medium:0, low: 0}
+                    } else {
+                        self.data = data;
+                        self.tls_qualys = data.tls_qualys.improvements;
+                        self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
+                        self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
+                        self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
+                        self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
+                        self.plain_https = data.plain_https.improvements;
+                        self.overall = data.overall.improvements;
+                    }
                 });
             },
             goodbad: function (value) {
