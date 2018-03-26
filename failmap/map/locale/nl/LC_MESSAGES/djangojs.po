@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-26 11:12+0000\n"
+"POT-Creation-Date: 2018-03-26 12:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:470
-#: failmap/map/static/js/views.js:475 failmap/map/static/js/views.js:478
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:476
+#: failmap/map/static/js/views.js:481 failmap/map/static/js/views.js:484
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -372,19 +372,47 @@ msgstr "Provincies"
 msgid "category_menu_hacking"
 msgstr "Hackers"
 
+#: failmap/map/static/js/script.js:62
+msgid "bundesland"
+msgstr "Bundesland"
+
 #: failmap/map/static/js/script.js:63
+msgid "regierungsbezirk"
+msgstr "Regierungsbezirk"
+
+#: failmap/map/static/js/script.js:64
+msgid "landkreis_kreis_kreisfreie_stadt"
+msgstr "Landkreis / Kreis / kreisfreie Stadt"
+
+#: failmap/map/static/js/script.js:65
+msgid "samtgemeinde_verwaltungsgemeinschaft"
+msgstr "Samtgemeinde, Verwaltungsgemeinschaft"
+
+#: failmap/map/static/js/script.js:66
+msgid "stadt_gemeinde"
+msgstr "Stadt, Gemeinde"
+
+#: failmap/map/static/js/script.js:67
+msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgstr "Stadtbezirk / Gemeindeteil mit Selbstverwaltung"
+
+#: failmap/map/static/js/script.js:68
+msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgstr "Stadtteil / Gemeindeteil ohne Selbstverwaltung"
+
+#: failmap/map/static/js/script.js:71
 msgid "country_NL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:64
+#: failmap/map/static/js/script.js:72
 msgid "country_DE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:65
+#: failmap/map/static/js/script.js:73
 msgid "country_SE"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:66
+#: failmap/map/static/js/script.js:74
 msgid "country_AT"
 msgstr "Oostenrijk"
 
@@ -442,7 +470,7 @@ msgstr "faalkaart"
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:476
+#: failmap/map/static/js/views.js:482
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 

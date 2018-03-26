@@ -58,6 +58,14 @@ var dynamic_translations = function(){
     gettext('category_menu_water_board');
     gettext('category_menu_province');
     gettext('category_menu_hacking');
+    // and germany
+    gettext('bundesland');
+    gettext('regierungsbezirk');
+    gettext('landkreis_kreis_kreisfreie_stadt');
+    gettext('samtgemeinde_verwaltungsgemeinschaft');
+    gettext('stadt_gemeinde');
+    gettext('stadtbezirk_gemeindeteil_mit_selbstverwaltung');
+    gettext('stadtteil_gemeindeteil_ohne_selbstverwaltung');
 
     // some countries:
     gettext('country_NL');

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-26 11:12+0000\n"
+"POT-Creation-Date: 2018-03-26 12:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:470
-#: failmap/map/static/js/views.js:475 failmap/map/static/js/views.js:478
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:476
+#: failmap/map/static/js/views.js:481 failmap/map/static/js/views.js:484
 msgid "View Full Screen"
 msgstr ""
 
@@ -363,19 +363,47 @@ msgstr "Provinces"
 msgid "category_menu_hacking"
 msgstr "Hackers"
 
+#: failmap/map/static/js/script.js:62
+msgid "bundesland"
+msgstr ""
+
 #: failmap/map/static/js/script.js:63
-msgid "country_NL"
+msgid "regierungsbezirk"
 msgstr ""
 
 #: failmap/map/static/js/script.js:64
-msgid "country_DE"
+msgid "landkreis_kreis_kreisfreie_stadt"
 msgstr ""
 
 #: failmap/map/static/js/script.js:65
-msgid "country_SE"
+msgid "samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
 #: failmap/map/static/js/script.js:66
+msgid "stadt_gemeinde"
+msgstr ""
+
+#: failmap/map/static/js/script.js:67
+msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgstr ""
+
+#: failmap/map/static/js/script.js:68
+msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgstr ""
+
+#: failmap/map/static/js/script.js:71
+msgid "country_NL"
+msgstr ""
+
+#: failmap/map/static/js/script.js:72
+msgid "country_DE"
+msgstr ""
+
+#: failmap/map/static/js/script.js:73
+msgid "country_SE"
+msgstr ""
+
+#: failmap/map/static/js/script.js:74
 msgid "country_AT"
 msgstr ""
 
@@ -433,6 +461,6 @@ msgstr ""
 msgid "top win on failmap"
 msgstr ""
 
-#: failmap/map/static/js/views.js:476
+#: failmap/map/static/js/views.js:482
 msgid "Exit Full Screen"
 msgstr ""
