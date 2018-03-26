@@ -111,12 +111,27 @@
     </div>
 </nav>
 
+<nav class="navbar navbar-default navbar-static-top" id="countrynavbar" v-if="countries.length > 1" v-cloak>
+    <div class="container">
+        <div class="navbar-collapse">
+            <ul class="nav navbar-nav navbar-center">
+                <li v-for="(x, key) in countries" v-bind:class="[selected == x ? 'selected_country' : '']">
+                    <a v-on:click="set_country(x)">
+                        <img :src="'static/flags/' + x + '.gif'" width="16" height="10">
+                        {% verbatim %}{{ translate("country_" + x) }}{% endverbatim %}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 <nav class="navbar navbar-default navbar-static-top" id="categorynavbar" v-if="categories.length > 1" v-cloak>
     <div class="container">
         <div class="navbar-collapse">
             <ul class="nav navbar-nav navbar-center">
                 <li v-for="(x, key) in categories" v-bind:class="[selected == x ? 'selected_category' : '']">
-                    <a v-on:click="set_category(x)">{% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
+                    <a v-on:click="set_category(x)">
+                        {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
                 </li>
             </ul>
         </div>

@@ -523,13 +523,13 @@ path {
     font-size: 12px;
 }
 
-.selected_category {
+.selected_category, .selected_country {
     background-color: lightblue;
     border-bottom: 4px solid blue;
     color: black;
 }
 
-#categorynavbar {
+#categorynavbar, #countrynavbar {
     margin-bottom: 0 !important;
 }
 

@@ -56,6 +56,19 @@ var category_mixin = {
     }
 };
 
+var country_mixin = {
+    data: {
+        country: "NL"
+    },
+    watch: {
+        country: function (newCountry, oldCountry) {
+            // refresh the views :)
+            this.load()
+        }
+    }
+};
+
+
 var report_mixin = {
     data: {
         calculation: '',
@@ -284,6 +297,12 @@ var top_mixin = {
     }
 };
 
+
+function extra() {
+    vueCountryNavbar.countries = ["NL", "DE", "SE"];
+    vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"];
+}
+
 function views() {
 
     // You can try with:
@@ -303,6 +322,27 @@ function views() {
                 // all validation is done server side, all parameters are optional and have fallbacks.
                 vueMap.category = category_name;
                 this.selected = category_name;
+            }
+        }
+    });
+
+    // test with:
+    // vueCountryNavbar.countries = ["NL", "DE", "SE"]
+    window.vueCountryNavbar = new Vue({
+        mixins: [translation_mixin],
+
+        el: '#countrynavbar',
+
+        data: {
+            countries: ["NL"],
+            selected: "NL"
+        },
+
+        methods: {
+            set_country: function (country) {
+                // all validation is done server side, all parameters are optional and have fallbacks.
+                vueMap.country = country;
+                this.selected = country;
             }
         }
     });
@@ -515,6 +555,8 @@ function views() {
         mounted: function () {
             this.load(this.category, this.week)
         },
+        mixins: [category_mixin, country_mixin],
+
         el: '#historycontrol',
         data: {
             // # historyslider
@@ -522,7 +564,6 @@ function views() {
             week: 0,
             selected_organization: -1,
             features: null,
-            category: "municipality"
         },
         computed: {
             visibleweek: function () {
@@ -549,14 +590,20 @@ function views() {
                 vueLatestXFrameOptions.category = newCategory;
                 vueLatestXXSSProtection.category = newCategory;
                 vueGraphs.category = newCategory;
+            },
+            country: function (newCountry, oldCountry) {
+                // retoggle map focus in an ugly way,
+                // it was never meant to work with multiple countries, so cutting corners here...
+                failmap.geojson.clearLayers();
+                failmap.geojson = null;
             }
         },
         methods: {
             // slowly moving the failmap into a vue.
-            load: function (category, week) {
+            load: function (week) {
                 var self = this;
                 self.loading = true;
-                $.getJSON('/data/map/' + category + '/' + week, function (mapdata) {
+                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week, function (mapdata) {
                     self.loading = true;
                     // if there is one already, overwrite the attributes...
                     if (failmap.geojson) {

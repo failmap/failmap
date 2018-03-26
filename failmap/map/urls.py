@@ -4,37 +4,38 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.i18n import JavaScriptCatalog
 
-from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, index, latest_scans,
-                               manifest_json, map_data, organization_report,
+from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, changes, index,
+                               latest_scans, manifest_json, map_data, organization_report,
                                organizationtype_exists, robots_txt, security_txt, stats,
                                terrible_urls, top_fail, top_win, updates_on_organization,
-                               vulnerability_graphs, wanted_urls, changes)
+                               vulnerability_graphs, wanted_urls)
 
 urlpatterns = [
     url(r'^$', index, name='failmap'),
     url(r'^security.txt$', security_txt),
     url(r'^robots.txt$', robots_txt),
     url(r'^manifest.json$', manifest_json),
-    url(r'^data/organizationtype_exists/(?P<organization_type_name>[a-z0-9A-Z_\-]{0,50})',
+    url(r'^data/organizationtype_exists/(?P<organization_type_name>[a-z_\-]{0,50})',
         organizationtype_exists, name='set category'),
 
-    url(r'^data/map/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+    url(r'^data/map/(?P<country>[A-Z]{2})/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         map_data, name='map data'),
-    url(r'^data/stats/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+
+    url(r'^data/stats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         stats, name='stats'),
 
     # url(r'^d3.html', d3, name='d3'),
-    url(r'^data/vulnstats/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+    url(r'^data/vulnstats/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         vulnerability_graphs, name='vulnstats'),
-    url(r'^data/topfail/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+    url(r'^data/topfail/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         top_fail, name='top fail'),
-    url(r'^data/topwin/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+    url(r'^data/topwin/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         top_win, name='top win'),
-    url(r'^data/latest_scans/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<scan_type>[a-zA-Z_-]{0,100})',
+    url(r'^data/latest_scans/(?P<organization_type>[a-z_\-]{0,50})/(?P<scan_type>[a-zA-Z_-]{0,100})',
         latest_scans, name='latest scans'),
     url(r'^data/feed/(?P<scan_type>[a-zA-Z_-]{0,100})$', LatestScanFeed()),
     # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
-    url(r'^data/terrible_urls/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
+    url(r'^data/terrible_urls/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         terrible_urls, name='terrible urls'),
     url(r'^data/changes/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/'
         r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',

@@ -384,6 +384,10 @@ var failmap = {
         });
     },
 
+    refit: function() {
+        failmap.map.fitBounds(failmap.geojson.getBounds());
+    },
+
     clean_map: function(mapdata) {
 
 

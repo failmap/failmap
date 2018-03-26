@@ -43,6 +43,28 @@ def get_organization_type(name: str):
         return 1
 
 
+# any two letters will do... :)
+# All countries are managed by django-countries, but we're fine with any other weird stuff.
+# url routing does validation... expect it will go wrong so STILL do validation...
+def get_country(code: str):
+    import re
+
+    # handle default, save a regex
+    if code == "NL":
+        return "NL"
+
+    match = re.search(r"[A-Z]{2}", code)
+    if not match:
+        # https://what-if.xkcd.com/53/
+        return "NL"
+
+    # check if we have a country like that in the db:
+    if not Organization.objects.all().filter(country=code).exists():
+        return "NL"
+
+    return code
+
+
 @cache_page(one_hour)
 def index(request):
     # todo: move to vue translations on client side. There are many javascript components that
@@ -766,7 +788,8 @@ def changes(request, organization_type: str="municipality", weeks_back: int=0, w
            INNER JOIN url_organization on url.id = url_organization.url_id
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
-        """ % {"when": when - timedelta(days=(weeks_duration*7)), "OrganizationTypeId": get_organization_type(organization_type)}
+        """ % {"when": when - timedelta(days=(weeks_duration*7)),
+               "OrganizationTypeId": get_organization_type(organization_type)}
 
     oldest_urlratings = UrlRating.objects.raw(sql)
 
@@ -847,18 +870,23 @@ def changes(request, organization_type: str="municipality", weeks_back: int=0, w
         changes['overall'] = {
             'old': {
                 'high': changes.get('overall', {}).get('old', {}).get('high', 0) + changes[scan_type]['old']['high'],
-                'medium': changes.get('overall', {}).get('old', {}).get('medium', 0) + changes[scan_type]['old']['medium'],
+                'medium':
+                    changes.get('overall', {}).get('old', {}).get('medium', 0) + changes[scan_type]['old']['medium'],
                 'low': changes.get('overall', {}).get('old', {}).get('low', 0) + changes[scan_type]['old']['low'],
             },
             'new': {
                 'high': changes.get('overall', {}).get('new', {}).get('high', 0) + changes[scan_type]['new']['high'],
-                'medium': changes.get('overall', {}).get('new', {}).get('medium', 0) + changes[scan_type]['new']['medium'],
+                'medium':
+                    changes.get('overall', {}).get('new', {}).get('medium', 0) + changes[scan_type]['new']['medium'],
                 'low': changes.get('overall', {}).get('new', {}).get('low', 0) + changes[scan_type]['new']['low'],
             },
             'improvements': {
-                'high': changes.get('overall', {}).get('improvements', {}).get('high', 0) + changes[scan_type]['improvements']['high'],
-                'medium': changes.get('overall', {}).get('improvements', {}).get('medium', 0) + changes[scan_type]['improvements']['medium'],
-                'low': changes.get('overall', {}).get('improvements', {}).get('low', 0) + changes[scan_type]['improvements']['low'],
+                'high': changes.get('overall', {}).get('improvements', {}).get('high', 0) +
+                changes[scan_type]['improvements']['high'],
+                'medium': changes.get('overall', {}).get('improvements', {}).get('medium', 0) +
+                changes[scan_type]['improvements']['medium'],
+                'low': changes.get('overall', {}).get('improvements', {}).get('low', 0) +
+                changes[scan_type]['improvements']['low'],
             }
         }
 
@@ -866,7 +894,7 @@ def changes(request, organization_type: str="municipality", weeks_back: int=0, w
 
 
 @cache_page(ten_minutes)
-def map_data(request, organization_type="municipality", weeks_back=0):
+def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -943,10 +971,11 @@ def map_data(request, organization_type="municipality", weeks_back=0):
           (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
           WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
-        WHERE organization.type_id = '%(OrganizationTypeId)s'
+        WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY `when` ASC
-        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type)}
+        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+               "country": get_country(country)}
     # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)

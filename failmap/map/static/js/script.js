@@ -58,6 +58,12 @@ var dynamic_translations = function(){
     gettext('category_menu_water_board');
     gettext('category_menu_province');
     gettext('category_menu_hacking');
+
+    // some countries:
+    gettext('country_NL');
+    gettext('country_DE');
+    gettext('country_SE');
+    gettext('country_AT');
 };
 
 $(document).ready(function () {
