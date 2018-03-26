@@ -203,7 +203,10 @@ def organization_report(request, organization_id, weeks_back=0):
             "twitter_handle": values['twitter_handle'],
             "rating": values['organizationrating__rating'],
             "when": values['organizationrating__when'].isoformat(),
-            "calculation": values['organizationrating__calculation'],
+
+            # fixing json being presented and escaped as a string, this makes it a lot slowr
+            # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
+            "calculation": json.loads(values['organizationrating__calculation']),
             "promise": promise,
             "high": values['organizationrating__high'],
             "medium": values['organizationrating__medium'],
