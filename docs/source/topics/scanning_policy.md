@@ -24,6 +24,7 @@ Not all scans are published and a variety of scans will be implemented in the co
 
 
 **Endpoint discovery**
+
 Failmap tries to auto-discover endpoints for urls. A normal website today has about four endpoints:
 
 - One on IPv4, port 80 that redirects to port 443. Example: http://example.com
@@ -37,6 +38,7 @@ Since it's possible to host a website on any port, failmap also scans for the ex
 The existence of an endpoint in itself is not rated. This is implicit: the more endpoints, the more risk.
 
 **HTTP Headers**
+
 The following HTTP headers are scanned:
 
 - HTTP Strict Transport Security
@@ -56,6 +58,7 @@ Documented here:
 Maximum severity: low / green
 
 **Missing encryption**
+
 Offering encryption is a must.
 
 There are two sides to encryption: first it aims to make it impossible
@@ -72,14 +75,17 @@ devices that don't have access to encryption.
 Maximum severity: high / red
 
 **DNSSEC**
+
 Documented here:
 Maximum severity: -not published on the map yet-, probably orange or red.
 
 
 **New subdomains**
+
 Every week urls are scanned for new subdomains using various methods.
 
 **Transport Layer Security (Qualys)**
+
 Qualys offers the excellent tool SSL Labs, which does a very comprehensive scan of the TLS connection and the associated
 trust. They have documented their scanning procedure here:
 
@@ -93,6 +99,7 @@ Since failmap is completely automated, there are some special cases that could h
 These are:
 
 **No HSTS header requirement when there are only encrypted endpoints available.**
+
 Only if there are no unencrypted endpoints available on the url, the HSTS header is not required.
 
 Many products do not use the HSTS header as they don't provide an unsecured endpoint. Those products usually also
@@ -116,7 +123,7 @@ Thanks to: antoinet.
 From the terminology used in RFC 7034,
 
 The use of "X-Frame-Options" allows a web page from host B to declare that its content (for example, a
-button, links, text, etc.) must not be displayed in a frame (<frame> or <iframe>) of another page (e.g.,
+button, links, text, etc.) must not be displayed in a frame (frame / iframe) of another page (e.g.,
 from host A). This is done by a policy declared in the HTTP header and enforced by browser implementations
 as documented here.
 
@@ -131,6 +138,7 @@ This also means no X-XSS-Protection or X-Content-Type-Options are needed. So jus
 
 
 **Wildcard domains cause certificate mismatches**
+
 It's impossible to automatically see what domains are / aren't used on wildcard DNS records. We often get requests
 to delete results because "the url has been deleted". Those requests are processed slowly and might affect the score
 presented for your organization for a while. We hear the major reason to use wildcards is to make it easier adding
