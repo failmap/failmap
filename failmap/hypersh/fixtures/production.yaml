@@ -1,21 +1,29 @@
 - model: hypersh.credential
   pk: 1
-  fields:
-    name: Default
-    region: eu-central-1
-    access_key: ''
-    secret_key: ''
-    enabled: false
-    valid: false
-    last_validated: !!timestamp '2018-03-27 15:51:49.573723+00:00'
-    last_result: ''
+  fields: {name: Default, region: eu-central-1, access_key: '',
+    secret_key: '', enabled: true, valid: true,
+    last_validated: !!timestamp '2018-03-27 20:49:44.595101+00:00', last_result: '{}'}
 - model: hypersh.containerenvironment
   pk: 3
-  fields: {name: BROKER, value: 'redis://faalkaart.nl:1337/0', configuration: null,
-    group: null}
+  fields:
+    name: BROKER
+    value: redis://faalkaart.nl:1337/0
+    configuration: []
+    group: []
 - model: hypersh.containerenvironment
   pk: 4
-  fields: {name: WORKER_ROLE, value: scanner, configuration: null, group: null}
+  fields:
+    name: WORKER_ROLE
+    value: scanner
+    configuration: []
+    group: []
+- model: hypersh.containerenvironment
+  pk: 5
+  fields:
+    name: WORKER_ROLE
+    value: scanner_qualys
+    configuration: []
+    group: []
 - model: hypersh.containerconfiguration
   pk: 1
   fields:
@@ -36,3 +44,16 @@
     state: idle
     current: 0
     environment_overlay: [4]
+- model: hypersh.containergroup
+  pk: 2
+  fields:
+    name: Qualys scanners
+    enabled: true
+    credential: 1
+    configuration: 1
+    minimum: 0
+    maximum: 5
+    desired: 0
+    state: idle
+    current: 0
+    environment_overlay: [5]
