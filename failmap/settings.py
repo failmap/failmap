@@ -49,6 +49,8 @@ INTERNAL_IPS = ['localhost', '127.0.0.1', '::1']
 INSTALLED_APPS = [
     # needs to be before jet and admin to extend admin/base.html template
     'failmap.app',
+    'failmap.hypersh',
+    'django_fsm_log',
     # Jet admin dashboard
     'jet.dashboard',
     'jet',
