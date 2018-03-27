@@ -2,7 +2,6 @@
 
 Failmap tries to scan with all scanners every day. This means the map shows new results on a daily basis.
 
-
 ## What does failmap scan?
 
 Failmap scans the following:
@@ -16,11 +15,20 @@ Daily scans:
 
 Weekly scans:
 
-- New subdomains (using various methods)
+- Subdomain discovery
 - TLS quality using Qualys SSL Labs
 
 
 Not all scans are published and a variety of scans will be implemented in the coming weeks.
+
+
+**Subdomain discovery**
+
+The DNS scanner tries to find hostnames using various strategies:
+
+- Brute force on a subdomain list (existing, targeted subdomains only)
+- Looking at NSEC1 hashes
+- Looking at the Certificate transparency database
 
 
 **Endpoint discovery**

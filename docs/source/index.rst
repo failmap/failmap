@@ -3,7 +3,20 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Failmap Documentation 🤣
+Failmap End User Documentation
+========================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   topics/scanning_policy
+   topics/faq_end_users
+   topics/user_guide
+   topics/running_a_remote_worker
+   topics/thanks
+
+Failmap Developer Documentation
 ========================
 
 .. toctree::
@@ -12,21 +25,15 @@ Failmap Documentation 🤣
 
    topics/getting_started
    topics/development
-   topics/scanners_scanning_and_rating
-   topics/running_a_remote_worker
-   topics/deployment
+   topics/data_model
    topics/translation
+   topics/deployment
 
    topics/gis_and_map_information
    topics/writing_a_scanner
+   topics/stacking_pattern
    topics/docker
    topics/task_processing_system
-   topics/user_guide
-   topics/scanning_policy
-
-   topics/thanks
-
-   topics/stacking_pattern
 
 
 Indices and tables
