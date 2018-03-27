@@ -3,12 +3,12 @@
   fields:
     name: Default
     region: eu-central-1
-    access_key:
-    secret_key:
+    access_key: ''
+    secret_key: ''
     enabled: false
     valid: false
     last_validated: !!timestamp '2018-03-27 15:51:49.573723+00:00'
-    last_result: ''}
+    last_result: ''
 - model: hypersh.containerenvironment
   pk: 3
   fields: {name: BROKER, value: 'redis://faalkaart.nl:1337/0', configuration: null,
