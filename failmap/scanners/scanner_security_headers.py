@@ -41,9 +41,13 @@ def compose_task(
     # scan.
 
     # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
     # apply filter to urls in organizations (or if no filter, all urls)
-    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+    organizations = []
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+    else:
+        urls = Url.objects.filter(**urls_filter)
 
     # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(
