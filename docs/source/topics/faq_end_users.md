@@ -1,7 +1,7 @@
-# History
+# FAQ for those on listed on failmap
 
 
-## These texts are kept for historical purposes.
+## Why Failmap?
 
 Many organizations (have to) transfer sensitive information over the internet. Sometimes they ask to share sensitive
 information with them via forms, mail and etcetera. Anyone should be able to use internet services without worrying
@@ -59,6 +59,22 @@ domains of subdomains of organization we miss.
 In the Netherlands, just for municipalities, we scan about 8000 endpoints daily or weekly.
 
 We add all subdomains given to our e-mail address: info@faalkaart.nl
+
+
+## What are endpoints?
+
+A website usually has several endpoints. Every url can have a maximum of 65535 endpoints, of which usually very few are
+used. Additionally there are usually two address to approach the url, but it's possible to have more. Usually we see
+ an IPv4 and IPv6 address.
+
+An average website wants to be reachable over both IPv4 and IPv6, on standard ports 80 (http) and 443 (https). This
+means that an average website usually has four endpoints: 2 addresses * 2 ports/protocols.
+
+More about this:
+- IPv4: https://en.wikipedia.org/wiki/IPv4
+- IPv6: https://en.wikipedia.org/wiki/Port_(computer_networking)
+- Ports: https://en.wikipedia.org/wiki/Port_(computer_networking)
+- Protocols: https://en.wikipedia.org/wiki/Application_layer
 
 
 ## The score is wrong / I've improved my stuff! Please rescan.
