@@ -466,7 +466,7 @@ function views() {
                 return "green";
             },
             load: debounce(function (organization, weeks_back) {
-                
+
                 if (!weeks_back)
                     weeks_back = 0;
 

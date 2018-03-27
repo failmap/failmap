@@ -87,13 +87,14 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="#intro">{% trans "Intro" %}</a></li>
+                <li><a href="#intro">{% trans "About" %}</a></li>
+                <li><a href="#">{% trans "Map" %}</a></li>
+                <li><a href="#improvements">{% trans "Improvements" %}</a></li>
                 <li><a href="#numbers">{% trans "Numbers" %}</a></li>
                 <li><a href="#graphs">{% trans "Graphs" %}</a></li>
                 <li><a href="#charts">{% trans "Charts" %}</a></li>
                 <li><a href="#updates">{% trans "Updates" %}</a></li>
                 <li><a href="#report">{% trans "Report" %}</a></li>
-                <li><a href="#explanation">{% trans "Explanation" %}</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if debug %}
@@ -543,8 +544,6 @@
                 {% endverbatim %}
             </div>
             <div class="col-md-6">
-                <h3>{% trans "Services faq" %}</h3>
-                {% trans "Services faq content" %}
             </div>
         </div>
     </div>
@@ -590,7 +589,7 @@
         </div>
     </div>
 
-    <div id="charts" v-cloak>
+    <div id="charts">
         <div class="page-header">
             <a name="charts" class="jumptonav"></a>
             <h2>{% trans "Charts" %}</h2>
@@ -802,20 +801,12 @@
                     <b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b>
                 </p>
                 <div class="donatebuttons">
-                    <span class="Donate a5"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/5"
-                                               target="_blank">&euro; 5</a></span>
-                    <span class="Donate a10"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/10"
-                                                target="_blank">&euro; 10</a></span>
-                    <span class="Donate a20"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25"
+                    <span class="Donate a25"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25"
                                                 target="_blank">&euro; 20</a></span>
                     <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50"
                                                 target="_blank">&euro; 50</a></span>
                     <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100"
                                                  target="_blank">&euro; 100</a></span>
-                    <span class="Donate a200"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/200"
-                                                 target="_blank">&euro; 200</a></span>
-                    <span class="Donate a500"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/500"
-                                                 target="_blank">&euro; 500</a></span>
                 </div>
             </div>
         </div>
