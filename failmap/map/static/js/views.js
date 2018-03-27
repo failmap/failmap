@@ -466,11 +466,7 @@ function views() {
                 return "green";
             },
             load: debounce(function (organization, weeks_back) {
-
-                // only load if you're still on something.
-                if (organization !== failmap.hovered_organization)
-                    return;
-
+                
                 if (!weeks_back)
                     weeks_back = 0;
 
