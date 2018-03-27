@@ -680,7 +680,7 @@ function views() {
                     this.week = parseInt(e.target.value);
                 }
 
-                this.load(this.category, this.week);
+                this.load(this.week);
 
                 // nobody understands that when you drag the map slider, the rest
                 // of the site and all reports are also old.
