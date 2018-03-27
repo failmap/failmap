@@ -1,8 +1,9 @@
 import logging
 import time
-from datetime import datetime
 
 from django.db import models
+from django.utils import timezone
+from django.utils.text import slugify
 from django_fsm import FSMField, transition
 from django_fsm_log.models import StateLog
 from hyper_sh import Client
@@ -81,10 +82,22 @@ class Credential(models.Model):
             self.valid = False
             self.last_result = str(e)
 
-        self.last_validated = datetime.now()
+        self.last_validated = timezone.now()
         self.save()
 
         return self.valid
+
+
+class ContainerEnvironment(models.Model):
+    """Single environment variable for docker container."""
+    name = models.CharField(max_length=64)
+    value = models.CharField(max_length=64)
+
+    configuration = models.ForeignKey('hypersh.ContainerConfiguration', null=True)
+    group = models.ForeignKey('hypersh.ContainerGroup', null=True)
+
+    def __str__(self):
+        return "{name}={value}".format(**self.__dict__)
 
 
 class ContainerConfiguration(models.Model):
@@ -93,6 +106,7 @@ class ContainerConfiguration(models.Model):
     name = models.CharField(max_length=30)
     image = models.CharField(max_length=200, default=DEFAULT_IMAGE)
     command = models.CharField(max_length=200, default=DEFAULT_COMMAND)
+    environment = models.ManyToManyField(ContainerEnvironment)
 
     def __str__(self):
         return self.name
@@ -117,6 +131,7 @@ class ContainerGroup(models.Model):
 
     credential = models.ForeignKey(Credential)
     configuration = models.ForeignKey(ContainerConfiguration)
+    environment_overlay = models.ManyToManyField(ContainerEnvironment)
 
     # scaling configuration
     minimum = models.IntegerField(default=0)
@@ -134,9 +149,9 @@ class ContainerGroup(models.Model):
     def __str__(self):
         return self.name
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._init_desired = self.desired
+    @property
+    def environment(self):
+        return self.configuration.environment.all() | self.environment_overlay.all()
 
     @property
     def client(self):
@@ -177,6 +192,8 @@ class ContainerGroup(models.Model):
         """
 
         # state is used as a crude lock to prevent multiple simultanious scaling actions
+        if self.state != 'idle':
+            raise Exception('concurrent scaling actions')
         self.state = 'scaling'
         self.save(update_fields=['state'])
 
@@ -209,11 +226,11 @@ class ContainerGroup(models.Model):
     def update(self):
         """Update current object state based on real-world state."""
         self.current = len([c for c in self.client.containers()
-                            if c['Names'][0].startswith("/%s-" % self.name)])
+                            if c['Names'][0].startswith("/%s-" % slugify(self.name))])
         self.save(update_fields=['current'])
 
     def create_container(self):
-        container_id = "%s-%d" % (self.name, self.current + 1)
+        container_id = slugify("%s-%d" % (self.name, self.current + 1))
         # destroy lingering container
         try:
             self.client.remove_container(container_id, force=True)
@@ -221,16 +238,18 @@ class ContainerGroup(models.Model):
             pass
 
         try:
+            environment = [str(x) for x in self.environment.all()]
             self.client.create_container(
                 name=container_id,
                 labels={
                     'sh_hyper_instancetype': 'S1'
                 },
+                environment=environment,
                 **self.configuration.as_dict)
             self.client.start(container_id)
         except BaseException:
             log.exception('failed')
 
     def destroy_container(self):
-        container_id = "%s-%d" % (self.name, self.current)
+        container_id = slugify("%s-%d" % (self.name, self.current))
         self.client.remove_container(container_id, force=True)

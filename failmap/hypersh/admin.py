@@ -1,11 +1,16 @@
 import logging
 
 from django.contrib import admin
+from django.utils.html import format_html
 from django_fsm_log.admin import StateLogInline
 
-from .models import ContainerConfiguration, ContainerGroup, Credential
+from .models import ContainerConfiguration, ContainerEnvironment, ContainerGroup, Credential
 
 log = logging.getLogger(__name__)
+
+
+def environment_strings(obj):
+    return format_html("<br>".join(str(e) for e in obj.environment.all()))
 
 
 @admin.register(Credential)
@@ -25,12 +30,25 @@ class CredentialAdmin(admin.ModelAdmin):
     validate.short_description = "Validate against Hyper.sh API."
 
 
+@admin.register(ContainerEnvironment)
+class ContainerEnvironmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'value', 'used_by_group', 'used_by_configuration')
+    readonly_fields = ('configuration', 'group')
+
+    def used_by_group(self, obj):
+        return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containergroup_set.all())
+
+    def used_by_configuration(self, obj):
+        return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containerconfiguration_set.all())
+
+
 @admin.register(ContainerGroup)
 class ContainerGroupAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'credential',
         'configuration',
+        environment_strings,
         'enabled',
         'minimum',
         'maximum',
@@ -40,7 +58,7 @@ class ContainerGroupAdmin(admin.ModelAdmin):
         'last_update',
     )
     readonly_fields = ('current', 'last_update', 'state')
-    actions = ('min1', 'plus1', 'maximum', 'minimum', 'update', 'scale', 'reset')
+    actions = ('min1', 'plus1', 'minimum', 'maximum', 'reset', 'update', 'scale', )
 
     inlines = [StateLogInline]
 
@@ -92,7 +110,7 @@ class ContainerGroupAdmin(admin.ModelAdmin):
 
 @admin.register(ContainerConfiguration)
 class ContainerConfigurationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'image', 'command', 'used_by')
+    list_display = ('name', 'image', 'command', environment_strings, 'used_by')
 
     def used_by(self, obj):
         return "{0.__class__.__name__}({0.name})".format(obj.containergroup_set.get())
