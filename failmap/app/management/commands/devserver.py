@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import warnings
+from datetime import timedelta
 from os.path import abspath, dirname, join
 from uuid import uuid1
 
@@ -18,8 +19,8 @@ log = logging.getLogger(__name__)
 
 SOURCE_DIRECTORY = abspath(join(dirname(abspath(__file__)), '../' * 3))
 
-TIMEOUT = 30
-KILL_TIMEOUT = 3
+TIMEOUT = timedelta(seconds=30)
+KILL_TIMEOUT = timedelta(seconds=3)
 
 REDIS_INFO = """
 In order to run a full Failmap development instance Docker is required.
@@ -67,7 +68,7 @@ def stop_process(process):
     # soft shutdown
     process.terminate()
     try:
-        process.wait(KILL_TIMEOUT)
+        process.wait(KILL_TIMEOUT.seconds)
     except subprocess.TimeoutExpired:
         # hard shutdown
         process.kill()
@@ -140,7 +141,7 @@ class Command(RunserverCommand):
 
             # wait for worker to be ready
             log.info('Waiting for worker to be ready')
-            for _ in range(TIMEOUT * 2):
+            for _ in range(TIMEOUT.seconds * 2):
                 if app.control.ping(timeout=0.5):
                     break
             log.info('Worker ready')
