@@ -1,0 +1,38 @@
+- model: hypersh.credential
+  pk: 1
+  fields:
+    name: Default
+    region: eu-central-1
+    access_key:
+    secret_key:
+    enabled: false
+    valid: false
+    last_validated: !!timestamp '2018-03-27 15:51:49.573723+00:00'
+    last_result: ''}
+- model: hypersh.containerenvironment
+  pk: 3
+  fields: {name: BROKER, value: 'redis://faalkaart.nl:1337/0', configuration: null,
+    group: null}
+- model: hypersh.containerenvironment
+  pk: 4
+  fields: {name: WORKER_ROLE, value: scanner, configuration: null, group: null}
+- model: hypersh.containerconfiguration
+  pk: 1
+  fields:
+    name: Scanner worker
+    image: registry.gitlab.com/failmap/failmap:latest
+    command: celery worker --log info --concurrency 1
+    environment: [3]
+- model: hypersh.containergroup
+  pk: 1
+  fields:
+    name: Normal scanners
+    enabled: true
+    credential: 1
+    configuration: 1
+    minimum: 0
+    maximum: 5
+    desired: 0
+    state: idle
+    current: 0
+    environment_overlay: [4]
