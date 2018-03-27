@@ -233,23 +233,28 @@ class ContainerGroup(models.Model):
         container_id = slugify("%s-%d" % (self.name, self.current + 1))
         # destroy lingering container
         try:
+            log.debug("removing possible previous container with same name")
             self.client.remove_container(container_id, force=True)
         except BaseException:
             pass
 
         try:
             environment = [str(x) for x in self.environment.all()]
+            log.debug("creating container")
             self.client.create_container(
                 name=container_id,
                 labels={
                     'sh_hyper_instancetype': 'S1'
                 },
                 environment=environment,
+                tty=True,
                 **self.configuration.as_dict)
+            log.debug("starting container")
             self.client.start(container_id)
         except BaseException:
-            log.exception('failed')
+            log.exception('failed to start container')
 
     def destroy_container(self):
         container_id = slugify("%s-%d" % (self.name, self.current))
+        log.debug("removing container")
         self.client.remove_container(container_id, force=True)
