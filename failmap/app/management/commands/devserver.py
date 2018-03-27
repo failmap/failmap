@@ -4,6 +4,7 @@ import subprocess
 import sys
 import time
 import warnings
+from os.path import abspath, dirname, join
 from uuid import uuid1
 
 from django.conf import settings
@@ -15,7 +16,10 @@ from failmap.celery import app
 
 log = logging.getLogger(__name__)
 
+SOURCE_DIRECTORY = abspath(join(dirname(abspath(__file__)), '../' * 3))
+
 TIMEOUT = 30
+KILL_TIMEOUT = 3
 
 REDIS_INFO = """
 In order to run a full Failmap development instance Docker is required.
@@ -48,8 +52,13 @@ def start_borker(uuid):
 
 
 def start_worker(broker_port, silent=True):
-    worker_command = 'failmap celery worker -l info --pool eventlet -c 1 --broker redis://localhost:%d/0' % broker_port
-    worker_process = subprocess.Popen(worker_command.split(), stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
+    watchdog = ('watchmedo auto-restart --directory={} --pattern=*.py'
+                ' --recursive --signal=SIGKILL -- ').format(SOURCE_DIRECTORY).split()
+    # watchdog = 'tools/autoreload.sh'
+    worker_command = ('failmap celery worker --loglevel=info --pool=eventlet'
+                      ' --concurrency=1 --broker redis://localhost:{}/0').format(broker_port).split()
+
+    worker_process = subprocess.Popen(watchdog + worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)
 
     return worker_process
 
@@ -58,7 +67,7 @@ def stop_process(process):
     # soft shutdown
     process.terminate()
     try:
-        process.wait(TIMEOUT)
+        process.wait(KILL_TIMEOUT)
     except subprocess.TimeoutExpired:
         # hard shutdown
         process.kill()
