@@ -34,7 +34,7 @@ class Credential(models.Model):
 
     valid = models.BooleanField(help_text="")
     last_validated = models.DateTimeField(null=True)
-    last_result = models.TextField()
+    last_result = models.TextField(default="{}")
 
     def __str__(self):
         return self.name
@@ -83,9 +83,20 @@ class Credential(models.Model):
             self.last_result = str(e)
 
         self.last_validated = timezone.now()
-        self.save()
+        self.save(update_fields=['last_validated', 'valid', 'last_result'])
 
         return self.valid
+
+    @app.task
+    def task_validate(self):
+        return self.validate()
+
+    def save(self, *args, **kwargs):
+        """Verify credentials after they have been changed."""
+        super().save(*args, **kwargs)
+        is_validation_save = 'last_validated' in kwargs.get('update_fields', [])
+        if not is_validation_save:
+            self.task_validate.apply_async(args=(self,))
 
 
 class ContainerEnvironment(models.Model):
@@ -93,8 +104,8 @@ class ContainerEnvironment(models.Model):
     name = models.CharField(max_length=64)
     value = models.CharField(max_length=64)
 
-    configuration = models.ForeignKey('hypersh.ContainerConfiguration', null=True)
-    group = models.ForeignKey('hypersh.ContainerGroup', null=True)
+    configuration = models.ManyToManyField('hypersh.ContainerConfiguration')
+    group = models.ManyToManyField('hypersh.ContainerGroup')
 
     def __str__(self):
         return "{name}={value}".format(**self.__dict__)
@@ -129,8 +140,8 @@ class ContainerGroup(models.Model):
     enabled = models.BooleanField(default=True,
                                   help_text="When disabled are containers are removed and scaling is not possible.")
 
-    credential = models.ForeignKey(Credential)
-    configuration = models.ForeignKey(ContainerConfiguration)
+    credential = models.ForeignKey(Credential, on_delete=models.PROTECT)
+    configuration = models.ForeignKey(ContainerConfiguration, on_delete=models.PROTECT)
     environment_overlay = models.ManyToManyField(ContainerEnvironment)
 
     # scaling configuration
@@ -138,13 +149,9 @@ class ContainerGroup(models.Model):
     maximum = models.IntegerField(default=1)
     desired = models.IntegerField(default=1)
 
-    # size = models.CharField(max_length=100)
-
     # use django-fsm to
     state = FSMField(default='new')
-    current = models.IntegerField(default=0)  # readonly=True
-
-    INTERVAL = 10
+    current = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -171,7 +178,7 @@ class ContainerGroup(models.Model):
         super().save(*args, **kwargs)
 
         state_field_change = 'state' in kwargs.get('update_fields', [])
-        is_scaling = self.state != 'idle'
+        is_scaling = self.state not in ['idle', 'new']
         if is_scaling or state_field_change:
             return
 

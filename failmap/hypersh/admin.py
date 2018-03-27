@@ -15,13 +15,13 @@ def environment_strings(obj):
 
 @admin.register(Credential)
 class CredentialAdmin(admin.ModelAdmin):
-    list_display = ('name', 'enabled', 'valid', 'last_validated', 'used_by')
+    list_display = ('name', 'enabled', 'valid', 'last_validated', 'used_by_group')
     readonly_fields = ('valid',)
 
     actions = ('validate',)
 
-    def used_by(self, obj):
-        return "{0.__class__.__name__}({0.name})".format(obj.containergroup_set.get())
+    def used_by_group(self, obj):
+        return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containergroup_set.all())
 
     def validate(modeladmin, request, queryset):
         """Run validate command on model."""
