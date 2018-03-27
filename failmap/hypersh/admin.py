@@ -110,7 +110,7 @@ class ContainerGroupAdmin(admin.ModelAdmin):
 
 @admin.register(ContainerConfiguration)
 class ContainerConfigurationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'image', 'command', environment_strings, 'used_by')
+    list_display = ('name', 'image', 'command', environment_strings, 'used_by_group')
 
-    def used_by(self, obj):
-        return "{0.__class__.__name__}({0.name})".format(obj.containergroup_set.get())
+    def used_by_group(self, obj):
+        return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containergroup_set.all())
