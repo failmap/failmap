@@ -679,30 +679,43 @@
                 </div>
                 <br/>
                 <div v-if="name">
-                    <p>{% trans "RSS change feed teaser" %}
-                        <a :href="'/data/updates_on_organization_feed/' + selected"
-                           target="_blank">{% trans "rss feed" %}</a>.</p>
 
-                    {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br/>
-                    {% trans "Score" %}<span v-if="promise"><strong>*</strong></span>:<br/>
-                    {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br/>
-                    {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br/>
-                    {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br/>
-                    {% trans "congratulations" %}!
+                    <div class="score high">
+                        <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "High" %}</span>
+                    </div>
+
+                    <div class="score medium">
+                        <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "Medium" %}</span>
+                    </div>
+
+                    <div class="score low">
+                        <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "Low" %}</span>
+                    </div>
+
+                    <br style="clear: both">
+                    <br />
+                    <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
                     <br/>
+                    <ul>
+                    {% verbatim %}
+                    <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
+                    </li>
+                    {% endverbatim %}
+                    <li>{% trans "RSS change feed teaser" %}
+                    <a :href="'/data/updates_on_organization_feed/' + selected"
+                    target="_blank">{% trans "rss feed" %}</a>.</li>
+                    <li>
                     {% trans "Report share result question" %} {% verbatim %}<span
                         v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-                    <br/>
-                    <br/>
-                    {% trans "Report ask pentest leader" %} <a
-                        :href="'mailto:' + mailto + '?subject={% trans "Report ask pentest subject" %}' + name + '&body={% trans "Report ask pentest body" %}'">{% trans "Report ask request pentest" %}</a><br/>
+                    </li>
+                    <li>
                     {% trans "Report ask domains leader" %} <a
                         :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-                    <br/>
-                    {% verbatim %}
-                    <div v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
-                    </div>
-                    {% endverbatim %}
+                    </li>
+                    </ul>
                     <br/>
                     {% verbatim %}
                     <div v-for="url in urls" class="perurl"

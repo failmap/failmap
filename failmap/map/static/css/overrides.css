@@ -582,3 +582,51 @@ path {
 [v-cloak] {
   display: none;
 }
+
+
+.score {
+    float: left;
+    width: 10em;
+    height: 13em;
+    border-radius: 6px;
+    margin: 10px;
+    text-align: center;
+    padding: 13px;
+}
+
+.score_label {
+    font-size: 2em;
+    color: white;
+}
+
+.score_value {
+    font-size: 5em;
+    background-color: #ffffffcf;
+    width: 113px;
+    display: block;
+    border-radius: 10px;
+}
+
+.high {
+    background-color: #f70000;
+}
+
+.medium {
+    background-color: #f78900;;
+}
+
+.low {
+    background-color: #f7e400;
+}
+
+.high_text {
+    color: #f70000;
+}
+
+.medium_text {
+    color: #f78900;;
+}
+
+.low_text {
+    color: #f7e400;
+}
