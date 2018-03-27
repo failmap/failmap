@@ -188,7 +188,7 @@ class ActionMixin:
 
     def scan_plain_http(self, *args, **kwargs):
         return self.generic_action(scanner_plain_http.compose_task, 'Scan Plain Http', *args, **kwargs)
-    scan_plain_http.short_description = '🔬  Scan Plain Http'
+    scan_plain_http.short_description = '🔬  Scan Missing TLS'
     actions.append(scan_plain_http)
 
     def scan_security_headers(self, *args, **kwargs):
@@ -198,7 +198,7 @@ class ActionMixin:
 
     def scan_tls_qualys(self, *args, **kwargs):
         return self.generic_action(scanner_tls_qualys.compose_task, 'Scan TLS Qualys', *args, **kwargs)
-    scan_tls_qualys.short_description = '🔬  Scan TLS Qualys'
+    scan_tls_qualys.short_description = '🔬  Scan TLS (Qualys)'
     actions.append(scan_tls_qualys)
 
     def rebuild_ratings(self, *args, **kwargs):
@@ -392,38 +392,38 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     def onboard(self, request, queryset):
         onboard_urls(urls=list(queryset))
-        self.message_user(request, "URL(s) have been scanned on known subdomains: Done")
+        self.message_user(request, "Onboarding task has been added. Onboarding can take a while depending on server load.")
     actions.append('onboard')
-    onboard.short_description = "🔮  Onboard (discover subdomains and endpoints, http scans, screenshot)"
+    onboard.short_description = "🔮  Onboard"
 
     def dns_certificate_transparency(self, request, queryset):
         certificate_transparency(urls=list(queryset))
-        self.message_user(request, "URL(s) have been scanned on known subdomains: Done")
+        self.message_user(request, "DNS Scan task created.")
     actions.append('dns_certificate_transparency')
-    dns_certificate_transparency.short_description = "🗺  +subdomains (certificate transparency)"
+    dns_certificate_transparency.short_description = "🗺  + subdomains (certificate transparency)"
 
     def dns_known_subdomains(self, request, queryset):
         brute_known_subdomains(urls=list(queryset))
-        self.message_user(request, "Discover subdomains (using known subdomains): Done")
-    dns_known_subdomains.short_description = "🗺  +subdomains (known subdomains)"
+        self.message_user(request, "DNS Scan task created.")
+    dns_known_subdomains.short_description = "🗺  + subdomains (known subdomains)"
     actions.append('dns_known_subdomains')
 
     def dns_nsec(self, request, queryset):
         nsec(urls=list(queryset))
-        self.message_user(request, "Discover subdomains (using nsec): Done")
-    dns_known_subdomains.short_description = "🗺  +subdomains (nsec)"
+        self.message_user(request, "Discover subdomains (using nsec): task created")
+    dns_known_subdomains.short_description = "🗺  + subdomains (nsec)"
     actions.append('dns_nsec')
 
     def discover_http_endpoints(self, request, queryset):
         scanner_http.discover_endpoints(urls=list(queryset))
-        self.message_user(request, "Discover http(s) endpoints: Done")
-    discover_http_endpoints.short_description = "🗺  Discover http(s) endpoints"
+        self.message_user(request, "Discover http(s) endpoints: task created")
+    discover_http_endpoints.short_description = "🗺  Discover endpoints"
     actions.append('discover_http_endpoints')
 
     def screenshots(self, request, queryset):
         screenshot_urls([url for url in queryset])
-        self.message_user(request, "Create screenshot: Done")
-    screenshots.short_description = "📷  Create screenshot"
+        self.message_user(request, "Create screenshot: task created")
+    screenshots.short_description = "📷  Screenshot"
     actions.append('screenshots')
 
     def declare_dead(self, request, queryset):
