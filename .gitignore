@@ -13,6 +13,7 @@ db_backup_*.sqlite3
 failmap/map/static/CACHE/*
 failmap/map/static/images/screenshots/*
 failmap/scanners/resources/wordlists/knownsubdomains.txt
+failmap/scanners/resources/wordlists/nonsense.txt
 dist/
 build/
 code.json

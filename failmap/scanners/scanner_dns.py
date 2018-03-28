@@ -24,6 +24,8 @@ from typing import List
 import untangle
 from django.conf import settings
 
+from celery import Task, group
+
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 
@@ -72,16 +74,66 @@ def search_engines(organizations: List[Organization]=None, urls: List[Url]=None)
     return [new_url for new_url in search_engines_scan(urls)]
 
 
-@app.task(ignore_result=True, queue="scanners")
 def nsec(organizations: List[Organization]=None, urls: List[Url]=None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in nsec_scan(urls)]
 
 
+def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict(),
+                   endpoints_filter: dict = dict()) -> List:
+    if endpoints_filter:
+        raise NotImplemented("Endpoints are not yet supported for DNS scans.")
+
+    urls = []
+    # todo: check voor toplevel
+    # todo: functional decomposition
+
+    # merge
+    toplevel_filter = {"url__iregex": "^[^.]*\.[^.]*$"}
+
+    # merge using python 3.6 syntax
+    # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+    urls_filter = {**toplevel_filter, **urls_filter}
+
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        # when empty no results.
+        urls += Url.objects.filter(organization__in=organizations, **urls_filter)
+    else:
+        urls += Url.objects.filter(**urls_filter)
+
+    return urls
+
+
 @app.task(ignore_result=True, queue="scanners")
+def nsec_compose_task(organizations_filter: dict = dict(),
+                      urls_filter: dict = dict(),
+                      endpoints_filter: dict = dict(),) -> Task:
+
+    urls = url_by_filters(organizations_filter=organizations_filter,
+                          urls_filter=urls_filter,
+                          endpoints_filter=endpoints_filter)
+
+    task = group(nsec_scan.s([url]) for url in urls)
+    return task
+
+
 def certificate_transparency(organizations: List[Organization]=None, urls: List[Url]=None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in certificate_transparency_scan(urls)]
+
+
+@app.task(ignore_result=True, queue="scanners")
+def certificate_transparency_compose_task(organizations_filter: dict = dict(),
+                                          urls_filter: dict = dict(),
+                                          endpoints_filter: dict = dict(),) -> Task:
+
+    urls = url_by_filters(organizations_filter=organizations_filter,
+                          urls_filter=urls_filter,
+                          endpoints_filter=endpoints_filter)
+
+    task = group(certificate_transparency_scan.s([url]) for url in urls)
+    return task
 
 
 def brute_dutch(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -94,7 +146,6 @@ def brute_three_letters(organizations: List[Organization]=None, urls: List[Url]=
     return bruteforce_scan(urls, str(wordlists["three_letters"]["path"]))
 
 
-@app.task(ignore_result=True, queue="scanners")
 def brute_known_subdomains(organizations: List[Organization]=None, urls: List[Url]=None):
     if organizations:
         for organization in organizations:
@@ -107,6 +158,22 @@ def brute_known_subdomains(organizations: List[Organization]=None, urls: List[Ur
         for url in urls:
             update_subdomain_wordlist()
             return bruteforce_scan([url], str(wordlists["known_subdomains"]["path"]))
+
+
+@app.task(ignore_result=True, queue="scanners")
+def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
+                                        urls_filter: dict = dict(),
+                                        endpoints_filter: dict = dict(),) -> Task:
+
+    urls = url_by_filters(organizations_filter=organizations_filter,
+                          urls_filter=urls_filter,
+                          endpoints_filter=endpoints_filter)
+
+    # todo: this should be placed to elsewhere, but we might not have write permissions in scanners...???
+    update_subdomain_wordlist()
+
+    task = group(bruteforce_scan.s([url], str(wordlists["known_subdomains"]["path"])) for url in urls)
+    return task
 
 
 def standard(organizations: List[Organization]=None, urls: List[Url]=None):
@@ -340,6 +407,8 @@ def search_engines_scan(urls: List[Url]):
     return addedlist
 
 
+# this can be highly invasive and slow, so try to behave: rate limit: 1 to 2 per minute.
+@app.task(ignore_result=True, queue="scanners", rate_limit='40/h')
 def bruteforce_scan(urls: List[Url], wordlist: str):
     """
 
@@ -382,6 +451,8 @@ def bruteforce_scan(urls: List[Url], wordlist: str):
     return imported_urls
 
 
+# don't overload the crt.sh service, rate limit
+@app.task(ignore_result=True, queue="scanners", rate_limit='10/m')
 def certificate_transparency_scan(urls: List[Url]):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
@@ -435,7 +506,8 @@ def certificate_transparency_scan(urls: List[Url]):
     return addedlist
 
 
-# only works with python 2.
+# this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
+@app.task(ignore_result=True, queue="scanners", rate_limit='4/m')
 def nsec_scan(urls: List[Url]):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).

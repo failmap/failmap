@@ -15,9 +15,9 @@ __all__ = [scanner_tls_qualys, scanner_security_headers, scanner_dummy, scanner_
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
 # Other code can iterate over these functions and call them, example: see onboard.py.
 TLD_DEFAULT_ONBOARDERS = [
-    scanner_dns.brute_known_subdomains,
-    scanner_dns.certificate_transparency,
-    scanner_dns.nsec]
+    scanner_dns.brute_known_subdomains_compose_task,
+    scanner_dns.certificate_transparency_compose_task,
+    scanner_dns.nsec_compose_task]
 DEFAULT_ONBOARDERS = [scanner_http.compose_task]
 DEFAULT_SCANNERS = [
     scanner_plain_http.compose_task,
