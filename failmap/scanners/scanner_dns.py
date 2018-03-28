@@ -22,9 +22,8 @@ import subprocess
 from typing import List
 
 import untangle
-from django.conf import settings
-
 from celery import Task, group
+from django.conf import settings
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
