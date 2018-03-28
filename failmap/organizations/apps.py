@@ -5,4 +5,4 @@ class OrganizationsConfig(AppConfig):
     name = 'failmap.organizations'
 
     def ready(self):
-        import failmap.organizations.signals # noqa
+        import failmap.organizations.signals  # noqa

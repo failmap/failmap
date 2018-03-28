@@ -2,11 +2,13 @@
 # from __future__ import unicode_literals
 
 import logging
+
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from failmap.organizations.models import Url
 from failmap.scanners import onboard
-from django.db import transaction
 
 log = logging.getLogger(__name__)
 
