@@ -19,7 +19,8 @@ import failmap.scanners.scanner_http as scanner_http
 from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
-from failmap.scanners import onboard, scanner_plain_http, scanner_security_headers, scanner_tls_qualys
+from failmap.scanners import (onboard, scanner_plain_http, scanner_security_headers,
+                              scanner_tls_qualys)
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
@@ -397,7 +398,8 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     # saved here in case we want to go back.
     # def onboard(self, request, queryset):
     #     onboard_urls(urls=list(queryset))
-    #     self.message_user(request, "Onboarding task has been added. Onboarding can take a while depending on server load.")
+    #     self.message_user(request,
+    #         "Onboarding task has been added. Onboarding can take a while depending on server load.")
     # actions.append('onboard')
     # onboard.short_description = "🔮  Onboard"
 
