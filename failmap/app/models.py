@@ -1,12 +1,12 @@
 # coding=UTF-8
 # from __future__ import unicode_literals
 
-import datetime
 import importlib
 
 import celery
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 from jsonfield import JSONField
 
 from ..celery import app
@@ -59,7 +59,7 @@ class Job(models.Model):
             result = '-- task generated no result object --'
         job.result = result
         job.status = 'completed'
-        job.finished_on = datetime.datetime.now()
+        job.finished_on = timezone.now()
         job.save(update_fields=['result', 'status', 'finished_on'])
 
     def __str__(self):

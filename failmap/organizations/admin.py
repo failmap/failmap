@@ -19,10 +19,9 @@ import failmap.scanners.scanner_http as scanner_http
 from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
-from failmap.scanners import scanner_plain_http, scanner_security_headers, scanner_tls_qualys
+from failmap.scanners import onboard, scanner_plain_http, scanner_security_headers, scanner_tls_qualys
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
-from failmap.scanners.onboard import onboard_urls
 from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
 
@@ -205,6 +204,11 @@ class ActionMixin:
         return self.generic_action(rating.compose_task, 'Rebuild rating', *args, **kwargs)
     rebuild_ratings.short_description = '✅  Rebuild rating'
     actions.append(rebuild_ratings)
+
+    def onboard(self, *args, **kwargs):
+        return self.generic_action(onboard.compose_task, 'Onboard', *args, **kwargs)
+    onboard.short_description = '🔮  Onboard'
+    actions.append(onboard)
 
     def generic_action(self, task_composer: types.compose_task, name: str, request, queryset):
         """Admin action that will create a Job of tasks."""
@@ -390,11 +394,12 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     actions = []
 
-    def onboard(self, request, queryset):
-        onboard_urls(urls=list(queryset))
-        self.message_user(request, "Onboarding task has been added. Onboarding can take a while depending on server load.")
-    actions.append('onboard')
-    onboard.short_description = "🔮  Onboard"
+    # saved here in case we want to go back.
+    # def onboard(self, request, queryset):
+    #     onboard_urls(urls=list(queryset))
+    #     self.message_user(request, "Onboarding task has been added. Onboarding can take a while depending on server load.")
+    # actions.append('onboard')
+    # onboard.short_description = "🔮  Onboard"
 
     def dns_certificate_transparency(self, request, queryset):
         certificate_transparency(urls=list(queryset))
