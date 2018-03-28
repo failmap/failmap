@@ -2,4 +2,7 @@ from django.apps import AppConfig
 
 
 class OrganizationsConfig(AppConfig):
-    name = 'organizations'
+    name = 'failmap.organizations'
+
+    def ready(self):
+        import failmap.organizations.signals # noqa

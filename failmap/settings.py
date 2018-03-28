@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'import_export',
     'failmap.fail',
-    'failmap.organizations',
+    'failmap.organizations.apps.OrganizationsConfig',
     'failmap.scanners',
     'failmap.map',
     'django_countries',
