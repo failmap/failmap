@@ -1,6 +1,6 @@
 import logging
 
-from celery import group
+from celery import chain, chord, group
 from django.utils import timezone
 
 from failmap.organizations.models import Url
@@ -28,7 +28,17 @@ def compose_task(
 
     tasks = []
     for url in urls:
-        tasks.append(group(compose_explore_tasks(url)) | finish_onboarding.si(url) | scan_tasks.si(url))
+        callback = chain(finish_onboarding.si(url), scan_tasks.si(url))
+        explore = compose_explore_tasks(url)
+        # We made a mistake in the chain: the scanner tasks can only run IF there are endpoints.
+        # and the chain with scan_tasks does not wait until the explore tasks are finished.
+        # The explore tasks discover endoints (and save them).
+        # Without explore tasks there are no endpoints, so all scanners fail.
+        # But moving to a chord seems to be hard/impossible. I'm getting a
+        # self Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
+        # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
+        # https://stackoverflow.com/questions/47457546/
+        tasks.append(chord(explore)(callback))
 
     task = group(tasks)
 
@@ -75,4 +85,3 @@ def finish_onboarding(url):
     url.save(update_fields=['onboarded_on', 'onboarded'])
 
     return True
-

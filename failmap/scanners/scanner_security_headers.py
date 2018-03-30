@@ -53,11 +53,12 @@ def compose_task(
     endpoints = Endpoint.objects.filter(
         # apply filter to endpoints (or if no filter, all endpoints)
         url__in=urls, **endpoints_filter,
-        # also apply manditory filters to only select valid endpoints for this action
+        # also apply mandatory filters to only select valid endpoints for this action
         is_dead=False, protocol__in=['http', 'https'])
 
     if not endpoints:
-        raise Exception('Applied filters resulted in no tasks!')
+        raise Exception('Security headers: Applied filters resulted in no tasks! organisations_filter %s, '
+                        'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
 
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))

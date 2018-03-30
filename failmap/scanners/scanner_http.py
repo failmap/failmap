@@ -56,6 +56,7 @@ STANDARD_HTTPS_PORTS = [443, 8443]
 # Discover Endpoints generic task
 
 
+@app.task(queue="storage")
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -253,7 +254,7 @@ def scan_url_direct(protocol: str, url: Url, port: int):
 # would this be faster the ip discovery and actual scan grow to far apart.
 # also it would mean an intense series of questions to the dns server.
 # TODO: make queue explicit, split functionality in storage and scanner
-@app.task
+@app.task(ignore_result=True, queue="scanners")
 def resolve_and_scan(protocol: str, url: Url, port: int):
     ips = get_ips(url.url)
 
