@@ -43,6 +43,14 @@ WORKER_QUEUE_CONFIGURATION = {
         Queue('scanners.endpoint_discovery.ipv4'),
         Queue('scanners.endpoint_discovery.ipv6'),
     ],
+    'scanner_v4': [
+        Queue('scanners.ipv4'),
+        Queue('scanners.endpoint_discovery.ipv4'),
+    ],
+    'scanner_v6': [
+        Queue('scanners.ipv6'),
+        Queue('scanners.endpoint_discovery.ipv6'),
+    ],
     # worker with access to storage allowed to connect to databases
     'storage': [
         Queue('storage'),
