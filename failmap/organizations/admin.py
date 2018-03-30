@@ -19,11 +19,10 @@ import failmap.scanners.scanner_http as scanner_http
 from failmap import types
 from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
-from failmap.scanners import (onboard, scanner_plain_http, scanner_security_headers,
+from failmap.scanners import (onboard, scanner_dns, scanner_plain_http, scanner_security_headers,
                               scanner_tls_qualys)
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
-from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
 from failmap.scanners.scanner_screenshot import screenshot_urls
 
 from ..app.models import Job
@@ -205,6 +204,27 @@ class ActionMixin:
         return self.generic_action(rating.compose_task, 'Rebuild rating', *args, **kwargs)
     rebuild_ratings.short_description = '✅  Rebuild rating'
     actions.append(rebuild_ratings)
+
+    def dns_certificate_transparency(self, *args, **kwargs):
+        return self.generic_action(scanner_dns.certificate_transparency_compose_task,
+                                   'DNS Certificate transparency', *args, **kwargs)
+    dns_certificate_transparency.short_description = "🗺  + subdomains (certificate transparency)"
+    actions.append(dns_certificate_transparency)
+
+    def dns_nsec(self, *args, **kwargs):
+        return self.generic_action(scanner_dns.nsec_compose_task, 'DNS Nsec', *args, **kwargs)
+    dns_nsec.short_description = "🗺  + subdomains (nsec)"
+    actions.append(dns_nsec)
+
+    def dns_known_subdomains(self, *args, **kwargs):
+        return self.generic_action(scanner_dns.brute_known_subdomains_compose_task, 'DNS Nsec', *args, **kwargs)
+    dns_known_subdomains.short_description = "🗺  + subdomains (brute known subdomains)"
+    actions.append(dns_known_subdomains)
+
+    def disover_endpoints(self, *args, **kwargs):
+        return self.generic_action(scanner_http.compose_task, 'Discover endpoints', *args, **kwargs)
+    disover_endpoints.short_description = "🗺 Discover endpoints"
+    actions.append(disover_endpoints)
 
     def onboard(self, *args, **kwargs):
         return self.generic_action(onboard.compose_task, 'Onboard', *args, **kwargs)
@@ -402,30 +422,6 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     #         "Onboarding task has been added. Onboarding can take a while depending on server load.")
     # actions.append('onboard')
     # onboard.short_description = "🔮  Onboard"
-
-    def dns_certificate_transparency(self, request, queryset):
-        certificate_transparency(urls=list(queryset))
-        self.message_user(request, "DNS Scan task created.")
-    actions.append('dns_certificate_transparency')
-    dns_certificate_transparency.short_description = "🗺  + subdomains (certificate transparency)"
-
-    def dns_known_subdomains(self, request, queryset):
-        brute_known_subdomains(urls=list(queryset))
-        self.message_user(request, "DNS Scan task created.")
-    dns_known_subdomains.short_description = "🗺  + subdomains (known subdomains)"
-    actions.append('dns_known_subdomains')
-
-    def dns_nsec(self, request, queryset):
-        nsec(urls=list(queryset))
-        self.message_user(request, "Discover subdomains (using nsec): task created")
-    dns_known_subdomains.short_description = "🗺  + subdomains (nsec)"
-    actions.append('dns_nsec')
-
-    def discover_http_endpoints(self, request, queryset):
-        scanner_http.discover_endpoints(urls=list(queryset))
-        self.message_user(request, "Discover http(s) endpoints: task created")
-    discover_http_endpoints.short_description = "🗺  Discover endpoints"
-    actions.append('discover_http_endpoints')
 
     def screenshots(self, request, queryset):
         screenshot_urls([url for url in queryset])
