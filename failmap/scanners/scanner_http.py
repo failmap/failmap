@@ -343,7 +343,7 @@ def get_ips(url: str):
 
     # on the development machine it scans all within 10 minutes. About 20/s.
 
-    rate_limit='20/s',
+    rate_limit='120/s',
     # queue needs to be set based on ip, either scanners.endpoint_discovery.ipv4 or scanners.endpoint_discovery.ipv4
 )
 def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
