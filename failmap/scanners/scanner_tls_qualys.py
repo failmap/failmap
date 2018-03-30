@@ -210,7 +210,7 @@ def qualys_scan(self, url):
     https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     """
     log.info('Still waiting for Qualys result on %s. Retrying task in 180 seconds. Status: %s' %
-             url.url, data.get('status', "unknown"))
+             (url.url, data.get('status', "unknown")))
     # not tested yet: report_to_console(url.url, data)
     # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
     # The 'retry' converts this task instance from a rate_limited into a

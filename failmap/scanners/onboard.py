@@ -69,6 +69,10 @@ def scan_tasks(url):
 
 @app.task(queue='storage')
 def finish_onboarding(url):
+    log.info("Finishing onboarding of %s", url)
     url.onboarded = True
     url.onboarded_on = timezone.now()
     url.save(update_fields=['onboarded_on', 'onboarded'])
+
+    return True
+
