@@ -17,10 +17,9 @@ from leaflet.admin import LeafletGeoAdminMixin
 
 import failmap.scanners.scanner_http as scanner_http
 from failmap import types
-from failmap.map import rating
 from failmap.map.rating import OrganizationRating, UrlRating
-from failmap.scanners import (onboard, scanner_dns, scanner_plain_http, scanner_security_headers,
-                              scanner_tls_qualys)
+from failmap.scanners import (onboard, scanner_dns, scanner_dnssec, scanner_plain_http,
+                              scanner_security_headers, scanner_tls_qualys)
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner_screenshot import screenshot_urls
@@ -187,43 +186,43 @@ class ActionMixin:
 
     def scan_plain_http(self, *args, **kwargs):
         return self.generic_action(scanner_plain_http.compose_task, 'Scan Plain Http', *args, **kwargs)
-    scan_plain_http.short_description = '🔬  Scan Missing TLS'
+    scan_plain_http.short_description = '🔬  Missing TLS'
     actions.append(scan_plain_http)
 
     def scan_security_headers(self, *args, **kwargs):
         return self.generic_action(scanner_security_headers.compose_task, 'Scan Security Headers', *args, **kwargs)
-    scan_security_headers.short_description = '🔬  Scan Security Headers'
+    scan_security_headers.short_description = '🔬  Security Headers'
     actions.append(scan_security_headers)
 
     def scan_tls_qualys(self, *args, **kwargs):
         return self.generic_action(scanner_tls_qualys.compose_task, 'Scan TLS Qualys', *args, **kwargs)
-    scan_tls_qualys.short_description = '🔬  Scan TLS (Qualys)'
+    scan_tls_qualys.short_description = '🔬  TLS (Qualys)'
     actions.append(scan_tls_qualys)
 
-    def rebuild_ratings(self, *args, **kwargs):
-        return self.generic_action(rating.compose_task, 'Rebuild rating', *args, **kwargs)
-    rebuild_ratings.short_description = '✅  Rebuild rating'
-    actions.append(rebuild_ratings)
+    def dnssec(self, *args, **kwargs):
+        return self.generic_action(scanner_dnssec.compose_task, 'DNSSEC', *args, **kwargs)
+    dnssec.short_description = "🔬 DNSSEC"
+    actions.append(dnssec)
 
     def dns_certificate_transparency(self, *args, **kwargs):
         return self.generic_action(scanner_dns.certificate_transparency_compose_task,
                                    'DNS Certificate transparency', *args, **kwargs)
-    dns_certificate_transparency.short_description = "🗺  + subdomains (certificate transparency)"
+    dns_certificate_transparency.short_description = "🗺  DNS (certificate transparency)"
     actions.append(dns_certificate_transparency)
 
     def dns_nsec(self, *args, **kwargs):
-        return self.generic_action(scanner_dns.nsec_compose_task, 'DNS Nsec', *args, **kwargs)
-    dns_nsec.short_description = "🗺  + subdomains (nsec)"
+        return self.generic_action(scanner_dns.nsec_compose_task, 'DNS nsec1', *args, **kwargs)
+    dns_nsec.short_description = "🗺  DNS (nsec1)"
     actions.append(dns_nsec)
 
     def dns_known_subdomains(self, *args, **kwargs):
         return self.generic_action(scanner_dns.brute_known_subdomains_compose_task, 'DNS Nsec', *args, **kwargs)
-    dns_known_subdomains.short_description = "🗺  + subdomains (brute known subdomains)"
+    dns_known_subdomains.short_description = "🗺  + DNS (known subdomains)"
     actions.append(dns_known_subdomains)
 
     def disover_endpoints(self, *args, **kwargs):
         return self.generic_action(scanner_http.compose_task, 'Discover endpoints', *args, **kwargs)
-    disover_endpoints.short_description = "🗺 Discover endpoints"
+    disover_endpoints.short_description = "🗺  Discover endpoints"
     actions.append(disover_endpoints)
 
     def onboard(self, *args, **kwargs):
