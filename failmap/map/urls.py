@@ -4,11 +4,11 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.i18n import JavaScriptCatalog
 
-from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, improvements, index,
-                               latest_scans, manifest_json, map_data, organization_report,
-                               organizationtype_exists, robots_txt, security_txt, stats,
-                               terrible_urls, top_fail, top_win, updates_on_organization,
-                               vulnerability_graphs, wanted_urls)
+from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, get_categories,
+                               improvements, index, latest_scans, manifest_json, map_data,
+                               organization_report, organizationtype_exists, robots_txt,
+                               security_txt, stats, terrible_urls, top_fail, top_win,
+                               updates_on_organization, vulnerability_graphs, wanted_urls)
 
 urlpatterns = [
     url(r'^$', index, name='failmap'),
@@ -23,6 +23,9 @@ urlpatterns = [
 
     url(r'^data/stats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         stats, name='stats'),
+
+    url(r'^data/categories/(?P<country>[A-Z]{2})/',
+        get_categories, name='get_categories'),
 
     # url(r'^d3.html', d3, name='d3'),
     url(r'^data/vulnstats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',

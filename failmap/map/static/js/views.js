@@ -298,6 +298,11 @@ var top_mixin = {
 };
 
 
+function extracrunchycyber(){
+    vueCountryNavbar.countries = ["NL", "DE"];
+}
+
+
 function extra() {
     vueCountryNavbar.countries = ["NL", "DE", "SE"];
     vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"];
@@ -354,6 +359,24 @@ function views() {
                 // all validation is done server side, all parameters are optional and have fallbacks.
                 vueMap.country = country;
                 this.selected = country;
+
+                // update the cateogories bar for this country, todo: load a default category when a country
+                // is selected
+
+                this.load_categories()
+            },
+            load_categories: function() {
+                var self = this;
+                $.getJSON('/data/categories/' + this.selected + '/', function (categories) {
+                    // it's fine to clear the navbar if there are no categories for this country
+                    vueCategoryNavbar.categories = categories;
+
+                    // but then don't clear the current category, so it's easier to go back
+                    if (categories.length) {
+                        vueCategoryNavbar.set_category(categories[0])
+                    }
+
+                })
             }
         }
     });

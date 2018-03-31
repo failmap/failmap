@@ -50,8 +50,8 @@ def get_country(code: str):
     import re
 
     # handle default, save a regex
-    if code == "NL":
-        return "NL"
+    if code in ["NL", "DE", "SE"]:
+        return code
 
     match = re.search(r"[A-Z]{2}", code)
     if not match:
@@ -63,6 +63,16 @@ def get_country(code: str):
         return "NL"
 
     return code
+
+
+def get_categories(request, country: str="NL"):
+
+    # todo: organization exists, over time, ratings exist... etc...
+    categories = Organization.objects.all().filter(
+        country=get_country(country)).order_by().values_list('type', flat=True).distinct()
+
+    types = list(OrganizationType.objects.all().filter(pk__in=categories).order_by().values_list('name', flat=True))
+    return JsonResponse(types, safe=False, encoder=JSEncoder)
 
 
 @cache_page(one_hour)
