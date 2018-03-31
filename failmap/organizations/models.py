@@ -20,6 +20,8 @@ class OrganizationType(models.Model):
 
     class Meta:
         managed = True
+        verbose_name = _('organization_type')
+        verbose_name_plural = _('organization_types')
 
     def __str__(self):
         return self.name
@@ -88,6 +90,8 @@ class Organization(models.Model):
     class Meta:
         managed = True
         db_table = 'organization'
+        verbose_name = _('organization')
+        verbose_name_plural = _('organizations')
 
     def __str__(self):
         if self.is_dead:
@@ -158,6 +162,8 @@ class Coordinate(models.Model):
     class Meta:
         managed = True
         db_table = 'coordinate'
+        verbose_name = _('coordinate')
+        verbose_name_plural = _('coordinates')
 
 
 class Url(models.Model):
@@ -331,3 +337,7 @@ class Promise(models.Model):
 
     def __str__(self):
         return '%s - %s' % (self.organization.name, self.created_on)
+
+    class Meta:
+        verbose_name = _('promise')
+        verbose_name_plural = _('promises')

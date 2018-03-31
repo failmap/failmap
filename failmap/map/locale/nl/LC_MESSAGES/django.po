@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-27 14:26+0000\n"
+"POT-Creation-Date: 2018-03-31 09:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -245,8 +245,8 @@ msgstr "Dit zijn de verbeteringen van de laatste <b>vier weken</b>."
 
 #: failmap/map/templates/map/index.html:163
 #: failmap/map/templates/map/index.html:186
-#: failmap/map/templates/map/index.html:688
-#: failmap/map/templates/map/index.html:833
+#: failmap/map/templates/map/index.html:685
+#: failmap/map/templates/map/index.html:846
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:15
 #: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:1190
@@ -256,8 +256,8 @@ msgstr "Hoog"
 
 #: failmap/map/templates/map/index.html:170
 #: failmap/map/templates/map/index.html:187
-#: failmap/map/templates/map/index.html:689
-#: failmap/map/templates/map/index.html:834
+#: failmap/map/templates/map/index.html:690
+#: failmap/map/templates/map/index.html:847
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:16
 #: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:1190
@@ -267,8 +267,8 @@ msgstr "Midden"
 
 #: failmap/map/templates/map/index.html:176
 #: failmap/map/templates/map/index.html:188
-#: failmap/map/templates/map/index.html:690
-#: failmap/map/templates/map/index.html:835
+#: failmap/map/templates/map/index.html:695
+#: failmap/map/templates/map/index.html:848
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:17
 #: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:1190
@@ -510,8 +510,8 @@ msgstr ""
 "Er wordt door faalkaart controle uitgevoerd op {{ x['endpoints'] }} diensten."
 
 #: failmap/map/templates/map/index.html:532
-#: failmap/map/templates/map/index.html:735
-#: failmap/map/templates/map/index.html:877
+#: failmap/map/templates/map/index.html:748
+#: failmap/map/templates/map/index.html:890
 msgid "Service"
 msgstr "Dienst"
 
@@ -582,7 +582,7 @@ msgstr "Volg de laatste bevinden via deze"
 #: failmap/map/templates/map/index.html:641
 #: failmap/map/templates/map/index.html:649
 #: failmap/map/templates/map/index.html:655
-#: failmap/map/templates/map/index.html:684
+#: failmap/map/templates/map/index.html:709
 msgid "rss feed"
 msgstr "RSS feed"
 
@@ -610,83 +610,50 @@ msgstr ""
 msgid "Show report for organization"
 msgstr "Toon verslag voor organisatie"
 
-#: failmap/map/templates/map/index.html:682
-msgid "RSS change feed teaser"
-msgstr "Volg de laatste wijzigingen van deze organisatie via deze"
-
-#: failmap/map/templates/map/index.html:686
-#: failmap/map/templates/map/index.html:831
+#: failmap/map/templates/map/index.html:700
+#: failmap/map/templates/map/index.html:844
 msgid "Data from"
 msgstr "Gegevens van"
 
-#: failmap/map/templates/map/index.html:687
-#: failmap/map/templates/map/index.html:832
-msgid "Score"
-msgstr ""
+#: failmap/map/templates/map/index.html:707
+msgid "RSS change feed teaser"
+msgstr "Volg de laatste wijzigingen van deze organisatie via deze"
 
-#: failmap/map/templates/map/index.html:691
-#: failmap/map/templates/map/index.html:836
-msgid "congratulations"
-msgstr "gefeliciteerd"
-
-#: failmap/map/templates/map/index.html:693
-#: failmap/map/templates/map/index.html:828
+#: failmap/map/templates/map/index.html:711
+#: failmap/map/templates/map/index.html:841
 msgid "Report share result question"
 msgstr "Dit resultaat delen?"
 
-#: failmap/map/templates/map/index.html:697
-#: failmap/map/templates/map/index.html:839
-msgid "Report ask pentest leader"
-msgstr "Gaat faalkaart niet ver genoeg?"
-
-#: failmap/map/templates/map/index.html:698
-#: failmap/map/templates/map/index.html:840
-msgid "Report ask pentest subject"
-msgstr "Pentest%20aanvraag%20voor%20"
-
-#: failmap/map/templates/map/index.html:698
-#: failmap/map/templates/map/index.html:840
-msgid "Report ask pentest body"
-msgstr ""
-"Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de "
-"outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A"
-"%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
-
-#: failmap/map/templates/map/index.html:698
-#: failmap/map/templates/map/index.html:840
-msgid "Report ask request pentest"
-msgstr "Vraag hier een echte pentest aan."
-
-#: failmap/map/templates/map/index.html:699
-#: failmap/map/templates/map/index.html:841
+#: failmap/map/templates/map/index.html:715
+#: failmap/map/templates/map/index.html:854
 msgid "Report ask domains leader"
 msgstr "Ontbreken er domeinen?"
 
-#: failmap/map/templates/map/index.html:700
-#: failmap/map/templates/map/index.html:842
+#: failmap/map/templates/map/index.html:716
+#: failmap/map/templates/map/index.html:855
 msgid "Report ask domains subject"
 msgstr "Nieuwe%20domeinen%20voor%20"
 
-#: failmap/map/templates/map/index.html:700
-#: failmap/map/templates/map/index.html:842
+#: failmap/map/templates/map/index.html:716
+#: failmap/map/templates/map/index.html:855
 msgid "Report ask domains body"
 msgstr ""
 "Beste Faalkaart,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de "
 "kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met "
 "alle domeinen.%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
 
-#: failmap/map/templates/map/index.html:700
-#: failmap/map/templates/map/index.html:842
+#: failmap/map/templates/map/index.html:716
+#: failmap/map/templates/map/index.html:855
 msgid "Report ask sendin domains"
 msgstr "Stuur hier domeinen in."
 
-#: failmap/map/templates/map/index.html:718
-#: failmap/map/templates/map/index.html:860
+#: failmap/map/templates/map/index.html:731
+#: failmap/map/templates/map/index.html:873
 msgid "Incorrect finding on mail subject"
 msgstr "verkeerde%20bevinding%20op%20"
 
-#: failmap/map/templates/map/index.html:718
-#: failmap/map/templates/map/index.html:860
+#: failmap/map/templates/map/index.html:731
+#: failmap/map/templates/map/index.html:873
 msgid "Incorrect finding on mail body"
 msgstr ""
 "Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een "
@@ -697,26 +664,53 @@ msgstr ""
 "ook een verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. "
 "%0D%0A%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
 
-#: failmap/map/templates/map/index.html:720
-#: failmap/map/templates/map/index.html:862
+#: failmap/map/templates/map/index.html:733
+#: failmap/map/templates/map/index.html:875
 msgid "Report incorrect finding"
 msgstr "Meld onjuiste verbinding"
 
-#: failmap/map/templates/map/index.html:743
-#: failmap/map/templates/map/index.html:885
+#: failmap/map/templates/map/index.html:756
+#: failmap/map/templates/map/index.html:898
 msgid "Since"
 msgstr "Sinds"
 
-#: failmap/map/templates/map/index.html:744
-#: failmap/map/templates/map/index.html:886
+#: failmap/map/templates/map/index.html:757
+#: failmap/map/templates/map/index.html:899
 msgid "Last check"
 msgstr "meest recente controle"
 
-#: failmap/map/templates/map/index.html:905
+#: failmap/map/templates/map/index.html:845
+msgid "Score"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:849
+msgid "congratulations"
+msgstr "gefeliciteerd"
+
+#: failmap/map/templates/map/index.html:852
+msgid "Report ask pentest leader"
+msgstr "Gaat faalkaart niet ver genoeg?"
+
+#: failmap/map/templates/map/index.html:853
+msgid "Report ask pentest subject"
+msgstr "Pentest%20aanvraag%20voor%20"
+
+#: failmap/map/templates/map/index.html:853
+msgid "Report ask pentest body"
+msgstr ""
+"Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de "
+"outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D%0A"
+"%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
+
+#: failmap/map/templates/map/index.html:853
+msgid "Report ask request pentest"
+msgstr "Vraag hier een echte pentest aan."
+
+#: failmap/map/templates/map/index.html:918
 msgid "Scan moment"
 msgstr "Scantijd"
 
-#: failmap/map/templates/map/index.html:906
+#: failmap/map/templates/map/index.html:919
 #: failmap/map/templates/map/terrible_urls.html:15
 msgid "Url"
 msgstr "Internet Adres"
