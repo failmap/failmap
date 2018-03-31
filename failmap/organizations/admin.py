@@ -391,6 +391,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
                    'uses_dns_wildcard', 'organization', 'onboarded', 'organization__type__name',
+                   'organization__country',
                    HasEndpointScansListFilter)
 
     fieldsets = (
