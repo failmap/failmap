@@ -328,11 +328,19 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
 
     # try to find official urls for this organization, as it's empty now. All those will then be onboarded and scanned.
     if "wikidata" in properties:
+
+        # validate that this region belongs to the right country
+        # country = country, P17, you'll get a Q back
+        # From the country get P297: ISO 3166-1 alpha-2 code
+        country = ""
+        isocode = ""
+
         website = ""
         try:
             client = Client()  # Q9928
             entity = client.get(properties["wikidata"], load=True)
             website = str(entity.get(client.get("P856"), None))  # P856 == Official Website.
+            country = entity.get(client.get("P17"), None)
         except HTTPError as e:
             # No entity with ID Q15111448 was found... etc.
             # perfectly possible. In that case, no website, and thus continue.
@@ -340,6 +348,31 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
         except Exception as e:
             # don't cause problems here... if the service is down, bad luck, try an import later etc...
             pass
+
+        log.debug("Country: %s" % country)
+        # validate country:
+        if country:
+            try:
+                client = Client()  # Q9928
+                entity = client.get(country.id, load=True)
+                isocode = str(entity.get(client.get("P297"), None))
+                log.debug("Retrieved ISO code: %s" % isocode)
+            except HTTPError as e:
+                # No entity with ID Q15111448 was found... etc.
+                # perfectly possible. In that case, no website, and thus continue.
+                pass
+            except Exception as e:
+                # don't cause problems here... if the service is down, bad luck, try an import later etc...
+                pass
+
+        log.debug("Matching isocode: %s", isocode)
+
+        # instead of removing or breaking things, just update the organization to belong to this country.
+        if isocode and new_organization.country != isocode.upper():
+            log.info("The imported organization is from another country, saving it as such. This may cause some "
+                     "issues as double organizations can be created.")
+            new_organization.country = isocode.upper()
+            new_organization.save()
 
         if not website or website == "None":
             return
