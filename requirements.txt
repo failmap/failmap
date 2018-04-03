@@ -85,5 +85,6 @@ django-nested-admin  # going deeper underground
 sphinx_rtd_theme
 
 hyper_sh
+
 django-fsm
 django-fsm-log

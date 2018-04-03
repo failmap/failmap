@@ -57,7 +57,7 @@ class ContainerGroupAdmin(admin.ModelAdmin):
         'state',
         'last_update',
     )
-    readonly_fields = ('current', 'last_update', 'state')
+    readonly_fields = ('current', 'last_update', 'state', 'last_error', 'error_count')
     actions = ('min1', 'plus1', 'minimum', 'maximum', 'reset', 'update', 'scale', )
 
     inlines = [StateLogInline]

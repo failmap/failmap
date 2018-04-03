@@ -1,17 +1,22 @@
 import logging
 import time
 
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 from django_fsm import FSMField, transition
 from django_fsm_log.models import StateLog
 from hyper_sh import Client
+from raven.contrib.django.raven_compat.models import client
 
 from ..celery import app
 
 DEFAULT_IMAGE = 'registry.gitlab.com/failmap/failmap:latest'
 DEFAULT_COMMAND = 'celery worker --log info --concurrency 1'
+
+MAX_ERROR_COUNT = 5
+STATE_FIELDS = ['last_error', 'error_count', 'state']
 
 log = logging.getLogger(__name__)
 
@@ -149,9 +154,13 @@ class ContainerGroup(models.Model):
     maximum = models.IntegerField(default=1)
     desired = models.IntegerField(default=1)
 
-    # use django-fsm to
+    # use django-fsm to manage state
     state = FSMField(default='new')
+    last_error = models.TextField(default='')
+    error_count = models.IntegerField(default=0)
     current = models.IntegerField(default=0)
+
+    last_error.allow_tags = True
 
     def __str__(self):
         return self.name
@@ -177,8 +186,9 @@ class ContainerGroup(models.Model):
         """If after a save a scaling action is required enqueue a task for this."""
         super().save(*args, **kwargs)
 
-        state_field_change = 'state' in kwargs.get('update_fields', [])
-        is_scaling = self.state not in ['idle', 'new']
+        # prevent creating concurrent scaling tasks or exponential task spawning
+        state_field_change = set(kwargs.get('update_fields', [])).intersection(set(STATE_FIELDS))
+        is_scaling = self.state not in ['idle', 'new', 'error']
         if is_scaling or state_field_change:
             return
 
@@ -199,20 +209,28 @@ class ContainerGroup(models.Model):
         """
 
         # state is used as a crude lock to prevent multiple simultanious scaling actions
-        if self.state != 'idle':
+        if self.state not in ['idle', 'error']:
             raise Exception('concurrent scaling actions')
         self.state = 'scaling'
-        self.save(update_fields=['state'])
+        self.last_error = ''
+        self.error_count = 0
+        self.save(update_fields=['state', 'last_error', 'error_count'])
 
         # get latest state changes from user and real world
+        self.refresh_from_db()
         self.update()
 
-        while self.current is not self.desired:
+        while self.current is not self.desired and self.error_count < MAX_ERROR_COUNT:
             # get latest state changes from user and real world
-            # self.refresh_from_db()
+            self.refresh_from_db()
             self.update()
 
             if self.current < self.desired:
+                log.info('Updating image')
+                self.state = 'updating image'
+                self.save(update_fields=['state'])
+                self.pull_image()
+
                 log.info('Scaling up')
                 self.state = 'scaling up'
                 self.save(update_fields=['state'])
@@ -226,15 +244,55 @@ class ContainerGroup(models.Model):
                 self.destroy_container()
             time.sleep(1)
 
-        log.info('Idle')
-        self.state = 'idle'
-        self.save(update_fields=['state'])
+        if self.error_count >= MAX_ERROR_COUNT:
+            self.state = 'error'
+        else:
+            log.info('Idle')
+            self.state = 'idle'
+            self.last_error = ''
+            self.error_count = 0
+        self.save(update_fields=['state', 'last_error', 'error_count'])
 
     def update(self):
         """Update current object state based on real-world state."""
-        self.current = len([c for c in self.client.containers()
-                            if c['Names'][0].startswith("/%s-" % slugify(self.name))])
-        self.save(update_fields=['current'])
+        try:
+            containers = self.client.containers()
+        except BaseException as e:
+            log.exception('failed to start container')
+            sentry_id = client.captureException()
+            if sentry_id:
+                self.last_error = '{e}\nSentry: {project_url}/?query={sentry_id}'.format(
+                    e=e,
+                    project_url=settings.SENTRY_PROJECT_URL,
+                    sentry_id=sentry_id,
+                )
+            else:
+                self.last_error = e
+            self.error_count += 1
+            self.save(update_fields=['last_error', 'error_count'])
+        else:
+            self.current = len([c for c in containers
+                                if c['Names'][0].startswith("/%s-" % slugify(self.name))])
+            self.save(update_fields=['current'])
+
+    def pull_image(self):
+        try:
+            log.debug("pulling latest image")
+            self.client.import_image(image=self.configuration.as_dict['image'])
+        except BaseException as e:
+            log.exception('failed to start container')
+            sentry_id = client.captureException()
+            if sentry_id:
+                self.last_error = '{e}\nSentry: {project_url}/?query={sentry_id}'.format(
+                    e=e,
+                    project_url=settings.SENTRY_PROJECT_URL,
+                    sentry_id=sentry_id,
+                )
+            else:
+                self.last_error = e
+            self.error_count += 1
+            self.save(update_fields=['last_error', 'error_count'])
+            raise
 
     def create_container(self):
         container_id = slugify("%s-%d" % (self.name, self.current + 1))
@@ -246,20 +304,34 @@ class ContainerGroup(models.Model):
             pass
 
         try:
-            environment = [str(x) for x in self.environment.all()]
             log.debug("creating container")
             self.client.create_container(
                 name=container_id,
                 labels={
                     'sh_hyper_instancetype': 'S1'
                 },
-                environment=environment,
+                environment=[str(x) for x in self.environment.all()],
                 tty=True,
                 **self.configuration.as_dict)
             log.debug("starting container")
             self.client.start(container_id)
-        except BaseException:
+        except BaseException as e:
             log.exception('failed to start container')
+            sentry_id = client.captureException()
+            if sentry_id:
+                self.last_error = '{e}\nSentry: {project_url}/?query={sentry_id}'.format(
+                    e=e,
+                    project_url=settings.SENTRY_PROJECT_URL,
+                    sentry_id=sentry_id,
+                )
+            else:
+                self.last_error = e
+            self.error_count += 1
+            self.save(update_fields=['last_error', 'error_count'])
+        else:
+            self.last_error = ''
+            self.error_count = 0
+            self.save(update_fields=['last_error', 'error_count'])
 
     def destroy_container(self):
         container_id = slugify("%s-%d" % (self.name, self.current))
