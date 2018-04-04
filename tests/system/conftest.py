@@ -83,7 +83,7 @@ def docker_services(pytestconfig, docker_ip):
     for _ in range(int(TIMEOUT.seconds / INTERVAL.seconds)):
         try:
             # verify admin is http responsive and stop waiting
-            urllib.request.urlopen('url')
+            urllib.request.urlopen(url)
             print("admin instance is ready for testing")
             break
         except BaseException as e:
@@ -96,7 +96,7 @@ def docker_services(pytestconfig, docker_ip):
         docker_compose('down -v')
         pytest.fail(
             "admin instance at %s not accessible after %s seconds" %
-            (url, TIMEOUT), pytrace=False)
+            (url, TIMEOUT.seconds), pytrace=False)
 
     yield docker_compose
 

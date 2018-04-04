@@ -63,7 +63,7 @@ services:
       - "8000"
     volumes:
       - ../failmap:/source/failmap
-    command: production --migrate --loaddata development -v3
+    command: production --migrate --loaddata development
 
   frontend:
     image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
