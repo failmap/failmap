@@ -85,7 +85,6 @@ def docker_services(pytestconfig, docker_ip):
     else:
         # provide context as to why the containered service failed to be responsive
         for service in docker_compose('config --services').splitlines():
-            print(service)
             for line in docker_compose('logs %s' % service).splitlines():
                 print(line)
         docker_compose('down -v')

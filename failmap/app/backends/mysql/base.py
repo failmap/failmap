@@ -21,4 +21,6 @@ class DatabaseWrapper(MysqlDatabaseWrapper):
     # retry
     @retry(logger=log, tries=TRIES, delay=1, backoff=2, max_delay=5)
     def get_new_connection(self, *args, **kwargs):
-        return super().get_new_connection(*args, **kwargs)
+        connection = super().get_new_connection(*args, **kwargs)
+        log.info("Connected to MySQL")
+        return connection
