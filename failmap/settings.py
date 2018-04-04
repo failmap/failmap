@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'failmap.organizations.apps.OrganizationsConfig',
     'failmap.scanners',
     'failmap.map',
+    'failmap.game',
     'django_countries',
     'django.contrib.admindocs',
     'django.contrib.humanize',

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-31 09:18+0000\n"
+"POT-Creation-Date: 2018-04-04 18:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -174,8 +174,8 @@ msgid "Toggle navigation"
 msgstr "Navigatie in of uitklappen"
 
 #: failmap/map/templates/map/index.html:86
-#: failmap/map/templates/map/index.html:147 failmap/map/views.py:107
-#: failmap/map/views.py:108
+#: failmap/map/templates/map/index.html:147 failmap/map/views.py:117
+#: failmap/map/views.py:118
 msgid "Fail Map"
 msgstr "Faalkaart"
 
@@ -223,7 +223,7 @@ msgstr "ONGEDIERTEBESTRIJDINGSMODUS"
 msgid "Admin"
 msgstr "Beheer"
 
-#: failmap/map/templates/map/index.html:148 failmap/map/views.py:109
+#: failmap/map/templates/map/index.html:148 failmap/map/views.py:119
 msgid "Fail Map Introduction"
 msgstr ""
 "Faalkaart geeft inzicht in hoe veilig de overheid en relevante organisaties "
@@ -249,8 +249,8 @@ msgstr "Dit zijn de verbeteringen van de laatste <b>vier weken</b>."
 #: failmap/map/templates/map/index.html:846
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:15
-#: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:1190
-#: failmap/map/views.py:1256
+#: failmap/map/templates/map/topwin.html:13 failmap/map/views.py:1200
+#: failmap/map/views.py:1266
 msgid "High"
 msgstr "Hoog"
 
@@ -260,8 +260,8 @@ msgstr "Hoog"
 #: failmap/map/templates/map/index.html:847
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:16
-#: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:1190
-#: failmap/map/views.py:1256
+#: failmap/map/templates/map/topwin.html:14 failmap/map/views.py:1200
+#: failmap/map/views.py:1266
 msgid "Medium"
 msgstr "Midden"
 
@@ -271,8 +271,8 @@ msgstr "Midden"
 #: failmap/map/templates/map/index.html:848
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:17
-#: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:1190
-#: failmap/map/views.py:1256
+#: failmap/map/templates/map/topwin.html:15 failmap/map/views.py:1200
+#: failmap/map/views.py:1266
 msgid "Low"
 msgstr "Laag"
 
@@ -789,7 +789,7 @@ msgstr "Top Win!"
 msgid "This is the top win from"
 msgstr "Dit is de top win van"
 
-#: failmap/map/views.py:1189 failmap/map/views.py:1255
+#: failmap/map/views.py:1199 failmap/map/views.py:1265
 msgid "Perfect"
 msgstr ""
 
