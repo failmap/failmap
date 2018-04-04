@@ -2,10 +2,10 @@ import logging
 import os
 import re
 import subprocess
+import time
 import urllib.request
 
 import pytest
-from retry import retry
 
 log = logging.getLogger(__name__)
 
@@ -74,22 +74,24 @@ def docker_services(pytestconfig, docker_ip):
     url = 'http://%s:%d' % (docker_ip, int(docker_compose('port admin 8000').split(':')[-1]))
 
     log.info('Waiting for url %s to be responsive.', url)
-
-    @retry(tries=TIMEOUT, delay=1, logger=log)
-    def check():
-        with urllib.request.urlopen(url) as f:
-            assert f.status == 200
-            return
-
-    try:
-        check()
-    except BaseException:
+    for _ in range(TIMEOUT):
+        try:
+            # verify admin is http responsive and stop waiting
+            urllib.request.urlopen(url)
+            break
+        except BaseException as e:
+            print("admin instance not accessible, exception: %r" % e)
+            time.sleep(1)
+    else:
+        # provide context as to why the containered service failed to be responsive
         for service in docker_compose('config --services').splitlines():
             print(service)
             for line in docker_compose('logs %s' % service).splitlines():
                 print(line)
         docker_compose('down -v')
-        raise
+        pytest.fail(
+            "admin instance at %s not accessible after %s seconds" %
+            (url, TIMEOUT), pytrace=False)
 
     yield docker_compose
 
