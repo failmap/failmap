@@ -2,7 +2,7 @@
   pk: 1
   fields: {name: Default, region: eu-central-1, access_key: '',
     secret_key: '', enabled: true, valid: true,
-    last_validated: !!timestamp '2018-03-27 20:49:44.595101+00:00', last_result: '{}'}
+    last_validated: !!timestamp '2018-04-04 13:07:41.808128+00:00', last_result: '{}'}
 - model: hypersh.containerenvironment
   pk: 3
   fields:
@@ -24,13 +24,29 @@
     value: scanner_qualys
     configuration: []
     group: []
+- model: hypersh.containerenvironment
+  pk: 6
+  fields:
+    name: C_FORCE_ROOT
+    value: '1'
+    configuration: []
+    group: []
+- model: hypersh.containerenvironment
+  pk: 7
+  fields:
+    name: SENTRY_DSN
+    value: ''
+    configuration: []
+    group: []
 - model: hypersh.containerconfiguration
   pk: 1
   fields:
     name: Scanner worker
     image: registry.gitlab.com/failmap/failmap:latest
-    command: celery worker --log info --concurrency 1
-    environment: [3]
+    command: celery worker --loglevel=info --concurrency=1
+    volumes_from: client_certificate
+    instance_type: S3
+    environment: [3, 6, 7]
 - model: hypersh.containergroup
   pk: 1
   fields:
@@ -40,9 +56,11 @@
     configuration: 1
     minimum: 0
     maximum: 5
-    desired: 0
+    desired: 1
     state: idle
-    current: 0
+    last_error: ''
+    error_count: 0
+    current: 1
     environment_overlay: [4]
 - model: hypersh.containergroup
   pk: 2
@@ -55,5 +73,7 @@
     maximum: 5
     desired: 0
     state: idle
+    last_error: ''
+    error_count: 0
     current: 0
     environment_overlay: [5]

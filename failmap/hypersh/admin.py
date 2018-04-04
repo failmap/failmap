@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def environment_strings(obj):
-    return format_html("<br>".join(str(e) for e in obj.environment.all()))
+    return format_html("<br>".join(str(e)[:64] for e in obj.environment.all()))
 
 
 @admin.register(Credential)

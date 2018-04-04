@@ -13,7 +13,7 @@ from raven.contrib.django.raven_compat.models import client
 from ..celery import app
 
 DEFAULT_IMAGE = 'registry.gitlab.com/failmap/failmap:latest'
-DEFAULT_COMMAND = 'celery worker --log info --concurrency 1'
+DEFAULT_COMMAND = 'celery worker --loglevel=info --concurrency=1'
 
 MAX_ERROR_COUNT = 5
 STATE_FIELDS = ['last_error', 'error_count', 'state']
@@ -107,7 +107,7 @@ class Credential(models.Model):
 class ContainerEnvironment(models.Model):
     """Single environment variable for docker container."""
     name = models.CharField(max_length=64)
-    value = models.CharField(max_length=64)
+    value = models.TextField()
 
     configuration = models.ManyToManyField('hypersh.ContainerConfiguration')
     group = models.ManyToManyField('hypersh.ContainerGroup')
@@ -123,6 +123,8 @@ class ContainerConfiguration(models.Model):
     image = models.CharField(max_length=200, default=DEFAULT_IMAGE)
     command = models.CharField(max_length=200, default=DEFAULT_COMMAND)
     environment = models.ManyToManyField(ContainerEnvironment)
+    volumes_from = models.CharField(max_length=200, help_text="Comma separated list of volumes.")
+    instance_type = models.CharField(max_length=2, default='S1')
 
     def __str__(self):
         return self.name
@@ -134,6 +136,9 @@ class ContainerConfiguration(models.Model):
         return {
             'image': self.image,
             'command': self.command,
+            'host_config': {
+                'volumes_from': self.volumes_from,
+            },
         }
 
 
@@ -308,7 +313,7 @@ class ContainerGroup(models.Model):
             self.client.create_container(
                 name=container_id,
                 labels={
-                    'sh_hyper_instancetype': 'S1'
+                    'sh_hyper_instancetype': self.configuration.instance_type,
                 },
                 environment=[str(x) for x in self.environment.all()],
                 tty=True,
