@@ -4,34 +4,53 @@
 - model: django_celery_beat.intervalschedule
   pk: 2
   fields: {every: 3, period: days}
+- model: django_celery_beat.intervalschedule
+  pk: 3
+  fields: {every: 5, period: minutes}
+- model: django_celery_beat.crontabschedule
+  pk: 1
+  fields: {minute: '0', hour: '4', day_of_week: '*', day_of_month: '*', month_of_year: '*'}
+- model: django_celery_beat.periodictasks
+  pk: 1
+  fields: {last_update: !!timestamp '2018-04-04 13:36:18.044051+00:00'}
 - model: django_celery_beat.periodictask
   pk: 1
   fields: {name: Rebuild ratings, task: failmap.app.models.create_job, interval: 1,
-    crontab: null, args: '["failmap.map.rating"]', kwargs: '{}', queue: 'storage', exchange: null, routing_key: null,
-    expires: null, enabled: true, last_run_at: null,
-    total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
-    description: ''}
+    crontab: null, solar: null, args: '["failmap.map.rating"]', kwargs: '{}', queue: storage,
+    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null,
+    total_run_count: 0, date_changed: !!timestamp '2017-10-31 15:11:21+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 2
-  fields: {name: scan-security-headers, task: failmap.app.models.create_job,
-    interval: 1, crontab: null, solar: null, args: '["failmap.scanners.scanner_security_headers"]', kwargs: '{}', queue: 'storage',
-    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
-    description: ''}
+  fields: {name: scan-security-headers, task: failmap.app.models.create_job, interval: 1,
+    crontab: null, solar: null, args: '["failmap.scanners.scanner_security_headers"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, expires: null,
+    enabled: true, last_run_at: null, total_run_count: 0, date_changed: !!timestamp '2017-10-31
+      15:11:21+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 3
-  fields: {name: scan-tls-qualys, task: failmap.app.models.create_job,
-    interval: 2, crontab: null, solar: null, args: '["failmap.scanners.scanner_tls_qualys"]', kwargs: '{}', queue: 'storage',
-    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
+  fields: {name: scan-tls-qualys, task: failmap.app.models.create_job, interval: 2,
+    crontab: null, solar: null, args: '["failmap.scanners.scanner_tls_qualys"]', kwargs: '{}',
+    queue: storage, exchange: null, routing_key: null, expires: null, enabled: true,
+    last_run_at: null, total_run_count: 0, date_changed: !!timestamp '2017-10-31 15:11:21+00:00',
     description: ''}
 - model: django_celery_beat.periodictask
   pk: 4
-  fields: {name: scan-plain-http, task: failmap.app.models.create_job,
-    interval: 1, crontab: null, solar: null, args: '["failmap.scanners.scanner_plain_http"]', kwargs: '{}', queue: 'storage',
-    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
+  fields: {name: scan-plain-http, task: failmap.app.models.create_job, interval: 1,
+    crontab: null, solar: null, args: '["failmap.scanners.scanner_plain_http"]', kwargs: '{}',
+    queue: storage, exchange: null, routing_key: null, expires: null, enabled: true,
+    last_run_at: null, total_run_count: 0, date_changed: !!timestamp '2017-10-31 15:11:21+00:00',
     description: ''}
 - model: django_celery_beat.periodictask
   pk: 5
   fields: {name: scan-http-endpoint-discovery, task: failmap.app.models.create_job,
-    interval: 2, crontab: null, solar: null, args: '["failmap.scanners.scanner_http"]', kwargs: '{}', queue: 'storage',
-    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null, total_run_count: 0, date_changed: ! '2017-10-31 15:11:21+00:00',
+    interval: 2, crontab: null, solar: null, args: '["failmap.scanners.scanner_http"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, expires: null,
+    enabled: true, last_run_at: null, total_run_count: 0, date_changed: !!timestamp '2017-10-31
+      15:11:21+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 6
+  fields: {name: Hypersh scaling check, task: failmap.hypersh.models.scale_action,
+    interval: 3, crontab: null, solar: null, args: '[]', kwargs: '{}', queue: null,
+    exchange: null, routing_key: null, expires: null, enabled: true, last_run_at: null,
+    total_run_count: 0, date_changed: !!timestamp '2018-04-04 13:35:51.880438+00:00',
     description: ''}

@@ -194,7 +194,8 @@ class ContainerGroup(models.Model):
         # prevent creating concurrent scaling tasks or exponential task spawning
         state_field_change = set(kwargs.get('update_fields', [])).intersection(set(STATE_FIELDS))
         is_scaling = self.state not in ['idle', 'new', 'error']
-        if is_scaling or state_field_change:
+        disabled = not self.enabled
+        if disabled or is_scaling or state_field_change:
             return
 
         self.scale_action.apply_async(args=(self,))
@@ -342,3 +343,10 @@ class ContainerGroup(models.Model):
         container_id = slugify("%s-%d" % (self.name, self.current))
         log.debug("removing container")
         self.client.remove_container(container_id, force=True)
+
+
+@app.task
+def check_scaling():
+    """Create tasks for each container group to check if scaling actions are required."""
+    for group in ContainerGroup.objects.filter(enabled=True, state__in=['idle', 'new', 'error']):
+        group.scale_action.apply_async(args=(group,))
