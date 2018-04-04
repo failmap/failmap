@@ -152,7 +152,7 @@ image_test:
 
   image: registry.gitlab.com/failmap/ci:docker-git
   variables:
-    TIMEOUT: 120
+    SYSTEM_TEST_TIMEOUT: 120
     GIT_SUBMODULE_STRATEGY: recursive
 
   before_script:
