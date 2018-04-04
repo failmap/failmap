@@ -181,6 +181,7 @@ test_system:
   - docker:dind
 
   variables:
+    SYSTEM_TEST_TIMEOUT: 120
     IMAGE: $CI_REGISTRY_IMAGE:build
 
   before_script:
