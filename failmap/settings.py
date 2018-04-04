@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 from datetime import timedelta
 
+import raven
+import raven.contrib.celery
 from pkg_resources import get_distribution
 
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
@@ -549,6 +551,11 @@ if SENTRY_DSN:
     # add sentry ID to request for inclusion in templates
     # https://docs.sentry.io/clients/python/integrations/django/#message-references
     MIDDLEWARE.insert(0, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
+
+    # Celery specific handlers
+    client = raven.Client(SENTRY_DSN)
+    raven.contrib.celery.register_logger_signal(client)
+    raven.contrib.celery.register_signal(client)
 
 # set javascript sentry token if provided
 SENTRY_TOKEN = os.environ.get('SENTRY_TOKEN', '')
