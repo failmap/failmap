@@ -1,8 +1,8 @@
 - model: hypersh.credential
   pk: 1
-  fields: {name: Default, region: eu-central-1, access_key: '',
-    secret_key: '', enabled: true, valid: true,
-    last_validated: !!timestamp '2018-04-04 13:07:41.808128+00:00', last_result: '{}'}
+  fields: {name: Default, region: eu-central-1, access_key: '***',
+    secret_key: '***', enabled: true, valid: true,
+    last_validated: !!timestamp '2018-04-05 14:59:28.053397+00:00', last_result: '{}'}
 - model: hypersh.containerenvironment
   pk: 3
   fields:
@@ -35,7 +35,28 @@
   pk: 7
   fields:
     name: SENTRY_DSN
-    value: ''
+    value: '***'
+    configuration: []
+    group: []
+- model: hypersh.containerenvironment
+  pk: 8
+  fields:
+    name: TLS_CLIENT_FILE
+    value: /client-certificate/client.p12
+    configuration: []
+    group: []
+- model: hypersh.containerenvironment
+  pk: 9
+  fields:
+    name: PASSPHRASE
+    value: '***'
+    configuration: []
+    group: []
+- model: hypersh.containerenvironment
+  pk: 10
+  fields:
+    name: HOST_HOSTNAME
+    value: hyper.sh
     configuration: []
     group: []
 - model: hypersh.containerconfiguration
@@ -43,10 +64,10 @@
   fields:
     name: Scanner worker
     image: registry.gitlab.com/failmap/failmap:latest
-    command: celery worker --loglevel=info --concurrency=1
-    volumes_from: client_certificate
+    command: celery worker --loglevel=info --concurrency=2
+    volumes: client-certificate:/client-certificate
     instance_type: S3
-    environment: [3, 6, 7]
+    environment: [3, 6, 7, 8, 9, 10]
 - model: hypersh.containergroup
   pk: 1
   fields:
