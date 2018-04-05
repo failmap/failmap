@@ -65,6 +65,7 @@ class Credential(models.Model):
                 self.endpoint: {
                     'accesskey': self.access_key,
                     'secretkey': self.secret_key,
+                    'region': self.region,
                 }
             }
         }
@@ -85,7 +86,16 @@ class Credential(models.Model):
             self.last_result = self.client.info()
         except BaseException as e:
             self.valid = False
-            self.last_result = str(e)
+            sentry_id = client.captureException()
+            if sentry_id:
+                self.last_result = 'Error: {e}\nSentry: {project_url}/?query={sentry_id}'.format(
+                    e=e,
+                    project_url=settings.SENTRY_PROJECT_URL,
+                    sentry_id=sentry_id,
+                )
+            else:
+                self.last_result = 'Error: {e}'.format(e=e)
+            raise
 
         self.last_validated = timezone.now()
         self.save(update_fields=['last_validated', 'valid', 'last_result'])
@@ -123,7 +133,7 @@ class ContainerConfiguration(models.Model):
     image = models.CharField(max_length=200, default=DEFAULT_IMAGE)
     command = models.CharField(max_length=200, default=DEFAULT_COMMAND)
     environment = models.ManyToManyField(ContainerEnvironment)
-    volumes_from = models.CharField(max_length=200, help_text="Comma separated list of volumes.")
+    volumes = models.CharField(max_length=200, help_text="Comma separated list of volumes.")
     instance_type = models.CharField(max_length=2, default='S1')
 
     def __str__(self):
@@ -136,9 +146,7 @@ class ContainerConfiguration(models.Model):
         return {
             'image': self.image,
             'command': self.command,
-            'host_config': {
-                'volumes_from': self.volumes_from,
-            },
+            'volumes': self.volumes.split(','),
         }
 
 
@@ -262,7 +270,7 @@ class ContainerGroup(models.Model):
     def update(self):
         """Update current object state based on real-world state."""
         try:
-            containers = self.client.containers()
+            containers = self.client.containers.list(filters={'label': 'group=' + slugify(self.name)})
         except BaseException as e:
             log.exception('failed to start container')
             sentry_id = client.captureException()
@@ -277,14 +285,14 @@ class ContainerGroup(models.Model):
             self.error_count += 1
             self.save(update_fields=['last_error', 'error_count'])
         else:
-            self.current = len([c for c in containers
-                                if c['Names'][0].startswith("/%s-" % slugify(self.name))])
+            self.current = len(containers)
             self.save(update_fields=['current'])
 
     def pull_image(self):
         try:
             log.debug("pulling latest image")
-            self.client.import_image(image=self.configuration.as_dict['image'])
+            self.client.images.pull(self.configuration.as_dict['image'],
+                                    auth_config="hack")  # prevent docker api from having auth issues
         except BaseException as e:
             log.exception('failed to start container')
             sentry_id = client.captureException()
@@ -301,26 +309,17 @@ class ContainerGroup(models.Model):
             raise
 
     def create_container(self):
-        container_id = slugify("%s-%d" % (self.name, self.current + 1))
-        # destroy lingering container
         try:
-            log.debug("removing possible previous container with same name")
-            self.client.remove_container(container_id, force=True)
-        except BaseException:
-            pass
-
-        try:
-            log.debug("creating container")
-            self.client.create_container(
-                name=container_id,
+            log.debug("running container")
+            self.client.containers.run(
+                detach=True,
                 labels={
                     'sh_hyper_instancetype': self.configuration.instance_type,
+                    'group': slugify(self.name),
                 },
                 environment=[str(x) for x in self.environment.all()],
                 tty=True,
                 **self.configuration.as_dict)
-            log.debug("starting container")
-            self.client.start(container_id)
         except BaseException as e:
             log.exception('failed to start container')
             sentry_id = client.captureException()
@@ -340,9 +339,9 @@ class ContainerGroup(models.Model):
             self.save(update_fields=['last_error', 'error_count'])
 
     def destroy_container(self):
-        container_id = slugify("%s-%d" % (self.name, self.current))
+        """Remove one container."""
         log.debug("removing container")
-        self.client.remove_container(container_id, force=True)
+        self.client.containers.list(filters={'label': 'group=' + slugify(self.name)})[0].remove(force=True)
 
 
 @app.task

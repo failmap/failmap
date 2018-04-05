@@ -146,10 +146,11 @@ class Command(RunserverCommand):
                     break
             log.info('Worker ready')
 
+        log.info('Updating database tables')
+        call_command('migrate')
+
         if not options['no_data']:
             # initialize/update dataset
-            log.info('Updating database tables')
-            call_command('migrate')
             log.info('Loading fixture data')
             call_command('load_dataset', *options['loaddata'].split(','))
 

@@ -84,7 +84,8 @@ wikidata  # downloading data from wikidata
 django-nested-admin  # going deeper underground
 sphinx_rtd_theme
 
-hyper_sh
+# https://github.com/tardyp/hyper_sh/pull/14/
+git+https://github.com/berryp/hyper_sh.git@8a4c52ac88fdcc052f3c008377bdf77e70c30904#egg=hyper_sh
 
 django-fsm
 django-fsm-log
