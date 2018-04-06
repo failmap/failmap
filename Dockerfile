@@ -17,7 +17,8 @@ RUN apk --no-cache add \
   make \
   # required to install osmtogeojson module
   nodejs \
-  nodejs-npm
+  nodejs-npm \
+  git
 
 # install app and dependencies in a artifact-able directory
 RUN pip install virtualenv
