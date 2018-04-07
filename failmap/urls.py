@@ -20,6 +20,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.template.response import TemplateResponse
+from django.urls import path
 
 # register Jet Dashboard views
 import failmap.app.dashboard_module_views  # noqa
@@ -37,12 +38,19 @@ admin_urls = [
 frontend_urls = [
     url(r'^', include('failmap.map.urls')),
 ]
+interactive_urls = [
+    path('authentication/', include('django.contrib.auth.urls')),
+]
 
 urlpatterns = frontend_urls.copy()
 
 # enable admin url's if this is an administrative (more secured/read-write) instance
 if settings.ADMIN:
     urlpatterns += admin_urls
+
+# enable urls with interactive components that require database write access (login, url/org submit)
+if settings.ADMIN or settings.INTERACTIVE:
+    urlpatterns += interactive_urls
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()

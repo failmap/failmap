@@ -17,12 +17,19 @@ from pkg_resources import get_distribution
 
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
 
-# this application can run in 2 modes: admin and frontend
+# this application can run in 3 modes: admin, interactive and frontend
 # 'admin' exposes all routes and uses no caching. It should be restricted in access.
-# 'frontend' only exposes the visitor facing routes and serves with cache headers.
-# The environment variable is borrowed from the docker environment where SERVICE_NAME
-# is used to set application name for discovery (consul).
-APPNAME = os.environ.get('SERVICE_NAME', 'failmap-admin')
+# 'interactive' does not expose administrative urls, but does allow write access. Access should be
+# restricted but can be less restricted then admin.
+# 'frontend' only exposes the visitor facing routes and serves with cache headers. It does not
+# allow write access to the database. Access can be unrestricted but is preferably behind caching
+# proxy.
+
+# for usability default to most functional mode
+APPLICATION_MODE = os.environ.get('APPLICATION_MODE', 'admin')
+
+ADMIN = bool(APPLICATION_MODE == 'admin')
+INTERACTIVE = bool(APPLICATION_MODE == 'interactive')
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -536,9 +543,6 @@ if DEBUG:
         STATSD_CLIENT = 'django_statsd.clients.toolbar'
     except ImportError:
         pass
-
-# is administrative backend enabled on this instance
-ADMIN = bool(APPNAME == 'failmap-admin')
 
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
