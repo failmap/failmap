@@ -14,7 +14,7 @@
   pk: 4
   fields:
     name: WORKER_ROLE
-    value: scanner
+    value: scanner_v4
     configuration: []
     group: []
 - model: hypersh.containerenvironment
