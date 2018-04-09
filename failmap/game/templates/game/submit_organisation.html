@@ -1,5 +1,20 @@
 {% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
 {% block content %}
+
+    {% if success %}
+        <div class="alert alert-success" role="alert">
+            <strong>Organization added!</strong> organization has been added!
+         </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error!</strong> {{ error }}
+         </div>
+    {% endif %}
+
     <h1>Suggest a new organisation</h1>
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}

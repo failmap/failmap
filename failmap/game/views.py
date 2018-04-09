@@ -55,6 +55,30 @@ def submit_url(request):
                                                     'error': form.errors})
 
 
+@login_required(login_url='/authentication/login/')
+def submit_organisation(request):
+
+    # validate you're in a session
+    if not request.session.get('team'):
+        return redirect('/game/team/')
+
+    if request.POST:
+        form = OrganisationSubmissionForm(request.POST)
+
+        if form.is_valid():
+            # manually saving the form, this is not your normal 1 to 1 save.
+            form.save(team=request.session.get('team'))
+
+            form = OrganisationSubmissionForm()
+
+            return render(request, 'game/submit_organisation.html', {'form': form, 'success': True})
+
+    else:
+        form = OrganisationSubmissionForm()
+
+    return render(request, 'game/submit_organisation.html', {'form': form})
+
+
 # todo: disqualified urls toevoegen.
 @cache_page(ten_minutes)
 def scores(request):
@@ -153,7 +177,7 @@ def teams(request):
     else:
         form = TeamForm({'team': get_team_id(request)})
 
-    return render(request, 'game/submit_team.html', {'form': form, 'team': get_team_info(request)})
+    return render(request, 'game/team.html', {'form': form, 'team': get_team_info(request)})
 
 
 def get_team_id(request):
@@ -170,17 +194,6 @@ def get_team_info(request):
     except (ObjectDoesNotExist, ValueError):
         team = {"name": "-"}
     return team
-
-
-@login_required(login_url='/authentication/login/')
-def submit_organisation(request):
-
-    # validate you're in a session
-    if not request.session.get('team'):
-        return redirect('/game/team/')
-
-    form = OrganisationSubmissionForm()
-    return render(request, 'game/submit_organisation.html', {'form': form})
 
 
 class OrganizationAutocomplete(autocomplete.Select2QuerySetView):

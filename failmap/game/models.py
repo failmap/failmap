@@ -120,6 +120,12 @@ class OrganizationSubmission(models.Model):
         help_text="The address of the (main location) of the organization. This will be used for geocoding."
     )
 
+    organization_evidence = models.CharField(
+        max_length=600,
+        default="unknown",
+        help_text="Sources of information about this organization."
+    )
+
     organization_address_geocoded = GeoJSONField(
         max_length=5000,
         null=True,
@@ -138,6 +144,11 @@ class OrganizationSubmission(models.Model):
     has_been_accepted = models.BooleanField(
         default=False,
         help_text="If the admin likes it, they can accept the submission to be part of the real system"
+    )
+
+    has_been_rejected = models.BooleanField(
+        default=False,
+        help_text="Nonsense organizations can be rejected."
     )
 
     added_on = models.DateTimeField(

@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^game/team/$', teams, name='teams'),
 
     url(r'^game/submit_url/$', submit_url, name='submit url'),
-    url(r'^game/submit_organisation/$', submit_organisation, name='submit url'),
+    url(r'^game/submit_organization/$', submit_organisation, name='submit organization'),
 
     url(r'^game/autocomplete/organization-autocomplete/$', OrganizationAutocomplete.as_view(),
         name='organization-autocomplete'),

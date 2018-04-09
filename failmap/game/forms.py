@@ -71,7 +71,8 @@ class TeamForm(forms.Form):
 
 
 # http://django-autocomplete-light.readthedocs.io/en/master/tutorial.html
-class OrganisationSubmissionForm(forms.ModelForm):
+class OrganisationSubmissionForm(forms.Form):
+    field_order = ('organization_type_name', 'organization_name', 'organization_address', 'organization_evidence')
 
     # todo: filter based on country and organization type.
     # todo: but how to suggest new organizations?
@@ -80,19 +81,53 @@ class OrganisationSubmissionForm(forms.ModelForm):
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/')
     )
 
-    organization_name = forms.ModelChoiceField(
-        queryset=Organization.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(url='/game/autocomplete/organization-autocomplete/',
-                                                 forward=['organization_type_name'])
-    )
+    organization_name = forms.CharField()
 
-    class Meta:
-        model = OrganizationSubmission
+    organization_address = forms.CharField(widget=forms.Textarea)
 
-        # todo: show map, view only.
-        fields = ('organization_type_name', 'organization_name', 'organization_address_geocoded',)
+    organization_evidence = forms.CharField(widget=forms.Textarea)
 
-        # widgets = {'organization_address_geocoded': GooglePointFieldWidget}
+    def clean(self):
+        # verify that an organization of this type is not in the database yet...
+        cleaned_data = super().clean()
+        organization_type_name = cleaned_data.get("organization_type_name")
+        name = cleaned_data.get("organization_name")
+
+        # todo: allow adding for any country...
+        # todo: this is now a setting in the contest... should be availble somewhere...
+        exists = Organization.objects.all().filter(
+            type=organization_type_name, name=name, is_dead=False, country='NL').exists()
+
+        if exists:
+            raise ValidationError(
+                _('This organization %(organization)s already exists in the database for this group.'),
+                code='invalid',
+                params={'organization': name},
+            )
+
+    @transaction.atomic
+    def save(self, team):
+        organization_type_name = self.cleaned_data.get('organization_type_name', None)
+        organization_name = self.cleaned_data.get('organization_name', None)
+        organization_address = self.cleaned_data.get('organization_address', None)
+        organization_evidence = self.cleaned_data.get('organization_address', None)
+
+        if not all([organization_name, organization_type_name, organization_address, organization_evidence]):
+            raise forms.ValidationError(
+                "Missing some fields..."
+            )
+
+        submission = OrganizationSubmission(
+            added_by_team=Team.objects.get(pk=team),
+            organization_address=organization_address,
+            organization_evidence=organization_evidence,
+            organization_name=organization_name,
+            organization_type_name=organization_type_name,
+            added_on=timezone.now(),
+            has_been_accepted=False,
+            has_been_rejected=False
+        )
+        submission.save()
 
 
 class UrlSubmissionForm(forms.Form):
