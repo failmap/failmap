@@ -17,19 +17,24 @@ IPV6_TEST_DOMAIN = 'faalkaart.nl'
 CONNECTIVITY_TEST_DOMAIN = 'faalkaart.nl'
 
 # list of all roles that require IPv6 networking
-IPV6_ROLES = ['scanners', 'scanners.ipv6', 'scanners.endpoint_discovery.ipv6']
+IPV6_ROLES = [
+    'default',
+    'scanner_endpoint_discovery',
+    'scanner_v6',
+    'scanner',
+]
 
 # list of all roles that require internet connectivity
 CONNECTIVITY_ROLES = [
-    'scanners',
-    'scanners.ipv4',
-    'scanners.ipv6',
-    'scanners.qualys',
     'default',
-    'celery',
-    'scanners.endpoint_discovery.ipv4',
-    'scanners.endpoint_discovery.ipv6',
-    'scanners.dns']
+    'scanner_endpoint_discovery',
+    'scanner_v4',
+    'scanner_v6',
+    'scanner',
+    'scanner_qualys',
+    'scanner_dns',
+    'scanner_ipv4_only',
+]
 
 # define roles for workers
 WORKER_QUEUE_CONFIGURATION = {
