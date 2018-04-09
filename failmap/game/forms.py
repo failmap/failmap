@@ -3,7 +3,8 @@ import time
 
 import tldextract
 from dal import autocomplete
-from django.contrib.gis import forms
+# from django.contrib.gis import forms  # needs gdal, which...
+from django import forms
 from django.db import transaction
 from django.forms import ValidationError
 from django.utils import timezone
