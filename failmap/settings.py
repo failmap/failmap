@@ -595,3 +595,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
 # The default is far too low with various inlines (even on the test dataset).
 # Yes, we happily exceed 1000 fields anyday. No problem :)
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 4242
+
+# login on the frontpage should redirect to the game landingpage
+LOGIN_REDIRECT_URL = '/game/'
