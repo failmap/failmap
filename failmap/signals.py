@@ -31,6 +31,7 @@ def configure_workers(sender=None, conf=None, instance=None, **kwargs):
     if not worker_verify_role_capabilities(role):
         log.error('Host does not seem to have capabilities to run chosen role!')
         sys.exit(1)
+    log.info('Worker is capable for chosen role.')
 
     try:
         # create a universal temporary directory to be removed when the application quits
