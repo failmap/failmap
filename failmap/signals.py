@@ -9,7 +9,8 @@ import tempfile
 from celery.signals import celeryd_init, worker_shutdown
 from django.conf import settings
 
-from .celery.worker import tls_client_certificate, worker_configuration
+from .celery.worker import (tls_client_certificate, worker_configuration,
+                            worker_verify_role_capabilities)
 
 log = logging.getLogger(__name__)
 
@@ -26,6 +27,10 @@ def configure_workers(sender=None, conf=None, instance=None, **kwargs):
         hostname = platform.node()
     role = os.environ.get('WORKER_ROLE', 'default')
     instance.hostname = "%s@%s" % (role, hostname)
+
+    if not worker_verify_role_capabilities(role):
+        log.error('Host does not seem to have capabilities to run chosen role!')
+        sys.exit(1)
 
     try:
         # create a universal temporary directory to be removed when the application quits

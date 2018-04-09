@@ -1,6 +1,7 @@
 import getpass
 import logging
 import os
+import socket
 import ssl
 import tempfile
 
@@ -12,6 +13,23 @@ from kombu import Queue
 log = logging.getLogger(__name__)
 
 TLS_CLIENT_FILE = '/client.p12'
+IPV6_TEST_DOMAIN = 'faalkaart.nl'
+CONNECTIVITY_TEST_DOMAIN = 'faalkaart.nl'
+
+# list of all roles that require IPv6 networking
+IPV6_ROLES = ['scanners', 'scanners.ipv6', 'scanners.endpoint_discovery.ipv6']
+
+# list of all roles that require internet connectivity
+CONNECTIVITY_ROLES = [
+    'scanners',
+    'scanners.ipv4',
+    'scanners.ipv6',
+    'scanners.qualys',
+    'default',
+    'celery',
+    'scanners.endpoint_discovery.ipv4',
+    'scanners.endpoint_discovery.ipv6',
+    'scanners.dns']
 
 # define roles for workers
 WORKER_QUEUE_CONFIGURATION = {
@@ -91,6 +109,31 @@ def worker_configuration():
 
     # configure which queues should be consumed depending on assigned role for this worker
     return {'task_queues': WORKER_QUEUE_CONFIGURATION[role]}
+
+
+def worker_verify_role_capabilities(role):
+    """Determine if chosen role can be performed on this host (eg: ipv6 connectivity.)"""
+
+    if role in IPV6_ROLES:
+        # verify if a https connection to a IPv6 website can be made
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+        try:
+            s.connect((IPV6_TEST_DOMAIN, 443))
+        except BaseException:
+            log.warning('Failed to connect to ipv6 test domain %s via IPv6', IPV6_TEST_DOMAIN, exc_info=True)
+            return False
+        return True
+
+    if role in CONNECTIVITY_ROLES:
+        # verify if a https connection to a website can be made
+        # we assume non-ipv4 internet doesn't exist
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        try:
+            s.connect((CONNECTIVITY_TEST_DOMAIN, 443))
+        except BaseException:
+            log.warning('Failed to connect to test domain %s', CONNECTIVITY_TEST_DOMAIN, exc_info=True)
+            return False
+        return True
 
 
 def tls_client_certificate():
