@@ -40,7 +40,10 @@ def compose_task(
         # self Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # https://stackoverflow.com/questions/47457546/
-        tasks.append(chain(group(explore), crawl, scan))
+        if crawl:
+            tasks.append(chain(group(explore), crawl, scan))
+        else:
+            tasks.append(chain(group(explore), scan))
 
     task = group(tasks)
     print(task)
