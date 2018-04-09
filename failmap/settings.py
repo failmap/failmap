@@ -598,3 +598,5 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 4242
 
 # login on the frontpage should redirect to the game landingpage
 LOGIN_REDIRECT_URL = '/game/'
+LOGIN_URL = '/authentication/login/'
+LOGOUT_REDIRECT_URL = '/'
