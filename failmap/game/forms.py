@@ -21,6 +21,15 @@ from failmap.scanners.scanner_http import resolves
 log = logging.getLogger(__package__)
 
 
+# todo: rewrite to get the active contest, this is a hack to prevent creating a fixture with a first value.
+def get_default_contest():
+    contest = Contest.objects.first()
+    if contest:
+        return contest
+    else:
+        return 0
+
+
 # todo: this doesn't work yet
 # don't show the secret (only in the source)
 # should this be in forms.py or in admin.py?
@@ -33,7 +42,7 @@ class TeamForm(forms.Form):
     team = forms.ModelChoiceField(
         widget=forms.RadioSelect,
         queryset=Team.objects.all().filter(
-            allowed_to_submit_things=True, participating_in_contest=Contest.objects.get(pk=1)))
+            allowed_to_submit_things=True, participating_in_contest=get_default_contest()))
 
     def clean(self):
         cleaned_data = super().clean()

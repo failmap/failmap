@@ -141,7 +141,7 @@ def teams(request):
         form = TeamForm(request.POST)
 
         if form.is_valid():
-            request.session['team'] = form.cleaned_data['team']
+            request.session['team'] = form.cleaned_data['team'].id
             form = TeamForm()
 
     else:
