@@ -57,6 +57,8 @@ INTERNAL_IPS = ['localhost', '127.0.0.1', '::1']
 
 INSTALLED_APPS = [
     # needs to be before jet and admin to extend admin/base.html template
+    'dal',
+    'dal_select2',
     'failmap.app',
     'failmap.hypersh',
     'django_fsm_log',
@@ -86,7 +88,9 @@ INSTALLED_APPS = [
     'constance',
     'constance.backends.database',
     'leaflet',
-    'djgeojson'
+    'djgeojson',
+    'crispy_forms',
+    'mapwidgets',
     # Dal removed, since we use the admin site for custom commands.
     # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
     # 'dal_select2',  # django-autocomplete-light
@@ -601,3 +605,15 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 4242
 LOGIN_REDIRECT_URL = '/game/'
 LOGIN_URL = '/authentication/login/'
 LOGOUT_REDIRECT_URL = '/'
+
+# for the game:
+MAP_WIDGETS = {
+    "GooglePointFieldWidget": (
+        ("zoom", 15),
+        ("mapCenterLocationName", "utrecht"),
+        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {'country': 'nl'}}),
+        ("markerFitZoom", 12),
+    ),
+    "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyDQE_dmG0ceayxXQrVQbDH-D_9wB9vp7fI")
+}
+

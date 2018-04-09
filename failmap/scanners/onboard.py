@@ -1,6 +1,6 @@
 import logging
 
-from celery import chain, chord, group
+from celery import chain, group
 from django.utils import timezone
 
 from failmap.organizations.models import Url
@@ -38,9 +38,10 @@ def compose_task(
         # self Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # https://stackoverflow.com/questions/47457546/
-        tasks.append(chord(explore)(callback))
+        tasks.append(chain(group(explore), callback))
 
     task = group(tasks)
+    print(task)
 
     return task
 

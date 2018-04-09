@@ -1,0 +1,24 @@
+{% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    {% if success %}
+        <div class="alert alert-success" role="alert">
+            <strong>URL Toegevoegd!</strong> {{ url }} is toegevoegd!
+         </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Fout!</strong> {{ error }}
+         </div>
+    {% endif %}
+
+    <h1>Suggest a new url</h1>
+    <form method="POST" class="uniForm">{% csrf_token %}
+        {{ form | crispy }}
+        <br />
+        <button type="submit" class="save btn btn-lg btn-primary">DO THE THING</button>
+    </form>
+{% endblock %}

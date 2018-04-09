@@ -89,3 +89,9 @@ git+https://github.com/berryp/hyper_sh.git@8a4c52ac88fdcc052f3c008377bdf77e70c30
 
 django-fsm
 django-fsm-log
+
+# game requirements
+django-crispy-forms
+django-autocomplete-light
+geocoder
+django-map-widgets

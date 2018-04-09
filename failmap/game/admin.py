@@ -1,9 +1,13 @@
+import logging
+
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
-from failmap.game.forms import TeamForm
-from failmap.game.models import Contest, Submission, Team
+from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
+from failmap.organizations.models import Url
+
+log = logging.getLogger(__package__)
 
 
 class TeamInline(CompactInline):
@@ -13,11 +17,11 @@ class TeamInline(CompactInline):
     ordering = ["name"]
 
 
-class SubmissionInline(CompactInline):
-    model = Submission
+class OrganizationSubmissionInline(CompactInline):
+    model = OrganizationSubmission
     extra = 0
     can_delete = False
-    ordering = ["url"]
+    ordering = ["organization_name"]
 
 
 # Register your models here.
@@ -38,8 +42,6 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     inlines = [TeamInline]
 
-    form = TeamForm
-
 
 # todo: submissioninline, read only... there are going to be MANY new things...
 class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -57,20 +59,63 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         }),
     )
 
-    inlines = [SubmissionInline]
+    inlines = [OrganizationSubmissionInline]
 
 
-class SubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('added_by_team', 'has_been_accepted', 'url', 'organization_name', 'added_on')
-    search_fields = ('url', 'added_by_team__name', 'organization_name', 'organization_type_name')
+class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('added_by_team', 'for_organization', 'url', 'has_been_accepted', 'added_on')
+    search_fields = ('added_by_team__name', 'organization_name', 'url')
+
+    list_filter = ('has_been_accepted', 'added_by_team__name', 'added_by_team__participating_in_contest__name')
+
+    fields = ('added_by_team', 'for_organization', 'url', 'url_in_system', 'has_been_accepted', 'added_on')
+
+    ordering = ('for_organization', 'url')
+
+    actions = []
+
+    def accept(self, request, queryset):
+        for urlsubmission in queryset:
+
+            # don't add the same thing over and over, allows to re-select the ones already added without a problem
+            if urlsubmission.has_been_accepted:
+                continue
+
+            try:
+                url = Url.objects.all().get(url=urlsubmission.url)
+            except Url.DoesNotExist:
+                # if it already exists, then add the url to the organization.
+                url = Url(url=urlsubmission.url)
+                url.save()
+
+            # organization might also be added... that not really a problem.
+            try:
+                url.organization.add(urlsubmission.for_organization)
+                url.save()
+            except Exception as e:
+                log.error(e)
+
+            urlsubmission.url_in_system = url
+            urlsubmission.has_been_accepted = True
+            urlsubmission.save()
+
+        self.message_user(request, "Urls have been accepted and added to the system.")
+    accept.short_description = "✅  Accept"
+    actions.append('accept')
+
+
+class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('added_by_team', 'organization_name', 'has_been_accepted', 'added_on')
+    search_fields = ('added_by_team__name', 'organization_name', 'organization_type_name')
 
     list_filter = ('added_by_team__name', 'has_been_accepted', 'added_by_team__participating_in_contest__name')
 
     fields = ('added_by_team', 'organization_country', 'organization_type_name', 'organization_name',
-              'organization_address', 'organization_address_geocoded', 'url', 'url_in_system', 'has_been_accepted',
+              'organization_address', 'organization_address_geocoded', 'url_in_system', 'has_been_accepted',
               'added_on')
 
 
 admin.site.register(Contest, ContestAdmin)
 admin.site.register(Team, TeamAdmin)
-admin.site.register(Submission, SubmissionAdmin)
+admin.site.register(UrlSubmission, UrlSubmissionAdmin)
+admin.site.register(OrganizationSubmission, OrganizationSubmissionAdmin)

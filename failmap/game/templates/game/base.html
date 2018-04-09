@@ -1,0 +1,41 @@
+{% load static %} {% load i18n %} {% load leaflet_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+   {% leaflet_js plugins="forms" %}
+   {% leaflet_css plugins="forms" %}
+    <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap_v3.3.6.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
+
+    {{ form.media }}
+</head>
+<body>
+
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container">
+        <div class="navbar-collapse">
+            <ul class="nav navbar-nav navbar-center">
+                <li><a href="/game/scores/">Scores</a></li>
+                <li><a href="/game/team/">Select Team</a></li>
+                <li><a href="/game/submit_url/">Submit Url</a></li>
+                <li><a href="/game/submit_organization/">Submit Organization</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+
+{% block content %}
+{% endblock %}
+
+</div>
+</body>
+</html>

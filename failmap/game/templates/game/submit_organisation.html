@@ -1,0 +1,8 @@
+{% extends 'game/base.html' %}
+{% block content %}
+    <h1>Suggest a new organisation</h1>
+    <form method="POST" class="uniForm">{% csrf_token %}
+        {{ form | crispy }}
+        <button type="submit" class="save btn btn-lg btn-primary">Save</button>
+    </form>
+{% endblock %}

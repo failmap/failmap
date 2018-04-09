@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from djgeojson.fields import GeoJSONField
 
-from failmap.organizations.models import Url
+from failmap.organizations.models import Organization, Url
 
 # Highest level adding:
 
@@ -12,6 +12,7 @@ from failmap.organizations.models import Url
 
 class Contest(models.Model):
     name = models.CharField(
+        verbose_name=_("Contest name"),
         max_length=42,
         help_text="Whatever name the team wants. Must be at least PEGI 88."
     )
@@ -56,6 +57,7 @@ class Team(models.Model):
 
     """
     name = models.CharField(
+        verbose_name=_("Team name"),
         max_length=42,
         help_text="Whatever name the team wants. Must be at least PEGI 88."
     )
@@ -85,15 +87,9 @@ class Team(models.Model):
         return "%s/%s" % (self.participating_in_contest, self.name)
 
 
-class Submission(models.Model):
-    """
-    Submissions are suggestions of urls to add. They are not directly added to the system.
-    The admin of the system is the consensus algorithm.
+class OrganizationSubmission(models.Model):
 
-    The admin can do "imports" on these submissions if they think it's a good one.
-    Todo: create admin action.
-
-    """
+    organization_country = CountryField()
 
     added_by_team = models.ForeignKey(
         Team,
@@ -101,8 +97,6 @@ class Submission(models.Model):
         blank=True,
         on_delete=models.CASCADE
     )
-
-    organization_country = CountryField()
 
     # Organization types are managed by the admin, so informed decisions are made.
     # the type is not really important, that will be managed anyway. It's more a suggestion.
@@ -131,6 +125,60 @@ class Submission(models.Model):
         null=True,
         blank=True,
         help_text="Automatic geocoded organization address."
+    )
+
+    organisation_in_system = models.ForeignKey(
+        Organization,
+        null=True,
+        help_text="This reference will be used to calculate the score and to track imports.",
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    has_been_accepted = models.BooleanField(
+        default=False,
+        help_text="If the admin likes it, they can accept the submission to be part of the real system"
+    )
+
+    added_on = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="Automatically filled when creating a new submission."
+    )
+
+    def __str__(self):
+        if self.has_been_accepted:
+            return "OK: %s" % self.organization_name
+        else:
+            return self.organization_name
+
+    class Meta:
+        verbose_name = _('organisation submission')
+        verbose_name_plural = _('organisation submissions')
+
+
+class UrlSubmission(models.Model):
+    """
+    Submissions are suggestions of urls to add. They are not directly added to the system.
+    The admin of the system is the consensus algorithm.
+
+    The admin can do "imports" on these submissions if they think it's a good one.
+    Todo: create admin action.
+
+    """
+
+    added_by_team = models.ForeignKey(
+        Team,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
+
+    for_organization = models.ForeignKey(
+        Organization,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
     )
 
     url = models.CharField(
@@ -164,5 +212,5 @@ class Submission(models.Model):
             return self.url
 
     class Meta:
-        verbose_name = _('submission')
-        verbose_name_plural = _('submissions')
+        verbose_name = _('url submission')
+        verbose_name_plural = _('url submissions')

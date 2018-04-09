@@ -3,10 +3,12 @@
 
 import logging
 
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from failmap.organizations.models import Url
+from failmap.scanners import onboard
 
 log = logging.getLogger(__name__)
 
@@ -25,6 +27,9 @@ def onboard_after_add(sender, instance, created, **kwargs):
     if instance.onboarded:
         return
 
-    return
     # disabled this until the onboarding is fixed. Otherwise we'll get tons and tons of useless exceptions.
-    #    transaction.on_commit(lambda: onboard.compose_task(urls_filter={"url": instance}).apply_async())
+    # todo: this signal only comes from the admin interface, run this command when new urls are found elsewhere
+    def compose():
+        onboard.compose_task(urls_filter={"url": instance}).apply_async()
+
+    transaction.on_commit(compose)
