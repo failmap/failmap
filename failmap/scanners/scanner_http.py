@@ -94,11 +94,11 @@ def compose_task(
     # opening non-tls port 443 and tls port 80. We're not doing that anymore.
     for port in STANDARD_HTTP_PORTS:
         for url in urls:
-            tasks.append(resolve_and_scan.s(protocol="http", url=url, port=port))
+            tasks.append(resolve_and_scan_tasks(protocol="http", url=url, port=port))
 
     for port in STANDARD_HTTPS_PORTS:
         for url in urls:
-            tasks.append(resolve_and_scan.s(protocol="https", url=url, port=port))
+            tasks.append(resolve_and_scan_tasks(protocol="https", url=url, port=port))
     task = group(tasks)
 
     return task
@@ -297,29 +297,23 @@ def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
         group(store_url_ips_task.s(url),
               kill_url_task.s(url),
               revive_url_task.s(url),
-              the_scan.s(url, protocol, port)))
-
+              group(
+            can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
+            can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
+        )
+        )
+    )
     return task
 
 
 @app.task(queue="scanner")
-def the_scan(ips, url, protocol, port):
-    (ipv4, ipv6) = ips
-    tasks = []
-    if ipv4:
-        # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4).set(
-            queue='scanners.endpoint_discovery.ipv4')
-        result_task = connect_result.s(protocol, url, port, 4)  # administrative task
-        tasks.append(chain(connect_task, result_task))
+def can_connect_ips(ips, protocol, url, port, ip_version):
+    ipv4, ipv6 = ips
+    if ip_version == 4:
+        return can_connect(protocol, url, port, ipv4)
 
-    if ipv6:
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6).set(
-            queue='scanners.endpoint_discovery.ipv6')
-        result_task = connect_result.s(protocol, url, port, 6)  # administrative task
-        tasks.append(chain(connect_task, result_task))
-
-    return tasks
+    if ip_version == 6:
+        return can_connect(protocol, url, port, ipv6)
 
 
 @app.task(queue="scanner")

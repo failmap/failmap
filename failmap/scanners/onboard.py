@@ -41,9 +41,9 @@ def compose_task(
         # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # https://stackoverflow.com/questions/47457546/
         if crawl:
-            tasks.append(chain(group(explore), crawl, scan))
+            tasks.append(chain(explore, crawl, scan))
         else:
-            tasks.append(chain(group(explore), scan))
+            tasks.append(chain(explore, scan))
 
     task = group(tasks)
     print(task)
@@ -62,7 +62,7 @@ def compose_explore_tasks(url):
     for onboarder in onboarders:
         tasks.append(onboarder(urls_filter={"url": url}))
 
-    return tasks
+    return group(tasks)
 
 
 def compose_crawl_tasks(url):
