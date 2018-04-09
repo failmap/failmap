@@ -478,6 +478,10 @@ CELERY_accept_content = ['pickle', 'yaml']
 CELERY_task_serializer = 'pickle'
 CELERY_result_serializer = 'pickle'
 
+# result backend is required for chords for synchronisation of tasks (chords)
+CELERY_RESULT_BACKEND = 'redis'
+
+
 # Celery config
 CELERY_BROKER_URL = os.environ.get('BROKER', 'redis://localhost:6379/0')
 ENABLE_UTC = True
@@ -616,4 +620,3 @@ MAP_WIDGETS = {
     ),
     "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyDQE_dmG0ceayxXQrVQbDH-D_9wB9vp7fI")
 }
-

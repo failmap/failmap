@@ -2,7 +2,14 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <h1>Suggest a new url</h1>
+    <h1>Select your team</h1>
+    <p>Feel free to join, mix and match teams on the go. But please don't leak the secret for your team. If you do,
+    other teams might submit bogus urls which will be rejected and will ruin your score.</p>
+
+    <p>
+        Your Current Team: {{ team.name }}
+    </p>
+
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}
         <br />

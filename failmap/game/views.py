@@ -1,11 +1,13 @@
 import logging
 
 from dal import autocomplete
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
 
 from failmap.game.forms import OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
-from failmap.game.models import Contest, Team
+from failmap.game.models import Contest, Team, UrlSubmission
 from failmap.map.calculate import get_calculation
 from failmap.organizations.models import Organization, OrganizationType
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
@@ -19,6 +21,7 @@ ten_minutes = 60 * 10
 
 
 # Create your views here.
+@login_required(login_url='/authentication/login/')
 def submit_url(request):
 
     # validate you're in a session
@@ -64,7 +67,8 @@ def scores(request):
         # todo: je haalt nu ALLE scans op, niet de laatste per URL. Zelfde gedoe als altijd.
         # todo: maak dit wel correct.
         # Op de grote hoop zal het wel meevallen, voor het spel is het even voldoende... er zijn
-        # nog weinig urls gedeeld over organisaties / samenwerkingsverbanden enzo.
+        # nog weinig urls gedeeld over organisaties / samenwerkingsverbanden enzo. Dus het toevoegen van
+        # al bestaande / gescande urls zal erg meevallen. Anders heb je mazzel.
         scans = list(TlsQualysScan.objects.all().filter(
             endpoint__url__urlsubmission__added_by_team=team.id,
             endpoint__url__urlsubmission__has_been_accepted=True
@@ -74,6 +78,11 @@ def scores(request):
             endpoint__url__urlsubmission__added_by_team=team.id,
             endpoint__url__urlsubmission__has_been_accepted=True
         ))
+
+        rejected = UrlSubmission.objects.all().filter(
+            added_by_team=team.id,
+            has_been_rejected=True
+        ).count()
 
         final_calculation = {
             'high': 0,
@@ -90,27 +99,42 @@ def scores(request):
 
         # todo: generic scans
 
+        score_multiplier = {
+            'low': 100,
+            'medium': 250,
+            'high': 1000,
+            'rejected': 1337,
+        }
+
         score = {
             'team': team.name,
             'high': final_calculation['high'],
+            'high_multiplier': score_multiplier['high'],
+            'high_score': final_calculation['high'] * score_multiplier['high'],
             'medium': final_calculation['medium'],
+            'medium_multiplier': score_multiplier['medium'],
+            'medium_score': final_calculation['medium'] * score_multiplier['medium'],
             'low': final_calculation['low'],
+            'low_multiplier': score_multiplier['low'],
+            'low_score': final_calculation['low'] * score_multiplier['low'],
+            'rejected': rejected,
+            'rejected_multiplier': score_multiplier['rejected'],
+            'rejected_score': rejected * score_multiplier['rejected'],
+            'total_score': final_calculation['high'] * score_multiplier['high'] +
+            final_calculation['medium'] * score_multiplier['medium'] +
+            final_calculation['low'] * score_multiplier['low'] - rejected * score_multiplier['rejected']
         }
 
         scores.append(score)
 
-    # order the scores.
+    # order the scores from high to low.
     scores = sorted(scores, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
-    try:
-        team = Team.objects.get(pk=request.session.get('team', '-'))
-    except team.DoesNotExist:
-        team = {"name": "-"}
-
-    return render(request, 'game/scores.html', {'team': team,
+    return render(request, 'game/scores.html', {'team': get_team_info(request),
                                                 'scores': scores})
 
 
+@login_required(login_url='/authentication/login/')
 def teams(request):
 
     if request.POST:
@@ -123,9 +147,18 @@ def teams(request):
     else:
         form = TeamForm()
 
-    return render(request, 'game/submit_team.html', {'form': form})
+    return render(request, 'game/submit_team.html', {'form': form, 'team': get_team_info(request)})
 
 
+def get_team_info(request):
+    try:
+        team = Team.objects.get(pk=request.session.get('team', '-'))
+    except (ObjectDoesNotExist, ValueError):
+        team = {"name": "-"}
+    return team
+
+
+@login_required(login_url='/authentication/login/')
 def submit_organisation(request):
 
     # validate you're in a session

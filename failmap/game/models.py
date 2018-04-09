@@ -199,6 +199,11 @@ class UrlSubmission(models.Model):
         help_text="If the admin likes it, they can accept the submission to be part of the real system"
     )
 
+    has_been_rejected = models.BooleanField(
+        default=False,
+        help_text="Rejected urls makes for deduction in points."
+    )
+
     added_on = models.DateTimeField(
         blank=True,
         null=True,

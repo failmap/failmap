@@ -63,10 +63,11 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('added_by_team', 'for_organization', 'url', 'has_been_accepted', 'added_on')
+    list_display = ('added_by_team', 'for_organization', 'url', 'has_been_accepted', 'has_been_rejected', 'added_on')
     search_fields = ('added_by_team__name', 'organization_name', 'url')
 
-    list_filter = ('has_been_accepted', 'added_by_team__name', 'added_by_team__participating_in_contest__name')
+    list_filter = ('has_been_accepted', 'has_been_rejected',
+                   'added_by_team__name', 'added_by_team__participating_in_contest__name')
 
     fields = ('added_by_team', 'for_organization', 'url', 'url_in_system', 'has_been_accepted', 'added_on')
 
@@ -78,7 +79,8 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         for urlsubmission in queryset:
 
             # don't add the same thing over and over, allows to re-select the ones already added without a problem
-            if urlsubmission.has_been_accepted:
+            # once rejected, can't be accepted via buttons: needs to be a manual action
+            if urlsubmission.has_been_accepted or urlsubmission.has_been_rejected:
                 continue
 
             try:
@@ -102,6 +104,15 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, "Urls have been accepted and added to the system.")
     accept.short_description = "✅  Accept"
     actions.append('accept')
+
+    def reject(self, request, queryset):
+        for urlsubmission in queryset:
+            urlsubmission.has_been_rejected = True
+            urlsubmission.save()
+
+        self.message_user(request, "Urls have been rejected.")
+    reject.short_description = "❌  Reject"
+    actions.append('reject')
 
 
 class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):

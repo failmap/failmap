@@ -3,7 +3,7 @@
     <h1>Scores</h1>
 
     <p>
-        Jouw Team: {{ team.name }}
+        Your Team: {{ team.name }}
     </p>
 
     <table class="table">
@@ -14,16 +14,20 @@
         <th>High</th>
         <th>Medium</th>
         <th>Low</th>
+        <th>Rejected</th>
+        <th>Total</th>
     </tr>
     </thead>
     <tbody>
     {% for score in scores %}
-        <tr>
+        <tr style="{% if team.name == score.team %} font-weight: bold; background-color: #ddffdd {% endif %}">
             <td>{{ forloop.counter }}</td>
             <td>{{ score.team }}</td>
-            <td>{{ score.high }}</td>
-            <td>{{ score.medium }}</td>
-            <td>{{ score.low }}</td>
+            <td>{{ score.high }} * {{ score.high_multiplier }} = {{ score.high_score }}</td>
+            <td>{{ score.medium }} * {{ score.medium_multiplier }} = {{ score.medium_score }}</td>
+            <td>{{ score.low }} * {{ score.low_multiplier }} = {{ score.low_score }}</td>
+            <td>{{ score.rejected }} * {{ score.rejected_multiplier }} = {{ score.rejected_score }}</td>
+            <td>{{ score.total_score }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="5">-</td></tr>
