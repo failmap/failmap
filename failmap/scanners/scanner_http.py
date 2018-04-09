@@ -34,7 +34,7 @@ import pytz
 import requests
 # suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
-from celery import Task, group
+from celery import Task, chain, group
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
@@ -289,6 +289,40 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
         task.apply_async()
 
 
+def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
+
+    # todo: give ips als argument in kill an revive.
+    task = chain(
+        get_ips.si(url.url),
+        group(store_url_ips_task.s(url),
+              kill_url_task.s(url),
+              revive_url_task.s(url),
+              the_scan.s(url, protocol, port)))
+
+    return task
+
+
+@app.task(queue="scanner")
+def the_scan(ips, url, protocol, port):
+    (ipv4, ipv6) = ips
+    tasks = []
+    if ipv4:
+        # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4).set(
+            queue='scanners.endpoint_discovery.ipv4')
+        result_task = connect_result.s(protocol, url, port, 4)  # administrative task
+        tasks.append(chain(connect_task, result_task))
+
+    if ipv6:
+        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6).set(
+            queue='scanners.endpoint_discovery.ipv6')
+        result_task = connect_result.s(protocol, url, port, 6)  # administrative task
+        tasks.append(chain(connect_task, result_task))
+
+    return tasks
+
+
+@app.task(queue="scanner")
 def get_ips(url: str):
     ipv4 = ""
     ipv6 = ""
@@ -531,6 +565,32 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
 
 
 @app.task(queue='storage')
+def revive_url_task(ips, url: Url):
+
+    # don't revive if there are no ips
+    if not any(ips):
+        return
+
+    """
+    Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
+
+    Todo:
+    This does not revive all endpoints... There should be new ones to better match with actual
+    happenings with servers.
+
+    Should this add a new url instead of reviving the old one to better reflect the network?
+
+    :param url:
+    :return:
+    """
+    if url.not_resolvable:
+        url.not_resolvable = False
+        url.not_resolvable_since = datetime.now(pytz.utc)
+        url.not_resolvable_reason = "Made resolvable again since ip address was found."
+        url.save()
+
+
+@app.task(queue='storage')
 def revive_url(url: Url):
     """
     Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
@@ -549,6 +609,35 @@ def revive_url(url: Url):
         url.not_resolvable_since = datetime.now(pytz.utc)
         url.not_resolvable_reason = "Made resolvable again since ip address was found."
         url.save()
+
+
+@app.task(queue='storage')
+def kill_url_task(ips, url: Url):
+
+    # only kill if there are no ips.
+    if any(ips):
+        return
+
+    """
+    Sets a URL as not resolvable. Does not touches the is_dead (layer 8) field.
+
+    :param url:
+    :return:
+    """
+    url.not_resolvable = True
+    url.not_resolvable_since = datetime.now(pytz.utc)
+    url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
+    url.save()
+
+    Endpoint.objects.all().filter(url=url).update(is_dead=True,
+                                                  is_dead_since=datetime.now(pytz.utc),
+                                                  is_dead_reason="Url was killed")
+
+    UrlIp.objects.all().filter(url=url).update(
+        is_unused=True,
+        is_unused_since=datetime.now(pytz.utc),
+        is_unused_reason="Url was killed"
+    )
 
 
 @app.task(queue='storage')
@@ -572,6 +661,44 @@ def kill_url(url: Url):
         is_unused=True,
         is_unused_since=datetime.now(pytz.utc),
         is_unused_reason="Url was killed"
+    )
+
+
+# todo: split up between rdns and storing.
+@app.task(queue='storage')
+def store_url_ips_task(ips, url: Url):
+    """
+    Todo: method should be stored in manager
+
+    Be sure to give all ip's that are currently active in one call. Mix IPv4 and IPv6.
+
+    the http endpoint finder will clash with qualys on this method, until we're using the same
+    method to discover all ip's this url currently has.
+    """
+
+    for ip in ips:
+
+        # sometimes there is no ipv4 or 6 address... or you get some other dirty dataset.
+        if not ip:
+            continue
+
+        # the same thing that exists already? don't do anything about it.
+        if UrlIp.objects.all().filter(url=url, ip=ip, is_unused=False).count():
+            continue
+
+        epip = UrlIp()
+        epip.ip = ip
+        epip.url = url
+        epip.is_unused = False
+        epip.discovered_on = datetime.now(pytz.utc)
+        epip.rdns_name = get_rdns_name(ip)
+        epip.save()
+
+    # and then clean up all that are not in the current set of ip's.
+    UrlIp.objects.all().filter(url=url, is_unused=False).exclude(ip__in=ips).update(
+        is_unused=True,
+        is_unused_since=datetime.now(pytz.utc),
+        is_unused_reason="cleanup at storing new endpoints"
     )
 
 
