@@ -292,14 +292,16 @@ def resolve_and_scan(protocol: str, url: Url, port: int):
 def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
 
     # todo: give ips als argument in kill an revive.
-    task = chain(
-        get_ips.si(url.url),
-        group(store_url_ips_task.s(url),
-              kill_url_task.s(url),
-              revive_url_task.s(url),
-              can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
-              can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
-              )
+    task = group(
+        chain(
+            get_ips.si(url.url),
+            group(store_url_ips_task.s(url),
+                  kill_url_task.s(url),
+                  revive_url_task.s(url),
+                  ),
+        ),
+        get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
+        get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
     )
     return task
 

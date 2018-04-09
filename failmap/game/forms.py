@@ -9,7 +9,6 @@ from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
-from mapwidgets.widgets import GooglePointFieldWidget
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Organization, OrganizationType, Url
@@ -42,31 +41,32 @@ class TeamForm(forms.Form):
     team = forms.ModelChoiceField(
         widget=forms.RadioSelect,
         queryset=Team.objects.all().filter(
-            allowed_to_submit_things=True, participating_in_contest=get_default_contest()))
+            allowed_to_submit_things=True, participating_in_contest=get_default_contest()),
+    )
 
     def clean(self):
         cleaned_data = super().clean()
         team = cleaned_data.get("team")
         secret = cleaned_data.get("secret")
 
-        log.error("%s %s", team, secret)
-
         # validate secret, add some timing...
         time.sleep(1)  # wait a second to deter brute force attacks (you can still do them)
 
-        try:
-            team = Team.objects.all().get(id=team.id, secret=secret)
-        except Team.DoesNotExist:
-            raise ValidationError(
-                _('Incorrect secret or team. Try again!'),
-                code='invalid',
-            )
+        # it's possible NOT to select a team, in that case, don't try and validate secret.
+        if team:
+            try:
+                team = Team.objects.all().get(id=team.id, secret=secret)
+            except Team.DoesNotExist:
+                raise ValidationError(
+                    _('Incorrect secret or team. Try again!'),
+                    code='invalid',
+                )
 
-    class Meta:
+    # class Meta:
         # model = UrlSubmission  # not bound to a model, we have to write save ourselves since we want to do
         # a bit of dirty hacks (to prevent more N-N fields).
 
-        fields = ('team', 'secret', )
+        # fields = ('team', 'secret', )
 
 
 # http://django-autocomplete-light.readthedocs.io/en/master/tutorial.html
@@ -91,7 +91,7 @@ class OrganisationSubmissionForm(forms.ModelForm):
         # todo: show map, view only.
         fields = ('organization_type_name', 'organization_name', 'organization_address_geocoded',)
 
-        widgets = {'organization_address_geocoded': GooglePointFieldWidget}
+        # widgets = {'organization_address_geocoded': GooglePointFieldWidget}
 
 
 class UrlSubmissionForm(forms.Form):

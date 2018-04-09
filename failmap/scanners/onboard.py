@@ -46,6 +46,8 @@ def compose_task(
             tasks.append(chain(explore, scan))
 
     task = group(tasks)
+
+    print("Tasks:")
     print(task)
 
     return task

@@ -141,18 +141,32 @@ def teams(request):
         form = TeamForm(request.POST)
 
         if form.is_valid():
-            request.session['team'] = form.cleaned_data['team'].id
-            form = TeamForm()
+            if form.cleaned_data['team']:
+                request.session['team'] = form.cleaned_data['team'].id
+            else:
+                request.session['team'] = None
+
+            request.session.modified = True
+            request.session.save()
+            form = TeamForm({'team': get_team_id(request)})
 
     else:
-        form = TeamForm()
+        form = TeamForm({'team': get_team_id(request)})
 
     return render(request, 'game/submit_team.html', {'form': form, 'team': get_team_info(request)})
 
 
+def get_team_id(request):
+    try:
+        team = Team.objects.get(pk=request.session.get('team', 0))
+    except (ObjectDoesNotExist, ValueError):
+        team = {"id": "-"}
+    return team
+
+
 def get_team_info(request):
     try:
-        team = Team.objects.get(pk=request.session.get('team', '-'))
+        team = Team.objects.get(pk=request.session.get('team', 0))
     except (ObjectDoesNotExist, ValueError):
         team = {"name": "-"}
     return team

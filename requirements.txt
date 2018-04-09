@@ -94,4 +94,4 @@ django-fsm-log
 django-crispy-forms
 django-autocomplete-light
 geocoder
-django-map-widgets
+# django-map-widgets  # uses gdal, not in alpine, cannot be fixed quickly so not using this.
