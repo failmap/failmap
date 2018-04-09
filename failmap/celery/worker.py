@@ -122,7 +122,6 @@ def worker_verify_role_capabilities(role):
         except BaseException:
             log.warning('Failed to connect to ipv6 test domain %s via IPv6', IPV6_TEST_DOMAIN, exc_info=True)
             return False
-        return True
 
     if role in CONNECTIVITY_ROLES:
         # verify if a https connection to a website can be made
@@ -133,7 +132,8 @@ def worker_verify_role_capabilities(role):
         except BaseException:
             log.warning('Failed to connect to test domain %s', CONNECTIVITY_TEST_DOMAIN, exc_info=True)
             return False
-        return True
+
+    return True
 
 
 def tls_client_certificate():
