@@ -30,9 +30,10 @@ class TeamForm(forms.Form):
 
     secret = forms.CharField(widget=forms.PasswordInput)
 
-    CHOICES = Team.objects.all().filter(allowed_to_submit_things=True,
-                                        participating_in_contest=Contest.objects.get(pk=1)).values_list('pk', 'name')
-    team = forms.ChoiceField(widget=forms.RadioSelect, choices=CHOICES)
+    team = forms.ModelChoiceField(
+        widget=forms.RadioSelect,
+        queryset=Team.objects.all().filter(
+            allowed_to_submit_things=True, participating_in_contest=Contest.objects.get(pk=1)))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -45,7 +46,7 @@ class TeamForm(forms.Form):
         time.sleep(1)  # wait a second to deter brute force attacks (you can still do them)
 
         try:
-            team = Team.objects.all().get(id=team, secret=secret)
+            team = Team.objects.all().get(id=team.id, secret=secret)
         except Team.DoesNotExist:
             raise ValidationError(
                 _('Incorrect secret or team. Try again!'),

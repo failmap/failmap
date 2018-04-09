@@ -297,16 +297,14 @@ def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
         group(store_url_ips_task.s(url),
               kill_url_task.s(url),
               revive_url_task.s(url),
-              group(
-            can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
-            can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
-        )
-        )
+              can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
+              can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
+              )
     )
     return task
 
 
-@app.task(queue="scanner")
+@app.task(queue="scanners")
 def can_connect_ips(ips, protocol, url, port, ip_version):
     ipv4, ipv6 = ips
     if ip_version == 4:
@@ -316,7 +314,7 @@ def can_connect_ips(ips, protocol, url, port, ip_version):
         return can_connect(protocol, url, port, ipv6)
 
 
-@app.task(queue="scanner")
+@app.task(queue="scanners")
 def get_ips(url: str):
     ipv4 = ""
     ipv6 = ""
