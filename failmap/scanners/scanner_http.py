@@ -497,6 +497,9 @@ def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     else:
         kill_endpoint(protocol, url, port, ip_version)
 
+    # always give a positive result, so the chain continues(?)
+    return True
+
 
 def resolves(url: str):
     (ip4, ip6) = get_ips(url)

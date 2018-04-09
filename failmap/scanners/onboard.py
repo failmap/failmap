@@ -29,7 +29,7 @@ def compose_task(
 
     tasks = []
     for url in urls:
-        scan = chain(finish_onboarding.si(url), scan_tasks.si(url))
+        scan = scan_tasks.si(url)
         crawl = compose_crawl_tasks(url)
         explore = compose_explore_tasks(url)
         # We made a mistake in the chain: the scanner tasks can only run IF there are endpoints.
@@ -41,9 +41,9 @@ def compose_task(
         # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # https://stackoverflow.com/questions/47457546/
         if crawl:
-            tasks.append(chain(explore, crawl, scan))
+            tasks.append(chain(explore, crawl, finish_onboarding.si(url), scan))
         else:
-            tasks.append(chain(explore, scan))
+            tasks.append(chain(explore, finish_onboarding.si(url), scan))
 
     task = group(tasks)
 

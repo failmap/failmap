@@ -90,10 +90,7 @@ INSTALLED_APPS = [
     'leaflet',
     'djgeojson',
     'crispy_forms',
-    'mapwidgets',
-    # Dal removed, since we use the admin site for custom commands.
-    # 'dal',  # django-autocomplete-light, explicitly after admin, to not interfere with admin
-    # 'dal_select2',  # django-autocomplete-light
+    # 'mapwidgets',  no gdal available yet, try again later
     # 'cachalot',  # query cache, is not faster.
     # 'silk'  # works great for debugging.
 ]
