@@ -52,6 +52,7 @@ def submit_url(request):
                                                     'error': form.errors})
 
 
+# todo: disqualified urls toevoegen.
 @cache_page(ten_minutes)
 def scores(request):
 
