@@ -23,14 +23,16 @@ ten_minutes = 60 * 10
 
 # workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
 def get_default_contest():
-
     try:
         return Contest.objects.first()
-    except OperationalError:
+    # temp supressing ALL exceptions
+    # todo: make this sane again
+    except (OperationalError, Exception):
         return 0
 
-
 # Create your views here.
+
+
 @login_required(login_url='/authentication/login/')
 def submit_url(request):
 

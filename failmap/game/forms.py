@@ -30,7 +30,9 @@ log = logging.getLogger(__package__)
 def get_default_contest():
     try:
         return Contest.objects.first()
-    except OperationalError:
+    # temp supressing ALL exceptions
+    # todo: make this sane again
+    except (OperationalError, Exception):
         return 0
 
 
