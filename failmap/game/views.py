@@ -3,6 +3,7 @@ import logging
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import OperationalError
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
 
@@ -18,6 +19,15 @@ one_minute = 60
 one_hour = 60 * 60
 one_day = 24 * 60 * 60
 ten_minutes = 60 * 10
+
+
+# workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
+def get_default_contest():
+
+    try:
+        return Contest.objects.first()
+    except OperationalError:
+        return 0
 
 
 # Create your views here.
@@ -79,11 +89,10 @@ def submit_organisation(request):
     return render(request, 'game/submit_organisation.html', {'form': form})
 
 
-# todo: disqualified urls toevoegen.
 @cache_page(ten_minutes)
 def scores(request):
 
-    teams = Team.objects.all().filter(participating_in_contest=Contest.objects.get(id=1))
+    teams = Team.objects.all().filter(participating_in_contest=get_default_contest())
 
     scores = []
     for team in teams:

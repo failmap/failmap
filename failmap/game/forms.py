@@ -9,6 +9,7 @@ from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
 from django.db import transaction
+from django.db.utils import OperationalError
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -25,11 +26,11 @@ log = logging.getLogger(__package__)
 
 
 # todo: rewrite to get the active contest, this is a hack to prevent creating a fixture with a first value.
+# workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
 def get_default_contest():
-    contest = Contest.objects.first()
-    if contest:
-        return contest
-    else:
+    try:
+        return Contest.objects.first()
+    except OperationalError:
         return 0
 
 
