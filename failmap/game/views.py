@@ -172,10 +172,10 @@ def teams(request):
 
             request.session.modified = True
             request.session.save()
-            form = TeamForm({'team': get_team_id(request)})
+            form = TeamForm(initial={'team': get_team_id(request)})
 
     else:
-        form = TeamForm({'team': get_team_id(request)})
+        form = TeamForm(initial={'team': get_team_id(request)})
 
     return render(request, 'game/team.html', {'form': form, 'team': get_team_info(request)})
 

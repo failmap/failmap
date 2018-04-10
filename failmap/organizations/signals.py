@@ -3,7 +3,6 @@
 
 import logging
 
-from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -27,9 +26,9 @@ def onboard_after_add(sender, instance, created, **kwargs):
     if instance.onboarded:
         return
 
-    # disabled this until the onboarding is fixed. Otherwise we'll get tons and tons of useless exceptions.
     # todo: this signal only comes from the admin interface, run this command when new urls are found elsewhere
     def compose():
         onboard.compose_task(urls_filter={"url": instance}).apply_async()
 
-    transaction.on_commit(compose)
+    # disabled this until the onboarding is fixed. Otherwise we'll get tons and tons of useless exceptions.
+    # transaction.on_commit(compose)

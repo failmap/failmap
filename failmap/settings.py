@@ -617,3 +617,5 @@ MAP_WIDGETS = {
     ),
     "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyDQE_dmG0ceayxXQrVQbDH-D_9wB9vp7fI")
 }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'

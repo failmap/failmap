@@ -133,7 +133,13 @@ class OrganizationSubmission(models.Model):
         help_text="Automatic geocoded organization address."
     )
 
-    organisation_in_system = models.ForeignKey(
+    organization_wikipedia = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Helps finding more info about the organization."
+    )
+
+    organization_in_system = models.ForeignKey(
         Organization,
         null=True,
         help_text="This reference will be used to calculate the score and to track imports.",

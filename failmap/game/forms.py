@@ -2,6 +2,9 @@ import logging
 import time
 
 import tldextract
+from crispy_forms.bootstrap import AppendedText, FormActions, PrependedText
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Field, Layout, Submit
 from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
@@ -83,6 +86,8 @@ class OrganisationSubmissionForm(forms.Form):
 
     organization_name = forms.CharField()
 
+    organization_wikipedia = forms.URLField()
+
     organization_address = forms.CharField(widget=forms.Textarea)
 
     organization_evidence = forms.CharField(widget=forms.Textarea)
@@ -111,6 +116,7 @@ class OrganisationSubmissionForm(forms.Form):
         organization_name = self.cleaned_data.get('organization_name', None)
         organization_address = self.cleaned_data.get('organization_address', None)
         organization_evidence = self.cleaned_data.get('organization_address', None)
+        organization_wikipedia = self.cleaned_data.get('organization_wikipedia', None)
 
         if not all([organization_name, organization_type_name, organization_address, organization_evidence]):
             raise forms.ValidationError(
@@ -123,6 +129,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_evidence=organization_evidence,
             organization_name=organization_name,
             organization_type_name=organization_type_name,
+            organization_wikipedia=organization_wikipedia,
             added_on=timezone.now(),
             has_been_accepted=False,
             has_been_rejected=False
@@ -134,14 +141,16 @@ class UrlSubmissionForm(forms.Form):
     field_order = ('country', 'organization_type_name', 'for_organization', 'url',)
 
     country = CountryField().formfield(
-        required=False
+        required=False,
+        help_text="This only helps finding the correct organization."
     )
 
     organization_type_name = forms.ModelChoiceField(
         queryset=OrganizationType.objects.all(),
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/',
                                          forward=['country']),
-        required=False
+        required=False,
+        help_text="This only helps finding the correct organization."
     )
 
     for_organization = forms.ModelMultipleChoiceField(
@@ -150,7 +159,27 @@ class UrlSubmissionForm(forms.Form):
                                                  forward=['organization_type_name', 'country'])
     )
 
-    url = forms.CharField()
+    url = forms.CharField(
+        help_text="Do NOT enter http:// or https://"
+    )
+
+    helper = FormHelper()
+    helper.form_class = 'form-horizontal'
+    helper.layout = Layout(
+        Field('text_input', css_class='input-xlarge'),
+        Field('textarea', rows="3", css_class='input-xlarge'),
+        'radio_buttons',
+        Field('checkboxes', style="background: #FAFAFA; padding: 10px;"),
+        AppendedText('appended_text', '.00'),
+        PrependedText('prepended_text', '<input type="checkbox" checked="checked" value="" id="" name="">',
+                      active=True),
+        PrependedText('prepended_text_two', '@'),
+        'multicolon_select',
+        FormActions(
+            Submit('save_changes', 'Save changes', css_class="btn-primary"),
+            Submit('cancel', 'Cancel'),
+        )
+    )
 
     def clean_url(self):
         url = self.cleaned_data['url']
@@ -236,8 +265,8 @@ class UrlSubmissionForm(forms.Form):
             )
             submission.save()
 
-    class Meta:
+    # class Meta:
         # model = UrlSubmission  # not bound to a model, we have to write save ourselves since we want to do
         # a bit of dirty hacks (to prevent more N-N fields).
 
-        fields = ('url', 'for_organization', )
+        # fields = ('url', 'for_organization', )
