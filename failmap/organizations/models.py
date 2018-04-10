@@ -33,12 +33,13 @@ def validate_twitter(value):
 
 
 class Organization(models.Model):
-    country = CountryField()
+    country = CountryField(db_index=True)
+
     type = models.ForeignKey(
         OrganizationType,
         on_delete=models.PROTECT,
         default=1)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, db_index=True)
     twitter_handle = models.CharField(
         max_length=150,
         help_text="Include the @ symbol. Used in the top lists to let visitors tweet to the"
@@ -53,12 +54,14 @@ class Organization(models.Model):
     created_on = models.DateTimeField(
         blank=True,
         null=True,
-        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
+        default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc),
+        db_index=True
     )
 
     is_dead_since = models.DateTimeField(
         blank=True,
-        null=True
+        null=True,
+        db_index=True
     )
 
     is_dead = models.BooleanField(
@@ -139,6 +142,7 @@ class Coordinate(models.Model):
     created_on = models.DateTimeField(
         blank=True,
         null=True,
+        db_index=True,
         default=datetime(year=2016, month=1, day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=pytz.utc)
     )
     creation_metadata = models.CharField(
@@ -151,7 +155,8 @@ class Coordinate(models.Model):
                   "automatically (which might change in the future)")
     is_dead_since = models.DateTimeField(
         blank=True,
-        null=True
+        null=True,
+        db_index=True
     )
     is_dead_reason = models.CharField(
         max_length=255,

@@ -28,6 +28,7 @@ log = logging.getLogger(__package__)
 
 one_minute = 60
 one_hour = 60 * 60
+four_hours = 60 * 60 * 4
 one_day = 24 * 60 * 60
 ten_minutes = 60 * 10
 
@@ -921,7 +922,7 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2})
 
 
-@cache_page(ten_minutes)
+@cache_page(four_hours)
 def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0):
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -1004,7 +1005,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
         ORDER BY `when` ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
-    # print(sql)
+    print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
     cursor.execute(sql)
