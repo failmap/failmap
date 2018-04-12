@@ -630,3 +630,59 @@ path {
 .low_text {
     color: #f7e400;
 }
+
+
+
+/* Make it a marquee */
+.marquee {
+    width: 100%;
+    margin: 0 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.marquee span {
+    display: inline-block;
+    padding-left: 1vw;
+    text-indent: 0;
+    animation: marquee 5000s linear infinite;
+}
+.marquee span:hover {
+    animation-play-state: paused
+}
+
+/* Make it move */
+@keyframes marquee {
+    0%   { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
+
+.very-huge{
+    font-size: 140px;
+}
+
+#ticker {
+    z-index: 1000;
+    width: 100%;
+    height: 200px;
+    position: fixed;
+    bottom: 0px;
+    left: 0px;
+    background-color: white;
+    border-top: 2px solid black;
+}
+
+
+/* next april fools
+path {
+	animation: rotation 1s infinite linear;
+    transform-origin: 0 0;
+}
+
+@keyframes rotation {
+    from {transform: rotate(0deg);}
+    to   {transform: rotate(359deg);}
+}
+
+*/

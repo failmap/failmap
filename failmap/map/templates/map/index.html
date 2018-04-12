@@ -825,6 +825,11 @@
         </div>
     </div>
 </div>
+
+<div id="ticker" v-if="visible" v-cloak>
+    <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>
+</div>
+
 </body>
 <script type="x-template" id="fullscreenreport">
     {% verbatim %}

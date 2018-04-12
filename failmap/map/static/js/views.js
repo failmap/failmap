@@ -302,6 +302,11 @@ function extracrunchycyber(){
     vueCountryNavbar.countries = ["NL", "DE"];
 }
 
+function startTicker(){
+    vueTicker.visible=true;
+    vueTicker.load()
+}
+
 
 function extra() {
     vueCountryNavbar.countries = ["NL", "DE", "SE"];
@@ -499,6 +504,82 @@ function views() {
             }, 42)
         }
     });
+
+
+    // ticker
+    // todo: determine the scroll time dynamically, as it might be too fast / too slow depending on the data.
+    window.vueTicker = new Vue({
+        mixins: [category_mixin, country_mixin],
+        el: '#ticker',
+        data: {
+            tickertext: "",
+            visible: false,
+            data: Array
+        },
+        methods: {
+            colorize: function (value, rank) {
+                if (value === 0)
+                    return "black";
+
+                if (rank === "high")
+                    return "red";
+
+                if (rank === "medium")
+                    return "orange";
+
+                if (rank === "low")
+                    return "yellow";
+
+                if (high > 0) return "red";
+                if (medium > 0) return "orange";
+                return "green";
+            },
+            arrow: function(value, rank){
+                if (value > 0)
+                    return "<a style='color: red'>▲</a>"+ value + " ";
+                if (value === 0)
+                    return "▶0";
+                if (value < 0)
+                    return "<a style='color: green'>▼</a>" + (value * -1) + " ";
+            },
+            get_tickertext: function() {
+                // weird that this should be a function...
+                return this.tickertext;
+            },
+            load: debounce(function () {
+                // /data/ticker/NL/municipality/0/0
+                self = this;
+                $.getJSON('/data/ticker/' + this.country + '/' + this.category + '/0/0', function (data) {
+                    j = 0;
+
+                    self.data = data;
+
+                    for (j=0;j<data.length;j++){
+                        self.tickertext += "  &nbsp; " + data[j]['organization'] + " ";
+
+                        self.tickertext += "<a style='color: " + self.colorize(data[j]['high_now'], 'high') +"'>" + data[j]['high_now'] + "</a>";
+                        self.tickertext += self.arrow(data[j]['high_changes'], 'high');
+                        self.tickertext += " | ";
+
+                        self.tickertext += "<a style='color: " + self.colorize(data[j]['medium_now'], 'medium') +"'>" + data[j]['medium_now'] + "</a>";
+                        self.tickertext += self.arrow(data[j]['medium_changes'], 'medium');
+                        self.tickertext += " | ";
+
+                        self.tickertext += "<a style='color: " + self.colorize(data[j]['low_now'], 'low') +"'>" + data[j]['low_now'] + "</a>";
+                        self.tickertext += self.arrow(data[j]['low_changes'], 'low');
+                        self.tickertext += " ";
+
+                        if (j % 10 === 0) {
+                            self.tickertext += " - <b> failmap.org, monitor governments </b> - "
+                        }
+                    }
+                });
+            }, 42)
+        }
+    });
+
+
+
 
     window.vueFullscreen = new Vue({
         el: '#fullscreen',

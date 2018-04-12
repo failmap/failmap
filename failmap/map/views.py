@@ -922,6 +922,90 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2})
 
 
+@cache_page(one_hour)
+def ticker(request, country: str="NL", organization_type: str="municipality",
+           weeks_back: int=0, weeks_duration: int=0):
+
+    weeks_back = int(weeks_back)
+    weeks_duration = int(weeks_duration)
+
+    # Gives ticker data of organizations, like in news scrolling:
+    # On organization level, could be on URL level in the future (selecing more cool urls?)
+    # Organizations are far more meaningful.
+    # Amsterdam 42 +1, 32 +2, 12 -, Zutphen 12 -3, 32 -1, 3 +3, etc.
+
+    if not weeks_duration:
+        weeks_duration = 10
+
+    if not weeks_back:
+        when = datetime.now(pytz.utc)
+    else:
+        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+    # looks a lot like graphs, but then just subtract/add some values and done (?)
+
+    # compare the first urlrating to the last urlrating
+    # but do not include urls that don't exist.
+
+    # the query is INSTANT!
+    sql = """SELECT map_organizationrating.id as id, name, high, medium, low FROM
+               map_organizationrating
+           INNER JOIN
+           (SELECT MAX(id) as id2 FROM map_organizationrating or2
+           WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+           ON x.id2 = map_organizationrating.id
+           INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
+            AND organization.country = '%(country)s'
+        """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+               "country": get_country(country)}
+
+    newest_urlratings = list(OrganizationRating.objects.raw(sql))
+
+    # this of course doesn't work with the first day, as then we didn't measure
+    # everything (and the ratings for several issues are 0...
+    sql = """SELECT map_organizationrating.id as id, name, high, medium, low FROM
+               map_organizationrating
+           INNER JOIN
+           (SELECT MAX(id) as id2 FROM map_organizationrating or2
+           WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+           ON x.id2 = map_organizationrating.id
+           INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+            WHERE organization.type_id = '%(OrganizationTypeId)s'
+            AND organization.country = '%(country)s'
+        """ % {"when": when - timedelta(days=(weeks_duration*7)),
+               "OrganizationTypeId": get_organization_type(organization_type),
+               "country": get_country(country)}
+
+    oldest_urlratings = list(OrganizationRating.objects.raw(sql))
+
+    changes = []
+    # stats for the newest, should be made a function:
+
+    # silently implying that both querysets have the same length and so on. Which might not be the case(?!)
+    i = 0
+    for newest_urlrating in newest_urlratings:
+
+        change = {
+            'organization': newest_urlrating.name,
+            'high_now': newest_urlrating.high,
+            'medium_now': newest_urlrating.medium,
+            'low_now': newest_urlrating.low,
+            'high_then': oldest_urlratings[i].high,
+            'medium_then': oldest_urlratings[i].medium,
+            'low_then': oldest_urlratings[i].low,
+            'high_changes': newest_urlrating.high - oldest_urlratings[i].high,
+            'medium_changes': newest_urlrating.medium - oldest_urlratings[i].medium,
+            'low_changes': newest_urlrating.low - oldest_urlratings[i].low,
+        }
+
+        i += 1
+
+        changes.append(change)
+
+    return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
+
+
 @cache_page(four_hours)
 def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0):
     if not weeks_back:

@@ -7,7 +7,7 @@ from django.views.i18n import JavaScriptCatalog
 from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, get_categories,
                                improvements, index, latest_scans, manifest_json, map_data,
                                organization_report, organizationtype_exists, robots_txt,
-                               security_txt, stats, terrible_urls, top_fail, top_win,
+                               security_txt, stats, terrible_urls, ticker, top_fail, top_win,
                                updates_on_organization, vulnerability_graphs, wanted_urls)
 
 urlpatterns = [
@@ -44,6 +44,9 @@ urlpatterns = [
     url(r'^data/improvements/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
         r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',
         improvements, name='improvements'),
+    url(r'^data/ticker/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
+        r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',
+        ticker, name='ticker'),
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),
