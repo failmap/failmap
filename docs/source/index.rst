@@ -3,37 +3,45 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Failmap End User Documentation
+End User Documentation
 ========================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   topics/scanning_policy
-   topics/faq_end_users
-   topics/user_guide
-   topics/running_a_remote_worker
-   topics/thanks
+   topics/usage/scanning_policy
+   topics/usage/faq_end_users
+   topics/usage/user_guide
+   topics/usage/running_a_remote_worker
+   topics/usage/thanks
 
-Failmap Developer Documentation
+Developer Documentation
 ========================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   topics/getting_started
-   topics/development
-   topics/data_model
-   topics/translation
-   topics/deployment
+   topics/development/getting_started
+   topics/development/development
+   topics/development/data_model
+   topics/development/translation
+   topics/development/deployment
 
-   topics/gis_and_map_information
-   topics/writing_a_scanner
-   topics/stacking_pattern
-   topics/docker
-   topics/task_processing_system
+
+Advanced Topics
+========================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   topics/development/gis_and_map_information
+   topics/development/writing_a_scanner
+   topics/development/stacking_pattern
+   topics/development/docker
+   topics/development/task_processing_system
 
 
 Indices and tables
