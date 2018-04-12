@@ -88,7 +88,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     # todo: functional decomposition
 
     # merge
-    toplevel_filter = {"url__iregex": "^[^.]*\.[^.]*$"}
+    toplevel_filter = {"url__iregex": "^[^.]*\\.[^.]*$"}
 
     # merge using python 3.6 syntax
     # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
