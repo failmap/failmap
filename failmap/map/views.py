@@ -665,7 +665,9 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
         # print("%s: %s" % (stat, when))
 
         # about 1 second per query, while it seems to use indexes.
-        sql = """SELECT map_urlrating.id as id, calculation FROM
+        # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
+        # see map_data for more info.
+        sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation FROM
                    map_urlrating
                INNER JOIN
                (SELECT MAX(id) as id2 FROM map_urlrating or2
@@ -674,6 +676,7 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                INNER JOIN url ON map_urlrating.url_id = url.id
                INNER JOIN url_organization on url.id = url_organization.url_id
                INNER JOIN organization ON url_organization.organization_id = organization.id
+               INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
                 WHERE organization.type_id = '%(OrganizationTypeId)s'
                 AND organization.country = '%(country)s'
             """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
@@ -1046,19 +1049,25 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
     # This could be added to a standerd django query manager, with an extra join. It's fast.
     # sometimes 0.01 second :) And also works in sqlite. Hooray.
 
-    # ID Order should not matter, esp in async rebuild situations.
+    # ID Order should not matter, esp in async rebuild situations. It does now.
+
+    # The calculation is being grabbed in a separate join to speed up MySQL: the calculation field is a longtext
+    # that forces mysql to use disk cache as the result set is matched on to temporary tables etc.
+    # So, therefore we're joining in the calculation on the last moment. Then the query just takes two seconds (still
+    # slower than sqlite), but by far more acceptable than 68 seconds. This is about or3. This approach makes sqllite
+    # a bit slower it seems, but still well within acceptable levels.
     sql = """
         SELECT
-            rating,
+            map_organizationrating.rating,
             organization.name,
             organizations_organizationtype.name,
             coordinate_stack.area,
             coordinate_stack.geoJsonType,
             organization.id,
-            calculation,
-            high,
-            medium,
-            low
+            or3.calculation,
+            map_organizationrating.high,
+            map_organizationrating.medium,
+            map_organizationrating.low
         FROM map_organizationrating
         INNER JOIN
           (SELECT id as stacked_organization_id
@@ -1084,12 +1093,14 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
           (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
           WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
+        INNER JOIN map_organizationrating as or3 ON or3.id = map_organizationrating.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
-        ORDER BY `when` ASC
+        ORDER BY map_organizationrating.`when` ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
-    print(sql)
+
+    # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
     cursor.execute(sql)
