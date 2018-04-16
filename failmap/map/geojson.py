@@ -107,7 +107,7 @@ queries = {
     "BE": {
         # Municipalities
         "municipality":
-            'area[name="België"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
+            'area[int_name="Belgium"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
     },
     "ES": {
         "municipality":
@@ -541,6 +541,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
             "Combination of country and organization_type does not have a matching OSM query implemented.")
 
     log.info("Connecting to overpass to download data. Downloading can take a while (minutes)!")
+    log.debug(query)
     response = requests.post("http://www.overpass-api.de/api/interpreter",
                              data={"data": query, "submit": "Query"},
                              stream=True,
