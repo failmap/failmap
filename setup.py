@@ -36,7 +36,7 @@ def get_version():
             print('Found commits after last release, versioning with latest sha', file=sys.stderr)
 
             # append git sha to version
-            return tag_version + '+' + check_output("git rev-parse --short HEAD".split()).strip().decode()
+            return tag_version + '+' + check_output("git rev-parse HEAD".split()).strip().decode()[:8]
 
         return tag_version
     except Exception as e:
