@@ -43,10 +43,12 @@ def celery_worker(queues, request):
         '--pool', pool,
         '--queues', ','.join(queues)
     ]
+    worker_env = dict(os.environ, WORKER_ROLE='default_ipv4')
+
     log.info('Running worker with: %s', ' '.join(worker_command))
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
-                                      preexec_fn=os.setsid)
+                                      preexec_fn=os.setsid, env=worker_env)
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function

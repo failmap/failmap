@@ -27,6 +27,7 @@ IPV6_ROLES = [
 # list of all roles that require internet connectivity
 CONNECTIVITY_ROLES = [
     'default',
+    'default_ipv4',
     'scanner_endpoint_discovery',
     'scanner_v4',
     'scanner_v6',
@@ -58,6 +59,17 @@ WORKER_QUEUE_CONFIGURATION = {
         # endpoint discovery
         Queue('scanners.endpoint_discovery.ipv4'),
         Queue('scanners.endpoint_discovery.ipv6'),
+        Queue('scanners.dns'),
+    ],
+    # universal worker without ipv6 specific queues
+    'default_ipv4': [
+        Queue('scanners'),
+        Queue('scanners.ipv4'),
+        Queue('scanners.qualys'),
+        Queue('storage'),
+        Queue('default'),
+        Queue('celery'),
+        Queue('scanners.endpoint_discovery.ipv4'),
         Queue('scanners.dns'),
     ],
     # special queue for handling tons of tasks that are rate limited (we don't want to broadcast

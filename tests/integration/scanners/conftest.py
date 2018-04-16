@@ -27,9 +27,10 @@ def worker(request):
     pool = request.param
 
     worker_command = ['failmap', 'celery', 'worker', '-l', 'info', '--pool', pool]
+    worker_env = dict(os.environ, WORKER_ROLE='default_ipv4')
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
-                                      preexec_fn=os.setsid)
+                                      preexec_fn=os.setsid, env=worker_env)
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function
