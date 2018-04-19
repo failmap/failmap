@@ -103,7 +103,10 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     # listing all endpoints takes ages
     list_filter = ('qualys_rating', 'qualys_rating_no_trust',
-                   'scan_date', 'rating_determined_on', 'qualys_message')
+                   'scan_date', 'rating_determined_on', 'qualys_message',
+                   'endpoint__protocol',
+                   'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead'
+                   )
 
     # loading related fields in django jet is not done in a smart way: everything is prefetched.
     # and when there are > 10000 objects of some sort, the system becomes insanely slow.
@@ -167,7 +170,10 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ('endpoint__url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = (('endpoint', RelatedFieldAjaxListFilter), 'type', 'rating',
-                   'explanation', 'last_scan_moment', 'rating_determined_on')
+                   'explanation', 'last_scan_moment', 'rating_determined_on',
+                   'endpoint__protocol',
+                   'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead'
+                   )
 
     fields = ('endpoint', 'type', 'rating',
               'explanation', 'last_scan_moment', 'rating_determined_on')
