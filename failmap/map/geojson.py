@@ -13,168 +13,48 @@ import requests
 import tldextract
 from clint.textui import progress
 from django.conf import settings
-from django.db import transaction
 from rdp import rdp
 from wikidata.client import Client
 
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from failmap.celery import app
+
+from ..organizations.models import Coordinate, Organization, OrganizationType, Url
+from .models import AdministrativeRegion
 
 log = logging.getLogger(__package__)
 
 
-# the map should look seamless when you're looking at the entire country, region etc. If it doesn't, increase
-# the resolution.
-resampling_resolutions = {
-    'NL': {'municipality': 0.001}
-}
-
 """
-Now to convert the table in wiki to a model, let users edit it and make import possible via a task in the admin
-interface. Warn them that import can take a while. No command line needed anymore. Also warn them for memory usage:
-
-
-Easier importing:
-area["ISO3166-2"~"^NL"]->.gem; relation(area.gem)[type=boundary][ boundary=administrative][admin_level=8]; out geom;
-
-
-Possibility to remove water:
+Todo: Possibility to remove water:
 https://stackoverflow.com/questions/25297811/how-can-i-remove-water-from-openstreetmap-ways
 https://gis.stackexchange.com/questions/157842/how-to-get-landmass-polygons-for-bounding-box-in-overpass-api/157943
-
-country, organization_type, admin_level, is_imported, is_imported_on, last_updated, download_size_in_megabytes
-
+https://stackoverflow.com/questions/41723087/get-administrative-borders-with-overpass-ql
 """
 
-queries = {
-    "NL": {
-        # 4: province, 5: water board, 8: municipality, 9: stadsdelen, 10: settlements, 11: neighborhoods (wijken)
-        "municipality":
-            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        # empty :(
-        "water board":
-            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-        "province":
-            'area[name="Nederland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
-    },
-    "SE": {
-        # 3: "landsdeel", 7: municipality,  8: district, 4: province,
-        "municipality":
-            'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        "province":
-            'area[name="Sverige"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
-    },
-    "DE": {
-        # Don't even try to translate (or understand) German regions. Just take it as it is, name it like they do.
-        # https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
-        # Here is a nice image to help you: https://en.wikipedia.org/wiki/Districts_of_Germany
-        "bundesland":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=4]; out geom;',
-        "regierungsbezirk":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-        "landkreis_kreis_kreisfreie_stadt":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        "samtgemeinde_verwaltungsgemeinschaft":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        # huge!
-        """
-        A bit too huge?
-        FATAL ERROR: CALL_AND_RETRY_LAST Allocation failed - JavaScript heap out of memory
-         1: node::Abort() [/usr/local/bin/node]
-         2: node::FatalException(v8::Isolate*, v8::Local<v8::Value>, v8::Local<v8::Message>) [/usr/local/bin/node]
-         3: v8::Utils::ReportOOMFailure(char const*, bool) [/usr/local/bin/node]
-         4: v8::internal::V8::FatalProcessOutOfMemory(char const*, bool) [/usr/local/bin/node]
-         5: v8::internal::Factory::NewFillerObject(int, bool, v8::internal::AllocationSpace) [/usr/local/bin/node]
-         6: v8::internal::Runtime_AllocateInTargetSpace(int, v8::internal::Object**, v8::internal::Isolate*)
-         [/usr/local/bin/node]
-         7: 0x2fb7fb8ed46
-         8: 0x2fb7fcf4e76
-         9: 0x2fb7fcdd264
-        10: 0x2fb7fb85cd5
-        """
-        "stadt_gemeinde":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        "stadtbezirk_gemeindeteil_mit_selbstverwaltung":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=9]; out geom;',
-        "stadtteil_gemeindeteil_ohne_selbstverwaltung":
-            'area[name="Deutschland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=10]; out geom;',
-    },
-    "FR": {
-        # Communes
-        # Use name=* to indicate the name of the commune, and
-        # ref:INSEE=* to indicate the unique identifier given by INSEE (COG).
-        "municipality":
-            'area[name="France"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-    },
-    "NO": {
-        # Muncipiality (Kommue) (430) Example: Stavanger, Sandnes etc
-        "municipality":
-            'area[name="Norge"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-    },
-    "FI": {
-        # Kunnat / Kaupungit, LAU 2, for ref=*, see Väestörekisterikeskus, kuntaluettelo): Helsinki
-        # municipality
-        "municipality":
-            'area[name="Suomi"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-    },
-    "UK": {
-        # parishes / communities, probably not a municipality?
-        "municipality":
-            'area[name="United Kingdom"]->.gem; relation(area.gem)["type"="boundary"][admin_level=10]; out geom;',
-    },
-    "BE": {
-        # Municipalities
-        "municipality":
-            'area[int_name="Belgium"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-    },
-    "ES": {
-        "municipality":
-            'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        "province":
-            'area[name="España"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-    },
-    "PT": {
-        "municipality":
-            'area[name="Portugal"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-    },
-    "LU": {
-        "municipality":
-            'area[name="Luxembourg"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-    },
-    "DK": {
-        "municipality":
-            'area[name="Danmark"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-    },
-    "CH": {
-        "municipality":
-            'area[name="Schweiz/Suisse/Svizzera/Svizra"]->.gem; '
-            'relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-    },
-    "AT": {
-        "municipality":
-            'area[name="Österreich"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-    },
-    "IT": {
-        "municipality":
-            'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=8]; out geom;',
-        "province":
-            'area[name="Italia"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-    },
-    "IE": {
-        "municipality":
-            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=7]; out geom;',
-        "county":
-            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-        "province":
-            'area[name="Ireland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=5]; out geom;',
-    },
-    "IS": {
-        "municipality":
-            'area[name="Iceland"]->.gem; relation(area.gem)["type"="boundary"][admin_level=6]; out geom;',
-    },
-}
+
+def get_resampling_resolution(country: str="NL", organization_type: str="municipality"):
+    resolution = AdministrativeRegion.objects.all().filter(
+        country=country,
+        organization_type__name=organization_type).values_list('resampling_resolution', flat=True).first()
+
+    if not resolution:
+        return 0.001
+
+    return resolution
 
 
-@transaction.atomic
+def get_region(country: str="NL", organization_type: str="municipality"):
+    return AdministrativeRegion.objects.all().filter(
+        country=country,
+        organization_type__name=organization_type).values_list('admin_level', flat=True).first()
+
+
+# making this atomic makes sure that the database is locked in sqlite.
+# The transaction is very very very very very very very very very very long
+# You also cannot see progress...
+# better to validate that the region doesn't exist and then add it...
+# @transaction.atomic
+@app.task(queue="scanners")
 def import_from_scratch(countries: List[str]=None, organization_types: List[str]=None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
@@ -200,7 +80,7 @@ def import_from_scratch(countries: List[str]=None, organization_types: List[str]
     for country in countries:
         for organization_type in organization_types:
 
-            if not queries.get(country, {}).get(organization_type, None):
+            if not get_region(country, organization_type):
                 log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
                 continue
 
@@ -213,15 +93,17 @@ def import_from_scratch(countries: List[str]=None, organization_types: List[str]
                 if "name" not in feature["properties"]:
                     continue
 
-                resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
-                store_new(resample(feature, resolution), country, organization_type, when)
+                resolution = get_resampling_resolution(country, organization_type)
+                resampled = resample(feature, resolution)
+                store_new(resampled, country, organization_type, when)
 
                 # can't do multiprocessing.pool, given non global functions.
 
     log.info("Import finished.")
 
 
-@transaction.atomic
+# @transaction.atomic
+@app.task(queue="scanners")
 def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
 
     if not osmtogeojson_available():
@@ -247,7 +129,7 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
             continue
 
         # slower, but in a task. Still atomic this way.
-        resolution = resampling_resolutions.get(country, {}).get(organization_type, 0.001)
+        resolution = get_resampling_resolution(country, organization_type)
         store_updates(resample(feature, resolution), country, organization_type, when)
 
     log.info("Resampling and update tasks have been created.")
@@ -551,11 +433,16 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
         https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative
     """
 
-    query = queries.get(country, {}).get(organization_type, None)
+    admin_level = get_region(country, organization_type)
 
-    if not query:
+    if not admin_level:
         raise NotImplemented(
             "Combination of country and organization_type does not have a matching OSM query implemented.")
+
+    # we used to use the country name, which doesn't work very consistently and requires a greater source of knowledge
+    # luckily OSM supports ISO3166-2, just like django countries. So that's a perfect fit.
+    query = 'area["ISO3166-2"~"^%s"]->.gem; relation(area.gem)[type=boundary]' \
+            '[boundary=administrative][admin_level=%s]; out geom;' % (country, admin_level)
 
     log.info("Connecting to overpass to download data. Downloading can take a while (minutes)!")
     log.debug(query)

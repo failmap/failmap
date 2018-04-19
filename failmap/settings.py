@@ -594,6 +594,12 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
 }
 
+# todo: fit in constance
+FAILMAP_DEFAULT_COUNTRY = "NL"
+
+# todo: constance doesn't do lists... now what?
+FAILMAP_COUNTRIES_PUBLISHED = ["NL", ]
+
 # https://docs.djangoproject.com/en/1.11/ref/settings/#data-upload-max-number-fields
 # The default is far too low with various inlines (even on the test dataset).
 # Yes, we happily exceed 1000 fields anyday. No problem :)

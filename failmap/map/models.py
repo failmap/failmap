@@ -95,7 +95,8 @@ class AdministrativeRegion(models.Model):
 
     Caveats:
     - The more detail you need, the more data is downloaded and processed. This can go into extremes when working with
-    cities. Our advice is to only download larger regions or have a massive setup to convert the data.
+    cities. Our advice is to only download larger regions or have a massive setup to convert the data. Your memory might
+    not be adequate in those cases.
     - Importing regions can be excruciatingly slow, even up to hours and days, depending on the size.
     - Importing regions will possibly block the worker that is importing the region for said time.
     """
@@ -118,6 +119,13 @@ class AdministrativeRegion(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(11)]
     )
 
+    resampling_resolution = models.FloatField(
+        help_text='This is used in the algorithm that reduces datapoints in map shapes: this saves a lot of data. '
+                  'value here should make the map look decent when the entire country is visible but may be somewhat '
+                  'blocky when zooming in. The smaller the number, the more detail.',
+        default='0.001'
+    )
+
     imported = models.BooleanField(
         help_text="When imported, this is checked. Helps with importing a larger number of regions manually.",
         default=False
@@ -126,3 +134,6 @@ class AdministrativeRegion(models.Model):
     class Meta:
         verbose_name = _('administrative_region')
         verbose_name_plural = _('administrative_regions')
+
+    def __str__(self):
+        return '%s/%s' % (self.country, self.organization_type,)
