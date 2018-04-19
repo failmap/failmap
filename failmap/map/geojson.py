@@ -28,6 +28,23 @@ resampling_resolutions = {
     'NL': {'municipality': 0.001}
 }
 
+"""
+Now to convert the table in wiki to a model, let users edit it and make import possible via a task in the admin
+interface. Warn them that import can take a while. No command line needed anymore. Also warn them for memory usage:
+
+
+Easier importing:
+area["ISO3166-2"~"^NL"]->.gem; relation(area.gem)[type=boundary][ boundary=administrative][admin_level=8]; out geom;
+
+
+Possibility to remove water:
+https://stackoverflow.com/questions/25297811/how-can-i-remove-water-from-openstreetmap-ways
+https://gis.stackexchange.com/questions/157842/how-to-get-landmass-polygons-for-bounding-box-in-overpass-api/157943
+
+country, organization_type, admin_level, is_imported, is_imported_on, last_updated, download_size_in_megabytes
+
+"""
+
 queries = {
     "NL": {
         # 4: province, 5: water board, 8: municipality, 9: stadsdelen, 10: settlements, 11: neighborhoods (wijken)

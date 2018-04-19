@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
-from .models import OrganizationRating, UrlRating
+from .models import AdministrativeRegion, OrganizationRating, UrlRating
 
 
 class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -36,5 +36,13 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
 
 
+class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('country', 'organization_type', 'admin_level', 'imported')
+    search_fields = (['country', 'organization_type', 'admin_level'])
+    list_filter = ('country', 'organization_type', 'admin_level', 'imported')
+    fields = ('country', 'organization_type', 'admin_level', 'imported')
+
+
+admin.site.register(AdministrativeRegion, AdministrativeRegionAdmin)
 admin.site.register(OrganizationRating, OrganizationRatingAdmin)
 admin.site.register(UrlRating, UrlRatingAdmin)

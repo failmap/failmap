@@ -1,9 +1,11 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.safestring import mark_safe
+from django.utils.translation import gettext_lazy as _
+from django_countries.fields import CountryField
 from jsonfield import JSONField
 
-from failmap.organizations.models import Organization, Url
-
-# Create your models here.
+from failmap.organizations.models import Organization, OrganizationType, Url
 
 
 class OrganizationRating(models.Model):
@@ -84,3 +86,43 @@ class UrlRating(models.Model):
 
     def __str__(self):
         return '%s,%s,%s  - %s' % (self.high, self.medium, self.low, self.when.date(),)
+
+
+class AdministrativeRegion(models.Model):
+    """
+    Helps with downloading / importing openstreetmap regions. Makes it possible for end users to add regions without
+    altering code and then import / update those regions.
+
+    Caveats:
+    - The more detail you need, the more data is downloaded and processed. This can go into extremes when working with
+    cities. Our advice is to only download larger regions or have a massive setup to convert the data.
+    - Importing regions can be excruciatingly slow, even up to hours and days, depending on the size.
+    - Importing regions will possibly block the worker that is importing the region for said time.
+    """
+
+    country = CountryField(db_index=True)
+
+    organization_type = models.ForeignKey(OrganizationType, on_delete=models.CASCADE,
+                                          help_text="The organization type desired to import. Not all organization "
+                                                    "types might be present in this list by default. Create new ones"
+                                                    "accordingly.")
+
+    admin_level = models.IntegerField(
+        help_text=mark_safe(
+            "The administrative level as documented on the OSM Wiki. Note that each country uses a different way "
+            "to organize the same thing. Some use municipalities on level 8, other on level 4 etc. Really do "
+            "check the wiki before adding any missing organization. "
+            "<a href='https://wiki.openstreetmap.org/wiki/Tag:boundary=administrative' target='_blank'>"
+            "Visit the OSM wiki</a>."),
+        default=8,
+        validators=[MinValueValidator(1), MaxValueValidator(11)]
+    )
+
+    imported = models.BooleanField(
+        help_text="When imported, this is checked. Helps with importing a larger number of regions manually.",
+        default=False
+    )
+
+    class Meta:
+        verbose_name = _('administrative_region')
+        verbose_name_plural = _('administrative_regions')
