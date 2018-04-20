@@ -5,10 +5,12 @@ from django.conf.urls import url
 from django.views.i18n import JavaScriptCatalog
 
 from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, export_url_dataset,
-                               get_categories, improvements, index, latest_scans, manifest_json,
-                               map_data, organization_report, organizationtype_exists, robots_txt,
-                               security_txt, stats, terrible_urls, ticker, top_fail, top_win,
-                               updates_on_organization, vulnerability_graphs, wanted_urls)
+                               get_categories, get_countries, get_default_category,
+                               get_default_country, improvements, index, latest_scans,
+                               manifest_json, map_data, organization_report,
+                               organizationtype_exists, robots_txt, security_txt, stats,
+                               terrible_urls, ticker, top_fail, top_win, updates_on_organization,
+                               vulnerability_graphs, wanted_urls)
 
 urlpatterns = [
     url(r'^$', index, name='failmap'),
@@ -23,6 +25,15 @@ urlpatterns = [
 
     url(r'^data/stats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         stats, name='stats'),
+
+    url(r'^data/countries/',
+        get_countries, name='get_countries'),
+
+    url(r'^data/default_country/',
+        get_default_country, name='default_country'),
+
+    url(r'^data/default_category/',
+        get_default_category, name='default_category'),
 
     url(r'^data/categories/(?P<country>[A-Z]{2})/',
         get_categories, name='get_categories'),

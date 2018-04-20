@@ -44,7 +44,11 @@ def get_organization_type(name: str):
     try:
         return OrganizationType.objects.get(name=name).id
     except OrganizationType.DoesNotExist:
-        return 1
+        default = Configuration.objects.all().filter(
+            is_displayed=True, is_the_default_option=True
+        ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+
+        return default if default else 1
 
 
 # any two letters will do... :)
@@ -69,14 +73,29 @@ def get_country(code: str):
     return code
 
 
-def get_default_country():
-    # todo: from constance, no, from config table
-    return 'NL'
+def get_default_country(request, ):
+    country = Configuration.objects.all().filter(
+        is_displayed=True,
+        is_the_default_option=True
+    ).order_by('display_order').values_list('country', flat=True).first()
+
+    if not country:
+        return 'NL'
+
+    return JsonResponse([country], safe=False, encoder=JSEncoder)
 
 
-def get_default_category():
+def get_default_category(request, ):
+
+    organization_type = Configuration.objects.all().filter(
+        is_displayed=True,
+        is_the_default_option=True
+    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+
+    if not organization_type:
+        return 'municipality'
     # from config table
-    return 'municipality'
+    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
 
 
 # note: this is only visual, this is no security mechanism(!) Don't act like it is.
@@ -92,15 +111,17 @@ def get_countries(request,):
         if conf not in list:
             list.append(conf)
 
-    return list
+    return JsonResponse(list, safe=False, encoder=JSEncoder)
 
 
 def get_categories(request, country: str="NL"):
 
     categories = Configuration.objects.all().filter(
-        country=get_country(country)).order_by('display_order').values_list('organization_type__name', flat=True)
+        country=get_country(country),
+        is_displayed=True
+    ).order_by('display_order').values_list('organization_type__name', flat=True)
 
-    return JsonResponse(categories, safe=False, encoder=JSEncoder)
+    return JsonResponse(list(categories), safe=False, encoder=JSEncoder)
 
 
 @cache_page(one_day)
