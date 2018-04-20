@@ -101,7 +101,7 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
             configuration.is_displayed = True
             configuration.save()
 
-    display.short_description = '  Display'
+    display.short_description = '☀️ Display'
     actions.append(display)
 
     def hide(self, request, queryset):
@@ -110,7 +110,7 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
             configuration.is_displayed = False
             configuration.save()
 
-    hide.short_description = '  Hide'
+    hide.short_description = '🌑 Hide'
     actions.append(hide)
 
     def allow_scanning(self, request, queryset):
@@ -119,7 +119,7 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
             configuration.is_scanned = True
             configuration.save()
 
-    allow_scanning.short_description = '  Allow scanning'
+    allow_scanning.short_description = '❤️  Allow scanning'
     actions.append(allow_scanning)
 
     def stop_scanning(self, request, queryset):
@@ -128,17 +128,8 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
             configuration.is_scanned = False
             configuration.save()
 
-    stop_scanning.short_description = '  Stop scanning'
+    stop_scanning.short_description = '💔  Stop scanning'
     actions.append(stop_scanning)
-
-    def remove_default(self, request, queryset):
-
-        for configuration in queryset:
-            configuration.is_the_default_option = False
-            configuration.save()
-
-    remove_default.short_description = '  Remove default'
-    actions.append(remove_default)
 
     def set_default(self, request, queryset):
 
@@ -146,8 +137,17 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
             configuration.is_the_default_option = True
             configuration.save()
 
-    set_default.short_description = '  Set default'
+    set_default.short_description = '😀  Set default'
     actions.append(set_default)
+
+    def remove_default(self, request, queryset):
+
+        for configuration in queryset:
+            configuration.is_the_default_option = False
+            configuration.save()
+
+    remove_default.short_description = '😭  Remove default'
+    actions.append(remove_default)
 
 
 admin.site.register(Configuration, ConfigurationAdmin)
