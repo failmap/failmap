@@ -137,3 +137,37 @@ class AdministrativeRegion(models.Model):
 
     def __str__(self):
         return '%s/%s' % (self.country, self.organization_type,)
+
+
+class Configuration(models.Model):
+
+    country = CountryField(db_index=True,
+                           help_text="Part of the combination shown on the map.")
+
+    organization_type = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        help_text="Part of the combination shown on the map.")
+
+    is_displayed = models.BooleanField(
+        help_text="Whether this combination is shown on the map.",
+        default=False
+    )
+
+    is_displayed_as_default = models.BooleanField(
+        help_text="Determines if this is the default view. Only one can be selected to be displayed first. If there "
+                  "are multiple, the first one is used. This can lead to unexpected results.",
+        default=False
+    )
+
+    display_order = models.PositiveIntegerField(_('order'), default=0, blank=False, null=False)
+
+    is_scanned = models.BooleanField(
+        help_text="Whether this combination will be scanned by the scanners.",
+        default=False
+    )
+
+    class Meta(object):
+        verbose_name = _('configuration')
+        verbose_name_plural = _('configurations')
+        ordering = ('display_order', )

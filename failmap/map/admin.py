@@ -1,3 +1,4 @@
+from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
 from django.urls import reverse
@@ -7,7 +8,7 @@ from import_export.admin import ImportExportModelAdmin
 from ..app.models import Job
 from ..celery import PRIO_HIGH
 from .geojson import import_from_scratch, update_coordinates
-from .models import AdministrativeRegion, OrganizationRating, UrlRating
+from .models import AdministrativeRegion, Configuration, OrganizationRating, UrlRating
 
 
 class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -85,6 +86,15 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(update_coordinates)
 
 
+class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
+
+    list_display = ('country', 'organization_type', 'is_displayed', 'is_displayed_as_default', 'is_scanned', )
+    search_fields = (['country', 'organization_type', ])
+    list_filter = ('country', 'organization_type', 'is_displayed', 'is_displayed_as_default', 'is_scanned',)
+    fields = ('country', 'organization_type', 'is_displayed', 'is_displayed_as_default', 'is_scanned', )
+
+
+admin.site.register(Configuration, ConfigurationAdmin)
 admin.site.register(AdministrativeRegion, AdministrativeRegionAdmin)
 admin.site.register(OrganizationRating, OrganizationRatingAdmin)
 admin.site.register(UrlRating, UrlRatingAdmin)

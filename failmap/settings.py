@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'failmap.app',
     'failmap.hypersh',
     'django_fsm_log',
+    'adminsortable2',
     # Jet admin dashboard
     'jet.dashboard',
     'jet',

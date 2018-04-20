@@ -95,3 +95,5 @@ django-crispy-forms
 django-autocomplete-light
 geocoder
 # django-map-widgets  # uses gdal, not in alpine, cannot be fixed quickly so not using this.
+
+django-admin-sortable2  # nice sorting in the admin
