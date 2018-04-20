@@ -670,7 +670,7 @@
                     {% trans "Show report for organization" %}:
                     {% verbatim %}
                     <select v-model="selected">
-                        <option v-for="organization in organizations" :value="organization.id">
+                        <option v-for="organization in organizations" :value="organization.slug">
                             {{ organization.name }}
                         </option>
                     </select>

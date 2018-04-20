@@ -80,11 +80,11 @@ $(document).ready(function () {
     lazyload(); // allow for lazy loading of images
 
     // if browser contains report anchor with organization id load that organization
-    let match = RegExp('report-([0-9]+)').exec(location.hash);
+    let match = RegExp('report-([a-z-]+)').exec(location.hash);
     if (match) {
-        let organization_id = match[1];
+        let organization_name = match[1];
         location.href = '#report';
-        vueReport.selected = organization_id;
+        vueReport.selected = organization_name;
     }
 
 });

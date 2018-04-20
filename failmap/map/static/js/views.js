@@ -188,10 +188,10 @@ var report_mixin = {
                 self.name = data.name;
                 self.twitter_handle = data.twitter_handle;
                 self.promise = data.promise;
-                organization_name = data.slug;
+                self.slug = data.slug;
 
                 // include id in anchor to allow url sharing
-                let newHash = 'report-' + organization_name;
+                let newHash = 'report-' + self.slug;
                 $('a#report-anchor').attr('name', newHash)
                 history.replaceState({}, '', '#' + newHash);
             });
@@ -494,12 +494,12 @@ function views() {
                 if (medium > 0) return "orange";
                 return "green";
             },
-            load: debounce(function (organization, weeks_back) {
+            load: debounce(function (organization_id, weeks_back) {
 
                 if (!weeks_back)
                     weeks_back = 0;
 
-                $.getJSON('/data/report/' + organization + '/' + weeks_back, function (data) {
+                $.getJSON('/data/report/' + organization_id + '/' + weeks_back, function (data) {
                     vueDomainlist.urls = data.calculation["organization"]["urls"];
                 });
             }, 42)
@@ -815,7 +815,8 @@ function views() {
                     let organizations = vueMap.features.map(function (feature) {
                         return {
                             "id": feature.properties.organization_id,
-                            "name": feature.properties.organization_name
+                            "name": feature.properties.organization_name,
+                            "slug": feature.properties.organization_slug
                         }
                     });
                     return organizations.sort(function (a, b) {
