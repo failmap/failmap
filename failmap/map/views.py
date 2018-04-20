@@ -14,6 +14,7 @@ from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.text import slugify
+from django.utils import timezone
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
@@ -23,6 +24,7 @@ from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
 from ..app.common import JSEncoder
+from ..map.models import Configuration
 from .calculate import get_calculation
 
 log = logging.getLogger(__package__)
@@ -67,14 +69,79 @@ def get_country(code: str):
     return code
 
 
+def get_default_country():
+    # todo: from constance, no, from config table
+    return 'NL'
+
+
+def get_default_category():
+    # from config table
+    return 'municipality'
+
+
+# note: this is only visual, this is no security mechanism(!) Don't act like it is.
+# the data in this system is as open as possible.
+def get_countries(request,):
+    # sqllite doens't do distinct on, workaround
+
+    confs = Configuration.objects.all().filter(
+        is_displayed=True).order_by('display_order').values_list('country', flat=True)
+
+    list = []
+    for conf in confs:
+        if conf not in list:
+            list.append(conf)
+
+    return list
+
+
 def get_categories(request, country: str="NL"):
 
-    # todo: organization exists, over time, ratings exist... etc...
-    categories = Organization.objects.all().filter(
-        country=get_country(country)).order_by().values_list('type', flat=True).distinct()
+    categories = Configuration.objects.all().filter(
+        country=get_country(country)).order_by('display_order').values_list('organization_type__name', flat=True)
 
-    types = list(OrganizationType.objects.all().filter(pk__in=categories).order_by().values_list('name', flat=True))
-    return JsonResponse(types, safe=False, encoder=JSEncoder)
+    return JsonResponse(categories, safe=False, encoder=JSEncoder)
+
+
+@cache_page(one_day)
+def export_url_dataset(request, country: str="NL", organization_type="municipality",):
+    """
+    Exports all alive urls in the current database and offers this as a download.
+
+    :param request:
+    :return:
+    """
+
+    datas = Url.objects.all().filter(
+        is_dead=False,
+        not_resolvable=False,
+        organization__is_dead=False,
+        organization__country=get_country(country),
+        organization__type=get_organization_type(organization_type)
+    ).values(
+        'organization__name', 'url'
+    )
+
+    # make the export nicer
+    nice_data = []
+    for data in datas:
+        nice_data.append({'organization': data['organization__name'], 'url': data['url']})
+
+    export = {'date': timezone.datetime.now().date(),
+              'source': 'failmap NL',
+              'country': get_country(country),
+              'organization_type': get_organization_type(organization_type),
+              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
+                              ' - have fun and enjoy! ',
+              'license': 'MIT',
+              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
+              'data': nice_data
+              }
+
+    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
+    # response['Content-Disposition'] =
+    # 'attachment; filename="failmap_url_export_%s.json"' % timezone.datetime.now().date
+    return response
 
 
 @cache_page(one_hour)

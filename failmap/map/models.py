@@ -154,7 +154,7 @@ class Configuration(models.Model):
         default=False
     )
 
-    is_displayed_as_default = models.BooleanField(
+    is_the_default_option = models.BooleanField(
         help_text="Determines if this is the default view. Only one can be selected to be displayed first. If there "
                   "are multiple, the first one is used. This can lead to unexpected results.",
         default=False

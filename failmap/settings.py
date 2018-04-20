@@ -586,20 +586,24 @@ IMPORT_EXPORT_USE_TRANSACTIONS = True
 # https://django-constance.readthedocs.io/en/latest/
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    'yes_no_null_select': ['django.forms.fields.ChoiceField', {
+        'widget': 'django.forms.Select',
+        'choices': ((None, "-----"), ("1", "Yes"), ("0", "No"))
+    }],
+}
+
 CONSTANCE_CONFIG = {
-    'MAILTO': ('info@faalkaart.nl', 'General email address.'),
+    'MAILTO': ('info@faalkaart.nl', 'General email address.', str),
+    'DEFAULT_COUNTRY': ('NL', 'ISO 3166-1 alpha-2 country code. Eg: NL, DE, FR, IT, DK, IS, AT...', str)
 }
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
+    'Map': ('DEFAULT_COUNTRY', ),
 }
-
-# todo: fit in constance
-FAILMAP_DEFAULT_COUNTRY = "NL"
-
-# todo: constance doesn't do lists... now what?
-FAILMAP_COUNTRIES_PUBLISHED = ["NL", ]
 
 # https://docs.djangoproject.com/en/1.11/ref/settings/#data-upload-max-number-fields
 # The default is far too low with various inlines (even on the test dataset).
