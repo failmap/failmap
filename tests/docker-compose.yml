@@ -14,7 +14,9 @@ services:
 
   # stateful storage
   database:
-    image: mysql
+    # latest mysql (8.x) causes errors, pin until these can be investigated
+    # error: "Authentication plugin 'caching_sha2_password' cannot be loaded
+    image: mysql:5
     stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     logging: {driver: none}
     environment:
