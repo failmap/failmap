@@ -50,6 +50,8 @@ urlpatterns = [
     url(r'^data/wanted/', wanted_urls, name='wanted urls'),
     url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
         organization_report, name='organization report'),
+    url(r'^data/report/(?P<organization_name>[a-z-]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
+        organization_report, name='organization report'),
 
     url(r'^data/updates_on_organization/(?P<organization_id>[0-9]{1,6})$', updates_on_organization, name='asdf'),
     url(r'^data/updates_on_organization_feed/(?P<organization_id>[0-9]{1,6})$', UpdatesOnOrganizationFeed()),

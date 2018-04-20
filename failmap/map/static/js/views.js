@@ -188,9 +188,10 @@ var report_mixin = {
                 self.name = data.name;
                 self.twitter_handle = data.twitter_handle;
                 self.promise = data.promise;
+                organization_name = data.slug;
 
                 // include id in anchor to allow url sharing
-                let newHash = 'report-' + organization_id;
+                let newHash = 'report-' + organization_name;
                 $('a#report-anchor').attr('name', newHash)
                 history.replaceState({}, '', '#' + newHash);
             });

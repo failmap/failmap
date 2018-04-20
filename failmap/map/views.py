@@ -13,6 +13,7 @@ from django.db import connection
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
@@ -176,10 +177,9 @@ def organizationtype_exists(request, organization_type_name):
 
 
 @cache_page(ten_minutes)
-def organization_report(request, organization_id, weeks_back=0):
-
+def organization_report(request, organization_id=None, organization_name=None, weeks_back=0):
     # urls with /data/report// (two slashes)
-    if not organization_id:
+    if not organization_id and not organization_name:
         return JsonResponse({}, safe=False, encoder=JSEncoder)
 
     if not weeks_back:
@@ -189,7 +189,11 @@ def organization_report(request, organization_id, weeks_back=0):
 
     # getting the latest report.
     try:
-        ratings = Organization.objects.filter(pk=organization_id, organizationrating__when__lte=when)
+        if organization_id:
+            organization = Organization.objects.filter(pk=organization_id)
+        elif organization_name:
+            organization = Organization.objects.filter(name__iexact=organization_name)
+        ratings = organization.filter(organizationrating__when__lte=when)
         values = ratings.values('organizationrating__rating',
                                 'organizationrating__calculation',
                                 'organizationrating__when',
@@ -210,6 +214,7 @@ def organization_report(request, organization_id, weeks_back=0):
 
         report = {
             "name": values['name'],
+            "slug": slugify(values['name']),
             "id": values['pk'],
             "twitter_handle": values['twitter_handle'],
             "rating": values['organizationrating__rating'],
@@ -819,7 +824,7 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
-        """ % {"when": when - timedelta(days=(weeks_duration*7)),
+        """ % {"when": when - timedelta(days=(weeks_duration * 7)),
                "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
@@ -879,7 +884,7 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
 
         changes[scan_type] = {
             'old':
-                {'date': datetime.now(pytz.utc) - timedelta(days=(weeks_duration*7)),
+                {'date': datetime.now(pytz.utc) - timedelta(days=(weeks_duration * 7)),
                  'high': old_measurement[scan_type].get('high', 0),
                  'medium': old_measurement[scan_type].get('medium', 0),
                  'low': old_measurement[scan_type].get('low', 0),
@@ -976,7 +981,7 @@ def ticker(request, country: str="NL", organization_type: str="municipality",
            INNER JOIN organization ON map_organizationrating.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
-        """ % {"when": when - timedelta(days=(weeks_duration*7)),
+        """ % {"when": when - timedelta(days=(weeks_duration * 7)),
                "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
