@@ -4,7 +4,8 @@ from django.conf import settings
 from django.conf.urls import url
 from django.views.i18n import JavaScriptCatalog
 
-from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, export_url_dataset,
+from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, export_urls_only, export_full_dataset,
+export_urls_and_organizations,
                                get_categories, get_countries, get_default_category,
                                get_default_country, improvements, index, latest_scans,
                                manifest_json, map_data, organization_report,
@@ -41,10 +42,14 @@ urlpatterns = [
     url(r'^data/vulnstats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         vulnerability_graphs, name='vulnstats'),
 
-
     url(r'^export/url/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
-        export_url_dataset, name='url export'),
+        export_urls_only, name='url export'),
 
+    url(r'^export/organizations/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
+        export_urls_and_organizations, name='url export'),
+
+    url(r'^export/full/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
+        export_full_dataset, name='url export'),
 
     url(r'^data/topfail/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
         top_fail, name='top fail'),

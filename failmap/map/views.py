@@ -26,6 +26,8 @@ from .. import __version__
 from ..app.common import JSEncoder
 from ..map.models import Configuration
 from .calculate import get_calculation
+from django.core.serializers import serialize
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 
@@ -125,7 +127,50 @@ def get_categories(request, country: str="NL"):
 
 
 @cache_page(one_day)
-def export_url_dataset(request, country: str="NL", organization_type="municipality",):
+def export_urls_only(request, country: str="NL", organization_type="municipality",):
+    """
+    Retrieves a machine parseable list of urls, for other research purposes, transparency and such.
+
+    Most users still should want to use the url_dataset, that contains more information about the organization.
+
+    :param request:
+    :return:
+    """
+
+    datas = Url.objects.all().filter(
+        is_dead=False,
+        not_resolvable=False,
+        organization__is_dead=False,
+        organization__country=get_country(country),
+        organization__type=get_organization_type(organization_type)
+    ).values(
+        'organization__name', 'url'
+    )
+
+    # make the export nicer
+    nice_data = []
+    for data in datas:
+        nice_data.append(data['url'])
+
+    export = {'date': timezone.datetime.now().date(),
+              'source': 'failmap NL',  # todo based on config...
+              'country': get_country(country),
+              'organization_type': get_organization_type(organization_type),
+              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
+                              ' - have fun and enjoy! ',
+              'license': 'MIT',
+              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
+              'data': nice_data
+              }
+
+    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
+    # response['Content-Disposition'] =
+    # 'attachment; filename="failmap_url_export_%s.json"' % timezone.datetime.now().date
+    return response
+
+
+@cache_page(one_day)
+def export_urls_and_organizations(request, country: str="NL", organization_type="municipality",):
     """
     Exports all alive urls in the current database and offers this as a download.
 
@@ -162,6 +207,65 @@ def export_url_dataset(request, country: str="NL", organization_type="municipali
     response = JsonResponse(export, safe=False, encoder=JSEncoder, )
     # response['Content-Disposition'] =
     # 'attachment; filename="failmap_url_export_%s.json"' % timezone.datetime.now().date
+    return response
+
+
+@cache_page(one_day)
+def export_full_dataset(request, country: str="NL", organization_type="municipality",):
+    """
+    This dataset can be imported in another instance blindly. This helps getting a start-dataset to scan from.
+    There is no merge-compatible dataset. We don't know how a re-import behaves. It will probably make a lot of
+    duplicates.
+
+    Todo: what is the current behaviour when importing this? And what happens if we do two times?
+
+    :return:
+    """
+
+    from django.core import serializers
+
+    objects = []
+
+    ots = list(OrganizationType.objects.all().values('name'))
+
+    organizations = list(Organization.objects.all().filter(
+        country=get_country(country),
+        type=get_organization_type(organization_type),
+        is_dead=False
+    ).values('id', 'name'))
+
+    objects += organizations
+
+    coordinates = list(Coordinate.objects.all().filter(
+        organization__in=Organization.objects.all().filter(
+            country=get_country(country),
+            type=get_organization_type(organization_type)),
+        is_dead=False
+    ).values('id', 'organization', 'geojsontype', 'area'))
+
+    urls = list(Url.objects.all().filter(
+        organization__in=Organization.objects.all().filter(
+            country=get_country(country),
+            type=get_organization_type(organization_type)),
+        is_dead=False,
+        not_resolvable=False
+    ).values('id', 'url', 'organization'))
+
+    export = {'date': timezone.datetime.now().date(),
+              'source': 'failmap NL',
+              'country': get_country(country),
+              'organization_type': get_organization_type(organization_type),
+              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
+                              ' - have fun and enjoy! ',
+              'license': 'MIT',
+              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
+              'data': {'organization_type': ots,
+                       'organizations': organizations,
+                       'coordinates': coordinates,
+                       'urls': urls}
+              }
+
+    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
     return response
 
 
