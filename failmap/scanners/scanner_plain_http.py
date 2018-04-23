@@ -49,7 +49,8 @@ def compose_task(
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
     if not urls:
-        raise Exception('Applied filters resulted in no tasks!')
+        log.warning('Applied filters resulted in no urls, thus no tasks!')
+        return group()
 
     log.info('Creating scan task %s urls for %s organizations.', len(urls), len(organizations))
 
@@ -64,8 +65,7 @@ def compose_task(
 # distributed. For examples see scan_dummy.py
 
 # http://185.3.211.120:80: Host: demo3.data.amsterdam.nl Status: 301
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task
+@app.task(queue='scanners')
 def scan_url(url: Url):
     """
 

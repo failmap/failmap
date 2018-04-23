@@ -75,7 +75,8 @@ def compose_task(
         urls += Url.objects.filter(**urls_filter)
 
     if not urls:
-        raise Exception('Applied filters resulted in no tasks!')
+        log.warning('Applied filters resulted in no urls, thus no tasks!')
+        return group()
 
     # only unique urls
     urls = list(set(urls))

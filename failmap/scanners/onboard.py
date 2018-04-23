@@ -1,6 +1,6 @@
 import logging
 
-from celery import chain, group
+from celery import group
 from django.utils import timezone
 
 from failmap.organizations.models import Url
@@ -29,7 +29,6 @@ def compose_task(
 
     tasks = []
     for url in urls:
-        scan = scan_tasks.si(url)
         crawl = compose_crawl_tasks(url)
         explore = compose_explore_tasks(url)
         # We made a mistake in the chain: the scanner tasks can only run IF there are endpoints.
@@ -40,17 +39,36 @@ def compose_task(
         # self Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
         # https://stackoverflow.com/questions/47457546/
+
+        task_str = str(explore)
+        task_str = task_str.replace("), group(", "), \n group(")
+        task_str = task_str.replace("|", "\n|")
+        print(task_str)
+
         if crawl:
-            tasks.append(chain(explore, crawl, finish_onboarding.si(url), scan))
+            tasks.append(explore | crawl | finish_onboarding.si(url) | scan_tasks.si(url))
         else:
-            tasks.append(chain(explore, finish_onboarding.si(url), scan))
+            # scan task may have no ednpoints, we're not going to give exceptions anymore...
+            tasks.append(explore | (dummy_task.si() | finish_onboarding_mutable.s(url) | scan_tasks.si(url)))
 
     task = group(tasks)
 
-    print("Tasks:")
-    print(task)
+    # Trying to make the output gibberish more readable.
+    task_str = str(tasks)
+    task_str = task_str.replace("), group(", "), \n group(")
+    task_str = task_str.replace("|", "\n|")
+    print(task_str)
+
+    # keeping a raw version
+    # print("Tasks:")
+    # print(task)
 
     return task
+
+
+@app.task(queue='storage')
+def dummy_task():
+    log.error("Nothing is going wrong here...")
 
 
 def compose_explore_tasks(url):
@@ -77,7 +95,7 @@ def compose_crawl_tasks(url):
     for crawler in crawlers:
         tasks.append(crawler(urls_filter={"url": url}))
 
-    return tasks
+    return group(tasks)
 
 
 @app.task(queue='storage')
@@ -95,11 +113,23 @@ def scan_tasks(url):
     for scanner in scanners:
         tasks.append(scanner(urls_filter={"url": url}))
 
+    log.info(tasks)
+
     group(tasks).apply_async()
 
 
 @app.task(queue='storage')
 def finish_onboarding(url):
+    log.info("Finishing onboarding of %s", url)
+    url.onboarded = True
+    url.onboarded_on = timezone.now()
+    url.save(update_fields=['onboarded_on', 'onboarded'])
+
+    return True
+
+
+@app.task(queue='storage')
+def finish_onboarding_mutable(result, url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
     url.onboarded_on = timezone.now()

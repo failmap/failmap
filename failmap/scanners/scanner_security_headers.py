@@ -57,8 +57,9 @@ def compose_task(
         is_dead=False, protocol__in=['http', 'https'])
 
     if not endpoints:
-        raise Exception('Security headers: Applied filters resulted in no tasks! organisations_filter %s, '
-                        'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
+        log.warning('Security headers: Applied filters resulted in no tasks! organisations_filter %s, '
+                    'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
+        return group()
 
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))

@@ -58,7 +58,8 @@ def compose_task(
         is_dead=False, protocol__in=['http', 'https'])
 
     if not endpoints:
-        raise Exception('Applied filters resulted in no tasks!')
+        log.warning('Applied filters resulted in no endpoints, thus no tasks!')
+        return group()
 
     log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))

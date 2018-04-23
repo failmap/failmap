@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        run_sequential_groups()
+        tasking()
         return
         # develop_determineratings()
         # test_can_connect_to_organization()
@@ -33,6 +33,12 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def tasking():
+    from celery import group, chain
+
+    group(chain(group(), group(), group())).apply_async()
 
 
 def run_sequential_groups():

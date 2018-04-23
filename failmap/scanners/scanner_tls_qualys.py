@@ -107,7 +107,8 @@ def compose_task(
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
     if not urls:
-        raise Exception('Applied filters resulted in no tasks!')
+        log.warning('Applied filters resulted in no urls, thus no tasks!')
+        return group()
 
     log.info('Creating scan task for %s urls for %s organizations.',
              len(urls), len(organizations))

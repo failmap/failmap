@@ -1200,6 +1200,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
 
     rows = cursor.fetchall()
 
+    # todo: http://www.gadzmo.com/python/using-pythons-dictcursor-in-mysql-to-return-a-dict-with-keys/
     # unfortunately numbered results are used.
     for i in rows:
 

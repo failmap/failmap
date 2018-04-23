@@ -75,8 +75,7 @@ def compose_task(
     urls = Url.objects.filter(organization__in=organizations, **urls_filter)
 
     if endpoints_filter:
-        raise ValueError("No filtering available for endpoints: this method discovers new "
-                         "endpoints based on Url or Organization.")
+        logger.warning("Endpoint filters are not implemented: filter has no effect.")
 
     logger.info('Creating scan task for %s urls for %s organizations.',
                 len(urls), len(organizations))
@@ -99,9 +98,8 @@ def compose_task(
     for port in STANDARD_HTTPS_PORTS:
         for url in urls:
             tasks.append(resolve_and_scan_tasks(protocol="https", url=url, port=port))
-    task = group(tasks)
 
-    return task
+    return group(tasks)
 
 
 def validate_port(port: int):
@@ -300,8 +298,8 @@ def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
                   revive_url_task.s(url),
                   ),
         ),
-        get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4),
-        get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6),
+        (get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4)),
+        (get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6)),
     )
     return task
 
@@ -405,8 +403,11 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     Todo: remove IP from endpoints. (change for version 1.1)
 
     """
+
+    # it might be that this is called without an IP, for example via celery code that doesn't know if an ipv4 or ipv6
+    # result actually returned something. In such cases, no IP, means no endpoint.
     if not ip:
-        raise ValueError("ip not supplied.")
+        return False
 
     if ":" in ip:
         uri = "%s://[%s]:%s" % (protocol, ip, port)
