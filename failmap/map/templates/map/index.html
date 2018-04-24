@@ -95,6 +95,7 @@
                 <li><a href="#charts">{% trans "Charts" %}</a></li>
                 <li><a href="#updates">{% trans "Updates" %}</a></li>
                 <li><a href="#report">{% trans "Report" %}</a></li>
+                <li><a href="#export">{% trans "Export" %}</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if debug %}
@@ -765,6 +766,44 @@
                     </div>
                 </div>
                 {% endverbatim %}
+            </div>
+        </div>
+    </div>
+
+    <div id="export">
+        <div class="page-header">
+            <a name="export" class="jumptonav"></a>
+            <h2>{% trans "Export" %}</h2>
+            {% trans "Export explanation" %}
+            <p></p>
+            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Category" %}</th>
+                            <th>{% trans "List of only urls" %}</th>
+                            <th>{% trans "Copy of organization_types" %}*</th>
+                            <th>{% trans "Copy of organizations" %}*</th>
+                            <th>{% trans "Copy of coordinates" %}*</th>
+                            <th>{% trans "Copy of urls" %}*</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="category in categories">
+                            <td>{% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</td>
+                            <td><a :href="create_link(category, 'urls_only')">{% trans "Download" %} ⬇️</a></td>
+                            <td><a :href="create_link(category, 'organization_types')">{% trans "Download" %} ⬇️</a></td>
+                            <td><a :href="create_link(category, 'organizations')">{% trans "Download" %} ⬇️</a></td>
+                            <td><a :href="create_link(category, 'coordinates')">{% trans "Download" %} ⬇️</a></td>
+                            <td><a :href="create_link(category, 'urls')">{% trans "Download" %} ⬇️</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br /><br />
+                <p>* = {% trans "export_failmap_compatible_explained" %}</p>
             </div>
         </div>
     </div>

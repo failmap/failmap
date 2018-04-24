@@ -46,7 +46,7 @@ def get_organization_type(name: str):
     except OrganizationType.DoesNotExist:
         default = Configuration.objects.all().filter(
             is_displayed=True, is_the_default_option=True
-        ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+        ).order_by('display_order').values_list('organization_type__id', flat=True).first()
 
         return default if default else 1
 
@@ -137,91 +137,7 @@ def get_categories(request, country: str="NL"):
     return JsonResponse(list(categories), safe=False, encoder=JSEncoder)
 
 
-@cache_page(one_day)
-def export_urls_only(request, country: str="NL", organization_type="municipality",):
-    """
-    Retrieves a machine parseable list of urls, for other research purposes, transparency and such.
-
-    Most users still should want to use the url_dataset, that contains more information about the organization.
-
-    :param request:
-    :return:
-    """
-
-    datas = Url.objects.all().filter(
-        is_dead=False,
-        not_resolvable=False,
-        organization__is_dead=False,
-        organization__country=get_country(country),
-        organization__type=get_organization_type(organization_type)
-    ).values(
-        'organization__name', 'url'
-    )
-
-    # make the export nicer
-    nice_data = []
-    for data in datas:
-        nice_data.append(data['url'])
-
-    export = {'date': timezone.datetime.now().date(),
-              'source': 'failmap NL',  # todo based on config...
-              'country': get_country(country),
-              'organization_type': get_organization_type(organization_type),
-              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
-                              ' - have fun and enjoy! ',
-              'license': 'MIT',
-              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
-              'data': nice_data
-              }
-
-    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
-    # response['Content-Disposition'] =
-    # 'attachment; filename="failmap_url_export_%s.json"' % timezone.datetime.now().date
-    return response
-
-
-@cache_page(one_day)
-def export_urls_and_organizations(request, country: str="NL", organization_type="municipality",):
-    """
-    Exports all alive urls in the current database and offers this as a download.
-
-    :param request:
-    :return:
-    """
-
-    datas = Url.objects.all().filter(
-        is_dead=False,
-        not_resolvable=False,
-        organization__is_dead=False,
-        organization__country=get_country(country),
-        organization__type=get_organization_type(organization_type)
-    ).values(
-        'organization__name', 'url'
-    )
-
-    # make the export nicer
-    nice_data = []
-    for data in datas:
-        nice_data.append({'organization': data['organization__name'], 'url': data['url']})
-
-    export = {'date': timezone.datetime.now().date(),
-              'source': 'failmap NL',
-              'country': get_country(country),
-              'organization_type': get_organization_type(organization_type),
-              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
-                              ' - have fun and enjoy! ',
-              'license': 'MIT',
-              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
-              'data': nice_data
-              }
-
-    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
-    # response['Content-Disposition'] =
-    # 'attachment; filename="failmap_url_export_%s.json"' % timezone.datetime.now().date
-    return response
-
-
-def generic_export(query, category):
+def generic_export(query, set, country: str="NL", organization_type="municipality"):
     """
     This dataset can be imported in another instance blindly using the admin interface.
 
@@ -233,9 +149,33 @@ def generic_export(query, category):
 
     :return:
     """
+
+    # prevent some filename manipulation trolling :)
+    country = get_country(country)
+    organization_type_name = OrganizationType.objects.filter(name=organization_type).values('name').first()
+
+    if not organization_type_name:
+        organization_type_name = 'municipality'
+    else:
+        organization_type_name = organization_type_name.get('name')
+
     response = JsonResponse(list(query), safe=False, encoder=JSEncoder, )
-    response['Content-Disposition'] = 'attachment; filename="%s_%s.json"' % (category, timezone.datetime.now().date)
+    response['Content-Disposition'] = 'attachment; filename="%s_%s_%s_%s.json"' % (
+        country, organization_type_name, set, timezone.datetime.now().date())
     return response
+
+
+@cache_page(one_day)
+def export_urls_only(request, country: str="NL", organization_type="municipality",):
+    query = Url.objects.all().filter(
+        is_dead=False,
+        not_resolvable=False,
+        organization__is_dead=False,
+        organization__country=get_country(country),
+        organization__type=get_organization_type(organization_type)
+    ).values_list('url', flat=True)
+
+    return generic_export(query, 'urls_only', country, organization_type)
 
 
 @cache_page(one_day)
@@ -246,28 +186,31 @@ def export_organizations(request, country: str="NL", organization_type="municipa
         is_dead=False
     ).values('id', 'name', 'type', 'wikidata', 'wikipedia', 'twitter_handle')
 
-    return generic_export(query, 'organiziations')
+    return generic_export(query, 'organizations', country, organization_type)
 
 
 @cache_page(one_day)
-def export_organization_types():
+def export_organization_types(request, country: str="NL", organization_type="municipality"):
     query = OrganizationType.objects.all().values('name')
-    return generic_export(query, 'organization_types')
+    return generic_export(query, 'organization_types', country, organization_type)
 
 
 @cache_page(one_day)
-def export_coordinates(country: str="NL", organization_type="municipality",):
+def export_coordinates(request, country: str="NL", organization_type="municipality",):
+    organizations = Organization.objects.all().filter(
+        country=get_country(country),
+        type=get_organization_type(organization_type))
+
     query = Coordinate.objects.all().filter(
-        organization__in=Organization.objects.all().filter(
-            country=get_country(country),
-            type=get_organization_type(organization_type)),
+        organization__in=list(organizations),
         is_dead=False
     ).values('id', 'organization', 'geojsontype', 'area')
-    return generic_export(query, 'organization_types')
+    return generic_export(query, 'coordinates', country, organization_type)
 
 
 @cache_page(one_day)
-def export_urls(country: str="NL", organization_type="municipality",):
+def export_urls(request, country: str="NL", organization_type="municipality"):
+    print(country)
     query = Url.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
@@ -275,7 +218,7 @@ def export_urls(country: str="NL", organization_type="municipality",):
         is_dead=False,
         not_resolvable=False
     ).values('id', 'url', 'organization')
-    return generic_export(query, 'organization_types')
+    return generic_export(query, 'urls', country, organization_type)
 
 
 @cache_page(one_hour)

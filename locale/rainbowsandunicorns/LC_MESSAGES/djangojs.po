@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-04 18:58+0000\n"
+"POT-Creation-Date: 2018-04-24 14:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -57,97 +57,131 @@ msgstr ""
 msgid ", in "
 msgstr ""
 
-#: static/admin/js/SelectFilter2.js:47
-#, javascript-format
-msgid "Available %s"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:53
-#, javascript-format
-msgid ""
-"This is the list of available %s. You may choose some by selecting them in "
-"the box below and then clicking the \"Choose\" arrow between the two boxes."
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:69
-#, javascript-format
-msgid "Type into this box to filter down the list of available %s."
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:74
-msgid "Filter"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:78
-msgid "Choose all"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:78
-#, javascript-format
-msgid "Click to choose all %s at once."
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:84
-msgid "Choose"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:86
-msgid "Remove"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:92
-#, javascript-format
-msgid "Chosen %s"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:98
-#, javascript-format
-msgid ""
-"This is the list of chosen %s. You may remove some by selecting them in the "
-"box below and then clicking the \"Remove\" arrow between the two boxes."
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:108
-msgid "Remove all"
-msgstr ""
-
-#: static/admin/js/SelectFilter2.js:108
-#, javascript-format
-msgid "Click to remove all chosen %s at once."
-msgstr ""
-
-#: static/admin/js/actions.js:48 static/admin/js/actions.min.js:48
+#: static/admin/js/actions.js:48 static/admin/js/actions.min.js:2
 msgid "%(sel)s of %(cnt)s selected"
 msgid_plural "%(sel)s of %(cnt)s selected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: static/admin/js/actions.js:117 static/admin/js/actions.min.js:117
+#: static/admin/js/actions.js:117 static/admin/js/actions.min.js:4
 msgid ""
 "You have unsaved changes on individual editable fields. If you run an "
 "action, your unsaved changes will be lost."
 msgstr ""
 
-#: static/admin/js/actions.js:129 static/admin/js/actions.min.js:129
+#: static/admin/js/actions.js:129 static/admin/js/actions.min.js:5
 msgid ""
 "You have selected an action, but you haven't saved your changes to "
 "individual fields yet. Please click OK to save. You'll need to re-run the "
 "action."
 msgstr ""
 
-#: static/admin/js/actions.js:131 static/admin/js/actions.min.js:131
+#: static/admin/js/actions.js:131 static/admin/js/actions.min.js:5
 msgid ""
 "You have selected an action, and you haven't made any changes on individual "
 "fields. You're probably looking for the Go button rather than the Save "
 "button."
 msgstr ""
 
+#: static/admin/js/calendar.js:12 static/js/graphs.js:29
+msgid "January"
+msgstr ""
+
+#: static/admin/js/calendar.js:13 static/js/graphs.js:29
+msgid "February"
+msgstr ""
+
+#: static/admin/js/calendar.js:14 static/js/graphs.js:29
+msgid "March"
+msgstr ""
+
+#: static/admin/js/calendar.js:15 static/js/graphs.js:30
+msgid "April"
+msgstr ""
+
+#: static/admin/js/calendar.js:16 static/js/graphs.js:30 static/js/graphs.js:34
+msgid "May"
+msgstr ""
+
+#: static/admin/js/calendar.js:17 static/js/graphs.js:30
+msgid "June"
+msgstr ""
+
+#: static/admin/js/calendar.js:18 static/js/graphs.js:31
+msgid "July"
+msgstr ""
+
+#: static/admin/js/calendar.js:19 static/js/graphs.js:31
+msgid "August"
+msgstr ""
+
+#: static/admin/js/calendar.js:20 static/js/graphs.js:31
+msgid "September"
+msgstr ""
+
+#: static/admin/js/calendar.js:21 static/js/graphs.js:32
+msgid "October"
+msgstr ""
+
+#: static/admin/js/calendar.js:22 static/js/graphs.js:32
+msgid "November"
+msgstr ""
+
+#: static/admin/js/calendar.js:23 static/js/graphs.js:32
+msgid "December"
+msgstr ""
+
+#: static/admin/js/calendar.js:26
+msgctxt "one letter Sunday"
+msgid "S"
+msgstr ""
+
+#: static/admin/js/calendar.js:27
+msgctxt "one letter Monday"
+msgid "M"
+msgstr ""
+
+#: static/admin/js/calendar.js:28
+msgctxt "one letter Tuesday"
+msgid "T"
+msgstr ""
+
+#: static/admin/js/calendar.js:29
+msgctxt "one letter Wednesday"
+msgid "W"
+msgstr ""
+
+#: static/admin/js/calendar.js:30
+msgctxt "one letter Thursday"
+msgid "T"
+msgstr ""
+
+#: static/admin/js/calendar.js:31
+msgctxt "one letter Friday"
+msgid "F"
+msgstr ""
+
+#: static/admin/js/calendar.js:32
+msgctxt "one letter Saturday"
+msgid "S"
+msgstr ""
+
+#: static/admin/js/collapse.js:10 static/admin/js/collapse.js:21
+#: static/admin/js/collapse.min.js:4
+msgid "Show"
+msgstr ""
+
+#: static/admin/js/collapse.js:18 static/admin/js/collapse.min.js:4
+msgid "Hide"
+msgstr ""
+
 #: static/grappelli/jquery/ui/jquery-ui.min.js:10
+#: static/jet/js/build/bundle.min.js:3
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js:71 static/js/views.js:436 static/js/views.js:441
-#: static/js/views.js:444
+#: static/js/failmap.js:71 static/js/views.js:505 static/js/views.js:510
+#: static/js/views.js:513
 msgid "View Full Screen"
 msgstr ""
 
@@ -201,54 +235,6 @@ msgstr ""
 
 #: static/js/failmap.js:216
 msgid "Unknown"
-msgstr ""
-
-#: static/js/graphs.js:29
-msgid "January"
-msgstr ""
-
-#: static/js/graphs.js:29
-msgid "February"
-msgstr ""
-
-#: static/js/graphs.js:29
-msgid "March"
-msgstr ""
-
-#: static/js/graphs.js:30
-msgid "April"
-msgstr ""
-
-#: static/js/graphs.js:30 static/js/graphs.js:34
-msgid "May"
-msgstr ""
-
-#: static/js/graphs.js:30
-msgid "June"
-msgstr ""
-
-#: static/js/graphs.js:31
-msgid "July"
-msgstr ""
-
-#: static/js/graphs.js:31
-msgid "August"
-msgstr ""
-
-#: static/js/graphs.js:31
-msgid "September"
-msgstr ""
-
-#: static/js/graphs.js:32
-msgid "October"
-msgstr ""
-
-#: static/js/graphs.js:32
-msgid "November"
-msgstr ""
-
-#: static/js/graphs.js:32
-msgid "December"
 msgstr ""
 
 #: static/js/graphs.js:33
@@ -489,59 +475,103 @@ msgstr ""
 msgid "category_menu_hacking"
 msgstr ""
 
+#: static/js/script.js:62
+msgid "category_menu_bundesland"
+msgstr ""
+
+#: static/js/script.js:63
+msgid "category_menu_regierungsbezirk"
+msgstr ""
+
+#: static/js/script.js:64
+msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
+msgstr ""
+
+#: static/js/script.js:65
+msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
+msgstr ""
+
+#: static/js/script.js:66
+msgid "category_menu_stadt_gemeinde"
+msgstr ""
+
+#: static/js/script.js:67
+msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgstr ""
+
+#: static/js/script.js:68
+msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgstr ""
+
+#: static/js/script.js:71
+msgid "country_NL"
+msgstr ""
+
+#: static/js/script.js:72
+msgid "country_DE"
+msgstr ""
+
+#: static/js/script.js:73
+msgid "country_SE"
+msgstr ""
+
+#: static/js/script.js:74
+msgid "country_AT"
+msgstr ""
+
 #: static/js/views.js:44
 msgid "week"
 msgstr ""
 
-#: static/js/views.js:114 static/js/views.js:117 static/js/views.js:120
-#: static/js/views.js:122 static/js/views.js:124
+#: static/js/views.js:127 static/js/views.js:130 static/js/views.js:133
+#: static/js/views.js:135 static/js/views.js:137
 msgid "Documentation"
 msgstr ""
 
-#: static/js/views.js:115 static/js/views.js:118
+#: static/js/views.js:128 static/js/views.js:131
 msgid "Second opinion"
 msgstr ""
 
-#: static/js/views.js:140
+#: static/js/views.js:153
 msgid "score perfect"
 msgstr ""
 
-#: static/js/views.js:142
+#: static/js/views.js:155
 msgid "score high"
 msgstr ""
 
-#: static/js/views.js:144
+#: static/js/views.js:157
 msgid "score medium"
 msgstr ""
 
-#: static/js/views.js:146
+#: static/js/views.js:159
 msgid "score low"
 msgstr ""
 
-#: static/js/views.js:272 static/js/views.js:277
+#: static/js/views.js:285 static/js/views.js:290
 msgid "top congratulations"
 msgstr ""
 
-#: static/js/views.js:273 static/js/views.js:278
+#: static/js/views.js:286 static/js/views.js:291
 msgid "top position"
 msgstr ""
 
-#: static/js/views.js:274
+#: static/js/views.js:287
 msgid "top fail on failmap"
 msgstr ""
 
-#: static/js/views.js:275 static/js/views.js:280
+#: static/js/views.js:288 static/js/views.js:293
 msgid "hastag fail"
 msgstr ""
 
-#: static/js/views.js:275 static/js/views.js:280
+#: static/js/views.js:288 static/js/views.js:293
 msgid "hastag failmap"
 msgstr ""
 
-#: static/js/views.js:279
+#: static/js/views.js:292
 msgid "top win on failmap"
 msgstr ""
 
-#: static/js/views.js:442
+#: static/js/views.js:511
 msgid "Exit Full Screen"
 msgstr ""

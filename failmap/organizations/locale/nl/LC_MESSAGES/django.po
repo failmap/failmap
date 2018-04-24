@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-04 18:58+0000\n"
+"POT-Creation-Date: 2018-04-24 14:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,34 +56,34 @@ msgstr "organisatie type"
 msgid "organization_types"
 msgstr "organisatie typen"
 
-#: failmap/organizations/models.py:93
+#: failmap/organizations/models.py:96
 msgid "organization"
 msgstr "organisatie"
 
-#: failmap/organizations/models.py:94
+#: failmap/organizations/models.py:97
 msgid "organizations"
 msgstr "organisaties"
 
-#: failmap/organizations/models.py:165
+#: failmap/organizations/models.py:170
 msgid "coordinate"
 msgstr "coordinaat"
 
-#: failmap/organizations/models.py:166
+#: failmap/organizations/models.py:171
 msgid "coordinates"
 msgstr "coordinaten"
 
-#: failmap/organizations/models.py:246
+#: failmap/organizations/models.py:251
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""
 
-#: failmap/organizations/models.py:249
+#: failmap/organizations/models.py:254
 msgid "Url already exists, existing url is alive and resolvable."
 msgstr "URL bestaat al, het bestaande URL is in leven en bereikbaar."
 
-#: failmap/organizations/models.py:342
+#: failmap/organizations/models.py:347
 msgid "promise"
 msgstr "belofte"
 
-#: failmap/organizations/models.py:343
+#: failmap/organizations/models.py:348
 msgid "promises"
 msgstr "beloften"

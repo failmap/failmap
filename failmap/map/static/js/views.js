@@ -47,14 +47,20 @@ Date.prototype.humanTimeStamp = function () {
 // todo: the week should also be in the state.
 // and this is where we slowly creep towards vuex.
 var state_mixin = {
-   data: {
+    data: {
         category: "",
         country: ""
     },
     // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
     // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
+
     methods: {
        set_state: function(country, category) {
+
+           // prevent loading when things didn't change.
+           if (country === this.country && category === this.category)
+               return;
+
            this.country = country;
            this.category = category;
            this.load();
@@ -403,6 +409,7 @@ function views() {
                 $.getJSON('/data/categories/' + this.country + '/', function (categories) {
                     // it's fine to clear the navbar if there are no categories for this country
                     self.categories = categories;
+                    vueExport.categories = categories;
 
                     // but then don't clear the current category, so it's easier to go back
                     if (categories.length) {
@@ -660,7 +667,18 @@ function views() {
         }
     });
 
-
+    window.vueExport = new Vue({
+        mixins: [translation_mixin, state_mixin],
+        el: '#export',
+        data: {
+            categories: Array
+        },
+        methods: {
+            create_link: function(category, linktype){
+                return '/data/export/' + linktype + '/' + this.country + '/' + category + '/';
+            }
+        }
+    });
 
 
     window.vueFullscreen = new Vue({
@@ -805,6 +823,7 @@ function views() {
                 vueLatestXXSSProtection.set_state(this.country, this.category);
                 vueGraphs.set_state(this.country, this.category);
                 vueImprovements.set_state(this.country, this.category);
+                vueExport.set_state(this.country, this.category);
             },
             // slowly moving the failmap into a vue.
             load: function (week) {
