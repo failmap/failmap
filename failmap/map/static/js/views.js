@@ -44,6 +44,24 @@ Date.prototype.humanTimeStamp = function () {
     return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
 };
 
+// todo: the week should also be in the state.
+// and this is where we slowly creep towards vuex.
+var state_mixin = {
+   data: {
+        category: "",
+        country: ""
+    },
+    // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
+    // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
+    methods: {
+       set_state: function(country, category) {
+           this.country = country;
+           this.category = category;
+           this.load();
+       }
+    }
+};
+
 var category_mixin = {
     data: {
         category: ""
@@ -225,6 +243,10 @@ var latest_mixin = {
     },
     methods: {
         load: function(){
+
+            if (!this.country || !this.category)
+                return;
+
             var self = this;
             $.getJSON( this.data_url + this.country + '/' + this.category + '/' + this.scan, function (data) {
                 self.scans = data.scans;
@@ -275,6 +297,13 @@ var top_mixin = {
             return new Date(date).humanTimeStamp()
         },
         load: function (weeknumber) {
+
+            if (!this.country || !this.category)
+                return;
+
+            if (weeknumber === undefined)
+                weeknumber = 0;
+
             var self = this;
             $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                 self.top = data;
@@ -336,7 +365,8 @@ function views() {
 
         data: {
             categories: [""],
-            selected: ""
+            selected: "",
+            country: ""
         },
 
         mounted: function() {
@@ -345,16 +375,40 @@ function views() {
 
         methods: {
             set_category: function (category_name) {
-                // all validation is done server side, all parameters are optional and have fallbacks.
-                vueMap.category = category_name;
                 this.selected = category_name;
+                vueMap.set_state(this.country, category_name);
             },
             default_category: function(){
                 var self = this;
-                $.getJSON('/data/default_category/', function (categories) {
+
+                // there is a difference between the initial load and later loads. On later loads you need to
+                // get the default for a country, when a country is clicked. But on the first load
+                // you need to select whatever the default is for that country.
+
+                if (!this.selected) {
+                    $.getJSON('/data/default_category/', function (categories) {
+                        // it's fine to clear the navbar if there are no categories for this country
+                        self.set_category(categories[0])
+                    });
+                } else {
+                    // should be handled by load_categories...
+                    $.getJSON('/data/default_category_for_country/' + this.country + '', function (categories) {
+                        // it's fine to clear the navbar if there are no categories for this country
+                        self.set_category(categories[0])
+                    });
+                }
+            },
+            load_categories: function() {
+                var self = this;
+                $.getJSON('/data/categories/' + this.country + '/', function (categories) {
                     // it's fine to clear the navbar if there are no categories for this country
-                    self.set_category(categories[0])
-                });
+                    self.categories = categories;
+
+                    // but then don't clear the current category, so it's easier to go back
+                    if (categories.length) {
+                        self.set_category(categories[0]);
+                    }
+                })
             }
         }
     });
@@ -373,53 +427,38 @@ function views() {
 
         mounted: function() {
             this.default_country();
-            this.load_countries();
         },
 
         methods: {
             set_country: function (country) {
-                // all validation is done server side, all parameters are optional and have fallbacks.
-                vueMap.country = country;
+                // todo: we need to find a way to set both country and category at the same time in vuemap: now it first
+                // tries to load some nonsense combination (or the wrong combination), which delays results.
+                vueCategoryNavbar.country = country;
+                vueCategoryNavbar.load_categories();
                 this.selected = country;
-
-                // update the cateogories bar for this country, todo: load a default category when a country
-                // is selected
-
-                this.load_categories()
             },
             // todo: should be implemented as watch.
-            load_categories: function() {
-                $.getJSON('/data/categories/' + this.selected + '/', function (categories) {
-                    // it's fine to clear the navbar if there are no categories for this country
-                    vueCategoryNavbar.categories = categories;
 
-                    // but then don't clear the current category, so it's easier to go back
-                    if (categories.length) {
-                        vueCategoryNavbar.set_category(categories[0])
-                    }
-
-                })
-            },
             load_countries: function() {
                 var self = this;
                 $.getJSON('/data/countries/', function (countries) {
                     // it's fine to clear the navbar if there are no categories for this country
                     self.countries = countries;
                 });
-                this.load_categories();
             },
             default_country: function(){
                 var self = this;
                 $.getJSON('/data/default_country/', function (countries) {
                     // it's fine to clear the navbar if there are no categories for this country
-                    self.set_country(countries[0])
+                    self.set_country(countries[0]);
                 });
+                this.load_countries();
             }
         }
     });
 
     window.vueGraphs = new Vue({
-        mixins: [category_mixin, country_mixin],
+        mixins: [state_mixin],
 
         // the mixin requires data to exist, otherwise massive warnings.
         data: {
@@ -435,8 +474,12 @@ function views() {
 
         methods: {
             load: function () {
+
+                if (!this.country || !this.category)
+                    return;
+
                 var self = this;
-                d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0/index.json", function (error, data) {
+                d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0", function (error, data) {
                     d3stats();
                     self.d3stats.stacked_area_chart("tls_qualys", error, data.tls_qualys);
                     self.d3stats.stacked_area_chart("plain_https", error, data.plain_https);
@@ -450,7 +493,7 @@ function views() {
     });
 
     window.vueStatistics = new Vue({
-        mixins: [category_mixin, country_mixin],
+        mixins: [state_mixin],
         el: '#statistics',
         mounted: function () {
             this.load(0)
@@ -500,6 +543,13 @@ function views() {
         },
         methods: {
             load: function (weeknumber) {
+
+                if (!this.country || !this.category)
+                    return;
+
+                if (weeknumber === undefined)
+                    weeknumber = 0;
+
                 var self = this;
                 $.getJSON('/data/stats/' + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                     self.data = data;
@@ -541,7 +591,7 @@ function views() {
     // ticker
     // todo: determine the scroll time dynamically, as it might be too fast / too slow depending on the data.
     window.vueTicker = new Vue({
-        mixins: [category_mixin, country_mixin],
+        mixins: [state_mixin],
         el: '#ticker',
         data: {
             tickertext: "",
@@ -633,55 +683,55 @@ function views() {
     window.vueTopfail = new Vue({
         el: '#topfail',
         data: {data_url: "/data/topfail/"},
-        mixins: [top_mixin, category_mixin, country_mixin]
+        mixins: [top_mixin, state_mixin]
     });
 
     window.vueTopwin = new Vue({
         el: '#topwin',
         data: {data_url: "/data/topwin/"},
-        mixins: [top_mixin, category_mixin, country_mixin]
+        mixins: [top_mixin, state_mixin]
     });
 
     window.vueTerribleurls = new Vue({
         el: '#terrible_urls',
         data: {data_url: "/data/terrible_urls/"},
-        mixins: [top_mixin, category_mixin, country_mixin]
+        mixins: [top_mixin, state_mixin]
     });
 
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_tls_qualys',
         data: {scan: "tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_plain_https',
         data: {scan: "plain_https"}
     });
 
     window.vueLatestHSTS = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_strict_transport_security',
         data: {scan: "Strict-Transport-Security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_frame_options',
         data: {scan: "X-Content-Type-Options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_content_type_options',
         data: {scan: "X-Frame-Options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
-        mixins: [latest_mixin, category_mixin, country_mixin],
+        mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_xss_protection',
         data: {scan: "X-XSS-Protection"}
     });
@@ -697,7 +747,7 @@ function views() {
     window.vueMap = new Vue({
         mounted: function () {
             // wait until the default category and default languages have been set...
-            this.load(this.category, this.week)
+            this.load(this.week)
         },
         mixins: [category_mixin, country_mixin],
 
@@ -707,7 +757,7 @@ function views() {
             loading: false,
             week: 0,
             selected_organization: -1,
-            features: null,
+            features: null
         },
         computed: {
             visibleweek: function () {
@@ -718,65 +768,53 @@ function views() {
         },
         watch: {
             category: function (newCategory, oldCategory) {
-
                 if (newCategory === oldCategory)
                     return;
 
                 // refresh the views :)
                 vueMap.show_week();
-
-                // unfortunately(?) we can't set the mixin to trigger updates everywhere.
-                // ... subclass everything?
-                // do not load these things on page load, when only one of both is known
-                if (this.country && this.category) {
-                    vueTopfail.category = newCategory;
-                    vueTopwin.category = newCategory;
-                    vueTerribleurls.category = newCategory;
-                    vueStatistics.category = newCategory;
-                    vueLatestPlainHttps.category = newCategory;
-                    vueLatestTlsQualys.category = newCategory;
-                    vueLatestXContentTypeOptions.category = newCategory;
-                    vueLatestHSTS.category = newCategory;
-                    vueLatestXFrameOptions.category = newCategory;
-                    vueLatestXXSSProtection.category = newCategory;
-                    vueGraphs.category = newCategory;
-                    vueImprovements.category = newCategory;
-                }
             },
             country: function (newCountry, oldCountry) {
-
                 if (newCountry === oldCountry)
                     return;
 
                 // retoggle map focus in an ugly way,
                 // it was never meant to work with multiple countries, so cutting corners here...
-                failmap.geojson.clearLayers();
-                failmap.geojson = null;
+                // this will go wrong when we group points / use other layers.
+                // this will crash the first time...
 
-                // do not load these things on page load, when only one of both is known
-                if (this.country && this.category) {
-                    vueTopfail.country = newCountry;
-                    vueTopwin.country = newCountry;
-                    vueTerribleurls.country = newCountry;
-                    vueStatistics.country = newCountry;
-                    vueLatestPlainHttps.country = newCountry;
-                    vueLatestTlsQualys.country = newCountry;
-                    vueLatestXContentTypeOptions.country = newCountry;
-                    vueLatestHSTS.country = newCountry;
-                    vueLatestXFrameOptions.country = newCountry;
-                    vueLatestXXSSProtection.country = newCountry;
-                    vueGraphs.country = newCountry;
-                    vueImprovements.country = newCountry;
-                }
+                if (failmap !== undefined)
+                    failmap.geojson.clearLayers();
+                    failmap.geojson = null;
             }
         },
         methods: {
+            set_state: function(country, category){
+                this.category = category;
+                this.country = country;
+
+                vueTopfail.set_state(this.country, this.category);
+                vueTopwin.set_state(this.country, this.category);
+                vueTerribleurls.set_state(this.country, this.category);
+                vueStatistics.set_state(this.country, this.category);
+                vueLatestPlainHttps.set_state(this.country, this.category);
+                vueLatestTlsQualys.set_state(this.country, this.category);
+                vueLatestXContentTypeOptions.set_state(this.country, this.category);
+                vueLatestHSTS.set_state(this.country, this.category);
+                vueLatestXFrameOptions.set_state(this.country, this.category);
+                vueLatestXXSSProtection.set_state(this.country, this.category);
+                vueGraphs.set_state(this.country, this.category);
+                vueImprovements.set_state(this.country, this.category);
+            },
             // slowly moving the failmap into a vue.
             load: function (week) {
 
                 if (!this.country || !this.category) {
                     return
                 }
+
+                if (week === undefined)
+                    week = 0;
 
                 var self = this;
                 self.loading = true;
@@ -914,7 +952,7 @@ function views() {
     * */
     window.vueImprovements = new Vue({
         el: '#issue_improvements',
-        mixins: [category_mixin, country_mixin],
+        mixins: [state_mixin],
 
         mounted: function () {
             this.load(0)
@@ -933,6 +971,9 @@ function views() {
 
         methods: {
             load: function (weeks_ago) {
+
+                if (!this.country || !this.category)
+                    return;
 
                 if (!weeks_ago) {
                     weeks_ago = 0;

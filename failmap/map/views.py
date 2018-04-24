@@ -98,6 +98,19 @@ def get_default_category(request, ):
     return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
 
 
+def get_default_category_for_country(request, country: str="NL"):
+
+    organization_type = Configuration.objects.all().filter(
+        is_displayed=True,
+        country=get_country(country)
+    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
+
+    if not organization_type:
+        return 'municipality'
+    # from config table
+    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
+
+
 # note: this is only visual, this is no security mechanism(!) Don't act like it is.
 # the data in this system is as open as possible.
 def get_countries(request,):
