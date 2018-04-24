@@ -36,7 +36,7 @@ admin_urls = [
     url(r'^nested_admin/', include('nested_admin.urls')),
 ]
 frontend_urls = [
-    url(r'^', include('failmap.map.urls')),
+    url('', include('failmap.map.urls')),
     url(r'^', include('failmap.game.urls')),
 ]
 interactive_urls = [

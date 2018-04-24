@@ -2,82 +2,52 @@
 import proxy.views
 from django.conf import settings
 from django.conf.urls import url
+from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 
-from failmap.map.views import (LatestScanFeed, UpdatesOnOrganizationFeed, export_urls_only, export_full_dataset,
-export_urls_and_organizations,
-                               get_categories, get_countries, get_default_category,
-                               get_default_country, improvements, index, latest_scans,
-                               manifest_json, map_data, organization_report,
-                               organizationtype_exists, robots_txt, security_txt, stats,
-                               terrible_urls, ticker, top_fail, top_win, updates_on_organization,
-                               vulnerability_graphs, wanted_urls)
+from . import views
+from .. import converters
+
+# todo: organization type converter doesn't work yet... using slug as an alternative.
+register_converter(converters.OrganizationTypeConverter, 'ot')
+register_converter(converters.WeeksConverter, 'w')
+register_converter(converters.CountryConverter, 'c')
+register_converter(converters.OrganizationIdConverter, 'oid')
 
 urlpatterns = [
-    url(r'^$', index, name='failmap'),
-    url(r'^security.txt$', security_txt),
-    url(r'^robots.txt$', robots_txt),
-    url(r'^manifest.json$', manifest_json),
-    url(r'^data/organizationtype_exists/(?P<organization_type_name>[a-z_\-]{0,50})',
-        organizationtype_exists, name='set category'),
+    path('', views.index),
+    path('security.txt', views.security_txt),
+    path('robots.txt', views.robots_txt),
+    path('manifest.json', views.manifest_json),
 
-    url(r'^data/map/(?P<country>[A-Z]{2})/(?P<organization_type>[0-9A-Za-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        map_data, name='map data'),
+    path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
+    path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>', views.map_data),
+    path('data/stats/<c:country>/<slug:organization_type_name>/<w:weeks_back>', views.stats),
+    path('data/countries/', views.get_countries),
+    path('data/default_country/', views.get_default_country),
+    path('data/default_category/', views.get_default_category),
+    path('data/categories/<c:country>/', views.get_categories),
+    path('data/vulnstats/<c:country>/<slug:organization_type_name>/<w:weeks_back>', views.vulnerability_graphs),
+    path('data/topfail/<c:country>/<slug:organization_type_name>/<w:weeks_back>', views.top_fail),
+    path('data/topwin/<c:country>/<slug:organization_type_name>/<w:weeks_back>', views.top_win),
 
-    url(r'^data/stats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        stats, name='stats'),
+    path('data/latest_scans/<c:country>/<slug:organization_type_name>/<slug:scan_type>', views.latest_scans),
+    path('data/feed/<slug:scan_type>', views.LatestScanFeed()),
+    path('data/terrible_urls/<c:country>/<slug:organization_type_name>/<w:weeks_back>', views.terrible_urls,),
+    path('data/improvements/<c:country>/<slug:organization_type_name>/<w:weeks_back>/<w:weeks_duration>',
+         views.improvements),
+    path('data/ticker/<c:country>/<slug:organization_type_name>/<w:weeks_back>/<w:weeks_duration>', views.ticker),
+    path('data/wanted/', views.wanted_urls),
+    path('data/report/<oid:organization_id>/<w:weeks_back>', views.organization_report),
+    path('data/report/<slug:organization_name>/<w:weeks_back>', views.organization_report),
+    path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
+    path('data/updates_on_organization_feed/<oid:organization_id>', views.UpdatesOnOrganizationFeed()),
 
-    url(r'^data/countries/',
-        get_countries, name='get_countries'),
+    path('export/url/<c:country>/<slug:organization_type_name>/', views.export_urls_only),
+    path('export/organizations/<c:country>/<slug:organization_type_name>/', views.export_organizations),
 
-    url(r'^data/default_country/',
-        get_default_country, name='default_country'),
-
-    url(r'^data/default_category/',
-        get_default_category, name='default_category'),
-
-    url(r'^data/categories/(?P<country>[A-Z]{2})/',
-        get_categories, name='get_categories'),
-
-    url(r'^data/vulnstats/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        vulnerability_graphs, name='vulnstats'),
-
-    url(r'^export/url/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
-        export_urls_only, name='url export'),
-
-    url(r'^export/organizations/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
-        export_urls_and_organizations, name='url export'),
-
-    url(r'^export/full/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/',
-        export_full_dataset, name='url export'),
-
-    url(r'^data/topfail/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        top_fail, name='top fail'),
-    url(r'^data/topwin/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        top_win, name='top win'),
-    url(r'^data/latest_scans/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
-        r'(?P<scan_type>[a-zA-Z_-]{0,100})',
-        latest_scans, name='latest scans'),
-    url(r'^data/feed/(?P<scan_type>[a-zA-Z_-]{0,100})$', LatestScanFeed()),
-    # disabled until the url ratings are improved to reflect dead endpoints and such too(!)
-    url(r'^data/terrible_urls/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/(?P<weeks_back>[0-9]{0,2})',
-        terrible_urls, name='terrible urls'),
-    url(r'^data/improvements/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
-        r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',
-        improvements, name='improvements'),
-    url(r'^data/ticker/(?P<country>[A-Z]{2})/(?P<organization_type>[a-z_\-]{0,50})/'
-        r'(?P<weeks_back>[0-9]{0,2})/(?P<weeks_duration>[0-9]{0,2})',
-        ticker, name='ticker'),
-    url(r'^data/wanted/', wanted_urls, name='wanted urls'),
-    url(r'^data/report/(?P<organization_id>[0-9]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
-        organization_report, name='organization report'),
-    url(r'^data/report/(?P<organization_name>[a-z-]{0,200})/(?P<weeks_back>[0-9]{0,2})$',
-        organization_report, name='organization report'),
-
-    url(r'^data/updates_on_organization/(?P<organization_id>[0-9]{1,6})$', updates_on_organization, name='asdf'),
-    url(r'^data/updates_on_organization_feed/(?P<organization_id>[0-9]{1,6})$', UpdatesOnOrganizationFeed()),
-    # proxy maptile requests, in production this can be done by caching proxy, this makes sure
-    # it works for dev. as well.
+    # Proxy maptile requests,
+    # In production this can be done by caching proxy, this makes sure it works for dev. as well.
     url(r'^proxy/(?P<url>https://api.tiles.mapbox.com/v4/.*.png$)',
         proxy.views.proxy_view,
         {"requests_args": {"params": {"access_token": settings.MAPBOX_TOKEN}}}),

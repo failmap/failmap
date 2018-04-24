@@ -19,15 +19,13 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 
 from failmap.map.models import OrganizationRating, UrlRating
-from failmap.organizations.models import Organization, OrganizationType, Promise, Url
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
 from ..app.common import JSEncoder
 from ..map.models import Configuration
 from .calculate import get_calculation
-from django.core.serializers import serialize
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 
@@ -210,63 +208,61 @@ def export_urls_and_organizations(request, country: str="NL", organization_type=
     return response
 
 
-@cache_page(one_day)
-def export_full_dataset(request, country: str="NL", organization_type="municipality",):
+def generic_export(query, category):
     """
-    This dataset can be imported in another instance blindly. This helps getting a start-dataset to scan from.
-    There is no merge-compatible dataset. We don't know how a re-import behaves. It will probably make a lot of
-    duplicates.
+    This dataset can be imported in another instance blindly using the admin interface.
 
-    Todo: what is the current behaviour when importing this? And what happens if we do two times?
+    It does not export dead organizations, to save waste.
+
+    A re-import, or existing data, will be duplicated. There is no matching algorithm yet. The first intention
+    was to get you started getting an existing dataset from a certain country, and making it easy to get "up to
+    speed" with another instance of this software.
 
     :return:
     """
+    response = JsonResponse(list(query), safe=False, encoder=JSEncoder, )
+    response['Content-Disposition'] = 'attachment; filename="%s_%s.json"' % (category, timezone.datetime.now().date)
+    return response
 
-    from django.core import serializers
 
-    objects = []
-
-    ots = list(OrganizationType.objects.all().values('name'))
-
-    organizations = list(Organization.objects.all().filter(
+@cache_page(one_day)
+def export_organizations(request, country: str="NL", organization_type="municipality",):
+    query = Organization.objects.all().filter(
         country=get_country(country),
         type=get_organization_type(organization_type),
         is_dead=False
-    ).values('id', 'name'))
+    ).values('id', 'name', 'type', 'wikidata', 'wikipedia', 'twitter_handle')
 
-    objects += organizations
+    return generic_export(query, 'organiziations')
 
-    coordinates = list(Coordinate.objects.all().filter(
+
+@cache_page(one_day)
+def export_organization_types():
+    query = OrganizationType.objects.all().values('name')
+    return generic_export(query, 'organization_types')
+
+
+@cache_page(one_day)
+def export_coordinates(country: str="NL", organization_type="municipality",):
+    query = Coordinate.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
             type=get_organization_type(organization_type)),
         is_dead=False
-    ).values('id', 'organization', 'geojsontype', 'area'))
+    ).values('id', 'organization', 'geojsontype', 'area')
+    return generic_export(query, 'organization_types')
 
-    urls = list(Url.objects.all().filter(
+
+@cache_page(one_day)
+def export_urls(country: str="NL", organization_type="municipality",):
+    query = Url.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
             type=get_organization_type(organization_type)),
         is_dead=False,
         not_resolvable=False
-    ).values('id', 'url', 'organization'))
-
-    export = {'date': timezone.datetime.now().date(),
-              'source': 'failmap NL',
-              'country': get_country(country),
-              'organization_type': get_organization_type(organization_type),
-              'usage policy': 'Attribute Internet Cleanup Foundation when using this data: internetcleanup.foundation'
-                              ' - have fun and enjoy! ',
-              'license': 'MIT',
-              'copyright': '(C)%s Internet Cleanup Foundation' % timezone.datetime.now().year,
-              'data': {'organization_type': ots,
-                       'organizations': organizations,
-                       'coordinates': coordinates,
-                       'urls': urls}
-              }
-
-    response = JsonResponse(export, safe=False, encoder=JSEncoder, )
-    return response
+    ).values('id', 'url', 'organization')
+    return generic_export(query, 'organization_types')
 
 
 @cache_page(one_hour)
