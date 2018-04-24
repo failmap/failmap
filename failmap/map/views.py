@@ -13,8 +13,8 @@ from django.db import connection
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.utils.text import slugify
 from django.utils import timezone
+from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 

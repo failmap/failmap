@@ -2,7 +2,6 @@
 
 import json
 
-import pytest
 from django.core.management import call_command
 
 SECURITY_HEADERS = {
@@ -36,8 +35,8 @@ def test_security_headers_all(responses, db, faalonië):
 def test_security_headers_notfound(responses, db, faalonië):
     """Test invalid organization."""
 
-    with pytest.raises(Exception):
-        call_command('scan_security_headers', '-v3', '-o', NON_EXISTING_ORGANIZATION)
+    # should work fine, it will start a scan on nothing, so it's done quickly :)
+    call_command('scan_security_headers', '-v3', '-o', NON_EXISTING_ORGANIZATION)
 
 
 # todo: could do a redirect test
