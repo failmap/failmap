@@ -365,7 +365,7 @@ function views() {
     // You can try with:
     // vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"]
     window.vueCategoryNavbar = new Vue({
-        mixins: [translation_mixin],
+        mixins: [translation_mixin, state_mixin],
 
         el: '#categorynavbar',
 
@@ -676,6 +676,10 @@ function views() {
         methods: {
             create_link: function(category, linktype){
                 return '/data/export/' + linktype + '/' + this.country + '/' + category + '/';
+            },
+            load: function(){
+                // doesn't have a load method, but is auto called via the state_mixin.
+                // values are set via another vue, which is not very nice, but it works...
             }
         }
     });
