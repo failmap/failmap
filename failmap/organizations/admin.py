@@ -420,7 +420,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             return
 
         str = format_html("%s <a href='/admin/scanners/endpoint/?q=%s' target='_blank'>🔍</a>" %
-                           (obj.endpoint_set.count(), obj.url))
+                          (obj.endpoint_set.count(), obj.url))
 
         for endpoint in obj.endpoint_set.all():
 

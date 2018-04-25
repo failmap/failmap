@@ -16,6 +16,7 @@ from datetime import timedelta
 
 import raven
 import raven.contrib.celery
+from django.utils.translation import gettext_lazy as _
 from pkg_resources import get_distribution
 
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
@@ -93,12 +94,12 @@ INSTALLED_APPS = [
     'constance.backends.database',
     'leaflet',
     'djgeojson',
-    'crispy_forms', # for the game
+    'crispy_forms',  # for the game
 
     # django helpdesk requirements:
     'django.contrib.sites',  # Required for determining domain url for use in emails
     'markdown_deux',  # Required for Knowledgebase item formatting
-    'bootstrapform', # Required for nicer formatting of forms with the default templates
+    'bootstrapform',  # Required for nicer formatting of forms with the default templates
     'helpdesk',  # This is us!
 
 
@@ -673,7 +674,6 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file
 # begin django jet menu configuration
 # This helps making various resources and fewer used features less visible.
 
-from django.utils.translation import gettext_lazy as _
 
 # todo: add permissions: 'permissions': ['core.user']
 
