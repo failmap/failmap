@@ -97,3 +97,13 @@ geocoder
 # django-map-widgets  # uses gdal, not in alpine, cannot be fixed quickly so not using this.
 
 django-admin-sortable2  # nice sorting in the admin
+
+# Helpdesk requirements
+# Runs django-helpdesk, https://github.com/django-helpdesk
+django-helpdesk  # more complete ticketing, might help a lot with interaction.
+django-bootstrap-form>=3.3,<4
+email-reply-parser
+django-markdown-deux
+beautifulsoup4
+lxml
+six
