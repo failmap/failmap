@@ -6,7 +6,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from ..app.models import Job
-from ..celery import PRIO_HIGH
+from ..celery import PRIO_HIGH, app
 from .geojson import import_from_scratch, update_coordinates
 from .models import AdministrativeRegion, Configuration, OrganizationRating, UrlRating
 
@@ -56,7 +56,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(import_from_scratch.s([region.country], [region.organization_type]))
+            tasks.append(import_from_scratch.s([region.country], [region.organization_type])
+                         | add_configuration.si(region.country, region.organization_type))
 
         task_name = "%s (%s) " % ("Import region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -84,6 +85,18 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
     update_coordinates.short_description = '🛂  Update region'
     actions.append(update_coordinates)
+
+
+@app.task(queue='storage')
+def add_configuration(country, organization_type):
+    a = Configuration(
+        country=country,
+        organization_type=organization_type,
+        is_the_default_option=False,
+        is_displayed=False,
+        is_scanned=False
+    )
+    a.save()
 
 
 class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
