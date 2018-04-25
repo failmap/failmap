@@ -253,7 +253,7 @@ class ActionMixin:
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name_details', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
-    list_filter = ('name', 'type__name', 'country')  # todo: type is now listed as name, confusing
+    list_filter = ('type__name', 'country', 'created_on', 'is_dead', 'is_dead_since')
 
     fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
               'is_dead', 'is_dead_since', 'is_dead_reason')
@@ -385,8 +385,9 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
     form = MyUrlAdminForm
 
-    list_display = ('url', 'endpoints', 'current_rating', 'onboarded', 'uses_dns_wildcard',
+    list_display = ('url', 'visit', 'current_rating', 'onboarded', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
+
     search_fields = ('url', )
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
@@ -414,10 +415,22 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     )
     readonly_fields = ['created_on', 'onboarded']
 
-    def endpoints(self, obj: Url):
+    def visit(self, obj: Url):
+        if not obj.endpoint_set.count():
+            return
 
-        return format_html("%s <a href='/admin/scanners/endpoint/?q=%s' target='_blank'>🔍</a>" %
+        str = format_html("%s <a href='/admin/scanners/endpoint/?q=%s' target='_blank'>🔍</a>" %
                            (obj.endpoint_set.count(), obj.url))
+
+        for endpoint in obj.endpoint_set.all():
+
+            if endpoint.is_dead is False:
+                str += " - <a href='%(protocol)s://%(url)s:%(port)s' target='_blank'>%(protocol)s/%(port)s</a>" % {
+                    'url': obj.url,
+                    'port': endpoint.port,
+                    'protocol': endpoint.protocol
+                }
+        return format_html(str)
 
     @staticmethod
     def unresolvable_for(self):

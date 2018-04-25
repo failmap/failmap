@@ -43,7 +43,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     'tls_scans', 'generic_scans')
     search_fields = ('url__url', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
-    list_filter = ('ip_version', 'port', 'protocol', 'is_dead', 'is_dead_reason')
+    list_filter = ('ip_version', 'port', 'protocol', 'is_dead', 'is_dead_reason', 'discovered_on')
     fieldsets = (
         (None, {
             'fields': ('url', 'ip_version', 'protocol', 'port', 'discovered_on')

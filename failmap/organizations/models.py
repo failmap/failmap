@@ -16,7 +16,7 @@ logger = logging.getLogger(__package__)
 
 
 class OrganizationType(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, verbose_name=_("organization type"))
 
     class Meta:
         managed = True
