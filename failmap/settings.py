@@ -667,3 +667,81 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file
 
 # End of helpdesk settings
 #######
+
+
+#######
+# Jet Menu configuration
+# This helps making various resources and fewer used features less visible.
+
+from django.utils.translation import gettext_lazy as _
+
+# todo: add permissions: 'permissions': ['core.user']
+
+# The following items are hidden on purpose:
+# core.site (we only have one site)
+# scanners.state, will be deprecated and removed (if not already)
+
+JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
+    {'label': _('configuration'), 'items': [
+        {'name': 'auth.user'},
+        {'name': 'auth.group'},
+        {'name': 'map.configuration', 'label': _('map display order')},
+        {'name': 'constance.config', 'label': _('variables')},
+        {'name': 'map.administrativeregion', 'label': _('import regions')},
+    ]},
+
+    {'app_label': 'organizations', 'items': [
+        {'name': 'organization'},
+        {'name': 'url'},
+        {'name': 'promise'},
+        {'name': 'coordinate'},
+        {'name': 'organizationtype'},
+    ]},
+
+    {'app_label': 'scanners', 'items': [
+        {'name': 'endpoint'},
+        {'name': 'endpointgenericscan'},
+        {'name': 'tlsqualysscan'},
+        {'name': 'urlgenericscan'},
+        {'name': 'screenshot'},
+        {'name': 'urlip'},
+        {'name': 'endpointgenericscanscratchpad'},
+    ]},
+
+    {'label': _('periodic tasks'), 'items': [
+        {'name': 'app.job'},
+        {'name': 'django_celery_beat.periodictask'},
+        {'name': 'django_celery_beat.crontabschedule'},
+        {'name': 'django_celery_beat.intervalschedule'},
+        {'name': 'django_celery_beat.solarschedule'},
+    ]},
+
+    {'app_label': 'helpdesk', 'items': [
+        {'name': 'queue'},
+        {'name': 'ticket'},
+        {'name': 'followup'},
+        {'name': 'customfield'},
+        {'name': 'presetreply'},
+        {'name': 'emailtemplate'},
+        {'name': 'escalationexclusion'},
+        {'name': 'ignoreemail'},
+        {'name': 'kbcategory'},
+        {'name': 'kbitem'},
+    ]},
+
+    {'app_label': 'hypersh', 'items': [
+        {'name': 'containerenvironment'},
+        {'name': 'containerconfiguration'},
+        {'name': 'containergroup'},
+        {'name': 'credential'},
+    ]},
+
+    {'app_label': 'game', 'items': [
+        {'name': 'contest'},
+        {'name': 'team'},
+        {'name': 'organizationsubmission'},
+        {'name': 'urlsubmission'},
+    ]},
+]
+#
+########
