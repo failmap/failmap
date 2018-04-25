@@ -670,7 +670,7 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file
 
 
 #######
-# Jet Menu configuration
+# begin django jet menu configuration
 # This helps making various resources and fewer used features less visible.
 
 from django.utils.translation import gettext_lazy as _
@@ -680,6 +680,9 @@ from django.utils.translation import gettext_lazy as _
 # The following items are hidden on purpose:
 # core.site (we only have one site)
 # scanners.state, will be deprecated and removed (if not already)
+
+# Todo: it's possible to add custom items, for example some often used
+# queries. See: http://jet.readthedocs.io/en/latest/config_file.html#custom-menu
 
 JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'label': _('configuration'), 'items': [
@@ -743,5 +746,5 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'urlsubmission'},
     ]},
 ]
-#
+# end django jet menu configuration
 ########
