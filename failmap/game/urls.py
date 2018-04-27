@@ -1,21 +1,13 @@
-# urls for scanners, maybe in their own url files
-from django.conf.urls import url
+from django.urls import path
 
-from failmap.game.views import (OrganizationAutocomplete, OrganizationTypeAutocomplete, scores,
-                                submit_organisation, submit_url, teams)
+from failmap.game import views
 
 urlpatterns = [
-
-    url(r'^game/$', scores, name='scores'),
-    url(r'^game/scores/$', scores, name='scores'),
-    url(r'^game/team/$', teams, name='teams'),
-
-    url(r'^game/submit_url/$', submit_url, name='submit url'),
-    url(r'^game/submit_organization/$', submit_organisation, name='submit organization'),
-
-    url(r'^game/autocomplete/organization-autocomplete/$', OrganizationAutocomplete.as_view(),
-        name='organization-autocomplete'),
-
-    url(r'^game/autocomplete/organization-type-autocomplete/$', OrganizationTypeAutocomplete.as_view(),
-        name='organization-type-autocomplete'),
+    path('', views.scores),
+    path('scores/', views.scores),
+    path('team/', views.teams),
+    path('submit_url/', views.submit_url),
+    path('submit_organization/', views.submit_organisation),
+    path('autocomplete/organization-autocomplete/', views.OrganizationAutocomplete.as_view()),
+    path('autocomplete/organization-type-autocomplete/', views.OrganizationTypeAutocomplete.as_view()),
 ]
