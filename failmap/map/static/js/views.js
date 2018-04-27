@@ -292,7 +292,17 @@ var top_mixin = {
     mounted: function () {
         this.load(0)
     },
-    data: {top: Array},
+    props: {
+        filterKey: String,
+
+    },
+    data: {
+        data: Array,
+        columns: ['rank', 'high', 'medium', 'low', 'organization_id'],
+        sortKey: '',
+        metadata: {},
+        key: {}
+    },
     methods: {
         showReport: function (organization_id) {
             vueReport.show_in_browser();
@@ -312,7 +322,8 @@ var top_mixin = {
 
             var self = this;
             $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
-                self.top = data;
+                self.data = data.ranking;
+                self.metadata  = data.metadata;
             });
         },
         twitter_message: function (chart, rank){
@@ -329,6 +340,38 @@ var top_mixin = {
                     '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
             }
             return message
+        },
+        sortBy: function (key) {
+            this.sortKey = key;
+            this.sortOrders[key] = this.sortOrders[key] * -1
+        }
+    },
+    computed: {
+        filteredData: function () {
+          var sortKey = this.sortKey;
+          var filterKey = this.filterKey && this.filterKey.toLowerCase();
+          var order = this.sortOrders[sortKey] || 1;
+          var data = this.data;
+          if (filterKey) {
+            data = data.filter(function (row) {
+              return Object.keys(row).some(function (key) {
+                return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+              })
+            })
+          }
+          if (sortKey) {
+            data = data.slice().sort(function (a, b) {
+              a = a[sortKey];
+              b = b[sortKey];
+              return (a === b ? 0 : a > b ? 1 : -1) * order
+            })
+          }
+          return data
+        }
+    },
+    filters: {
+        capitalize: function (str) {
+            return str.charAt(0).toUpperCase() + str.slice(1)
         }
     }
 };
@@ -488,6 +531,7 @@ function views() {
                 var self = this;
                 d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0", function (error, data) {
                     d3stats();
+                    self.d3stats.stacked_area_chart("total", error, data.total);
                     self.d3stats.stacked_area_chart("tls_qualys", error, data.tls_qualys);
                     self.d3stats.stacked_area_chart("plain_https", error, data.plain_https);
                     self.d3stats.stacked_area_chart("security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
@@ -506,7 +550,14 @@ function views() {
             this.load(0)
         },
         data: {
-            data: Array
+            data: Array,
+            services: [],
+            endpoints_now: 0,
+
+            // sorting
+            columns: ['ip_version', 'protocol', 'port', 'amount'],
+            sortKey: 'amount',
+            sortOrders: {'ip_version': 1, 'protocol': 1, 'port': 1, 'amount': -1}
         },
         computed: {
             greenpercentage: function () {
@@ -546,6 +597,27 @@ function views() {
                     return roundTo(score, 2) + "%";
                 }
                 return 0
+            },
+            filteredData: function () {
+                var sortKey = this.sortKey;
+                var filterKey = this.filterKey && this.filterKey.toLowerCase();
+                var order = this.sortOrders[sortKey] || 1;
+                var data = this.services;
+                if (filterKey) {
+                    data = data.filter(function (row) {
+                        return Object.keys(row).some(function (key) {
+                            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+                        })
+                    })
+                }
+                if (sortKey) {
+                    data = data.slice().sort(function (a, b) {
+                        a = a[sortKey];
+                        b = b[sortKey];
+                        return (a === b ? 0 : a > b ? 1 : -1) * order
+                    })
+                }
+                return data
             }
         },
         methods: {
@@ -560,15 +632,29 @@ function views() {
                 var self = this;
                 $.getJSON('/data/stats/' + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                     self.data = data;
+
+                    self.endpoints_now = data.data.now['endpoints'];
+
+                    for(var i=0; i<data.data.now['endpoint'].length; i++){
+                        var z = data.data.now['endpoint'][i][1];
+                        self.services.push({
+                            'amount': z.amount,
+                            'ip_version': z.ip_version,
+                            'protocol': z.protocol,
+                            'port': z.port})
+                    }
                 });
             },
             perc: function (data, amount, total) {
                 return (!data) ? "0%" :
                     roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
             },
-            // we can't do gettext
             translate: function(string){
                 return gettext(string);
+            },
+            sortBy: function (key) {
+                this.sortKey = key;
+                this.sortOrders[key] = this.sortOrders[key] * -1;
             }
         }
     });
@@ -704,22 +790,21 @@ function views() {
 
     window.vueTopfail = new Vue({
         el: '#topfail',
-        data: {data_url: "/data/topfail/"},
+        data: {
+            data_url: "/data/topfail/",
+            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1}
+        },
         mixins: [top_mixin, state_mixin]
     });
 
     window.vueTopwin = new Vue({
         el: '#topwin',
-        data: {data_url: "/data/topwin/"},
+        data: {
+            data_url: "/data/topwin/",
+            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1}
+        },
         mixins: [top_mixin, state_mixin]
     });
-
-    window.vueTerribleurls = new Vue({
-        el: '#terrible_urls',
-        data: {data_url: "/data/terrible_urls/"},
-        mixins: [top_mixin, state_mixin]
-    });
-
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
@@ -817,7 +902,6 @@ function views() {
 
                 vueTopfail.set_state(this.country, this.category);
                 vueTopwin.set_state(this.country, this.category);
-                vueTerribleurls.set_state(this.country, this.category);
                 vueStatistics.set_state(this.country, this.category);
                 vueLatestPlainHttps.set_state(this.country, this.category);
                 vueLatestTlsQualys.set_state(this.country, this.category);
@@ -899,8 +983,6 @@ function views() {
                 // of the site and all reports are also old.
                 // so don't. Add matching UI elsewhere...
                 // vueTopfail.load(this.week);
-                // vueTopwin.load(this.week);
-                // vueTerribleurls.load(this.week);
 
 
                 if (this.selected_organization > -1) {

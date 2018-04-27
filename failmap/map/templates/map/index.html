@@ -37,6 +37,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
 
@@ -49,6 +50,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/fontawesome.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
@@ -62,6 +65,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/fontawesome.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
@@ -83,19 +88,17 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">{% trans "Fail Map" %}</a>
+            <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i> {% trans "Map" %}</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="#intro">{% trans "About" %}</a></li>
-                <li><a href="#">{% trans "Map" %}</a></li>
-                <li><a href="#improvements">{% trans "Improvements" %}</a></li>
-                <li><a href="#numbers">{% trans "Numbers" %}</a></li>
-                <li><a href="#graphs">{% trans "Graphs" %}</a></li>
+                <li><a href="#info">{% trans "Info" %}</a></li>
                 <li><a href="#charts">{% trans "Charts" %}</a></li>
-                <li><a href="#updates">{% trans "Updates" %}</a></li>
-                <li><a href="#report">{% trans "Report" %}</a></li>
-                <li><a href="#export">{% trans "Export" %}</a></li>
+                <li><a href="#extensive_statistics">{% trans "Statistics" %}</a></li>
+
+
+                <li><a href="#reports">{% trans "Reports" %}</a></li>
+                <li><a href="#datasets">{% trans "Datasets" %}</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if debug %}
@@ -140,730 +143,785 @@
     </div>
 </nav>
 
-<div id='map'></div>
+<section>
+    <div id='map'></div>
+</section>
 
-<div class="container theme-showcase" role="main">
-    <a name="intro" class="jumptonav"></a>
-    <div class="jumbotron">
-        <h1>{% trans "Fail Map" %}</h1>
-        <p>{% trans "Fail Map Introduction" %}</p>
-        <p>{% trans "Send in subdomain adresses" %}</p>
-    </div>
-
-    {% include "map/target_audience.html" %}
-
-    <div id="issue_improvements" v-cloak>
-        <div class="page-header">
-            <a name="improvements" class="jumptonav"></a>
-            <h2>{% trans "Improvements" %}</h2>
-            <p>{% trans "Improvements explained" %}</p>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
-        <div class="row">
-            <div class="col-md-4" style="text-align:center">
-                <h4>{% trans "High" %}</h4>
-                {% verbatim %}
-                    <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
-                {% endverbatim %}
-
-            </div>
-            <div class="col-md-4" style="text-align:center">
-                <h4>{% trans "Medium" %}</h4>
-                {% verbatim %}
-                    <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
-                {% endverbatim %}
-            </div>
-            <div class="col-md-4" style="text-align:center">
-                <h4>{% trans "Low" %}</h4>
-                {% verbatim %}
-                    <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
-                {% endverbatim %}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <h4>{% trans "Improvements Details" %}</h4>
-                <table class="improvementstable">
-                    <tr><th colspan="2" class="improvement_severity">{% trans "High" %}</th>
-                        <th colspan="4" class="improvement_severity">{% trans "Medium" %}</th>
-                        <th colspan="3" class="improvement_severity">{% trans "Low" %}</th>
-                    </tr>
-                    {% verbatim %}
-                    <tr>
-                        <td :class="'number-sm ' + goodbad(tls_qualys.high)">{{ tls_qualys.high }}</td>
-                        <td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>
-                        <td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>
-                        <td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>
-                        <td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>
-                        <td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>
-                        <td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>
-                        <td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>
-                        <td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>
-                    </tr>
-                    {% endverbatim %}
-                    <tr>
-                        <td>{% trans "Encryption" %}</td>
-                        <td>{% trans "Missing encryption" %}</td>
-                        <td>{% trans "Encryption" %}</td>
-                        <td>{% trans "Missing encryption" %}</td>
-                        <td>{% trans "HSTS Header" %}</td>
-                        <td>{% trans "XFO Header" %}</td>
-                        <td>{% trans "Encryption" %}</td>
-                        <td>{% trans "X-XSS" %}</td>
-                        <td>{% trans "X-Content" %}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="statistics" v-cloak>
-        <div class="page-header">
-            <a name="numbers" class="jumptonav"></a>
-            <h2>{% trans "The Numbers" %}</h2>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Organizations" %}</h3>
-                <p>{% trans "Organizations Explained" %}</p>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "Internet addresses" %}</h3>
-                <p>{% trans "Internet addresses Explained" %}</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
-                        <span class="sr-only">{% trans "stats remark green" %}</span>
-                    </div>
-                    <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
-                        <span class="sr-only">{% trans "stats remark orange" %}</span>
-                    </div>
-                    <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
-                        <span class='sr-only'>{% trans "stats remark red" %}</span>
-                    </div>
-                    <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
-                        <span class='sr-only'>{% trans "stats remark gray" %}</span>
-                    </div>
-                </div>
-
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th width="30%">{% trans "When" %}</th>
-                        <th width="15%">{% trans "Number" %}</th>
-                        <th width="18%">{% trans "Good" %}</th>
-                        <th width="18%">{% trans "Average" %}</th>
-                        <th width="18%">{% trans "Bad" %}</th>
-                    </tr>
-                    </thead>
-                    <tbody v-if="data.data">
-                    {% verbatim %}
-                    <tr v-for="(x, key) in data.data">
-                        <td>{{ translate(key) }}</td>
-                        <td>{{ x["included_organizations"] }}</td>
-                        <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, white ' + x['green percentage'] + '%, white 100%);'">
-                            {{ x["green"] }}
-                            <small>({{ x["green percentage"] }}%)</small>
-                        </td>
-                        <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, white ' + x['orange percentage'] + '%, white 100%);'">
-                            {{ x["orange"] }}
-                            <small>({{ x["orange percentage"] }}%)</small>
-                        </td>
-                        <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red percentage'] + '%, white ' + x['red percentage'] + '%, white 100%);'">
-                            {{ x["red"] }}
-                            <small>({{ x["red percentage"] }}%)</small>
-                        </td>
-                    </tr>
-                    {% endverbatim %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="col-md-6">
-                <div class="progress">
-                    <div class="progress-bar progress-bar-success" :style="{width:greenurlpercentage}">
-                        <span class="sr-only">Oh, wow!</span>
-                    </div>
-                    <div class="progress-bar progress-bar-warning" :style="{width:orangeurlpercentage}">
-                        <span class="sr-only">Pretty fair, but not really there.</span>
-                    </div>
-                    <div class="progress-bar progress-bar-danger" :style="{width:redurlpercentage}">
-                        <span class='sr-only'>They have a lot to learn.</span>
-                    </div>
-                </div>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th width="30%">{% trans "When" %}</th>
-                        <th width="15%">{% trans "Number" %}</th>
-                        <th width="18%">{% trans "Good" %}</th>
-                        <th width="18%">{% trans "Average" %}</th>
-                        <th width="18%">{% trans "Bad" %}</th>
-                    </tr>
-                    </thead>
-                    <tbody v-if="data.data">
-                    {% verbatim %}
-                    <tr v-for="(x, key) in data.data">
-                        <td>{{ translate(key) }}</td>
-                        <td>{{ x["total_urls"] }}</td>
-                        <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, white ' + x['green url percentage'] + '%, white 100%);'">
-                            {{ x["green_urls"] }}
-                            <small>({{ x["green url percentage"] }}%)</small>
-                        </td>
-                        <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, white ' + x['orange url percentage'] + '%, white 100%);'">
-                            {{ x["orange_urls"] }}
-                            <small>({{ x["orange url percentage"] }}%)</small>
-                        </td>
-                        <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red url percentage'] + '%, white ' + x['red url percentage'] + '%, white 100%);'">
-                            {{ x["red_urls"] }}
-                            <small>({{ x["red url percentage"] }}%)</small>
-                        </td>
-                    </tr>
-                    {% endverbatim %}
-                    </tbody>
-                </table>
-            </div>
+<section>
+    <div class="container theme-showcase" role="main">
+        <a name="info" class="jumptonav"></a>
+        <div class="jumbotron">
+            <h1>{% trans "What do i see?" %}</h1>
+            <p>{% trans "whats do i see explained" %}</p>
+            <p>{% trans "this website is run by" %}</p>
+            <p>{% trans "Send in subdomain adresses" %}</p>
         </div>
 
         <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Technical TLS" %}</h3>
-                <p>{% trans "Technical stats TLS explained" %}</p>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "Technical stats headers" %}</h3>
-                <p>{% trans "Technical stats headers explained" %}</p>
-            </div>
-        </div>
-        <div class="row" v-if="data.data">
-            <div class="col-md-6">
-                <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                    <table class="table" v-if="x['explained']">
-                        <thead>
-                        <tr>
-                            <th width="10%">{% trans "Technology" %}</th>
-                            <th width="50%">{% trans "Result" %}</th>
-                            <th width="40%">{% trans "Total" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% verbatim %}
-                        <tr v-if="x['explained']['plain_https']">
-                            <td colspan="3">{% endverbatim %}{% trans "Application of encryption" %}{% verbatim %}</td>
-                        </tr>
-                        <tr v-if="x['explained']['plain_https']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['plain_https']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has no secure alternative on a standard port.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['plain_https']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Redirect from unsafe address" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']">
-                            <td colspan="3">{% endverbatim %} {% trans "Encryption quality" %}{% verbatim %}</td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Broken" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "No trust, C" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "No trust, B" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "No trust, A-" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "No trust, A" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "TLS rated C" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "TLS rated B" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "TLS rated A-" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "TLS rated A" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td>
-                        </tr>
-                        <tr v-if="x['explained']['tls_qualys']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "TLS rated A+" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}</td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
+            <div class="col-md-2">
+                <div style="background-image: url('{% static 'images/logo_tile.png' %}'); height: 360px;border-radius: 25px;text-align: center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"
+                width="100%">
+                    <span style="font-size: 18em; font-weight: bold; font-family: arial; color: white;"></span>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                    <table class="table" v-if="x['explained']">
-                        <thead>
-                        <tr>
-                            <th width="10%">{% trans "Technology" %}</th>
-                            <th width="50%">{% trans "Result" %}</th>
-                            <th width="40%">{% trans "Total" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% verbatim %}
-                        <tr v-if="x['explained']['security_headers_strict_transport_security']">
-                            <td colspan="3">{% endverbatim %}{% trans "Stats HSTS" %}{% verbatim %}</td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_frame_options']">
-                            <td colspan="3">{% endverbatim %}{% trans "Stats X-Frame-Options" %}{% verbatim %}</td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_xss_protection']">
-                            <td colspan="3">{% endverbatim %}{% trans "Stats X-XSS Protection" %}{% verbatim %}</td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_content_type_options']">
-                            <td colspan="3">{% endverbatim %}{% trans "Stats X-Content Type Options" %}{% verbatim %}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}
-                            </td>
-                        </tr>
-                        <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow">
-                            <td></td>
-                            <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                            <td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}
-                            </td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="col-md-5">
+                <h2>Controleer het zelf!</h2>
+                <p>Deze website hoef je niet te geloven: daarom is deze website en alle achterliggende software
+                    <a href="https://gitlab.com/failmap/failmap" targer="blank">open source</a>. Hierdoor kan iedereen
+                    zelf controleren of de overheid haar veiligheid op orde heeft.</p>
+                <p>Door zelf te controleren help je je eigen gegevens beter te beschermen.</p>
+                <p>Heb je vragen, of kom je er niet uit? Dan helpen wij je op weg!</p>
+                <p><a href="https://gitlab.com/failmap/failmap" class="btn btn-lg btn-success"><i class="fas fa-eye"></i> Ik wil deze software!</a></p>
             </div>
-        </div>
-        <div class="row" v-if="data.data">
-            <div class="col-md-6">
-                <h3>{% trans "Services" %}</h3>
-                <p>{% trans "Services explained" %}</p>
-                {% verbatim %}
-                <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                    <p>{% endverbatim %}{% trans "Number of service checked" %}</p>
-                    <table class="table">
-                        <tr>
-                            <th>{% trans "Service" %}</th>
-                            <th>{% trans "Amount" %}</th>
-                            <th>{% trans "Percentage" %}</th>
-                        </tr>
-                        {% verbatim %}
-                        <tr v-for="(xx, xkey) in x['endpoint']">
-                            <td>{{ xx[0] }}</td>
-                            <td>{{ xx[1] }}</td>
-                            <td>{{ ((xx[1]/x['endpoints']) * 100).toFixed(2) }}%</td>
-                        </tr>
-                    </table>
-                </div>
-                {% endverbatim %}
-            </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
+                <h2>Uw branche of onderneming?</h2>
+                <p>Alles op orde? Gebruik deze monitor voor uw branch of onderneming en weet het zeker! De Internet Cleanup
+                    Foundation biedt professionele ondersteuning en ontneemt alle zorgen rondom techniek.
+                </p>
+                <p>
+                    Belangrijkste voordelen:
+                    <ul>
+                        <li>Ontdek kwetsbare vergeten sites</li>
+                        <li>Dagelijkse controle</li>
+                        <li>Status in een oogopslag</li>
+                        <li>U bepaalt wie de resultaten ziet</li>
+                        <li>Hosting on premise of in de cloud</li>
+                        <li>Altijd de laatste versie</li>
+                        <li>Ondersteuning en advies</li>
+                    </ul>
+                </p>
+                <p>
+                    <a href="mailto:info@internetcleanup.foundation?subject=Vertel%20me%20meer!&body=Beste," class="btn btn-lg btn-info"><i class="fas fa-globe"></i> Vertel me meer!</a>
+                </p>
             </div>
         </div>
     </div>
+</section>
 
-    <div id="graphs" v-cloak>
-        <div class="page-header">
-            <a name="graphs" class="jumptonav"></a>
-            <h2>{% trans "Graphs" %}</h2>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
+<section style="background-color: ghostwhite">
+   <div class="container">
 
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Encryption failure" %}</h3>
-                <svg id="tls_qualys" width="555" height="300"></svg>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "Lack of encryption failure" %}</h3>
-                <svg id="plain_https" width="555" height="300"></svg>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Forcing of encryption failure" %}</h3>
-                <svg id="security_headers_strict_transport_security" width="555" height="300"></svg>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "X-Frame Options failure" %}</h3>
-                <svg id="security_headers_x_frame_options" width="555" height="300"></svg>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "X-Content-Type-Options failure" %}</h3>
-                <svg id="security_headers_x_content_type_options" width="555" height="300"></svg>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "X-XSS-Protection failure" %}</h3>
-                <svg id="security_headers_x_xss_protection" width="555" height="300"></svg>
-            </div>
-        </div>
-    </div>
-
-    <div id="charts">
-        <div class="page-header">
-            <a name="charts" class="jumptonav"></a>
-            <h2>{% trans "Charts" %}</h2>
-            <p>{% trans "Chart introduction" %}</p>
-            <p></p>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
-        <div class="row">
-            {% include "map/topfail.html" %}
-            {% include "map/topwin.html" %}
-        </div>
-        <div class="row">
-            {% include "map/terrible_urls.html" %}
-        </div>
-    </div>
-
-    <div id="latest_scans">
-        <div class="page-header">
-            <a name="updates" class="jumptonav"></a>
-            <h2>{% trans "Latest changes" %}</h2>
-            {% trans "Latest changes explanation" %}
-            <p></p>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Encryption updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys"
-                                                    target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_tls_qualys"></span>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "Lack of encryption updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %} <a href="/data/feed/plain_https"
-                                                    target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_plain_https"></span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "Forcing encryption updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security"
-                                                    target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_security_headers_strict_transport_security"></span>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "X-Frame-Options updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options"
-                                                   target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_security_headers_x_frame_options"></span>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <h3>{% trans "X-Content-Type-Option updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options"
-                                                    target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_security_headers_x_content_type_options"></span>
-            </div>
-            <div class="col-md-6">
-                <h3>{% trans "X-XSS-Protection updates" %}</h3>
-                <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection"
-                                                    target="_blank">{% trans "rss feed" %}</a>.</p>
-                <span id="latest_security_headers_x_xss_protection"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="page-header" id="report">
-        <div>
+       <div id="charts">
             <div class="page-header">
-                <a name="report" id="report-anchor" class="jumptonav"></a>
-                <h2><span class="organization_points"></span>{% trans "Report" %}</h2>
+                <a name="charts" class="jumptonav"></a>
+                <h2>{% trans "Charts" %}</h2>
+                <p>{% trans "Chart introduction" %}</p>
+                <p></p>
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
             </div>
+            <div class="row">
+                {% include "map/topfail.html" %}
+                {% include "map/topwin.html" %}
+            </div>
+        </div>
+  </div>
+</section>
+
+
+<section name="report" style="background-color: white">
+    <div class="container">
+        <div class="page-header" id="report">
             <div>
-                <div>
-                    {% trans "Show report for organization" %}:
-                    {% verbatim %}
-                    <select v-model="selected">
-                        <option v-for="organization in organizations" :value="organization.slug">
-                            {{ organization.name }}
-                        </option>
-                    </select>
-                    <span v-if='loading'> (loading...)</span>
-                    {% endverbatim %}
+                <div class="page-header">
+                    <a name="reports" id="report-anchor" class="jumptonav"></a>
+                    <h2><span class="organization_points"></span>{% trans "Report" %}</h2>
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
-                <br/>
-                <div v-if="name">
-
-                    <div class="score high">
-                        <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
-                        <span class="score_label">{% trans "High" %}</span>
+                <div>
+                    <div>
+                        {% trans "Show report for organization" %}:
+                        {% verbatim %}
+                        <select v-model="selected">
+                            <option v-for="organization in organizations" :value="organization.name">
+                                {{ organization.name }}
+                            </option>
+                        </select>
+                        <span v-if='loading'> (loading...)</span>
+                        {% endverbatim %}
                     </div>
-
-                    <div class="score medium">
-                        <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
-                        <span class="score_label">{% trans "Medium" %}</span>
-                    </div>
-
-                    <div class="score low">
-                        <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
-                        <span class="score_label">{% trans "Low" %}</span>
-                    </div>
-
-                    <br style="clear: both">
-                    <br />
-                    <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
                     <br/>
-                    <ul>
-                    {% verbatim %}
-                    <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
-                    </li>
-                    {% endverbatim %}
-                    <li>{% trans "RSS change feed teaser" %}
-                    <a :href="'/data/updates_on_organization_feed/' + selected"
-                    target="_blank">{% trans "rss feed" %}</a>.</li>
-                    <li>
-                    {% trans "Report share result question" %} {% verbatim %}<span
-                        v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-                    </li>
-                    <li>
-                    {% trans "Report ask domains leader" %} <a
-                        :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-                    </li>
-                    </ul>
-                    <br/>
-                    {% verbatim %}
-                    <div v-for="url in urls" class="perurl"
-                         :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
+                    <div v-if="name">
 
-                        <div class="col-md-4">
-                            &nbsp;
-                        </div>
-                        <div class="col-md-8">
-                            <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                            <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                                  :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                            <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
-                               class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
-                                {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                        <div class="score high">
+                            <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
+                            <span class="score_label">{% trans "High" %}</span>
                         </div>
 
-                        <div v-for="endpoint in url.endpoints">
-                            <div class="col-md-4 giveroom">
-                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
-                                   target="_blank"
-                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
-                                    <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
-                                        :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
-                                    />
-                                </a>
+                        <div class="score medium">
+                            <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
+                            <span class="score_label">{% trans "Medium" %}</span>
+                        </div>
+
+                        <div class="score low">
+                            <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
+                            <span class="score_label">{% trans "Low" %}</span>
+                        </div>
+
+                        <br style="clear: both">
+                        <br />
+                        <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
+                        <br/>
+                        <ul>
+                        {% verbatim %}
+                        <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
+                        </li>
+                        {% endverbatim %}
+                        <li>{% trans "RSS change feed teaser" %}
+                        <a :href="'/data/updates_on_organization_feed/' + selected"
+                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
+                        <li>
+                        {% trans "Report share result question" %} {% verbatim %}<span
+                            v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
+                        </li>
+                        <li>
+                        {% trans "Report ask domains leader" %} <a
+                            :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+                        </li>
+                        </ul>
+                        <br/>
+                        {% verbatim %}
+                        <div v-for="url in urls" class="perurl"
+                             :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
+
+                            <div class="col-md-4">
+                                &nbsp;
                             </div>
-                            <div class="col-md-8 giveroom">
-                                <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
+                            <div class="col-md-8">
+                                <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                                <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
+                                      :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                                <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                                   class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
+                                    {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                            </div>
 
-                                <div>
-                                    <div v-for="rating in endpoint.ratings">
-                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                        &nbsp; &nbsp; <span
-                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                        translate(rating.explanation) }}<br/>
-                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                        {{ humanize(rating.last_scan) }} <br/>
-                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                        <br/>
+                            <div v-for="endpoint in url.endpoints">
+                                <div class="col-md-4 giveroom">
+                                    <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
+                                       target="_blank"
+                                       :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                        <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
+                                             class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                            :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
+                                        />
+                                    </a>
+                                </div>
+                                <div class="col-md-8 giveroom">
+                                    <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
+
+                                    <div>
+                                        <div v-for="rating in endpoint.ratings">
+                                            <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                            &nbsp; &nbsp; <span
+                                                v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
+                                            translate(rating.explanation) }}<br/>
+                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
+                                            humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
+                                            {{ humanize(rating.last_scan) }} <br/>
+                                            &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
+                                            <br/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    {% endverbatim %}
                 </div>
-                {% endverbatim %}
             </div>
         </div>
     </div>
+</section>
 
-    <div id="export">
-        <div class="page-header">
-            <a name="export" class="jumptonav"></a>
-            <h2>{% trans "Export" %}</h2>
-            {% trans "Export explanation" %}
-            <p></p>
-            <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <table style="width:100%">
-                    <thead>
+<section name="extensive_statistics" style="background-color: ghostwhite">
+    <div class="container">
+
+
+        <div id="statistics" v-cloak>
+            <div class="page-header">
+                <a name="extensive_statistics" class="jumptonav"></a>
+                <h2>{% trans "Extensive statistics" %}</h2>
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>{% trans "Organizations" %}</h3>
+                    <p>{% trans "Organizations Explained" %}</p>
+                </div>
+                <div class="col-md-6">
+                    <h3>{% trans "Internet addresses" %}</h3>
+                    <p>{% trans "Internet addresses Explained" %}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
+                            <span class="sr-only">{% trans "stats remark green" %}</span>
+                        </div>
+                        <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
+                            <span class="sr-only">{% trans "stats remark orange" %}</span>
+                        </div>
+                        <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
+                            <span class='sr-only'>{% trans "stats remark red" %}</span>
+                        </div>
+                        <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
+                            <span class='sr-only'>{% trans "stats remark gray" %}</span>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
                         <tr>
-                            <th>{% trans "Category" %}</th>
-                            <th>{% trans "List of only urls" %}</th>
-                            <th>{% trans "Copy of organization_types" %}*</th>
-                            <th>{% trans "Copy of organizations" %}*</th>
-                            <th>{% trans "Copy of coordinates" %}*</th>
-                            <th>{% trans "Copy of urls" %}*</th>
+                            <th width="30%">{% trans "When" %}</th>
+                            <th width="15%">{% trans "Number" %}</th>
+                            <th width="18%">{% trans "Good" %}</th>
+                            <th width="18%">{% trans "Average" %}</th>
+                            <th width="18%">{% trans "Bad" %}</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="category in categories">
-                            <td>{% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</td>
-                            <td><a :href="create_link(category, 'urls_only')">{% trans "Download" %} ⬇️</a></td>
-                            <td><a :href="create_link(category, 'organization_types')">{% trans "Download" %} ⬇️</a></td>
-                            <td><a :href="create_link(category, 'organizations')">{% trans "Download" %} ⬇️</a></td>
-                            <td><a :href="create_link(category, 'coordinates')">{% trans "Download" %} ⬇️</a></td>
-                            <td><a :href="create_link(category, 'urls')">{% trans "Download" %} ⬇️</a></td>
+                        </thead>
+                        <tbody v-if="data.data">
+                        {% verbatim %}
+                        <tr v-for="(x, key) in data.data">
+                            <td>{{ translate(key) }}</td>
+                            <td>{{ x["included_organizations"] }}</td>
+                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, white ' + x['green percentage'] + '%, white 100%);'">
+                                {{ x["green"] }}
+                                <small>({{ x["green percentage"] }}%)</small>
+                            </td>
+                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, white ' + x['orange percentage'] + '%, white 100%);'">
+                                {{ x["orange"] }}
+                                <small>({{ x["orange percentage"] }}%)</small>
+                            </td>
+                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red percentage'] + '%, white ' + x['red percentage'] + '%, white 100%);'">
+                                {{ x["red"] }}
+                                <small>({{ x["red percentage"] }}%)</small>
+                            </td>
                         </tr>
-                    </tbody>
-                </table>
-                <br /><br />
-                <p>* = {% trans "export_failmap_compatible_explained" %}</p>
+                        {% endverbatim %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" :style="{width:greenurlpercentage}">
+                            <span class="sr-only">Oh, wow!</span>
+                        </div>
+                        <div class="progress-bar progress-bar-warning" :style="{width:orangeurlpercentage}">
+                            <span class="sr-only">Pretty fair, but not really there.</span>
+                        </div>
+                        <div class="progress-bar progress-bar-danger" :style="{width:redurlpercentage}">
+                            <span class='sr-only'>They have a lot to learn.</span>
+                        </div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th width="30%">{% trans "When" %}</th>
+                            <th width="15%">{% trans "Number" %}</th>
+                            <th width="18%">{% trans "Good" %}</th>
+                            <th width="18%">{% trans "Average" %}</th>
+                            <th width="18%">{% trans "Bad" %}</th>
+                        </tr>
+                        </thead>
+                        <tbody v-if="data.data">
+                        {% verbatim %}
+                        <tr v-for="(x, key) in data.data">
+                            <td>{{ translate(key) }}</td>
+                            <td>{{ x["total_urls"] }}</td>
+                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, white ' + x['green url percentage'] + '%, white 100%);'">
+                                {{ x["green_urls"] }}
+                                <small>({{ x["green url percentage"] }}%)</small>
+                            </td>
+                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, white ' + x['orange url percentage'] + '%, white 100%);'">
+                                {{ x["orange_urls"] }}
+                                <small>({{ x["orange url percentage"] }}%)</small>
+                            </td>
+                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red url percentage'] + '%, white ' + x['red url percentage'] + '%, white 100%);'">
+                                {{ x["red_urls"] }}
+                                <small>({{ x["red url percentage"] }}%)</small>
+                            </td>
+                        </tr>
+                        {% endverbatim %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "Technical TLS" %}</h4>
+                    <p>{% trans "Technical stats TLS explained" %}</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "Technical stats headers" %}</h4>
+                    <p>{% trans "Technical stats headers explained" %}</p>
+                </div>
+            </div>
+            <div class="row" v-if="data.data">
+                <div class="col-md-6">
+                    <div v-for="(x, key) in data.data" v-if="key == 'now'">
+                        <table class="table" v-if="x['explained']">
+                            <thead>
+                            <tr>
+                                <th width="10%">{% trans "Technology" %}</th>
+                                <th width="50%">{% trans "Result" %}</th>
+                                <th width="40%">{% trans "Total" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% verbatim %}
+                            <tr v-if="x['explained']['plain_https']">
+                                <td colspan="3">{% endverbatim %}{% trans "Application of encryption" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['plain_https']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['plain_https']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has no secure alternative on a standard port.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['plain_https']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Redirect from unsafe address" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']">
+                                <td colspan="3">{% endverbatim %} {% trans "Encryption quality" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Broken" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust, C" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust, B" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust, A-" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust, A" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "TLS rated C" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "TLS rated B" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "TLS rated A-" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "TLS rated A" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "TLS rated A+" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}</td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div v-for="(x, key) in data.data" v-if="key == 'now'">
+                        <table class="table" v-if="x['explained']">
+                            <thead>
+                            <tr>
+                                <th width="10%">{% trans "Technology" %}</th>
+                                <th width="50%">{% trans "Result" %}</th>
+                                <th width="40%">{% trans "Total" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% verbatim %}
+                            <tr v-if="x['explained']['security_headers_strict_transport_security']">
+                                <td colspan="3">{% endverbatim %}{% trans "Stats HSTS" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_frame_options']">
+                                <td colspan="3">{% endverbatim %}{% trans "Stats X-Frame-Options" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_xss_protection']">
+                                <td colspan="3">{% endverbatim %}{% trans "Stats X-XSS Protection" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_content_type_options']">
+                                <td colspan="3">{% endverbatim %}{% trans "Stats X-Content Type Options" %}{% verbatim %}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}
+                                </td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12" v-for="(x, key) in data.data" v-if="key == 'now'">
+                    <h3>{% trans "Services" %}</h3>
+                    <p>{% trans "Services explained" %}</p>
+                    {% verbatim %}
+                        <p>{% endverbatim %}{% trans "Number of service checked" %}</p>
+                        <table class="table table-striped" id="services_table">
+                            <thead>
+                                <tr>
+                                    <th @click="sortBy('ip_version')" :class="{ active: sortKey == 'ip_version' }">
+                                        {% trans "IP Version" %}
+                                        <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'">
+                                    </th>
+                                    <th @click="sortBy('protocol')" :class="{ active: sortKey == 'protocol' }">
+                                        {% trans "Protocol" %}
+                                        <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'">
+                                    </th>
+                                    <th @click="sortBy('port')" :class="{ active: sortKey == 'port' }">
+                                        {% trans "Port" %}
+                                        <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'">
+                                    </th>
+                                    <th @click="sortBy('amount')" :class="{ active: sortKey == 'amount' }">
+                                        {% trans "Amount" %}
+                                        <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'">
+                                    </th>
+                                    <th>{% trans "Percentage" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% verbatim %}
+                                <tr v-for="service in filteredData">
+                                    <td>{{ service['ip_version'] }}</td>
+                                    <td>{{ service['protocol'] }}</td>
+                                    <td>{{ service['port'] }}</td>
+                                    <td>{{ service['amount'] }}</td>
+                                    <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endverbatim %}
+            </div>
+        </div>
+
+
+        <div id="issue_improvements" class="stats_part" v-cloak>
+            <div class="page-header">
+                <h3>{% trans "Improvements" %}</h3>
+                <p>{% trans "Improvements explained" %}</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4" style="text-align:center">
+                    <h4>{% trans "High risk" %}</h4>
+                    {% verbatim %}
+                        <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
+                    {% endverbatim %}
+
+                </div>
+                <div class="col-md-4" style="text-align:center">
+                    <h4>{% trans "Medium risk" %}</h4>
+                    {% verbatim %}
+                        <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
+                    {% endverbatim %}
+                </div>
+                <div class="col-md-4" style="text-align:center">
+                    <h4>{% trans "Low risk" %}</h4>
+                    {% verbatim %}
+                        <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
+                    {% endverbatim %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>{% trans "Improvements Details" %}</h4>
+                    <table class="improvementstable">
+                        <tr><th colspan="2" class="improvement_severity">{% trans "High risk" %}</th>
+                            <th colspan="4" class="improvement_severity">{% trans "Medium risk" %}</th>
+                            <th colspan="3" class="improvement_severity">{% trans "Low risk" %}</th>
+                        </tr>
+                        <tr>
+                            <td>{% trans "Encryption" %}</td>
+                            <td>{% trans "Missing encryption" %}</td>
+                            <td>{% trans "Encryption" %}</td>
+                            <td>{% trans "Missing encryption" %}</td>
+                            <td>{% trans "HSTS Header" %}</td>
+                            <td>{% trans "XFO Header" %}</td>
+                            <td>{% trans "Encryption" %}</td>
+                            <td>{% trans "X-XSS" %}</td>
+                            <td>{% trans "X-Content" %}</td>
+                        </tr>
+                        {% verbatim %}
+                        <tr>
+                            <td :class="'number-sm ' + goodbad(tls_qualys.high)">{{ tls_qualys.high }}</td>
+                            <td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>
+                            <td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>
+                            <td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>
+                            <td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>
+                            <td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>
+                            <td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>
+                            <td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>
+                            <td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>
+                        </tr>
+                        {% endverbatim %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="graphs" class="stats_part" v-cloak>
+            <div class="page-header">
+                <h3>{% trans "Graphs" %}</h3>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h4>{% trans "Overall" %}</h4>
+                    <svg id="total" width="1110" height="300"></svg>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "Encryption failure" %}</h4>
+                    <svg id="tls_qualys" width="555" height="300"></svg>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "Lack of encryption failure" %}</h4>
+                    <svg id="plain_https" width="555" height="300"></svg>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "Forcing of encryption failure" %}</h4>
+                    <svg id="security_headers_strict_transport_security" width="555" height="300"></svg>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "X-Frame Options failure" %}</h4>
+                    <svg id="security_headers_x_frame_options" width="555" height="300"></svg>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "X-Content-Type-Options failure" %}</h4>
+                    <svg id="security_headers_x_content_type_options" width="555" height="300"></svg>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "X-XSS-Protection failure" %}</h4>
+                    <svg id="security_headers_x_xss_protection" width="555" height="300"></svg>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="latest_scans" class="stats_part">
+            <div class="page-header">
+                <h3>{% trans "Latest changes" %}</h3>
+                {% trans "Latest changes explanation" %}
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "Encryption updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_tls_qualys"></span>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "Lack of encryption updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/plain_https"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_plain_https"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "Forcing encryption updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_strict_transport_security"></span>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "X-Frame-Options updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options"
+                                                       target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_frame_options"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>{% trans "X-Content-Type-Option updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_content_type_options"></span>
+                </div>
+                <div class="col-md-6">
+                    <h4>{% trans "X-XSS-Protection updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_xss_protection"></span>
+                </div>
             </div>
         </div>
     </div>
+</section>
 
-    <br style="clear: both">
+<section name="datasets">
+    <div class="container">
+        <div id="export">
+            <div class="page-header">
+                <a name="datasets" class="jumptonav"></a>
+                <h2>{% trans "Datasets" %}</h2>
+                {% trans "Datasets explanation" %}
+                <p></p>
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Category" %}</th>
+                                <th>{% trans "List of only urls" %}</th>
+                                <th>{% trans "Copy of organization_types" %}*</th>
+                                <th>{% trans "Copy of organizations" %}*</th>
+                                <th>{% trans "Copy of coordinates" %}*</th>
+                                <th>{% trans "Copy of urls" %}*</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="category in categories">
+                                <td>{% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</td>
+                                <td><a :href="create_link(category, 'urls_only')">{% trans "Download" %} ⬇️</a></td>
+                                <td><a :href="create_link(category, 'organization_types')">{% trans "Download" %} ⬇️</a></td>
+                                <td><a :href="create_link(category, 'organizations')">{% trans "Download" %} ⬇️</a></td>
+                                <td><a :href="create_link(category, 'coordinates')">{% trans "Download" %} ⬇️</a></td>
+                                <td><a :href="create_link(category, 'urls')">{% trans "Download" %} ⬇️</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <br /><br />
+                    <p>* = {% trans "export_failmap_compatible_explained" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-    <div id="lastrow">
+
+<section id="lastrow">
+    <div class="container">
         <div class="row">
             <a name="footer" class="jumptonav"></a>
 
-            <div class="col-md-2 logoandtext">
-                <div class="logo fail_logo">
-                    <a href="https://internetcleanup.foundation" target="_blank">
-                        <img class="lazyload" data-src="{% static 'images/internet_cleanup_foundation_logo.png' %}"
-                             alt="Internet Cleanup Foundation Logo"
-                             src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="/>
-                    </a>
-                </div>
-                <b><a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></b>
-                <p>Let's clean up the internet: our privacy depends on it.</p>
+            <div class="col-md-3">
+                <b>This website is run by</b>
+                <ul>
+                    <li><a href="Organization website" target="_blank">Organization Name</a></li>
+                    <li><a href="mailto:project_email" target="_blank">project_email</a></li>
+                </ul>
             </div>
-            <div class="col-md-2 logoandtext">
-                <div class="logo sidn_logo">
-                    <a href="https://www.sidnfonds.nl/" target="_blank">
-                        <img class="lazyload" data-src="{% static 'images/sidnfonds-logo.png' %}" alt="SIDN Fonds Logo"
-                             src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="/>
-                    </a>
-                </div>
-                <b><a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></b>
-                <p>Invests in a resillient internet for everyone.</p>
+
+            <div class="col-md-3">
+                <b>About this software</b>
+                <ul>
+                    <li><a href="https://gitlab.com/failmap/" target="_blank">Get the source code</a></li>
+                    <li><a href="https://docs.failmap.org" target="_blank">Documentation</a></li>
+                </ul>
             </div>
-            <div class="col-md-2 logoandtext">
-                <div class="logo git_logo">
-                    <a href="https://gitlab.com/failmap/" target="_blank">
-                        <img class="lazyload" data-src="{% static 'images/gitlab_logo.png' %}" alt="Gitlab Logo"
-                             src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="/>
-                    </a>
-                </div>
-                <b><a href="https://github.com/failmap/" target="_blank">Fail Map</a></b>
-                <p>Fail map is open software maintained by the Internet Cleanup Foundation.</p>
+
+            <div class="col-md-3">
+                <b>Made possible by</b>
+                <ul>
+                    <li><a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></li>
+                    <li><a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></li>
+                </ul>
             </div>
-            <div class="col-md-6">
-                <b>Bescherm je gegevens! Doneer nu!</b><br/>
-                <p>We houden organisaties scherp om ieders gegevens te beschermen. Vind je dit cool? Jouw donatie zorgt
-                    voor blijvende updates, onderhoud en nieuwe controles!</p>
-                <p>
-                    <b>Doneer gemakkelijk, veilig en snel door op een bedrag te klikken:</b>
-                </p>
-                <div class="donatebuttons">
-                    <span class="Donate a25"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/25"
-                                                target="_blank">&euro; 20</a></span>
-                    <span class="Donate a50"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/50"
-                                                target="_blank">&euro; 50</a></span>
-                    <span class="Donate a100"><a href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/100"
-                                                 target="_blank">&euro; 100</a></span>
-                </div>
+            <div class="col-md-3">
             </div>
         </div>
     </div>
-</div>
+</section>
 
 <div id="ticker" v-if="visible" v-cloak>
     <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>

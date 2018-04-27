@@ -611,13 +611,15 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 CONSTANCE_CONFIG = {
     'MAILTO': ('info@faalkaart.nl', 'General email address.', str),
+    'HOSTING_ORGANIZATION_NAME': ('', 'The name of the organization that hosts this instance.', str),
+    'HOSTING_ORGANIZATION_EMAIL': ('', 'The address where people can send in new domains and issues.', str),
+    'HOSTING_ORGANIZATION_TWITTER': ('', 'Twitter address of the hosting organization.', str)
 }
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
-    'Map': ('DEFAULT_COUNTRY', ),
-    'Helpdesk': ('AKISMET_API_KEY', 'TYPEPAD_ANTISPAM_API_KEY'),
+    'Map': ('HOSTING_ORGANIZATION_NAME', 'HOSTING_ORGANIZATION_EMAIL', 'HOSTING_ORGANIZATION_TWITTER'),
 }
 # End constance settings
 ########

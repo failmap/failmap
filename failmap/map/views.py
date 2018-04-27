@@ -748,8 +748,11 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
                                 endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
                                                                ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"))
                                 if endpointtype not in measurement["endpoint"]:
-                                    measurement["endpoint"][endpointtype] = 0
-                                measurement["endpoint"][endpointtype] += 1
+                                    measurement["endpoint"][endpointtype] = {'amount': 0,
+                                                                             'port': endpoint["port"],
+                                                                             'protocol': endpoint["protocol"],
+                                                                             'ip_version': endpoint["ip_version"]}
+                                measurement["endpoint"][endpointtype]['amount'] += 1
                                 measurement["endpoints"] += 1
 
         """                 measurement["total_organizations"] += 1
@@ -806,10 +809,10 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
     # print([timeframe for timeframe in timeframes])
 
     stats = {}
-    scan_types = []
+    scan_types = ['total']
 
     for stat in timeframes:
-        measurement = {}
+        measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
         when = stats_determine_when(stat, weeks_back)
         # print("%s: %s" % (stat, when))
 
@@ -853,6 +856,10 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                     measurement[rating['type']]['high'] += rating['high']
                     measurement[rating['type']]['medium'] += rating['medium']
                     measurement[rating['type']]['low'] += rating['low']
+
+                    measurement['total']['high'] += rating['high']
+                    measurement['total']['medium'] += rating['medium']
+                    measurement['total']['low'] += rating['low']
 
         for scan_type in scan_types:
             if scan_type not in stats:
@@ -927,7 +934,7 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
     weeks_duration = int(weeks_duration)
 
     if not weeks_duration:
-        weeks_duration = 4
+        weeks_duration = 1
 
     if not weeks_back:
         when = datetime.now(pytz.utc)

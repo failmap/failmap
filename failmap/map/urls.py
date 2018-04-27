@@ -40,7 +40,7 @@ urlpatterns = [
     path('data/ticker/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>', views.ticker),
     path('data/wanted/', views.wanted_urls),
     path('data/report/<oid:organization_id>/<w:weeks_back>', views.organization_report),
-    path('data/report/<slug:organization_name>/<w:weeks_back>', views.organization_report),
+    path('data/report/<str:organization_name>/<w:weeks_back>', views.organization_report),
     path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
     path('data/updates_on_organization_feed/<oid:organization_id>', views.UpdatesOnOrganizationFeed()),
 

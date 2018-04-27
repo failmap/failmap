@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-24 14:16+0000\n"
+"POT-Creation-Date: 2018-04-27 19:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,8 +180,8 @@ msgstr ""
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js:71 static/js/views.js:505 static/js/views.js:510
-#: static/js/views.js:513
+#: static/js/failmap.js:71 static/js/views.js:691 static/js/views.js:696
+#: static/js/views.js:699
 msgid "View Full Screen"
 msgstr ""
 
@@ -523,55 +523,55 @@ msgstr ""
 msgid "week"
 msgstr ""
 
-#: static/js/views.js:127 static/js/views.js:130 static/js/views.js:133
-#: static/js/views.js:135 static/js/views.js:137
+#: static/js/views.js:151 static/js/views.js:154 static/js/views.js:157
+#: static/js/views.js:159 static/js/views.js:161
 msgid "Documentation"
 msgstr ""
 
-#: static/js/views.js:128 static/js/views.js:131
+#: static/js/views.js:152 static/js/views.js:155
 msgid "Second opinion"
 msgstr ""
 
-#: static/js/views.js:153
+#: static/js/views.js:177
 msgid "score perfect"
 msgstr ""
 
-#: static/js/views.js:155
+#: static/js/views.js:179
 msgid "score high"
 msgstr ""
 
-#: static/js/views.js:157
+#: static/js/views.js:181
 msgid "score medium"
 msgstr ""
 
-#: static/js/views.js:159
+#: static/js/views.js:183
 msgid "score low"
 msgstr ""
 
-#: static/js/views.js:285 static/js/views.js:290
+#: static/js/views.js:321 static/js/views.js:326
 msgid "top congratulations"
 msgstr ""
 
-#: static/js/views.js:286 static/js/views.js:291
+#: static/js/views.js:322 static/js/views.js:327
 msgid "top position"
 msgstr ""
 
-#: static/js/views.js:287
+#: static/js/views.js:323
 msgid "top fail on failmap"
 msgstr ""
 
-#: static/js/views.js:288 static/js/views.js:293
+#: static/js/views.js:324 static/js/views.js:329
 msgid "hastag fail"
 msgstr ""
 
-#: static/js/views.js:288 static/js/views.js:293
+#: static/js/views.js:324 static/js/views.js:329
 msgid "hastag failmap"
 msgstr ""
 
-#: static/js/views.js:292
+#: static/js/views.js:328
 msgid "top win on failmap"
 msgstr ""
 
-#: static/js/views.js:511
+#: static/js/views.js:697
 msgid "Exit Full Screen"
 msgstr ""

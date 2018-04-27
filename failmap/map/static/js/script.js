@@ -86,5 +86,4 @@ $(document).ready(function () {
         location.href = '#report';
         vueReport.selected = organization_name;
     }
-
 });

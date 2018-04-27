@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-24 14:16+0000\n"
+"POT-Creation-Date: 2018-04-27 19:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:686
-#: failmap/map/static/js/views.js:691 failmap/map/static/js/views.js:694
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:777
+#: failmap/map/static/js/views.js:782 failmap/map/static/js/views.js:785
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -446,31 +446,31 @@ msgstr "midden"
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:320 failmap/map/static/js/views.js:325
+#: failmap/map/static/js/views.js:332 failmap/map/static/js/views.js:337
 msgid "top congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap/map/static/js/views.js:321 failmap/map/static/js/views.js:326
+#: failmap/map/static/js/views.js:333 failmap/map/static/js/views.js:338
 msgid "top position"
 msgstr "positie"
 
-#: failmap/map/static/js/views.js:322
+#: failmap/map/static/js/views.js:334
 msgid "top fail on failmap"
 msgstr "slechtste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:323 failmap/map/static/js/views.js:328
+#: failmap/map/static/js/views.js:335 failmap/map/static/js/views.js:340
 msgid "hastag fail"
 msgstr "faal"
 
-#: failmap/map/static/js/views.js:323 failmap/map/static/js/views.js:328
+#: failmap/map/static/js/views.js:335 failmap/map/static/js/views.js:340
 msgid "hastag failmap"
 msgstr "faalkaart"
 
-#: failmap/map/static/js/views.js:327
+#: failmap/map/static/js/views.js:339
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:692
+#: failmap/map/static/js/views.js:783
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 

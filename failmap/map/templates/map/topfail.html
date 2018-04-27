@@ -4,28 +4,38 @@
 
         <h3>{% trans "Top Fail" %}</h3>
 
-        <p v-if="top.metadata">{% trans "This is the top fail from" %} {% verbatim %}{{
-            humanize(top.metadata.data_from_time) }}{% endverbatim %}</p>
+        <p v-if="metadata">{% trans "This is the top fail from" %} {% verbatim %}{{
+            humanize(metadata.data_from_time) }}{% endverbatim %}</p>
 
-        <table class="table table-striped">
+        <table class="table table-striped" id="topfail_table">
             <thead>
-            <tr>
-                <th>{% trans "Rank" %}</th>
-                <th>{% trans "Organization" %}</th>
-                <th>{% trans "High" %}</th>
-                <th>{% trans "Medium" %}</th>
-                <th>{% trans "Low" %}</th>
-                <th>{% trans "Tweet" %}</th>
-            </tr>
+         <tr>
+            <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
+                <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
+          </span></th>
+            <th @click="sortBy('organization_id')" :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
+                <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'">
+          </span></th>
+            <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
+                <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'">
+          </span></th>
+            <th @click="sortBy('medium')" :class="{ active: sortKey == 'medium' }">{% trans "Medium" %}
+                <span class="arrow" :class="sortOrders['medium'] > 0 ? 'asc' : 'dsc'">
+          </span></th>
+            <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
+                <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
+          </span></th>
+            <th>{% trans "Tweet" %}</th>
+        </tr>
             </thead>
             <tbody>
             {% verbatim %}
-            <tr v-for='rank in top.ranking'>
-                <td>{{ rank.rank }}</td>
-                <td><a v-on:click="showReport(rank.organization_id)">{{ rank.organization_name }}</a></td>
-                <td>{{ rank.high }}</td>
-                <td>{{ rank.medium }}</td>
-                <td>{{ rank.low }}</td>
+            <tr v-for='rank in filteredData'>
+                <td>{{ rank['rank'] }}</td>
+                <td><a v-on:click="showReport(rank.organization_id)">{{ rank['organization_name'] }}</a></td>
+                <td>{{ rank['high'] }}</td>
+                <td>{{ rank['medium'] }}</td>
+                <td>{{ rank['low'] }}</td>
                 <!-- https://dev.twitter.com/web/tweet-button/parameters -->
                 <td><a v-if="rank.organization_twitter" :href="twitter_message('fail', rank)">{% endverbatim %}{% trans "Tweet" %}</a></td>
             </tr>

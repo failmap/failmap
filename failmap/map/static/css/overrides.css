@@ -98,8 +98,8 @@ div#report {
 .jumptonav {
     display: block;
     content: " ";
-    margin-top: -55px;
-    height: 55px;
+    margin-top: -90px;
+    height: 51px;
     visibility: hidden;
 }
 
@@ -169,38 +169,6 @@ div#report {
 .screenshotlist {
     width: 330px;
     float: left;
-}
-
-#lastrow {
-    background-color: lightgray;
-    padding-top: 20px;
-    border-top: 2px solid gray;
-    left: 0;
-    right: 0;
-    position: absolute;
-    margin-top: 40px;
-    padding-bottom: 20px;
-}
-
-@media (min-width: 768px) {
-    #lastrow .row {
-        width: 750px;
-        margin: auto;
-    }
-}
-
-@media (min-width: 992px) {
-    #lastrow .row {
-        width: 970px;
-        margin: auto;
-    }
-}
-
-@media (min-width: 1200px) {
-    #lastrow .row {
-        width: 1170px;
-        margin: auto;
-    }
 }
 
 .Donate {
@@ -686,3 +654,75 @@ path {
 }
 
 */
+
+section {
+    margin-bottom: 55px;
+
+}
+
+section:last-of-type {
+    margin-bottom: 0;
+}
+
+/**
+ Sortable Tables
+ https://vuejs.org/v2/examples/grid-component.html
+*/
+
+th.active .arrow {
+  opacity: 1;
+}
+
+.arrow {
+  display: inline-block;
+  vertical-align: middle;
+  width: 0;
+  height: 0;
+  margin-left: 5px;
+  opacity: 0.66;
+}
+
+.arrow.asc {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid #00a0c6;
+}
+
+.arrow.dsc {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #00a0c6;
+}
+
+.stats_part{
+    margin-top: 40px;
+}
+
+
+#lastrow {
+    background-color: black;
+    padding-top: 40px;
+    border-top: 10px solid lightgreen;
+    left: 0;
+    right: 0;
+    position: absolute;
+    margin-top: 40px;
+    padding-bottom: 40px;
+    color: white;
+}
+
+#lastrow ul {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#lastrow ul li {
+    margin-bottom: 12px;
+    list-style: none;
+    margin-left: -40px;
+}
+
+#lastrow a, #lastrow a:hover, #lastrow a:visited {
+    color:white;
+    text-decoration: none;
+}
