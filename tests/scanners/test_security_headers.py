@@ -36,7 +36,9 @@ def test_security_headers_notfound(responses, db, faalonië):
     """Test invalid organization."""
 
     # should work fine, it will start a scan on nothing, so it's done quickly :)
-    call_command('scan_security_headers', '-v3', '-o', NON_EXISTING_ORGANIZATION)
+    result = json.loads(call_command('scan_security_headers', '-v3', '-o', NON_EXISTING_ORGANIZATION))
+    # no crashes, just an empty result.
+    assert result == []
 
 
 # todo: could do a redirect test
