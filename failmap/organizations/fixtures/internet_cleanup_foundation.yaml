@@ -280,3 +280,267 @@
   fields: {type: X-Content-Type-Options, rating: 'True', explanation: nosniff, evidence: '0',
     last_scan_moment: !!timestamp '2017-11-12 17:32:35+00:00', rating_determined_on: !!timestamp '2017-11-09
       05:09:15+00:00', domain: '', endpoint: 14219}
+- model: map.configuration
+  pk: 1
+  fields: {country: NL, organization_type: 1, is_displayed: true, is_the_default_option: true,
+    display_order: 0, is_scanned: true}
+- model: map.configuration
+  pk: 2
+  fields: {country: DE, organization_type: 7, is_displayed: false, is_the_default_option: false,
+    display_order: 2, is_scanned: false}
+- model: map.configuration
+  pk: 3
+  fields: {country: NL, organization_type: 5, is_displayed: false, is_the_default_option: false,
+    display_order: 1, is_scanned: false}
+- model: map.administrativeregion
+  pk: 4
+  fields: {country: CH, organization_type: 16, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 5
+  fields: {country: FR, organization_type: 17, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 6
+  fields: {country: BE, organization_type: 17, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 7
+  fields: {country: DE, organization_type: 7, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 8
+  fields: {country: AT, organization_type: 7, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 9
+  fields: {country: CH, organization_type: 18, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 10
+  fields: {country: FR, organization_type: 19, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 11
+  fields: {country: ES, organization_type: 20, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 12
+  fields: {country: 'NO', organization_type: 6, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 13
+  fields: {country: GB, organization_type: 6, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 14
+  fields: {country: ES, organization_type: 6, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 15
+  fields: {country: LU, organization_type: 6, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 16
+  fields: {country: IE, organization_type: 6, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 17
+  fields: {country: PL, organization_type: 6, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 18
+  fields: {country: RO, organization_type: 6, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 19
+  fields: {country: GR, organization_type: 6, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 20
+  fields: {country: FR, organization_type: 22, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 21
+  fields: {country: PT, organization_type: 23, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 22
+  fields: {country: LU, organization_type: 23, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 23
+  fields: {country: CH, organization_type: 23, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 24
+  fields: {country: CZ, organization_type: 23, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 25
+  fields: {country: DE, organization_type: 9, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 26
+  fields: {country: SE, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 27
+  fields: {country: NL, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: true}
+- model: map.administrativeregion
+  pk: 28
+  fields: {country: FR, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 29
+  fields: {country: 'NO', organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 30
+  fields: {country: FI, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 31
+  fields: {country: BE, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 32
+  fields: {country: ES, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 33
+  fields: {country: PT, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 34
+  fields: {country: DK, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 35
+  fields: {country: CH, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 36
+  fields: {country: AT, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 37
+  fields: {country: IT, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 38
+  fields: {country: IE, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 39
+  fields: {country: IS, organization_type: 1, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 40
+  fields: {country: AD, organization_type: 1, admin_level: 8, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 41
+  fields: {country: PL, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 42
+  fields: {country: RO, organization_type: 1, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 43
+  fields: {country: GR, organization_type: 1, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 44
+  fields: {country: SE, organization_type: 5, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 45
+  fields: {country: NL, organization_type: 5, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 46
+  fields: {country: FI, organization_type: 5, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 47
+  fields: {country: BE, organization_type: 5, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 48
+  fields: {country: ES, organization_type: 5, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 49
+  fields: {country: IT, organization_type: 5, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 50
+  fields: {country: IE, organization_type: 5, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 51
+  fields: {country: GR, organization_type: 5, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 52
+  fields: {country: DE, organization_type: 8, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 53
+  fields: {country: FR, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 54
+  fields: {country: FI, organization_type: 24, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 55
+  fields: {country: GB, organization_type: 24, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 56
+  fields: {country: BE, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 57
+  fields: {country: PT, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 58
+  fields: {country: LU, organization_type: 24, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 59
+  fields: {country: DK, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 60
+  fields: {country: CH, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 61
+  fields: {country: IT, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 62
+  fields: {country: IS, organization_type: 24, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 63
+  fields: {country: PL, organization_type: 24, admin_level: 4, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 64
+  fields: {country: CZ, organization_type: 24, admin_level: 6, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 65
+  fields: {country: FI, organization_type: 25, admin_level: 7, resampling_resolution: 0.001,
+    imported: false}
+- model: map.administrativeregion
+  pk: 66
+  fields: {country: NL, organization_type: 4, admin_level: 5, resampling_resolution: 0.001,
+    imported: false}
