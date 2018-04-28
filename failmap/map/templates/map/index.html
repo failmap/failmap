@@ -217,7 +217,7 @@
   </div>
 </section>
 
-
+<iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 <section name="report" style="background-color: white">
     <div class="container">
         <div class="page-header" id="report">
@@ -240,7 +240,11 @@
                         {% endverbatim %}
                     </div>
                     <br/>
-                    <div v-if="name">
+                        <a @click="closereport()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
+                        <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+                        <br />
+
+                    <div v-if="name" id="reportcontent">
 
                         <div class="score high">
                             <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>

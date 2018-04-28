@@ -92,6 +92,9 @@ var country_mixin = {
     }
 };
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 var report_mixin = {
     data: {
@@ -236,6 +239,23 @@ var report_mixin = {
         },
         formatDate: function (date) {
             return new Date(date).toISOString().substring(0, 10)
+        },
+        closereport: function(){
+            this.name = "";
+        },
+        printreport: function(divId){
+            css1 = new String ('<link href="/static/css/vendor/bootstrap_v3.3.6.min.css" rel="stylesheet" type="text/css">');
+            css2 = new String ('<link href="/static/css/vendor/bootstrap-theme_v3.3.6.min.css" rel="stylesheet" type="text/css">');
+            css3 = new String ('<link href="/static/css/vendor/fa-svg-with-js.css" rel="stylesheet" type="text/css">');
+            css4 = new String ('<link href="/static/css/overrides.css" rel="stylesheet" type="text/css">');
+            window.frames["print_frame"].document.body.innerHTML=css1 + css2 + css3 + css4 + document.getElementById(divId).innerHTML;
+
+            // there is no real guarantee that the content / css has loaded...
+            setTimeout(vueReport.theprint,1000);
+        },
+        theprint: function(){
+            window.frames["print_frame"].window.focus();
+            window.frames["print_frame"].window.print();
         }
     }
 };

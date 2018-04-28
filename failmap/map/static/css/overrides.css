@@ -726,3 +726,17 @@ th.active .arrow {
     color:white;
     text-decoration: none;
 }
+
+/* Report printing in chrome / safari, so it looks nice */
+* {
+    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari */
+    color-adjust: exact !important;                 /*Firefox*/
+}
+
+@media print {
+    .noprint {display:none !important;}
+    a:link:after, a:visited:after {
+      display: none;
+      content: "";
+    }
+}
