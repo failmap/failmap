@@ -1537,3 +1537,14 @@ class LatestScanFeed(Feed):
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
         return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)
+
+
+def organization_autcomplete(request, country: str="NL", organization_type="municipality", parameter: str=""):
+    # If you would try SQL injection, this would be the place. The ORM would shield it... or does it :)
+
+    qs = Organization.objects.all()
+    qs = qs.filter(type=get_organization_type(organization_type))
+    qs = qs.filter(country=get_country(country))
+    qs = qs.filter(name__icontains=parameter).values_list('name', flat=True)
+
+    return JsonResponse(list(qs), encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)

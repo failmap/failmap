@@ -20,6 +20,9 @@ urlpatterns = [
     path('robots.txt', views.robots_txt),
     path('manifest.json', views.manifest_json),
 
+    path('autocomplete/<c:country>/<slug:organization_type>/organization/<str:parameter>',
+         views.organization_autcomplete),
+
     path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
     path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>', views.map_data),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
@@ -31,7 +34,6 @@ urlpatterns = [
     path('data/vulnstats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),
     path('data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_fail),
     path('data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_win),
-
     path('data/latest_scans/<c:country>/<slug:organization_type>/<slug:scan_type>', views.latest_scans),
     path('data/feed/<slug:scan_type>', views.LatestScanFeed()),
     path('data/terrible_urls/<c:country>/<slug:organization_type>/<w:weeks_back>', views.terrible_urls,),
