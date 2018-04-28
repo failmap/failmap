@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-27 19:22+0000\n"
+"POT-Creation-Date: 2018-04-28 12:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:777
-#: failmap/map/static/js/views.js:782 failmap/map/static/js/views.js:785
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:798
+#: failmap/map/static/js/views.js:803 failmap/map/static/js/views.js:806
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -420,57 +420,57 @@ msgstr "Oostenrijk"
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js:151 failmap/map/static/js/views.js:154
-#: failmap/map/static/js/views.js:157 failmap/map/static/js/views.js:159
-#: failmap/map/static/js/views.js:161
+#: failmap/map/static/js/views.js:154 failmap/map/static/js/views.js:157
+#: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
+#: failmap/map/static/js/views.js:164
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js:152 failmap/map/static/js/views.js:155
+#: failmap/map/static/js/views.js:155 failmap/map/static/js/views.js:158
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap/map/static/js/views.js:177
+#: failmap/map/static/js/views.js:180
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap/map/static/js/views.js:179
+#: failmap/map/static/js/views.js:182
 msgid "score high"
 msgstr "hoog"
 
-#: failmap/map/static/js/views.js:181
+#: failmap/map/static/js/views.js:184
 msgid "score medium"
 msgstr "midden"
 
-#: failmap/map/static/js/views.js:183
+#: failmap/map/static/js/views.js:186
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:332 failmap/map/static/js/views.js:337
+#: failmap/map/static/js/views.js:353 failmap/map/static/js/views.js:358
 msgid "top congratulations"
 msgstr "gefeliciteerd"
 
-#: failmap/map/static/js/views.js:333 failmap/map/static/js/views.js:338
+#: failmap/map/static/js/views.js:354 failmap/map/static/js/views.js:359
 msgid "top position"
 msgstr "positie"
 
-#: failmap/map/static/js/views.js:334
+#: failmap/map/static/js/views.js:355
 msgid "top fail on failmap"
 msgstr "slechtste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:335 failmap/map/static/js/views.js:340
+#: failmap/map/static/js/views.js:356 failmap/map/static/js/views.js:361
 msgid "hastag fail"
 msgstr "faal"
 
-#: failmap/map/static/js/views.js:335 failmap/map/static/js/views.js:340
+#: failmap/map/static/js/views.js:356 failmap/map/static/js/views.js:361
 msgid "hastag failmap"
 msgstr "faalkaart"
 
-#: failmap/map/static/js/views.js:339
+#: failmap/map/static/js/views.js:360
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:783
+#: failmap/map/static/js/views.js:804
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 
