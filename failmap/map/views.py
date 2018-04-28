@@ -321,7 +321,8 @@ def organizationtype_exists(request, organization_type_name):
 
 
 @cache_page(ten_minutes)
-def organization_report(request, organization_id=None, organization_name=None, weeks_back=0):
+def organization_report(request, country: str="NL", organization_type="municipality",
+                        organization_id=None, organization_name=None, weeks_back=0):
     # urls with /data/report// (two slashes)
     if not organization_id and not organization_name:
         return JsonResponse({}, safe=False, encoder=JSEncoder)
@@ -336,7 +337,9 @@ def organization_report(request, organization_id=None, organization_name=None, w
         if organization_id:
             organization = Organization.objects.filter(pk=organization_id)
         elif organization_name:
-            organization = Organization.objects.filter(name__iexact=organization_name)
+            organization = Organization.objects.filter(name__iexact=organization_name,
+                                                       country=get_country(country),
+                                                       type=get_organization_type(organization_type))
         ratings = organization.filter(organizationrating__when__lte=when)
         values = ratings.values('organizationrating__rating',
                                 'organizationrating__calculation',

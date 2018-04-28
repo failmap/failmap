@@ -204,7 +204,7 @@ var report_mixin = {
             vueReport.loading = true;
             vueReport.name = null;
             var self = this;
-            $.getJSON('/data/report/' + organization_id + '/' + weeks_ago, function (data) {
+            $.getJSON('/data/report/' + this.country + '/' + this.category + '/' + organization_id + '/' + weeks_ago, function (data) {
                 self.loading = false;
                 self.urls = data.calculation["organization"]["urls"];
                 self.points = data.rating;
@@ -251,6 +251,7 @@ var report_mixin = {
             window.frames["print_frame"].document.body.innerHTML=css1 + css2 + css3 + css4 + document.getElementById(divId).innerHTML;
 
             // there is no real guarantee that the content / css has loaded...
+            // even load doesn't do that it seems.
             setTimeout(vueReport.theprint,1000);
         },
         theprint: function(){
@@ -932,6 +933,10 @@ function views() {
                 vueGraphs.set_state(this.country, this.category);
                 vueImprovements.set_state(this.country, this.category);
                 vueExport.set_state(this.country, this.category);
+
+                // this needs state as the organizaton name in itself is not unique.
+                vueReport.set_state(this.country, this.category);
+                vueFullScreenReport.set_state(this.country, this.category);
             },
             // slowly moving the failmap into a vue.
             load: function (week) {
@@ -1020,7 +1025,7 @@ function views() {
 
     window.vueReport = new Vue({
         el: '#report',
-        mixins: [report_mixin],
+        mixins: [state_mixin, report_mixin],
 
         computed: {
             // load list of organizations from map features
@@ -1137,7 +1142,7 @@ function views() {
 
     window.vueFullScreenReport = new Vue({
         el: '#fullscreenreport',
-        mixins: [report_mixin],
+        mixins: [state_mixin, report_mixin],
 
         filters: {
             // you cannot run filters in rawHtml, so this doesn't work.

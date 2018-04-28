@@ -240,12 +240,13 @@
                         {% endverbatim %}
                     </div>
                     <br/>
-                        <a @click="closereport()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
-                        <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
-                        <br />
 
                     <div v-if="name" id="reportcontent">
 
+                        <br />
+                        <a @click="closereport()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
+                        <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+                        <br />
                         <div class="score high">
                             <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
                             <span class="score_label">{% trans "High" %}</span>
