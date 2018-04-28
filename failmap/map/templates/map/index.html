@@ -257,7 +257,7 @@
                     <br/>
 
                     <div v-if="name" id="reportcontent">
-
+                        <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
                         <br />
                         <a @click="closereport()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
                         <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
@@ -282,10 +282,8 @@
                         <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
                         <br/>
                         <ul>
-                        {% verbatim %}
                         <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
                         </li>
-                        {% endverbatim %}
                         <li>{% trans "RSS change feed teaser" %}
                         <a :href="'/data/updates_on_organization_feed/' + selected"
                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>

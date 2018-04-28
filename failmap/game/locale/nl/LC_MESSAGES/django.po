@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-04-28 12:29+0000\n"
+"POT-Creation-Date: 2018-04-28 17:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,7 +52,6 @@ msgid "This URL %(url)s is already suggested for organization %(organization)s"
 msgstr ""
 
 #: failmap/game/models.py:15
-#| msgid "contest"
 msgid "Contest name"
 msgstr "Naam van de wedstrijd"
 
@@ -77,17 +76,14 @@ msgid "teams"
 msgstr "teams"
 
 #: failmap/game/models.py:173
-#| msgid "submission"
 msgid "organisation submission"
 msgstr "organisatie inzending"
 
 #: failmap/game/models.py:174
-#| msgid "submissions"
 msgid "organisation submissions"
 msgstr "organisatie inzendingen"
 
 #: failmap/game/models.py:237
-#| msgid "submission"
 msgid "url submission"
 msgstr "url inzending"
 
