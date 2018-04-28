@@ -4,6 +4,69 @@
 - model: organizations.organizationtype
   pk: 2
   fields: {name: cyber}
+- model: organizations.organizationtype
+  pk: 3
+  fields: {name: safety_departments}
+- model: organizations.organizationtype
+  pk: 4
+  fields: {name: water board}
+- model: organizations.organizationtype
+  pk: 5
+  fields: {name: province}
+- model: organizations.organizationtype
+  pk: 6
+  fields: {name: county}
+- model: organizations.organizationtype
+  pk: 7
+  fields: {name: bundesland}
+- model: organizations.organizationtype
+  pk: 8
+  fields: {name: regierungsbezirk}
+- model: organizations.organizationtype
+  pk: 9
+  fields: {name: landkreis_kreis_kreisfreie_stadt}
+- model: organizations.organizationtype
+  pk: 10
+  fields: {name: samtgemeinde_verwaltungsgemeinschaft}
+- model: organizations.organizationtype
+  pk: 11
+  fields: {name: county}
+- model: organizations.organizationtype
+  pk: 12
+  fields: {name: agency}
+- model: organizations.organizationtype
+  pk: 14
+  fields: {name: other}
+- model: organizations.organizationtype
+  pk: 15
+  fields: {name: ministry}
+- model: organizations.organizationtype
+  pk: 16
+  fields: {name: administrative_region}
+- model: organizations.organizationtype
+  pk: 17
+  fields: {name: arrondissement}
+- model: organizations.organizationtype
+  pk: 18
+  fields: {name: circle}
+- model: organizations.organizationtype
+  pk: 19
+  fields: {name: circonscription_departementale}
+- model: organizations.organizationtype
+  pk: 20
+  fields: {name: community}
+- model: organizations.organizationtype
+  pk: 22
+  fields: {name: departement}
+- model: organizations.organizationtype
+  pk: 23
+  fields: {name: district}
+- model: organizations.organizationtype
+  pk: 24
+  fields: {name: region}
+- model: organizations.organizationtype
+  pk: 25
+  fields: {name: sub_region}
 - model: organizations.organization
   pk: 391
   fields: {country: NL, type: 2, name: Internet Cleanup Foundation, twitter_handle: '@faalkaart'}
