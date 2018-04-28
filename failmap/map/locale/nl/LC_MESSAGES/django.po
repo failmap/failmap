@@ -789,23 +789,23 @@ msgstr ""
 
 #: failmap/map/templates/map/index.html:911
 msgid "About this software"
-msgstr ""
+msgstr "Over deze software"
 
 #: failmap/map/templates/map/index.html:913
 msgid "Get the sourcecode"
-msgstr ""
+msgstr "Download de broncode"
 
 #: failmap/map/templates/map/index.html:914
 msgid "Documentation"
-msgstr ""
+msgstr "Documentatie"
 
 #: failmap/map/templates/map/index.html:919
 msgid "Made possible by"
-msgstr ""
+msgstr "Mogelijk gemaakt door"
 
 #: failmap/map/templates/map/index.html:952
 msgid "Score"
-msgstr ""
+msgstr "Score"
 
 #: failmap/map/templates/map/index.html:956
 msgid "congratulations"
@@ -929,7 +929,7 @@ msgstr ""
 
 #: failmap/map/views.py:1456 failmap/map/views.py:1522
 msgid "Perfect"
-msgstr ""
+msgstr "Perfect"
 
 #~ msgid "The Numbers"
 #~ msgstr "De Cijfers"

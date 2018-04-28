@@ -900,10 +900,40 @@
             <a name="footer" class="jumptonav"></a>
 
             <div class="col-md-3">
+                {% if config.RESPONSIBLE_ORGANIZATION_WEBSITE %}
                 <b>{% trans "This website is run by" %}</b>
+                {% endif %}
+
                 <ul>
-                    <li>🖥️ <a href="Organization website" target="_blank">Organization Name</a></li>
-                    <li><a href="mailto:project_email" target="_blank">project_email</a></li>
+                    {% if config.RESPONSIBLE_ORGANIZATION_WEBSITE %}
+                    <li>🖥️ <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank">{{ config.RESPONSIBLE_ORGANIZATION_NAME }}</a></li>
+                    {% endif %}
+
+                    <li>{% trans "Contact" %}:
+                        {% if config.RESPONSIBLE_ORGANIZATION_MAIL %}
+                        <a href="mailto:{{ config.RESPONSIBLE_ORGANIZATION_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a>
+                        {% endif %}
+
+                        {% if config.RESPONSIBLE_ORGANIZATION_TWITTER %}
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank"><i class="fab fa-twitter-square"></i></a>
+                        {% endif %}
+
+                        {% if config.RESPONSIBLE_ORGANIZATION_FACEBOOK %}
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                        {% endif %}
+
+                        {% if config.RESPONSIBLE_ORGANIZATION_LINKEDIN %}
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank"><i class="fas fa-linkedin"></i></a>
+                        {% endif %}
+
+                        {% if config.RESPONSIBLE_ORGANIZATION_WHATSAPP %}
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank"><i class="fab fa-whatsapp-square"></i></a>
+                        {% endif %}
+
+                        {% if config.RESPONSIBLE_ORGANIZATION_PHONE %}
+                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank"><i class="fas fa-phone-square"></i></a>
+                        {% endif %}
+                    </li>
                 </ul>
             </div>
 

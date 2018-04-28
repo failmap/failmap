@@ -20,19 +20,19 @@ msgstr ""
 
 #: failmap/game/forms.py:68
 msgid "Incorrect secret or team. Try again!"
-msgstr ""
+msgstr "Verkeerd geheim of team. Probeer opnieuw!"
 
 #: failmap/game/forms.py:111
 #, python-format
 msgid ""
 "This organization %(organization)s already exists in the database for this "
 "group."
-msgstr ""
+msgstr "De organisatie %(organization)s zit al in deze groep."
 
 #: failmap/game/forms.py:193
 #, python-format
 msgid "Invalid or missing suffix (like .com etc): %(url)s"
-msgstr ""
+msgstr "Ongeldig suffix (zoals .com etc): %(url)s"
 
 #: failmap/game/forms.py:201
 #, python-format
@@ -52,10 +52,9 @@ msgid "This URL %(url)s is already suggested for organization %(organization)s"
 msgstr ""
 
 #: failmap/game/models.py:15
-#, fuzzy
 #| msgid "contest"
 msgid "Contest name"
-msgstr "wedstrijd"
+msgstr "Naam van de wedstrijd"
 
 #: failmap/game/models.py:47
 msgid "contest"
@@ -67,7 +66,7 @@ msgstr "wedstrijden"
 
 #: failmap/game/models.py:60
 msgid "Team name"
-msgstr ""
+msgstr "Team-naam"
 
 #: failmap/game/models.py:83
 msgid "team"
@@ -78,25 +77,22 @@ msgid "teams"
 msgstr "teams"
 
 #: failmap/game/models.py:173
-#, fuzzy
 #| msgid "submission"
 msgid "organisation submission"
-msgstr "inzending"
+msgstr "organisatie inzending"
 
 #: failmap/game/models.py:174
-#, fuzzy
 #| msgid "submissions"
 msgid "organisation submissions"
-msgstr "inzendingen"
+msgstr "organisatie inzendingen"
 
 #: failmap/game/models.py:237
-#, fuzzy
 #| msgid "submission"
 msgid "url submission"
-msgstr "inzending"
+msgstr "url inzending"
 
 #: failmap/game/models.py:238
 #, fuzzy
 #| msgid "submissions"
 msgid "url submissions"
-msgstr "inzendingen"
+msgstr "url inzendingen"

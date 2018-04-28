@@ -49,7 +49,6 @@ msgid "No"
 msgstr "Nee"
 
 #: failmap/organizations/models.py:19
-#, fuzzy
 #| msgid "organization_type"
 msgid "organization type"
 msgstr "organisatie type"

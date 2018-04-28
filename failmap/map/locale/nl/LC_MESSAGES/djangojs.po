@@ -29,19 +29,19 @@ msgstr "Zoek organisatie..."
 
 #: failmap/map/static/js/failmap.js:139 failmap/map/static/js/failmap.js:143
 msgid "High"
-msgstr "Hoog"
+msgstr "Hoog risico"
 
 #: failmap/map/static/js/failmap.js:140 failmap/map/static/js/failmap.js:144
 msgid "Medium"
-msgstr "Midden"
+msgstr "Midden risico"
 
 #: failmap/map/static/js/failmap.js:141 failmap/map/static/js/failmap.js:145
 msgid "Low"
-msgstr "Laag"
+msgstr "Laag risico"
 
 #: failmap/map/static/js/failmap.js:173
 msgid "Loading"
-msgstr ""
+msgstr "Laden"
 
 #: failmap/map/static/js/failmap.js:191
 msgid "Url"

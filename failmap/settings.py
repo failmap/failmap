@@ -610,16 +610,50 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 }
 
 CONSTANCE_CONFIG = {
-    'MAILTO': ('info@faalkaart.nl', 'General email address.', str),
-    'HOSTING_ORGANIZATION_NAME': ('', 'The name of the organization that hosts this instance.', str),
-    'HOSTING_ORGANIZATION_EMAIL': ('', 'The address where people can send in new domains and issues.', str),
-    'HOSTING_ORGANIZATION_TWITTER': ('', 'Twitter address of the hosting organization.', str)
+    'MAILTO': ('', 'General email address.', str),
+
+    'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
+    'PROJECT_WEBSITE': ('', 'The url where this site is located.', str),
+    'PROJECT_MAIL': ('', 'The address where people can contact for more info about this project.', str),
+    'PROJECT_ISSUE_MAIL': ('', 'The address where people can mail when they encounter issues, for example when they '
+                               'are using the incorrect findings button.', str),
+    'PROJECT_TWITTER': ('', 'The twitter address where people can follow this project. Include the @!', str),
+    'PROJECT_FACEBOOK': ('', 'The facebook address where people can follow this project. Has to be a complete url.',
+                         str),
+
+    'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
+    'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
+                                                ' not be translated.', str),
+    'RESPONSIBLE_ORGANIZATION_WEBSITE': ('', 'The name of the organization running this project.', str),
+    'RESPONSIBLE_ORGANIZATION_MAIL': ('', 'The name of the organization running this project.', str),
+    'RESPONSIBLE_ORGANIZATION_TWITTER': ('', 'The twitter address where people can follow this project. Include '
+                                             'the @!', str),
+    'RESPONSIBLE_ORGANIZATION_FACEBOOK': ('', 'The facebook address where people can follow this project. Make sure'
+                                              ' this is a complete url.', str),
+
+    'SHOW_INTRO': (True, 'Shows the introduction.', bool),
+    'SHOW_GOOD_BAD': (True, 'Shows the good / bad lists.', bool),
+    'SHOW_EXTENDED_STATISTICS': (True, 'Shows extended statistics.', bool),
+    'SHOW_STATS_GRAPHS': (True, 'Shows graphs in extended statistics.', bool),
+    'SHOW_STATS_IMPROVEMENTS': (True, 'Shows improvements in extended statistics.', bool),
+    'SHOW_STATS_NUMBERS': (True, 'Shows numbers in extended statistics.', bool),
+    'SHOW_STATS_CHANGES': (True, 'Shows changes in extended statistics.', bool),
+    'SHOW_DATASETS': (True, 'Shows dataset downloads.', bool),
 }
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
-    'Map': ('HOSTING_ORGANIZATION_NAME', 'HOSTING_ORGANIZATION_EMAIL', 'HOSTING_ORGANIZATION_TWITTER'),
+
+    'Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENDED_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
+                'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES'),
+
+    'Project': ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
+                'PROJECT_FACEBOOK'),
+
+    'Responsible': ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
+                    'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
+                    'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK'),
 }
 # End constance settings
 ########
