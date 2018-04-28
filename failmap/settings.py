@@ -631,22 +631,33 @@ CONSTANCE_CONFIG = {
     'RESPONSIBLE_ORGANIZATION_FACEBOOK': ('', 'The facebook address where people can follow this project. Make sure'
                                               ' this is a complete url.', str),
 
-    'SHOW_INTRO': (True, 'Shows the introduction.', bool),
+    'SHOW_INTRO': (True, 'Shows the standard introduction.', bool),
     'SHOW_GOOD_BAD': (True, 'Shows the good / bad lists.', bool),
-    'SHOW_EXTENDED_STATISTICS': (True, 'Shows extended statistics.', bool),
-    'SHOW_STATS_GRAPHS': (True, 'Shows graphs in extended statistics.', bool),
-    'SHOW_STATS_IMPROVEMENTS': (True, 'Shows improvements in extended statistics.', bool),
-    'SHOW_STATS_NUMBERS': (True, 'Shows numbers in extended statistics.', bool),
-    'SHOW_STATS_CHANGES': (True, 'Shows changes in extended statistics.', bool),
-    'SHOW_DATASETS': (True, 'Shows dataset downloads.', bool),
+    'SHOW_EXTENSIVE_STATISTICS': (True, 'Shows extended statistics.', bool),
+    'SHOW_STATS_GRAPHS': (True, 'Shows graphs in extended statistics. '
+                                'Extended statistics needs to be enabled for this to have effect.', bool),
+    'SHOW_STATS_IMPROVEMENTS': (True, 'Shows improvements in extended statistics. '
+                                      'Extended statistics needs to be enabled for this to have effect.', bool),
+    'SHOW_STATS_NUMBERS': (True, 'Shows numbers in extended statistics. '
+                                 'Extended statistics needs to be enabled for this to have effect.', bool),
+    'SHOW_STATS_CHANGES': (True, 'Shows changes in extended statistics. '
+                                 'Extended statistics needs to be enabled for this to have effect.', bool),
+    'SHOW_DATASETS': (True, 'Shows dataset downloads. Note: dataset downloads are always available, even if they '
+                            'are not shown on the website.', bool),
+    'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
+
+    #
+    # 'USE_CUSTOM_INTRO': (False, 'If you want to use an (untranslated) custom intro, enable this. Enabling this'
+    #                             'will remove the standard intro and has several fields that can be filled with '
+    #                             'custom HTML.', bool),
 }
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
     'General': ('MAILTO', ),
 
-    'Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENDED_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
-                'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES'),
+    'Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
+                'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES', 'SHOW_TICKER'),
 
     'Project': ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
                 'PROJECT_FACEBOOK'),

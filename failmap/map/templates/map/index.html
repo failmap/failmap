@@ -92,13 +92,24 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="#info">{% trans "Info" %}</a></li>
-                <li><a href="#charts">{% trans "Charts" %}</a></li>
-                <li><a href="#extensive_statistics">{% trans "Statistics" %}</a></li>
 
+                {% if config.SHOW_INFO %}
+                <li><a href="#info">{% trans "Info" %}</a></li>
+                {% endif %}
+
+                {% if config.SHOW_GOOD_BAD %}
+                <li><a href="#charts">{% trans "Charts" %}</a></li>
+                {% endif %}
+
+                {% if config.SHOW_EXTENSIVE_STATISTICS %}
+                <li><a href="#extensive_statistics">{% trans "Statistics" %}</a></li>
+                {% endif %}
 
                 <li><a href="#reports">{% trans "Reports" %}</a></li>
+
+                {% if config.SHOW_DATASETS %}
                 <li><a href="#datasets">{% trans "Datasets" %}</a></li>
+                {% endif %}
             </ul>
             <ul class="nav navbar-nav navbar-right">
             {% if debug %}
@@ -147,6 +158,7 @@
     <div id='map'></div>
 </section>
 
+{% if config.SHOW_INTRO %}
 <section>
     <div class="container theme-showcase" role="main">
         <a name="info" class="jumptonav"></a>
@@ -197,7 +209,9 @@
         </div>
     </div>
 </section>
+{% endif %}
 
+{% if config.SHOW_GOOD_BAD %}
 <section style="background-color: ghostwhite">
    <div class="container">
 
@@ -216,6 +230,7 @@
         </div>
   </div>
 </section>
+{% endif %}
 
 <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 <section name="report" style="background-color: white">
@@ -338,10 +353,11 @@
     </div>
 </section>
 
+{% if config.SHOW_EXTENSIVE_STATISTICS %}
 <section name="extensive_statistics" style="background-color: ghostwhite">
     <div class="container">
 
-
+        {% if config.SHOW_STATS_NUMBERS %}
         <div id="statistics" v-cloak>
             <div class="page-header">
                 <a name="extensive_statistics" class="jumptonav"></a>
@@ -688,8 +704,9 @@
                     {% endverbatim %}
             </div>
         </div>
+        {% endif %}
 
-
+        {% if config.SHOW_STATS_IMPROVEMENTS %}
         <div id="issue_improvements" class="stats_part" v-cloak>
             <div class="page-header">
                 <h3>{% trans "Improvements" %}</h3>
@@ -752,7 +769,9 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
+        {% if config.SHOW_STATS_GRAPHS %}
         <div id="graphs" class="stats_part" v-cloak>
             <div class="page-header">
                 <h3>{% trans "Graphs" %}</h3>
@@ -798,8 +817,9 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
-
+        {% if config.SHOW_STATS_CHANGES %}
         <div id="latest_scans" class="stats_part">
             <div class="page-header">
                 <h3>{% trans "Latest changes" %}</h3>
@@ -848,9 +868,12 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </section>
+{% endif %}
 
+{% if config.SHOW_DATASETS %}
 <section name="datasets">
     <div class="container">
         <div id="export">
@@ -892,6 +915,7 @@
         </div>
     </div>
 </section>
+{% endif %}
 
 
 <section id="lastrow">
@@ -958,9 +982,11 @@
     </div>
 </section>
 
-<div id="ticker" v-if="visible" v-cloak>
+{% if config.SHOW_TICKER %}
+<div id="ticker" v-cloak>
     <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>
 </div>
+{% endif %}
 
 </body>
 <script type="x-template" id="fullscreenreport">
