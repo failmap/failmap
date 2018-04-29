@@ -50,6 +50,7 @@ RUN apk --no-cache add \
   libffi \
   libressl \
   libxml2 \
+  libxslt \
   mariadb-client \
   mariadb-client-libs \
   postgresql-libs \
