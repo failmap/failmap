@@ -18,6 +18,8 @@ RUN apk --no-cache add \
   # required to install osmtogeojson module
   nodejs \
   nodejs-npm \
+  libxml2-dev \
+  libxslt-dev \
   git
 
 # install app and dependencies in a artifact-able directory
