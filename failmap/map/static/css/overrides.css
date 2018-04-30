@@ -664,6 +664,8 @@ section:last-of-type {
     margin-bottom: 0;
 }
 
+section:nth-child(2n+2) {background-color: ghostwhite;}
+
 /**
  Sortable Tables
  https://vuejs.org/v2/examples/grid-component.html

@@ -212,7 +212,7 @@
 {% endif %}
 
 {% if config.SHOW_GOOD_BAD %}
-<section style="background-color: ghostwhite">
+<section>
    <div class="container">
 
        <div id="charts">
@@ -232,8 +232,7 @@
 </section>
 {% endif %}
 
-<iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
-<section name="report" style="background-color: white">
+<section name="report">
     <div class="container">
         <div class="page-header" id="report">
             <div>
@@ -352,7 +351,7 @@
 </section>
 
 {% if config.SHOW_EXTENSIVE_STATISTICS %}
-<section name="extensive_statistics" style="background-color: ghostwhite">
+<section name="extensive_statistics">
     <div class="container">
 
         {% if config.SHOW_STATS_NUMBERS %}
@@ -1094,6 +1093,7 @@
         </tbody>
     </table>
 </script>
+<iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>
 <!--
 This page was generated with MSPAINT.EXE on {{ timestamp }} in over 9000 seconds, version: {{ version }}.

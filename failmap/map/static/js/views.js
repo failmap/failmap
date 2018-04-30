@@ -201,6 +201,14 @@ var report_mixin = {
             if (!weeks_ago) {
                 weeks_ago = 0;
             }
+
+            if (!this.country || !this.category)
+                return;
+
+            // against symptom of autoloading when setting state, this doesn't have the right parameters.
+            if (!organization_id)
+                return;
+
             vueReport.loading = true;
             vueReport.name = null;
             var self = this;
@@ -400,11 +408,6 @@ var top_mixin = {
 
 function extracrunchycyber(){
     vueCountryNavbar.countries = ["NL", "DE"];
-}
-
-function startTicker(){
-    vueTicker.visible=true;
-    vueTicker.load()
 }
 
 
@@ -681,6 +684,7 @@ function views() {
     });
 
     window.vueDomainlist = new Vue({
+        mixins: [state_mixin],
         el: '#domainlist',
         data: {urls: Array},
         methods: {
@@ -694,7 +698,14 @@ function views() {
                 if (!weeks_back)
                     weeks_back = 0;
 
-                $.getJSON('/data/report/' + organization_id + '/' + weeks_back, function (data) {
+                if (!this.country || !this.category)
+                    return;
+
+                // symptom of state mixing loads this even though it's not needed (and doesn't have the right arguments)
+                if (!organization_id)
+                    return;
+
+                $.getJSON('/data/report/' + this.country + '/' + this.category + '/' + organization_id + '/' + weeks_back, function (data) {
                     vueDomainlist.urls = data.calculation["organization"]["urls"];
                 });
             }, 42)
@@ -744,6 +755,11 @@ function views() {
             },
             load: debounce(function () {
                 // /data/ticker/NL/municipality/0/0
+
+                if (!this.country || !this.category)
+                    return;
+
+
                 self = this;
                 $.getJSON('/data/ticker/' + this.country + '/' + this.category + '/0/0', function (data) {
                     j = 0;
@@ -911,9 +927,10 @@ function views() {
                 // this will go wrong when we group points / use other layers.
                 // this will crash the first time...
 
-                if (failmap !== undefined)
+                if ((failmap !== undefined) && (failmap.geojson.clearLayers !== undefined)) {
                     failmap.geojson.clearLayers();
                     failmap.geojson = null;
+                }
             }
         },
         methods: {
@@ -921,6 +938,7 @@ function views() {
                 this.category = category;
                 this.country = country;
 
+                // todo: make this dependent on what is shown or not in the settings.
                 vueTopfail.set_state(this.country, this.category);
                 vueTopwin.set_state(this.country, this.category);
                 vueStatistics.set_state(this.country, this.category);
@@ -933,6 +951,8 @@ function views() {
                 vueGraphs.set_state(this.country, this.category);
                 vueImprovements.set_state(this.country, this.category);
                 vueExport.set_state(this.country, this.category);
+                vueDomainlist.set_state(this.country, this.category);
+                vueTicker.set_state(this.country, this.category);
 
                 // this needs state as the organizaton name in itself is not unique.
                 vueReport.set_state(this.country, this.category);

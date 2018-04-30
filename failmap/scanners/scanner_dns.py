@@ -28,6 +28,8 @@ from django.conf import settings
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 
+from .scanner import allowed_to_discover
+
 logger = logging.getLogger(__package__)
 
 theharvester = settings.TOOLS['theHarvester']['executable']
@@ -109,6 +111,9 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
                       endpoints_filter: dict = dict(),) -> Task:
 
+    if not allowed_to_discover(nsec_compose_task):
+        return group()
+
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
@@ -126,6 +131,9 @@ def certificate_transparency(organizations: List[Organization]=None, urls: List[
 def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
                                           endpoints_filter: dict = dict(),) -> Task:
+
+    if not allowed_to_discover(certificate_transparency_compose_task):
+        return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,
@@ -163,6 +171,9 @@ def brute_known_subdomains(organizations: List[Organization]=None, urls: List[Ur
 def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
                                         urls_filter: dict = dict(),
                                         endpoints_filter: dict = dict(),) -> Task:
+
+    if not allowed_to_discover(brute_known_subdomains_compose_task):
+        return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,

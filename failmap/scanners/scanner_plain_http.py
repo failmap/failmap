@@ -17,6 +17,7 @@ from failmap.scanners.scanner_http import (redirects_to_safety, resolves_on_v4, 
 
 from ..celery import app
 from .models import Endpoint
+from .scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__package__)
 
@@ -33,17 +34,18 @@ def compose_task(
 
     """
 
-    # The dummy scanner is an example of a scanner that scans on an endpoint
-    # level. Meaning to create tasks for scanning, this function needs to be
-    # smart enough to translate (filtered) lists of organzations and urls into a
-    # (filtered) lists of endpoints (or use a url filter directly). This list of
-    # endpoints is then used to create a group of tasks which would perform the
-    # scan.
+    # We might not be allowed to scan for this at all.
+    if not allowed_to_scan(compose_task):
+        return group()  # An empty group fits this callable's signature and does not impede celery.
 
-    # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
-    # apply filter to urls in organizations (or if no filter, all urls)
-    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+    if organizations_filter:
+        organizations = Organization.objects.filter(is_dead=False, **organizations_filter)
+        urls = Url.objects.filter(q_configurations_to_scan(),
+                                  organization__in=organizations, is_dead=False, not_resolvable=False, **urls_filter)
+        log.info('Creating scan task %s urls for %s organizations.', len(urls), len(organizations))
+    else:
+        urls = Url.objects.filter(q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter)
+        log.info('Creating scan task %s urls.', len(urls))
 
     if endpoints_filter:
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
@@ -51,8 +53,6 @@ def compose_task(
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tasks!')
         return group()
-
-    log.info('Creating scan task %s urls for %s organizations.', len(urls), len(organizations))
 
     # create tasks for scanning all selected endpoints as a single managable group
     task = group(scan_url.s(url) for url in urls)
