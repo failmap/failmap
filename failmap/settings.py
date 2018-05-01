@@ -173,8 +173,12 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+# hopefully fixes helpdesk issue https://github.com/django-helpdesk/django-helpdesk/issues/184
 DATABASE_OPTIONS = {
-    'mysql': {'init_command': "SET sql_mode='STRICT_ALL_TABLES';"},
+    'mysql': {'init_command': "SET storage_engine=INNODB,"
+                              "character_set_connection=utf8,"
+                              "collation_connection=utf8_unicode_ci,"
+                              "sql_mode='STRICT_ALL_TABLES';"},
 
 }
 DB_ENGINE = os.environ.get('DB_ENGINE', 'mysql')
