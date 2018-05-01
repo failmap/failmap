@@ -175,8 +175,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 # hopefully fixes helpdesk issue https://github.com/django-helpdesk/django-helpdesk/issues/184
 DATABASE_OPTIONS = {
-    'mysql': {'init_command': "SET storage_engine=INNODB,"
-                              "character_set_connection=utf8,"
+    'mysql': {'init_command': "SET character_set_connection=utf8,"
                               "collation_connection=utf8_unicode_ci,"
                               "sql_mode='STRICT_ALL_TABLES';"},
 
@@ -652,16 +651,13 @@ CONSTANCE_CONFIG = {
                             'are not shown on the website.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
 
-    # show specific vulnerabilities. Note that they still can be in the report and the reports are what drives
-    # the map and of course the report section.
-    # These variables may cause blank spots in the site design (it's not fully designed for not showing this)
-    'SHOW_DNS_DNSSEC': (True, '', bool),
-    'SHOW_HTTP_TLS_QUALYS': (True, '', bool),
-    'SHOW_HTTP_MISSING_TLS': (True, '', bool),
-    'SHOW_HTTP_HEADERS_HSTS': (True, '', bool),
-    'SHOW_HTTP_HEADERS_XFO': (True, '', bool),
-    'SHOW_HTTP_HEADERS_X_XSS': (True, '', bool),
-    'SHOW_HTTP_HEADERS_X_CONTENT': (True, '', bool),
+    'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_TLS_QUALYS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_MISSING_TLS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_HEADERS_HSTS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_HEADERS_XFO': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
 
     # todo: schedule this once per week by default.
     'DISCOVER_URLS_USING_NSEC': (True, 'Discover new domains using DNSSEC NSEC1 hashes? (See docs)', bool),
@@ -675,7 +671,6 @@ CONSTANCE_CONFIG = {
     'SCAN_HTTP_TLS_QUALYS': (True, 'Do you want to scan for TLS issues through Qualys? This is about 1 scan per '
                                    'two minutes. Cloud scanning can improve this a bit.', bool),
     'SCAN_HTTP_MISSING_TLS': (True, 'Do you want to scan for endpoints that don\'t have a secure counterpart?', bool),
-    'SCAN_HTTP_HEADERS': (True, 'Do you want to scan for HTTP headers at all?', bool),
     'SCAN_HTTP_HEADERS_HSTS': (True, 'Do you want to scan for missing '
                                      'Hypertext Strict Transport Security headers?', bool),
     'SCAN_HTTP_HEADERS_XFO': (True, 'Do you want to scan for missing X-Frame-Options headers?', bool),
@@ -701,33 +696,35 @@ CONSTANCE_CONFIG = {
 
 # required until fixed: https://github.com/jazzband/django-constance/issues/263
 CONSTANCE_CONFIG_FIELDSETS = {
-    'General': ('COMMENTS', 'MAILTO', ),
+    '1 General': ('COMMENTS', 'MAILTO', ),
 
-    'Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
-                'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES', 'SHOW_TICKER'),
+    '2 Project': ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
+                  'PROJECT_FACEBOOK'),
 
-    'Project': ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
-                'PROJECT_FACEBOOK'),
+    '3 Responsible': ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
+                      'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
+                      'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK'),
 
-    'Responsible': ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
-                    'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
-                    'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK'),
+    '4 Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
+                  'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES', 'SHOW_TICKER',
+                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
+                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
+                  'SHOW_HTTP_HEADERS_X_CONTENT'
+                  ),
 
-    'Scanning': ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
-                 'SCAN_HTTP_HEADERS_HSTS',
-                 'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT'),
+    '5 Discovery': ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
+                    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS'),
 
-    'Reporting': ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
-                  'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
-                  'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-                  'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'),
+    '6 Scanning': ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
+                   'SCAN_HTTP_HEADERS_HSTS',
+                   'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT',
+                   'CREATE_HTTP_SCREENSHOT'),
 
-    'Vulnerabilities': ('SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
-                        'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                        'SHOW_HTTP_HEADERS_X_CONTENT'),
+    '7 Reporting': ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
+                    'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
+                    'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
+                    'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'),
 
-    'Discovery': ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
-                  'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')
 }
 # End constance settings
 ########
