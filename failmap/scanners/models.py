@@ -324,12 +324,3 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
-
-
-class State(models.Model):
-    """
-    A key value system (registry) to help with resuming scanners.
-    """
-    scanner = models.CharField(max_length=255, unique=True)
-    value = models.CharField(max_length=255)
-    since = models.DateTimeField(auto_now_add=True)

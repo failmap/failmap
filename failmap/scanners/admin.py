@@ -7,7 +7,7 @@ from jet.filters import RelatedFieldAjaxListFilter
 from failmap.map.rating import rate_url
 
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
-                     State, TlsQualysScan, TlsQualysScratchpad, UrlGenericScan, UrlIp)
+                     TlsQualysScan, TlsQualysScratchpad, UrlGenericScan, UrlIp)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -156,14 +156,6 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['created_on']
 
 
-class StateAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('scanner', 'value', 'since')
-    search_fields = ('scanner', 'value', 'since')
-    list_filter = ('scanner', 'value', 'since')
-    fields = ('scanner', 'value', 'since')
-    readonly_fields = ['since']
-
-
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on')
@@ -205,7 +197,6 @@ admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
 admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
 admin.site.register(Endpoint, EndpointAdmin)
 admin.site.register(Screenshot, ScreenshotAdmin)
-admin.site.register(State, StateAdmin)
 admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)
 admin.site.register(UrlGenericScan, UrlGenericScanAdmin)
 admin.site.register(EndpointGenericScanScratchpad, EndpointGenericScanScratchpadAdmin)

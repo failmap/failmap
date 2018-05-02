@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                     Screenshot, State, TlsQualysScan, TlsQualysScratchpad, UrlIp)
+                                     Screenshot, TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
 logger = logging.getLogger(__package__)
 
@@ -59,7 +59,6 @@ def and_its_gone():
     EndpointGenericScanScratchpad.objects.all().delete()
     TlsQualysScratchpad.objects.all().delete()
     Screenshot.objects.all().delete()
-    State.objects.all().delete()
     EndpointGenericScan.objects.all().delete()
     TlsQualysScan.objects.all().delete()
     Endpoint.objects.all().delete()
