@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 
 from ..celery import Task, app
 from .calculate import get_calculation
@@ -188,12 +188,19 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         allowed_to_report.append("X-XSS-Protection")
     if config.REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT:
         allowed_to_report.append("X-Content-Type-Options")
+    if config.REPORT_INCLUDE_DNS_DNSSEC:
+        allowed_to_report.append("DNSSEC")
 
     generic_scans = EndpointGenericScan.objects.all().filter(type__in=allowed_to_report, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
     generic_scan_dates = [x.rating_determined_on for x in generic_scans]
     # this is not faster.
     # generic_scan_dates = list(generic_scans.values_list("rating_determined_on", flat=True))
+
+    # url generic scans
+    generic_url_scans = UrlGenericScan.objects.all().filter(type__in=allowed_to_report, url__in=urls).\
+        prefetch_related("url")
+    generic_url_scan_dates = [x.rating_determined_on for x in generic_url_scans]
 
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
@@ -206,7 +213,8 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
 
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient. Using the latest possible time of the day is used.
-    moments = tls_qualys_scan_dates + generic_scan_dates + non_resolvable_dates + dead_scan_dates + dead_url_dates
+    moments = tls_qualys_scan_dates + generic_scan_dates + generic_url_scan_dates + non_resolvable_dates + \
+        dead_scan_dates + dead_url_dates
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
 
@@ -215,6 +223,7 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         return [], {
             'tls_qualys_scans': [],
             'generic_scans': [],
+            'generic_url_scans': [],
             'dead_endpoints': [],
             'non_resolvable_urls': [],
             'dead_urls': []
@@ -232,6 +241,7 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     happenings = {
         'tls_qualys_scans': tls_qualys_scans,
         'generic_scans': generic_scans,
+        'generic_url_scans': generic_url_scans,
         'dead_endpoints': dead_endpoints,
         'non_resolvable_urls': non_resolvable_urls,
         'dead_urls': dead_urls
@@ -270,8 +280,10 @@ def create_timeline(url: Url):
         moment_date = moment.date()
         timeline[moment_date] = {}
         timeline[moment_date]["endpoints"] = []
-        timeline[moment_date]['scans'] = []
+        timeline[moment_date]['scans'] = []   # todo: should be named endpoint_scans
+        timeline[moment_date]['url_scans'] = []
         timeline[moment_date]["dead_endpoints"] = []
+        timeline[moment_date]["urls"] = []
 
     # sometimes there have been scans on dead endpoints. This is a problem in the database.
     # this code is correct with retrieving those endpoints again.
@@ -289,7 +301,20 @@ def create_timeline(url: Url):
         timeline[some_day]["generic_scan"]['scans'].append(scan)
         timeline[some_day]["generic_scan"]["endpoints"].append(scan.endpoint)
         timeline[some_day]["endpoints"].append(scan.endpoint)
-        timeline[some_day]['scans'].append(scan)
+        timeline[some_day]['scans'].append(scan)  # todo: should be named endpoint_scans
+
+    for scan in happenings['generic_url_scans']:
+        some_day = scan.rating_determined_on.date()
+
+        # can we create this set in an easier way?
+        if "generic_url_scan" not in timeline[some_day]:
+            timeline[some_day]["generic_url_scan"] = {'scans': [], 'urls': []}
+
+        # timeline[some_day]["generic_scan"]["scanned"] = True  # do we ever check on this? Seems not.
+        timeline[some_day]["generic_url_scan"]['scans'].append(scan)
+        timeline[some_day]["generic_url_scan"]["urls"].append(scan.url)
+        timeline[some_day]["urls"].append(scan.url)
+        timeline[some_day]['url_scans'].append(scan)
 
     for scan in happenings['tls_qualys_scans']:
         some_day = scan.rating_determined_on.date()
@@ -301,7 +326,7 @@ def create_timeline(url: Url):
         timeline[some_day]["tls_qualys"]['scans'].append(scan)
         timeline[some_day]["tls_qualys"]["endpoints"].append(scan.endpoint)
         timeline[some_day]["endpoints"].append(scan.endpoint)
-        timeline[some_day]['scans'].append(scan)
+        timeline[some_day]['scans'].append(scan)  # todo: should be named endpoint_scans
 
     # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
     # see there are gaps in using the url over time. Which is more truthful.
@@ -333,7 +358,8 @@ def latest_moment_of_datetime(datetime_: datetime):
 def rate_timeline(timeline, url: Url):
     log.info("Rebuilding ratings for url %s on %s moments" % (url, len(timeline)))
 
-    previous_ratings = {}
+    previous_endpoint_ratings = {}
+    previous_url_ratings = {}
     previous_endpoints = []
     url_was_once_rated = False
 
@@ -370,7 +396,7 @@ def rate_timeline(timeline, url: Url):
             endpoint_scans[scan.endpoint.id].append(scan)
 
         # create the report for this moment
-        endpoint_calculations = []
+        endpoint_reports = []
 
         # also include all endpoints from the past time, which we do until the endpoints are dead.
         relevant_endpoints = set(timeline[moment]["endpoints"] + previous_endpoints)
@@ -386,33 +412,34 @@ def rate_timeline(timeline, url: Url):
                 if dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
-        scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                      "tls_qualys", "plain_https"]
+        endpoint_scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
+                               "X-XSS-Protection", "tls_qualys", "plain_https"]
 
         for endpoint in relevant_endpoints:
             url_was_once_rated = True
 
             calculations = []
-            these_scans = {}
+            these_endpoint_scans = {}
             if endpoint.id in endpoint_scans:
                 for scan in endpoint_scans[endpoint.id]:
                     if isinstance(scan, TlsQualysScan):
-                        these_scans['tls_qualys'] = scan
+                        these_endpoint_scans['tls_qualys'] = scan
                     if isinstance(scan, EndpointGenericScan):
                         if scan.type in ['Strict-Transport-Security', 'X-Content-Type-Options',
                                          'X-Frame-Options', 'X-XSS-Protection', 'plain_https']:
-                            these_scans[scan.type] = scan
+                            these_endpoint_scans[scan.type] = scan
 
             # enrich the ratings with previous ratings, without overwriting them.
-            for scan_type in scan_types:
-                if scan_type not in these_scans:
-                    if endpoint.id in previous_ratings:
-                        if scan_type in previous_ratings[endpoint.id]:
-                            these_scans[scan_type] = previous_ratings[endpoint.id][scan_type]
+            for endpoint_scan_type in endpoint_scan_types:
+                if endpoint_scan_type not in these_endpoint_scans:
+                    if endpoint.id in previous_endpoint_ratings:
+                        if endpoint_scan_type in previous_endpoint_ratings[endpoint.id]:
+                            these_endpoint_scans[endpoint_scan_type] = \
+                                previous_endpoint_ratings[endpoint.id][endpoint_scan_type]
 
             # propagate the ratings to the next iteration.
-            previous_ratings[endpoint.id] = {}
-            previous_ratings[endpoint.id] = these_scans
+            previous_endpoint_ratings[endpoint.id] = {}
+            previous_endpoint_ratings[endpoint.id] = these_endpoint_scans
 
             # build the calculation:
             #
@@ -434,10 +461,10 @@ def rate_timeline(timeline, url: Url):
 
             endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
 
-            for scan_type in scan_types:
-                if scan_type in these_scans:
-                    if scan_type not in given_ratings[label]:
-                        calculation = get_calculation(these_scans[scan_type])
+            for endpoint_scan_type in endpoint_scan_types:
+                if endpoint_scan_type in these_endpoint_scans:
+                    if endpoint_scan_type not in given_ratings[label]:
+                        calculation = get_calculation(these_endpoint_scans[endpoint_scan_type])
                         if calculation:
                             calculations.append(calculation)
                             endpoint_high += calculation["high"]
@@ -447,23 +474,23 @@ def rate_timeline(timeline, url: Url):
                             total_medium += calculation["medium"]
                             total_low += calculation["low"]
 
-                        given_ratings[label].append(scan_type)
+                        given_ratings[label].append(endpoint_scan_type)
                     else:
                         calculations.append({
-                            "type": scan_type,
+                            "type": endpoint_scan_type,
                             "explanation": "Repeated finding. Probably because this url changed IP adresses or has "
                                            "multiple IP adresses (common for failover / load-balancing).",
                             "high": 0,
                             "medium": 0,
                             "low": 0,
-                            "since": these_scans[scan_type].rating_determined_on.isoformat(),
-                            "last_scan": these_scans[scan_type].last_scan_moment.isoformat()
+                            "since": these_endpoint_scans[endpoint_scan_type].rating_determined_on.isoformat(),
+                            "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat()
                         })
 
             # Readibility is important: it's ordered from the worst to least points.
             calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
-            endpoint_calculations.append({
+            endpoint_reports.append({
                 "ip": endpoint.ip_version,
                 "ip_version": endpoint.ip_version,
                 "port": endpoint.port,
@@ -479,21 +506,67 @@ def rate_timeline(timeline, url: Url):
 
         # prevent empty ratings cluttering the database and skewing the stats.
         # todo: only do this if there never was a urlrating before this.
-        if not endpoint_calculations and not url_was_once_rated:
+        if not endpoint_reports and not url_was_once_rated:
             continue
 
-        sorted_endpoints = sorted(endpoint_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
+        # Add url generic scans, using the same logic as endpoints.
+        # - It reuses ratings from the previous moment, but if there are new ratings for a specific scan type only the
+        # rating for this specific scan type is overwritten.
+        # - Dead and not resolvable urls have been checked above, which helps.
+        url_scans = {}
+        for scan in timeline[moment]['url_scans']:
+            url_scans[scan.url.id] = []
+
+        for scan in timeline[moment]['url_scans']:
+            url_scans[scan.url.id].append(scan)
+
+        url_calculations = []
+        these_url_scans = {}
+        url_scan_types = ["DNSSEC"]
+
+        if url.id in url_scans:
+            for scan in url_scans[url.id]:
+                if isinstance(scan, UrlGenericScan):
+                    if scan.type in ['DNSSEC']:
+                        these_url_scans[scan.type] = scan
+
+        # enrich the ratings with previous ratings, which saves queries.
+        for url_scan_type in url_scan_types:
+            if url_scan_type not in these_url_scans:
+                if url.id in previous_url_ratings:
+                    if url_scan_type in previous_url_ratings[url.id]:
+                        these_url_scans[url_scan_type] = \
+                            previous_url_ratings[url.id][url_scan_type]
+
+        # propagate the ratings to the next iteration.
+        previous_url_ratings[url.id] = {}
+        previous_url_ratings[url.id] = these_url_scans
+
+        for url_scan_type in url_scan_types:
+            if url_scan_type in these_url_scans:
+                calculation = get_calculation(these_url_scans[url_scan_type])
+                if calculation:
+                    url_calculations.append(calculation)
+                    total_high += calculation["high"]
+                    total_medium += calculation["medium"]
+                    total_low += calculation["low"]
+
+        sorted_url_reports = sorted(url_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
+
+        sorted_endpoints_reports = sorted(
+            endpoint_reports, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
         calculation = {
             "url": url.url,
             "high": total_high,
             "medium": total_medium,
             "low": total_low,
-            "endpoints": sorted_endpoints
+            "ratings": sorted_url_reports,
+            "endpoints": sorted_endpoints_reports
         }
 
         log.debug("On %s %s has %s endpoints and %s high, %s medium and %s low vulnerabilities" %
-                  (moment, url, len(sorted_endpoints), total_high, total_medium, total_low))
+                  (moment, url, len(sorted_endpoints_reports), total_high, total_medium, total_low))
 
         save_url_rating(url, moment, total_high, total_medium, total_low, calculation)
 

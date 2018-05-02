@@ -15,8 +15,10 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        tasking()
+        rebuild_ratings()
         return
+
+        # tasking()
         # develop_determineratings()
         # test_can_connect_to_organization()
         # as a task
@@ -26,13 +28,21 @@ class Command(BaseCommand):
         # rebuild_ratings()
         # develop_determineratings()
         # develop_timeline()
-        #
+
         # Command.test_sslscan_real()
         # Command.test_determine_grade()
         # Command.develop_sslscan()
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def rebuild_ratings():
+    from failmap.map.rating import rerate_organizations
+
+    organization = Organization.objects.filter(name="Arnhem").get()
+    rerate_urls(list(Url.objects.all().filter(organization=organization)))
+    rerate_organizations(organizations=[organization])
 
 
 def tasking():
