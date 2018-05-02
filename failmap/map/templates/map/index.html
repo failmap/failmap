@@ -519,6 +519,24 @@
                             </tr>
                             </thead>
                             <tbody>
+                            {% if config.SHOW_DNS_DNSSEC %}
+                            {% verbatim %}
+                            <tr v-if="x['explained']['DNSSEC']">
+                                <td colspan="3">{% endverbatim %}{% trans "DNSSEC" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['DNSSEC']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "DNSSEC incorrect" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['DNSSEC']['DNSSEC is incorrectly or not configured (errors found).'] }}
+                                </td>
+                            </tr>
+                            <tr v-if="x['explained']['DNSSEC']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "DNSSEC correct" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['DNSSEC']['DNSSEC seems to be implemented sufficiently.'] }}{% endverbatim %}
+                                </td>
+                            </tr>
+                            {% endif %}
                             {% if config.SHOW_HTTP_MISSING_TLS %}
                             {% verbatim %}
                             <tr v-if="x['explained']['plain_https']">

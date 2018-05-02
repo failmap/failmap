@@ -723,6 +723,18 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
                 # yet there is not enough data to really make a graph.
                 # do not have duplicate urls in the stats.
                 # ratings
+                for r in url['ratings']:
+                    # stats over all different ratings
+                    if r['type'] not in measurement["explained"]:
+                        measurement["explained"][r['type']] = {}
+                        measurement["explained"][r['type']]['total'] = 0
+                    if not r['explanation'].startswith("Repeated finding."):
+                        if r['explanation'] not in measurement["explained"][r['type']]:
+                            measurement["explained"][r['type']][r['explanation']] = 0
+
+                        measurement["explained"][r['type']][r['explanation']] += 1
+                        measurement["explained"][r['type']]['total'] += 1
+
                 for endpoint in url['endpoints']:
 
                     # Only add the endpoint once for a series of ratings. And only if the
@@ -847,9 +859,6 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
             # rare occasions there are no endpoints.
             if "endpoints" not in urlrating.calculation:
                 continue
-
-            # todo: add type filter here. So you can select what types you want to see on the map.
-            # which helps.
 
             # url reports
             for rating in urlrating.calculation['ratings']:
