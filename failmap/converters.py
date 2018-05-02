@@ -9,7 +9,7 @@ class FourDigitYearConverter:
 
 
 class OrganizationTypeConverter:
-    regex = '[a-z_\-]{0, 50}'
+    regex = '[a-z_\-]{0,50}'
 
     def to_python(self, value):
         return str(value)
@@ -29,7 +29,18 @@ class OrganizationIdConverter:
 
 
 class OrganizationConverter:
-    regex = '[a-z_\-]{0, 50}'
+    regex = '[a-z_\-]{0,50}'
+
+    def to_python(self, value):
+        return str(value)
+
+    def to_url(self, value):
+        return '%s' % value
+
+
+class JsonConverter:
+    # Supports {"key": "value", "key2": "value2"} syntax.
+    regex = '[a-zA-Z0-9:_\-=}{, "\']{0,255}'
 
     def to_python(self, value):
         return str(value)

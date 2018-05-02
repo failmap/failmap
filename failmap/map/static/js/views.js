@@ -904,16 +904,65 @@ function views() {
             loading: false,
             week: 0,
             selected_organization: -1,
-            features: null
+            features: null,
+
+            // show individual vulnerabilities
+            // url
+            DNSSEC: true,
+
+            // endpoint
+            security_headers_strict_transport_security: true,
+            security_headers_x_content_type_options: true,
+            security_headers_x_frame_options: true,
+            security_headers_x_xss_protection: true,
+            tls_qualys: true,
+            plain_https: true
         },
         computed: {
             visibleweek: function () {
                 var x = new Date();
                 x.setDate(x.getDate() - this.week * 7);
                 return x.humanTimeStamp();
+            },
+            // todo: add debouncing.
+            desired_url_scans: function(){
+                return '{"DNSSEC": "' + this.DNSSEC + '"}'
+            },
+            desired_endpoint_scans: function(){
+                return '{"security_headers_strict_transport_security": "' + this.security_headers_strict_transport_security + '", ' +
+                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
+                    '"security_headers_x_frame_options": "' + this.security_headers_x_frame_options + '", ' +
+                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
+                    '"tls_qualys": "' + this.tls_qualys + '", ' +
+                    '"plain_https": "' + this.plain_https + '"}'
             }
+
         },
         watch: {
+            // todo: add all of these in one variables, so you can set more than one at the same time, which
+            // saves on loads.
+            DNSSEC: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_strict_transport_security: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_content_type_options: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_frame_options: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_xss_protection: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            tls_qualys: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            plain_https: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+
             category: function (newCategory, oldCategory) {
                 if (newCategory === oldCategory)
                     return;
@@ -973,7 +1022,8 @@ function views() {
 
                 var self = this;
                 self.loading = true;
-                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week, function (mapdata) {
+                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
+                    self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
                     self.loading = true;
                     // if there is one already, overwrite the attributes...
                     if (failmap.geojson) {

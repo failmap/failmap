@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
+from simplejson.errors import JSONDecodeError
 
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
@@ -210,7 +211,6 @@ def export_coordinates(request, country: str="NL", organization_type="municipali
 
 @cache_page(one_day)
 def export_urls(request, country: str="NL", organization_type="municipality"):
-    print(country)
     query = Url.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
@@ -1198,11 +1198,51 @@ def ticker(request, country: str="NL", organization_type: str="municipality",
 
 
 @cache_page(four_hours)
-def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0):
+def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0,
+             url_scan_types: dict=None, endpoint_scan_types: dict=None, ):
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
         when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+    desired_url_scans = []
+    desired_endpoint_scans = []
+
+    possible_url_scans = ["DNSSEC"]
+    possible_endpoint_scans = ["security_headers_strict_transport_security",
+                               "security_headers_x_content_type_options",
+                               "security_headers_x_frame_options",
+                               "security_headers_x_xss_protection",
+                               "tls_qualys",
+                               "plain_https"]
+
+    # todo: add try except for standard json errors.
+    # this is a vulnerability, so we try to contain it
+    try:
+        if len(url_scan_types) < 255 and len(endpoint_scan_types) < 255:
+            # risky, custom user input.
+            url_scan_types = json.loads(url_scan_types)
+            endpoint_scan_types = json.loads(endpoint_scan_types)
+
+            for possible_scan_type in possible_url_scans:
+                if url_scan_types.get(possible_scan_type, False) == "true":
+                    desired_url_scans += [possible_scan_type]
+
+            for possible_scan_type in possible_endpoint_scans:
+                if endpoint_scan_types.get(possible_scan_type, False) == "true":
+                    desired_endpoint_scans += [possible_scan_type]
+    except (JSONDecodeError, ) as e:
+        # falling back to default value
+        # log.debug("JsonDecodeError")
+        pass
+
+    # log.debug(desired_url_scans)
+    # log.debug(desired_endpoint_scans)
+
+    # fallback if no data
+    if not desired_url_scans and not desired_endpoint_scans:
+        desired_url_scans = possible_url_scans
+        desired_endpoint_scans = possible_endpoint_scans
 
     """
     Returns a json structure containing all current map data.
@@ -1296,8 +1336,42 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
     rows = cursor.fetchall()
 
     # todo: http://www.gadzmo.com/python/using-pythons-dictcursor-in-mysql-to-return-a-dict-with-keys/
-    # unfortunately numbered results are used.
+    # unfortunately numbered results are used. There is no decent solution for sqlite and the column to dict
+    # translation is somewhat hairy. A rawquery would probably be better if possible.
+
     for i in rows:
+
+        # Here we're going to do something stupid: to rebuild the high, medium, low classifcation based on scan_types
+        # It's somewhat insane to do it like this, but it's also insane to keep adding columns for each vulnerability
+        # that's added to the system. This solution will be a bit slow, but given the caching and such it wouldn't
+        # hurt too much.
+        # Also: we've optimized for calculation in the past, but we're not even using it until now. So that part of
+        # this code is pretty optimized :)
+        # This feature is created to give an instant overview of what issues are where. This will lead more clicks to
+        # reports.
+        # The caching of this url should be decent, as people want to click fast. Filtering on the client
+        # would be possible using the calculation field. Perhaps that should be the way. Yet then we have to do
+        # filtering with javascript, which is error prone (todo: this will be done in the future, as it responds faster
+        # but it will also mean an enormous increase of data sent to the client.)
+        # It's actually reasonably fast.
+        high, medium, low = 0, 0, 0
+
+        calculation = json.loads(i[6])
+
+        for url in calculation['organization']['urls']:
+            for url_rating in url['ratings']:
+                if url_rating['type'] in desired_url_scans:
+                    high += url_rating['high']
+                    medium += url_rating['medium']
+                    low += url_rating['low']
+
+            # it's possible the url doesn't have ratings.
+            for endpoint in url['endpoints']:
+                for endpoint_rating in endpoint['ratings']:
+                    if endpoint_rating['type'] in desired_endpoint_scans:
+                        high += endpoint_rating['high']
+                        medium += endpoint_rating['medium']
+                        low += endpoint_rating['low']
 
         # figure out if red, orange or green:
         # #162, only make things red if there is a critical issue.
@@ -1306,7 +1380,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
         if "endpoints" not in i[6]:
             color = "gray"
         else:
-            color = "red" if i[7] else "orange" if i[8] else "green"
+            color = "red" if high else "orange" if medium else "green"
 
         dataset = {
             "type": "Feature",
@@ -1317,9 +1391,9 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
                     "organization_name": i[1],
                     "organization_slug": slugify(i[1]),
                     "overall": i[0],
-                    "high": i[7],
-                    "medium": i[8],
-                    "low": i[9],
+                    "high": high,
+                    "medium": medium,
+                    "low": low,
                     "data_from": when,
                     "color": color
                 },
@@ -1519,7 +1593,7 @@ class LatestScanFeed(Feed):
 
     # magic
     def get_object(self, request, *args, **kwargs):
-        print("args: %s" % kwargs['scan_type'])
+        # print("args: %s" % kwargs['scan_type'])
         return kwargs['scan_type']
 
     def title(self, scan_type):
@@ -1536,7 +1610,7 @@ class LatestScanFeed(Feed):
 
     # second parameter via magic
     def items(self, scan_type):
-        print(scan_type)
+        # print(scan_type)
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                          "plain_https"]:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]

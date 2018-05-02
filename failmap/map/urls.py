@@ -13,6 +13,7 @@ register_converter(converters.OrganizationTypeConverter, 'ot')
 register_converter(converters.WeeksConverter, 'w')
 register_converter(converters.CountryConverter, 'c')
 register_converter(converters.OrganizationIdConverter, 'oid')
+register_converter(converters.JsonConverter, 'json')
 
 urlpatterns = [
     path('', views.index),
@@ -24,7 +25,8 @@ urlpatterns = [
          views.organization_autcomplete),
 
     path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
-    path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>', views.map_data),
+    path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>/<json:url_scan_types>/'
+         '<json:endpoint_scan_types>/', views.map_data),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
     path('data/countries/', views.get_countries),
     path('data/default_country/', views.get_default_country),
