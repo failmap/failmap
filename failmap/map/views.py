@@ -848,6 +848,26 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
             if "endpoints" not in urlrating.calculation:
                 continue
 
+            # todo: add type filter here. So you can select what types you want to see on the map.
+            # which helps.
+
+            # url reports
+            for rating in urlrating.calculation['ratings']:
+                if rating['type'] not in measurement:
+                    measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                if rating['type'] not in scan_types:
+                    scan_types.append(rating['type'])
+
+                measurement[rating['type']]['high'] += rating['high']
+                measurement[rating['type']]['medium'] += rating['medium']
+                measurement[rating['type']]['low'] += rating['low']
+
+                measurement['total']['high'] += rating['high']
+                measurement['total']['medium'] += rating['medium']
+                measurement['total']['low'] += rating['low']
+
+            # endpoint reports
             for endpoint in urlrating.calculation['endpoints']:
                 for rating in endpoint['ratings']:
                     if rating['type'] not in measurement:

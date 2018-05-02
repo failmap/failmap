@@ -42,6 +42,8 @@ var dynamic_translations = function(){
     gettext('Strict-Transport-Security header present.');
     gettext('Missing Strict-Transport-Security header.');
     gettext('Missing Strict-Transport-Security header. Offers no insecure alternative service.');
+    gettext('DNSSEC is incorrectly or not configured (errors found).');
+    gettext('DNSSEC seems to be implemented sufficiently.');
 
     // vulnerabilities:
     gettext('report_header_tls_qualys');
@@ -50,6 +52,7 @@ var dynamic_translations = function(){
     gettext('report_header_security_headers_x_frame_options');
     gettext('report_header_security_headers_x_content_type_options');
     gettext('report_header_security_headers_strict_transport_security');
+    gettext('report_header_DNSSEC');
 
     // some categories:
     gettext('category_menu_municipality');

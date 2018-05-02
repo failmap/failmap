@@ -155,6 +155,11 @@ div#report {
     min-height: 230px;
 }
 
+.giveroom_url {
+    margin-top: 12px;
+    min-height: 156px;
+}
+
 .reportlist {
     display: table;
     padding-bottom: 15px;

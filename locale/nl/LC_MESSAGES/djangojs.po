@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-02 10:13+0000\n"
+"POT-Creation-Date: 2018-05-02 14:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -451,71 +451,75 @@ msgstr ""
 msgid "report_header_security_headers_strict_transport_security"
 msgstr ""
 
-#: static/js/script.js:55
-msgid "category_menu_municipality"
+#: static/js/script.js:53
+msgid "report_header_DNSSEC"
 msgstr ""
 
 #: static/js/script.js:56
-msgid "category_menu_cyber"
+msgid "category_menu_municipality"
 msgstr ""
 
 #: static/js/script.js:57
-msgid "category_menu_unknown"
+msgid "category_menu_cyber"
 msgstr ""
 
 #: static/js/script.js:58
-msgid "category_menu_water_board"
+msgid "category_menu_unknown"
 msgstr ""
 
 #: static/js/script.js:59
-msgid "category_menu_province"
+msgid "category_menu_water_board"
 msgstr ""
 
 #: static/js/script.js:60
+msgid "category_menu_province"
+msgstr ""
+
+#: static/js/script.js:61
 msgid "category_menu_hacking"
 msgstr ""
 
-#: static/js/script.js:62
+#: static/js/script.js:63
 msgid "category_menu_bundesland"
 msgstr ""
 
-#: static/js/script.js:63
+#: static/js/script.js:64
 msgid "category_menu_regierungsbezirk"
 msgstr ""
 
-#: static/js/script.js:64
+#: static/js/script.js:65
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr ""
 
-#: static/js/script.js:65
+#: static/js/script.js:66
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
-#: static/js/script.js:66
+#: static/js/script.js:67
 msgid "category_menu_stadt_gemeinde"
 msgstr ""
 
-#: static/js/script.js:67
+#: static/js/script.js:68
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:68
+#: static/js/script.js:69
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:71
+#: static/js/script.js:72
 msgid "country_NL"
 msgstr ""
 
-#: static/js/script.js:72
+#: static/js/script.js:73
 msgid "country_DE"
 msgstr ""
 
-#: static/js/script.js:73
+#: static/js/script.js:74
 msgid "country_SE"
 msgstr ""
 
-#: static/js/script.js:74
+#: static/js/script.js:75
 msgid "country_AT"
 msgstr ""
 

@@ -301,19 +301,44 @@
                         <div v-for="url in urls" class="perurl"
                              :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
 
-                            <div class="col-md-4">
-                                &nbsp;
-                            </div>
-                            <div class="col-md-8">
-                                <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                                <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                                      :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                                <a :href="'mailto:' + issue_mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
-                                   class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
-                                    {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    &nbsp;
+                                </div>
+                                <div class="col-md-8">
+                                    <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                                    <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
+                                          :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                                    <a :href="'mailto:' + issue_mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                                       class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
+                                        {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
+                                </div>
                             </div>
 
-                            <div v-for="endpoint in url.endpoints">
+                            <!-- url reports -->
+                            <div v-if="url.ratings.length > 0" class="row">
+                                <div class="col-md-4">
+                                    &nbsp;
+                                </div>
+                                <div class="col-md-8 giveroom_url">
+                                    <h4>{% trans "Url level findings" %}</h4>
+                                    {% verbatim %}
+                                    <div v-for="rating in url.ratings">
+                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                        &nbsp; &nbsp; <span
+                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
+                                        translate(rating.explanation) }}<br/>
+                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
+                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
+                                        {{ humanize(rating.last_scan) }} <br/>
+                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
+                                        <br/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- endpoint reports -->
+                            <div v-for="endpoint in url.endpoints" class="row">
                                 <div class="col-md-4 giveroom">
                                     <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
                                        target="_blank"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-02 10:13+0000\n"
+"POT-Creation-Date: 2018-05-02 14:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:814
-#: failmap/map/static/js/views.js:819 failmap/map/static/js/views.js:822
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:817
+#: failmap/map/static/js/views.js:822 failmap/map/static/js/views.js:825
 msgid "View Full Screen"
 msgstr "🌈"
 
@@ -313,109 +313,123 @@ msgid ""
 "service."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:47
+#: failmap/map/static/js/script.js:45
+msgid "DNSSEC is incorrectly or not configured (errors found)."
+msgstr ""
+
+#: failmap/map/static/js/script.js:46
+msgid "DNSSEC seems to be implemented sufficiently."
+msgstr ""
+
+#: failmap/map/static/js/script.js:49
 msgid "report_header_tls_qualys"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:48
+#: failmap/map/static/js/script.js:50
 msgid "report_header_plain_https"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:49
+#: failmap/map/static/js/script.js:51
 msgid "report_header_security_headers_x_xss_protection"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:50
+#: failmap/map/static/js/script.js:52
 msgid "report_header_security_headers_x_frame_options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:51
+#: failmap/map/static/js/script.js:53
 msgid "report_header_security_headers_x_content_type_options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:52
+#: failmap/map/static/js/script.js:54
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:55
-msgid "category_menu_municipality"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:56
-msgid "category_menu_cyber"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:57
-msgid "category_menu_unknown"
+#, fuzzy
+#| msgid "report_header_tls_qualys"
+msgid "report_header_DNSSEC"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:58
-msgid "category_menu_water_board"
+msgid "category_menu_municipality"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:59
-msgid "category_menu_province"
+msgid "category_menu_cyber"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:60
-msgid "category_menu_hacking"
+msgid "category_menu_unknown"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:61
+msgid "category_menu_water_board"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:62
+msgid "category_menu_province"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:63
+msgid "category_menu_hacking"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:65
 #, fuzzy
 #| msgid "category_menu_unknown"
 msgid "category_menu_bundesland"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:63
+#: failmap/map/static/js/script.js:66
 #, fuzzy
 #| msgid "regierungsbezirk"
 msgid "category_menu_regierungsbezirk"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:64
+#: failmap/map/static/js/script.js:67
 #, fuzzy
 #| msgid "landkreis_kreis_kreisfreie_stadt"
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:65
+#: failmap/map/static/js/script.js:68
 #, fuzzy
 #| msgid "samtgemeinde_verwaltungsgemeinschaft"
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:66
+#: failmap/map/static/js/script.js:69
 #, fuzzy
 #| msgid "category_menu_hacking"
 msgid "category_menu_stadt_gemeinde"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:67
+#: failmap/map/static/js/script.js:70
 #, fuzzy
 #| msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:68
+#: failmap/map/static/js/script.js:71
 #, fuzzy
 #| msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:71
+#: failmap/map/static/js/script.js:74
 msgid "country_NL"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:72
+#: failmap/map/static/js/script.js:75
 msgid "country_DE"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:73
+#: failmap/map/static/js/script.js:76
 msgid "country_SE"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:74
+#: failmap/map/static/js/script.js:77
 msgid "country_AT"
 msgstr "🌈"
 
@@ -425,55 +439,56 @@ msgstr "🌈"
 
 #: failmap/map/static/js/views.js:154 failmap/map/static/js/views.js:157
 #: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
-#: failmap/map/static/js/views.js:164
+#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:166
 msgid "Documentation"
 msgstr "🌈"
 
 #: failmap/map/static/js/views.js:155 failmap/map/static/js/views.js:158
+#: failmap/map/static/js/views.js:167
 msgid "Second opinion"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:180
+#: failmap/map/static/js/views.js:183
 msgid "score perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:182
+#: failmap/map/static/js/views.js:185
 msgid "score high"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:184
+#: failmap/map/static/js/views.js:187
 msgid "score medium"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:186
+#: failmap/map/static/js/views.js:189
 msgid "score low"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:361 failmap/map/static/js/views.js:366
+#: failmap/map/static/js/views.js:364 failmap/map/static/js/views.js:369
 msgid "top congratulations"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:362 failmap/map/static/js/views.js:367
+#: failmap/map/static/js/views.js:365 failmap/map/static/js/views.js:370
 msgid "top position"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:363
+#: failmap/map/static/js/views.js:366
 msgid "top fail on failmap"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:364 failmap/map/static/js/views.js:369
+#: failmap/map/static/js/views.js:367 failmap/map/static/js/views.js:372
 msgid "hastag fail"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:364 failmap/map/static/js/views.js:369
+#: failmap/map/static/js/views.js:367 failmap/map/static/js/views.js:372
 msgid "hastag failmap"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:368
+#: failmap/map/static/js/views.js:371
 msgid "top win on failmap"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:820
+#: failmap/map/static/js/views.js:823
 msgid "Exit Full Screen"
 msgstr "🌈"
 

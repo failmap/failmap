@@ -164,7 +164,8 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = (('endpoint', RelatedFieldAjaxListFilter), 'type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on',
                    'endpoint__protocol',
-                   'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead'
+                   'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead',
+                   'endpoint__url__organization__country', 'endpoint__url__organization__type__name',
                    )
 
     fields = ('endpoint', 'type', 'rating',
@@ -178,7 +179,7 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                     'explanation', 'last_scan_moment', 'rating_determined_on')
     search_fields = ('url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
-    list_filter = ('type', 'rating',
+    list_filter = ('url__organization__country', 'url__organization__type__name', 'type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')
     fields = ('url', 'type', 'rating',
               'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')

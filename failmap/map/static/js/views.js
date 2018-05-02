@@ -162,6 +162,9 @@ var report_mixin = {
                 return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>';
             if (rating.type === "security_headers_x_content_type_options")
                 return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
+            if (rating.type === "DNSSEC")
+                return '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>' +
+                    '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank">' + gettext('Second opinion') + ' (verisign)</a>';
         },
         total_awarded_points: function (high, medium, low) {
             var marker = vueReport.make_marker(high, medium, low);
