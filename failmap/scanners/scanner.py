@@ -1,8 +1,13 @@
 # Generic functions for scanners
+import logging
+
 from constance import config
 from django.db.models import Q
 
 from ..map.models import Configuration
+
+log = logging.getLogger(__name__)
+
 
 # The reason these permissions are taken away from the rest of the implementation is to
 # make sure these permissions can be more easily be replaced by other permissions. For example we might want to
@@ -10,25 +15,31 @@ from ..map.models import Configuration
 
 
 # simply matching config variables to modules.
-def allowed_to_scan(scanner):
+# Note that .__module__  is always celery.local :)
+def allowed_to_scan(scanner_name: str=""):
+
+    log.info(scanner_name)
 
     if not config.SCAN_AT_ALL:
         return False
 
-    if scanner.__module__ == 'scanner_plain_http':
+    if scanner_name == 'scanner_plain_http':
         return config.SCAN_HTTP_MISSING_TLS
 
-    if scanner.__module__ == 'scanner_tls_qualys':
+    if scanner_name == 'scanner_tls_qualys':
         return config.SCAN_HTTP_TLS_QUALYS
 
-    if scanner.__module__ == 'scanner_dnssec':
+    if scanner_name == 'scanner_dnssec':
         return config.SCAN_DNS_DNSSEC
 
-    if scanner.__module__ == 'scanner_screenshot':
+    if scanner_name == 'scanner_screenshot':
         return config.SCAN_HTTP_SCREENSHOT
 
-    if scanner.__module__ == 'scanner_security_headers':
+    if scanner_name == 'scanner_security_headers':
         return config.CREATE_HTTP_SCREENSHOT
+
+    if scanner_name == 'scanner_dummy':
+        return True
 
     return False
 

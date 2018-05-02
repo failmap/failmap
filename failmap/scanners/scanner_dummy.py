@@ -16,6 +16,7 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 
 from .models import Endpoint
+from .scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
@@ -45,10 +46,13 @@ def compose_task(
     # endpoints is then used to create a group of tasks which would perform the
     # scan.
 
+    if not allowed_to_scan("scanner_dummy"):
+        return group()
+
     # apply filter to organizations (or if no filter, all organizations)
     organizations = Organization.objects.filter(**organizations_filter)
     # apply filter to urls in organizations (or if no filter, all urls (which is not wat below code does))
-    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+    urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
 
     # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(

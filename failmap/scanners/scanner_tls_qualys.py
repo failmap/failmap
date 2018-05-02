@@ -39,6 +39,7 @@ from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysSca
 from failmap.scanners.scanner_http import store_url_ips
 
 from ..celery import PRIO_HIGH, PRIO_NORMAL, app
+from .scanner import allowed_to_scan, q_configurations_to_scan
 
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30
@@ -59,12 +60,8 @@ def compose_task(
 
     """
 
-    # The dummy scanner is an example of a scanner that scans on an endpoint
-    # level. Meaning to create tasks for scanning, this function needs to be
-    # smart enough to translate (filtered) lists of organzations and urls into a
-    # (filtered) lists of endpoints (or use a url filter directly). This list of
-    # endpoints is then used to create a group of tasks which would perform the
-    # scan.
+    if not allowed_to_scan("scanner_tls_qualys"):
+        return group()
 
     # apply filter to organizations (or if no filter, all organizations)
     organizations = []
@@ -79,6 +76,7 @@ def compose_task(
         # scan only once in seven days. an emergency fix to make sure everything is scanned.
         # todo: force re-scan, where days is < 7, with 5000 scanning takes a while and a lot still goes wrong.
         urls = Url.objects.filter(
+            q_configurations_to_scan(),
             is_dead=False,
             not_resolvable=False,
             endpoint__protocol="https",
@@ -90,6 +88,7 @@ def compose_task(
                   ).order_by("?")  # used to be endpoint__tlsqualysscan__last_scan_moment
     else:
         urls = Url.objects.filter(
+            q_configurations_to_scan(),
             is_dead=False,
             not_resolvable=False,
             endpoint__protocol="https",

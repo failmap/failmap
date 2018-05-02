@@ -32,6 +32,7 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.url_scan_manager import UrlScanManager
 
 from .models import Endpoint
+from .scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
@@ -57,6 +58,9 @@ def compose_task(
     endpoint variant.
     """
 
+    if not allowed_to_scan("scanner_dnssec"):
+        return group()
+
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"url__iregex": "^[^.]*\.[^.]*$"})
 
@@ -65,14 +69,14 @@ def compose_task(
     # gather urls from organizations
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter)
-        urls += Url.objects.filter(organization__in=organizations, **urls_filter)
+        urls += Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
     elif endpoints_filter:
         # and now retrieve urls from endpoints
         endpoints = Endpoint.objects.filter(**endpoints_filter)
-        urls += Url.objects.filter(endpoint__in=endpoints, **urls_filter)
+        urls += Url.objects.filter(q_configurations_to_scan(), endpoint__in=endpoints, **urls_filter)
     else:
         # now urls directly
-        urls += Url.objects.filter(**urls_filter)
+        urls += Url.objects.filter(q_configurations_to_scan(), **urls_filter)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tasks!')

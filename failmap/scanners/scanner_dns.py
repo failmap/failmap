@@ -111,7 +111,7 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
                       endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover(nsec_compose_task):
+    if not allowed_to_discover("nsec"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
@@ -132,7 +132,7 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
                                           endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover(certificate_transparency_compose_task):
+    if not allowed_to_discover("certificate_transparency"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
@@ -172,7 +172,7 @@ def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
                                         urls_filter: dict = dict(),
                                         endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover(brute_known_subdomains_compose_task):
+    if not allowed_to_discover("brute_known_subdomains"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,

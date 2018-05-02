@@ -35,7 +35,7 @@ def compose_task(
     """
 
     # We might not be allowed to scan for this at all.
-    if not allowed_to_scan(compose_task):
+    if not allowed_to_scan("scanner_plain_http"):
         return group()  # An empty group fits this callable's signature and does not impede celery.
 
     if organizations_filter:

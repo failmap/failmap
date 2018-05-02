@@ -16,6 +16,8 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
 from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
 
+from .scanner import allowed_to_scan, q_configurations_to_scan
+
 log = logging.getLogger(__name__)
 
 
@@ -33,21 +35,19 @@ def compose_task(
 
     """
 
-    # The dummy scanner is an example of a scanner that scans on an endpoint
-    # level. Meaning to create tasks for scanning, this function needs to be
-    # smart enough to translate (filtered) lists of organzations and urls into a
-    # (filtered) lists of endpoints (or use a url filter directly). This list of
-    # endpoints is then used to create a group of tasks which would perform the
-    # scan.
+    if not allowed_to_scan("scanner_security_headers"):
+        return group()
 
     # apply filter to organizations (or if no filter, all organizations)
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter)
-        urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
+        log.info('Creating scan task for %s urls for %s organizations.', len(urls), len(organizations))
     else:
-        urls = Url.objects.filter(**urls_filter)
+        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
+        log.info('Creating scan task for %s urls.', len(urls))
 
     # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(

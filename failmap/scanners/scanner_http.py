@@ -43,6 +43,7 @@ from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
 
+from .scanner import allowed_to_scan, q_configurations_to_scan
 from .timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -69,16 +70,20 @@ def compose_task(
 
     """
 
-    # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
-    # apply filter to urls in organizations (or if no filter, all urls)
-    urls = Url.objects.filter(organization__in=organizations, **urls_filter)
+    if not allowed_to_scan("scanner_http"):
+        return group()
+
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        # apply filter to urls in organizations (or if no filter, all urls)
+        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
+        logger.info('Creating scan task for %s urls for %s organizations.', len(urls), len(organizations))
+    else:
+        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
+        logger.info('Creating scan task for %s urls.', len(urls))
 
     if endpoints_filter:
         logger.warning("Endpoint filters are not implemented: filter has no effect.")
-
-    logger.info('Creating scan task for %s urls for %s organizations.',
-                len(urls), len(organizations))
 
     # make sure we're dealing with a list for the coming random function
     urls = list(urls)

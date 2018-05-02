@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
-from failmap.scanners import (scanner_dns, scanner_dnssec, scanner_http, scanner_plain_http,
+from failmap.scanners import (scanner_dnssec, scanner_http, scanner_plain_http,
                               scanner_security_headers, scanner_tls_qualys)
 
 log = logging.getLogger(__name__)
@@ -23,8 +23,7 @@ class Command(ScannerTaskCommand):
             'headers': scanner_security_headers,
             'plain': scanner_plain_http,
             'endpoints': scanner_http,
-            'tls': scanner_tls_qualys,
-            'dns': scanner_dns
+            'tls': scanner_tls_qualys
         }
 
         if options['scanner'][0] not in scanners:
