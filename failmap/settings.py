@@ -802,17 +802,15 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file
 # The following items are hidden on purpose:
 # core.site (we only have one site)
 # scanners.state, will be deprecated and removed (if not already)
-
-# Todo: it's possible to add custom items, for example some often used
-# queries. See: http://jet.readthedocs.io/en/latest/config_file.html#custom-menu
+# See: http://jet.readthedocs.io/en/latest/config_file.html#custom-menu
 
 JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 
     {'label': _('🔧 configuration'), 'items': [
         {'name': 'auth.user'},
         {'name': 'auth.group'},
-        {'name': 'map.configuration', 'label': _('map display order')},
-        {'name': 'constance.config', 'label': _('variables')},
+        {'name': 'constance.config', 'label': _('configuration')},
+        {'name': 'map.configuration', 'label': _('map configuration')},
         {'name': 'map.administrativeregion', 'label': _('import regions')},
     ]},
 
