@@ -7,14 +7,13 @@ import tempfile
 
 import certifi
 import OpenSSL
+from constance import config
 from django.conf import settings
 from kombu import Queue
 
 log = logging.getLogger(__name__)
 
 TLS_CLIENT_FILE = '/client.p12'
-IPV6_TEST_DOMAIN = 'faalkaart.nl'
-CONNECTIVITY_TEST_DOMAIN = 'faalkaart.nl'
 
 # list of all roles that require IPv6 networking
 IPV6_ROLES = [
@@ -135,9 +134,9 @@ def worker_verify_role_capabilities(role):
         # verify if a https connection to a IPv6 website can be made
         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
         try:
-            s.connect((IPV6_TEST_DOMAIN, 443))
+            s.connect((config.IPV6_TEST_DOMAIN, 443))
         except BaseException:
-            log.warning('Failed to connect to ipv6 test domain %s via IPv6', IPV6_TEST_DOMAIN, exc_info=True)
+            log.warning('Failed to connect to ipv6 test domain %s via IPv6', config.IPV6_TEST_DOMAIN, exc_info=True)
             return False
 
     if role in CONNECTIVITY_ROLES:
@@ -145,9 +144,9 @@ def worker_verify_role_capabilities(role):
         # we assume non-ipv4 internet doesn't exist
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         try:
-            s.connect((CONNECTIVITY_TEST_DOMAIN, 443))
+            s.connect((config.CONNECTIVITY_TEST_DOMAIN, 443))
         except BaseException:
-            log.warning('Failed to connect to test domain %s', CONNECTIVITY_TEST_DOMAIN, exc_info=True)
+            log.warning('Failed to connect to test domain %s', config.CONNECTIVITY_TEST_DOMAIN, exc_info=True)
             return False
 
     return True

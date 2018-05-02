@@ -4,6 +4,7 @@ from typing import List
 
 import pytz
 from celery import group
+from constance import config
 from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
@@ -168,11 +169,27 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     # A nearly 40% performance increase :)
     # the red flag was there was a lot of "__get__" operations going on inside create timeline, while it doesn't do sql
     # after the update no calls to __get__ at all.
-    tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).\
-        prefetch_related("endpoint").defer("endpoint__url")
-    tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
+    if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
+        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).\
+            prefetch_related("endpoint").defer("endpoint__url")
+        tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
+    else:
+        tls_qualys_scans = []
+        tls_qualys_scan_dates = []
 
-    generic_scans = EndpointGenericScan.objects.all().filter(endpoint__url__in=urls).\
+    allowed_to_report = []
+    if config.REPORT_INCLUDE_HTTP_MISSING_TLS:
+        allowed_to_report.append("plain_https")
+    if config.REPORT_INCLUDE_HTTP_HEADERS_HSTS:
+        allowed_to_report.append("Strict-Transport-Security")
+    if config.REPORT_INCLUDE_HTTP_HEADERS_XFO:
+        allowed_to_report.append("X-Frame-Options")
+    if config.REPORT_INCLUDE_HTTP_HEADERS_X_XSS:
+        allowed_to_report.append("X-XSS-Protection")
+    if config.REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT:
+        allowed_to_report.append("X-Content-Type-Options")
+
+    generic_scans = EndpointGenericScan.objects.all().filter(type__in=allowed_to_report, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
     generic_scan_dates = [x.rating_determined_on for x in generic_scans]
     # this is not faster.

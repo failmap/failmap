@@ -12,6 +12,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 import os
+# required until fixed: https://github.com/jazzband/django-constance/issues/263
+from collections import OrderedDict
 from datetime import timedelta
 
 import raven
@@ -614,7 +616,6 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 
 CONSTANCE_CONFIG = {
-    'MAILTO': ('', 'General email address.', str),
     'COMMENTS': ('', 'Some comments by you that say a little bit about why below settings are the way they are.', str),
 
     'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
@@ -635,6 +636,9 @@ CONSTANCE_CONFIG = {
                                              'the @!', str),
     'RESPONSIBLE_ORGANIZATION_FACEBOOK': ('', 'The facebook address where people can follow this project. Make sure'
                                               ' this is a complete url.', str),
+    'RESPONSIBLE_ORGANIZATION_LINKEDIN': ('', 'Linkedin page url.', str),
+    'RESPONSIBLE_ORGANIZATION_WHATSAPP': ('', 'Whatsapp number.', str),
+    'RESPONSIBLE_ORGANIZATION_PHONE': ('', 'Phone number, displayed as a sip:// addres.', str),
 
     'SHOW_INTRO': (True, 'Shows the standard introduction.', bool),
     'SHOW_GOOD_BAD': (True, 'Shows the good / bad lists.', bool),
@@ -651,6 +655,7 @@ CONSTANCE_CONFIG = {
                             'are not shown on the website.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
 
+    'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
     'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_TLS_QUALYS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_MISSING_TLS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
@@ -688,44 +693,54 @@ CONSTANCE_CONFIG = {
     'REPORT_INCLUDE_HTTP_HEADERS_X_XSS': (True, 'Do you want to show X-XSS protection headers in the report?', bool),
     'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to show X-Content-Type headers in the report?', bool),
 
+    # scanning pre-requisites
+    'CONNECTIVITY_TEST_DOMAIN': ('faalkaart.nl', 'A server that is reachable over IPv4. This is used by a worker '
+                                                 'to determine what kind of scans it can do. Enter an '
+                                                 'address that you own or manage.', str),
+    'IPV6_TEST_DOMAIN': ('faalkaart.nl', 'A server that is reachable over IPv6. This is used by a worker to determine '
+                                         'what kind of scans it can do. Enter an address that you own or manage.', str),
+
+
     #
     # 'USE_CUSTOM_INTRO': (False, 'If you want to use an (untranslated) custom intro, enable this. Enabling this'
     #                             'will remove the standard intro and has several fields that can be filled with '
     #                             'custom HTML.', bool),
 }
 
-# required until fixed: https://github.com/jazzband/django-constance/issues/263
-CONSTANCE_CONFIG_FIELDSETS = {
-    '1 General': ('COMMENTS', 'MAILTO', ),
+CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
+    ('General', ('COMMENTS', )),
 
-    '2 Project': ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
-                  'PROJECT_FACEBOOK'),
+    ('Project', ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
+                 'PROJECT_FACEBOOK')),
 
-    '3 Responsible': ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
-                      'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
-                      'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK'),
+    ('Responsible', ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
+                     'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
+                     'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK',
+                     'RESPONSIBLE_ORGANIZATION_LINKEDIN', 'RESPONSIBLE_ORGANIZATION_WHATSAPP',
+                     'RESPONSIBLE_ORGANIZATION_PHONE')),
 
-    '4 Website': ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
-                  'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_STATS_CHANGES', 'SHOW_TICKER',
-                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
-                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                  'SHOW_HTTP_HEADERS_X_CONTENT'
-                  ),
+    ('Website', ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
+                 'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES', 'SHOW_TICKER',
+                 'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
+                 'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
+                 'SHOW_HTTP_HEADERS_X_CONTENT'
+                 )),
 
-    '5 Discovery': ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
-                    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS'),
+    ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
+                   'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')),
 
-    '6 Scanning': ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
-                   'SCAN_HTTP_HEADERS_HSTS',
-                   'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT',
-                   'CREATE_HTTP_SCREENSHOT'),
+    ('Scanner Capabilities', ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN')),
 
-    '7 Reporting': ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
-                    'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
-                    'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-                    'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'),
+    ('Scanning', ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
+                  'SCAN_HTTP_HEADERS_HSTS',
+                  'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT',
+                  'CREATE_HTTP_SCREENSHOT')),
 
-}
+    ('Reporting', ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
+                   'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
+                   'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
+                   'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT')),
+])
 # End constance settings
 ########
 

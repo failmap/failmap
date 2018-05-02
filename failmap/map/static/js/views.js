@@ -1132,23 +1132,30 @@ function views() {
                 var self = this;
                 $.getJSON('/data/improvements/' + this.country + '/' + this.category + '/' + weeks_ago + '/0', function (data) {
                     if ($.isEmptyObject(data)) {
-                        self.data = null,
-                        self.tls_qualys = {high: 0, medium:0, low: 0},
-                        self.security_headers_strict_transport_security = {high: 0, medium:0, low: 0},
-                        self.security_headers_x_content_type_options = {high: 0, medium:0, low: 0},
-                        self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0},
-                        self.security_headers_x_frame_options = {high: 0, medium:0, low: 0},
-                        self.plain_https = {high: 0, medium:0, low: 0},
+                        self.data = null;
+                        self.tls_qualys = {high: 0, medium:0, low: 0};
+                        self.security_headers_strict_transport_security = {high: 0, medium:0, low: 0};
+                        self.security_headers_x_content_type_options = {high: 0, medium:0, low: 0};
+                        self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0};
+                        self.security_headers_x_frame_options = {high: 0, medium:0, low: 0};
+                        self.plain_https = {high: 0, medium:0, low: 0};
                         self.overall = {high: 0, medium:0, low: 0}
                     } else {
                         self.data = data;
-                        self.tls_qualys = data.tls_qualys.improvements;
-                        self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
-                        self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
-                        self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
-                        self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
-                        self.plain_https = data.plain_https.improvements;
-                        self.overall = data.overall.improvements;
+                        if (data.tls_qualys !== undefined)
+                            self.tls_qualys = data.tls_qualys.improvements;
+                        if (data.security_headers_strict_transport_security !== undefined)
+                            self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
+                        if (data.security_headers_x_content_type_options !== undefined)
+                            self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
+                        if (data.security_headers_x_xss_protection !== undefined)
+                            self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
+                        if (data.security_headers_x_frame_options !== undefined)
+                            self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
+                        if (data.plain_https !== undefined)
+                            self.plain_https = data.plain_https.improvements;
+                        if (data.overall !== undefined)
+                            self.overall = data.overall.improvements;
                     }
                 });
             },
