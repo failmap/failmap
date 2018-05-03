@@ -35,21 +35,23 @@ Failmap depends on tons of services and open source projects.
 
 *   Graphs: [D3js](https://d3js.org)
 
-*   Website frontend: [Vue.js](https://vuejs.org/), [Leaflet](https:/http://leafletjs.com/), [JQuery](https://jquery.com/)
+*   Website frontend: [Vue.js](https://vuejs.org/), [Leaflet](https:/http://leafletjs.com/), [JQuery](https://jquery.com/),
+[Font Awesome](https://fontawesome.com/), [Leaflet fullscreen](https://github.com/Leaflet/Leaflet.fullscreen),
+[Vue Raven](https://github.com/anteriovieira/vue-raven),
 
 *   Website backend: [Django](https://www.djangoproject.com/), [Django Jet](https://github.com/geex-arts/django-jet),
 [Django countries](https://github.com/SmileyChris/django-countries),
 [Django jsonfield](https://github.com/dmkoch/django-jsonfield),
 [django-statsd-mozilla](https://github.com/django-statsd/django-statsd),
 [django-celery-beat](https://github.com/celery/django-celery-beat),
-[django-uwsgi](https://docs.djangoproject.com/en/1.11/howto/deployment/wsgi/uwsgi/),
-[django-coverage](http://pypi.python.org/pypi/django-coverage),
+[django-uwsgi](https://github.com/unbit/django-uwsgi),
+[django-coverage](https://github.com/kmike/django-coverage),
 [django-extensions](https://github.com/django-extensions/django-extensions),
 [django-debug-toolbar](https://github.com/jazzband/django-debug-toolbar),
 [django-debug-toolbar-request-history](https://github.com/djsutho/django-debug-toolbar-request-history),
-[django_compressor](http://pypi.python.org/pypi/django_compressor),
+[django_compressor](https://github.com/django-compressor/django-compressor),
 [django-proxy](https://github.com/mjumbewu/django-proxy),
-[pyyaml (testdata)](https://pyyaml.org),
+[pyyaml (testdata)](https://github.com/yaml/pyyaml),
 [tldextract](https://github.com/john-kurkowski/tldextract),
 [docutils](http://docutils.sourceforge.net/),
 [typing](https://docs.python.org/3.5/library/typing.html),
@@ -75,7 +77,8 @@ Failmap depends on tons of services and open source projects.
 [pytest-mock](https://github.com/pytest-dev/pytest-mock/),
 [mysqlclient](https://github.com/PyMySQL/mysqlclient-python),
 [psycopg2](https://initd.org/psycopg/),
-[uwsgi](https://uwsgi-docs.readthedocs.io/en/latest/)
+[uwsgi](https://uwsgi-docs.readthedocs.io/en/latest/),
+
 
 *   Coding quality: [autopep8](https://github.com/hhatto/autopep8),
 [autoflake](https://github.com/myint/autoflake),
@@ -98,3 +101,5 @@ Failmap depends on tons of services and open source projects.
 
 *   Development: [Gitlab](https://gitlab.com/failmap/)
 [PyCharm](https://www.jetbrains.com/pycharm/)
+
+*   TLS checks (beta): [cert-chain-resolver](https://github.com/zakjan/cert-chain-resolver),
