@@ -247,7 +247,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # shoddy documentation on dashes and underscores... different than the "ll" suggestion.
 # LANGUAGE_CODE = 'en-gb'
 LANGUAGES = (
-    # ('en', 'English'), # temporarily disable english until those translations are fixed.
+    # ('en', 'English'),  # temporarily disable english until those translations are fixed.
     ('nl', 'Dutch'),
     # This helps to find missing translations. Using this language the goal is to replace all text
     # strings with a single rainbow. In the end there should be no text, only rainbows! 🌈
@@ -271,10 +271,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/topics/i18n/translation/#how-django-discovers-translations
 # In all cases the name of the directory containing the translation is expected to be named using
 # locale name notation. E.g. de, pt_BR, es_AR, etc.
-LOCALE_PATHS = (
-    os.path.join(BASE_DIR, 'locale'),
-)
-print(LOCALE_PATHS)
+LOCALE_PATHS = ['locale']
 
 
 # Static files (CSS, JavaScript, Images)
