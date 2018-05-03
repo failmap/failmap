@@ -27,6 +27,10 @@ services:
       MYSQL_PASSWORD: "${DB_PASSWORD:-failmap}"
     ports:
       - 3306
+    command:
+      # make sure a sane character set and collation are used
+      - --character-set-server=utf8
+      - --collation-server=utf8_general_ci
     # Configure database to persist accross restarts of the development environment.
     volumes:
       # overwrite memory hungry default config for docker mysql
