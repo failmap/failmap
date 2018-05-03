@@ -619,6 +619,7 @@ CONSTANCE_CONFIG = {
     'COMMENTS': ('', 'Some comments by you that say a little bit about why below settings are the way they are.', str),
 
     'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
+    'PROJECT_TAGLINE': ('', 'Tagline for this project.', str),
     'PROJECT_WEBSITE': ('', 'The url where this site is located.', str),
     'PROJECT_MAIL': ('', 'The address where people can contact for more info about this project.', str),
     'PROJECT_ISSUE_MAIL': ('', 'The address where people can mail when they encounter issues, for example when they '
@@ -710,8 +711,8 @@ CONSTANCE_CONFIG = {
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('General', ('COMMENTS', )),
 
-    ('Project', ('PROJECT_NAME', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER',
-                 'PROJECT_FACEBOOK')),
+    ('Project', ('PROJECT_NAME', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL',
+                 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
 
     ('Responsible', ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
                      'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',

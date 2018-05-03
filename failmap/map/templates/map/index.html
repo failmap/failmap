@@ -1034,7 +1034,53 @@
             <a name="footer" class="jumptonav"></a>
 
             <div class="col-md-3">
-                {% if config.RESPONSIBLE_ORGANIZATION_WEBSITE %}
+                {% if config.PROJECT_NAME %}
+                    <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank"><b>{{ config.PROJECT_NAME }}</b></a><br />
+                {% endif %}
+                {% if config.PROJECT_TAGLINE %}
+                    <i>{{ config.PROJECT_TAGLINE }}</i><br />
+                {% endif %}
+
+                <ul>
+                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    <li>
+                        {% if config.PROJECT_TWITTER or config.PROJECT_FACEBOOK %}
+                            {% trans "Also on social media" %}:
+
+                            {% if config.PROJECT_TWITTER %}
+                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><i class="fab fa-twitter-square"></i></a>
+                            {% endif %}
+
+                            {% if config.PROJECT_FACEBOOK %}
+                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                            {% endif %}
+
+                        {% endif %}
+                    </li>
+                </ul>
+
+
+
+            </div>
+
+            <div class="col-md-3">
+                <b>{% trans "About this website" %}</b>
+                <ul>
+                    <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank">{% trans "Get the sourcecode" %}</a></li>
+                    <li>📖 <a href="https://docs.failmap.org" target="_blank">{% trans "Documentation" %}</a></li>
+                </ul>
+            </div>
+
+            <div class="col-md-3">
+                <b>{% trans "Made possible by" %}</b>
+                <ul>
+                    <li>🗺️ <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></li>
+                    <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                {% if config.RESPONSIBLE_ORGANIZATION_NAME %}
                 <b>{% trans "This website is run by" %}</b>
                 {% endif %}
 
@@ -1069,24 +1115,6 @@
                         {% endif %}
                     </li>
                 </ul>
-            </div>
-
-            <div class="col-md-3">
-                <b>{% trans "About this software" %}</b>
-                <ul>
-                    <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank">{% trans "Get the sourcecode" %}</a></li>
-                    <li>📖 <a href="https://docs.failmap.org" target="_blank">{% trans "Documentation" %}</a></li>
-                </ul>
-            </div>
-
-            <div class="col-md-3">
-                <b>{% trans "Made possible by" %}</b>
-                <ul>
-                    <li>🗺️ <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></li>
-                    <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3">
             </div>
         </div>
     </div>
