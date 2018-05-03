@@ -134,6 +134,12 @@ MIDDLEWARE = [
     'django_statsd.middleware.GraphiteRequestTimingMiddleware',
     'django_statsd.middleware.GraphiteMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # based on cookie or based on user agent. So people with Dutch browsers will see the Dutch version(?).
+    # This project is going to be used in a variety of countries, with multiple languages, so auto-setting this
+    # makes sense over having a fixed single option.
+    # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/#how-django-discovers-language-preference
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -241,7 +247,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # shoddy documentation on dashes and underscores... different than the "ll" suggestion.
 # LANGUAGE_CODE = 'en-gb'
 LANGUAGES = (
-    ('en', 'English'),
+    # ('en', 'English'), # temporarily disable english until those translations are fixed.
     ('nl', 'Dutch'),
     # This helps to find missing translations. Using this language the goal is to replace all text
     # strings with a single rainbow. In the end there should be no text, only rainbows! 🌈
@@ -250,6 +256,8 @@ LANGUAGES = (
 
 # There is no 🌈🦄 translation for humanize. Instead you'll get the english fallback values.
 LANGUAGE_CODE = 'nl'
+
+LANGUAGE_COOKIE_NAME = 'language'
 
 TIME_ZONE = 'UTC'
 
@@ -263,7 +271,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/topics/i18n/translation/#how-django-discovers-translations
 # In all cases the name of the directory containing the translation is expected to be named using
 # locale name notation. E.g. de, pt_BR, es_AR, etc.
-LOCALE_PATHS = ['locale']
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
+print(LOCALE_PATHS)
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
@@ -875,8 +887,3 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 ]
 # end django jet menu configuration
 ########
-
-# Huge celery tasks require a connection to be open longer than just a single request.
-# this setting might become problematic.
-# https://docs.djangoproject.com/en/2.0/ref/settings/#conn-max-age
-CONN_MAX_AGE = 0

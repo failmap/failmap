@@ -381,6 +381,7 @@ def rate_timeline(timeline, url: Url):
                     "high": 0,
                     "medium": 0,
                     "low": 0,
+                    "ratings": [],
                     "endpoints": []
                 }
             }

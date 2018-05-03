@@ -94,7 +94,7 @@
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
 
-                {% if config.SHOW_INFO %}
+                {% if config.SHOW_INTRO %}
                 <li><a href="#info">{% trans "Info" %}</a></li>
                 {% endif %}
 
@@ -166,8 +166,7 @@
         <div class="jumbotron">
             <h1>{% trans "What do i see?" %}</h1>
             <p>{% trans "whats do i see explained" %}</p>
-            <p>{% trans "this website is run by" %}</p>
-            <p>{% trans "Send in subdomain adresses" %}</p>
+            <p>{% blocktrans with RESPONSIBLE_ORGANIZATION_NAME=config.RESPONSIBLE_ORGANIZATION_NAME PROJECT_ISSUE_MAIL=config.PROJECT_ISSUE_MAIL %} This website is run by {{ RESPONSIBLE_ORGANIZATION_NAME }}. To submit new domains, or ask questions, contact us via: {{ PROJECT_ISSUE_MAIL }}.{% endblocktrans %}</p>
         </div>
 
         <div class="row">
@@ -309,7 +308,7 @@
                                     <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                                     <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
                                           :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                                    <a :href="'mailto:' + issue_mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                                    <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
                                        class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
                                         {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
                                 </div>
@@ -790,54 +789,60 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <h4>{% trans "Improvements Details" %}</h4>
-                    <table class="improvementstable">
+                <h4>{% trans "Improvements Details" %}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <span class="improvement_severity">{% trans "High risk" %}</span>
+                </div>
+                <div class="col-md-4">
+                    <span class="improvement_severity">{% trans "Medium risk" %}</span>
+                </div>
+                <div class="col-md-4">
+                    <span class="improvement_severity">{% trans "Low risk" %}</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <table> <!-- todo: make these spans, float left etc -->
                         <tr>
-                            <th class="improvement_severity">{% trans "High risk" %}</th>
-                            <th class="improvement_severity">{% trans "Medium risk" %}</th>
-                            <th class="improvement_severity">{% trans "Low risk" %}</th>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
                         </tr>
-                        <tr><!-- todo: make these spans, float left etc -->
-                            <td>
-                                <table>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
-                                    </tr>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.high)">{% verbatim %}{{ tls_qualys.high }}{% endverbatim %}</td> {% endif %}
-                                        {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>{% endif %}
-                                    </tr>
-                                </table>
-                            </td><td>
-                                <table>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_HSTS %}<td>{% trans "HSTS Header" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
-                                    </tr>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>{% endif %}
-                                    </tr>
-                                </table>
-                            </td><td>
-                                <table>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td>{% trans "X-Content" %}</td>{% endif %}
-                                    </tr>
-                                    <tr>
-                                        {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>{% endif %}
-                                        {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>{% endif %}
-                                    </tr>
-                                </table>
-                            </td>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.high)">{% verbatim %}{{ tls_qualys.high }}{% endverbatim %}</td> {% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>{% endif %}
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td>{% trans "HSTS Header" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>{% endif %}
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td>{% trans "X-Content" %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>{% endif %}
                         </tr>
                     </table>
                 </div>
@@ -1042,7 +1047,7 @@
                 {% endif %}
 
                 <ul>
-                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
                     <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
                     <li>
                         {% if config.PROJECT_TWITTER or config.PROJECT_FACEBOOK %}
@@ -1171,7 +1176,7 @@
                             <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                             <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
                                   :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                            <a :href="'mailto:' + issue_mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                            <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
                                class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
                                 {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
                         </div>
