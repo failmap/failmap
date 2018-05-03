@@ -30,6 +30,16 @@ class Job(models.Model):
     # probably because of blank and/or default.
     created_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE,)
 
+    def clean_task(self):
+        """Truncate long task signatures as they result in mysql issues.
+
+        https://gitlab.com/failmap/server/issues/24
+
+        Task signatures are for informational purpose and not functionally required. Currently
+        there is no reason to keep large signatures so truncating to arbitrary limit of 1k.
+        """
+        return self.cleaned_data['task'][:1000*1]
+
     @classmethod
     def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':
         """Create job object and publish task on celery queue."""
