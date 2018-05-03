@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-02 14:42+0000\n"
+"POT-Creation-Date: 2018-05-03 13:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -275,8 +275,8 @@ msgstr "Afdrukken"
 #: failmap/map/templates/map/index.html:1119
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:19
-#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "High"
 msgstr "Hoog risico"
 
@@ -284,8 +284,8 @@ msgstr "Hoog risico"
 #: failmap/map/templates/map/index.html:1120
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:22
-#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "Medium"
 msgstr "Midden risico"
 
@@ -293,8 +293,8 @@ msgstr "Midden risico"
 #: failmap/map/templates/map/index.html:1121
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:25
-#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "Low"
 msgstr "Laag risico"
 
@@ -865,6 +865,46 @@ msgstr "Scantijd"
 msgid "Url"
 msgstr "Internet Adres"
 
+#: failmap/map/templates/map/index.html:1211
+msgid "Risks"
+msgstr "Risico's"
+
+#: failmap/map/templates/map/index.html:1213
+msgid "report_header_DNSSEC"
+msgstr "DNS beveiliging (DNSSEC)"
+
+#: failmap/map/templates/map/index.html:1216
+msgid "report_header_tls_qualys"
+msgstr "Transport Layer Security (TLS)"
+
+#: failmap/map/templates/map/index.html:1219
+msgid "report_header_plain_https"
+msgstr "Ontbreken van versleuteling"
+
+#: failmap/map/templates/map/index.html:1222
+msgid "report_header_security_headers_strict_transport_security"
+msgstr "Strict-Transport-Security Header (HSTS)"
+
+#: failmap/map/templates/map/index.html:1225
+msgid "report_header_security_headers_x_frame_options"
+msgstr "X-Frame-Options Header (clickjacking)"
+
+#: failmap/map/templates/map/index.html:1228
+msgid "Moment"
+msgstr "Moment"
+
+#: failmap/map/templates/map/index.html:1229
+msgid "Loading"
+msgstr "Laden"
+
+#: failmap/map/templates/map/index.html:1231
+msgid "One week earlier"
+msgstr "-1 week"
+
+#: failmap/map/templates/map/index.html:1232
+msgid "One week later"
+msgstr "+1 week"
+
 #: failmap/map/templates/map/target_audience.html:4
 msgid "For citizens"
 msgstr "Voor burgers"
@@ -953,7 +993,7 @@ msgstr ""
 "misbruik. Hieruit ontstaat een beeld hoe (de rest van de) beveiliging is "
 "ingeregeld. Dit zou allemaal op orde moeten zijn... toch?"
 
-#: failmap/map/views.py:1485 failmap/map/views.py:1551
+#: failmap/map/views.py:1559 failmap/map/views.py:1625
 msgid "Perfect"
 msgstr "Perfect"
 

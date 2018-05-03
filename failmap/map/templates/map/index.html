@@ -1206,6 +1206,32 @@
         </tbody>
     </table>
 </script>
+<script type="x-template" id="historycontrol_template">
+    <div>
+        <h4>{% trans "Risks" %}</h4>
+        {% if config.SHOW_DNS_DNSSEC %}
+        <input type='checkbox' v-model="DNSSEC" name="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
+        {% endif %}
+        {% if config.SHOW_HTTP_TLS_QUALYS %}
+        <input type='checkbox' v-model="tls_qualys" name="TLS_QUALYS" id="TLS_QUALYS"> <label for="TLS_QUALYS">{% trans "report_header_tls_qualys" %}</label><br />
+        {% endif %}
+        {% if config.SHOW_HTTP_MISSING_TLS %}
+        <input type='checkbox' v-model="plain_https" name="plain_https" id="plain_https"> <label for="plain_https">{% trans "report_header_plain_https" %}</label><br />
+        {% endif %}
+        {% if config.SHOW_HTTP_HEADERS_HSTS %}
+        <input type='checkbox' v-model="security_headers_strict_transport_security" name="HSTS" id="HSTS"> <label for="HSTS">{% trans "report_header_security_headers_strict_transport_security" %}</label><br />
+        {% endif %}
+        {% if config.SHOW_HTTP_HEADERS_XFO %}
+        <input type='checkbox' v-model="security_headers_x_frame_options" name="XFO" id="XFO"> <label for="XFO">{% trans "report_header_security_headers_x_frame_options" %}</label><br />
+        {% endif %}
+        <br />
+        <h4>{% trans "Moment" %}</h4>
+        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %}<span v-if='loading'> ({% trans "Loading" %}...)</span></h5>
+        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>
+        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
+        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
+    </div>
+</script>
 <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>
 <!--

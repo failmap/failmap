@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-02 14:42+0000\n"
+"POT-Creation-Date: 2018-05-03 13:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -265,8 +265,8 @@ msgstr ""
 #: failmap/map/templates/map/index.html:1119
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:19
-#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "High"
 msgstr "🌈"
 
@@ -274,8 +274,8 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html:1120
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:22
-#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "Medium"
 msgstr "🌈"
 
@@ -283,8 +283,8 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html:1121
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:25
-#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1486
-#: failmap/map/views.py:1552
+#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1560
+#: failmap/map/views.py:1626
 msgid "Low"
 msgstr "🌈"
 
@@ -843,6 +843,48 @@ msgstr "🌈"
 msgid "Url"
 msgstr "🌈"
 
+#: failmap/map/templates/map/index.html:1211
+msgid "Risks"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1213
+msgid "report_header_DNSSEC"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1216
+msgid "report_header_tls_qualys"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1219
+#, fuzzy
+#| msgid "plain_https"
+msgid "report_header_plain_https"
+msgstr "🌈"
+
+#: failmap/map/templates/map/index.html:1222
+msgid "report_header_security_headers_strict_transport_security"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1225
+msgid "report_header_security_headers_x_frame_options"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1228
+msgid "Moment"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1229
+msgid "Loading"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1231
+msgid "One week earlier"
+msgstr ""
+
+#: failmap/map/templates/map/index.html:1232
+msgid "One week later"
+msgstr ""
+
 #: failmap/map/templates/map/target_audience.html:4
 msgid "For citizens"
 msgstr "🌈"
@@ -910,7 +952,7 @@ msgstr "🌈"
 msgid "Fail Map Introduction"
 msgstr "🌈"
 
-#: failmap/map/views.py:1485 failmap/map/views.py:1551
+#: failmap/map/views.py:1559 failmap/map/views.py:1625
 msgid "Perfect"
 msgstr "🌈"
 

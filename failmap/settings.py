@@ -874,3 +874,8 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 ]
 # end django jet menu configuration
 ########
+
+# Huge celery tasks require a connection to be open longer than just a single request.
+# this setting might become problematic.
+# https://docs.djangoproject.com/en/2.0/ref/settings/#conn-max-age
+CONN_MAX_AGE = 0

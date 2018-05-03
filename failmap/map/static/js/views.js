@@ -899,6 +899,7 @@ function views() {
         mixins: [category_mixin, country_mixin],
 
         el: '#historycontrol',
+        template: '#historycontrol_template',
         data: {
             // # historyslider
             loading: false,

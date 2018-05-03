@@ -154,7 +154,7 @@ var failmap = {
 
     add_fullscreen_hint: function () {
         this.fullscreenhint.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
+            this._div = L.DomUtil.create('div', 'info_nobackground');
             html = "<div id=\"fullscreen\">" +
                 "   <span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
                 "</div>";
@@ -170,18 +170,6 @@ var failmap = {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
             dataslider_control = " <div id=\"historycontrol\">" +
-                "<h4>Risico's</h4>" +
-                "<input type='checkbox' v-model=\"DNSSEC\" name=\"DNSSEC\" id=\"DNSSEC\"><label for=\"DNSSEC\">DNSSEC</label><br />" +
-                "<input type='checkbox' v-model=\"security_headers_strict_transport_security\" name=\"HSTS\" id=\"HSTS\"><label for=\"HSTS\">Strict Transport Security Header</label><br />" +
-                "<input type='checkbox' v-model=\"tls_qualys\" name=\"TLS_QUALYS\" id=\"TLS_QUALYS\"><label for=\"TLS_QUALYS\">Transport Layer Security</label><br />" +
-                "<input type='checkbox' v-model=\"security_headers_x_frame_options\" name=\"XFO\" id=\"XFO\"><label for=\"XFO\">X-Frame-Options</label><br />" +
-                "<input type='checkbox' v-model=\"plain_https\" name=\"plain_https\" id=\"plain_https\"><label for=\"plain_https\">plain_https</label><br />" +
-
-
-                "    <h4>{{ visibleweek }}<span v-if='loading'> (" + gettext('Loading') + "...)</span></h4>" +
-                "    <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>" +
-                "    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt;'/>" +
-                "    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='&gt;&gt;&gt;'/>" +
                 "</div>";
 
             this._div.innerHTML = dataslider_control;

@@ -11,6 +11,7 @@ from django.db.models import Q
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
+from failmap.scanners.scanner import q_configurations_to_display
 
 from ..celery import Task, app
 from .calculate import get_calculation
@@ -41,8 +42,9 @@ def compose_task(
     if endpoints_filter:
         raise NotImplementedError('This scanner does not work on a endpoint level.')
 
+    # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
+    organizations = Organization.objects.filter(q_configurations_to_display('organization'), **organizations_filter)
 
     # Create tasks for rebuilding ratings for selected organizations and urls.
     # Wheneven a url has been (re)rated the organization for that url need to
@@ -53,7 +55,7 @@ def compose_task(
 
     tasks = []
     for organization in organizations:
-        urls = Url.objects.filter(organization=organization, **urls_filter)
+        urls = Url.objects.filter(q_configurations_to_display(), organization=organization, **urls_filter)
         if not urls:
             continue
 

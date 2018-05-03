@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-02 14:42+0000\n"
+"POT-Creation-Date: 2018-05-03 13:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,39 +39,35 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:173
-msgid "Loading"
-msgstr ""
-
-#: failmap/map/static/js/failmap.js:191
+#: failmap/map/static/js/failmap.js:187
 msgid "Url"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:192
+#: failmap/map/static/js/failmap.js:188
 msgid "H"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:193
+#: failmap/map/static/js/failmap.js:189
 msgid "M"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:194
+#: failmap/map/static/js/failmap.js:190
 msgid "L"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:213
+#: failmap/map/static/js/failmap.js:209
 msgid "Good"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:214
+#: failmap/map/static/js/failmap.js:210
 msgid "Mediocre"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:215
+#: failmap/map/static/js/failmap.js:211
 msgid "Bad"
 msgstr ""
 
-#: failmap/map/static/js/failmap.js:216
+#: failmap/map/static/js/failmap.js:212
 msgid "Unknown"
 msgstr ""
 
@@ -423,6 +419,22 @@ msgstr ""
 
 #: failmap/map/static/js/script.js:77
 msgid "country_AT"
+msgstr ""
+
+#: failmap/map/static/js/script.js:80
+msgid "One week earlier"
+msgstr ""
+
+#: failmap/map/static/js/script.js:81
+msgid "One week later"
+msgstr ""
+
+#: failmap/map/static/js/script.js:82
+msgid "Moment"
+msgstr ""
+
+#: failmap/map/static/js/script.js:83
+msgid "Risks"
 msgstr ""
 
 #: failmap/map/static/js/views.js:44

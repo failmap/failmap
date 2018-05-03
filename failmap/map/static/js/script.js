@@ -75,6 +75,12 @@ var dynamic_translations = function(){
     gettext('country_DE');
     gettext('country_SE');
     gettext('country_AT');
+
+    // historycontrol
+    gettext('One week earlier');
+    gettext('One week later');
+    gettext('Moment');
+    gettext('Risks');
 };
 
 $(document).ready(function () {
