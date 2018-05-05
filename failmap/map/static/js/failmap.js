@@ -136,13 +136,13 @@ var failmap = {
             if (props) {
                 sometext += "<h4>" + props.organization_name + "</h4>";
                 if (props.high || props.medium || props.low) {
-                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColor(1000) + '">' + props.high + '</span><br />';
-                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColor(500) + '">' + props.medium + '</span><br />';
-                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColor(0) + '">' + props.low + '</span><br />';
+                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColorCode('red') + '">' + props.high + '</span><br />';
+                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColorCode('orange') + '">' + props.medium + '</span><br />';
+                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColorCode('green') + '">' + props.low + '</span><br />';
                 } else {
-                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColor(1000) + '">0</span><br />';
-                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColor(500) + '">0</span><br />';
-                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColor(0) + '">0</span><br />';
+                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColorCode('red') + '">0</span><br />';
+                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColorCode('orange') + '">0</span><br />';
+                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColorCode('green') + '">0</span><br />';
                 }
                 vueDomainlist.load(props.organization_id, vueMap.week);
                 this._div.innerHTML = sometext;
@@ -206,10 +206,11 @@ var failmap = {
 
             var div = L.DomUtil.create('div', 'info legend'), labels = [];
 
-            labels.push('<i style="background:' + failmap.getColor(199) + '"></i> '+ gettext('Good'));
-            labels.push('<i style="background:' + failmap.getColor(999) + '"></i> '+ gettext('Mediocre'));
-            labels.push('<i style="background:' + failmap.getColor(1000) + '"></i> '+ gettext('Bad'));
-            labels.push('<i style="background:' + failmap.getColor(-1) + '"></i> '+ gettext('Unknown'));
+            labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
+            labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
+            labels.push('<i style="background:' + failmap.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
+            labels.push('<i style="background:' + failmap.getColorCode('red') + '"></i> '+ gettext('Bad'));
+            labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
 
             div.innerHTML = labels.join('<br>');
             return div;
@@ -233,14 +234,6 @@ var failmap = {
     redIcon: new L.Icon({iconUrl: 'static/images/red-dot.png'}),
     orangeIcon: new L.Icon({iconUrl: 'static/images/orange-dot.png'}),
     grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
-
-    // get color depending on population density value
-    getColor: function (d) {
-        return d > 999 ? '#bd383c' :
-            d > 199 ? '#fc9645' :
-                d >= 0 ? '#62fe69' :
-                    '#c1bcbb';
-    },
 
     getColorCode: function (d) {
         return d === "red" ? '#bd383c' :

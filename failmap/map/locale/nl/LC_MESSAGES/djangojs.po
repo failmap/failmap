@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-04 14:33+0000\n"
+"POT-Creation-Date: 2018-05-05 19:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,18 +56,24 @@ msgid "L"
 msgstr "L"
 
 #: failmap/map/static/js/failmap.js:209
+#, fuzzy
+#| msgid "score perfect"
+msgid "Perfect"
+msgstr "perfect"
+
+#: failmap/map/static/js/failmap.js:210
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/static/js/failmap.js:210
+#: failmap/map/static/js/failmap.js:211
 msgid "Mediocre"
 msgstr "Matig"
 
-#: failmap/map/static/js/failmap.js:211
+#: failmap/map/static/js/failmap.js:212
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/static/js/failmap.js:212
+#: failmap/map/static/js/failmap.js:213
 msgid "Unknown"
 msgstr "Onbekend"
 
