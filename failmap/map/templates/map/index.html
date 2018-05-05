@@ -1257,6 +1257,12 @@
         {% if config.SHOW_HTTP_HEADERS_XFO %}
         <input type='checkbox' v-model="security_headers_x_frame_options" name="XFO" id="XFO"> <label for="XFO">{% trans "report_header_security_headers_x_frame_options" %}</label><br />
         {% endif %}
+        {% if config.SHOW_HTTP_HEADERS_X_XSS %}
+        <input type='checkbox' v-model="security_headers_x_xss_protection" name="X_XSS" id="X_XSS"> <label for="X_XSS">{% trans "report_header_security_headers_x_xss_protection" %}</label><br />
+        {% endif %}
+        {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
+        <input type='checkbox' v-model="security_headers_x_content_type_options" name="X_CONTENT" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
+        {% endif %}
         <br />
         <h4>{% trans "Moment" %}</h4>
         <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %}<span v-if='loading'> ({% trans "Loading" %}...)</span></h5>

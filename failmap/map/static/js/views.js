@@ -909,15 +909,15 @@ function views() {
 
             // show individual vulnerabilities
             // url
-            DNSSEC: true,
+            DNSSEC: false,
 
             // endpoint
-            security_headers_strict_transport_security: true,
-            security_headers_x_content_type_options: true,
-            security_headers_x_frame_options: true,
-            security_headers_x_xss_protection: true,
-            tls_qualys: true,
-            plain_https: true
+            security_headers_strict_transport_security: false,
+            security_headers_x_content_type_options: false,
+            security_headers_x_frame_options: false,
+            security_headers_x_xss_protection: false,
+            tls_qualys: false,
+            plain_https: false
         },
         computed: {
             visibleweek: function () {
@@ -935,6 +935,8 @@ function views() {
                     '"security_headers_x_frame_options": "' + this.security_headers_x_frame_options + '", ' +
                     '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
                     '"tls_qualys": "' + this.tls_qualys + '", ' +
+                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
+                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
                     '"plain_https": "' + this.plain_https + '"}'
             }
 

@@ -1219,7 +1219,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
     # todo: add try except for standard json errors.
     # this is a vulnerability, so we try to contain it
     try:
-        if len(url_scan_types) < 255 and len(endpoint_scan_types) < 255:
+        if len(url_scan_types) < 1024 and len(endpoint_scan_types) < 1024:
             # risky, custom user input.
             url_scan_types = json.loads(url_scan_types)
             endpoint_scan_types = json.loads(endpoint_scan_types)
@@ -1239,7 +1239,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
     # log.debug(desired_url_scans)
     # log.debug(desired_endpoint_scans)
 
-    # fallback if no data
+    # fallback if no data, which is the default.
     if not desired_url_scans and not desired_endpoint_scans:
         desired_url_scans = possible_url_scans
         desired_endpoint_scans = possible_endpoint_scans
@@ -1380,7 +1380,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
         if "endpoints" not in i[6]:
             color = "gray"
         else:
-            color = "red" if high else "orange" if medium else "green"
+            color = "red" if high else "orange" if medium else "yellow" if low else "green"
 
         dataset = {
             "type": "Feature",

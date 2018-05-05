@@ -40,7 +40,7 @@ class OrganizationConverter:
 
 class JsonConverter:
     # Supports {"key": "value", "key2": "value2"} syntax.
-    regex = '[a-zA-Z0-9:_\-=}{, "\']{0,255}'
+    regex = '[a-zA-Z0-9:_\-=}{, "\']{0,1024}'
 
     def to_python(self, value):
         return str(value)

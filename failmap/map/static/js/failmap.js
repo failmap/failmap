@@ -245,8 +245,9 @@ var failmap = {
     getColorCode: function (d) {
         return d === "red" ? '#bd383c' :
             d === "orange" ? '#fc9645' :
-                d === "green" ? '#62fe69' :
-                    '#c1bcbb';
+                d === "yellow" ? '#d3fc6a' :
+                     d === "green" ? '#62fe69' :
+                            '#c1bcbb';
     },
 
     style: function (feature) {
