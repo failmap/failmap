@@ -43,7 +43,7 @@ from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
 
-from .scanner import allowed_to_scan, q_configurations_to_scan
+from .scanner import allowed_to_discover, q_configurations_to_scan
 from .timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -70,7 +70,7 @@ def compose_task(
 
     """
 
-    if not allowed_to_scan("scanner_http"):
+    if not allowed_to_discover("scanner_http"):
         return group()
 
     if organizations_filter:
@@ -492,7 +492,7 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
 
 @app.task(queue='storage')
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
-    logger.info("%s %s" % (url, result))
+    logger.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
     # log.info("%s %s" % (url, url))
     # log.info("%s %s" % (url, port))
     # log.info("%s %s" % (url, protocol))

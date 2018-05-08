@@ -44,19 +44,19 @@ def allowed_to_scan(scanner_name: str=""):
     return False
 
 
-def allowed_to_discover(scanner):
+def allowed_to_discover(scanner_name: str=""):
 
     # discover endpoints does not listen to NEW_DOMAINS, since it aren't new domains.
-    if scanner.__module__ == 'scanner_http':
+    if scanner_name == 'scanner_http':
         return config.DISCOVER_HTTP_ENDPOINTS
 
-    if scanner.__name__ == 'nsec_compose_task':
+    if scanner_name == 'nsec_compose_task':
         return config.DISCOVER_URLS_USING_NSEC
 
-    if scanner.__name__ == 'certificate_transparency_compose_task':
+    if scanner_name == 'certificate_transparency_compose_task':
         return config.DISCOVER_URLS_USING_KNOWN_SUBDOMAINS
 
-    if scanner.__name__ == 'brute_known_subdomains_compose_task':
+    if scanner_name == 'brute_known_subdomains_compose_task':
         return config.DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY
 
     return False
