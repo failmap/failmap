@@ -9,6 +9,7 @@ import pytz
 import requests
 import urllib3
 from celery import Task, group
+from constance import config
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
 from failmap.celery import IP_VERSION_QUEUE, ParentFailed, app
@@ -78,6 +79,8 @@ def compose_task(
 # database related tasks should by default be handled by a worker connected to the database
 @app.task(queue="storage")
 def analyze_headers(result: requests.Response, endpoint):
+    # todo: Content-Security-Policy, Referrer-Policy
+
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
         return ParentFailed('skipping result parsing because scan failed.', cause=result)
@@ -92,9 +95,14 @@ def analyze_headers(result: requests.Response, endpoint):
     egss.domain = endpoint.uri_url()
     egss.save()
 
-    generic_check(endpoint, response.headers, 'X-XSS-Protection')
-    generic_check(endpoint, response.headers, 'X-Frame-Options')
-    generic_check(endpoint, response.headers, 'X-Content-Type-Options')
+    if config.SCAN_HTTP_HEADERS_X_XSS:
+        generic_check(endpoint, response.headers, 'X-XSS-Protection')
+
+    if config.SCAN_HTTP_HEADERS_XFO:
+        generic_check(endpoint, response.headers, 'X-Frame-Options')
+
+    if config.SCAN_HTTP_HEADERS_X_CONTENT:
+        generic_check(endpoint, response.headers, 'X-Content-Type-Options')
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
@@ -120,7 +128,7 @@ def analyze_headers(result: requests.Response, endpoint):
 
     If you think it works differently, just file an issue or make a pull request. We want to get it right.
     """
-    if endpoint.protocol == "https":
+    if endpoint.protocol == "https" and config.SCAN_HTTP_HEADERS_HSTS:
 
         # runs any unsecured http service? (on ANY port).
         unsecure_services = Endpoint.objects.all().filter(url=endpoint.url, protocol="http", is_dead=False).exists()

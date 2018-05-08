@@ -36,7 +36,10 @@ def allowed_to_scan(scanner_name: str=""):
         return config.SCAN_HTTP_SCREENSHOT
 
     if scanner_name == 'scanner_security_headers':
-        return config.CREATE_HTTP_SCREENSHOT
+        return (config.SCAN_HTTP_HEADERS_HSTS or
+                config.SCAN_HTTP_HEADERS_XFO or
+                config.SCAN_HTTP_HEADERS_X_XSS or
+                config.SCAN_HTTP_HEADERS_X_CONTENT)
 
     if scanner_name == 'scanner_dummy':
         return True
