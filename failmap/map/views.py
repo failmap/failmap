@@ -239,10 +239,6 @@ def index(request):
     })
 
 
-def d3(request):
-    return render(request, 'map/d3.html')
-
-
 @cache_page(one_day)
 def robots_txt(request):
     return HttpResponse("User-Agent: *\nDisallow:", content_type="text/plain")

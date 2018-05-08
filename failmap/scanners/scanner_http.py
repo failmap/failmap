@@ -825,21 +825,6 @@ def check_network(code_location=""):
         logger.info("IPv6 could be reached via %s" % code_location)
 
 
-def verify_is_secure(endpoint: Endpoint):
-    # i've seen qualys saying there is no TLS, while there is! So qualys kills the endpoint, this adds a new one.
-
-    scan_urls(['https'], [endpoint.url], [443])
-
-    # might hopefully result in a new endpoint
-    endpoints = Endpoint.objects.all().filter(url=endpoint.url, is_dead=False, protocol="https", port=443,
-                                              ip_version=endpoint.ip_version)
-    if endpoints:
-        logger.debug("Url does seem to be secure after all: %s" % endpoint.url)
-        return True
-    logger.debug("Url is still not secure: %s" % endpoint.url)
-    return False
-
-
 def redirects_to_safety(endpoint: Endpoint):
     """
     Also includes the ip-version of the endpoint.

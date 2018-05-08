@@ -12,8 +12,8 @@ from celery import Task, group
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner_http import (redirects_to_safety, resolves_on_v4, resolves_on_v6,
-                                           verify_is_secure)
+from failmap.scanners.scanner_http import (redirects_to_safety, resolve_and_scan_tasks,
+                                           resolves_on_v4, resolves_on_v6)
 
 from ..celery import app
 from .models import Endpoint
@@ -65,13 +65,19 @@ def compose_task(
 # distributed. For examples see scan_dummy.py
 
 # http://185.3.211.120:80: Host: demo3.data.amsterdam.nl Status: 301
-@app.task(queue='scanners')
+@app.task(queue='storage')
 def scan_url(url: Url):
     """
 
     :param url:
     :return:
     """
+
+    # todo: verify that the you have both ipv4 6 and ipv6 capabilities.
+
+    log.info("started scanning url %s" % url)
+
+    tasks = []
 
     scan_manager = EndpointScanManager
     log.debug("Checking for http only sites on: %s" % url)
@@ -84,8 +90,6 @@ def scan_url(url: Url):
     http_v4_endpoint = None
     http_v6_endpoint = None
 
-    saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on the standard port is missing."
-    no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
     cleaned_up = "Has a secure equivalent, which wasn't so in the past."
     not_resolvable_at_all = "Cannot be resolved anymore, seems to be cleaned up."
 
@@ -128,7 +132,7 @@ def scan_url(url: Url):
     # Some organizations redirect the http site to a non-standard https port.
     # occurs more than once... you still have to follow redirects?
     if has_http_v4 and not has_https_v4:
-
+        log.debug("Needs to check ipv4")
         # fixing https://sentry.io/internet-cleanup-foundation/faalkaart/issues/435116126/
         if not resolves_on_v4(url.url):
             # the endpoint scanner will probably find there is no endpoint anymore as well...
@@ -138,39 +142,56 @@ def scan_url(url: Url):
             log.debug("This url seems to have no https at all: %s" % url)
             log.debug("Checking if they exist, to be sure there is nothing.")
 
-            # todo: doesn't work anymore, as it's async
-            # quick fix: run it again after the discovery tasks have finished.
-            if not verify_is_secure(http_v4_endpoint):
+            tasks.append(resolve_and_scan_tasks('https', url, 443)
+                         | handle_verify_is_secure.si(http_v4_endpoint, url))
 
-                log.info("Checking if the URL redirects to a secure url: %s" % url)
-                if redirects_to_safety(http_v4_endpoint):
-                    log.info("%s redirects to safety, saved by the bell." % url)
-                    scan_manager.add_scan("plain_https", http_v4_endpoint, "25", saved_by_the_bell)
-
-                else:
-                    log.info("%s does not have a https site. Saving/updating scan." % url)
-                    scan_manager.add_scan("plain_https", http_v4_endpoint, "1000", no_https_at_all)
     else:
         # it is secure, and if there was a rating, then reduce it to 0 (with a new rating).
+        log.debug("We don't have to do anything for v4 on %s" % url)
         if scan_manager.had_scan_with_points("plain_https", http_v4_endpoint):
             scan_manager.add_scan("plain_https", http_v4_endpoint, "0", cleaned_up)
 
     if has_http_v6 and not has_https_v6:
-
-        # fixing https://sentry.io/internet-cleanup-foundation/faalkaart/issues/435116126/
+        log.debug("Needs to check ipv6")
         if not resolves_on_v6(url.url):
-            # the endpoint scanner will probably find there is no endpoint anymore as well...
             log.debug("Does not resolve at all, so has no insecure endpoints. %s" % url)
             scan_manager.add_scan("plain_https", http_v6_endpoint, "0", not_resolvable_at_all)
         else:
-            if not verify_is_secure(http_v6_endpoint):
-                if redirects_to_safety(http_v6_endpoint):
-                    scan_manager.add_scan("plain_https", http_v6_endpoint, "25", saved_by_the_bell)
-                else:
-                    scan_manager.add_scan("plain_https", http_v6_endpoint, "1000", no_https_at_all)
+            tasks.append(
+                (resolve_and_scan_tasks('https', url, 443) | handle_verify_is_secure.si(http_v6_endpoint, url)))
+
     else:
-        # it is secure, and if there was a rating, then reduce it to 0 (with a new rating).
+        log.debug("We don't have to do anything for v6 on %s" % url)
         if scan_manager.had_scan_with_points("plain_https", http_v6_endpoint):
             scan_manager.add_scan("plain_https", http_v6_endpoint, "0", cleaned_up)
 
-    return
+    task = group(tasks)
+    if task:
+        log.info("Task chain: %s" % task)
+        task.apply_async()
+
+
+# unfortunately due to my limited experience with tasks, i've placed this on the storage queue so there is
+# direct access to the database and performing a scan.
+@app.task(queue="storage")
+def handle_verify_is_secure(endpoint, url):
+
+    secure_endpoints = Endpoint.objects.all().filter(
+        url=endpoint.url,
+        is_dead=False,
+        protocol="https",
+        port=443,
+        ip_version=endpoint.ip_version)
+
+    saved_by_the_bell = "Redirects to a secure site, while a secure counterpart on the standard port is missing."
+    no_https_at_all = "Site does not redirect to secure url, and has no secure alternative on a standard port."
+
+    if not secure_endpoints:
+        log.info("Checking if the URL redirects to a secure url: %s" % url)
+        if redirects_to_safety(endpoint):
+            log.info("%s redirects to safety, saved by the bell." % url)
+            EndpointScanManager.add_scan("plain_https", endpoint, "25", saved_by_the_bell)
+
+        else:
+            log.info("%s does not have a https site. Saving/updating scan." % url)
+            EndpointScanManager.add_scan("plain_https", endpoint, "1000", no_https_at_all)
