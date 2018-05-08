@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-05 19:33+0000\n"
+"POT-Creation-Date: 2018-05-08 17:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -272,8 +272,8 @@ msgstr "Afdrukken"
 #: failmap/map/templates/map/index.html:1156
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:19
-#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1560
-#: failmap/map/views.py:1626
+#: failmap/map/templates/map/topwin.html:18 failmap/map/views.py:1556
+#: failmap/map/views.py:1622
 msgid "High"
 msgstr "Hoog risico"
 
@@ -281,8 +281,8 @@ msgstr "Hoog risico"
 #: failmap/map/templates/map/index.html:1157
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:22
-#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1560
-#: failmap/map/views.py:1626
+#: failmap/map/templates/map/topwin.html:21 failmap/map/views.py:1556
+#: failmap/map/views.py:1622
 msgid "Medium"
 msgstr "Midden risico"
 
@@ -290,8 +290,8 @@ msgstr "Midden risico"
 #: failmap/map/templates/map/index.html:1158
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:25
-#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1560
-#: failmap/map/views.py:1626
+#: failmap/map/templates/map/topwin.html:24 failmap/map/views.py:1556
+#: failmap/map/views.py:1622
 msgid "Low"
 msgstr "Laag risico"
 
@@ -1001,11 +1001,11 @@ msgstr "De beste"
 msgid "This is the top win from"
 msgstr "Dit zijn op dit moment de organisaties met de beste basisveiligheid."
 
-#: failmap/map/views.py:263 failmap/map/views.py:264
+#: failmap/map/views.py:259 failmap/map/views.py:260
 msgid "Fail Map"
 msgstr "Faalkaart"
 
-#: failmap/map/views.py:265
+#: failmap/map/views.py:261
 msgid "Fail Map Introduction"
 msgstr ""
 "Faalkaart geeft inzicht in hoe veilig de overheid en verwante organisaties "
@@ -1014,7 +1014,7 @@ msgstr ""
 "misbruik. Hieruit ontstaat een beeld hoe (de rest van de) beveiliging is "
 "ingeregeld. Dit zou allemaal op orde moeten zijn... toch?"
 
-#: failmap/map/views.py:1559 failmap/map/views.py:1625
+#: failmap/map/views.py:1555 failmap/map/views.py:1621
 msgid "Perfect"
 msgstr "Perfect"
 

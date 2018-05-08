@@ -212,7 +212,7 @@ var failmap = {
             labels.push('<i style="background:' + failmap.getColorCode('red') + '"></i> '+ gettext('Bad'));
             labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
 
-            div.innerHTML = labels.join('<br>');
+            div.innerHTML = "<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />');
             return div;
         };
 
