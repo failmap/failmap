@@ -1227,7 +1227,7 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
             for possible_scan_type in possible_endpoint_scans:
                 if endpoint_scan_types.get(possible_scan_type, False) == "true":
                     desired_endpoint_scans += [possible_scan_type]
-    except (JSONDecodeError, ) as e:
+    except (JSONDecodeError, ):
         # falling back to default value
         # log.debug("JsonDecodeError")
         pass

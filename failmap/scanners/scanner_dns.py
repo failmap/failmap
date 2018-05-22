@@ -83,7 +83,7 @@ def nsec(organizations: List[Organization]=None, urls: List[Url]=None):
 def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict(),
                    endpoints_filter: dict = dict()) -> List:
     if endpoints_filter:
-        raise NotImplemented("Endpoints are not yet supported for DNS scans.")
+        raise NotImplementedError("Endpoints are not yet supported for DNS scans.")
 
     urls = []
     # todo: check voor toplevel
@@ -207,7 +207,7 @@ def standard(organizations: List[Organization]=None, urls: List[Url]=None):
 
 
 def dnsrecon_default(urls):
-    raise NotImplemented
+    raise NotImplementedError
     # todo: Expanding IP ranges found in DNS and TXT records for Reverse Look-up takes ages.
     # This is due to expansion of IPv6 addresses, which is extreme and sometimes impossible
     # Since dnsrecon doesn't give the option to time-out or skip this expansion...

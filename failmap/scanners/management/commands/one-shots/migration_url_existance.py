@@ -27,5 +27,5 @@ class Command(BaseCommand):
                 print("Url %s was discovered on %s" % (url, url.created_on))
             except ObjectDoesNotExist:
                 print("There was no endpoint ever for this url...")
-            except Exception as Ex:
+            except Exception:
                 print("%s has something strange, probably no endpoints." % url)

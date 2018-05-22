@@ -555,4 +555,4 @@ def cert_chain_is_complete(url, port):
     """
     # pyflakes tool = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
 
-    raise NotImplemented
+    raise NotImplementedError

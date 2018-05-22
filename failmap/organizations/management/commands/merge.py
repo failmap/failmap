@@ -106,4 +106,4 @@ def remove_short_deaths():
 
     :return:
     """
-    raise NotImplemented
+    raise NotImplementedError

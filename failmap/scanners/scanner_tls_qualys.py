@@ -163,7 +163,7 @@ def qualys_scan(self, url):
     # Query Qualys API for information about this URL.
     try:
         data = service_provider_scan_via_api(url.url)
-    except requests.RequestException as e:
+    except requests.RequestException:
         # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
         # ex: EOF occurred in violation of protocol (_ssl.c:749)
         log.exception("(Network or Server) Error when contacting Qualys for scan on %s", url.url)

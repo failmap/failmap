@@ -38,6 +38,7 @@ admin_urls = [
 frontend_urls = [
     url('', include('failmap.map.urls')),
     url(r'^game/', include('failmap.game.urls')),
+    url(r'^monitoryour/', include('failmap.monitoryour.urls')),
 ]
 interactive_urls = [
     path('authentication/', include('django.contrib.auth.urls')),

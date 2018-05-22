@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Adds some documentation artifacts to this project.'
 
     def handle(self, *args, **options):
-        raise NotImplemented
+        raise NotImplementedError
         # failmap graph_models organizations scanners map -o myapp_models.png
 
         # it's posisble to also include auth and other installed things by not specifying an app.

@@ -240,11 +240,11 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
             entity = client.get(properties["wikidata"], load=True)
             website = str(entity.get(client.get("P856"), None))  # P856 == Official Website.
             country = entity.get(client.get("P17"), None)
-        except HTTPError as e:
+        except HTTPError:
             # No entity with ID Q15111448 was found... etc.
             # perfectly possible. In that case, no website, and thus continue.
             pass
-        except Exception as e:
+        except Exception:
             # don't cause problems here... if the service is down, bad luck, try an import later etc...
             pass
 
@@ -256,11 +256,11 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
                 entity = client.get(country.id, load=True)
                 isocode = str(entity.get(client.get("P297"), None))
                 log.debug("Retrieved ISO code: %s" % isocode)
-            except HTTPError as e:
+            except HTTPError:
                 # No entity with ID Q15111448 was found... etc.
                 # perfectly possible. In that case, no website, and thus continue.
                 pass
-            except Exception as e:
+            except Exception:
                 # don't cause problems here... if the service is down, bad luck, try an import later etc...
                 pass
 
@@ -436,7 +436,7 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     admin_level = get_region(country, organization_type)
 
     if not admin_level:
-        raise NotImplemented(
+        raise NotImplementedError(
             "Combination of country and organization_type does not have a matching OSM query implemented.")
 
     # we used to use the country name, which doesn't work very consistently and requires a greater source of knowledge
