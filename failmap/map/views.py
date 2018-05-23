@@ -639,7 +639,9 @@ def stats_determine_when(stat, weeks_back=0):
     if weeks_back:
         when = when - relativedelta(weeks=int(weeks_back))
 
-    return when
+    # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
+    # performed every time.
+    return datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
 
 
 @cache_page(one_hour)
@@ -808,9 +810,8 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
     # they might.
     # also: it's "1 days ago", not "1 day ago".
     timeframes = [
-        'now', '1 days ago', '2 days ago', '3 days ago', '4 days ago', '5 days ago', '6 days ago', '7 days ago',
-        '8 days ago', '9 days ago', '10 days ago', '11 days ago', '12 days ago', '13 days ago', '14 days ago',
-        '21 days ago', '28 days ago',
+        'now', '1 days ago', '2 days ago', '4 days ago', '6 days ago',
+        '8 days ago', '10 days ago', '14 days ago', '21 days ago', '28 days ago',
         '35 days ago', '42 days ago', '49 days ago', '56 days ago',
         '63 days ago', '70 days ago', '77 days ago', '84 days ago', '91 days ago']
 
@@ -830,6 +831,24 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
         # about 1 second per query, while it seems to use indexes.
         # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
         # see map_data for more info.
+
+        # this query removes the double urls (see below) and makes the joins straightforward. But it's way slower.
+        sql = """SELECT MAX(map_urlrating.id) as id, map_urlrating2.calculation FROM map_urlrating
+               INNER JOIN url ON map_urlrating.url_id = url.id
+               INNER JOIN url_organization on url.id = url_organization.url_id
+               INNER JOIN organization ON url_organization.organization_id = organization.id
+               INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
+                WHERE organization.type_id = '%(OrganizationTypeId)s'
+                AND organization.country = '%(country)s'
+                AND map_urlrating.`when` <= '%(when)s'
+                GROUP BY map_urlrating.url_id
+            """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+                   "country": get_country(country)}
+
+        # The ID is included for convenience of the rawquery.
+        # This query will deliver double ratings for urls that are doubly listed, which is dubious.
+        # this happens because multiple organizations can have the same URL.
+        # It's fair that there are more issues if more organizations share the same url?
         sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation FROM
                    map_urlrating
                INNER JOIN
@@ -844,8 +863,6 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                 AND organization.country = '%(country)s'
             """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
-
-        # print(sql)
 
         urlratings = UrlRating.objects.raw(sql)
 
