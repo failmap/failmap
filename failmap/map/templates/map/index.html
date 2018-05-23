@@ -787,62 +787,54 @@
                     {% endverbatim %}
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                <h4>{% trans "Improvements Details" %}</h4>
-                </div>
-            </div>
+
             <div class="row">
                 <div class="col-md-4">
-                    <span class="improvement_severity">{% trans "High risk" %}</span>
-                </div>
-                <div class="col-md-4">
-                    <span class="improvement_severity">{% trans "Medium risk" %}</span>
-                </div>
-                <div class="col-md-4">
-                    <span class="improvement_severity">{% trans "Low risk" %}</span>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <table> <!-- todo: make these spans, float left etc -->
+                    <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
-                        </tr>
-                        <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.high)">{% verbatim %}{{ tls_qualys.high }}{% endverbatim %}</td> {% endif %}
-                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.high)">{{ plain_https.high }}</td>{% endif %}
                         </tr>
-                    </table>
-                </div>
-                <div class="col-md-4">
-                    <table>
                         <tr>
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
                             {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td>{% trans "HSTS Header" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
-                        </tr>
-                        <tr>
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.medium)">{{ tls_qualys.medium }}</td>{% endif %}
-                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.medium)">{{ plain_https.medium }}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{{ security_headers_strict_transport_security.medium }}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{{ security_headers_x_frame_options.medium }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.high)">{% verbatim %}{{ plain_https.high }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
                 </div>
                 <div class="col-md-4">
-                    <table>
+                    <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td>{% trans "X-Content" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.medium)">{% verbatim %}{{ tls_qualys.medium }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.low)">{{ tls_qualys.low }}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{{ security_headers_x_xss_protection.low }}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{{ security_headers_x_content_type_options.low }}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.medium)">{% verbatim %}{{ plain_https.medium }}{% endverbatim %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td>{% trans "HSTS Header" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{% verbatim %}{{ security_headers_strict_transport_security.medium }}{% endverbatim %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{% verbatim %}{{ security_headers_x_frame_options.medium }}{% endverbatim %}</td>{% endif %}
+
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <table class="table table-striped">
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.low)">{% verbatim %}{{ tls_qualys.low }}{% endverbatim %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{% verbatim %}{{ security_headers_x_xss_protection.low }}{% endverbatim %}</td>{% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td>{% trans "X-Content" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{% verbatim %}{{ security_headers_x_content_type_options.low }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
                 </div>

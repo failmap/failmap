@@ -542,11 +542,16 @@ path {
    content: "+";
 }
 
+.improvements_bad:before {
+   content: "+";
+}
+
+.improvements_bad_large:before {
+   content: "+";
+}
+
 .number-sm {
     text-align: center;
-    background-color: #efefef;
-    border-radius: 10px;
-    border: 2px silver;
     min-width: 112px;
 }
 
@@ -558,6 +563,10 @@ path {
 
 .improvement_severity{
     border-bottom: 2px solid silver;
+}
+
+.centered {
+    text-align:center
 }
 
 [v-cloak] {
