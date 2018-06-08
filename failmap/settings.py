@@ -885,3 +885,37 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 ]
 # end django jet menu configuration
 ########
+
+########
+# Begin Cacheops
+
+# Cacheops has been added to improve the retrieval of graphs-queries. At the time of writing it's only in use
+# there using a hack to improve querying speed.
+
+# It's a hack because out of the box cacheops doesn't support raw querysets (the only caveat without explanation).
+# But we just need the list of data for displaying, thus we can wrap that in a function and use function result caching
+#
+# Note that lru_cache from functools does not support lists or complex types, while cahcheops does.
+#
+# I've chosen cacheops because it's actively maintained and has a lot of commits, while it's backlog is clean.
+# Another reason is that it doesn't affect anything, except what you explicitly cache. So behaviour of the rest of the
+# application is unchanged.
+
+# If redis is not available, that is not a problem. For example: certain development scenario's or when redis fails.
+# in that case a limited set of functions are performed without caching (and thus slower) but without crashes.
+# If it's too slow, the webserver will kill it anyway, or in dev environments it will take longer.
+CACHEOPS_DEGRADE_ON_FAILURE = True
+
+CACHEOPS_REDIS = {
+    'host': 'localhost',  # redis-server is on same machine
+    'port': 6379,        # default redis port
+    'db': 1,             # SELECT non-default redis database
+                         # using separate redis db or redis instance
+                         # is highly recommended
+
+    'socket_timeout': 3,   # connection timeout in seconds, optional
+}
+
+
+# End cacheops
+########

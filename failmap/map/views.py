@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 import pytz
 import simplejson as json
+from cacheops import cached
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
@@ -646,6 +647,23 @@ def stats_determine_when(stat, weeks_back=0):
     return dt
 
 
+# Django Cacheops doesn't support caching of raw querysets, but it does support
+# function caching with complex output. So this is a hack to use cacheops on a raw queryset.
+@cached(timeout=one_hour)
+def rawOrganizationRatingQuery(query):
+    s = list(OrganizationRating.objects.raw(query))
+    return s
+
+# Django Cacheops doesn't support caching of raw querysets, but it does support
+# function caching with complex output. So this is a hack to use cacheops on a raw queryset.
+
+
+@cached(timeout=one_hour)
+def rawUrlRatingQuery(query):
+    s = list(UrlRating.objects.raw(query))
+    return s
+
+
 @cache_page(one_hour)
 def stats(request, country: str="NL", organization_type="municipality", weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
@@ -676,7 +694,11 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
 
         # log.debug(sql)
 
-        ratings = OrganizationRating.objects.raw(sql)
+        # django cacheops doesn't work with raw.
+        # too bad https://github.com/Suor/django-cacheops
+        # it's the elephant in the room in the documentation: all are explained except this one.
+        # we can of course do function caching :)
+        ratings = rawOrganizationRatingQuery(sql)
 
         noduplicates = []
         for rating in ratings:
@@ -828,7 +850,7 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
     for stat in timeframes:
         measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
         when = stats_determine_when(stat, weeks_back)
-        # print("%s: %s" % (stat, when))
+        print("%s: %s" % (stat, when))
 
         # about 1 second per query, while it seems to use indexes.
         # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
@@ -868,7 +890,7 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
 
         # print(sql)
 
-        urlratings = UrlRating.objects.raw(sql)
+        urlratings = rawUrlRatingQuery(sql)
 
         # group by vulnerability type
         for urlrating in urlratings:

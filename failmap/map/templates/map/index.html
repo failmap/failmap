@@ -847,7 +847,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <h4>{% trans "Overall" %}</h4>
-                    <svg id="total" width="1110" height="300"></svg>
+                    <svg id="graph_total" width="1110" height="300"></svg>
                 </div>
             </div>
 
@@ -856,13 +856,13 @@
                 {% if config.SHOW_HTTP_TLS_QUALYS %}
                 <div class="col-md-6">
                     <h4>{% trans "Encryption failure" %}</h4>
-                    <svg id="tls_qualys" width="555" height="300"></svg>
+                    <svg id="graph_tls_qualys" width="555" height="300"></svg>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_MISSING_TLS %}
                 <div class="col-md-6">
                     <h4>{% trans "Lack of encryption failure" %}</h4>
-                    <svg id="plain_https" width="555" height="300"></svg>
+                    <svg id="graph_plain_https" width="555" height="300"></svg>
                 </div>
                 {% endif %}
             </div>
@@ -873,13 +873,13 @@
                 {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
                 <div class="col-md-6">
                     <h4>{% trans "Forcing of encryption failure" %}</h4>
-                    <svg id="security_headers_strict_transport_security" width="555" height="300"></svg>
+                    <svg id="graph_security_headers_strict_transport_security" width="555" height="300"></svg>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Frame Options failure" %}</h4>
-                    <svg id="security_headers_x_frame_options" width="555" height="300"></svg>
+                    <svg id="graph_security_headers_x_frame_options" width="555" height="300"></svg>
                 </div>
                 {% endif %}
             </div>
@@ -890,13 +890,13 @@
                 {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Content-Type-Options failure" %}</h4>
-                    <svg id="security_headers_x_content_type_options" width="555" height="300"></svg>
+                    <svg id="graph_security_headers_x_content_type_options" width="555" height="300"></svg>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_HEADERS_X_XSS%}
                 <div class="col-md-6">
                     <h4>{% trans "X-XSS-Protection failure" %}</h4>
-                    <svg id="security_headers_x_xss_protection" width="555" height="300"></svg>
+                    <svg id="graph_security_headers_x_xss_protection" width="555" height="300"></svg>
                 </div>
                 {% endif %}
             </div>

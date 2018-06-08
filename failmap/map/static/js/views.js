@@ -558,13 +558,13 @@ function views() {
                 var self = this;
                 d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0", function (error, data) {
                     d3stats();
-                    self.d3stats.stacked_area_chart("total", error, data.total);
-                    self.d3stats.stacked_area_chart("tls_qualys", error, data.tls_qualys);
-                    self.d3stats.stacked_area_chart("plain_https", error, data.plain_https);
-                    self.d3stats.stacked_area_chart("security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
-                    self.d3stats.stacked_area_chart("security_headers_x_frame_options", error, data.security_headers_x_frame_options);
-                    self.d3stats.stacked_area_chart("security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
-                    self.d3stats.stacked_area_chart("security_headers_x_xss_protection", error, data.security_headers_x_xss_protection);
+                    self.d3stats.stacked_area_chart("graph_total", error, data.total);
+                    self.d3stats.stacked_area_chart("graph_tls_qualys", error, data.tls_qualys);
+                    self.d3stats.stacked_area_chart("graph_plain_https", error, data.plain_https);
+                    self.d3stats.stacked_area_chart("graph_security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
+                    self.d3stats.stacked_area_chart("graph_security_headers_x_frame_options", error, data.security_headers_x_frame_options);
+                    self.d3stats.stacked_area_chart("graph_security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
+                    self.d3stats.stacked_area_chart("graph_security_headers_x_xss_protection", error, data.security_headers_x_xss_protection);
                 });
             }
         }

@@ -107,3 +107,7 @@ django-markdown-deux
 beautifulsoup4
 lxml
 six
+
+# function caching / query caching for slow stats graphs queries
+# another way has to be found, but until then
+django-cacheops
