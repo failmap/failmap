@@ -641,13 +641,15 @@ def stats_determine_when(stat, weeks_back=0):
 
     # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
     # performed every time.
-    return datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
+    dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
+    log.debug("%s: %s (%s weeks back)" % (stat, dt, weeks_back))
+    return dt
 
 
 @cache_page(one_hour)
 def stats(request, country: str="NL", organization_type="municipality", weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
-                  '1 month ago': 0, '2 months ago': 0, '3 months ago': 0}
+                  '1 months ago': 0, '2 months ago': 0, '3 months ago': 0}
 
     for stat in timeframes:
 
@@ -863,6 +865,8 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                 AND organization.country = '%(country)s'
             """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
+
+        # print(sql)
 
         urlratings = UrlRating.objects.raw(sql)
 
