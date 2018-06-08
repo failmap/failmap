@@ -642,7 +642,7 @@ def stats_determine_when(stat, weeks_back=0):
     # optimize: always give back the time 00:00:00, so the query result can be cached as the same query is
     # performed every time.
     dt = datetime(year=when.year, month=when.month, day=when.day, hour=0, minute=0, second=0, tzinfo=pytz.utc)
-    log.debug("%s: %s (%s weeks back)" % (stat, dt, weeks_back))
+    # log.debug("%s: %s (%s weeks back)" % (stat, dt, weeks_back))
     return dt
 
 

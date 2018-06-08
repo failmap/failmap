@@ -773,23 +773,6 @@
                         <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
                     {% endverbatim %}
 
-                </div>
-                <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Medium risk" %}</h4>
-                    {% verbatim %}
-                        <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
-                    {% endverbatim %}
-                </div>
-                <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Low risk" %}</h4>
-                    {% verbatim %}
-                        <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
-                    {% endverbatim %}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
                     <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
@@ -800,8 +783,14 @@
                             {% if config.SHOW_HTTP_MISSING_TLS %}<td :class="'number-sm ' + goodbad(plain_https.high)">{% verbatim %}{{ plain_https.high }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
+
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" style="text-align:center">
+                    <h4>{% trans "Medium risk" %}</h4>
+                    {% verbatim %}
+                        <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
+                    {% endverbatim %}
+
                     <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
@@ -822,7 +811,12 @@
                         </tr>
                     </table>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-4" style="text-align:center">
+                    <h4>{% trans "Low risk" %}</h4>
+                    {% verbatim %}
+                        <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
+                    {% endverbatim %}
+
                     <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
@@ -837,8 +831,10 @@
                             {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{% verbatim %}{{ security_headers_x_content_type_options.low }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
+
                 </div>
             </div>
+
         </div>
         {% endif %}
 
