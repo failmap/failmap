@@ -892,6 +892,9 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 # Cacheops has been added to improve the retrieval of graphs-queries. At the time of writing it's only in use
 # there using a hack to improve querying speed.
 
+# It was not an option to rewrite queries to tailor to specific caching schemes per database vendor, django ORM also
+# does not support that.
+
 # It's a hack because out of the box cacheops doesn't support raw querysets (the only caveat without explanation).
 # But we just need the list of data for displaying, thus we can wrap that in a function and use function result caching
 #
