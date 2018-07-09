@@ -75,6 +75,15 @@
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
     {% endcompress %}{% endif %}
 
+    {% if config.GITTER_CHAT_ENABLE and config.GITTER_CHAT_CHANNEL %}
+        <script>
+          ((window.gitter = {}).chat = {}).options = {
+            room: '{{ config.GITTER_CHAT_CHANNEL }}'
+          };
+        </script>
+        <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+    {% endif %}
+
     <link rel="manifest" href="/manifest.json">
 </head>
 

@@ -782,3 +782,7 @@ th.active .arrow {
     margin-bottom: -12px;
     font-weight: bold;
 }
+
+.gitter-chat-embed {
+    z-index: 10000;
+}

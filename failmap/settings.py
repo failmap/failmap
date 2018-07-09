@@ -711,6 +711,8 @@ CONSTANCE_CONFIG = {
     'IPV6_TEST_DOMAIN': ('faalkaart.nl', 'A server that is reachable over IPv6. This is used by a worker to determine '
                                          'what kind of scans it can do. Enter an address that you own or manage.', str),
 
+    'GITTER_CHAT_ENABLE': (False, 'Show the Gitter Chat option on the website (using gitter sidecar).', bool),
+    'GITTER_CHAT_CHANNEL': ('internet-cleanup-foundation/support', 'Name of the channel chat takes place.', str),
 
     #
     # 'USE_CUSTOM_INTRO': (False, 'If you want to use an (untranslated) custom intro, enable this. Enabling this'
@@ -751,6 +753,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                    'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
                    'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
                    'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT')),
+    ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL'))
 ])
 # End constance settings
 ########
