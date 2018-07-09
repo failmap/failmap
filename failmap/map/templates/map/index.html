@@ -259,7 +259,7 @@
                                 {{ organization.name }}
                             </option>
                         </select>
-                        <span v-if='loading'> (loading...)</span>
+                        <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span>
                         {% endverbatim %}
                     </div>
                     <br/>
@@ -1266,7 +1266,7 @@
         {% endif %}
         <br />
         <h4>{% trans "Moment" %}</h4>
-        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %}<span v-if='loading'> ({% trans "Loading" %}...)</span></h5>
+        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
         <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>
         <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
         <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
