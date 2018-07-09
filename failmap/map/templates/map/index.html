@@ -1272,6 +1272,30 @@
         <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
     </div>
 </script>
+<script type="x-template" id="domainlist_template">
+    <div>
+        <div v-if="urls">
+            <table width='100%'>
+                <thead>
+                    <tr><th>{% trans "Url" %}</th>
+                    <th width='7%'>{% trans "H" %}</th>
+                    <th width='7%'>{% trans "M" %}</th>
+                    <th width='7%'>{% trans "L" %}</th></tr>
+                </thead>
+                {% verbatim %}
+                <tbody>
+                    <tr v-for="url in urls">
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.url }}</span></td>
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.high }}</span></td>
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.medium }}</span></td>
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.low }}</span></td>
+                    </tr>
+                </tbody>
+                {% endverbatim %}
+            </table>
+        </div>
+    </div>
+</script>
 <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>
 <!--

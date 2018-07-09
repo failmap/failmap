@@ -144,7 +144,6 @@ var failmap = {
                     sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColorCode('orange') + '">0</span><br />';
                     sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColorCode('green') + '">0</span><br />';
                 }
-                vueDomainlist.load(props.organization_id, vueMap.week);
                 this._div.innerHTML = sometext;
             }
         };
@@ -169,9 +168,7 @@ var failmap = {
         this.dataslider.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
-            dataslider_control = " <div id=\"historycontrol\">" +
-                "</div>";
-
+            dataslider_control = '<div id="historycontrol"></div>';
             this._div.innerHTML = dataslider_control;
             return this._div;
         };
@@ -182,18 +179,7 @@ var failmap = {
         this.internetadresses.onAdd = function (map) {
             this._div = L.DomUtil.create('div', 'info');
             L.DomEvent.disableClickPropagation(this._div);
-            this._div.innerHTML = "<div id=\"domainlist\" v-if=\"urls\">\n" +
-                "<table width='100%'><thead>" +
-                "<tr><th>" + gettext('Url') + "</th>" +
-                "<th width='5%'>" + gettext('H') + "</th>" +
-                "<th width='5%'>" + gettext('M') + "</th>" +
-                "<th width='5%'>" + gettext('L') + "</th></tr></thead>" +
-                "<tr v-for=\"url in urls\">\n" +
-                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.url }}</span></td>" +
-                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.high }}</span></td>" +
-                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.medium }}</span></td>" +
-                "<td><span v-bind:class=\"colorize(url.high, url.medium, url.low)\">{{ url.low }}</span></td>\n" +
-                "</tr></table>\n" +
+            this._div.innerHTML = "<div id=\"domainlist\">" +
                 "</div>";
             return this._div;
         };
@@ -290,6 +276,7 @@ var failmap = {
             }
         }
         failmap.info.update(layer.feature.properties);
+        vueDomainlist.load(layer.feature.properties.organization_id, vueMap.week);
     },
 
     onEachFeature: function (feature, layer) {

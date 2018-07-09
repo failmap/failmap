@@ -435,6 +435,8 @@ function views() {
     // You can try with:
     // vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"]
     window.vueCategoryNavbar = new Vue({
+        name: "CategoryNavbar",
+
         mixins: [translation_mixin, state_mixin],
 
         el: '#categorynavbar',
@@ -493,6 +495,7 @@ function views() {
     // test with:
     // vueCountryNavbar.countries = ["NL", "DE", "SE"]
     window.vueCountryNavbar = new Vue({
+        name: "CountryNavbar",
         mixins: [translation_mixin],
 
         el: '#countrynavbar',
@@ -535,6 +538,8 @@ function views() {
     });
 
     window.vueGraphs = new Vue({
+        name: "Graphs",
+
         mixins: [state_mixin],
 
         // the mixin requires data to exist, otherwise massive warnings.
@@ -571,6 +576,8 @@ function views() {
     });
 
     window.vueStatistics = new Vue({
+        name: "Statistics",
+
         mixins: [state_mixin],
         el: '#statistics',
         mounted: function () {
@@ -687,8 +694,12 @@ function views() {
     });
 
     window.vueDomainlist = new Vue({
+        name: "DomainList",
+
         mixins: [state_mixin],
         el: '#domainlist',
+        template: '#domainlist_template',
+
         data: {urls: Array},
         methods: {
             colorize: function (high, medium, low) {
@@ -719,6 +730,8 @@ function views() {
     // ticker
     // todo: determine the scroll time dynamically, as it might be too fast / too slow depending on the data.
     window.vueTicker = new Vue({
+        name: "Ticker",
+
         mixins: [state_mixin],
         el: '#ticker',
         data: {
@@ -794,6 +807,8 @@ function views() {
     });
 
     window.vueExport = new Vue({
+        name: "Export",
+
         mixins: [translation_mixin, state_mixin],
         el: '#export',
         data: {
@@ -812,6 +827,8 @@ function views() {
 
 
     window.vueFullscreen = new Vue({
+        name: "Fullscreen",
+
         el: '#fullscreen',
         data: {
             fullscreen: gettext("View Full Screen")
@@ -829,6 +846,8 @@ function views() {
     });
 
     window.vueTopfail = new Vue({
+        name: "TopFail",
+
         el: '#topfail',
         data: {
             data_url: "/data/topfail/",
@@ -838,6 +857,7 @@ function views() {
     });
 
     window.vueTopwin = new Vue({
+        name: "TopWin",
         el: '#topwin',
         data: {
             data_url: "/data/topwin/",
@@ -848,36 +868,42 @@ function views() {
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
+        name: "LatestTlsQualys",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_tls_qualys',
         data: {scan: "tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
+        name: "LatestPlainHttps",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_plain_https',
         data: {scan: "plain_https"}
     });
 
     window.vueLatestHSTS = new Vue({
+        name: "LatestHSTS",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_strict_transport_security',
         data: {scan: "Strict-Transport-Security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
+        name: "LatestXContentTypeOptions",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_frame_options',
         data: {scan: "X-Content-Type-Options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
+        name: "LatestXFrameOptions",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_content_type_options',
         data: {scan: "X-Frame-Options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
+        name: "LatestXXSSProtection",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_xss_protection',
         data: {scan: "X-XSS-Protection"}
@@ -892,6 +918,8 @@ function views() {
 // knowing fullscreen here would be nice...
 // state is managed here.
     window.vueMap = new Vue({
+        name: "Map",
+
         mounted: function () {
             // wait until the default category and default languages have been set...
             this.load(this.week)
@@ -1100,6 +1128,7 @@ function views() {
 
 
     window.vueReport = new Vue({
+        name: "Report",
         el: '#report',
         mixins: [state_mixin, report_mixin],
 
@@ -1157,6 +1186,7 @@ function views() {
           "security_headers_strict_transport_security": [
     * */
     window.vueImprovements = new Vue({
+        name: "Improvements",
         el: '#issue_improvements',
         mixins: [state_mixin],
 
@@ -1224,6 +1254,7 @@ function views() {
     });
 
     window.vueFullScreenReport = new Vue({
+        name: "FullScreenReport",
         el: '#fullscreenreport',
         mixins: [state_mixin, report_mixin],
 
