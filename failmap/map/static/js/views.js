@@ -151,20 +151,20 @@ var report_mixin = {
         // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
         second_opinion_links: function (rating, url) {
             if (rating.type === "security_headers_strict_transport_security")
-                return '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
-                    '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank">' + gettext('Second opinion') + ' (securityheaders.io)</a>';
+                return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "tls_qualys")
-                return '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a> - ' +
-                    '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank">' + gettext('Second opinion') + ' (qualys)</a>';
+                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a>' +
+                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "security_headers_x_xss_protection")
-                return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
+                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "security_headers_x_frame_options")
-                return '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>';
+                return  '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
             if (rating.type === "security_headers_x_content_type_options")
-                return '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank">' + gettext('Documentation') + ' (owasp)</a>';
+                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "DNSSEC")
-                return '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank">' + gettext('Documentation') + ' (wikipedia)</a>' +
-                    '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank">' + gettext('Second opinion') + ' (verisign)</a>';
+                return  '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (verisign)</a>' +
+                        '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
         },
         total_awarded_points: function (high, medium, low) {
             var marker = vueReport.make_marker(high, medium, low);
