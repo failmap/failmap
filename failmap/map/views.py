@@ -1253,7 +1253,8 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
                                "security_headers_x_frame_options",
                                "security_headers_x_xss_protection",
                                "tls_qualys",
-                               "plain_https"]
+                               "plain_https",
+                               "ftp"]
 
     # todo: add try except for standard json errors.
     # this is a vulnerability, so we try to contain it
@@ -1468,7 +1469,7 @@ def latest_scans(request, scan_type, country: str="NL", organization_type="munic
 
     if scan_type not in ["tls_qualys",
                          "Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https"]:
+                         "plain_https", "ftp"]:
         return empty_response()
 
     if scan_type == "tls_qualys":
@@ -1478,7 +1479,7 @@ def latest_scans(request, scan_type, country: str="NL", organization_type="munic
         ).order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                     "plain_https"]:
+                     "plain_https", "ftp"]:
         scans = list(EndpointGenericScan.objects.filter(
             type=scan_type,
             endpoint__url__organization__type=get_organization_type(organization_type),
@@ -1651,7 +1652,7 @@ class LatestScanFeed(Feed):
     def items(self, scan_type):
         # print(scan_type)
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https"]:
+                         "plain_https", "ftp"]:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]

@@ -566,6 +566,7 @@ function views() {
                     self.d3stats.stacked_area_chart("graph_total", error, data.total);
                     self.d3stats.stacked_area_chart("graph_tls_qualys", error, data.tls_qualys);
                     self.d3stats.stacked_area_chart("graph_plain_https", error, data.plain_https);
+                    self.d3stats.stacked_area_chart("graph_ftp", error, data.ftp);
                     self.d3stats.stacked_area_chart("graph_security_headers_strict_transport_security", error, data.security_headers_strict_transport_security);
                     self.d3stats.stacked_area_chart("graph_security_headers_x_frame_options", error, data.security_headers_x_frame_options);
                     self.d3stats.stacked_area_chart("graph_security_headers_x_content_type_options", error, data.security_headers_x_content_type_options);
@@ -881,6 +882,13 @@ function views() {
         data: {scan: "plain_https"}
     });
 
+    window.vueLatestFtp = new Vue({
+        name: "LatestFtp",
+        mixins: [latest_mixin, state_mixin],
+        el: '#latest_ftp',
+        data: {scan: "ftp"}
+    });
+
     window.vueLatestHSTS = new Vue({
         name: "LatestHSTS",
         mixins: [latest_mixin, state_mixin],
@@ -945,7 +953,8 @@ function views() {
             security_headers_x_frame_options: false,
             security_headers_x_xss_protection: false,
             tls_qualys: false,
-            plain_https: false
+            plain_https: false,
+            ftp: false
         },
         computed: {
             visibleweek: function () {
@@ -965,6 +974,7 @@ function views() {
                     '"tls_qualys": "' + this.tls_qualys + '", ' +
                     '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
                     '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
+                    '"ftp": "' + this.ftp + '", ' +
                     '"plain_https": "' + this.plain_https + '"}'
             }
 
@@ -991,6 +1001,9 @@ function views() {
                 this.load(this.week)
             },
             plain_https: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            ftp: function(newsetting, oldsetting){
                 this.load(this.week)
             },
 
@@ -1026,6 +1039,7 @@ function views() {
                 vueTopwin.set_state(this.country, this.category);
                 vueStatistics.set_state(this.country, this.category);
                 vueLatestPlainHttps.set_state(this.country, this.category);
+                vueLatestFtp.set_state(this.country, this.category);
                 vueLatestTlsQualys.set_state(this.country, this.category);
                 vueLatestXContentTypeOptions.set_state(this.country, this.category);
                 vueLatestHSTS.set_state(this.country, this.category);
@@ -1202,6 +1216,7 @@ function views() {
             security_headers_x_xss_protection: {high: 0, medium:0, low: 0},
             security_headers_x_frame_options: {high: 0, medium:0, low: 0},
             plain_https: {high: 0, medium:0, low: 0},
+            ftp: {high: 0, medium:0, low: 0},
             overall: {high: 0, medium:0, low: 0}
         },
 
@@ -1225,6 +1240,7 @@ function views() {
                         self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0};
                         self.security_headers_x_frame_options = {high: 0, medium:0, low: 0};
                         self.plain_https = {high: 0, medium:0, low: 0};
+                        self.ftp = {high: 0, medium:0, low: 0};
                         self.overall = {high: 0, medium:0, low: 0}
                     } else {
                         self.data = data;
@@ -1240,6 +1256,8 @@ function views() {
                             self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
                         if (data.plain_https !== undefined)
                             self.plain_https = data.plain_https.improvements;
+                        if (data.ftp !== undefined)
+                            self.ftp = data.ftp.improvements;
                         if (data.overall !== undefined)
                             self.overall = data.overall.improvements;
                     }

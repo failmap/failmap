@@ -192,6 +192,8 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
         allowed_to_report.append("X-Content-Type-Options")
     if config.REPORT_INCLUDE_DNS_DNSSEC:
         allowed_to_report.append("DNSSEC")
+    if config.REPORT_INCLUDE_FTP:
+        allowed_to_report.append("ftp")
 
     generic_scans = EndpointGenericScan.objects.all().filter(type__in=allowed_to_report, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
@@ -416,7 +418,7 @@ def rate_timeline(timeline, url: Url):
                     previous_endpoints.remove(dead_endpoint)
 
         endpoint_scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
-                               "X-XSS-Protection", "tls_qualys", "plain_https"]
+                               "X-XSS-Protection", "tls_qualys", "plain_https", "ftp"]
 
         for endpoint in relevant_endpoints:
             url_was_once_rated = True
@@ -429,7 +431,7 @@ def rate_timeline(timeline, url: Url):
                         these_endpoint_scans['tls_qualys'] = scan
                     if isinstance(scan, EndpointGenericScan):
                         if scan.type in ['Strict-Transport-Security', 'X-Content-Type-Options',
-                                         'X-Frame-Options', 'X-XSS-Protection', 'plain_https']:
+                                         'X-Frame-Options', 'X-XSS-Protection', 'plain_https', 'ftp']:
                             these_endpoint_scans[scan.type] = scan
 
             # enrich the ratings with previous ratings, without overwriting them.
@@ -633,6 +635,10 @@ def show_timeline_console(timeline, url: Url):
                     message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 if item.type == "X-XSS-Protection":
+                    calculation = get_calculation(item)
+                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
+            for item in timeline[moment]['generic_scan']['scans']:
+                if item.type == "ftp":
                     calculation = get_calculation(item)
                     message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
 
@@ -871,7 +877,7 @@ def get_url_score_modular(url: Url, when: datetime=None):
             continue
 
         scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                      "tls_qualys", "plain_https"]
+                      "tls_qualys", "plain_https", "ftp"]
 
         calculations = []
         for scan_type in scan_types:
@@ -974,6 +980,9 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
         if scan_type == "plain_https":
             scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
                                                       type="plain_https").latest('rating_determined_on')
+        if scan_type == "ftp":
+            scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
+                                                      type="ftp").latest('rating_determined_on')
         if scan_type == "tls_qualys":
             scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when
                                                 ).latest('rating_determined_on')

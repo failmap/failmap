@@ -674,6 +674,7 @@ CONSTANCE_CONFIG = {
     'SHOW_HTTP_HEADERS_XFO': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_FTP': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
 
     # todo: schedule this once per week by default.
     'DISCOVER_URLS_USING_NSEC': (True, 'Discover new domains using DNSSEC NSEC1 hashes? (See docs)', bool),
@@ -692,10 +693,12 @@ CONSTANCE_CONFIG = {
     'SCAN_HTTP_HEADERS_XFO': (True, 'Do you want to scan for missing X-Frame-Options headers?', bool),
     'SCAN_HTTP_HEADERS_X_XSS': (True, 'Do you want to scan for missing X-XSS headers?', bool),
     'SCAN_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to scan for missing X-Content-Type issues?', bool),
+    'SCAN_FTP': (True, 'Do you want to scan for FTP servers that are missing encryption?', bool),
     'CREATE_HTTP_SCREENSHOT': (True, 'Todo: Does not work yet! Do you want to create screenshots for HTTP endpoints?',
                                bool),
 
     # future: FTP, TLS_QUICK (way less robust and complete, much faster)
+    'REPORT_INCLUDE_FTP': (True, 'Do you want to add FTP encryption issues to the report?', bool),
     'REPORT_INCLUDE_DNS_DNSSEC': (True, 'Do you want to add DNSSEC issues to the report?', bool),
     'REPORT_INCLUDE_HTTP_TLS_QUALYS': (True, 'Do you want to show TLS results in the report?', bool),
     'REPORT_INCLUDE_HTTP_MISSING_TLS': (True, 'Do you want to show missing TLS in the report?', bool),
@@ -736,7 +739,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                  'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES', 'SHOW_TICKER',
                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                 'SHOW_HTTP_HEADERS_X_CONTENT'
+                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP'
                  )),
 
     ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
@@ -746,7 +749,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
 
     ('Scanning', ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
                   'SCAN_HTTP_HEADERS_HSTS',
-                  'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT',
+                  'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT', 'SCAN_FTP',
                   'CREATE_HTTP_SCREENSHOT')),
 
     ('Reporting', ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',

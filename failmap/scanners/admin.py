@@ -40,7 +40,7 @@ class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'url', 'visit', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
-                    'tls_scans', 'generic_scans')
+                    'tls_scans', 'endpoint_generic_scans', 'url_generic_scans')
     search_fields = ('url__url', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
     list_filter = ('ip_version', 'port', 'protocol', 'is_dead', 'is_dead_reason', 'discovered_on')
@@ -60,8 +60,12 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()
 
     @staticmethod
-    def generic_scans(inst):
+    def endpoint_generic_scans(inst):
         return EndpointGenericScan.objects.filter(endpoint_id=inst.id).count()
+
+    @staticmethod
+    def url_generic_scans(inst):
+        return UrlGenericScan.objects.filter(url__endpoint=inst.id).count()
 
     @staticmethod
     def visit(inst):
@@ -169,7 +173,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    )
 
     fields = ('endpoint', 'type', 'rating',
-              'explanation', 'last_scan_moment', 'rating_determined_on')
+              'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
 
     readonly_fields = ['last_scan_moment', 'endpoint']
 

@@ -151,6 +151,30 @@ def http_plain_rating_based_on_scan(scan):
     return calculation
 
 
+def ftp_rating_based_on_scan(scan):
+    # outdated, insecure
+    high = 0
+
+    # changed the ratings in the database. They are not really correct.
+    # When there is no https at all, it's worse than having broken https. So rate them the same.
+    if scan.rating == "outdated" or scan.rating == "insecure":
+        high += 1
+
+    # also here: the last scan moment increases with every scan. When you have a set of
+    # relevant dates (when scans where made) ....
+    calculation = {
+        "type": "ftp",
+        "explanation": scan.explanation,
+        "since": scan.rating_determined_on.isoformat(),
+        "last_scan": scan.last_scan_moment.isoformat(),
+        "high": high,
+        "medium": 0,
+        "low": 0,
+    }
+
+    return calculation
+
+
 def dnssec_rating_based_on_scan(scan):
     """
         See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
@@ -237,5 +261,6 @@ calculation_methods = {
     'X-XSS-Protection': security_headers_rating_based_on_scan,
     'plain_https': http_plain_rating_based_on_scan,
     'tls_qualys': tls_qualys_rating_based_on_scan,
-    'DNSSEC': dnssec_rating_based_on_scan
+    'DNSSEC': dnssec_rating_based_on_scan,
+    'ftp': ftp_rating_based_on_scan
 }

@@ -23,6 +23,9 @@ def allowed_to_scan(scanner_name: str=""):
     if not config.SCAN_AT_ALL:
         return False
 
+    if scanner_name == 'scanner_ftp':
+        return config.SCAN_FTP
+
     if scanner_name == 'scanner_plain_http':
         return config.SCAN_HTTP_MISSING_TLS
 
@@ -86,6 +89,11 @@ def q_configurations_to_scan(level: str='url'):
         for configuration in configurations:
             qs.add(Q(organization__type=configuration['organization_type'],
                      organization__country=configuration['country']), Q.OR)
+
+    if level == 'endpoint':
+        for configuration in configurations:
+            qs.add(Q(url__organization__type=configuration['organization_type'],
+                     url__organization__country=configuration['country']), Q.OR)
 
     return qs
 

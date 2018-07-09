@@ -52,7 +52,10 @@ class Command(DumpDataCommand):
         "scanners.Endpoint",
         "scanners.TlsQualysScan",
         "scanners.EndpointGenericScan",
-        "scanners.UrlIp"
+        "scanners.UrlGenericScan",
+        "scanners.UrlIp",
+        "map.Configuration",
+        "map.AdministrativeRegion"
     )
 
     def handle(self, *app_labels, **options):
