@@ -24,7 +24,6 @@
                 <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
                     <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
               </span></th>
-                <th>{% trans "Tweet" %}</th>
             </tr>
             </thead>
             <tbody>
@@ -35,9 +34,7 @@
                 <td>{{ rank['high'] }}</td>
                 <td>{{ rank['medium'] }}</td>
                 <td>{{ rank['low'] }}</td>
-                <!-- https://dev.twitter.com/web/tweet-button/parameters -->
-                <td><a v-if="rank['organization_twitter']" :href="twitter_message('win', rank)">{% endverbatim %}{% trans "Tweet" %}</a></td>
-            </tr>
+                {% endverbatim %}
             </tbody>
         </table>
     </div>
