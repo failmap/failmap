@@ -940,6 +940,21 @@
                 {% endif %}
             </div>
             {% endif %}
+
+            {% if config.SHOW_FTP %}
+            <div class="row">
+                {% if config.SHOW_FTP %}
+                <div class="col-md-6">
+                    <h4>{% trans "FTP failure" %}</h4>
+                    <svg id="graph_ftp" width="555" height="300"></svg>
+                </div>
+                {% endif %}
+                <div class="col-md-6">
+                    <h4>&nbsp;</h4>
+                </div>
+            </div>
+            {% endif %}
+
         </div>
         {% endif %}
 
@@ -1007,6 +1022,23 @@
                     <span id="latest_security_headers_x_xss_protection"></span>
                 </div>
                 {% endif %}
+            </div>
+            {% endif %}
+            {% if config.SHOW_FTP %}
+            <div class="row">
+                {% if config.SHOW_FTP %}
+                <div class="col-md-6">
+                    <h4>{% trans "FTP updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/ftp"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_ftp"></span>
+                </div>
+                {% endif %}
+                <div class="col-md-6">
+                    <h4>&nbsp;</h4>
+                    <p>&nbsp;</p>
+                    <span></span>
+                </div>
             </div>
             {% endif %}
         </div>

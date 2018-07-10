@@ -154,11 +154,19 @@ def http_plain_rating_based_on_scan(scan):
 def ftp_rating_based_on_scan(scan):
     # outdated, insecure
     high = 0
+    medium = 0
+    low = 0
 
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
     if scan.rating == "outdated" or scan.rating == "insecure":
         high += 1
+
+    # sometimes we cannot connect, but do see there is an FTP server. As we're not sure, and cannot verify, we'll give
+    # this a low rating. It might be wrong. On the other hand: FTP should be implemented properly and doing a FEAT
+    # and AUTH TLS should not result in connection resets and such. If that is happening: why is that server public?
+    if scan.rating == "unknown":
+        medium += 1
 
     # also here: the last scan moment increases with every scan. When you have a set of
     # relevant dates (when scans where made) ....
@@ -168,8 +176,8 @@ def ftp_rating_based_on_scan(scan):
         "since": scan.rating_determined_on.isoformat(),
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
-        "medium": 0,
-        "low": 0,
+        "medium": medium,
+        "low": low,
     }
 
     return calculation

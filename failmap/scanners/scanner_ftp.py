@@ -127,6 +127,10 @@ def store(result: dict, endpoint: Endpoint):
         level = "insecure"
         message = "FTP Server does not support encrypted transport or has protocol issues."
 
+    if result['supports_tls'] is 'Unknown' and result['supports_ssl'] is 'Unknown':
+        level = 'unknown'
+        message = "A connection could not be established properly. Not possible to verify encryption."
+
     log.debug('Storing result: %s, for url: %s.', level, endpoint)
 
     if result:
@@ -220,7 +224,7 @@ def scan(self, address: str, port: int):
         results['supports_tls'] = "AUTH TLS" in feats
         results['supports_ssl'] = "AUTH SSL" in feats
         log.debug(results)
-    except (error_reply, error_perm):
+    except (error_reply, error_perm, error_temp, error_proto):
         # An error was received, such as a not-implemented.
         # ftplib.error_perm: 502 Command not implemented.
         results['status'] = str(error_reply)
@@ -230,16 +234,24 @@ def scan(self, address: str, port: int):
         try:
             ftp.voidcmd("AUTH TLS")
             results['supports_tls'] = True
-        except error_reply:
+        except (error_reply, error_perm, error_temp, error_proto):
             # we already had an error
+            # ftplib.error_perm: 500 'AUTH TLS': command not understood
             results['supports_tls'] = False
+        except Exception:
+            # really don't know what to do here...
+            pass
 
         try:
             ftp.voidcmd("AUTH SSL")
             results['supports_ssl'] = True
-        except error_reply:
+        except (error_reply, error_perm, error_temp, error_proto):
             # we already had an error
+            # ftplib.error_perm: 500 'AUTH TLS': command not understood
             results['supports_ssl'] = False
+        except Exception:
+            # really don't know what to do here...
+            pass
 
     except Exception:
         # ConnectionResetError: [Errno 54] Connection reset by peer etc...
@@ -339,7 +351,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
         return
 
     # endpoint was alive and still is. Nothing changed. We don't have a last seen date. So do nothing.
-    if endpoint.is_dead is False and connected:
+    if not endpoint.is_dead and connected:
         return
 
     # endpoint died. Kill it.
