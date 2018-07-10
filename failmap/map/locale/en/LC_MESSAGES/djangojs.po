@@ -321,11 +321,11 @@ msgstr ""
 
 #: failmap/map/static/js/script.js:49
 msgid "report_header_tls_qualys"
-msgstr ""
+msgstr "Encrypted transport (https)"
 
 #: failmap/map/static/js/script.js:50
 msgid "report_header_plain_https"
-msgstr ""
+msgstr "Missing transport encryption"
 
 #: failmap/map/static/js/script.js:51
 msgid "report_header_security_headers_x_xss_protection"
@@ -345,7 +345,7 @@ msgstr ""
 
 #: failmap/map/static/js/script.js:55
 msgid "report_header_DNSSEC"
-msgstr ""
+msgstr "DNSSEC"
 
 #: failmap/map/static/js/script.js:58
 msgid "category_menu_municipality"
@@ -372,16 +372,14 @@ msgid "category_menu_hacking"
 msgstr "Hackers"
 
 #: failmap/map/static/js/script.js:65
-#, fuzzy
 #| msgid "category_menu_unknown"
 msgid "category_menu_bundesland"
-msgstr "Unknown"
+msgstr "Bundesland"
 
 #: failmap/map/static/js/script.js:66
-#, fuzzy
 #| msgid "category_menu_cyber"
 msgid "category_menu_regierungsbezirk"
-msgstr "Cyber"
+msgstr "Regierungsberzirk"
 
 #: failmap/map/static/js/script.js:67
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
@@ -392,10 +390,9 @@ msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
 #: failmap/map/static/js/script.js:69
-#, fuzzy
 #| msgid "category_menu_hacking"
 msgid "category_menu_stadt_gemeinde"
-msgstr "Hackers"
+msgstr "Stadt / Gemeinde"
 
 #: failmap/map/static/js/script.js:70
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
@@ -407,19 +404,19 @@ msgstr ""
 
 #: failmap/map/static/js/script.js:74
 msgid "country_NL"
-msgstr ""
+msgstr "The Netherlands"
 
 #: failmap/map/static/js/script.js:75
 msgid "country_DE"
-msgstr ""
+msgstr "Germany"
 
 #: failmap/map/static/js/script.js:76
 msgid "country_SE"
-msgstr ""
+msgstr "Sweden"
 
 #: failmap/map/static/js/script.js:77
 msgid "country_AT"
-msgstr ""
+msgstr "Austria"
 
 #: failmap/map/static/js/script.js:80
 msgid "One week earlier"

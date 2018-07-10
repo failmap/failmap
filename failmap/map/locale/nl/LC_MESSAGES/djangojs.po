@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-08 17:33+0000\n"
+"POT-Creation-Date: 2018-07-10 10:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:817
-#: failmap/map/static/js/views.js:822 failmap/map/static/js/views.js:825
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:835
+#: failmap/map/static/js/views.js:840 failmap/map/static/js/views.js:843
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -39,45 +39,27 @@ msgstr "Midden risico"
 msgid "Low"
 msgstr "Laag risico"
 
-#: failmap/map/static/js/failmap.js:187
-msgid "Url"
-msgstr "Url"
-
-#: failmap/map/static/js/failmap.js:188
-msgid "H"
-msgstr "H"
-
-#: failmap/map/static/js/failmap.js:189
-msgid "M"
-msgstr "M"
-
-#: failmap/map/static/js/failmap.js:190
-msgid "L"
-msgstr "L"
-
-#: failmap/map/static/js/failmap.js:209
-#, fuzzy
-#| msgid "score perfect"
+#: failmap/map/static/js/failmap.js:195
 msgid "Perfect"
-msgstr "perfect"
+msgstr "Perfect"
 
-#: failmap/map/static/js/failmap.js:210
+#: failmap/map/static/js/failmap.js:196
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/static/js/failmap.js:211
+#: failmap/map/static/js/failmap.js:197
 msgid "Mediocre"
 msgstr "Matig"
 
-#: failmap/map/static/js/failmap.js:212
+#: failmap/map/static/js/failmap.js:198
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/static/js/failmap.js:213
+#: failmap/map/static/js/failmap.js:199
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/failmap.js:215
+#: failmap/map/static/js/failmap.js:201
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
 
@@ -338,115 +320,145 @@ msgstr "DNS beveiliging is niet of onjuist toegepast."
 msgid "DNSSEC seems to be implemented sufficiently."
 msgstr "DNS beveiliging wordt toegepast."
 
+#: failmap/map/static/js/script.js:47
+msgid "FTP Server only supports insecure SSL protocol."
+msgstr "FTP Server ondersteund alleen verouderd en onveilig SSL protocol."
+
+#: failmap/map/static/js/script.js:48
+msgid "FTP Server does not configured to show if encryption is available."
+msgstr ""
+
 #: failmap/map/static/js/script.js:49
+msgid "FTP Server supports TLS encryption protocol."
+msgstr "FTP Server ondersteund TLS versleuteling."
+
+#: failmap/map/static/js/script.js:50
+msgid "FTP Server does not support encrypted transport or has protocol issues."
+msgstr ""
+"FTP Server heeft geen ondersteuning voor versleuteling of de server geeft "
+"protocol fouten."
+
+#: failmap/map/static/js/script.js:51
+msgid ""
+"An FTP connection could not be established properly. Not possible to verify "
+"encryption."
+msgstr ""
+"Er kon geen volledige verbinding worden gemaakt met de server. Het is daarom "
+"onduidelijk of er versleuteling wordt gebruikt."
+
+#: failmap/map/static/js/script.js:55
 msgid "report_header_tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:50
+#: failmap/map/static/js/script.js:56
 msgid "report_header_plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:51
+#: failmap/map/static/js/script.js:57
 msgid "report_header_security_headers_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
-#: failmap/map/static/js/script.js:52
+#: failmap/map/static/js/script.js:58
 msgid "report_header_security_headers_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
-#: failmap/map/static/js/script.js:53
+#: failmap/map/static/js/script.js:59
 msgid "report_header_security_headers_x_content_type_options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js:54
+#: failmap/map/static/js/script.js:60
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
-#: failmap/map/static/js/script.js:55
+#: failmap/map/static/js/script.js:61
 msgid "report_header_DNSSEC"
 msgstr "DNS beveiliging (DNSSEC)"
 
-#: failmap/map/static/js/script.js:58
+#: failmap/map/static/js/script.js:62
+msgid "report_header_ftp"
+msgstr "Bestandsoverdracht (FTP)"
+
+#: failmap/map/static/js/script.js:65
 msgid "category_menu_municipality"
 msgstr "Gemeenten"
 
-#: failmap/map/static/js/script.js:59
+#: failmap/map/static/js/script.js:66
 msgid "category_menu_cyber"
 msgstr "Cyber"
 
-#: failmap/map/static/js/script.js:60
+#: failmap/map/static/js/script.js:67
 msgid "category_menu_unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/script.js:61
+#: failmap/map/static/js/script.js:68
 msgid "category_menu_water_board"
 msgstr "Waterschappen"
 
-#: failmap/map/static/js/script.js:62
+#: failmap/map/static/js/script.js:69
 msgid "category_menu_province"
 msgstr "Provincies"
 
-#: failmap/map/static/js/script.js:63
+#: failmap/map/static/js/script.js:70
 msgid "category_menu_hacking"
 msgstr "Hackers"
 
-#: failmap/map/static/js/script.js:65
+#: failmap/map/static/js/script.js:72
 msgid "category_menu_bundesland"
 msgstr "Bundesland"
 
-#: failmap/map/static/js/script.js:66
+#: failmap/map/static/js/script.js:73
 msgid "category_menu_regierungsbezirk"
 msgstr "Regierungsbezirk"
 
-#: failmap/map/static/js/script.js:67
+#: failmap/map/static/js/script.js:74
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "Landkreis / Kreis / kreisfreie Stadt"
 
-#: failmap/map/static/js/script.js:68
+#: failmap/map/static/js/script.js:75
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "Samtgemeinde, Verwaltungsgemeinschaft"
 
-#: failmap/map/static/js/script.js:69
+#: failmap/map/static/js/script.js:76
 msgid "category_menu_stadt_gemeinde"
 msgstr "Stadt, Gemeinde"
 
-#: failmap/map/static/js/script.js:70
+#: failmap/map/static/js/script.js:77
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "Stadtbezirk / Gemeindeteil mit Selbstverwaltung"
 
-#: failmap/map/static/js/script.js:71
+#: failmap/map/static/js/script.js:78
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "Stadtteil / Gemeindeteil ohne Selbstverwaltung"
 
-#: failmap/map/static/js/script.js:74
+#: failmap/map/static/js/script.js:81
 msgid "country_NL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:75
+#: failmap/map/static/js/script.js:82
 msgid "country_DE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:76
+#: failmap/map/static/js/script.js:83
 msgid "country_SE"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:77
+#: failmap/map/static/js/script.js:84
 msgid "country_AT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:80
+#: failmap/map/static/js/script.js:87
 msgid "One week earlier"
 msgstr ""
 
-#: failmap/map/static/js/script.js:81
+#: failmap/map/static/js/script.js:88
 msgid "One week later"
 msgstr ""
 
-#: failmap/map/static/js/script.js:82
+#: failmap/map/static/js/script.js:89
 msgid "Moment"
 msgstr ""
 
-#: failmap/map/static/js/script.js:83
+#: failmap/map/static/js/script.js:90
 msgid "Risks"
 msgstr ""
 
@@ -455,15 +467,15 @@ msgid "week"
 msgstr "week"
 
 #: failmap/map/static/js/views.js:154 failmap/map/static/js/views.js:157
-#: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
-#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:166
-msgid "Documentation"
-msgstr "Documentatie"
-
-#: failmap/map/static/js/views.js:155 failmap/map/static/js/views.js:158
-#: failmap/map/static/js/views.js:167
+#: failmap/map/static/js/views.js:166
 msgid "Second opinion"
 msgstr "Second opinion"
+
+#: failmap/map/static/js/views.js:155 failmap/map/static/js/views.js:158
+#: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
+#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:167
+msgid "Documentation"
+msgstr "Documentatie"
 
 #: failmap/map/static/js/views.js:183
 msgid "score perfect"
@@ -505,9 +517,21 @@ msgstr "faalkaart"
 msgid "top win on failmap"
 msgstr "beste organisaties op faalkaart"
 
-#: failmap/map/static/js/views.js:823
+#: failmap/map/static/js/views.js:841
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
+
+#~ msgid "Url"
+#~ msgstr "Url"
+
+#~ msgid "H"
+#~ msgstr "H"
+
+#~ msgid "M"
+#~ msgstr "M"
+
+#~ msgid "L"
+#~ msgstr "L"
 
 #~ msgid "Loading"
 #~ msgstr "Laden"

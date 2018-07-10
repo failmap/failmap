@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-08 17:33+0000\n"
+"POT-Creation-Date: 2018-07-10 10:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:817
-#: failmap/map/static/js/views.js:822 failmap/map/static/js/views.js:825
+#: failmap/map/static/js/failmap.js:71 failmap/map/static/js/views.js:835
+#: failmap/map/static/js/views.js:840 failmap/map/static/js/views.js:843
 msgid "View Full Screen"
 msgstr "🌈"
 
@@ -39,47 +39,31 @@ msgstr "🌈"
 msgid "Low"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:187
-msgid "Url"
-msgstr "🌈"
-
-#: failmap/map/static/js/failmap.js:188
-msgid "H"
-msgstr "🌈"
-
-#: failmap/map/static/js/failmap.js:189
-msgid "M"
-msgstr "🌈"
-
-#: failmap/map/static/js/failmap.js:190
-msgid "L"
-msgstr "🌈"
-
-#: failmap/map/static/js/failmap.js:209
+#: failmap/map/static/js/failmap.js:195
 #, fuzzy
 #| msgid "score perfect"
 msgid "Perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:210
+#: failmap/map/static/js/failmap.js:196
 msgid "Good"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:211
+#: failmap/map/static/js/failmap.js:197
 msgid "Mediocre"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:212
+#: failmap/map/static/js/failmap.js:198
 msgid "Bad"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:213
+#: failmap/map/static/js/failmap.js:199
 msgid "Unknown"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:215
+#: failmap/map/static/js/failmap.js:201
 msgid "legend_basic_security"
-msgstr ""
+msgstr "🌈"
 
 #: failmap/map/static/js/graphs.js:29
 msgid "January"
@@ -321,153 +305,163 @@ msgstr "🌈"
 
 #: failmap/map/static/js/script.js:45
 msgid "DNSSEC is incorrectly or not configured (errors found)."
-msgstr ""
+msgstr "🌈"
 
 #: failmap/map/static/js/script.js:46
 msgid "DNSSEC seems to be implemented sufficiently."
-msgstr ""
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:47
+msgid "FTP Server only supports insecure SSL protocol."
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:48
+msgid "FTP Server does not configured to show if encryption is available."
+msgstr "🌈"
 
 #: failmap/map/static/js/script.js:49
-msgid "report_header_tls_qualys"
+msgid "FTP Server supports TLS encryption protocol."
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:50
-msgid "report_header_plain_https"
+msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:51
-msgid "report_header_security_headers_x_xss_protection"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:52
-msgid "report_header_security_headers_x_frame_options"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:53
-msgid "report_header_security_headers_x_content_type_options"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:54
-msgid "report_header_security_headers_strict_transport_security"
+msgid ""
+"An FTP connection could not be established properly. Not possible to verify "
+"encryption."
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:55
-#, fuzzy
-#| msgid "report_header_tls_qualys"
-msgid "report_header_DNSSEC"
+msgid "report_header_tls_qualys"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:56
+msgid "report_header_plain_https"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:57
+msgid "report_header_security_headers_x_xss_protection"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:58
-msgid "category_menu_municipality"
+msgid "report_header_security_headers_x_frame_options"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:59
-msgid "category_menu_cyber"
+msgid "report_header_security_headers_x_content_type_options"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:60
-msgid "category_menu_unknown"
+msgid "report_header_security_headers_strict_transport_security"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:61
-msgid "category_menu_water_board"
+msgid "report_header_DNSSEC"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:62
-msgid "category_menu_province"
-msgstr "🌈"
-
-#: failmap/map/static/js/script.js:63
-msgid "category_menu_hacking"
+msgid "report_header_ftp"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:65
-#, fuzzy
-#| msgid "category_menu_unknown"
-msgid "category_menu_bundesland"
+msgid "category_menu_municipality"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:66
-#, fuzzy
-#| msgid "regierungsbezirk"
-msgid "category_menu_regierungsbezirk"
+msgid "category_menu_cyber"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:67
-#, fuzzy
-#| msgid "landkreis_kreis_kreisfreie_stadt"
-msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
+msgid "category_menu_unknown"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:68
-#, fuzzy
-#| msgid "samtgemeinde_verwaltungsgemeinschaft"
-msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
+msgid "category_menu_water_board"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:69
-#, fuzzy
-#| msgid "category_menu_hacking"
-msgid "category_menu_stadt_gemeinde"
+msgid "category_menu_province"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:70
-#, fuzzy
-#| msgid "stadtbezirk_gemeindeteil_mit_selbstverwaltung"
-msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgid "category_menu_hacking"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:71
-#, fuzzy
-#| msgid "stadtteil_gemeindeteil_ohne_selbstverwaltung"
-msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
+#: failmap/map/static/js/script.js:72
+msgid "category_menu_bundesland"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:73
+msgid "category_menu_regierungsbezirk"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:74
-msgid "country_NL"
+msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:75
-msgid "country_DE"
+msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:76
-msgid "country_SE"
+msgid "category_menu_stadt_gemeinde"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js:77
+msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:78
+msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:81
+msgid "country_NL"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:82
+msgid "country_DE"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:83
+msgid "country_SE"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js:84
 msgid "country_AT"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js:80
+#: failmap/map/static/js/script.js:87
 msgid "One week earlier"
-msgstr ""
+msgstr "🌈"
 
-#: failmap/map/static/js/script.js:81
+#: failmap/map/static/js/script.js:88
 msgid "One week later"
-msgstr ""
+msgstr "🌈"
 
-#: failmap/map/static/js/script.js:82
+#: failmap/map/static/js/script.js:89
 msgid "Moment"
-msgstr ""
+msgstr "🌈"
 
-#: failmap/map/static/js/script.js:83
+#: failmap/map/static/js/script.js:90
 msgid "Risks"
-msgstr ""
+msgstr "🌈"
 
 #: failmap/map/static/js/views.js:44
 msgid "week"
 msgstr "🌈"
 
 #: failmap/map/static/js/views.js:154 failmap/map/static/js/views.js:157
-#: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
-#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:166
-msgid "Documentation"
+#: failmap/map/static/js/views.js:166
+msgid "Second opinion"
 msgstr "🌈"
 
 #: failmap/map/static/js/views.js:155 failmap/map/static/js/views.js:158
-#: failmap/map/static/js/views.js:167
-msgid "Second opinion"
+#: failmap/map/static/js/views.js:160 failmap/map/static/js/views.js:162
+#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:167
+msgid "Documentation"
 msgstr "🌈"
 
 #: failmap/map/static/js/views.js:183
@@ -510,9 +504,21 @@ msgstr "🌈"
 msgid "top win on failmap"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:823
+#: failmap/map/static/js/views.js:841
 msgid "Exit Full Screen"
 msgstr "🌈"
+
+#~ msgid "Url"
+#~ msgstr "🌈"
+
+#~ msgid "H"
+#~ msgstr "🌈"
+
+#~ msgid "M"
+#~ msgstr "🌈"
+
+#~ msgid "L"
+#~ msgstr "🌈"
 
 #~ msgid "Loading"
 #~ msgstr "🌈"

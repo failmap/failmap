@@ -44,6 +44,12 @@ var dynamic_translations = function(){
     gettext('Missing Strict-Transport-Security header. Offers no insecure alternative service.');
     gettext('DNSSEC is incorrectly or not configured (errors found).');
     gettext('DNSSEC seems to be implemented sufficiently.');
+    gettext('FTP Server only supports insecure SSL protocol.');
+    gettext('FTP Server does not configured to show if encryption is available.');
+    gettext('FTP Server supports TLS encryption protocol.');
+    gettext('FTP Server does not support encrypted transport or has protocol issues.');
+    gettext('An FTP connection could not be established properly. Not possible to verify encryption.');
+
 
     // vulnerabilities:
     gettext('report_header_tls_qualys');
@@ -53,6 +59,7 @@ var dynamic_translations = function(){
     gettext('report_header_security_headers_x_content_type_options');
     gettext('report_header_security_headers_strict_transport_security');
     gettext('report_header_DNSSEC');
+    gettext('report_header_ftp');
 
     // some categories:
     gettext('category_menu_municipality');

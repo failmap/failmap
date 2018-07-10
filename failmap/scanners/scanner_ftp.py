@@ -44,10 +44,10 @@ def compose_task(
     [X] Created allowed_to_scan permission in config.
     [X] Implemented scanner
     [X] Stored scan result
-    [ ] Processed scan result in report
+    [X] Processed scan result in report
     [X] Added risk filter on the map for this issue
-    [ ] Added graphs, stats and more
-    [ ] Created translations
+    [X] Added graphs, stats and more
+    [X] Created translations
 
     Other
     [x] Export DNSSEC scans / Urlgenericscans and map settings...
@@ -115,10 +115,6 @@ def store(result: dict, endpoint: Endpoint):
         level = "outdated"
         message = "FTP Server only supports insecure SSL protocol."
 
-    if result['supports_tls'] is "Unknown" and result['supports_ssl'] is "Unknown":
-        level = "unknown"
-        message = "FTP Server does not configured to show if encryption is available."
-
     if result['supports_tls'] is True:
         level = "secure"
         message = "FTP Server supports TLS encryption protocol."
@@ -129,7 +125,7 @@ def store(result: dict, endpoint: Endpoint):
 
     if result['supports_tls'] is 'Unknown' and result['supports_ssl'] is 'Unknown':
         level = 'unknown'
-        message = "A connection could not be established properly. Not possible to verify encryption."
+        message = "An FTP connection could not be established properly. Not possible to verify encryption."
 
     log.debug('Storing result: %s, for url: %s.', level, endpoint)
 
@@ -183,7 +179,7 @@ def scan(self, address: str, port: int):
         # ftp behaves unexpectedly, so there is FTP but we don't know anything about it.
         # we cannot draw any conclusion regarding it's safety?
         return results
-    except (error_perm, error_proto, error_temp, error_reply) as e:
+    except (error_perm, error_proto, error_temp, error_reply):
         # ftplib.error_perm: 502 Command not implemented. We can't assess it further.
         return results
     except Exception:
