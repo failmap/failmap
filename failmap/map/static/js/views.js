@@ -165,6 +165,9 @@ var report_mixin = {
             if (rating.type === "DNSSEC")
                 return  '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (verisign)</a>' +
                         '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
+            if (rating.type === "ftp")
+                return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a>' +
+                        '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
         },
         total_awarded_points: function (high, medium, low) {
             var marker = vueReport.make_marker(high, medium, low);
