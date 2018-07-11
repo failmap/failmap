@@ -40,7 +40,7 @@ class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'url', 'visit', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
-                    'tls_scans', 'endpoint_generic_scans', 'url_generic_scans')
+                    'is_dead_reason')
     search_fields = ('url__url', 'ip_version', 'port', 'protocol', 'is_dead',
                      'is_dead_since', 'is_dead_reason')
     list_filter = ('ip_version', 'port', 'protocol', 'is_dead', 'is_dead_reason', 'discovered_on')
@@ -57,14 +57,20 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def tls_scans(inst):
+        # slow subqueries are slow
+        return 0
         return TlsQualysScan.objects.filter(endpoint=inst.id).count()
 
     @staticmethod
     def endpoint_generic_scans(inst):
+        # slow subqueries are slow
+        return 0
         return EndpointGenericScan.objects.filter(endpoint_id=inst.id).count()
 
     @staticmethod
     def url_generic_scans(inst):
+        # slow subqueries are slow
+        return 0
         return UrlGenericScan.objects.filter(url__endpoint=inst.id).count()
 
     @staticmethod
