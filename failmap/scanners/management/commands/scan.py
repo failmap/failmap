@@ -2,7 +2,7 @@ import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
 from failmap.scanners import (scanner_dnssec, scanner_ftp, scanner_http, scanner_plain_http,
-                              scanner_security_headers, scanner_tls_qualys)
+                              scanner_security_headers, scanner_tls_osaft, scanner_tls_qualys)
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,8 @@ class Command(ScannerTaskCommand):
             'headers': scanner_security_headers,
             'plain': scanner_plain_http,
             'endpoints': scanner_http,
-            'tls': scanner_tls_qualys,
+            'tls': scanner_tls_osaft,
+            'tlsq': scanner_tls_qualys,
             'ftp': scanner_ftp
         }
 

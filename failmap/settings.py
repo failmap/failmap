@@ -845,6 +845,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'app_label': 'scanners', 'label': _('🔬 scanners'), 'items': [
         {'name': 'endpoint'},
         {'name': 'endpointgenericscan'},
+        {'name': 'tlsscan'},
         {'name': 'tlsqualysscan'},
         {'name': 'urlgenericscan'},
         {'name': 'screenshot'},

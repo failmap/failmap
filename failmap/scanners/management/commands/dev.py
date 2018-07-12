@@ -38,14 +38,28 @@ class Command(BaseCommand):
 
 
 def test_osaft():
-    from failmap.scanners.scanner_tls_osaft import scan_address, determine_grade, debug_grade
+    from failmap.scanners.scanner_tls_osaft import scan_address, determine_grade, grade_report, scan_url
+    from failmap.scanners.scanner import q_configurations_to_scan
+
+    urls = Url.objects.filter(
+        q_configurations_to_scan(),
+        is_dead=False,
+        not_resolvable=False,
+        endpoint__protocol="https",
+        endpoint__port=443,
+        endpoint__is_dead=False,
+    ).order_by("?")
+
+    for url in urls:
+        scan_url(url)
+
     address = 'faalkaart.nl'
     port = 443
     report = scan_address(address, port)
     grades, trust = determine_grade(report)
     logger.debug(trust)
     logger.debug(grades)
-    debug_grade(grades, trust)
+    print(grade_report(grades, trust))
 
 
 def rebuild_ratings():
