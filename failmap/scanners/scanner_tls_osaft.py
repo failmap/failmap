@@ -1,18 +1,15 @@
 import json
 import logging
 import platform
-import re
 import subprocess
-from datetime import datetime
 
-import pytz
 from django.conf import settings
 
 from failmap.celery import app
 from failmap.scanners.models import Endpoint
 from failmap.scanners.timeout import timeout
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 """
 This scanner currently uses:
@@ -117,15 +114,14 @@ BEAST: todo. All clients have client side mitigation. Is purely client side. No 
 it anymore. RC4 was a bigger problem.
 BREACH: todo. Disable HTTP compression, which is mandatory already
               https://en.wikipedia.org/wiki/BREACH - Same as CRIME.
-Lucky 13: Todo.
 
 What we should have used: https://www.owasp.org/index.php/O-Saft ... nah
 
 """
 # ./o-saft.pl +check faalkaart.nl | gawk -f contrib/JSON-array.awk > faalkaart.osaft
 
-osaft = settings.TOOLS['osaft']['executable'][platform.system()]
-output = settings.TOOLS['osaft']['report_output_dir']
+osaft_JSON = settings.TOOLS['osaft']['json']
+cert_chain_resolver = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
 
 
 def scan_url(url):
@@ -141,6 +137,45 @@ def scan_endpoint(endpoint, IPv6=False):
     return scan_address(endpoint.url.url, endpoint.port)
 
 
+@timeout(60)
+def run_osaft_scan(address, port):
+    # we're expecting SNI running everywhere. So we cant connect on IP alone, an equiv of http "host-header" is required
+    # We're not storing anything on the filesystem and expect no dependencies on the O-Saft system. All post-processing
+    # is done on another machine.
+
+    # --trace-key: adds a key to follow the specific commands: the labels then can change without affecting this script
+    # --legacy=quick : makes sure we're getting the json in proper output
+    # +check performs an extensive array of checks
+
+    # owasp/o-saft --trace-key --legacy=quick +check https://faalkaart.nl
+    # todo: determine call routine to O-Saft, docker is fine during development, but what during production?
+    log.debug("Running osaft scan on %s:%s" % (address, port))
+    process = subprocess.Popen(['docker', 'run', '--rm', '-it',
+                                'owasp/o-saft', '--trace-key', '--legacy=quick', '+check', "%s:%s" % (address, port)],
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (standardout, junk) = process.communicate()
+    log.debug("Output:")
+    log.debug(standardout)
+    return standardout
+
+
+# hooray for command injection from osaft output. If you can manipulate that, we're done :)
+# you can do so at any point in for example the contents of the HSTS header. So this is a really insecure way of
+# processing the output.
+def gawk(string):
+    # echo string | gawk -f contrib/JSON-array.awk
+    # todo: is echo a command? And what about command injection otherwise?
+    echo = subprocess.Popen(["echo", string], stdout=subprocess.PIPE)
+    # todo: check that gawk is installed
+    gawk = subprocess.Popen(["gawk", "-f", osaft_JSON], stdin=echo.stdout, stdout=subprocess.PIPE)
+    echo.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+    output, err = gawk.communicate()
+
+    log.debug("Output:")
+    log.debug(output)
+    return output
+
+
 def scan_address(address, port=443):
     """
     A scan takes about a minute to complete and can be run against any TLS website and many other services.
@@ -148,49 +183,48 @@ def scan_address(address, port=443):
     :param port: integer, port number.
     :return:
     """
-    url_and_port = "%s:%s" % (address, port)
-    now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
-    filename = str(re.sub(r'[^a-zA-Z0-9_]', '', url_and_port + now)) + '.json'
-    report_path = output + filename
+
     # todo: does O-Saft support hostnames and separate IP's? So you can test on IPv4 and IPv6?
-    # todo: how piping works?
     # todo: what about hangs? What is a timeout?
     # It's possible to run multiple scans at the same time, so we might do this in a batched approach.
     # but what if one of these things hangs? I suppose O-Saft has timeouts.
-    subprocess.call([osaft, '+check', url_and_port, '|', 'gawk', 'JSON-array.awk', '>', filename])
 
-    # Add the non O-Saft vulnerabilities to the report.
-    file = open(report_path, 'r')
-    lines = file.readlines()
-    lines = lines[:-1]
+    report = run_osaft_scan(address, port)
+    lines = gawk(report)  # convert the raw output to a JSON array
+    lines = lines.decode("utf-8")  # commands deliver byte strings, convert to something more easy
+    lines = lines.splitlines()  # split the report in multiple lines, to inject findings
+    lines = lines[:-1]  # make it possible to inject some other findings by removing the closing tag.
+
+    log.debug('Running workaround scans to complete O-Saft')
     try:
         vulnerable = test_cve_2016_2107(address, port)
-        string = '  {"typ": "check", "key": "Safe against CVE-2016-2107:", "value":"' + \
-            "no" if bool(vulnerable) else "yes" + '"},'
+        string = '  {"typ": "check", "key": "CVE-2016-2107", "label": "Safe against CVE-2016-2107:", "value":"' + \
+                 ("no (vulnerable)" if bool(vulnerable) else "yes") + '"},'
         lines.append(string)
     except TimeoutError:
-        string = '  {"typ": "check", "key": "Safe against CVE-2016-2107:", "value":"unknown"},'
+        string = ' {"typ": "check", "key": "CVE-2016-2107", "label": "Safe against CVE-2016-2107:", "value":"unknown"},'
         lines.append(string)
 
     try:
         vulnerable = test_cve_2016_9244(address, port)
-        string = '  {"typ": "check", "key": "Safe against CVE-2016-9244:", "value":"' + \
-            "no" if bool(vulnerable) else "yes" + '"},'
+        string = '  {"typ": "check", "key": "CVE-2016-9244", "label": "Safe against CVE-2016-9244:", "value":"' + \
+                 ("no (vulnerable)" if bool(vulnerable) else "yes") + '"},'
         lines.append(string)
     except TimeoutError:
-        string = '  {"typ": "check", "key": "Safe against CVE-2016-9244:", "value":"unknown"},'
+        string = ' {"typ": "check", "key": "CVE-2016-9244", "label": "Safe against CVE-2016-9244:", "value":"unknown"},'
         lines.append(string)
 
-    # todo: remove comma from last line.
-    lines.append("]")
-    file.close()
+    # todo: add cert-chain-resolver
 
-    # overwrite it with the new "json".
-    # be sure that there are not two scans on the same endpoint. Slim chance.
-    with open(report_path, 'w') as f:
-        f.write(''.join(lines))
+    # Remove comma from last line, json is very picky
+    lines[len(lines)-1] = lines[len(lines)-1][:-1]
 
-    return report_path
+    lines.append("]")  # close the injection
+    lines = "".join(lines)  # make it one line so json can load it
+    # log.debug(lines)
+    report = json.loads(lines)
+    # log.debug(report)
+    return report
 
 
 def trust_check(report, key, asserted_value, message_if_assertion_failed):
@@ -239,25 +273,14 @@ def security_value(report, key):
 
 
 @app.task(queue="storage")
-def determine_grade(report_path: str):
+def determine_grade(report):
     """
     Use the docker build of OSaft, otherwise you'll be building SSL until you've met all dependencies.
     O-Saft very neatly performs a lot of checks that we don't have to do anymore ourselves, wrongly.
 
-    :param report_path:
-    :return:
+    :param report: json report from O-Saft with injections
+    :return: two lists of grades.
     """
-
-    if not report_path:
-        logger.error('No report given: %s' % report_path)
-        return [], []
-
-    try:
-        with open(report_path) as data_file:
-            report = json.load(data_file)
-    except Exception:
-        logger.error('Something wrong with report file: %s' % report_path)
-        return [], []
 
     if not report:
         return [], []
@@ -265,71 +288,53 @@ def determine_grade(report_path: str):
     # list of items wether the certificate can be trusted or not (has chain of trust etc)
     # if any of the is_trusted is False, then there is no trust, which affects the rating (instant F)
     is_trusted = []
-    is_trusted += trust_check(report, "Certificate is valid:", "yes", "Certificate is not valid anymore.")
-    is_trusted += trust_check(report, "Certificate is not self-signed:", "yes",
-                              "Certificate is self-signed, chain of trust missing.")
-    is_trusted += trust_check(report, "Certificate is not expired:", "yes", "Certificate is expired.")
-    is_trusted += trust_check(report, "Certificate Private Key Signature SHA2:",
-                              "yes", "Obsolete Signature algorithm used.")
+    is_trusted.append(trust_check(report, "dates", "yes", "Certificate is not valid anymore."))
+    is_trusted.append(trust_check(report, "selfsigned", "yes", "Certificate is self-signed, chain of trust missing."))
+    is_trusted.append(trust_check(report, "expired", "yes", "Certificate is expired."))
+    is_trusted.append(trust_check(report, "sha2signature", "yes", "Obsolete Signature algorithm used."))
 
     # todo: hostname check.
     # todo: see +hostname vs. +wildhost vs. +altname vs. +rfc_2818
     # O-Saft only supports a check on hostname == certificate's subject. But a browser will accept if the hostname is
     # in the alt-names, and it's also fine if a wildcard certificate is used.
-    is_trusted += trust_check(
-        report, "Connected hostname equals certificate's Subject:", "yes", "Hostname and certificate do not match")
+    is_trusted.append(trust_check(report, "hostname", "yes", "Hostname and certificate do not match"))
 
     # Various security checks.
     # F-Class
     ratings = []
-    ratings += security_check(
-        report, "Connection is safe against Heartbleed attack:", "yes", "F", "Server vulnerable to Heartbleed")
-    ratings += security_check(
-        report, "Target does not accept NULL ciphers:", "yes", "F", "NULL Cipher supported.")
-    ratings += security_check(
-        report, "Target supports Secure Renegotiation:", "yes", "F",
-        "Server does not support secure session renegotiation, a Man in the Middle attack is possible.")
-    ratings += security_check(
-        report, "Connection is safe against FREAK attack:", "yes", "F", "Server is vulnerable to FREAK attack.")
-    ratings += security_check(
-        report, "Connection is safe against POODLE attack:", "yes", "F", "Vulnerable to CVE_2014_3566 (POOODLE).")
-    ratings += security_check(
-        report, "Connection is safe against Sweet32 attack:", "yes", "F", "Vulnerable to Sweet32.")
-    ratings += security_check(
-        report, "Connection is safe against Lucky 13 attack:", "yes", "F", "Vulnerable to Lucky 13.")
-    ratings += security_check(
-        report, "Target does not support SSLv2:", "yes", "F", "Insecure/Obsolete protocol supported (SSLv2).")
-    ratings += security_check(
-        report, "Target does not support SSLv3:", "yes", "F", "Insecure/Obsolete protocol supported (SSLv3).")
-    ratings += security_check(
-        report, "Connection is safe against Logjam attack:", "yes", "F", "Vulnerable to Logjam.")
-    ratings += security_check(
-        report, "Safe against CVE-2016-2107:", "yes", "F", "Vulnerable to CVE_2016-2107 (padding oracle).")
-    ratings += security_check(
-        report, "Safe against CVE_2016_9244:", "yes", "F", "Vulnerable to CVE_2016_9244 (ticketbleed).")
-    ratings += weak_cipher_check(
-        report, "F", "Insecure ciphers supported.")
+    ratings.append(security_check(report, "heartbleed", "yes", "F", "Server vulnerable to Heartbleed"))
+    ratings.append(security_check(report, "cipher_null", "yes", "F", "NULL Cipher supported."))
+    ratings.append(security_check(report, "renegotiation", "yes", "F",
+                                  "Server does not support secure session renegotiation, "
+                                  "a Man in the Middle attack is possible."))
+    ratings.append(security_check(report, "freak", "yes", "F", "Server is vulnerable to FREAK attack."))
+    ratings.append(security_check(report, "poodle", "yes", "F", "Vulnerable to CVE_2014_3566 (POOODLE)."))
+    ratings.append(security_check(report, "sweet32", "yes", "F", "Vulnerable to Sweet32."))
+    ratings.append(security_check(report, "lucky13", "yes", "F", "Vulnerable to Lucky 13."))
+    ratings.append(security_check(report, "hassslv2", "yes", "F", "Insecure/Obsolete protocol supported (SSLv2)."))
+    ratings.append(security_check(report, "hassslv3", "yes", "F", "Insecure/Obsolete protocol supported (SSLv3)."))
+    ratings.append(security_check(report, "logjam", "yes", "F", "Vulnerable to Logjam."))
+    ratings.append(security_check(report, "CVE-2016-2107", "yes", "F", "Vulnerable to CVE_2016_2107 (padding oracle)."))
+    ratings.append(security_check(report, "CVE-2016-9244", "yes", "F", "Vulnerable to CVE_2016_9244 (ticketbleed)."))
+    ratings.append(weak_cipher_check(report, "F", "Insecure ciphers supported."))
     # Beast is not awarded any rating in Qualys anymore, as being purely client-side.
 
     # Todo: does O-Saft not check AECDH cipher usage? Or is that included.
-    ratings += security_check(
-        report, "Target does not accept ADH ciphers:", "yes", "F", "Anonymous (insecure) suites used.")
+    ratings.append(security_check(report, "cipher_adh", "yes", "F", "Anonymous (insecure) suites used."))
 
     # C-Class
     # This does not check for TLS 1.3, which will come. Or have to come.
-    ratings += security_check(
-        report, "Target supports TLSv1.2:", "yes", "C", "The safest TLS protocol TLSv1.2 is not yet supported.")
-    ratings += security_check(
-        report, "Connection is safe against CRIME attack:", "yes", "C",
-        "Vulnerable to CRIME attack, due to compression used.")
+    ratings.append(security_check(report, "hastls12", "yes", "C",
+                                  "The safest TLS protocol TLSv1.2 is not yet supported."))
+    ratings.append(security_check(report, "crime", "yes", "C", "Vulnerable to CRIME attack, due to compression used."))
 
     # Qualys checks where RC4 is supported:
     # C when RC4 in ['TLSv1.2', 'TLSv1.1']
     # B when RC4 in ['TLSv1.0', 'SSLv3', 'SSLv2']
     # Here we can only check if RC4 is used at all (and not at what protocol as with sslyze), but who wants RC4 anyway
     # todo: isn't there any difference? Should O-Saft support this?
-    ratings += security_check(
-        report, "Connection is safe against RC4 attack:", "yes", "F", "RC4 is accepted and poses a weakness.")
+    ratings.append(security_check(
+        report, "rc4", "yes", "F", "RC4 is accepted and poses a weakness."))
 
     # Qualys checks for low bit ciphers in modern protocols. Specifically
     # ['3DES', 'RC4', 'IDEA', 'RC2'] in ['TLSv1.2', 'TLSv1.1', 'TLSv1.0'], if so:
@@ -341,8 +346,8 @@ def determine_grade(report_path: str):
     # Unknown Class
     # These are weaknesses described in O-Saft but not directly visible in Qualys. All ratings below might mis-match
     # the qualys rating. This can turn out to be a misalignment (where this or qualys is stronger).
-    ratings += security_check(
-        report, "Target selects strongest cipher:", "yes", "B", "Server does not prefer strongest encryption first.")
+    ratings.append(security_check(
+        report, "cipher_strong", "yes", "B", "Server does not prefer strongest encryption first."))
 
     # todo: check what these things do in qualys.
     """
@@ -359,7 +364,7 @@ def determine_grade(report_path: str):
     #  if cipher['bits'] and int(cipher['bits']) < 56:
     #       ratings.append(['F', "Insecure ciphers used (low number of bits)."])
 
-    if not ratings:
+    if final_grade(ratings) == "?":
 
         # See if we can go for A+ when HSTS is implemented (i think https should be the default... oh well)
         """
@@ -377,83 +382,98 @@ def determine_grade(report_path: str):
           {"typ":"check","line":"419","key":"STS max-age more than one year:","label":"no (< 99999999)","value":"no (< 9
           {"typ":"check","line":"420","key":"STS max-age < certificate's validity:","label":"no (1531304486 + 31536000 >
         """
-        if all([security_value(report, "Target sends STS header:") == "yes",
-                security_value(report, "Target sends STS and no Location header:") == "yes",
-                security_value(report, "Target sends STS and no Refresh header:") == "yes",
-                security_value(report, "STS max-age not reset:") == "yes"]) and (
-                    security_value(report, "STS max-age more than 18 weeks:") == "yes" or
-                    security_value(report, "STS max-age more than one year:") == "yes"):
-            ratings.append({'grade': 'A+', 'message': 'No weaknesses found, forces security using HSTS.',
-                            'debug_key': '', 'debug_value': ''})
+        # HSTS is only sensible on the "final" site, so redirects we can ignore.
+        if all([security_value(report, "hsts_sts") == "yes",
+                security_value(report, "hsts_location") == "yes",
+                security_value(report, "hsts_refresh") == "yes",
+                security_value(report, "sts_maxage0d") == "yes"]) and (
+                    security_value(report, "sts_maxage18") == "yes" or
+                    security_value(report, "sts_maxagexy") == "yes"):
+            ratings.append({'grade': 'A+', 'message': 'No weaknesses found, forces security by using HSTS.',
+                            'debug_key': 'A+', 'debug_value': 'A+'})
         else:
-            ratings.append({'grade': 'A', 'message': 'No weaknesses found', 'debug_key': '', 'debug_value': ''})
+            ratings.append({'grade': 'A', 'message': 'No weaknesses found', 'debug_key': 'A', 'debug_value': 'A'})
 
     return ratings, is_trusted
 
 
-def debug_grade(ratings, trust_ratings):
-    lowest_rating = 'A'
-    trust = True
-    logger.debug('-------------------------------------------------------------------')
-    logger.debug('Trust')
-    for rating in trust_ratings:
-        logger.debug("  %s: %s" % (rating[0], rating[1]))
-        trust = False
-    logger.debug('')
-    logger.debug('Trust:  %s' % trust)
-    logger.debug('')
-
-    logger.debug('Vulnerabilities')
+def final_grade(ratings):
+    # Order from worst to best: F, C, B, A, A+
+    grades = []
     for rating in ratings:
-        logger.debug("  %s: %s" % (rating[0], rating[1]))
-        if rating[0] > lowest_rating:
-            lowest_rating = rating[0]
-    logger.debug('')
-    logger.debug('Rating: %s' % lowest_rating)
-    logger.debug('')
+        grades.append(rating['grade'])
 
+    if "F" in grades:
+        return "F"
+
+    if "C" in grades:
+        return "C"
+
+    if "B" in grades:
+        return "B"
+
+    if "A" in grades:
+        return "A"
+
+    if "A+" in grades:
+        return "A+"
+
+    return "?"
+
+
+def final_trust(trust_ratings):
+    for rating in trust_ratings:
+        if not rating["trusted"]:
+            return "T"
+
+    return ""
+
+
+def debug_grade(ratings, trust_ratings):
+    log.debug('Trust:  %s (T is not trusted, no value is trusted)' % final_trust(trust_ratings))
+    log.debug('Rating: %s (F to A+, american school grades)' % final_grade(ratings))
+
+    log.debug('-------------------------------------------------------------------')
+    log.debug('Trust')
+    for rating in trust_ratings:
+        log.debug("  %2s: %5s (%s)" % (rating['trusted'], rating['message'], rating['debug_key']))
+    log.debug('')
+
+    log.debug('Vulnerabilities')
+    for rating in ratings:
+        log.debug("  %2s: %s (%s)" % (rating['grade'], rating['message'], rating['debug_key']))
+    log.debug('')
+
+
+# todo: what to do if there is no connection, what to do if connection fails etc...
+# in that case no rating?
 
 @app.task(queue="storage")
 def store_grade(ratings, trust_ratings, endpoint):
-    lowest_rating = 'A'
-    trust = True
+    trusted = final_trust(trust_ratings)
+    grade = final_grade(ratings)
 
-    logger.debug('Trust')
-    for rating in trust_ratings:
-        logger.debug("%s: %s" % (rating[0], rating[1]))
-        trust = False
+    if trusted != "T":
+        trusted = grade
 
-    logger.debug('Vulnerabilities')
-    for rating in ratings:
-        logger.debug("%s: %s" % (rating[0], rating[1]))
-        if rating[0] > lowest_rating:
-            lowest_rating = rating[0]
-
-    logger.debug('Conlcusion: rated %s with trust?: %s', (lowest_rating, trust))
+    # qualysscanmanager to store the rating.
 
     # clone of the qualys table. We're not doing the same management here as in the qualys thing.
     # we'll use the https-discovery to see where TLS is used, and then use this script.
     # which makes it much easier to handle issues.
 
-    # EndpointScanManager.add_scan('ssl_tls', endpoint, grade, explanation)
-
 
 @timeout(3)
 def test_cve_2016_2107(url, port):
     # The script will timeout sometimes.
-    # run GO package. go run main.go tweakers.net
-    # get the first line output.
 
     # writes to stderror by default.
-    process = subprocess.Popen(['go',
-                                'run',
-                                settings.TOOLS['TLS']['cve_2016_2107'],
-                                "%s:%s" % (url, port)],
+    process = subprocess.Popen(['go', 'run', settings.TOOLS['TLS']['cve_2016_2107'], "%s:%s" % (url, port)],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # get last word of first line. Can be true or false. Should only get one line.
     out, err = process.communicate()
-    print(out)
-    print(err)
+    # print(out)
+    # print(err)
     if "Vulnerable: true" in str(err) or "Vulnerable: true" in str(out):
         return True
     return False
@@ -462,12 +482,7 @@ def test_cve_2016_2107(url, port):
 @timeout(3)
 def test_cve_2016_9244(url, port):
     # The script will timeout sometimes.
-    # run GO package. go run main.go tweakers.net
-    # get the first line output.
-    process = subprocess.Popen(['go',
-                                'run',
-                                settings.TOOLS['TLS']['cve_2016_9244'],
-                                "%s:%s" % (url, port)],
+    process = subprocess.Popen(['go', 'run', settings.TOOLS['TLS']['cve_2016_9244'], "%s:%s" % (url, port)],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
     # print(out)
@@ -500,10 +515,12 @@ def cert_chain_is_complete(url, port):
 
     raise NotImplementedError
 
+# todo: create downloader for specific urls so we can easily harvest testcases
+
 
 def testcase(filename, domain='example.com'):
-    logger.info(filename)
-    rating, trust_rating = determine_grade(output + 'testcases/' + filename + '.xml', domain)
+    log.info(filename)
+    rating, trust_rating = determine_grade('testcases/' + filename + '.xml', domain)
     debug_grade(rating, trust_rating)
 
 

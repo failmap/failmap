@@ -452,6 +452,9 @@ TOOLS = {
     },
     'dnscheck': {
         'executable': TOOLS_DIR + 'dnssec.pl'
+    },
+    'osaft': {
+        'json': VENDOR_DIR + 'osaft/JSON-array.awk',
     }
 }
 

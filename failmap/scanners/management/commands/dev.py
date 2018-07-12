@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = 'Development command'
 
     def handle(self, *args, **options):
-        rebuild_ratings()
+        test_osaft()
         return
 
         # tasking()
@@ -35,6 +35,17 @@ class Command(BaseCommand):
         # Command.develop_celery()
         # Command.develop_celery_advanced()
         # Command.develop_celery_test_async_tasks()
+
+
+def test_osaft():
+    from failmap.scanners.scanner_tls_osaft import scan_address, determine_grade, debug_grade
+    address = 'faalkaart.nl'
+    port = 443
+    report = scan_address(address, port)
+    grades, trust = determine_grade(report)
+    logger.debug(trust)
+    logger.debug(grades)
+    debug_grade(grades, trust)
 
 
 def rebuild_ratings():
