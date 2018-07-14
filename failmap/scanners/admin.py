@@ -106,7 +106,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('endpoint', 'rating', 'rating_no_trust', 'explanation',
+    list_display = ('endpoint', 'rating', 'rating_no_trust', 'compared_to_qualys', 'explanation',
                     'last_scan_moment', 'rating_determined_on')
     search_fields = ('endpoint__url__url', 'rating', 'rating_no_trust',
                      'scan_date', 'rating_determined_on')
@@ -118,6 +118,13 @@ class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    )
     fields = ('endpoint', 'rating', 'rating_no_trust', 'explanation', 'evidence',
               'rating_determined_on', 'last_scan_moment')
+
+    @staticmethod
+    def compared_to_qualys(instance):
+        latest = TlsQualysScan.objects.all().filter(endpoint=instance.endpoint).latest('rating_determined_on')
+        first = "💚" if latest.qualys_rating == instance.rating else "😞"
+        second = "💚" if latest.qualys_rating_no_trust == instance.rating_no_trust else "😞"
+        return "%s %s | %s %s" % (first, latest.qualys_rating, second, latest.qualys_rating_no_trust)
 
     readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment', 'endpoint')
 

@@ -3,12 +3,13 @@ import logging
 import platform
 import subprocess
 from datetime import datetime, timedelta
+from random import shuffle
 
 import pytz
 from celery import Task, group
 from django.conf import settings
 
-from failmap.celery import app
+from failmap.celery import PRIO_HIGH, PRIO_LOW, PRIO_NORMAL, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 from failmap.scanners.timeout import timeout
@@ -21,7 +22,7 @@ log = logging.getLogger(__package__)
 """
 This scanner currently uses:
 - Linux commands
-- O-Saft
+- O-Saft (docker)
 - gawk
 - GO (external scripts)
 - cert-chain-resolver
@@ -34,6 +35,11 @@ Older grading: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
 
 
 Uses O-SAFT and a number of external scripts to perform complete validation of TLS/SSL akin to SSL Labs.
+
+On Juli 2018 this memory leak in docker prevented correct usage of O-Saft. It would eat all memory.
+'especially if the remote end would not read'... which happens all the time.
+https://github.com/moby/vpnkit/issues/371#issuecomment-390248401
+
 
 Documentation:
 https://www.owasp.org/index.php/O-Saft/Documentation#--trace-key
@@ -172,6 +178,8 @@ def compose_task(
 
     urls = list(set(urls))  # unique only
 
+    shuffle(urls)  # spread the load
+
     if endpoints_filter:
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
@@ -185,10 +193,20 @@ def compose_task(
     # todo: find the O-Saft command for IPv6 scans.
     endpoints = Endpoint.objects.all().filter(url__in=urls, protocol="https", ip_version=4, is_dead=False)
 
-    task = group(run_osaft_scan.s(endpoint.url.url, endpoint.port)
-                 | ammend_unsuported_issues.s(endpoint.url.url, endpoint.port)
-                 | determine_grade.s()
-                 | store_grade.s(endpoint) for endpoint in endpoints)
+    # tasks are prioritized in increasing order. Reason is that the chain has to be completed instead of a series of
+    # actions buffered. Consider 100 scans. We've seen that normally, first 100x the first task is run, then 100x
+    # the second one and then the last one. The problem with this is that the second task is performed quickly in a
+    # burst. Thus flooding the system with 100 tasks, while the first task is better rate limited.
+
+    # having 20 tasks on a worker run on a single docker osaft, (which has about 11 pids constantly) is
+    # a pretty steady setup. No memory leaks, no PID increases. Many scans finish and about 3 scans per minute are
+    # performed, which is pretty sweet. It's 3x Qualys :)
+
+    # You can clearly see the bursts in the scans table :)
+    task = group(run_osaft_scan.s(endpoint.url.url, endpoint.port)  # LOW
+                 | ammend_unsuported_issues.s(endpoint.url.url, endpoint.port)  # NORMAL
+                 | determine_grade.s()  # HIGH
+                 | store_grade.s(endpoint) for endpoint in endpoints)  # HIGH
     return task
 
 
@@ -238,8 +256,121 @@ def compare_results():
     log.info('comparison completed.')
 
 
+def start_osaft_container():
+    # wait 10 seconds, which is the boot time of the container, otherwise too many containers ar emade?
+    # docker: Error response from daemon: Conflict. The container name "/practical_bassi" is already in use by container
+    # so you can try and spawn the same container over and over, which is fine. Nothing happens.
+    # todo: check if the container is already up. We don't care about a range of errors while the scanner is starting
+
+    # every scan will now run this command, which is not really efficient.
+    docker_ps = ["docker", "ps"]
+    output = get_standard_out(docker_ps)
+
+    if "osaft" not in output:
+        start_docker = ["docker", "run", "-ti", "--rm", "-d", "--name", "osaft", "--entrypoint", "/bin/sh",
+                        "owasp/o-saft"]
+        get_standard_out(start_docker)
+
+
+def get_standard_out(command):
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (standardout, junk) = process.communicate()
+    return standardout.decode('utf-8')
+
+
+"""
+Using this construction the container will run out of memory and CPU. A slow CPU means that scans don't finish in time
+and the result is a clusterfuck. So we should only add scans when there is room to do so.
+
+We can set a max number of PID's (simultaneous scans), and have the task retry until there is enough room in the
+container.
+
+todo: we also want to finish a chain, instead os doing step 1 first for all servers. Perhaps higher prio on the
+rest of the process (which is more quick).
+
+CONTAINER ID    NAME     CPU %      MEM USAGE / LIMIT     MEM %      NET I/O             BLOCK I/O           PIDS
+ee377bec815d    osaft    162.55%    1.684GiB / 1.952GiB   86.27%     126MB / 78.6MB      4.93GB / 385MB      141
+
+After the first series of tasks has been processed, all tasks are moved to the next phase. This means at a single moment
+a large volume of other scans is performed which can completely drain or kill any resources available. It's therefore
+very important that all the tasks in this scan are performed more or less sequentially.
+
+So wait until it's finished, and don't start too many tasks. Otherwise your system WILL crash.
+"""
+
+
 @app.task(queue="scanners")
+def run_osaft_scan_shared_container(address, port):
+    start_osaft_container()
+
+    # See run_osaft_scan for parameter documentation
+    # This variant of osaft scan starts a single container to limit the amount of memory usage. Memory usage was
+    # 14 gigabyte when using 8 worker threads. We need to cut that down to 1 gb or something like that.
+    # altname is not in the check report?
+    log.info("Running osaft scan on %s:%s" % (address, port))
+
+    # docker exec -ti osaft /O-Saft/o-saft.pl
+    # a limited total means that certain ciphers are not checked and all kinds of vulnerabilities arise.
+    o_saft_command = ['docker', 'exec', '-ti', 'osaft', '/O-Saft/o-saft.pl', '--trace-key', '--legacy=quick',
+                      '--ssl-error-max=10', '--ssl-error-total=30', '+check',
+                                "%s:%s" % (address, port)]
+    log.info("O-Saft command: %s" % " ".join(o_saft_command))
+    process = subprocess.Popen(o_saft_command,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (standardout, junk) = process.communicate()
+    log.info("O-Saft output:")
+    log.info(standardout)
+    return standardout
+
+
+# todo: try a timeout on this command.
+# This has a hard time limit. If in two minutes there is no reply, there probably is no TLS or something fishy going on.
+# 90 seconds is ABSOLUTELY not enough... let's try 180.
+# Such non-updated servers we can find automatically and inspect by hand.
+# max_retries: we're scanning daily. If it fails, it fails. Too bad.
+# If this happens... no follow up task? Or other task processed? What is it waiting for?
+# once a time limit is received, it keeps on going with time limits and there is never a completed scan...
+# even though it says max retries 1.
+# hangs completely... control+c doesn't work... queue locked...
+# Note that the timeout can work against itself. Even while the task is killed, the process is still running in the
+# docker container waiting to be finished. It's better to hang then to process failed tasks.
+@app.task(queue="scanners", max_retries=1, priority=PRIO_LOW)
 def run_osaft_scan(address, port):
+    return run_osaft_scan_shared_container(address, port)
+
+
+"""
+Say goodbye to your ram when using this function :)
+25 containers at the same time? HMMMMMMMMMMMM... nope :)
+5bf410dcbcf5        owasp/o-saft     "perl /O-Saft/o-saft…"   33 seconds ago      Up 21 seconds  elated_brahmagupta
+fb30b8407438        owasp/o-saft     "perl /O-Saft/o-saft…"   37 seconds ago      Up 26 seconds  eloquent_benz
+22285b06085d        owasp/o-saft     "perl /O-Saft/o-saft…"   7 hours ago         Up 7 hours     relaxed_edison
+29e6efa6a5e4        owasp/o-saft     "perl /O-Saft/o-saft…"   9 hours ago         Up 9 hours     reverent_kowalevski
+8d47b5d7c1f4        owasp/o-saft     "perl /O-Saft/o-saft…"   9 hours ago         Up 9 hours     awesome_payne
+6d5b549a1674        owasp/o-saft     "perl /O-Saft/o-saft…"   9 hours ago         Up 9 hours     vibrant_shaw
+b430b506e7d3        owasp/o-saft     "perl /O-Saft/o-saft…"   9 hours ago         Up 9 hours     priceless_wozniak
+64bb55038b0f        owasp/o-saft     "perl /O-Saft/o-saft…"   10 hours ago        Up 10 hours    loving_benz
+80a85e8df743        owasp/o-saft     "perl /O-Saft/o-saft…"   10 hours ago        Up 10 hours    cranky_mccarthy
+989c9033f1c2        owasp/o-saft     "perl /O-Saft/o-saft…"   10 hours ago        Up 10 hours    youthful_sinoussi
+2dcdf767a9cf        owasp/o-saft     "perl /O-Saft/o-saft…"   12 hours ago        Up 12 hours    blissful_turing
+043c0402c987        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    vibrant_lovelace
+3dfbaea0b905        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    adoring_hermann
+5c648a60e691        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    tender_nightingale
+65f2af1c2061        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    gracious_mirzakhani
+5a5b60365496        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    eloquent_heyrovsky
+2309f92448e4        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    kind_hamilton
+dc1052fd4c65        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    vigilant_villani
+d7098ea0d1ff        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    silly_lewin
+d21abdb679ca        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    tender_leakey
+469e55cbba40        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    practical_bassi
+7da5f5236e43        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    gracious_liskov
+43c7c4575106        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    flamboyant_visvesvaraya
+3e94b4dca56c        owasp/o-saft     "perl /O-Saft/o-saft…"   15 hours ago        Up 15 hours    adoring_heisenberg
+c867bf514f17        owasp/o-saft     "perl /O-Saft/o-saft…"   17 hours ago        Up 17 hours    boring_edison
+"""
+
+
+def run_osaft_scan_dedicated_container(address, port):
     # we're expecting SNI running everywhere. So we cant connect on IP alone, an equiv of http "host-header" is required
     # We're not storing anything on the filesystem and expect no dependencies on the O-Saft system. All post-processing
     # is done on another machine.
@@ -247,6 +378,7 @@ def run_osaft_scan(address, port):
     # --trace-key: adds a key to follow the specific commands: the labels then can change without affecting this script
     # --legacy=quick : makes sure we're getting the json in proper output
     # +check performs an extensive array of checks
+    # --ssl-error-max=5 prevents indefinite hangs on urls without TLS at all
 
     # owasp/o-saft --trace-key --legacy=quick +check https://faalkaart.nl
     # todo: determine call routine to O-Saft, docker is fine during development, but what during production?
@@ -254,7 +386,7 @@ def run_osaft_scan(address, port):
     log.info("Running osaft scan on %s:%s" % (address, port))
     # **WARNING: 048: additional commands in conjunction with '+check' are not supported; +'selfsigned' ignored
     o_saft_command = ['docker', 'run', '--rm', '-it',
-                                'owasp/o-saft', '--trace-key', '--legacy=quick', '+check',
+                                'owasp/o-saft', '--trace-key', '--legacy=quick', '--ssl-error-max=5', '+check',
                                 "%s:%s" % (address, port)]
     log.info("O-Saft command: %s" % o_saft_command)
     process = subprocess.Popen(o_saft_command,
@@ -282,7 +414,7 @@ def gawk(string):
     return output
 
 
-@app.task(queue="scanners")
+@app.task(queue="scanners", priority=PRIO_NORMAL)
 def ammend_unsuported_issues(osaft_report, address, port=443):
     """
     A scan takes about a minute to complete and can be run against any TLS website and many other services.
@@ -335,7 +467,7 @@ def ammend_unsuported_issues(osaft_report, address, port=443):
 def trust_check(report, key, asserted_value, message_if_assertion_failed):
     for line in report:
         if line['key'] == key:
-            if line['value'] != asserted_value:
+            if line['value'].lower() != asserted_value:
                 return {'trusted': False, 'message': message_if_assertion_failed,
                         'debug_key': line['key'], 'debug_value': line['value']}
             else:
@@ -344,11 +476,14 @@ def trust_check(report, key, asserted_value, message_if_assertion_failed):
                 return {'trusted': True, 'message': 'OK',
                         'debug_key': line['key'], 'debug_value': line['value']}
 
+    raise KeyError("Key %s is not in report." % key)
+
 
 def security_check(report, key, asserted_value, grade_if_assertion_failed, message_if_assertion_failed):
     for line in report:
         if line['key'] == key:
-            if line['value'] != asserted_value:
+            # Please note that O-Saft uses the severity written lowercase or uppercase.
+            if line['value'].lower() != asserted_value:
                 return {'grade': grade_if_assertion_failed, 'message': message_if_assertion_failed,
                         'debug_key': line['key'], 'debug_value': line['value']}
             else:
@@ -357,10 +492,13 @@ def security_check(report, key, asserted_value, grade_if_assertion_failed, messa
                 return {'grade': '', 'message': 'OK',
                         'debug_key': line['key'], 'debug_value': line['value']}
 
+    raise KeyError("Key %s is not in report." % key)
 
+
+# Done: added cipher to report in JSON-array.awk in O-Saft
 def weak_cipher_check(report, grade_if_assertion_failed, message_if_assertion_failed):
     for line in report:
-        if line['typ'] == 'cipher' and line['value'] == "weak" and line['label'] == "yes":
+        if line['typ'] == 'cipher' and line['value'].lower() == "weak" and line['supported'] == "yes":
             return {'grade': grade_if_assertion_failed, 'message': message_if_assertion_failed,
                     'debug_key': line['key'], 'debug_value': line['value']}
 
@@ -374,10 +512,10 @@ def weak_cipher_check(report, grade_if_assertion_failed, message_if_assertion_fa
 def security_value(report, key):
     for line in report:
         if line['key'] == key:
-            return line['value']
+            return line['value'].lower()
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", priority=PRIO_HIGH)
 def determine_grade(report):
     """
     Use the docker build of OSaft, otherwise you'll be building SSL until you've met all dependencies.
@@ -394,6 +532,9 @@ def determine_grade(report):
     # if any of the is_trusted is False, then there is no trust, which affects the rating (instant F)
     is_trusted = []
     is_trusted.append(trust_check(report, "dates", "yes", "Certificate is not valid anymore."))
+
+    # todo: https://github.com/OWASP/O-Saft/issues/107
+    # should work after instructions...
     is_trusted.append(trust_check(report, "selfsigned", "yes", "Certificate is self-signed, chain of trust missing."))
     is_trusted.append(trust_check(report, "expired", "yes", "Certificate is expired."))
     is_trusted.append(trust_check(report, "sha2signature", "yes", "Obsolete Signature algorithm used."))
@@ -414,15 +555,63 @@ def determine_grade(report):
                                   "a Man in the Middle attack is possible."))
     ratings.append(security_check(report, "freak", "yes", "F", "Server is vulnerable to FREAK attack."))
     ratings.append(security_check(report, "poodle", "yes", "F", "Vulnerable to CVE_2014_3566 (POOODLE)."))
-    ratings.append(security_check(report, "sweet32", "yes", "F", "Vulnerable to Sweet32."))
-    ratings.append(security_check(report, "lucky13", "yes", "F", "Vulnerable to Lucky 13."))
+
+    """
+    https://sweet32.info/
+
+    You can use the scanning tool form Qualys SSL Labs. In the "Handshake Simulation" section, you should see 3DES or
+    RC4 only with browsers that don't support stronger ciphersuites, like IE6/XP and IE8/XP. If you have 3DES
+    ciphersuites at the bottom of the "Cipher Suites" section, you can try to remove them, but it's not an
+    immediate security issue. Removing 3DES will protect you against potential downgrade attack, but it will also break
+    connections from older clients.
+
+    Thus: if the server prefers other ciphers than the sweet32 ciphers, it's reasonably safe. Qualys says there are
+    weak ciphers but doesn't highlight the Sweet32 vulnerability. This basically means that you will only get an F
+    if you have a "sweet" cipher as a preferred cipher.
+
+    We can find the used cipher using cipher_selected. The rest of the order is unclear for now.
+
+    The cipher_selected is a convoluted value containing both the string representation of a cipher and the security
+    cipher_selected = ECDHE-RSA-AES256-GCM-SHA384 HIGH
+    We're splitting that into:
+    """
+    # todo: improve current output, it's not possible to see what ciphers are used...
+    # todo: use the "no" value from the report and see if the cipher_selected is in that list.
+    selected_cipher = security_value(report, "cipher_selected")
+
+    # the selected cipher is a cipher where the Sweet 32 attack works.
+    if selected_cipher in security_value(report, "sweet32"):
+        ratings.append(security_check(report, "sweet32", "yes", "F", "Vulnerable to Sweet32."))
+
+    """
+    https://en.wikipedia.org/wiki/Lucky_Thirteen_attack
+
+    Also focuses on CBC ciphers first. As such it is not listed in Qualys report. You see that both sweet32 and lucky13
+    have the same ciphers that cause trouble in scans. The same logic is applied: this is only a problem if the client
+    is weak / vulnerable.
+    """
+    if selected_cipher in security_value(report, "lucky13"):
+        ratings.append(security_check(report, "lucky13", "yes", "F", "Vulnerable to Lucky 13."))
+
+    # external tools may result in "unknown"
+    if security_value(report, "CVE-2016-2107") not in ["yes", "unknown"]:
+        ratings.append(security_check(report, "CVE-2016-2107", "yes", "F",
+                                      "Vulnerable to CVE_2016_2107 (padding oracle)."))
+
+    if security_value(report, "CVE-2016-9244") not in ["yes", "unknown"]:
+        ratings.append(security_check(report, "CVE-2016-9244", "yes", "F",
+                                      "Vulnerable to CVE_2016_9244 (ticketbleed)."))
+
     ratings.append(security_check(report, "hassslv2", "yes", "F", "Insecure/Obsolete protocol supported (SSLv2)."))
     ratings.append(security_check(report, "hassslv3", "yes", "F", "Insecure/Obsolete protocol supported (SSLv3)."))
     ratings.append(security_check(report, "logjam", "yes", "F", "Vulnerable to Logjam."))
-    ratings.append(security_check(report, "CVE-2016-2107", "yes", "F", "Vulnerable to CVE_2016_2107 (padding oracle)."))
-    ratings.append(security_check(report, "CVE-2016-9244", "yes", "F", "Vulnerable to CVE_2016_9244 (ticketbleed)."))
+
+    # This is not an F in qualys. Sometimes they show weak ciphers, but don't trigger any ratings on it.
+    # weak ciphers are supported everywhere....
     ratings.append(weak_cipher_check(report, "F", "Insecure ciphers supported."))
+
     # Beast is not awarded any rating in Qualys anymore, as being purely client-side.
+    # no BEAST check here.
     ratings.append(security_check(report, "crime", "yes", "F", "Vulnerable to CRIME attack, due to compression used."))
     # todo: robot ( and the new robot)
     ratings.append(security_check(report, "drown", "yes", "F", "Vulnerable to DROWN attack. If this certificate is "
@@ -433,8 +622,9 @@ def determine_grade(report):
 
     # C-Class
     # This does not check for TLS 1.3, which will come. Or have to come.
+    # not trustworthy...
     ratings.append(security_check(report, "hastls12", "yes", "C",
-                                  "The safest TLS protocol TLSv1.2 is not yet supported."))
+                                  "The server supports older protocols, but not TLSv1.2."))
 
     # todo: signature size is private key strength??? Doesn't seem to be, probably need some other options next to check
     private_key_strength = security_value(report, "len_sigdump")  # 2048 bits
@@ -452,6 +642,10 @@ def determine_grade(report):
     # B when RC4 in ['TLSv1.0', 'SSLv3', 'SSLv2']
     # Here we can only check if RC4 is used at all (and not at what protocol as with sslyze), but who wants RC4 anyway
     # todo: isn't there any difference? Should O-Saft support this?
+    # This error pops up if the cipher check has been cancelled (or the amount of errors was higher than the threshold)
+    # Should the threshold be applicable per protocol? It has to be increased now.
+    # {'typ': 'warning', 'line': '19', 'key': '8', 'label': '19', 'value': '**WARNING: 301: TLSv12:
+    # (1 of 193 ciphers checked) abort connection attempts after 10 total errors'} Total is too low.
     ratings.append(security_check(
         report, "rc4", "yes", "F", "RC4 is accepted and poses a weakness."))
 
@@ -465,8 +659,9 @@ def determine_grade(report):
     # Unknown Class
     # These are weaknesses described in O-Saft but not directly visible in Qualys. All ratings below might mis-match
     # the qualys rating. This can turn out to be a misalignment (where this or qualys is stronger).
-    ratings.append(security_check(
-        report, "cipher_strong", "yes", "B", "Server does not prefer strongest encryption first."))
+    # Qualys doesn't care. Perhaps due to client selection.
+    # ratings.append(security_check(
+    #    report, "cipher_strong", "yes", "B", "Server does not prefer strongest encryption first."))
 
     # todo: check what these things do in qualys.
     """
@@ -580,7 +775,7 @@ def grade_report(ratings, trust_ratings, report_for_debugging=""):
 # discovery script can do that.
 
 
-@app.task(queue="storage")
+@app.task(queue="storage", priority=PRIO_HIGH)
 def store_grade(combined_ratings, endpoint):
     ratings, trust_ratings, report = combined_ratings
 
@@ -626,6 +821,7 @@ def test_cve_2016_9244(url, port):
 
 @timeout(10)
 def cert_chain_is_complete(url, port):
+    # todo: implement cert chain resolver
     """
     Download cert:
     openssl s_client -showcerts -connect microsoft.com:443 </dev/null 2>/dev/null|openssl x509
