@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import platform
 import subprocess
 from datetime import datetime, timedelta
@@ -137,7 +138,6 @@ What we should have used: https://www.owasp.org/index.php/O-Saft ... nah
 
 """
 osaft_JSON = settings.TOOLS['osaft']['json']
-cert_chain_resolver = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
 
 
 @app.task(queue="storage")
@@ -311,15 +311,19 @@ def run_osaft_scan_shared_container(address, port):
 
     # docker exec -ti osaft /O-Saft/o-saft.pl
     # a limited total means that certain ciphers are not checked and all kinds of vulnerabilities arise.
-    o_saft_command = ['docker', 'exec', '-ti', 'osaft', '/O-Saft/o-saft.pl', '--trace-key', '--legacy=quick',
+    #  '--trace-key'
+    o_saft_command = ['docker', 'exec', '-ti', 'osaft', '/O-Saft/o-saft.pl', '--legacy=key',
                       '--ssl-error-max=10', '--ssl-error-total=30', '+check',
                                 "%s:%s" % (address, port)]
     log.info("O-Saft command: %s" % " ".join(o_saft_command))
-    process = subprocess.Popen(o_saft_command,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen(o_saft_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (standardout, junk) = process.communicate()
-    log.info("O-Saft output:")
-    log.info(standardout)
+    # log.info("O-Saft output:")
+    standardout = standardout.decode("utf-8")
+    if "Cannot connect to the Docker daemon" in standardout:
+        raise EnvironmentError(standardout)
+
+    # log.info(standardout)
     return standardout
 
 
@@ -389,11 +393,13 @@ def run_osaft_scan_dedicated_container(address, port):
                                 'owasp/o-saft', '--trace-key', '--legacy=quick', '--ssl-error-max=5', '+check',
                                 "%s:%s" % (address, port)]
     log.info("O-Saft command: %s" % o_saft_command)
-    process = subprocess.Popen(o_saft_command,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    process = subprocess.Popen(o_saft_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     (standardout, junk) = process.communicate()
     log.info("O-Saft output:")
     log.info(standardout)
+    if "Cannot connect to the Docker daemon" in standardout:
+        raise EnvironmentError(standardout)
+
     return standardout
 
 
@@ -401,17 +407,16 @@ def run_osaft_scan_dedicated_container(address, port):
 # you can do so at any point in for example the contents of the HSTS header. So this is a really insecure way of
 # processing the output.
 def gawk(string):
-    # echo string | gawk -f contrib/JSON-array.awk
-    # todo: is echo a command? And what about command injection otherwise?
-    echo = subprocess.Popen(["echo", string], stdout=subprocess.PIPE)
     # todo: check that gawk is installed
+    # echo string | gawk -f contrib/JSON-array.awk
+    echo = subprocess.Popen(["echo", string], stdout=subprocess.PIPE)
     gawk = subprocess.Popen(["gawk", "-f", osaft_JSON], stdin=echo.stdout, stdout=subprocess.PIPE)
     echo.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
     output, err = gawk.communicate()
 
-    log.debug("gawk output:")
-    log.debug(output)
-    return output
+    # log.debug("gawk output:")
+    # log.debug(output)
+    return output.decode('utf-8')
 
 
 @app.task(queue="scanners", priority=PRIO_NORMAL)
@@ -428,30 +433,35 @@ def ammend_unsuported_issues(osaft_report, address, port=443):
     # It's possible to run multiple scans at the same time, so we might do this in a batched approach.
     # but what if one of these things hangs? I suppose O-Saft has timeouts.
     lines = gawk(osaft_report)  # convert the raw output to a JSON array
-    lines = lines.decode("utf-8")  # commands deliver byte strings, convert to something more easy
     lines = lines.splitlines()  # split the report in multiple lines, to inject findings
     lines = lines[:-1]  # make it possible to inject some other findings by removing the closing tag.
 
     log.debug('Running workaround scans to complete O-Saft')
     try:
         vulnerable = test_cve_2016_2107(address, port)
-        string = '  {"typ": "check", "key": "CVE-2016-2107", "label": "Safe against CVE-2016-2107:", "value":"' + \
+        string = '  {"typ": "check", "key": "[CVE-2016-2107]", "label": "Safe against CVE-2016-2107:", "value":"' + \
                  ("no (vulnerable)" if bool(vulnerable) else "yes") + '"},'
         lines.append(string)
     except TimeoutError:
-        string = ' {"typ": "check", "key": "CVE-2016-2107", "label": "Safe against CVE-2016-2107:", "value":"unknown"},'
+
+        string = ' {"typ": "check", "key": "[CVE-2016-2107]", ' \
+                 '"label": "Safe against CVE-2016-2107:", "value":"unknown"},'
         lines.append(string)
 
     try:
         vulnerable = test_cve_2016_9244(address, port)
-        string = '  {"typ": "check", "key": "CVE-2016-9244", "label": "Safe against CVE-2016-9244:", "value":"' + \
+        string = '  {"typ": "check", "key": "[CVE-2016-9244]", "label": "Safe against CVE-2016-9244:", "value":"' + \
                  ("no (vulnerable)" if bool(vulnerable) else "yes") + '"},'
         lines.append(string)
     except TimeoutError:
-        string = ' {"typ": "check", "key": "CVE-2016-9244", "label": "Safe against CVE-2016-9244:", "value":"unknown"},'
+        string = ' {"typ": "check", "key": "[CVE-2016-9244]", ' \
+                 '"label": "Safe against CVE-2016-9244:", "value":"unknown"},'
         lines.append(string)
 
-    # todo: add cert-chain-resolver
+    # Able to resolve the whole certificate chain
+    string = '  {"typ": "check", "key": "[certchaincomplete]", "label": "Certificate chain can be resolved", ' \
+             '"value":"' + ("yes" if cert_chain_is_complete(address, port) else "no (missing certs)") + '"},'
+    lines.append(string)
 
     # Remove comma from last line, json is very picky
     lines[len(lines)-1] = lines[len(lines)-1][:-1]
@@ -466,7 +476,7 @@ def ammend_unsuported_issues(osaft_report, address, port=443):
 
 def trust_check(report, key, asserted_value, message_if_assertion_failed):
     for line in report:
-        if line['key'] == key:
+        if line['key'] == '[' + key + ']':
             if line['value'].lower() != asserted_value:
                 return {'trusted': False, 'message': message_if_assertion_failed,
                         'debug_key': line['key'], 'debug_value': line['value']}
@@ -481,7 +491,7 @@ def trust_check(report, key, asserted_value, message_if_assertion_failed):
 
 def security_check(report, key, asserted_value, grade_if_assertion_failed, message_if_assertion_failed):
     for line in report:
-        if line['key'] == key:
+        if line['key'] == '[' + key + ']':
             # Please note that O-Saft uses the severity written lowercase or uppercase.
             if line['value'].lower() != asserted_value:
                 return {'grade': grade_if_assertion_failed, 'message': message_if_assertion_failed,
@@ -511,8 +521,15 @@ def weak_cipher_check(report, grade_if_assertion_failed, message_if_assertion_fa
 
 def security_value(report, key):
     for line in report:
-        if line['key'] == key:
+        if line['key'] == '[' + key + ']':
             return line['value'].lower()
+
+
+# O-Saft has a compound output which sometimes places values in the wrong column.
+def security_label(report, key):
+    for line in report:
+        if line['key'] == '[' + key + ']':
+            return line['label'].lower()
 
 
 @app.task(queue="storage", priority=PRIO_HIGH)
@@ -524,6 +541,7 @@ def determine_grade(report):
     :param report: json report from O-Saft with injections
     :return: two lists of grades.
     """
+    # todo: A+ DNS Certification Authority Authorization (CAA) Policy found for this domain.
 
     if not report:
         return [], []
@@ -575,9 +593,11 @@ def determine_grade(report):
     cipher_selected = ECDHE-RSA-AES256-GCM-SHA384 HIGH
     We're splitting that into:
     """
-    # todo: improve current output, it's not possible to see what ciphers are used...
-    # todo: use the "no" value from the report and see if the cipher_selected is in that list.
-    selected_cipher = security_value(report, "cipher_selected")
+    selected_cipher = security_label(report, "cipher_selected")
+    log.debug("Connection has selected cipher: %s" % selected_cipher)
+
+    if not selected_cipher:
+        raise Exception("No selected_cipher detected, cannot perform checks.")
 
     # the selected cipher is a cipher where the Sweet 32 attack works.
     if selected_cipher in security_value(report, "sweet32"):
@@ -604,11 +624,18 @@ def determine_grade(report):
 
     ratings.append(security_check(report, "hassslv2", "yes", "F", "Insecure/Obsolete protocol supported (SSLv2)."))
     ratings.append(security_check(report, "hassslv3", "yes", "F", "Insecure/Obsolete protocol supported (SSLv3)."))
+
+    # todo: this is not always correct...
     ratings.append(security_check(report, "logjam", "yes", "F", "Vulnerable to Logjam."))
 
     # This is not an F in qualys. Sometimes they show weak ciphers, but don't trigger any ratings on it.
-    # weak ciphers are supported everywhere....
-    ratings.append(weak_cipher_check(report, "F", "Insecure ciphers supported."))
+    # weak ciphers are supported everywhere.... We have to find out when.
+    # Qualys will rate it an F if the cipher has been selected,
+    # 2018 july: TLS1 and weak is not detrimental to a rating.
+    # So only if the selected cipher is weak, this is a problem?
+    # O-Saft output does not support visibility in what ciphers are used PER TLS version, which does not allow this
+    # check. :(
+    # ratings.append(weak_cipher_check(report, "F", "Insecure ciphers supported."))
 
     # Beast is not awarded any rating in Qualys anymore, as being purely client-side.
     # no BEAST check here.
@@ -654,7 +681,8 @@ def determine_grade(report):
     # ['C', 'Using old 64-bit block cipher(s) (3DES / DES / RC2 / IDEA) with modern protocols.']
 
     # B-Class
-    # todo: certificate chain check
+    ratings.append(security_check(
+        report, "certchaincomplete", "yes", "B", "Certificate chain could not be resolved."))
 
     # Unknown Class
     # These are weaknesses described in O-Saft but not directly visible in Qualys. All ratings below might mis-match
@@ -745,7 +773,6 @@ def final_trust(trust_ratings):
 
 
 def grade_report(ratings, trust_ratings, report_for_debugging=""):
-    import os
     report = ""
     report += 'Trust:  %s (T is not trusted, no value is trusted)' % final_trust(trust_ratings) + os.linesep
     report += 'Rating: %s (F to A+, american school grades)' % final_grade(ratings) + os.linesep
@@ -821,28 +848,79 @@ def test_cve_2016_9244(url, port):
 
 @timeout(10)
 def cert_chain_is_complete(url, port):
-    # todo: implement cert chain resolver
     """
-    Download cert:
-    openssl s_client -showcerts -connect microsoft.com:443 </dev/null 2>/dev/null|openssl x509
-    -outform PEM >microsoft.pem
-    ./cert-chain-resolver microsoft.pem
     :param url:
     :param port:
     :return:
     """
-    # pyflakes tool = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
-    # openssl s_client -showcerts -connect microsoft.com:443 </dev/null 2>/dev/null|
-    # openssl x509 -outform PEM >microsoft.pem
 
-    # /Applications/XAMPP/xamppfiles/htdocs/faalkaart/test/cert-chain-resolver_darwin_amd64/cert-chain-resolver
-    # process = subprocess.Popen(['openssl',
-    #                             's_client',
-    #                             '-showcerts',
-    #                             '-connect', '%s:%s', ],
-    #                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    openssl = settings.TOOLS['openssl']['executable'][platform.system()]
 
-    raise NotImplementedError
+    # should complete near instantly (< 1 sec)
+    # true | openssl s_client -connect google.com:443 2>/dev/null | openssl x509
+    true_command = ['true']
+    true = subprocess.Popen(true_command, stdout=subprocess.PIPE)
+    openssl_command = [openssl, 's_client', '-connect', '%s:%s' % (url, port)]
+    openssl = subprocess.Popen(openssl_command, stdin=true.stdout, stdout=subprocess.PIPE)
+    openssl_output, err = openssl.communicate()
+    # log.debug("openssl: %s" % openssl_output)
+
+    # Why use an extra command just to extract begin/end?
+    # x509_command = [openssl, 'x509']
+    # x509 = subprocess.Popen(x509_command, stdin=openssl.stdout, stdout=subprocess.PIPE)
+    # x509_output, err = x509.communicate()
+    # log.debug("x509: %s" % x509_output)
+    x509_output = find_including(openssl_output.decode('utf-8'),
+                                 "-----BEGIN CERTIFICATE-----", "-----END CERTIFICATE-----")
+
+    # cert chain resovler needs a file...
+    output_dir = settings.TOOLS['TLS']['tls_check_output_dir']
+    path = output_dir + "%s_%s.pem" % (url, port)
+    with open(path, 'w') as the_file:
+        the_file.write(x509_output)
+    log.debug('File written to: %s' % the_file)
+
+    # writes to stdout by default
+    cert_chain_resolver = settings.TOOLS['TLS']['cert_chain_resolver'][platform.system()]
+    certchain_command = [cert_chain_resolver, path]
+    log.debug("Certchain command: %s" % " ".join(certchain_command))
+    certchain = subprocess.Popen(certchain_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    certchain_output, err = certchain.communicate()
+    certchain_output = certchain_output.decode('utf-8')
+    log.debug("certchain: %s" % certchain_output)
+    err = err.decode('utf-8')
+    log.debug(err)
+
+    # certchain_output contains the certificates downloaded to make the chain complete.
+    # err contains the real output of the check.
+    if "Invalid certificate" in err:
+        return False
+
+    if "Certificate chain complete." in err:
+        return True
+
+    return False
+
+
+# abcdefghijkl: bc, jk = bcdefghijk
+def find_including(s, first, last):
+    try:
+        start = s.index(first)
+        end = s.rindex(last, start) + len(last)
+        return s[start:end]
+    except ValueError:
+        return ""
+
+
+# abcdefghijkl: abc, jkl = defghi
+def find_between(s, first, last):
+    try:
+        start = s.rindex(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""
+
 
 # todo: create downloader for specific urls so we can easily harvest testcases
 

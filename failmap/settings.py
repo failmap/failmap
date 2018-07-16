@@ -448,7 +448,9 @@ TOOLS = {
         'cert_chain_resolver': {
             'Darwin': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-darwin',
             'Linux': VENDOR_DIR + 'cert-chain-resolver/cert-chain-resolver-linux',
-        }
+        },
+        'tls_check_output_dir': OUTPUT_DIR + os.environ.get('TLSCHECK_OUTPUT_DIR',
+                                                            'scanners/resources/output/tls_check/'),
     },
     'dnscheck': {
         'executable': TOOLS_DIR + 'dnssec.pl'

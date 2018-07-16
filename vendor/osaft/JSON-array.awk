@@ -66,6 +66,7 @@ function stat(key,val) {
 	line("label", arr[2], ",");
     if (typ == "cipher") {
         line("supported", arr[3], ",");
+        line("bits", arr[4], ",");
     }
 	line("value", arr[length(arr)], "");
 	print "},";
