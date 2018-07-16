@@ -1,10 +1,11 @@
 # coding=UTF-8
+from datetime import datetime
+
+import pytz
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
 from failmap.organizations.models import Url
-from django.core.exceptions import ObjectDoesNotExist
-from datetime import datetime
-import pytz
 
 
 class Endpoint(models.Model):
