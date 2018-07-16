@@ -4,39 +4,35 @@ Manages endpoints:
  Ports: 443
  IP's: any related to a domain on mentioned protocols and ports.
 
-This scanner harvests ips during scanning.
+Side effects from this scanner:
+- This scanner harvests ips during scanning, which are stored as metadata.
+- This scanner can discover new endpoints for port 443, protocol https, IPv4 or IPv6.
+- Only urls not scanned in the past 7 days are eligible for scan.
 
-This class will scan any domain it's asked to. It will rate limit on domains that have
-recently been scanned to not flood qualys (and keep in good standing). A scan at qualys
-takes about 1 to 10 minutes. This script will make sure requests are not done too quickly.
+Scans are severely rate limited using the Qualys API, trying to be as friendly as possible. If you want a faster
+scan, use multiple scanners on different IP-addresses. A normal qualys scan takes about two minutes.
 
-This class can scan domains in bulk. All endpoints related to these scans are set on pending
-before the scan starts. The caller of this class has to manage what URL's are scanned, when,
-especially when handling new domains without endpoints to set to pending problems may occur
-(problems = multiple scanners trying to scan the same domain at the same time).
+Be warned: the view of the internet from Qualys differs from yours. Some hosts block qualys or "foreign" traffic.
 
-Scans and grading is done by Qualys: it's their view of the internet, which might differ
-from yours.
+This scanner will be replaced with the O-Saft scanner when ready.
 
 API Documentation:
 https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-
 """
 import ipaddress
 import json
 import logging
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import pytz
 import requests
 from celery import Task, group, states
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan,
-                                     TlsQualysScratchpad)
+from failmap.scanners.models import Endpoint, TlsQualysScratchpad
 from failmap.scanners.scanner_http import store_url_ips
+from failmap.scanners.tlsqualys_scan_manager import TlsQualysScanManager
 
 from ..celery import PRIO_HIGH, PRIO_NORMAL, app
 from .scanner import allowed_to_scan, q_configurations_to_scan
@@ -53,12 +49,6 @@ def compose_task(
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
-
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
-
-    """
 
     if not allowed_to_scan("scanner_tls_qualys"):
         return group()
@@ -85,7 +75,7 @@ def compose_task(
             organization__in=organizations,  # whem empty, no results...
             **urls_filter,
         ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
-                  ).order_by("?")  # used to be endpoint__tlsqualysscan__last_scan_moment
+                  ).order_by("?")
     else:
         urls = Url.objects.filter(
             q_configurations_to_scan(),
@@ -96,10 +86,10 @@ def compose_task(
             endpoint__is_dead=False,
             **urls_filter,
         ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
-                  ).order_by("?")  # used to be endpoint__tlsqualysscan__last_scan_moment
+                  ).order_by("?")
 
-    # ordered randomly: i didn't get a distinct set of urls due to the inner join on endpoint. Would like to do
-    # oldest first to make sure everything is scanned more recently. To remove the join.
+    # Urls are ordered randomly.
+    # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     urls = list(set(urls))
 
     if endpoints_filter:
@@ -231,25 +221,22 @@ def process_qualys_result(data, url):
 
     # a normal completed scan.
     if data['status'] == "READY" and 'endpoints' in data.keys():
-        result = save_scan(url, data)
-        clean_endpoints(url, data['endpoints'])
-        return '%s %s' % (url, result)
+        save_scan(url, data)
+        return
 
     # missing endpoints: url propably resolves but has no TLS?
     elif data['status'] == "READY":
-        # no endpoints whut?
-        log.error("Found no endpoints in ready scan. Todo: How to handle this?")
         scratch(url, data)
+        raise ValueError("Found no endpoints in ready scan. Todo: How to handle this?")
 
     # Not resolving
     if data['status'] == "ERROR":
         """
-        Error is usually "unable to resolve domain". This should kill the endpoint(s).
-        todo: actually check on this.
+        Error is usually "unable to resolve domain". Will be cleaned with endpoint discovery. It's very possible that
+        the qualys scanner is blocked by the hosts. This is one of the reasons why Qualys SSL labs is not reliable.
         """
         scratch(url, data)  # we always want to see what happened.
-        clean_endpoints(url, [])
-        return '%s error' % url
+        return
 
 
 def report_to_console(domain, data):
@@ -314,18 +301,6 @@ def service_provider_scan_via_api(domain):
     return response.json()
 
 
-def extract_ips(url, data):
-    """
-    Store some metadata / IP addresses.
-    :param url:
-    :param data:
-    :return:
-    """
-
-    ips = [ipaddress.ip_address(endpoint['ipAddress']).compressed for endpoint in data['endpoints']]
-    store_url_ips(url, ips)
-
-
 def save_scan(url, data):
     """
     When a scan is ready it can contain both ipv4 and ipv6 endpoints. Sometimes multiple of both.
@@ -334,209 +309,63 @@ def save_scan(url, data):
     :param data: raw JSON data from qualys
     :return:
     """
+
     log.debug("Saving scan for %s", url.url)
-    extract_ips(url, data)
 
-    # manage endpoints
-    # An endpoint of the same IP could already exist and be dead. Keep it dead.
-    # An endpoint can be made dead by not appearing in this list (cleaning)
-    # or when qualys says so.
-
-    # this scanner only does https/443, so there are two possible entrypoints for a domain:
+    # this scanner only does https/443, so there are two possible entry points for a domain:
     stored_ipv6 = False
     stored_ipv4 = False
 
-    # keep kind of result for every endpoint to return at end of task
-    results = []
-
-    for qep in data['endpoints']:
+    # Scan can contain multiple IPv4 and IPv6 endpoints, for example, four of each.
+    for qualys_endpoint in data['endpoints']:
         """
         qep['grade']  # T, if trust issues.
         qep['gradeTrustIgnored']  # A+ to F
         """
-        if stored_ipv6 and ":" in qep['ipAddress']:
+
+        # Prevent storage of more than one result for either IPv4 and IPv6.
+        if stored_ipv6 and ":" in qualys_endpoint['ipAddress']:
             continue
 
-        if stored_ipv4 and ":" not in qep['ipAddress']:
+        if stored_ipv4 and ":" not in qualys_endpoint['ipAddress']:
             continue
 
-        if ":" in qep['ipAddress']:
+        if ":" in qualys_endpoint['ipAddress']:
             stored_ipv6 = True
             ip_version = 6
         else:
             stored_ipv4 = True
             ip_version = 4
+        # End prevent duplicates
 
-        message = qep['statusMessage']
+        message = qualys_endpoint['statusMessage']
 
-        rating = 0
-        rating_no_trust = 0
         if message in [
                 "Unable to connect to the server",
                 "Failed to communicate with the secure server",
                 "Unexpected failure",
                 "Failed to obtain certificate",
-                "IP address is from private address space (RFC 1918)"]:
-            rating = 0
-            rating_no_trust = 0
-            failmap_endpoint = kill_alive_and_get_endpoint('https', url, 443, ip_version, message)
+                "IP address is from private address space (RFC 1918)",
+                "No secure protocols supported",
+                "Certificate not valid for domain name"]:
+            # Note: Certificate not valid for domain name can be ignored with correct API setting.
+            # Nothing to store: something went wrong at the API side and we can't fix that.
+            continue
 
-        if message in [
-                "Ready",
-                "Certificate not valid for domain name",
-                "No secure protocols supported"]:
-            rating = qep['grade']
-            rating_no_trust = qep['gradeTrustIgnored']
-            failmap_endpoint = get_create_or_merge_endpoint('https', url, 443, ip_version)
+        if message not in ["Ready"]:
+            continue
 
-        # possibly update the most recent scan, to save on records in the database
-        previous_scan = TlsQualysScan.objects.filter(endpoint=failmap_endpoint). \
-            order_by('-last_scan_moment').first()
+        rating = qualys_endpoint['grade']
+        rating_no_trust = qualys_endpoint['gradeTrustIgnored']
 
-        # don't store "failures" as complete scans (with 0 scores).
-        # storing failures increases the amount of "waste" data. Since so many things can be not resolvable etc.
-        if rating:
-            if previous_scan:
-                if all([previous_scan.qualys_rating == rating,
-                        previous_scan.qualys_rating_no_trust == rating_no_trust]):
-                    log.info("Scan on %s did not alter the rating, updating scan date only." % failmap_endpoint)
-                    previous_scan.last_scan_moment = datetime.now(pytz.utc)
-                    previous_scan.scan_time = datetime.now(pytz.utc)
-                    previous_scan.scan_date = datetime.now(pytz.utc)
-                    previous_scan.qualys_message = message
-                    previous_scan.save()
-                    results.append('no-change')
+        # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
+        failmap_endpoint = Endpoint.force_get(url, ip_version, 'https', 443)
+        TlsQualysScanManager.add_scan(failmap_endpoint, rating, rating_no_trust, "Ready")
 
-                else:
-                    log.info("Rating changed on %s, we're going to save the scan to retain history" % failmap_endpoint)
-                    create_scan(failmap_endpoint, rating, rating_no_trust, message)
-                    results.append('rating-changed')
-            else:
-                log.info("This endpoint on %s was never scanned, creating a new scan." % failmap_endpoint)
-                create_scan(failmap_endpoint, rating, rating_no_trust, message)
-                results.append('first-scan')
-
-    return results
-
-
-def create_scan(endpoint, rating, rating_no_trust, status_message):
-    tls_scan = TlsQualysScan()
-    tls_scan.endpoint = endpoint
-    tls_scan.qualys_rating = rating
-    tls_scan.qualys_rating_no_trust = rating_no_trust
-    tls_scan.last_scan_moment = datetime.now(pytz.utc)
-    tls_scan.scan_time = datetime.now(pytz.utc)
-    tls_scan.scan_date = datetime.now(pytz.utc)
-    tls_scan.rating_determined_on = datetime.now(pytz.utc)
-    tls_scan.qualys_message = status_message
-    tls_scan.save()
-
-
-# todo: this has to be moved to a more generic place
-def get_create_or_merge_endpoint(protocol, url, port, ip_version):
-    endpoints = Endpoint.objects.all().filter(
-        protocol=protocol,
-        url=url,
-        port=port,
-        ip_version=ip_version,
-        is_dead=False).order_by('-discovered_on')
-
-    count = endpoints.count()
-    # 1: update the endpoint with the current information
-    # 0: make new endpoint, representing the current result
-    # >1: merge all these endpoints into one, something or someone made a mistake
-    if count == 1:
-        return endpoints[0]
-
-    if count == 0:
-        log.debug("Creating a new endpoint.")
-
-        failmap_endpoint = Endpoint()
-        try:
-            failmap_endpoint.url = Url.objects.filter(url=url).first()
-        except ObjectDoesNotExist:
-            failmap_endpoint.url = ""
-        failmap_endpoint.domain = url.url  # Filled for legacy reasons.
-        failmap_endpoint.port = port
-        failmap_endpoint.protocol = protocol
-        failmap_endpoint.ip_version = ip_version
-        failmap_endpoint.is_dead = False
-        failmap_endpoint.discovered_on = datetime.now(pytz.utc)
-        failmap_endpoint.save()
-
-        return failmap_endpoint
-
-    if count > 1:
-        log.debug("Multiple similar endpoints detected for %s" % url)
-        log.debug("Merging similar endpoints to a single one.")
-
-        failmap_endpoint = endpoints.first()  # save the first one
-        # and discard the rest
-        for endpoint in endpoints:
-            if endpoint == failmap_endpoint:
-                continue
-
-            # in the future there might be other scans too... be warned
-            TlsQualysScan.objects.all().filter(endpoint=endpoint).update(endpoint=failmap_endpoint)
-            EndpointGenericScan.objects.all().filter(endpoint=endpoint).update(endpoint=failmap_endpoint)
-            endpoint.delete()
-
-        return failmap_endpoint
-
-
-def kill_endpoint(endpoint, message):
-    endpoint.is_dead = True
-    endpoint.is_dead_since = datetime.now(pytz.utc)
-    endpoint.is_dead_reason = message
-    endpoint.save()
-
-
-def kill_alive_and_get_endpoint(protocol, url, port, ip_version, message):
-    log.debug("Handing could not connect to server")
-
-    endpoints = Endpoint.objects.all().filter(
-        url=url,
-        ip_version=ip_version,
-        port=port,
-        protocol=protocol,
-        is_dead=False).order_by('-discovered_on')
-
-    for ep in endpoints:
-        kill_endpoint(ep, message)
-
-    count = endpoints.count()
-    # 1 or >1: save this scan to the latest endpoint that was known to be alive.
-    # 0: Try to place the scan to the last dead endpoint. If there is nothing, create an endpoint.
-
-    if count >= 1:
-        log.debug("Getting the newest endpoint to save scan, which is now dead.")
-        return endpoints.first()
-
-    if count == 0:
-        log.debug("Checking if there is a dead endpoint, given there where none alive.")
-        dead_endpoints = Endpoint.objects.all().filter(
-            url=url,
-            ip_version=ip_version,
-            port=port,
-            protocol=protocol,
-            is_dead=True).order_by('-discovered_on')
-
-        if dead_endpoints.count():
-            log.debug("Dead endpoint exists, getting latest to save scan")
-            return dead_endpoints.first()
-
-        log.debug("Creating dead endpoint to save scan to.")
-        failmap_endpoint = Endpoint()
-        failmap_endpoint.url = url
-        failmap_endpoint.port = port
-        failmap_endpoint.protocol = protocol
-        failmap_endpoint.ip_version = ip_version
-        failmap_endpoint.is_dead = True
-        failmap_endpoint.is_dead_reason = message
-        failmap_endpoint.is_dead_since = datetime.now(pytz.utc)
-        failmap_endpoint.discovered_on = datetime.now(pytz.utc)
-        failmap_endpoint.save()
-        return failmap_endpoint
+    # Store IP address of the scan as metadata
+    ips = [ipaddress.ip_address(endpoint['ipAddress']).compressed for endpoint in data['endpoints']]
+    store_url_ips(url, ips)
+    return
 
 
 @app.task(queue='storage')
@@ -546,76 +375,3 @@ def scratch(domain, data):
     scratchpad.domain = domain
     scratchpad.data = json.dumps(data)
     scratchpad.save()
-
-
-# "smart" rate limiting
-def endpoints_alive_in_past_24_hours(url):
-    x = TlsQualysScan.objects.filter(endpoint__url=url,
-                                     endpoint__port=443,
-                                     endpoint__protocol__in=["https"],
-                                     scan_date__gt=date().today() - timedelta(1)).exists()
-    if x:
-        log.debug("Scanned in past 24 hours: yes: %s", url.url)
-    else:
-        log.debug("Scanned in past 24 hours: no : %s", url.url)
-    return x
-
-
-def clean_endpoints(url, endpoints):
-    """
-    Kill all endpoints for this url
-
-    :param endpoints: list of endpoints from qualys (from data['endpoints']), can be an empty list if nothing.
-    :param url:
-    :return: None
-    """
-    log.debug("Cleaning endpoints for: %s", url)
-
-    ipv6 = sum([True for endpoint in endpoints if ":" in endpoint['ipAddress']])
-    ipv4 = sum([True for endpoint in endpoints if ":" not in endpoint['ipAddress']])
-
-    # if there are both ipv4 and ipv6 endpoints, then both have been created and nothing has to be set to dead.
-    if ipv6 and not ipv4:
-        endpoints = Endpoint.objects.all().filter(
-            protocol="https",
-            url=url,
-            port=443,
-            ip_version=4,
-            is_dead=False).order_by('-discovered_on')
-        for endpoint in endpoints:
-            kill_endpoint(endpoint, "Only an IPv6 endpoint was returned, so this v4 endpoint didn't exist anymore.")
-
-    if ipv4 and not ipv6:
-        endpoints = Endpoint.objects.all().filter(
-            protocol="https",
-            url=url,
-            port=443,
-            ip_version=6,
-            is_dead=False).order_by('-discovered_on')
-        for endpoint in endpoints:
-            kill_endpoint(endpoint, "Only an IPv4 endpoint was returned, so this v6 endpoint didn't exist anymore.")
-
-    revive_url_if_possible(url)
-
-
-def revive_url_if_possible(url):
-    """
-    A generic method that revives domains that have endpoints that are not dead.
-
-    :return:
-    """
-    log.debug("Genericly attempting to revive url using endpoints from %s", url)
-
-    if not url.is_dead and not url.not_resolvable:
-        return
-
-    # if there is an endpoint that is alive, make sure that the domain is set to alive
-    # this should be a task of more generic endpoint management
-    if TlsQualysScan.objects.filter(endpoint__is_dead=0, endpoint_url=url).exists():
-        url.not_resolvable = False
-        url.not_resolvable_since = datetime.now(pytz.utc)
-        url.not_resolvable_reason = "Endpoints discovered during TLS Qualys Scan"
-        url.is_dead = False
-        url.is_deadsince = datetime.now(pytz.utc)
-        url.is_dead_reason = "Endpoints discovered during TLS Qualys Scan"
-        url.save()

@@ -2,6 +2,9 @@
 from django.db import models
 
 from failmap.organizations.models import Url
+from django.core.exceptions import ObjectDoesNotExist
+from datetime import datetime
+import pytz
 
 
 class Endpoint(models.Model):
@@ -99,6 +102,36 @@ class Endpoint(models.Model):
 
     def is_ipv6(self):
         return self.ip_version == 6
+
+    @staticmethod
+    def force_get(url, ip_version, protocol, port):
+        endpoints = Endpoint.objects.all().filter(
+            protocol=protocol,
+            url=url,
+            port=port,
+            ip_version=ip_version,
+            is_dead=False).order_by('-discovered_on')
+
+        count = endpoints.count()
+        # >0: update the endpoint with the current information, always add to the newest one, even if there are dupes
+        # 0: make new endpoint, representing the current result
+        if count > 0:
+            return endpoints[0]
+
+        if count == 0:
+            ep = Endpoint()
+            try:
+                ep.url = Url.objects.filter(url=url).first()
+            except ObjectDoesNotExist:
+                ep.url = ""
+            ep.port = port
+            ep.protocol = protocol
+            ep.ip_version = ip_version
+            ep.is_dead = False
+            ep.discovered_on = datetime.now(pytz.utc)
+            ep.save()
+
+            return ep
 
     @staticmethod
     # while being extermely slow, it sort of works... It's better than waiting for the whole list to download.
