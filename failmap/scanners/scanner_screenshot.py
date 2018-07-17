@@ -17,13 +17,20 @@ when trying to run a second screenshot, even though shutdown etc have been calle
 - Discarded: selenium + phantomjs
 where extremely slow
 
-- Chosen: headless chrome
+- Superseeded: headless chrome
 Was bleeding edge when we started doing this. Aside that all screenshots are named screenshot.png it worked
 pretty well: easy, and chrome handles dozens of connection problems, TLS issues and whatnot. Therefore this
 was the way to go.
 
-- Runner up: headless firefox
-Too bleeding edge: while you can specify a filename, it had a bug that prevented it to quit / restart.
+- Chosen: headless firefox
+
+Headless Firefox is now the default. It's faster mainly and writes directly to the correct directory. Still can have
+only one of them running at a time. It creates about 16 screenshots a minute. 1250 minutes for 20000 screenshots.
+= 20 hours. So in a day you've got everything.
+
+FireFox requires a user.js file to be in the profile. This user file contains a series of variables that will be used
+when starting firefox. On Mac the profile is at:
+/Users/elger/Library/Application\ Support/Firefox/Profiles/8ygqcbcw.default/
 
 """
 
@@ -35,45 +42,64 @@ import subprocess
 from datetime import datetime, timedelta
 
 import pytz
+from celery import Task, group
 from django.conf import settings
+from django.db.models import Q
 from PIL import Image
 
 from failmap.celery import app
 from failmap.scanners.models import Endpoint, Screenshot
 from failmap.scanners.timeout import timeout
 
-logger = logging.getLogger(__package__)
+from .scanner import allowed_to_scan, endpoint_filters, q_configurations_to_scan
+
+log = logging.getLogger(__package__)
 
 
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task(queue='scanners')
-def screenshot_urls(urls):
-    for url in urls:
-        screenshot_url(url)
+# basically updates screenshots. It will ignore whatever parameter you throw at it as creating screenshots every day
+# is a bit nonsense. It will update every month.
+def compose_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    # We might not be allowed to scan for this at all.
+    if not allowed_to_scan("scanner_screenshot"):
+        return group()  # An empty group fits this callable's signature and does not impede celery.
+
+    one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
+
+    no_screenshots = Endpoint.objects.all().filter(
+        q_configurations_to_scan(level="endpoint"),
+        is_dead=False,
+        url__not_resolvable=False,
+        url__is_dead=False,
+    )
+    # Without screenshot OR with a screenshot over a month ago
+    no_screenshots = no_screenshots.filter((Q(screenshot__isnull=True) | Q(screenshot__created_on__lt=one_month_ago)))
+
+    # It's possible to overwrite the above query also, you can add whatever you want to the normal query.
+    no_screenshots = endpoint_filters(no_screenshots, organizations_filter, urls_filter, endpoints_filter)
+
+    # unique endpoints only
+    endpoints = list(set(no_screenshots))
+
+    log.info("Trying to make %s screenshots." % len(endpoints))
+    task = group(screenshot_endpoint.s(endpoint) for endpoint in endpoints)
+
+    return task
 
 
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task(queue='scanners')
-def screenshot_url(url):
-    """
-    Contains a pointer to the most accurate and fastes screenshot method.
-    Will remove the hassle of chosing the right screenshot tool.
-    :param urls: list of url objects
-    :return:
-    """
-    endpoints = Endpoint.objects.all().filter(url=url)
-    for endpoint in endpoints:
-        try:
-            screenshot_with_chrome(endpoint)
-        except TimeoutError:
-            pass
-
-
+# only one screenshot-task per worker. And only one task per 20 seconds. You want that sequentially.
+# This will enforce a minimum delay of 20 seconds between starting two tasks on the same worker instance.
+# A worker instance is a host that contains multiple workers. So setting it for 20 seconds, you will only have
+# a limited set of tasks running, thus no concurrency on the same worker instance.
+@app.task(queue='storage', rate_limit="5/m")
 def screenshot_endpoint(endpoint):
     try:
-        return screenshot_with_chrome(endpoint)
+        return screenshot_with_firefox(endpoint)
     except TimeoutError:
-        pass
+        log.error("Screenshot timed out.")
 
 
 def screenshots_of_new_urls():
@@ -82,55 +108,108 @@ def screenshots_of_new_urls():
     # never had a screenshot or only has screenshots older than a month
     no_screenshots = Endpoint.objects.all().filter(is_dead=False,
                                                    url__not_resolvable=False,
+                                                   url__is_dead=False,
                                                    screenshot__isnull=True)
     outdated_screenshots = Endpoint.objects.all().filter(
         is_dead=False,
+        url__is_dead=False,
         url__not_resolvable=False,
         screenshot__created_on__lt=one_month_ago)
     endpoints = list(no_screenshots) + list(outdated_screenshots)
 
+    # unique endpoints only
+    endpoints = list(set(endpoints))
+
     if len(endpoints):
-        logger.info("Trying to make %s screenshot!" % len(endpoints))
+        log.info("Trying to make %s screenshots." % len(endpoints))
 
     for endpoint in endpoints:
         screenshot_endpoint(endpoint)
 
 
-# only one copy of firefox can be open at a time
-# Firefox doesn't close and show dialogs in headless: https://bugzilla.mozilla.org/show_bug.cgi?id=1403934
-@timeout(30, 'Took too long to make screenshot')
+# Important note for mac users:
+# When you're looking at the directory (finder window with the output directory open), firefox is not able to store
+# new screenshots. All screenshots will time out without error, and you'll find that running firefox yourself does make
+# a screenshot. The solution is not to have the output directory open. Hours have been wasted on this.
+
+# Firefox needs to be configured before this will work properly. Without configuration Firefox will nag you about
+# starting in safe-mode when it was killed via killall. There is no command parameter (such as safe-mode) that
+# counteracts this behavior. So be sure that firefox is configured properly. You can do so by:
+
+# Add the user.js file with user settings to firefox. This can be a copy of prefs.js in your ultimate-configured firefox
+# The user.js file resided in the profile directory. On the mac this directory is at:
+# /Users/[USERNAME]/Library/Application\ Support/Firefox/Profiles/[RANDOM].default/prefs.js
+
+# The settings that prevent the safe-mode nag dialog are reachable in about:config. And thus set in prefs.js after quit.
+# The settings are:
+# toolkit.startup.max_resumed_crashes;-1
+# browser.sessionstore.max_resumed_crashes;-1
+
+# Note that the first boot of firefox make take a while, all subsequent starts are faster.
+# Firefox will eat about 200 megabytes of ram including FirefoxCP. This task will not work on common workers as they
+# don't have the capacity in megabytes. The storage queue usually does have this capacity.
+
+# todo: ignore security certificates and warnings in firefox, to create better screenshots, or have screenshots showing
+# this warning.
+@timeout(12, 'Took too long to make screenshot')
 def screenshot_with_firefox(endpoint, skip_if_latest=False):
     if not check_installation('firefox'):
         return
 
     now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
     filename = str(re.sub(r'[^a-zA-Z0-9_]', '', str(endpoint.ip_version) + '_' + endpoint.uri_url() + now))
+    filename_latest = str(re.sub(r'[^a-zA-Z0-9_]', '', str(endpoint.ip_version) + '_' + endpoint.uri_url()))
     screenshot_image = settings.TOOLS['firefox']['screenshot_output_dir'] + filename + '.png'
     screenshot_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + filename + '_small.png'
-    latest_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + filename + '_latest.png'
+    latest_thumbnail = settings.TOOLS['firefox']['screenshot_output_dir'] + filename_latest + '_latest.png'
 
-    logger.debug("screenshot image: %s" % screenshot_image)
-    logger.debug("screenshot thumbnail: %s" % screenshot_thumbnail)
-    logger.debug("latest thumbnail: %s" % latest_thumbnail)
+    log.debug("Filename: %s (+ _small and _latest)" % filename)
+    log.debug("screenshot directory: %s" % settings.TOOLS['firefox']['screenshot_output_dir'])
 
     if skip_if_latest and os.path.exists(latest_thumbnail):
-        logger.debug("Skipped making screenshot, by request")
+        log.debug("Skipped making screenshot, by request")
         return
 
-    subprocess.call([settings.TOOLS['firefox']['executable'][platform.system()],
-                     '-screenshot',
-                     screenshot_image,
-                     endpoint.uri_url(),
-                     '--window-size=1920,3000',
-                     ])
+    # have disregard of any previous firefox instanced
+    log.debug("Killing other running instanced of firefox")
+    process = subprocess.Popen(['killall', 'firefox'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = process.communicate()
+    log.debug("Output: %s" % out)
+    log.debug("Error: %s" % err)
 
-    save_screenshot(endpoint, screenshot_image)  # administration
+    log.debug("Storing screenshot administration")
+    save_screenshot(endpoint, screenshot_image)  # prevents the same site from being visited.
+
+    """
+    This is normal output:
+    *** You are running in headless mode.
+    2018-07-17 09:56:39.551 plugin-container[58976:4069143] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c)
+     'Permission denied', port = 0x7643, name = 'com.apple.tsm.portname'
+    See /usr/include/servers/bootstrap_defs.h for the error codes.
+    2018-07-17 09:56:40.499 plugin-container[58977:4069304] *** CFMessagePort: bootstrap_register(): failed 1100 (0x44c)
+     'Permission denied', port = 0x7843, name = 'com.apple.tsm.portname'
+    See /usr/include/servers/bootstrap_defs.h for the error codes.
+    """
+    firefox = settings.TOOLS['firefox']['executable'][platform.system()]
+    # '-screenshot', screenshot_image,
+    command = [firefox, '-headless', '-screenshot', screenshot_image, endpoint.uri_url(),
+               '--window-size=1920,1080']
+    log.debug("Called command: %s" % " ".join(command))
+    subprocess.call(command)
+
+    log.debug("creating thumbnail")
     thumbnail(screenshot_image, screenshot_thumbnail)
 
-    # make copies of these images, so the latest are easily accessible.
+    log.debug("creating latest thumbnail")
+    # make copies of these images, so the latest are easily accessible without a db query.
     subprocess.call(['cp', screenshot_thumbnail, latest_thumbnail])
 
+    # remove the original file to save 500kb per site, which quickly ramps up to several gigabytes
+    log.debug("Removing original screenshot")
+    subprocess.call(['rm', screenshot_image])
 
+
+# This is a legacy function in case Firefox doesn't work properly.
 # s.make_screenshot_threaded(urllist)  # doesn't work well with cd.
 # Affects all threads (and the main thread) since they all belong to the same process.
 # chrome headless has no option to start with a working directory...
@@ -154,7 +233,7 @@ def screenshot_with_chrome(endpoint, skip_if_latest=False):
     if not check_installation('chrome'):
         return
 
-    logger.debug("Chrome Screenshot: %s over IPv%s" % (endpoint.uri_url(), endpoint.ip_version))
+    log.debug("Chrome Screenshot: %s over IPv%s" % (endpoint.uri_url(), endpoint.ip_version))
 
     # using a temporary dir because all screenshots will be named screenshot.png, which might result in various issues.
     now = str(datetime.now(pytz.utc).strftime("_%Y%m%d_%H%M%S_%f"))
@@ -165,13 +244,13 @@ def screenshot_with_chrome(endpoint, skip_if_latest=False):
     screenshot_thumbnail = settings.TOOLS['chrome']['screenshot_output_dir'] + filename + '_small.png'
     latest_thumbnail = settings.TOOLS['chrome']['screenshot_output_dir'] + filename + '_latest.png'
 
-    logger.debug("screenshot image: %s" % screenshot_image)
-    logger.debug("screenshot thumbnail: %s" % screenshot_thumbnail)
-    logger.debug("latest thumbnail: %s" % latest_thumbnail)
+    log.debug("screenshot image: %s" % screenshot_image)
+    log.debug("screenshot thumbnail: %s" % screenshot_thumbnail)
+    log.debug("latest thumbnail: %s" % latest_thumbnail)
 
     # skip if there is already a latest image, just to speed things up.
     if skip_if_latest and os.path.exists(latest_thumbnail):
-        logger.debug("Skipped making screenshot, by request")
+        log.debug("Skipped making screenshot, by request")
         return
 
     # Save the screenshot administration _before_ it was made.
@@ -205,18 +284,20 @@ def check_installation(browser):
     try:
         browser_binary = settings.TOOLS[browser]['executable'][platform.system()]
     except KeyError:
-        logger.error("Not possible to read configuration setting: TOOLS[browser]['executable'][platform].")
-        logger.error("Platform can be Darwin, Unix. Browser can be chrome or firefox.")
+        log.error("Not possible to read configuration setting: TOOLS[browser]['executable'][platform].")
+        log.error("Platform can be Darwin, Unix. Browser can be chrome or firefox.")
         return False
 
     if not browser_binary:
-        logger.error('%s is not available for %s, please update the configuration with the correct binary.'
-                     % (browser, platform.system()))
+        log.error('%s is not available for %s, please update the configuration with the correct binary.'
+                  % (browser, platform.system()))
         return False
 
     if not os.path.exists(browser_binary):
-        logger.error('Supplied browser does not exist in configured path: %s' % browser_binary)
+        log.error('Supplied browser does not exist in configured path: %s' % browser_binary)
         return False
+
+    # todo: are we able to write to disk?
 
     return True
 

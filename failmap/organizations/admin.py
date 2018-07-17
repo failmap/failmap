@@ -22,7 +22,6 @@ from failmap.scanners import (onboard, scanner_dns, scanner_dnssec, scanner_plai
                               scanner_security_headers, scanner_tls_qualys)
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
-from failmap.scanners.scanner_screenshot import screenshot_urls
 
 from ..app.models import Job
 from ..celery import PRIO_HIGH
@@ -470,12 +469,6 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     #         "Onboarding task has been added. Onboarding can take a while depending on server load.")
     # actions.append('onboard')
     # onboard.short_description = "🔮  Onboard"
-
-    def screenshots(self, request, queryset):
-        screenshot_urls([url for url in queryset])
-        self.message_user(request, "Create screenshot: task created")
-    screenshots.short_description = "📷  Screenshot"
-    actions.append('screenshots')
 
     def declare_dead(self, request, queryset):
         for url in queryset:

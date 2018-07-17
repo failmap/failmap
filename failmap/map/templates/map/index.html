@@ -352,7 +352,7 @@
                                        target="_blank"
                                        :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
                                         <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                             class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                             class="lazyload clippedimage" :data-src="'/static/images/screenshots/' + endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
                                             :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
                                         />
                                     </a>
@@ -1250,7 +1250,7 @@
                                    target="_blank"
                                    :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
                                     <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
                                         :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
                                     />
                                 </a>

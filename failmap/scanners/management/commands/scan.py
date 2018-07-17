@@ -1,8 +1,9 @@
 import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
-from failmap.scanners import (scanner_dnssec, scanner_ftp, scanner_http, scanner_plain_http,
-                              scanner_security_headers, scanner_tls_osaft, scanner_tls_qualys)
+from failmap.scanners import (scanner_dnssec, scanner_dummy, scanner_ftp, scanner_http,
+                              scanner_plain_http, scanner_screenshot, scanner_security_headers,
+                              scanner_tls_osaft, scanner_tls_qualys)
 
 log = logging.getLogger(__name__)
 
@@ -25,7 +26,9 @@ class Command(ScannerTaskCommand):
             'endpoints': scanner_http,
             'tls': scanner_tls_osaft,
             'tlsq': scanner_tls_qualys,
-            'ftp': scanner_ftp
+            'ftp': scanner_ftp,
+            'screenshot': scanner_screenshot,
+            'dummpy': scanner_dummy
         }
 
         if options['scanner'][0] not in scanners:

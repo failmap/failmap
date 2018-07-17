@@ -4,6 +4,9 @@ import logging
 from constance import config
 from django.db.models import Q
 
+from failmap.organizations.models import Organization, Url
+from failmap.scanners.models import Endpoint
+
 from ..map.models import Configuration
 
 log = logging.getLogger(__name__)
@@ -36,7 +39,7 @@ def allowed_to_scan(scanner_name: str=""):
         return config.SCAN_DNS_DNSSEC
 
     if scanner_name == 'scanner_screenshot':
-        return config.SCAN_HTTP_SCREENSHOT
+        return config.CREATE_HTTP_SCREENSHOT
 
     if scanner_name == 'scanner_security_headers':
         return (config.SCAN_HTTP_HEADERS_HSTS or
@@ -121,3 +124,19 @@ def q_configurations_to_display(level: str='url'):
                      organization__country=configuration['country']), Q.OR)
 
     return qs
+
+
+def endpoint_filters(query, organizations_filter, urls_filter, endpoints_filter):
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        query = query.filter(url__organization__in=organizations)
+
+    if endpoints_filter:
+        endpoints = Endpoint.objects.filter(**organizations_filter)
+        query = query.filter(pk__in=endpoints)
+
+    if urls_filter:
+        urls = Url.objects.filter(**urls_filter)
+        query = query.filter(url__in=urls)
+
+    return query
