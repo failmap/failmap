@@ -384,7 +384,7 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
     form = MyUrlAdminForm
 
-    list_display = ('url', 'visit', 'current_rating', 'onboarded', 'uses_dns_wildcard',
+    list_display = ('url', 'visit', 'current_rating', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
 
     search_fields = ('url', )

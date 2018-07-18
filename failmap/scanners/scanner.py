@@ -132,11 +132,29 @@ def endpoint_filters(query, organizations_filter, urls_filter, endpoints_filter)
         query = query.filter(url__organization__in=organizations)
 
     if endpoints_filter:
-        endpoints = Endpoint.objects.filter(**organizations_filter)
+        endpoints = Endpoint.objects.filter(**endpoints_filter)
         query = query.filter(pk__in=endpoints)
 
     if urls_filter:
         urls = Url.objects.filter(**urls_filter)
         query = query.filter(url__in=urls)
+
+    return query
+
+
+# todo: the __in filter is not optimal. What is the real approach we want? Probably the original approach, but that
+# didn't work.
+def url_filters(query, organizations_filter, urls_filter, endpoints_filter):
+    if organizations_filter:
+        organizations = Organization.objects.filter(**organizations_filter)
+        query = query.filter(organization__in=organizations)
+
+    if endpoints_filter:
+        endpoints = Endpoint.objects.filter(**endpoints_filter)
+        query = query.filter(endpoint__in=endpoints)  # warning: cartesian product!
+
+    if urls_filter:
+        urls = Url.objects.filter(**urls_filter)
+        query = query.filter(pk__in=urls)
 
     return query

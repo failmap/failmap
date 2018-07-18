@@ -187,7 +187,7 @@ def compose_task(
         log.warning('Applied filters resulted in no urls, thus no tls scan tasks!')
         return group()
 
-    log.info('Creating scan task for %s urls for %s organizations.', len(urls), len(organizations))
+    log.info('Creating osaft scan task for %s urls for %s organizations.', len(urls), len(organizations))
 
     # todo: IPv6 is not well supported in O-Saft... will be updated in the future. Let's see what it does now.
     # todo: find the O-Saft command for IPv6 scans.
@@ -203,7 +203,7 @@ def compose_task(
     # performed, which is pretty sweet. It's 3x Qualys :)
 
     # You can clearly see the bursts in the scans table :)
-    task = group(run_osaft_scan.s(endpoint.url.url, endpoint.port)  # LOW
+    task = group(run_osaft_scan.si(endpoint.url.url, endpoint.port)  # LOW
                  | ammend_unsuported_issues.s(endpoint.url.url, endpoint.port)  # NORMAL
                  | determine_grade.s()  # HIGH
                  | store_grade.s(endpoint) for endpoint in endpoints)  # HIGH
@@ -299,6 +299,7 @@ So wait until it's finished, and don't start too many tasks. Otherwise your syst
 """
 
 
+# todo: **WARNING: 201: Can\'t get IP for host \'raad.zutphen.nl:443\'; host ignored :)
 @app.task(queue="scanners")
 def run_osaft_scan_shared_container(address, port):
     start_osaft_container()

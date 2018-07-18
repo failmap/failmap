@@ -1,6 +1,5 @@
 import logging
 
-from celery import chain, group
 from django.core.management.base import BaseCommand
 
 from failmap.map.rating import (add_organization_rating, create_timeline, rerate_urls,
@@ -74,24 +73,6 @@ def tasking():
     from celery import group, chain
 
     group(chain(group(), group(), group())).apply_async()
-
-
-def run_sequential_groups():
-    # tasks.append(chain(group(explore), callback)) does not wait for the first tasks to finish(!)
-    # a chord does also NOT wait for tasks to finish... wtf
-    # or wait: the task of making the other tasks has finished...
-    from failmap.scanners.tasks import first_part, second_part
-
-    # we want to make sure tasks 4, 5, 6 are running AFTER 1 2 and 3
-    callback = second_part.si()
-    header = first_part.si()
-
-    # tasks = chord(header)(callback)
-    tasks = chain(header, callback)
-
-    task = group(tasks)
-    print(task)
-    tasks.apply_async()
 
 
 def do_a_few_things():

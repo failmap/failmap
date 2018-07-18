@@ -14,8 +14,9 @@ from celery import Task, group
 from django.utils import timezone
 
 from failmap.celery import ParentFailed, app
-from failmap.organizations.models import Organization, Url
+from failmap.organizations.models import Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanner import endpoint_filters, url_filters
 
 from .models import Endpoint
 from .scanner import allowed_to_scan, q_configurations_to_scan
@@ -56,23 +57,10 @@ def compose_task(
     if not allowed_to_scan("scanner_ftp"):
         return group()
 
-    endpoints = []
-
-    # only FTP endpoints
-    endpoints_filter = dict(endpoints_filter, **{"protocol": "ftp"})
-
-    # gather urls from organizations
-    if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
-        endpoints += Endpoint.objects.filter(q_configurations_to_scan(level='endpoint'),
-                                             url__organization__in=organizations, **endpoints_filter)
-    elif endpoints_filter:
-        endpoints += Endpoint.objects.filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
-    else:
-        # now urls directly
-        urls = Url.objects.filter(**urls_filter)
-        endpoints += Endpoint.objects.filter(q_configurations_to_scan(level='endpoint'),
-                                             url__in=urls, **endpoints_filter)
+    default_filter = {"protocol": "ftp"}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
 
     if not endpoints:
         log.warning('Applied filters resulted in no endpoints, thus no tasks!')
@@ -81,15 +69,31 @@ def compose_task(
     # only unique endpoints
     endpoints = list(set(endpoints))
 
-    log.info('Creating scan task for %s endpoints.', len(endpoints))
+    log.info('Creating ftp scan task for %s endpoints.', len(endpoints))
 
     # The number of top level urls is negligible, so randomization is not needed.
 
-    # create tasks for scanning all selected endpoints as a single managable group
-    # Sending entire objects is possible. How signatures (.s and .si) work is documented:
-    # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan.s(endpoint.url.url, endpoint.port) | store.s(endpoint) for endpoint in endpoints
+        scan.si(endpoint.url.url, endpoint.port) | store.s(endpoint) for endpoint in endpoints
+    )
+
+    return task
+
+
+def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
+                          endpoints_filter: dict = dict()) -> Task:
+    # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
+    ports = [21]
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+
+    log.info('Creating ftp discover task for %s urls.', len(urls))
+
+    task = group(
+        # first iterate through ports, so there is more time between different connection attempts. Which reduces load
+        # for the tested server. Also, the first port has the most hits :)
+        discover.si(url.url, port) | store_when_new_or_kill_if_gone.s(
+            url, port, 'ftp', 4) for port in ports for url in urls
     )
 
     return task
@@ -272,21 +276,6 @@ def scan(self, address: str, port: int):
         ftp.close()
 
     return results
-
-
-def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict()) -> Task:
-    ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
-
-    task = group(
-        # first iterate through ports, so there is more time between different connection attempts. Which reduces load
-        # for the tested server. Also, the first port has the most hits :)
-        discover.s(url.url, port) | store_when_new_or_kill_if_gone.s(
-            url, port, 'ftp', 4) for port in ports for url in urls
-    )
-
-    return task
 
 
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.

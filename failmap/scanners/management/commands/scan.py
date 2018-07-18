@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
-from failmap.scanners import (scanner_dnssec, scanner_dummy, scanner_ftp, scanner_http,
+from failmap.scanners import (onboard, scanner_dnssec, scanner_dummy, scanner_ftp, scanner_http,
                               scanner_plain_http, scanner_screenshot, scanner_security_headers,
                               scanner_tls_osaft, scanner_tls_qualys)
 
@@ -28,6 +28,7 @@ class Command(ScannerTaskCommand):
             'tlsq': scanner_tls_qualys,
             'ftp': scanner_ftp,
             'screenshot': scanner_screenshot,
+            'onboard': onboard,
             'dummpy': scanner_dummy
         }
 

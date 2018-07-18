@@ -45,7 +45,7 @@ def compose_task(
         log.info('Creating scan task %s urls for %s organizations.', len(urls), len(organizations))
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter)
-        log.info('Creating scan task %s urls.', len(urls))
+        log.info('Creating scan plain http task %s urls.', len(urls))
 
     if endpoints_filter:
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')

@@ -65,7 +65,7 @@ def compose_task(
         log.warning('Applied filters resulted in no endpoints, thus no tasks!')
         return group()
 
-    log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
+    log.info('Creating dummy scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
     # todo: this is a poor mans solution for queue randomization, will be implemented in the queue manager

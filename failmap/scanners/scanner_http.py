@@ -77,10 +77,10 @@ def compose_task(
         organizations = Organization.objects.filter(**organizations_filter)
         # apply filter to urls in organizations (or if no filter, all urls)
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
-        logger.info('Creating scan task for %s urls for %s organizations.', len(urls), len(organizations))
+        logger.info('Creating http scan task for %s urls for %s organizations.', len(urls), len(organizations))
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
-        logger.info('Creating scan task for %s urls.', len(urls))
+        logger.info('Creating http scan task for %s urls.', len(urls))
 
     if endpoints_filter:
         logger.warning("Endpoint filters are not implemented: filter has no effect.")

@@ -99,11 +99,11 @@ def compose_task(
         log.warning('Applied filters resulted in no urls, thus no tasks!')
         return group()
 
-    log.info('Creating scan task for %s urls for %s organizations.',
+    log.info('Creating qualys scan task for %s urls for %s organizations.',
              len(urls), len(organizations))
 
     # create tasks for scanning all selected urls as a single managable group
-    task = group(qualys_scan.s(url) | process_qualys_result.s(url) for url in urls)
+    task = group(qualys_scan.si(url) | process_qualys_result.s(url) for url in urls)
 
     return task
 

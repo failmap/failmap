@@ -219,6 +219,15 @@ class Url(models.Model):
         help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
                   "something on this host.")
 
+    onboarding_stage = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text="Because of complexity of onboarding, not working with Celery properly, onboarding is done in "
+                  "multiple steps. The last completed step is saved in this value. Empty: nothing. endpoints: endpoints"
+                  " have been found. completed: onboarding is done, also onboarded flag is set."
+    )
+
     onboarded = models.BooleanField(
         default=False,
         help_text="After adding a url, there is an onboarding process that runs a set of tests."

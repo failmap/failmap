@@ -85,7 +85,7 @@ def compose_task(
     # only unique urls
     urls = list(set(urls))
 
-    log.info('Creating scan task for %s urls.', len(urls))
+    log.info('Creating DNSSEC scan task for %s urls.', len(urls))
 
     # The number of top level urls is negligible, so randomization is not needed.
 

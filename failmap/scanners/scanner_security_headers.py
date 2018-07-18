@@ -62,7 +62,7 @@ def compose_task(
                     'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
         return group()
 
-    log.info('Creating scan task for %s endpoints for %s urls for %s organizations.',
+    log.info('Creating security headers scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
     # create tasks for scanning all selected endpoints as a single managable group

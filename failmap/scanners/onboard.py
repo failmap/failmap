@@ -4,118 +4,79 @@ from celery import group
 from django.utils import timezone
 
 from failmap.organizations.models import Url
-from failmap.scanners.tasks import (DEFAULT_CRAWLERS, DEFAULT_ONBOARDERS, DEFAULT_SCANNERS,
-                                    TLD_DEFAULT_CRAWLERS, TLD_DEFAULT_ONBOARDERS,
-                                    TLD_DEFAULT_SCANNERS)
+from failmap.scanners.scanner import url_filters
+from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 
 from ..celery import Task, app
 
 log = logging.getLogger(__package__)
 
 
+@app.task(queue='storage')
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
-    """Compose taskset to onboard specified urls."""
+    """Multi-stage onboarding."""
 
-    urls = Url.objects.filter(**urls_filter)
+    """
+    This onboarder has multiple stages. The main reason for this is that the original plan failed: endpoints where
+    discovered but the next task hanged. This is extensively documented here:
+    https://github.com/celery/celery/issues/4681
 
-    if not urls:
-        raise Exception('Applied filters resulted in no tasks!')
+    Therefore this onboarding task creates different sets of tasks per stage per url.
 
-    log.info('Creating onboard task for %s urls.', len(urls))
+    Stage:
+    V ""
+    V endpoint_discovery    endpoints are discovered on the url
+    V endpoint_finished     done, ready for next stage
+    V scans_running         running a series of scans on the endpoints
+    V scans_finished        done, ready for next stage
+    V crawl_started         trying to find more endpoints (via DNS)
+    V crawl_finished        IMPLICIT! Last step will not be saved.
+    - onboarded             onboarding completed
+
+    Todo: date the last step was set. So we can find processes that failed and retry.
+    Todo: run this every minute.
+    """
+
+    urls = Url.objects.all().filter(onboarded=False)
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+
+    # todo: filter out the scans that failed / took too long and try again.
+
+    log.info("Found %s urls to create tasks for." % len(urls))
 
     tasks = []
     for url in urls:
-        crawl = compose_crawl_tasks(url)
-        explore = compose_explore_tasks(url)
-        # We made a mistake in the chain: the scanner tasks can only run IF there are endpoints.
-        # and the chain with scan_tasks does not wait until the explore tasks are finished.
-        # The explore tasks discover endoints (and save them).
-        # Without explore tasks there are no endpoints, so all scanners fail.
-        # But moving to a chord seems to be hard/impossible. I'm getting a
-        # self Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
-        # Error in formatting: TypeError: 'AsyncResult' object is not subscriptable
-        # https://stackoverflow.com/questions/47457546/
+        log.info("Url %s is at onboarding_stage: %s", url, url.onboarding_stage)
 
-        task_str = str(explore)
-        task_str = task_str.replace("), group(", "), \n group(")
-        task_str = task_str.replace("|", "\n|")
-        print(task_str)
+        # you will see this happen per worker-size (so for example per 20 things)
+        if not url.onboarding_stage:  # While developing: or url.onboarding_stage == "endpoint_discovery":
+            log.info("Exploring on: %s", url)
+            tasks.append(update_stage.si(url, "endpoint_discovery")
+                         | explore_tasks(url)
+                         | update_stage.si(url, "endpoint_finished"))
 
-        if crawl:
-            tasks.append(explore | crawl | finish_onboarding.si(url) | scan_tasks.si(url))
+        elif url.onboarding_stage == "endpoint_finished":
+            log.info("Scanning on: %s", url)
+            tasks.append(update_stage.si(url, "scans_running")
+                         | scan_tasks(url)
+                         | update_stage.si(url, "scans_finished"))
+
+        elif url.onboarding_stage == "crawl_started":
+            log.info("Crawling on: %s", url)
+            tasks.append(update_stage.si(url, "endpoint_finished")
+                         | crawl_tasks(url)
+                         | finish_onboarding.si(url))
         else:
-            # scan task may have no ednpoints, we're not going to give exceptions anymore...
-            tasks.append(explore | (dummy_task.si() | finish_onboarding_mutable.s(url) | scan_tasks.si(url)))
+            # Do nothing when wheels are set in motion or an unknown state is encountered.
+            pass
 
+    log.info("Created %s tasks to be performed." % len(tasks))
     task = group(tasks)
-
-    # Trying to make the output gibberish more readable.
-    task_str = str(tasks)
-    task_str = task_str.replace("), group(", "), \n group(")
-    task_str = task_str.replace("|", "\n|")
-    print(task_str)
-
-    # keeping a raw version
-    # print("Tasks:")
-    # print(task)
-
     return task
-
-
-@app.task(queue='storage')
-def dummy_task():
-    log.error("Nothing is going wrong here...")
-
-
-def compose_explore_tasks(url):
-    """Return tasks to explore urls and endpoints for a given url."""
-
-    onboarders = DEFAULT_ONBOARDERS
-    if url.is_top_level():
-        onboarders += TLD_DEFAULT_ONBOARDERS
-
-    tasks = []
-    for onboarder in onboarders:
-        tasks.append(onboarder(urls_filter={"url": url}))
-
-    return group(tasks)
-
-
-def compose_crawl_tasks(url):
-
-    crawlers = DEFAULT_CRAWLERS
-    if url.is_top_level():
-        crawlers += TLD_DEFAULT_CRAWLERS
-
-    tasks = []
-    for crawler in crawlers:
-        tasks.append(crawler(urls_filter={"url": url}))
-
-    return group(tasks)
-
-
-@app.task(queue='storage')
-def scan_tasks(url):
-    """Put tasks on the queue to do an initial scan for all relevant scanners.
-
-    This tasks is to be called after onboarding has finished and as then url endpoints are available.
-    """
-
-    scanners = DEFAULT_SCANNERS
-    if url.is_top_level():
-        scanners += TLD_DEFAULT_SCANNERS
-
-    tasks = []
-    for scanner in scanners:
-        tasks.append(scanner(urls_filter={"url": url}))
-
-    log.info(tasks)
-
-    group(tasks).apply_async()
 
 
 @app.task(queue='storage')
@@ -123,16 +84,14 @@ def finish_onboarding(url):
     log.info("Finishing onboarding of %s", url)
     url.onboarded = True
     url.onboarded_on = timezone.now()
-    url.save(update_fields=['onboarded_on', 'onboarded'])
-
+    url.onboarding_stage = "onboarded"
+    url.save(update_fields=['onboarded_on', 'onboarded', 'onboarding_stage'])
     return True
 
 
 @app.task(queue='storage')
-def finish_onboarding_mutable(result, url):
-    log.info("Finishing onboarding of %s", url)
-    url.onboarded = True
-    url.onboarded_on = timezone.now()
-    url.save(update_fields=['onboarded_on', 'onboarded'])
-
+def update_stage(url, stage=""):
+    log.info("Updating onboarding_stage of %s to %s", url, stage)
+    url.onboarding_stage = stage
+    url.save(update_fields=['onboarding_stage'])
     return True
