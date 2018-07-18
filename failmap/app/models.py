@@ -80,7 +80,7 @@ class Job(models.Model):
 def create_job(task_module: str):
     """Helper to allow Jobs to be created using Celery Beat.
 
-    task_module: module from which to call `compose_task` which results in the task to be executed
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)

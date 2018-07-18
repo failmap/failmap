@@ -220,7 +220,7 @@ class ActionMixin:
     actions.append(dns_known_subdomains)
 
     def disover_endpoints(self, *args, **kwargs):
-        return self.generic_action(scanner_http.compose_task, 'Discover endpoints', *args, **kwargs)
+        return self.generic_action(scanner_http.compose_discover_task, 'Discover endpoints', *args, **kwargs)
     disover_endpoints.short_description = "🗺  Discover endpoints"
     actions.append(disover_endpoints)
 
@@ -316,10 +316,14 @@ class MyUrlAdminForm(forms.ModelForm):
         if not organizations:
             return
 
+        logger.error(self.cleaned_data)
         # make sure the URL is not added if it is already alive and matched to the selected organization.
+        # except yourself of course...
+        # todo: expemt yourself, .exclude(pk=self.cleaned_data.get("pk"))
         for organization in organizations:
             if Url.objects.all().filter(
-                    url=self.cleaned_data.get("url"), is_dead=False, organization=organization).count():
+                    url=self.cleaned_data.get("url"), is_dead=False,
+                    organization=organization).count() > 1:
 
                 # format_html = XSS :)
                 raise ValidationError(format_html(_(
@@ -336,7 +340,7 @@ class MyUrlAdminForm(forms.ModelForm):
         # This url already exists and the selected organization(s) have been added to it.
 
         if Url.objects.all().filter(
-                url=self.data.get("url"), is_dead=False).count():
+                url=self.data.get("url"), is_dead=False).count() > 1:
 
             # format_html = XSS :)
             raise ValidationError(format_html(_(
@@ -396,7 +400,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization', 'created_on', 'onboarded')
+            'fields': ('url', 'organization', 'created_on', 'onboarded', 'onboarding_stage')
         }),
         ('DNS', {
             'fields': ('uses_dns_wildcard', ),

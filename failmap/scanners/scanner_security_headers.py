@@ -30,10 +30,6 @@ def compose_task(
     endpoints_filter: dict = dict(),
 ) -> Task:
     """Compose taskset to scan specified endpoints.
-
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
-
     """
 
     if not allowed_to_scan("scanner_security_headers"):
@@ -67,10 +63,8 @@ def compose_task(
 
     # create tasks for scanning all selected endpoints as a single managable group
     task = group(
-        get_headers.signature(
-            (endpoint.uri_url(),),
-            options={'queue': IP_VERSION_QUEUE[endpoint.ip_version]}
-        ) | analyze_headers.s(endpoint) for endpoint in endpoints
+        get_headers.signature((endpoint.uri_url()), queue=IP_VERSION_QUEUE[endpoint.ip_version], immutable=True)
+        | analyze_headers.s(endpoint) for endpoint in endpoints
     )
 
     return task

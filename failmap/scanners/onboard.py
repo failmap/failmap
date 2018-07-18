@@ -55,11 +55,12 @@ def compose_task(
         # you will see this happen per worker-size (so for example per 20 things)
         if not url.onboarding_stage:  # While developing: or url.onboarding_stage == "endpoint_discovery":
             log.info("Exploring on: %s", url)
+            # Of course this will still fail as the bug aforementioned was not fixed. have to rewrite that.
             tasks.append(update_stage.si(url, "endpoint_discovery")
                          | explore_tasks(url)
                          | update_stage.si(url, "endpoint_finished"))
 
-        elif url.onboarding_stage == "endpoint_finished":
+        elif url.onboarding_stage in ["endpoint_finished", "scans_running"]:
             log.info("Scanning on: %s", url)
             tasks.append(update_stage.si(url, "scans_running")
                          | scan_tasks(url)

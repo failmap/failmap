@@ -146,13 +146,8 @@ def compose_task(
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
 
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
-
-    """
-
+    # todo: permission check
     if not allowed_to_scan("scanner_tls_qualys"):
         return group()
 

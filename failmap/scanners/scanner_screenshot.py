@@ -85,7 +85,7 @@ def compose_task(
     endpoints = list(set(no_screenshots))
 
     log.info("Trying to make %s screenshots." % len(endpoints))
-    task = group(screenshot_endpoint.s(endpoint) for endpoint in endpoints)
+    task = group(screenshot_endpoint.si(endpoint) for endpoint in endpoints)
 
     return task
 

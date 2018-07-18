@@ -34,8 +34,9 @@ def compose_task(
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
+    *This is an implementation of `compose_discover_task`.
+    For more documentation about this concept, arguments and concrete
+    examples of usage refer to `compose_discover_task` in `types.py`.*
 
     """
 
@@ -77,8 +78,9 @@ def compose_task(
     # create tasks for scanning all selected endpoints as a single managable group
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
+    # Make the first task imutable, so it doesn't get any arguments of other scanners by accident
     task = group(
-        scan_dummy.s(endpoint.uri_url()) | store_dummy.s(endpoint) for endpoint in endpoints
+        scan_dummy.si(endpoint.uri_url()) | store_dummy.s(endpoint) for endpoint in endpoints
     )
 
     return task

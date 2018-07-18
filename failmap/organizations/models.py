@@ -220,7 +220,7 @@ class Url(models.Model):
                   "something on this host.")
 
     onboarding_stage = models.CharField(
-        max_length=10,
+        max_length=150,
         blank=True,
         null=True,
         help_text="Because of complexity of onboarding, not working with Celery properly, onboarding is done in "
@@ -259,7 +259,7 @@ class Url(models.Model):
         if self.is_dead and (not self.is_dead_since or not self.is_dead_reason):
             raise ValidationError(_('When telling this is dead, also enter the date and reason for it.'))
 
-        if Url.objects.all().filter(url=self.url, is_dead=False, not_resolvable=False).exists():
+        if Url.objects.all().filter(url=self.url, is_dead=False, not_resolvable=False).exclude(pk=self.pk).exists():
             raise ValidationError(_('Url already exists, existing url is alive and resolvable.'))
 
         # urls must be lowercase

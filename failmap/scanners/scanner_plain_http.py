@@ -12,7 +12,7 @@ from celery import Task, group
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner_http import (redirects_to_safety, resolve_and_scan_tasks,
+from failmap.scanners.scanner_http import (can_connect, connect_result, redirects_to_safety,
                                            resolves_on_v4, resolves_on_v6)
 
 from ..celery import app
@@ -27,12 +27,6 @@ def compose_task(
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
-
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
-
-    """
 
     # We might not be allowed to scan for this at all.
     if not allowed_to_scan("scanner_plain_http"):
@@ -55,12 +49,12 @@ def compose_task(
         return group()
 
     # create tasks for scanning all selected endpoints as a single managable group
-    task = group(scan_url.s(url) for url in urls)
+    task = group(scan_url.si(url) for url in urls)
 
     return task
 
 
-# This needs to be refactored to move the Endpoint iteration to `compose_task`
+# This needs to be refactored to move the Endpoint iteration to `compose_discover_task`
 # and split this task up in a scan and store task so scans can be performed more
 # distributed. For examples see scan_dummy.py
 
@@ -142,7 +136,8 @@ def scan_url(url: Url):
             log.debug("This url seems to have no https at all: %s" % url)
             log.debug("Checking if they exist, to be sure there is nothing.")
 
-            tasks.append(resolve_and_scan_tasks('https', url, 443)
+            tasks.append(can_connect.si(protocol="https", url=url, port=443, ip_version=4)
+                         | connect_result.s(protocol="https", url=url, port=443, ip_version=4)
                          | handle_verify_is_secure.si(http_v4_endpoint, url))
 
     else:
@@ -157,8 +152,9 @@ def scan_url(url: Url):
             log.debug("Does not resolve at all, so has no insecure endpoints. %s" % url)
             scan_manager.add_scan("plain_https", http_v6_endpoint, "0", not_resolvable_at_all)
         else:
-            tasks.append(
-                (resolve_and_scan_tasks('https', url, 443) | handle_verify_is_secure.si(http_v6_endpoint, url)))
+            tasks.append(can_connect.si(protocol="https", url=url, port=443, ip_version=6)
+                         | connect_result.s(protocol="https", url=url, port=443, ip_version=6)
+                         | handle_verify_is_secure.si(http_v6_endpoint, url))
 
     else:
         log.debug("We don't have to do anything for v6 on %s" % url)

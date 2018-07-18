@@ -34,7 +34,7 @@ import pytz
 import requests
 # suppress InsecureRequestWarning, we do those request on purpose.
 import urllib3
-from celery import Task, chain, group
+from celery import Task, group
 from django.conf import settings
 from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
 from requests.exceptions import ConnectionError
@@ -58,15 +58,16 @@ STANDARD_HTTPS_PORTS = [443, 8443]
 
 
 @app.task(queue="storage")
-def compose_task(
+def compose_discover_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
-    *This is an implementation of `compose_task`. For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_task` in `types.py`.*
+    *This is an implementation of `compose_discover_task`.
+    For more documentation about this concept, arguments and concrete
+    examples of usage refer to `compose_discover_task` in `types.py`.*
 
     """
 
@@ -90,36 +91,70 @@ def compose_task(
     # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
     tasks = []
+    ip_versions = [4, 6]
 
     # even with a randomized url order, still try to add as much time as possible between contacting
     # the same url, to not disrupt running services.
 
     # We found we're getting useless endpoints that contain little to no data when
     # opening non-tls port 443 and tls port 80. We're not doing that anymore.
-    for port in STANDARD_HTTP_PORTS:
-        for url in urls:
-            tasks.append(resolve_and_scan_tasks(protocol="http", url=url, port=port))
+    for ip_version in ip_versions:
+        for port in STANDARD_HTTP_PORTS:
+            for url in urls:
+                tasks.append(get_ips.si(url.url) | url_lives.s(url))  # See if thing is alive, once.
+                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version)
+                             | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
 
-    for port in STANDARD_HTTPS_PORTS:
-        for url in urls:
-            tasks.append(resolve_and_scan_tasks(protocol="https", url=url, port=port))
+        for port in STANDARD_HTTPS_PORTS:
+            for url in urls:
+                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version)
+                             | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
 
     return group(tasks)
 
 
-def validate_port(port: int):
-    if port > 65535 or port < 0:
-        logger.error("Invalid port number, must be between 0 and 65535. %s" % port)
-        raise ValueError("Invalid port number, must be between 0 and 65535. %s" % port)
+@app.task(queue="storage")
+def url_lives(ips, url):
+    """
+    This results in problems in celery, so we're doing it the old sequential way.
+    And given this is all storage stuff anyway...
+    chain(
+        get_ips.si(url.url),
+        group(store_url_ips_task.s(url),
+              kill_url_task.s(url),
+              revive_url_task.s(url),
+              ),
+    ),
+    """
+
+    store_url_ips(url, ips)
+
+    if not any(ips) and not url.not_resolvable:
+        url.not_resolvable = True
+        url.not_resolvable_since = datetime.now(pytz.utc)
+        url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
+        url.save()
+
+        Endpoint.objects.all().filter(url=url).update(is_dead=True,
+                                                      is_dead_since=datetime.now(pytz.utc),
+                                                      is_dead_reason="Url was killed")
+
+        UrlIp.objects.all().filter(url=url).update(
+            is_unused=True,
+            is_unused_since=datetime.now(pytz.utc),
+            is_unused_reason="Url was killed"
+        )
+    else:
+        # revive url
+        if url.not_resolvable:
+            url.not_resolvable = False
+            url.not_resolvable_since = datetime.now(pytz.utc)
+            url.not_resolvable_reason = "Made resolvable again since ip address was found."
+            url.save()
 
 
-def validate_protocol(protocol: str):
-    if protocol not in ["http", "https"]:
-        logger.error("Invalid protocol %s, options are: http, https" % protocol)
-        raise ValueError("Invalid protocol %s, options are: http, https" % protocol)
-
-
-def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, organizations: List[Organization]=None):
+def dev_verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
+                         organizations: List[Organization]=None):
     """
     Checks all http(s) endpoints if they still exist. This is to monitor changes in the existing
     dataset, without contacting an organization too often. It can be checked every few days,
@@ -157,14 +192,9 @@ def verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None, o
     endpoints = list(endpoints)
     random.shuffle(endpoints)
 
-    for endpoint in endpoints:
-        scan_url(endpoint.protocol, endpoint.url, endpoint.port)
 
-
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task
-def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
-                       organizations: List[Organization]=None):
+def dev_discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
+                           organizations: List[Organization]=None):
     """
     Contact each URL (or each url of organizations) to determine if there are endpoints.
     Do so both over HTTP, HTTPS on various ports and with both IPv4 and IPv6.
@@ -190,133 +220,6 @@ def discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
 
     if organizations:
         urls = urls.filter(organization__in=organizations)
-
-    if protocol:
-        protocols = [protocol]
-    else:
-        protocols = ["https"]
-
-    if port:
-        ports = [port]
-    else:
-        # Yes, HTTP sites on port 443 exist, we've seen many of them. Not just warnings(!).
-        # Don't underestimate the flexibility of the internet.
-        ports = STANDARD_HTTPS_PORTS
-
-    # make sure we're dealing with a list for the coming random function
-    urls = list(urls)
-    # randomize the endpoints to better spread load over urls.
-    random.shuffle(urls)
-
-    scan_urls(protocols, urls, ports)
-
-
-def scan_urls_on_standard_ports(urls: List[Url]):
-    scan_urls(["http"], urls, STANDARD_HTTP_PORTS)
-    scan_urls(["https"], urls, STANDARD_HTTPS_PORTS)
-
-
-@app.task
-def discover_endpoints_on_standard_ports(urls: List[Url]):
-    scan_urls(["http"], urls, STANDARD_HTTP_PORTS)
-    scan_urls(["https"], urls, STANDARD_HTTPS_PORTS)
-
-
-def scan_urls(protocols: List[str], urls: List[Url], ports: List[int]):
-
-    if not has_internet_connection():
-        logger.error("No internet connection! Try again later!")
-        return
-
-    for port in ports:
-        validate_port(port)
-
-    for protocol in protocols:
-        validate_protocol(protocol)
-
-    # put some distance between the times an url is contacted, so it is less pressuring
-    # therefore, we do this per port and protocol instead of per url.
-    for port in ports:
-        for protocol in protocols:
-            for url in urls:
-                scan_url(protocol, url, port)
-
-
-# TODO: make queue explicit, split functionality in storage and scanner
-def scan_url(protocol: str, url: Url, port: int):
-    resolve_task = resolve_and_scan.s(protocol, url, port)
-    resolve_task.apply_async()
-
-
-def scan_url_direct(protocol: str, url: Url, port: int):
-    resolve_and_scan(protocol, url, port)
-
-
-# todo: apply rate limiting
-# also rate limited for the same reason as can_connect is rate limited.
-# would this be faster the ip discovery and actual scan grow to far apart.
-# also it would mean an intense series of questions to the dns server.
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task(ignore_result=True, queue="scanners")
-def resolve_and_scan(protocol: str, url: Url, port: int):
-    ips = get_ips(url.url)
-
-    # this can take max 20 seconds, no use to wait
-    store_task = store_url_ips.s(url, ips)  # administrative, does reverse dns query
-    store_task.apply_async()
-
-    # todo: this should be re-checked a few times before it's really killed. Retry?
-    if not any(ips):
-        kill_url_task = kill_url.s(url)  # administrative
-        kill_url_task.apply_async()
-        return
-
-    # this is not a stacking solution. Weird. Why not?
-    url_revive_task = revive_url.s(url)
-    url_revive_task.apply_async()
-
-    (ipv4, ipv6) = ips
-    if ipv4:
-        # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv4).set(
-            queue='scanners.endpoint_discovery.ipv4')
-        result_task = connect_result.s(protocol, url, port, 4)  # administrative task
-        task = (connect_task | result_task)
-        task.apply_async()
-
-    if ipv6:
-        connect_task = can_connect.s(protocol=protocol, url=url, port=port, ip=ipv6).set(
-            queue='scanners.endpoint_discovery.ipv6')
-        result_task = connect_result.s(protocol, url, port, 6)  # administrative task
-        task = (connect_task | result_task)
-        task.apply_async()
-
-
-def resolve_and_scan_tasks(protocol: str, url: Url, port: int):
-
-    # todo: give ips als argument in kill an revive.
-    task = group(
-        chain(
-            get_ips.si(url.url),
-            group(store_url_ips_task.s(url),
-                  kill_url_task.s(url),
-                  revive_url_task.s(url),
-                  ),
-        ),
-        (get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 4) | connect_result.s(protocol, url, port, 4)),
-        (get_ips.si(url.url) | can_connect_ips.s(protocol, url, port, 6) | connect_result.s(protocol, url, port, 6)),
-    )
-    return task
-
-
-@app.task(queue="scanners")
-def can_connect_ips(ips, protocol, url, port, ip_version):
-    ipv4, ipv6 = ips
-    if ip_version == 4:
-        return can_connect(protocol, url, port, ipv4)
-
-    if ip_version == 6:
-        return can_connect(protocol, url, port, ipv6)
 
 
 @app.task(queue="scanners")
@@ -377,7 +280,7 @@ def get_ips(url: str):
     rate_limit='120/s',
     # queue needs to be set based on ip, either scanners.endpoint_discovery.ipv4 or scanners.endpoint_discovery.ipv4
 )
-def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
+def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -404,20 +307,27 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
     something like that is spoken to them? Do we need a "special" TLS implementation on our server?
 
     Todo: futher look if DIG can be of value to us. Until now it seems not so.
-
-    Todo: remove IP from endpoints. (change for version 1.1)
-
     """
 
-    # it might be that this is called without an IP, for example via celery code that doesn't know if an ipv4 or ipv6
-    # result actually returned something. In such cases, no IP, means no endpoint.
-    if not ip:
-        return False
+    ipv4, ipv6 = get_ips(url.url)
+    uri = ""
+    ip = ""
+    if ip_version == 6:
+        if not ipv6:
+            return False
+        else:
+            uri = "%s://[%s]:%s" % (protocol, ipv6, port)
+            ip = ipv6
 
-    if ":" in ip:
-        uri = "%s://[%s]:%s" % (protocol, ip, port)
-    else:
-        uri = "%s://%s:%s" % (protocol, ip, port)
+    if ip_version == 4:
+        if not ipv4:
+            return False
+        else:
+            uri = "%s://[%s]:%s" % (protocol, ipv4, port)
+            ip = ipv4
+
+    if not uri or not ip:
+        return False
 
     logger.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
 
@@ -493,17 +403,11 @@ def can_connect(protocol: str, url: Url, port: int, ip: str) -> bool:
 @app.task(queue='storage')
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
     logger.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
-    # log.info("%s %s" % (url, url))
-    # log.info("%s %s" % (url, port))
-    # log.info("%s %s" % (url, protocol))
-    # log.info("%s %s" % (url, ip_version))
 
     if result:
         save_endpoint(protocol, url, port, ip_version)
     else:
         kill_endpoint(protocol, url, port, ip_version)
-
-    # always give a positive result, so the chain continues(?)
     return True
 
 
@@ -563,55 +467,7 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         logger.info("Added endpoint added to database: %s" % endpoint)
     else:
         logger.debug("Endpoint based on parameters was already in database.")
-
     return
-
-
-@app.task(queue='storage')
-def revive_url_task(ips, url: Url):
-
-    # don't revive if there are no ips
-    if not any(ips):
-        return
-
-    """
-    Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
-
-    Todo:
-    This does not revive all endpoints... There should be new ones to better match with actual
-    happenings with servers.
-
-    Should this add a new url instead of reviving the old one to better reflect the network?
-
-    :param url:
-    :return:
-    """
-    if url.not_resolvable:
-        url.not_resolvable = False
-        url.not_resolvable_since = datetime.now(pytz.utc)
-        url.not_resolvable_reason = "Made resolvable again since ip address was found."
-        url.save()
-
-
-@app.task(queue='storage')
-def revive_url(url: Url):
-    """
-    Sets a URL as resolvable. Does not touches the is_dead (layer 8) field.
-
-    Todo:
-    This does not revive all endpoints... There should be new ones to better match with actual
-    happenings with servers.
-
-    Should this add a new url instead of reviving the old one to better reflect the network?
-
-    :param url:
-    :return:
-    """
-    if url.not_resolvable:
-        url.not_resolvable = False
-        url.not_resolvable_since = datetime.now(pytz.utc)
-        url.not_resolvable_reason = "Made resolvable again since ip address was found."
-        url.save()
 
 
 @app.task(queue='storage')
@@ -640,68 +496,6 @@ def kill_url_task(ips, url: Url):
         is_unused=True,
         is_unused_since=datetime.now(pytz.utc),
         is_unused_reason="Url was killed"
-    )
-
-
-@app.task(queue='storage')
-def kill_url(url: Url):
-    """
-    Sets a URL as not resolvable. Does not touches the is_dead (layer 8) field.
-
-    :param url:
-    :return:
-    """
-    url.not_resolvable = True
-    url.not_resolvable_since = datetime.now(pytz.utc)
-    url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
-    url.save()
-
-    Endpoint.objects.all().filter(url=url).update(is_dead=True,
-                                                  is_dead_since=datetime.now(pytz.utc),
-                                                  is_dead_reason="Url was killed")
-
-    UrlIp.objects.all().filter(url=url).update(
-        is_unused=True,
-        is_unused_since=datetime.now(pytz.utc),
-        is_unused_reason="Url was killed"
-    )
-
-
-# todo: split up between rdns and storing.
-@app.task(queue='storage')
-def store_url_ips_task(ips, url: Url):
-    """
-    Todo: method should be stored in manager
-
-    Be sure to give all ip's that are currently active in one call. Mix IPv4 and IPv6.
-
-    the http endpoint finder will clash with qualys on this method, until we're using the same
-    method to discover all ip's this url currently has.
-    """
-
-    for ip in ips:
-
-        # sometimes there is no ipv4 or 6 address... or you get some other dirty dataset.
-        if not ip:
-            continue
-
-        # the same thing that exists already? don't do anything about it.
-        if UrlIp.objects.all().filter(url=url, ip=ip, is_unused=False).count():
-            continue
-
-        epip = UrlIp()
-        epip.ip = ip
-        epip.url = url
-        epip.is_unused = False
-        epip.discovered_on = datetime.now(pytz.utc)
-        epip.rdns_name = get_rdns_name(ip)
-        epip.save()
-
-    # and then clean up all that are not in the current set of ip's.
-    UrlIp.objects.all().filter(url=url, is_unused=False).exclude(ip__in=ips).update(
-        is_unused=True,
-        is_unused_since=datetime.now(pytz.utc),
-        is_unused_reason="cleanup at storing new endpoints"
     )
 
 
@@ -796,16 +590,8 @@ def check_network(code_location=""):
     url = Url()
     url.url = "faalkaart.nl"
 
-    ips = get_ips(url.url)
-
-    can_ipv4, can_ipv6 = False, False
-
-    (ipv4, ipv6) = ips
-    if ipv4:
-        can_ipv4 = can_connect("https", url, 443, ipv4)
-
-    if ipv6:
-        can_ipv6 = can_connect("https", url, 443, ipv6)
+    can_ipv4 = can_connect("https", url, 443, 4)
+    can_ipv6 = can_connect("https", url, 443, 6)
 
     if not can_ipv4 and not can_ipv6:
         raise ConnectionError("Both ipv6 and ipv4 networks could not be reached via %s."
