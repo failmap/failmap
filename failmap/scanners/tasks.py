@@ -23,7 +23,7 @@ DEFAULT_CRAWLERS = []
 DEFAULT_SCANNERS = [
     security_headers.compose_task,
     tls_osaft.compose_task,
-    # tls_qualys.compose_task,
+    tls_qualys.compose_task,
     ftp.compose_task,
     screenshot.compose_task,
     plain_http.compose_task,
