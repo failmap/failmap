@@ -17,7 +17,7 @@ from django_countries.fields import CountryField
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Organization, OrganizationType, Url
-from failmap.scanners.scanner_http import resolves
+from failmap.scanners.scanner.http import resolves
 
 # todo: callback on edit address, put result in leaflet:
 

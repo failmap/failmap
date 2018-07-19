@@ -13,10 +13,9 @@ from django.conf import settings
 
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-
-from .models import Endpoint
-from .scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.models import Endpoint
+from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 

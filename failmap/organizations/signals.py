@@ -7,7 +7,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from failmap.organizations.models import Url
-from failmap.scanners import onboard
+from failmap.scanners.scanner import onboard
 
 log = logging.getLogger(__name__)
 

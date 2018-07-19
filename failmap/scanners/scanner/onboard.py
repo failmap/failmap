@@ -3,11 +3,10 @@ import logging
 from celery import group
 from django.utils import timezone
 
+from failmap.celery import Task, app
 from failmap.organizations.models import Url
-from failmap.scanners.scanner import url_filters
+from failmap.scanners.scanner.scanner import url_filters
 from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
-
-from ..celery import Task, app
 
 log = logging.getLogger(__package__)
 
@@ -41,6 +40,11 @@ def compose_task(
     Todo: run this every minute.
     """
 
+    # Resetting the outdated onboarding has a risk: if the queue takes longer than the onboarding tasks to finish the
+    # tasks will be performed multiple time. This can grow fast and large. Therefore a very large time has been taken
+    # to reset onboarding of tasks. Normally onboarding should be one within 5 minutes. We'll reset after 7 days.
+    reset_expired_onboards()
+
     urls = Url.objects.all().filter(onboarded=False)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
@@ -60,13 +64,13 @@ def compose_task(
                          | explore_tasks(url)
                          | update_stage.si(url, "endpoint_finished"))
 
-        elif url.onboarding_stage in ["endpoint_finished", "scans_running"]:
+        elif url.onboarding_stage in ["endpoint_finished"]:  # dev: , "scans_running"
             log.info("Scanning on: %s", url)
             tasks.append(update_stage.si(url, "scans_running")
                          | scan_tasks(url)
                          | update_stage.si(url, "scans_finished"))
 
-        elif url.onboarding_stage == "crawl_started":
+        elif url.onboarding_stage == "scans_finished":
             log.info("Crawling on: %s", url)
             tasks.append(update_stage.si(url, "endpoint_finished")
                          | crawl_tasks(url)
@@ -77,7 +81,34 @@ def compose_task(
 
     log.info("Created %s tasks to be performed." % len(tasks))
     task = group(tasks)
+
+    # log.info("Task:")
+    # log.info(task)
+
     return task
+
+
+def reset_expired_onboards():
+    from datetime import datetime, timedelta
+    import pytz
+
+    expired = Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(pytz.utc) - timedelta(days=7))
+
+    for url in expired:
+        # set the task a step back.
+        # retry endpoint discovery if that didn't finish.
+        if url.onboarding_stage == "endpoint_discovery":
+            url.onboarding_stage = ""
+
+        # retry scanning after discovery of endpoints
+        if url.onboarding_stage == "scans_running":
+            url.onboarding_stage = "endpoint_finished"
+
+        # retry crawling after scans are finished
+        if url.onboarding_stage == "crawl_started":
+            url.onboarding_stage = "scans_finished"
+
+        url.save()
 
 
 @app.task(queue='storage')
@@ -92,7 +123,7 @@ def finish_onboarding(url):
 
 @app.task(queue='storage')
 def update_stage(url, stage=""):
-    log.info("Updating onboarding_stage of %s to %s", url, stage)
+    log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
     url.onboarding_stage = stage
     url.save(update_fields=['onboarding_stage'])
     return True

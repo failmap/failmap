@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.scanners.scanner_http import check_network
+from failmap.scanners.scanner.http import check_network
 
 logger = logging.getLogger(__package__)
 

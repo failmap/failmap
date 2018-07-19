@@ -96,11 +96,12 @@ class Organization(models.Model):
         verbose_name = _('organization')
         verbose_name_plural = _('organizations')
 
+    # todo: find a smarter way to get the organization type name, instead of a related query... cached enums?
     def __str__(self):
         if self.is_dead:
-            return "✝ %s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
+            return "✝ %s, %s/%s (%s)" % (self.name, self.country, self.type_id, self.created_on.strftime("%b %Y"))
         else:
-            return "%s, %s (%s)" % (self.name, self.country, self.created_on.strftime("%b %Y"))
+            return "%s, %s/%s (%s)" % (self.name, self.country, self.type_id, self.created_on.strftime("%b %Y"))
 
 
 GEOJSON_TYPES = (
@@ -228,6 +229,9 @@ class Url(models.Model):
                   " have been found. completed: onboarding is done, also onboarded flag is set."
     )
 
+    onboarding_stage_set_on = models.DateTimeField(blank=True, null=True,
+                                                   help_text="When the onboarding stage was hit. Helps with time-outs.")
+
     onboarded = models.BooleanField(
         default=False,
         help_text="After adding a url, there is an onboarding process that runs a set of tests."
@@ -287,7 +291,7 @@ class Url(models.Model):
 
     def add_subdomain(self, subdomain):
         # import here to prevent circular/cyclic imports, this module imports Url.
-        from failmap.scanners.scanner_http import resolves
+        from failmap.scanners.scanner.http import resolves
 
         new_url = (subdomain + "." + self.url).lower()
 

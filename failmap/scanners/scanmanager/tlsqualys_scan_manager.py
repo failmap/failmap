@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 
-from .models import Endpoint, TlsQualysScan
+from failmap.scanners.models import Endpoint, TlsQualysScan
 
 logger = logging.getLogger(__package__)
 
@@ -55,10 +55,9 @@ class TlsQualysScanManager:
         :param endpoint:
         :return:
         """
-        from .models import EndpointGenericScan
 
         try:
-            gs = EndpointGenericScan.objects.all().filter(
+            gs = TlsQualysScan.objects.all().filter(
                 endpoint=endpoint,
             ).latest('last_scan_moment')
             if gs.rating:

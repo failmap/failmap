@@ -2,35 +2,33 @@
 
 from celery import group
 
-from . import (scanner_dns, scanner_dnssec, scanner_dummy, scanner_ftp, scanner_http,
-               scanner_plain_http, scanner_screenshot, scanner_security_headers, scanner_tls_osaft,
-               scanner_tls_qualys)
+from failmap.scanners.scanner import (dns, dnssec, dummy, ftp, http, plain_http, screenshot,
+                                      security_headers, tls_osaft, tls_qualys)
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [scanner_tls_qualys, scanner_security_headers, scanner_dummy, scanner_http, scanner_dnssec, scanner_ftp,
-           scanner_tls_osaft, scanner_screenshot]
+__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, tls_osaft, screenshot, dns]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
 # Other code can iterate over these functions and call them, example: see onboard.py.
 TLD_DEFAULT_EXPLORERS = []
-DEFAULT_EXPLORERS = [scanner_http.compose_discover_task, scanner_ftp.compose_discover_task]
+DEFAULT_EXPLORERS = [http.compose_discover_task, ftp.compose_discover_task]
 
 TLD_DEFAULT_CRAWLERS = [
-    scanner_dns.brute_known_subdomains_compose_task,
-    scanner_dns.certificate_transparency_compose_task,
-    scanner_dns.nsec_compose_task]
+    dns.brute_known_subdomains_compose_task,
+    dns.certificate_transparency_compose_task,
+    dns.nsec_compose_task]
 DEFAULT_CRAWLERS = []
 
 DEFAULT_SCANNERS = [
-    scanner_plain_http.compose_task,
-    scanner_security_headers.compose_task,
-    scanner_tls_qualys.compose_task,
-    scanner_tls_osaft.compose_task,
-    scanner_ftp.compose_task,
-    scanner_screenshot.compose_task
+    security_headers.compose_task,
+    tls_osaft.compose_task,
+    # tls_qualys.compose_task,
+    ftp.compose_task,
+    screenshot.compose_task,
+    plain_http.compose_task,
 ]
-TLD_DEFAULT_SCANNERS = [scanner_dnssec.compose_task]
+TLD_DEFAULT_SCANNERS = [dnssec.compose_task]
 
 
 def get_tasks(url, normal_tasks, tld_tasks):

@@ -11,7 +11,7 @@ from django.db.models import Q
 
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
-from failmap.scanners.scanner import q_configurations_to_display
+from failmap.scanners.scanner.scanner import q_configurations_to_display
 
 from ..celery import Task, app
 from .calculate import get_calculation

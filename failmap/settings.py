@@ -692,6 +692,8 @@ CONSTANCE_CONFIG = {
     'SCAN_DNS_DNSSEC': (True, 'Do you want to scan for DNSSEC issues?', bool),
     'SCAN_HTTP_TLS_QUALYS': (True, 'Do you want to scan for TLS issues through Qualys? This is about 1 scan per '
                                    'two minutes. Cloud scanning can improve this a bit.', bool),
+    'SCAN_HTTP_TLS_OSAFT': (True, 'Experimental: Do you want to scan for TLS issues through OSaft? This is about '
+                                  '3 scans per minute. Cloud scanning can improve this a bit.', bool),
     'SCAN_HTTP_MISSING_TLS': (True, 'Do you want to scan for endpoints that don\'t have a secure counterpart?', bool),
     'SCAN_HTTP_HEADERS_HSTS': (True, 'Do you want to scan for missing '
                                      'Hypertext Strict Transport Security headers?', bool),
@@ -752,8 +754,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
 
     ('Scanner Capabilities', ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN')),
 
-    ('Scanning', ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_MISSING_TLS',
-                  'SCAN_HTTP_HEADERS_HSTS',
+    ('Scanning', ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_TLS_OSAFT',
+                  'SCAN_HTTP_MISSING_TLS', 'SCAN_HTTP_HEADERS_HSTS',
                   'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT', 'SCAN_FTP',
                   'CREATE_HTTP_SCREENSHOT')),
 

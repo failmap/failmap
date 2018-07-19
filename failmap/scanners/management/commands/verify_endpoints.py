@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-import failmap.scanners.scanner_http as scanner_http
+import failmap.scanners.scanner.http as scanner_http
 from failmap.organizations.models import Organization
 
 from .support.arguments import add_organization_argument

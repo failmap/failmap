@@ -54,7 +54,7 @@ def test_all_scanners():
 
     # check the network. No network, you'll fail. Todo: you should be able to reach a domain over the net. Build
     # machines often cannot do this for reasons and things.
-    from failmap.scanners.scanner_http import check_network
+    from failmap.scanners.scanner.http import check_network
     log.warning("check_network")
     check_network("real_scanner_test")
 
@@ -69,7 +69,7 @@ def test_all_scanners():
     # get errors.
     call_command('scan_tls_qualys', '-v3', '-o', 'Internet Cleanup Foundation')
 
-    from failmap.scanners.scanner_dns import brute_known_subdomains, certificate_transparency, nsec
+    from failmap.scanners.scanner.dns import brute_known_subdomains, certificate_transparency, nsec
     log.warning("brute_known_subdomains")
     brute_known_subdomains(urls=[first_toplevel_url])
     log.warning("certificate_transparency")

@@ -42,9 +42,8 @@ from requests.exceptions import ConnectionError
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
-
-from .scanner import allowed_to_discover, q_configurations_to_scan
-from .timeout import timeout
+from failmap.scanners.scanner.scanner import allowed_to_discover, q_configurations_to_scan
+from failmap.scanners.timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -55,6 +54,8 @@ STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
 
 # Discover Endpoints generic task
+
+# todo: in wildcard scenarios you can add urls that have a deviating IP from the (loadbalanced) wildcard address.
 
 
 @app.task(queue="storage")
@@ -525,7 +526,11 @@ def store_url_ips(url: Url, ips):
         epip.url = url
         epip.is_unused = False
         epip.discovered_on = datetime.now(pytz.utc)
-        epip.rdns_name = get_rdns_name(ip)
+        try:
+            epip.rdns_name = get_rdns_name(ip)
+        except TimeoutError:
+            # we'll have to do without.
+            epip.rdns_name = ""
         epip.save()
 
     # and then clean up all that are not in the current set of ip's.
@@ -543,7 +548,7 @@ def get_rdns_name(ip):
         reverse_name = socket.gethostbyaddr(ip)
     except (TimeoutError, socket.herror):
         # takes too long
-        # host doesn't exist
+        # host doesn't exist / unknown host
         pass
     except BaseException as e:
         logger.error('Unknown rdns failure %s on ip %s' % (str(e), ip))

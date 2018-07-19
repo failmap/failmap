@@ -13,10 +13,9 @@ from django.conf import settings
 from failmap.celery import PRIO_HIGH, PRIO_LOW, PRIO_NORMAL, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
+from failmap.scanners.scanmanager.tls_scan_manager import TlsScanManager
+from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 from failmap.scanners.timeout import timeout
-from failmap.scanners.tls_scan_manager import TlsScanManager
-
-from .scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__package__)
 
@@ -147,8 +146,7 @@ def compose_task(
     endpoints_filter: dict = dict(),
 ) -> Task:
 
-    # todo: permission check
-    if not allowed_to_scan("scanner_tls_qualys"):
+    if not allowed_to_scan("scanner_tls_osaft"):
         return group()
 
     # apply filter to organizations (or if no filter, all organizations)
@@ -179,7 +177,7 @@ def compose_task(
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
     if not urls:
-        log.warning('Applied filters resulted in no urls, thus no tls scan tasks!')
+        log.warning('Applied filters resulted in no urls, thus no osaft tls scan tasks!')
         return group()
 
     log.info('Creating osaft scan task for %s urls for %s organizations.', len(urls), len(organizations))
@@ -318,6 +316,9 @@ def run_osaft_scan_shared_container(address, port):
     standardout = standardout.decode("utf-8")
     if "Cannot connect to the Docker daemon" in standardout:
         raise EnvironmentError(standardout)
+
+    if "dates" not in standardout:
+        raise EnvironmentError("O-Saft report is not complete. Is O-Saft running? Call: %s" % " ".join(o_saft_command))
 
     # log.info(standardout)
     return standardout

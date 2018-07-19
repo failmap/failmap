@@ -49,9 +49,9 @@ from PIL import Image
 
 from failmap.celery import app
 from failmap.scanners.models import Endpoint, Screenshot
+from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
+                                              q_configurations_to_scan)
 from failmap.scanners.timeout import timeout
-
-from .scanner import allowed_to_scan, endpoint_filters, q_configurations_to_scan
 
 log = logging.getLogger(__package__)
 

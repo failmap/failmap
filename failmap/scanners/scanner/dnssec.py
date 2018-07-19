@@ -29,10 +29,9 @@ from django.conf import settings
 
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.url_scan_manager import UrlScanManager
-
-from .models import Endpoint
-from .scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.models import Endpoint
+from failmap.scanners.scanmanager.url_scan_manager import UrlScanManager
+from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
@@ -93,7 +92,7 @@ def compose_task(
     # Sending entire objects is possible. How signatures (.s and .si) work is documented:
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
     task = group(
-        scan_dnssec.s(url.url) | store_dnssec.s(url) for url in urls
+        scan_dnssec.si(url.url) | store_dnssec.s(url) for url in urls
     )
 
     return task

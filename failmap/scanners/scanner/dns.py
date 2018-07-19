@@ -27,8 +27,7 @@ from django.conf import settings
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
-
-from .scanner import allowed_to_discover
+from failmap.scanners.scanner.scanner import allowed_to_discover
 
 logger = logging.getLogger(__package__)
 
@@ -118,7 +117,7 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
 
-    task = group(nsec_scan.s([url]) for url in urls)
+    task = group(nsec_scan.si([url]) for url in urls)
     return task
 
 
@@ -139,7 +138,7 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
 
-    task = group(certificate_transparency_scan.s([url]) for url in urls)
+    task = group(certificate_transparency_scan.si([url]) for url in urls)
     return task
 
 
@@ -182,7 +181,7 @@ def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
     # todo: this should be placed to elsewhere, but we might not have write permissions in scanners...???
     update_subdomain_wordlist()
 
-    task = group(bruteforce_scan.s([url], str(wordlists["known_subdomains"]["path"])) for url in urls)
+    task = group(bruteforce_scan.si([url], str(wordlists["known_subdomains"]["path"])) for url in urls)
     return task
 
 

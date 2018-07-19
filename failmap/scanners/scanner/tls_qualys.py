@@ -29,13 +29,12 @@ import requests
 from celery import Task, group, states
 from django.conf import settings
 
+from failmap.celery import PRIO_HIGH, PRIO_NORMAL, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, TlsQualysScratchpad
-from failmap.scanners.scanner_http import store_url_ips
-from failmap.scanners.tlsqualys_scan_manager import TlsQualysScanManager
-
-from ..celery import PRIO_HIGH, PRIO_NORMAL, app
-from .scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.scanmanager.tlsqualys_scan_manager import TlsQualysScanManager
+from failmap.scanners.scanner.http import store_url_ips
+from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 API_NETWORK_TIMEOUT = 30
 API_SERVER_TIMEOUT = 30
@@ -96,7 +95,7 @@ def compose_task(
         raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
 
     if not urls:
-        log.warning('Applied filters resulted in no urls, thus no tasks!')
+        log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
         return group()
 
     log.info('Creating qualys scan task for %s urls for %s organizations.',

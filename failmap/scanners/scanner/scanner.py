@@ -4,10 +4,9 @@ import logging
 from constance import config
 from django.db.models import Q
 
+from failmap.map.models import Configuration
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-
-from ..map.models import Configuration
 
 log = logging.getLogger(__name__)
 
@@ -34,6 +33,9 @@ def allowed_to_scan(scanner_name: str=""):
 
     if scanner_name == 'scanner_tls_qualys':
         return config.SCAN_HTTP_TLS_QUALYS
+
+    if scanner_name == 'scanner_tls_osaft':
+        return config.SCAN_HTTP_TLS_OSAFT
 
     if scanner_name == 'scanner_dnssec':
         return config.SCAN_DNS_DNSSEC

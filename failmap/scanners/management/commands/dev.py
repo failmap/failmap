@@ -37,8 +37,8 @@ class Command(BaseCommand):
 
 
 def test_osaft():
-    from failmap.scanners.scanner_tls_osaft import scan_address, determine_grade, grade_report, scan_url
-    from failmap.scanners.scanner import q_configurations_to_scan
+    from failmap.scanners.scanner.tls_osaft import scan_address, determine_grade, grade_report, scan_url
+    from failmap.scanners.scanner.scanner import q_configurations_to_scan
 
     urls = Url.objects.filter(
         q_configurations_to_scan(),
@@ -132,7 +132,7 @@ def develop_timeline():
 
 
 def develop_sslscan():
-    from failmap.scanners.scanner_tls_standalone import scan_url
+    from failmap.scanners.scanner.tls_standalone import scan_url
     url = Url.objects.all().filter(url='www.ibdgemeenten.nl').get()
     scan_url(url)
     url = Url.objects.all().filter(url='www.amersfoort.nl').get()
@@ -140,12 +140,12 @@ def develop_sslscan():
 
 
 def test_determine_grade():
-    from failmap.scanners.scanner_tls_standalone import test_determine_grade
+    from failmap.scanners.scanner.tls_standalone import test_determine_grade
     test_determine_grade()
 
 
 def test_sslscan_real():
-    from failmap.scanners.scanner_tls_standalone import test_real
+    from failmap.scanners.scanner.tls_standalone import test_real
     test_real('johnkr.com', 443)
 
 

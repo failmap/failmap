@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.scanners.scanner_tls_osaft import (ammend_unsuported_issues, cert_chain_is_complete,
+from failmap.scanners.scanner.tls_osaft import (ammend_unsuported_issues, cert_chain_is_complete,
                                                 determine_grade, grade_report, run_osaft_scan)
 
 logger = logging.getLogger(__package__)

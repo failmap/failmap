@@ -15,11 +15,10 @@ from django.utils import timezone
 
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Url
-from failmap.scanners.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner import endpoint_filters, url_filters
-
-from .models import Endpoint
-from .scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.models import Endpoint
+from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
+                                              q_configurations_to_scan, url_filters)
 
 log = logging.getLogger(__name__)
 
@@ -63,7 +62,7 @@ def compose_task(
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
 
     if not endpoints:
-        log.warning('Applied filters resulted in no endpoints, thus no tasks!')
+        log.warning('Applied filters resulted in no endpoints, thus no ftp tasks!')
         return group()
 
     # only unique endpoints

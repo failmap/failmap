@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import DiscoverTaskCommand
-from failmap.scanners import scanner_ftp
+from failmap.scanners.scanner import ftp
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class Command(DiscoverTaskCommand):
     def handle(self, *args, **options):
 
         scanners = {
-            'ftp': scanner_ftp
+            'ftp': ftp
         }
 
         if options['scanner'][0] not in scanners:
