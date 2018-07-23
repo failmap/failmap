@@ -17,6 +17,7 @@ class Command(DiscoverTaskCommand):
 
     def handle(self, *args, **options):
 
+        # todo: subdomains, from scanner.dns
         scanners = {
             'ftp': ftp,
             'http': http,

@@ -32,7 +32,7 @@ class Command(DumpDataCommand):
     #         Scanners:
     #         - Endpoints             Yes         Needed for rebuild ratings, hard to gather
     #         - Screenshots           No          Can be recreated with ease (except history)
-    #         - States                No          Just start somewhere
+    #         - TLS Scans             Yes
     #         - TLS Qualys Scans      Yes         Needed for rebuild ratings
     #         - TLS Qualys Scratchpa  No          This is mainly for debugging
     #         - Generic Scans         Yes
@@ -42,6 +42,12 @@ class Command(DumpDataCommand):
     #         Auth:
     #         - Users                 No          Create this yourself
     #         - Groups                No          Create this yourself
+    #
+    #         Game:
+    #         - Team                  Yes
+    #         - Contest               Yes
+    #         - OrganizationSubmission Yes        Helps with debugging
+    #         - UrlSubmission         Yes         Helps with debugging
 
     APP_LABELS = (
         "organizations.OrganizationType",
@@ -51,11 +57,13 @@ class Command(DumpDataCommand):
         "organizations.Promise",
         "scanners.Endpoint",
         "scanners.TlsQualysScan",
+        "scanners.TlsScan",
         "scanners.EndpointGenericScan",
         "scanners.UrlGenericScan",
         "scanners.UrlIp",
         "map.Configuration",
-        "map.AdministrativeRegion"
+        "map.AdministrativeRegion",
+        "game"
     )
 
     def handle(self, *app_labels, **options):

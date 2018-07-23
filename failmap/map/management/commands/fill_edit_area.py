@@ -10,6 +10,14 @@ logger = logging.getLogger(__package__)
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        """
+        This was created to update coordinates from older databases. Was a one-shot.
+        todo: Not needed anymore?
+
+        :param args:
+        :param options:
+        :return:
+        """
 
         coords = Coordinate.objects.all()
         for coord in coords:
