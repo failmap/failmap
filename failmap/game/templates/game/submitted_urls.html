@@ -1,0 +1,76 @@
+{% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1>Submitted urls</h1>
+    <p>This is a list of submitted urls during this contest. Below it also shows the urls that already exist.
+    This information can help you to quickly determine if an organization is already being investigated and if some
+    information is still missing.</p>
+
+    <p>
+        Current Contest: {{ contest.name }}
+    </p>
+
+    <h2>Submitted urls</h2>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>Team</th>
+        <th>Organization</th>
+        <th>Url</th>
+        <th>Accepted</th>
+        <th>Rejected</th>
+        <th>In System?</th>
+        <th>Process</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for url in submitted_urls %}
+        <tr>
+            <td>{{ url.added_by_team.name }}</td>
+            <td>{{ url.for_organization }}</td>
+            <td>{{ url.url }} </td>
+            <td>{{ url.has_been_accepted }}</td>
+            <td>{{ url.has_been_rejected }}</td>
+            <td>{{ url.url_in_system }}</td>
+            <td>{{ url.added_on }}</td>
+            <td>{{ url.onboarding_stage }}</td>
+            <td>{{ url.onboarded }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+
+    <h2>Already known urls</h2>
+    <p>These urls where already in the database before the contest started.</p>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>Url</th>
+        <th>is_dead</th>
+        <th>is_resolvable</th>
+        <th>is_wildcard</th>
+        <th>is_wildcard</th>
+        <th>is_wildcard</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for url in already_known_urls %}
+        <tr>
+            <td>{{ url.url }}</td>
+            <td>{{ url.not_resolvable }} </td>
+            <td>{{ url.is_dead }}</td>
+            <td>{{ url.uses_dns_wildcard }}</td>
+            <td>{{ url.onboarding_stage }}</td>
+            <td>{{ url.onboarded }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock %}

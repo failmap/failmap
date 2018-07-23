@@ -1,0 +1,113 @@
+{% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h1>Contests</h1>
+    <p>During a contest, participants find new domains and subdomains for targeted countries and organizations.</p>
+
+    {% if success %}
+        <div class="alert alert-success" role="alert">
+            <strong>Contest selected!</strong>
+         </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error!</strong> {{ error }}
+         </div>
+    {% endif %}
+
+    <p>
+        Current Contest: {{ contest.name }}
+    </p>
+
+    {% comment "Find out how to re-use a list." %}
+    {% endcomment %}
+
+    <h2>Currently active</h2>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th></th>
+        <th>Name</th>
+        <th>From</th>
+        <th>Until</th>
+        <th>Filters</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for contest in active_contests %}
+        <tr>
+            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ contest.id }}">
+                <input type="submit" value="join"></form></td>
+            <td><img src="{{ contest.logo }}" height="25"/></td>
+            <td>{{ contest.name }}</td>
+            <td>{{ contest.from_moment }}</td>
+            <td>{{ contest.until_moment }} <div id="countdown_{{ contest.id }}">countdown...</div></td>
+            <td>{{ contest.filters }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <h2>Upcoming</h2>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Logo</th>
+        <th>Name</th>
+        <th>From</th>
+        <th>Until</th>
+        <th>Filters</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for contest in future_contests %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ contest.logo }}</td>
+            <td>{{ contest.name }}</td>
+            <td>{{ contest.from }}</td>
+            <td>{{ contest.until }}</td>
+            <td>{{ contest.filters }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    <h2>Expired</h2>
+    <table class="table">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Logo</th>
+        <th>Name</th>
+        <th>From</th>
+        <th>Until</th>
+        <th>Filters</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for contest in expired_contests %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ contest.logo }}</td>
+            <td>{{ contest.name }}</td>
+            <td>{{ contest.from }}</td>
+            <td>{{ contest.until }}</td>
+            <td>{{ contest.filters }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock %}

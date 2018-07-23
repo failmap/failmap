@@ -1,6 +1,8 @@
 import logging
 import time
+from datetime import datetime
 
+import pytz
 import tldextract
 from crispy_forms.bootstrap import AppendedText, FormActions, PrependedText
 from crispy_forms.helper import FormHelper
@@ -9,7 +11,6 @@ from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
 from django.db import transaction
-from django.db.utils import OperationalError
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -25,15 +26,22 @@ from failmap.scanners.scanner.http import resolves
 log = logging.getLogger(__package__)
 
 
-# todo: rewrite to get the active contest, this is a hack to prevent creating a fixture with a first value.
-# workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
-def get_default_contest():
-    try:
-        return Contest.objects.first()
-    # temp supressing ALL exceptions
-    # todo: make this sane again
-    except (OperationalError, Exception):
-        return 0
+class ContestForm(forms.Form):
+    field_order = ('id', )
+
+    id = forms.IntegerField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        id = cleaned_data.get("id")
+
+        if not Contest.objects.all().filter(pk=id).exists():
+            raise ValidationError(_('This contest does not exist.'), code='invalid',)
+
+        has_expired = Contest.objects.all().filter(pk=id, until_moment__lte=datetime.now(pytz.utc))
+        if has_expired:
+            raise ValidationError(_('This contest is already over, you cannot participate in it anymore.'),
+                                  code='invalid', )
 
 
 # todo: this doesn't work yet
@@ -41,15 +49,21 @@ def get_default_contest():
 # should this be in forms.py or in admin.py?
 # https://stackoverflow.com/questions/17523263/how-to-create-password-field-in-model-django
 class TeamForm(forms.Form):
+
+    contest = Contest()
+
+    def __init__(self, *args, **kwargs):
+        self.contest = kwargs.pop('contest', 0)
+        super(TeamForm, self).__init__(*args, **kwargs)
+        self.fields['team'] = forms.ModelChoiceField(
+            widget=forms.RadioSelect,
+            queryset=Team.objects.all().filter(
+                allowed_to_submit_things=True, participating_in_contest=self.contest),
+        )
+
     field_order = ('team', 'secret')
 
     secret = forms.CharField(widget=forms.PasswordInput)
-
-    team = forms.ModelChoiceField(
-        widget=forms.RadioSelect,
-        queryset=Team.objects.all().filter(
-            allowed_to_submit_things=True, participating_in_contest=get_default_contest()),
-    )
 
     def clean(self):
         cleaned_data = super().clean()

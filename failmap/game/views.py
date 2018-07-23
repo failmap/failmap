@@ -1,5 +1,7 @@
 import logging
+from datetime import datetime
 
+import pytz
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -7,10 +9,10 @@ from django.db.utils import OperationalError
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
 
-from failmap.game.forms import OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
-from failmap.game.models import Contest, Team, UrlSubmission
+from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
+from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.map.calculate import get_calculation
-from failmap.organizations.models import Organization, OrganizationType
+from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 log = logging.getLogger(__package__)
@@ -22,17 +24,19 @@ ten_minutes = 60 * 10
 
 
 # workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
-def get_default_contest():
+def get_default_contest(request):
     try:
-        return Contest.objects.first()
+        if request.session['contest']:
+            return Contest.objects.get(id=request.session['contest'])
+        else:
+            return Contest.objects.first()
     # temp supressing ALL exceptions
     # todo: make this sane again
-    except (OperationalError, Exception):
+    except (OperationalError, Exception, Contest.DoesNotExist):
         return 0
 
-# Create your views here.
 
-
+# todo: what about urls that are being added through another contest?
 @login_required(login_url='/authentication/login/')
 def submit_url(request):
 
@@ -94,7 +98,7 @@ def submit_organisation(request):
 @cache_page(ten_minutes)
 def scores(request):
 
-    teams = Team.objects.all().filter(participating_in_contest=get_default_contest())
+    teams = Team.objects.all().filter(participating_in_contest=get_default_contest(request))
 
     scores = []
     for team in teams:
@@ -169,11 +173,77 @@ def scores(request):
                                                 'scores': scores})
 
 
+@cache_page(ten_minutes)
+def contests(request):
+
+    if request.POST:
+        form = ContestForm(request.POST)
+
+        if form.is_valid():
+            if form.cleaned_data['id']:
+                request.session['contest'] = form.cleaned_data['id']
+                request.session['team'] = None  # resetting the team when switching
+                return redirect('/game/team/')
+            else:
+                request.session['contest'] = None
+    else:
+        form = ContestForm()
+
+    expired_contests = Contest.objects.all().filter(until_moment__lt=datetime.now(pytz.utc))
+
+    active_contests = Contest.objects.all().filter(from_moment__lt=datetime.now(pytz.utc),
+                                                   until_moment__gte=datetime.now(pytz.utc))
+
+    future_contests = Contest.objects.all().filter(from_moment__gte=datetime.now(pytz.utc))
+
+    try:
+        contest = get_default_contest(request)
+    except Contest.DoesNotExist:
+        contest = None
+
+    return render(request, 'game/contests.html', {
+        'contest': contest,
+        'expired_contests': expired_contests,
+        'active_contests': active_contests,
+        'future_contests': future_contests,
+        'error': form.errors
+    })
+
+
+@cache_page(ten_minutes)
+def submitted_organizations(request):
+    submitted_organizations = OrganizationSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=get_default_contest(request)).order_by('organization_name')
+
+    already_known_organizations = Organization.objects.all().filter().exclude(
+        id__in=submitted_organizations.values('organization_in_system'))
+
+    return render(request, 'game/submitted_organizations.html', {
+        'submitted_organizations': submitted_organizations,
+        'already_known_organizations': already_known_organizations})
+
+
+# todo: contest required!
+@cache_page(ten_minutes)
+def submitted_urls(request):
+    submitted_urls = UrlSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=get_default_contest(request)).order_by('for_organization', 'url')
+
+    # todo: query doesn't work yet
+    # Another competition might be adding urls too.
+    # todo: show all other urls for this competition filter.
+    # this is an expensive query, which will break with a lot of data... todo: determine when /if it breaks.
+    already_known_urls = Url.objects.all().filter().exclude(id__in=submitted_urls.values('url_in_system'))
+
+    return render(request, 'game/submitted_urls.html', {'submitted_urls': submitted_urls,
+                                                        'already_known_urls': already_known_urls})
+
+
 @login_required(login_url='/authentication/login/')
 def teams(request):
 
     if request.POST:
-        form = TeamForm(request.POST)
+        form = TeamForm(request.POST, contest=get_default_contest(request))
 
         if form.is_valid():
             if form.cleaned_data['team']:
@@ -183,10 +253,10 @@ def teams(request):
 
             request.session.modified = True
             request.session.save()
-            form = TeamForm(initial={'team': get_team_id(request)})
+            form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request))
 
     else:
-        form = TeamForm(initial={'team': get_team_id(request)})
+        form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request))
 
     return render(request, 'game/team.html', {'form': form, 'team': get_team_info(request)})
 

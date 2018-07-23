@@ -139,6 +139,13 @@ class OrganizationSubmission(models.Model):
         help_text="Helps finding more info about the organization."
     )
 
+    organization_wikidata_code = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text="The code for this page that starts with Q. Search for wikidata and the terms you're looking for to"
+                  " get this code."
+    )
+
     organization_in_system = models.ForeignKey(
         Organization,
         null=True,

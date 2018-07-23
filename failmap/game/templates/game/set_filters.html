@@ -1,0 +1,25 @@
+{% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    {% if success %}
+        <div class="alert alert-success" role="alert">
+            <strong>URL added!</strong> {{ url }} has been added!
+         </div>
+    {% endif %}
+
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            <strong>Error!</strong> {{ error }}
+         </div>
+    {% endif %}
+
+    <h1>Set Filters</h1>
+    <p>Filters allow you to more quickly add organizations and urls. By setting a filter the forms for submitting data
+    are pre-filled using the filtered value. This saves time and makes adding things easier.</p>
+    <form method="POST" class="uniForm">{% csrf_token %}
+        {{ form | crispy }}
+        <br />
+        <button type="submit" class="save btn btn-lg btn-primary">DO THE THING</button>
+    </form>
+{% endblock %}
