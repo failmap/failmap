@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -65,10 +65,10 @@ def http_scanner_undo_endpoint_deaths(in_the_last_n_days: int=1, ip_version: int
             url=dead_endpoint.url
         )
         if not has_similar_alive_endpoints:
-            logger.info("Undoing death on %s" % dead_endpoint)
+            log.info("Undoing death on %s" % dead_endpoint)
             dead_endpoint.is_dead = False
             dead_endpoint.is_dead_reason = ""
             dead_endpoint.is_dead_since = None
             dead_endpoint.save()
         else:
-            logger.info("Can't undo death on %s as there is a similar alive. Try and merge." % dead_endpoint)
+            log.info("Can't undo death on %s as there is a similar alive. Try and merge." % dead_endpoint)

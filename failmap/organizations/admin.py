@@ -26,7 +26,7 @@ from ..app.models import Job
 from ..celery import PRIO_HIGH
 from .models import Coordinate, Organization, OrganizationType, Promise, Url
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 PROMISE_DESCRIPTION = """
@@ -315,7 +315,7 @@ class MyUrlAdminForm(forms.ModelForm):
         if not organizations:
             return
 
-        logger.error(self.cleaned_data)
+        log.error(self.cleaned_data)
         # make sure the URL is not added if it is already alive and matched to the selected organization.
         # except yourself of course...
         # todo: expemt yourself, .exclude(pk=self.cleaned_data.get("pk"))
@@ -550,14 +550,14 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
 
             if current.area != obj.area or current.geojsontype != obj.geojsontype:
                 # if 'area' in form.changed_data or 'geojsontype' in form.changed_data: doesn't work.
-                logger.info("area changed")
+                log.info("area changed")
                 edit_area = {"type": form.cleaned_data['geojsontype'],
                              "coordinates": form.cleaned_data['area']}
                 obj.edit_area = edit_area
 
             elif current.edit_area != obj.edit_area:
-                logger.info("edit area changed")
-                logger.info(form.cleaned_data["edit_area"])
+                log.info("edit area changed")
+                log.info(form.cleaned_data["edit_area"])
                 obj.geojsontype = form.cleaned_data["edit_area"]["type"]
                 obj.area = form.cleaned_data["edit_area"]["coordinates"]
         else:

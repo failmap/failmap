@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint, Url
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -71,23 +71,23 @@ opendata.arnhem.nl	2 december 2016 15:01	4 december 2016 15:50	1
             pers.alkmaar.nl
         """
         url = Url.objects.all().filter(url="mail.rhenen.nl").get()
-        logger.debug("url %s" % url)
+        log.debug("url %s" % url)
         endpoints = Endpoint.objects.all().filter(url=url,
                                                   protocol="https",
                                                   port="443").order_by('discovered_on')
         for endpoint in endpoints:
-            logger.debug("endpoint: %s, Discovered on: %s" % (endpoint, endpoint.discovered_on))
+            log.debug("endpoint: %s, Discovered on: %s" % (endpoint, endpoint.discovered_on))
             if endpoint.is_dead_since:
-                logger.debug('Would replace dead date %s' % endpoint.is_dead_since)
+                log.debug('Would replace dead date %s' % endpoint.is_dead_since)
                 try:
                     endpoint.is_dead_since = Endpoint.objects.all().filter(
                         url=url,
                         discovered_on__gt=endpoint.discovered_on).earliest('discovered_on').\
                         discovered_on
-                    logger.debug('With date: %s' % endpoint.is_dead_since)
+                    log.debug('With date: %s' % endpoint.is_dead_since)
                     endpoint.save()
                 except ObjectDoesNotExist:
-                    logger.warning('Not replaced at all, since there is no date before this.')
+                    log.warning('Not replaced at all, since there is no date before this.')
 
     @staticmethod
     def urls_with_ridiculous_number_of_endpoints(protocol="https"):
@@ -110,11 +110,11 @@ opendata.arnhem.nl	2 december 2016 15:01	4 december 2016 15:50	1
                 ridiculous_urls.append(url)
 
         for ridiculous_url in ridiculous_urls:
-            logger.debug("Ridiculous amount of endpoints on: %s" % ridiculous_url)
-            logger.debug("You are looking for the ones that have _a lot_ of the same Is dead Since")
+            log.debug("Ridiculous amount of endpoints on: %s" % ridiculous_url)
+            log.debug("You are looking for the ones that have _a lot_ of the same Is dead Since")
             endpoints = Endpoint.objects.all().filter(url=ridiculous_url)
             for endpoint in endpoints:
-                logger.debug("Is dead since: %s, Endpoint: %s," %
-                             (endpoint.is_dead_since, endpoint))
+                log.debug("Is dead since: %s, Endpoint: %s," %
+                          (endpoint.is_dead_since, endpoint))
 
         return ridiculous_urls

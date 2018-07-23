@@ -5,7 +5,7 @@ from django.core.management.commands.loaddata import Command as LoadDataCommand
 
 from failmap import settings
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 # Solves this bug: https://code.djangoproject.com/ticket/18867

@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):

@@ -29,7 +29,7 @@ from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.scanner import allowed_to_discover
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 theharvester = settings.TOOLS['theHarvester']['executable']
 dnsrecon = settings.TOOLS['dnsrecon']['executable']
@@ -215,11 +215,11 @@ def dnsrecon_default(urls):
     # This doesn't ask google, the harvester is a bit more smarter / advanced.
     imported_urls = []
     for url in urls:
-        logger.info("Scanning DNS of toplevel domain: %s" % url.url)
+        log.info("Scanning DNS of toplevel domain: %s" % url.url)
         file = "%s_data_default.json" % url.url
         path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
-        logger.debug("DNS results will be stored in file: %s" % path)
+        log.debug("DNS results will be stored in file: %s" % path)
 
         # never continue with wildcard domains
         p = subprocess.Popen(['python', dnsrecon,
@@ -271,7 +271,7 @@ def has_wildcards(urls: List[Url]):
 
     for url in urls:
         if discover_wildcard_scan(url):
-            logger.info("Domain %s uses wildcards, DNS brute force not possible" % url.url)
+            log.info("Domain %s uses wildcards, DNS brute force not possible" % url.url)
             url.uses_dns_wildcard = True
             url.save()
             urls_with_wildcards.append(url)
@@ -290,11 +290,11 @@ def discover_wildcard_scan(url: Url):
 
     In some cases DNSrecon makes a wrong assumption about wildcard usage. This is hopefully a bit better.
     """
-    logger.debug("Checking for DNS wildcards on domain: %s" % url.url)
+    log.debug("Checking for DNS wildcards on domain: %s" % url.url)
     file = "%s_data_wildcards.json" % url.url
     path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
-    logger.debug("DNS results will be stored in file: %s" % path)
+    log.debug("DNS results will be stored in file: %s" % path)
 
     # never continue with wildcard domains
     # solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/467465408/
@@ -330,7 +330,7 @@ def import_dnsrecon_report(url: Url, path: str):
         addedlist = []
         for record in data:
             # brutally ignore all kinds of info from other structures.
-            logger.debug("Record: %s" % record)
+            log.debug("Record: %s" % record)
             # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
             # strings: dkim etc
             # target: cname
@@ -369,15 +369,15 @@ def search_engines_scan(urls: List[Url]):
         # Searching the internet for subdomains might result in overly long and incorrect lists.
         # The only correct way is to curate domains by hand.
         # So, we should also try to import those. So we have maximum result from our scan.
-        logger.info("Harvesting DNS of toplevel domain: %s" % url.url)
-        logger.warning("Search engines have strict rate limiting, do not use this function in an "
-                       "automated scan.")
+        log.info("Harvesting DNS of toplevel domain: %s" % url.url)
+        log.warning("Search engines have strict rate limiting, do not use this function in an "
+                    "automated scan.")
         # a bug in the harvester breaks the file at the first dot and uses that as the xml file,
         # and the full filename as the html file.
         file = ("%s_harvester_all" % url.url).replace(".", "_") + ".xml"
         path = settings.TOOLS['theHarvester']['output_dir'] + file
 
-        logger.debug("DNS results will be stored in file: %s" % path)
+        log.debug("DNS results will be stored in file: %s" % path)
         engine = "all"
         subprocess.call(['python', theharvester,
                          '-d', url.url,
@@ -399,15 +399,15 @@ def search_engines_scan(urls: List[Url]):
 
         for host in hosts:
             hostname = host.hostname.cdata
-            logger.debug("Hostname: %s" % hostname)
+            log.debug("Hostname: %s" % hostname)
             if hostname.endswith("." + url.url):
                 subdomains.append(hostname[0:len(hostname) - len(url.url) - 1])
-                logger.debug("Subdomain: %s" % hostname[0:len(hostname) - len(url.url) - 1])
+                log.debug("Subdomain: %s" % hostname[0:len(hostname) - len(url.url) - 1])
 
         subdomains = [x.lower() for x in subdomains]
         subdomains = set(subdomains)  # only unique
 
-        logger.debug("Found subdomains: %s" % subdomains)
+        log.debug("Found subdomains: %s" % subdomains)
 
         for subdomain in subdomains:
             added = url.add_subdomain(subdomain)
@@ -433,12 +433,12 @@ def bruteforce_scan(urls: List[Url], wordlist: str):
 
     imported_urls = []
     for url in urls:
-        logger.info("Bruting DNS of toplevel domain: %s" % url.url)
-        logger.debug("Using wordlist: %s" % wordlist)
+        log.info("Bruting DNS of toplevel domain: %s" % url.url)
+        log.debug("Using wordlist: %s" % wordlist)
         file = "%s_data_brute.json" % url.url
         path = settings.TOOLS['dnsrecon']['output_dir'] + file
 
-        logger.debug("DNS results will be stored in file: %s" % path)
+        log.debug("DNS results will be stored in file: %s" % path)
 
         # never continue with wildcard domains
         p = subprocess.Popen(['python', dnsrecon,
@@ -506,7 +506,7 @@ def certificate_transparency_scan(urls: List[Url]):
         if '25' in subdomains:
             subdomains.remove('25')
 
-        logger.debug("Found subdomains: %s" % subdomains)
+        log.debug("Found subdomains: %s" % subdomains)
 
         for subdomain in subdomains:
             added = url.add_subdomain(subdomain)
@@ -553,7 +553,7 @@ def nsec_scan(urls: List[Url]):
                 for rdata in answers:
                     UnboundLocalError: local variable 'answers' referenced before assignment
             """
-            logger.error('DNSRecon process error: %s' % str(message))
+            log.error('DNSRecon process error: %s' % str(message))
 
     return added
 

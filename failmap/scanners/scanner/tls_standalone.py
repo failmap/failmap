@@ -12,7 +12,7 @@ from failmap.celery import app
 from failmap.scanners.models import Endpoint
 from failmap.scanners.timeout import timeout
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 # uses sslscan to determine the quality of a tls connection. It's way faster than others and for
 # the basis it results the same sanity checks. What sslscan misses is a "general" rating. This will
@@ -214,7 +214,7 @@ def test_determine_grade():
 
 
 def testcase(filename, domain='example.com'):
-    logger.info(filename)
+    log.info(filename)
     rating, trust_rating = determine_grade(output + 'testcases/' + filename + '.xml', domain)
     debug_grade(rating, trust_rating)
 
@@ -246,18 +246,18 @@ def determine_grade(report, url):
     trust_rating = []
 
     if not url:
-        logger.error('No url given: %s' % url)
+        log.error('No url given: %s' % url)
         return
 
     if not report:
-        logger.error('No report given: %s' % report)
+        log.error('No report given: %s' % report)
         return
 
     try:
-        logger.debug('untangle.parse("%s")' % report)
+        log.debug('untangle.parse("%s")' % report)
         obj = untangle.parse(report)
     except Exception:
-        logger.error('Something wrong with report file: %s' % report)
+        log.error('Something wrong with report file: %s' % report)
         return
 
     # Used the --show-certificate option
@@ -463,23 +463,23 @@ def determine_grade(report, url):
 def debug_grade(ratings, trust_ratings):
     lowest_rating = 'A'
     trust = True
-    logger.debug('-------------------------------------------------------------------')
-    logger.debug('Trust')
+    log.debug('-------------------------------------------------------------------')
+    log.debug('Trust')
     for rating in trust_ratings:
-        logger.debug("  %s: %s" % (rating[0], rating[1]))
+        log.debug("  %s: %s" % (rating[0], rating[1]))
         trust = False
-    logger.debug('')
-    logger.debug('Trust:  %s' % trust)
-    logger.debug('')
+    log.debug('')
+    log.debug('Trust:  %s' % trust)
+    log.debug('')
 
-    logger.debug('Vulnerabilities')
+    log.debug('Vulnerabilities')
     for rating in ratings:
-        logger.debug("  %s: %s" % (rating[0], rating[1]))
+        log.debug("  %s: %s" % (rating[0], rating[1]))
         if rating[0] > lowest_rating:
             lowest_rating = rating[0]
-    logger.debug('')
-    logger.debug('Rating: %s' % lowest_rating)
-    logger.debug('')
+    log.debug('')
+    log.debug('Rating: %s' % lowest_rating)
+    log.debug('')
 
 
 # TODO: make queue explicit, split functionality in storage and scanner
@@ -488,18 +488,18 @@ def store_grade(ratings, trust_ratings, endpoint):
     lowest_rating = 'A'
     trust = True
 
-    logger.debug('Trust')
+    log.debug('Trust')
     for rating in trust_ratings:
-        logger.debug("%s: %s" % (rating[0], rating[1]))
+        log.debug("%s: %s" % (rating[0], rating[1]))
         trust = False
 
-    logger.debug('Vulnerabilities')
+    log.debug('Vulnerabilities')
     for rating in ratings:
-        logger.debug("%s: %s" % (rating[0], rating[1]))
+        log.debug("%s: %s" % (rating[0], rating[1]))
         if rating[0] > lowest_rating:
             lowest_rating = rating[0]
 
-    logger.debug('Conlcusion: rated %s with trust?: %s', (lowest_rating, trust))
+    log.debug('Conlcusion: rated %s with trust?: %s', (lowest_rating, trust))
 
     # EndpointScanManager.add_scan('ssl_tls', endpoint, grade, explanation)
 

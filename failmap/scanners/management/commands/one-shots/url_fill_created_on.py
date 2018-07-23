@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint, Url
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -23,7 +23,7 @@ class Command(BaseCommand):
         # created_on__isnull=True = 780 hits...
         # manually checking: if not url.created_on == 3084. HOW!?
 
-        logger.debug("Urls that don't have a created on: %s" % urls.count())
+        log.debug("Urls that don't have a created on: %s" % urls.count())
         # the earliest creation date = the creation date of the oldest endpoint
         for url in urls:
 
@@ -31,9 +31,9 @@ class Command(BaseCommand):
                 try:
                     oldest_endpoint = Endpoint.objects.all().filter(
                         url=url).earliest('discovered_on')
-                    logger.debug("The oldest endpoint for url: %s is: %s" %
-                                 (url, oldest_endpoint.discovered_on))
+                    log.debug("The oldest endpoint for url: %s is: %s" %
+                              (url, oldest_endpoint.discovered_on))
                     url.created_on = oldest_endpoint.discovered_on
                     url.save()
                 except ObjectDoesNotExist:
-                    logger.warning("Creation date for url could not be determined: %s" % url)
+                    log.warning("Creation date for url could not be determined: %s" % url)

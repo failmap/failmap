@@ -7,7 +7,7 @@ from failmap.map.rating import (add_organization_rating, create_timeline, rerate
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -56,8 +56,8 @@ def test_osaft():
     port = 443
     report = scan_address(address, port)
     grades, trust = determine_grade(report)
-    logger.debug(trust)
-    logger.debug(grades)
+    log.debug(trust)
+    log.debug(grades)
     print(grade_report(grades, trust))
 
 

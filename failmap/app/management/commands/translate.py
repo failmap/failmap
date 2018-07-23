@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -42,8 +42,8 @@ class Command(BaseCommand):
             call_command('makemessages', '-d', 'djangojs', '-l', language[0])
             call_command('compilemessages', '-l', language[0])
 
-        logger.info('You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po')
-        logger.info('Compiled files are located in ./locale/(language code)/LC_MESSAGES/django(js).mo')
-        logger.info('')
-        logger.info('Run this command again to have your changes compiled.')
-        logger.info('Remember to keep the amount of translations in javascript as low as possible.')
+        log.info('You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po')
+        log.info('Compiled files are located in ./locale/(language code)/LC_MESSAGES/django(js).mo')
+        log.info('')
+        log.info('Run this command again to have your changes compiled.')
+        log.info('Remember to keep the amount of translations in javascript as low as possible.')

@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from failmap.scanners.scanner.tls_osaft import (ammend_unsuported_issues, cert_chain_is_complete,
                                                 determine_grade, grade_report, run_osaft_scan)
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):

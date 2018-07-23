@@ -47,7 +47,7 @@ from failmap.scanners.timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 # don't contact http/443 and https/80. You can, but that is 99.99 waste data.
 STANDARD_HTTP_PORTS = [80, 8008, 8080]
@@ -79,13 +79,13 @@ def compose_discover_task(
         organizations = Organization.objects.filter(**organizations_filter)
         # apply filter to urls in organizations (or if no filter, all urls)
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
-        logger.info('Creating http scan task for %s urls for %s organizations.', len(urls), len(organizations))
+        log.info('Creating http scan task for %s urls for %s organizations.', len(urls), len(organizations))
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
-        logger.info('Creating http scan task for %s urls.', len(urls))
+        log.info('Creating http scan task for %s urls.', len(urls))
 
     if endpoints_filter:
-        logger.warning("Endpoint filters are not implemented: filter has no effect.")
+        log.warning("Endpoint filters are not implemented: filter has no effect.")
 
     # make sure we're dealing with a list for the coming random function
     urls = list(urls)
@@ -231,10 +231,10 @@ def get_ips(url: str):
     if settings.NETWORK_SUPPORTS_IPV4:
         try:
             ipv4 = socket.gethostbyname(url)
-            logger.debug("%s has IPv4 address: %s" % (url, ipv4))
+            log.debug("%s has IPv4 address: %s" % (url, ipv4))
         except Exception as ex:
             # when not known: [Errno 8] nodename nor servname provided, or not known
-            logger.debug("Get IPv4 error: %s" % ex)
+            log.debug("Get IPv4 error: %s" % ex)
 
     if settings.NETWORK_SUPPORTS_IPV6:
         try:
@@ -244,17 +244,17 @@ def get_ips(url: str):
 
             # six to four addresses make no sense
             if str(ipv6).startswith("::ffff:"):
-                logger.error("Six-to-Four address %s discovered on %s, "
-                             "did you configure IPv6 connectivity correctly? "
-                             "Removing this IPv6 address from result to prevent "
-                             "database pollution." %
-                             (ipv6, url))
+                log.error("Six-to-Four address %s discovered on %s, "
+                          "did you configure IPv6 connectivity correctly? "
+                          "Removing this IPv6 address from result to prevent "
+                          "database pollution." %
+                          (ipv6, url))
                 ipv6 = ""
             else:
-                logger.debug("%s has IPv6 address: %s" % (url, ipv6))
+                log.debug("%s has IPv6 address: %s" % (url, ipv6))
         except Exception as ex:
             # when not known: [Errno 8nodename nor servname provided, or not known
-            logger.debug("Get IPv6 error: %s" % ex)
+            log.debug("Get IPv6 error: %s" % ex)
 
     return ipv4, ipv6
 
@@ -330,7 +330,7 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     if not uri or not ip:
         return False
 
-    logger.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
+    log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
 
     try:
         """
@@ -363,14 +363,14 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
                          headers={'Host': url.url,
                                   'User-Agent': get_random_user_agent()})
         if r.status_code:
-            logger.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
+            log.debug("%s: Host: %s Status: %s" % (uri, url.url, r.status_code))
             return True
         else:
-            logger.debug("No status code? Now what?! %s" % url)
+            log.debug("No status code? Now what?! %s" % url)
             # probably never reached, exception thrown when no status code is present
             return True
     except (ConnectTimeout, Timeout, ReadTimeout) as Ex:
-        logger.debug("%s: Timeout! - %s" % (url, Ex))
+        log.debug("%s: Timeout! - %s" % (url, Ex))
         return False
     except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
         """
@@ -386,24 +386,24 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
         Perhaps: (todo)
         - EOF occurred in violation of protocol
         """
-        logger.debug("%s: Exception returned: %s" % (url, Ex))
+        log.debug("%s: Exception returned: %s" % (url, Ex))
         strerror = Ex.args  # this can be multiple.  # zit in nested exception?
         strerror = str(strerror)  # Cast whatever we get back to a string. Instead of trace.
         if any(["BadStatusLine" in strerror,
                 "CertificateError" in strerror,
                 "certificate verify failed" in strerror,
                 "bad handshake" in strerror]):
-            logger.debug("Exception indicates that there is a server, but we're not able to "
-                         "communicate with it correctly. Error: %s" % strerror)
+            log.debug("Exception indicates that there is a server, but we're not able to "
+                      "communicate with it correctly. Error: %s" % strerror)
             return True
         else:
-            logger.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
+            log.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
             return False
 
 
 @app.task(queue='storage')
 def connect_result(result, protocol: str, url: Url, port: int, ip_version: int):
-    logger.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
+    log.info("%s %s/%s IPv%s: %s" % (url, protocol, port, ip_version, result))
 
     if result:
         save_endpoint(protocol, url, port, ip_version)
@@ -445,7 +445,7 @@ def has_internet_connection(host: str="8.8.8.8", port: int=53, connection_timeou
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
     except Exception as ex:
-        logger.debug("No internet connection: %s" % ex)
+        log.debug("No internet connection: %s" % ex)
         return False
 
 
@@ -465,9 +465,9 @@ def save_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         endpoint.discovered_on = datetime.now(pytz.utc)
         # endpoint.dossier = "Found using the http scanner."  #
         endpoint.save()
-        logger.info("Added endpoint added to database: %s" % endpoint)
+        log.info("Added endpoint added to database: %s" % endpoint)
     else:
-        logger.debug("Endpoint based on parameters was already in database.")
+        log.debug("Endpoint based on parameters was already in database.")
     return
 
 
@@ -551,7 +551,7 @@ def get_rdns_name(ip):
         # host doesn't exist / unknown host
         pass
     except BaseException as e:
-        logger.error('Unknown rdns failure %s on ip %s' % (str(e), ip))
+        log.error('Unknown rdns failure %s on ip %s' % (str(e), ip))
 
     return reverse_name
 
@@ -587,10 +587,10 @@ def check_network(code_location=""):
     :return:
     """
 
-    logger.info("Testing network connection via %s." % code_location)
+    log.info("Testing network connection via %s." % code_location)
 
-    logger.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
-    logger.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
+    log.info("IPv4 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV4)
+    log.info("IPv6 is enabled via configuration: %s" % settings.NETWORK_SUPPORTS_IPV6)
 
     url = Url()
     url.url = "faalkaart.nl"
@@ -607,13 +607,13 @@ def check_network(code_location=""):
         raise ConnectionError("Could not reach IPv4 Network via %s. IPv4 enabled in config: %s" %
                               (code_location, settings.NETWORK_SUPPORTS_IPV4))
     else:
-        logger.info("IPv4 could be reached via %s" % code_location)
+        log.info("IPv4 could be reached via %s" % code_location)
 
     if not can_ipv6:
         raise ConnectionError("Could not reach IPv6 Network via %s. IPv6 enabled in config: %s" %
                               (code_location, settings.NETWORK_SUPPORTS_IPV6))
     else:
-        logger.info("IPv6 could be reached via %s" % code_location)
+        log.info("IPv6 could be reached via %s" % code_location)
 
 
 def redirects_to_safety(endpoint: Endpoint):
@@ -641,21 +641,21 @@ def redirects_to_safety(endpoint: Endpoint):
                                 headers={'Host': endpoint.url.url,
                                          'User-Agent': get_random_user_agent()})
         if response.history:
-            logger.debug("Request was redirected, there is hope. Redirect path:")
+            log.debug("Request was redirected, there is hope. Redirect path:")
             for resp in response.history:
-                logger.debug("%s: %s" % (resp.status_code, resp.url))
-            logger.debug("Final destination:")
-            logger.debug("%s: %s" % (response.status_code, response.url))
+                log.debug("%s: %s" % (resp.status_code, resp.url))
+            log.debug("Final destination:")
+            log.debug("%s: %s" % (response.status_code, response.url))
             if response.url.startswith("https://"):
-                logger.debug("Url starts with https, so it redirects to safety.")
+                log.debug("Url starts with https, so it redirects to safety.")
                 return True
-            logger.debug("Url is not redirecting to a safe url.")
+            log.debug("Url is not redirecting to a safe url.")
             return False
         else:
-            logger.debug("Request was not redirected, so not going to a safe url.")
+            log.debug("Request was not redirected, so not going to a safe url.")
             return False
     except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects):
-        logger.debug("Request resulted into an error, it's not redirecting properly.")
+        log.debug("Request resulted into an error, it's not redirecting properly.")
         return False
 
 

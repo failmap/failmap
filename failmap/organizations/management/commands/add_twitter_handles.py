@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.organizations.models import Organization
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):

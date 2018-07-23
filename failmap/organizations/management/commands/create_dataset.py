@@ -6,7 +6,7 @@ from django.core.management.commands.dumpdata import Command as DumpDataCommand
 
 from .datasethelpers import check_referential_integrity
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 # Remove ALL organization and URL ratings and rebuild them

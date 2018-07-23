@@ -45,7 +45,7 @@ Then run this script and start building dashboards in grafana.
 
 # todo: environment variables.
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 """
 The end goal of these ratings is to visualize changes over time.
@@ -55,17 +55,17 @@ The end goal of these ratings is to visualize changes over time.
 
 def update_stats():
     client = InfluxDBClient("influxdb", 8086, "", "", "elger_test", retries=50, timeout=10, verify_ssl=False)
-    logger.info("Creating stats, this can take a while. Get a cup of tea and say hi to the cat.")
+    log.info("Creating stats, this can take a while. Get a cup of tea and say hi to the cat.")
 
     for url in Url.objects.all():
-        logger.info("Adding metrics for %s" % url)
+        log.info("Adding metrics for %s" % url)
         metrics = metrics_per_url(url)
-        logger.info("Metrics found: %s" % len(metrics))
+        log.info("Metrics found: %s" % len(metrics))
         if metrics:
             if not client.write_points(metrics, batch_size=2500):
                 raise SyntaxError("Something went wrong inserting points. DB offline? Wrong syntax?")
 
-    logger.info("Done creating stats.")
+    log.info("Done creating stats.")
     return
 
 
@@ -133,8 +133,8 @@ def metrics_per_url(url):
             yesterdays_relevant_rating = relevant_rating
 
             if 'endpoints' not in relevant_rating.calculation.keys():
-                logger.debug("No endpoints in this calculation. Url died, became non-resolvable or it's endpoints died."
-                             "No metrics needed anymore for this one.")
+                log.debug("No endpoints in this calculation. Url died, became non-resolvable or it's endpoints died."
+                          "No metrics needed anymore for this one.")
                 return []
 
             for endpoint in relevant_rating.calculation['endpoints']:

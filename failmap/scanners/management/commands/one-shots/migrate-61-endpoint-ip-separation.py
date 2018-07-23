@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan, UrlIp
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -94,10 +94,10 @@ def merge_duplicate_endpoints():
         # check if this endpoint still exists... it could be deleted in a previous check
         # it can mess up connecting deleted endpoints
         if not Endpoint.objects.filter(id=endpoint.id).exists():
-            logger.debug('Endpoint does not exist anymore, probably merged previously. Continuing...')
+            log.debug('Endpoint does not exist anymore, probably merged previously. Continuing...')
             continue
 
-        logger.debug("Endpoint: %s, Discovered on: %s" % (endpoint, endpoint.discovered_on))
+        log.debug("Endpoint: %s, Discovered on: %s" % (endpoint, endpoint.discovered_on))
         similar_endpoints = list(Endpoint.objects.all().filter(
             ip_version=endpoint.ip_version,
             port=endpoint.port,
@@ -120,11 +120,11 @@ def merge_duplicate_endpoints():
         """
         if similar_endpoints:
             first_similar = similar_endpoints[-1]
-            logger.debug("Last similar: %s, Discovered on: %s" % (first_similar, first_similar.discovered_on))
+            log.debug("Last similar: %s, Discovered on: %s" % (first_similar, first_similar.discovered_on))
             endpoint.discovered_on = first_similar.discovered_on
             endpoint.save()
         else:
-            logger.debug("There are no similar endpoints. Ignoring.")
+            log.debug("There are no similar endpoints. Ignoring.")
 
         for similar_endpoint in similar_endpoints:
             # apperantly exclude doesn't work... there goes my faith in the data layer.
@@ -132,7 +132,7 @@ def merge_duplicate_endpoints():
                 continue
 
             # migrate all scans to the same endpoint
-            logger.debug("Merging similar: %s, Discovered on: %s" % (similar_endpoint, similar_endpoint.discovered_on))
+            log.debug("Merging similar: %s, Discovered on: %s" % (similar_endpoint, similar_endpoint.discovered_on))
             EndpointGenericScan.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)
             TlsQualysScan.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)
             Screenshot.objects.all().filter(endpoint=similar_endpoint).update(endpoint=endpoint)

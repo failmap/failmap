@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from failmap.scanners.models import Endpoint, EndpointGenericScan
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class EndpointScanManager:
@@ -30,12 +30,12 @@ class EndpointScanManager:
         # last scan had exactly the same result, so don't create a new scan and just update the
         # last scan date.
         if gs.explanation == message and gs.rating == rating:
-            logger.debug("Scan had the same rating and message, updating last_scan_moment only.")
+            log.debug("Scan had the same rating and message, updating last_scan_moment only.")
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.save()
         else:
             # message and rating changed for this scan_type, so it's worth while to save the scan.
-            logger.debug("Message or rating changed: making a new generic scan.")
+            log.debug("Message or rating changed: making a new generic scan.")
             gs = EndpointGenericScan()
             gs.explanation = message
             gs.rating = rating

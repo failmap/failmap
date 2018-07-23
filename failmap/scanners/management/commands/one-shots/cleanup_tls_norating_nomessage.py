@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import TlsQualysScan, TlsQualysScratchpad, Url
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -135,10 +135,10 @@ class Command(BaseCommand):
                                                                 qualys_rating="0")
 
             if scans.count() == nonsense_scans.count() and scans.count() > 0:
-                logger.debug(url)
-                logger.debug(
+                log.debug(url)
+                log.debug(
                     "Scans on this url: %s, nonsense: %s" % (scans.count(), nonsense_scans.count()))
-                logger.debug("Scans eligable for deletion.")
+                log.debug("Scans eligable for deletion.")
 
                 for scan in nonsense_scans:
                     # scan.delete()

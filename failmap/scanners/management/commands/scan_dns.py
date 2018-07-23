@@ -5,11 +5,10 @@ from django.core.management.base import BaseCommand
 from failmap.organizations.models import Organization
 from failmap.scanners.scanner.dns import (brute_dutch, brute_known_subdomains, brute_three_letters,
                                           certificate_transparency, nsec, search_engines, standard)
-from failmap.scanners.state_manager import StateManager
 
 from .support.arguments import add_organization_argument
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 # https://docs.python.org/3/library/argparse.html#required
@@ -47,13 +46,11 @@ class Command(BaseCommand):
         else:
             desired_organization = "*"
 
-        logger.debug("Scan type: %s" % scan_type)
-        logger.debug("Targetted organization: %s" % desired_organization)
+        log.debug("Scan type: %s" % scan_type)
+        log.debug("Targetted organization: %s" % desired_organization)
 
         if '*' in desired_organization:
-            organizations = StateManager.create_resumed_organizationlist(scanner="DNS_" + scan_type)
-            for organization in organizations:
-                StateManager.set_state("DNS_" + scan_type, organization.name)
+            for organization in desired_organization:
                 self.scan_organization(organization, scan_type)
             return
 
@@ -62,7 +59,7 @@ class Command(BaseCommand):
             self.scan_organization(organization, scan_type)
 
     def scan_organization(self, organization, scan_type):
-        logger.debug("Calling %s scan on: %s" % (scan_type, organization))
+        log.debug("Calling %s scan on: %s" % (scan_type, organization))
 
         # explicitly written so the imported functions are used, don't use strings as dynamic function names.
         if scan_type == "brute_known_subdomains":

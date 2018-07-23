@@ -8,7 +8,7 @@ from failmap.organizations.models import Coordinate, Organization, OrganizationT
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
                                      Screenshot, TlsQualysScan, TlsQualysScratchpad, UrlIp)
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):

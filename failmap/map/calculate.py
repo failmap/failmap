@@ -6,7 +6,7 @@ This file contains (or should) verbose explantion of why points are given.
 """
 import logging
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 def get_calculation(scan):
@@ -230,7 +230,7 @@ def tls_qualys_rating_based_on_scan(scan):
         scan.qualys_rating = "I"
 
     if scan.qualys_rating == '0':
-        logger.debug("TLS: This tls scan resulted in no https. Not returning a score.")
+        log.debug("TLS: This tls scan resulted in no https. Not returning a score.")
         return {}
 
     if scan.qualys_rating == "T":

@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from failmap.organizations.models import Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -79,8 +79,8 @@ def merge_endpoints_that_recently_died():
             if not identical_endpoints:
                 continue
 
-            logger.info("Found identical endpoints for %s: " % dead_endpoint)
-            logger.info([ep for ep in identical_endpoints])
+            log.info("Found identical endpoints for %s: " % dead_endpoint)
+            log.info([ep for ep in identical_endpoints])
 
             for identical_endpoint in identical_endpoints:
 

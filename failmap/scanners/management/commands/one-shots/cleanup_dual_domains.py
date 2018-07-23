@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint, Url
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
@@ -20,11 +20,11 @@ class Command(BaseCommand):
         endpoints = Endpoint.objects.all().filter(url__url__regex=".*\.n\..*\..*")
 
         for endpoint in endpoints:
-            logger.debug("Found possible weird endpoint: %s" % endpoint)
+            log.debug("Found possible weird endpoint: %s" % endpoint)
             # endpoint.delete()
 
         urls = Url.objects.all().filter(url__iregex=".*\.n\..*\..*")
 
         for url in urls:
-            logger.debug("Found possible weird url: %s" % url)
+            log.debug("Found possible weird url: %s" % url)
             # url.delete()

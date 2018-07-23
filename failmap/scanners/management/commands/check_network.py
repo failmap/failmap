@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.scanner.http import check_network
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):

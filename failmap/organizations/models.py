@@ -12,7 +12,7 @@ from django_countries.fields import CountryField
 from djgeojson.fields import GeoJSONField
 from jsonfield import JSONField
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class OrganizationType(models.Model):
@@ -296,11 +296,11 @@ class Url(models.Model):
         new_url = (subdomain + "." + self.url).lower()
 
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
-            logger.debug("Subdomain already in the database: %s" % new_url)
+            log.debug("Subdomain already in the database: %s" % new_url)
             return
 
         if not resolves(new_url):
-            logger.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
+            log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
             return
 
         u = Url()
@@ -310,7 +310,7 @@ class Url(models.Model):
         for organization in self.organization.all():
             u.organization.add(organization)
             u.save()
-            logger.info("Added url: %s to organization: %s" % (new_url, organization))
+            log.info("Added url: %s to organization: %s" % (new_url, organization))
 
         # run standard checks, so you know the
         # discover_wildcards([u])

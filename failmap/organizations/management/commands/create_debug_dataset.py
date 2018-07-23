@@ -2,7 +2,7 @@ import logging
 
 from .create_dataset import Command as CreateDatasetCommand
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(CreateDatasetCommand):

@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from failmap.scanners.models import Endpoint
 
-logger = logging.getLogger(__package__)
+log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
