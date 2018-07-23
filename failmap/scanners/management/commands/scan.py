@@ -36,4 +36,4 @@ class Command(ScannerTaskCommand):
             return
 
         self.scanner_module = scanners[options['scanner'][0]]
-        super().handle(self, *args, **options)
+        return super().handle(self, *args, **options)

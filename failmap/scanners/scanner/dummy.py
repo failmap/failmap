@@ -12,18 +12,21 @@ from celery import Task, group
 from django.conf import settings
 
 from failmap.celery import ParentFailed, app
-from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
+                                              q_configurations_to_scan)
 
 log = logging.getLogger(__name__)
 
 # how often a task should be retried when encountering an expectable exception
 MAX_RETRIES = 3
+
+# time in seconds how long it should take before a retry is attempted
 RETRY_DELAY = 1
-# after which time a pending task should no longer be accepted by a worker
-EXPIRES = 5
+
+# time in seconds, after which time a pending task should no longer be accepted by a worker
+EXPIRES = 3600 * 10  # 10 hour example
 
 
 def compose_task(
@@ -33,60 +36,46 @@ def compose_task(
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
-    *This is an implementation of `compose_discover_task`.
+    *This is an implementation of `compose_task`.
     For more documentation about this concept, arguments and concrete
-    examples of usage refer to `compose_discover_task` in `types.py`.*
-
+    examples of usage refer to `compose_task` in `types.py`.*
     """
 
-    # The dummy scanner is an example of a scanner that scans on an endpoint
-    # level. Meaning to create tasks for scanning, this function needs to be
-    # smart enough to translate (filtered) lists of organzations and urls into a
-    # (filtered) lists of endpoints (or use a url filter directly). This list of
-    # endpoints is then used to create a group of tasks which would perform the
-    # scan.
-
     if not allowed_to_scan("scanner_dummy"):
+        log.warning("Dummy scanner is not allowed to scan.")
         return group()
 
-    # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(**organizations_filter)
-    # apply filter to urls in organizations (or if no filter, all urls (which is not wat below code does))
-    urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
-
-    # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(
-        # apply filter to endpoints (or if no filter, all endpoints)
-        url__in=urls, **endpoints_filter,
-        # also apply manditory filters to only select valid endpoints for this action
+        q_configurations_to_scan(level='endpoint'),
+        # only scan endpoints that are known to be alive, using the http(s) protocol
         is_dead=False, protocol__in=['http', 'https'])
 
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
     if not endpoints:
-        log.warning('Applied filters resulted in no endpoints, thus no tasks!')
+        log.warning('Applied filters resulted in no endpoints, thus no dummy tasks!')
         return group()
 
-    log.info('Creating dummy scan task for %s endpoints for %s urls for %s organizations.',
-             len(endpoints), len(urls), len(organizations))
+    log.info('Creating dummy scan task for %s endpoints ', len(endpoints))
 
-    # todo: this is a poor mans solution for queue randomization, will be implemented in the queue manager
-    # make sure we're dealing with a list for the coming random function
-    endpoints = list(endpoints)
-    # randomize the endpoints so hosts are contacted in random order (less pressure)
+    """
+    Make sure there are no duplicate endpoints in the set: some filters may have resulted in a cartesian product.
+    Randomize the list of endpoints, so that scanned hosts experience less pressure / less requests per second.
+    """
+    endpoints = list(set(endpoints))
     random.shuffle(endpoints)
 
-    # create tasks for scanning all selected endpoints as a single managable group
-    # Sending entire objects is possible. How signatures (.s and .si) work is documented:
+    # Make the first task immutable, so it doesn't get any arguments of other scanners in a chain.
     # http://docs.celeryproject.org/en/latest/reference/celery.html#celery.signature
-    # Make the first task imutable, so it doesn't get any arguments of other scanners by accident
     task = group(
-        scan_dummy.si(endpoint.uri_url()) | store_dummy.s(endpoint) for endpoint in endpoints
+        scan.si(endpoint.uri_url()) | store.s(endpoint) for endpoint in endpoints
     )
 
     return task
 
 
 @app.task(queue='storage')
-def store_dummy(result, endpoint):
+def store(result, endpoint):
     """
 
     :param result: param endpoint:
@@ -126,7 +115,7 @@ class SomeError(Exception):
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
           expires=EXPIRES)
-def scan_dummy(self, uri_url):
+def scan(self, uri_url):
     """
 
     Before committing your scanner, verify the following:

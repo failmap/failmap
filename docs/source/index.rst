@@ -8,25 +8,35 @@ End User Documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: End User Documentation:
 
    topics/usage/scanning_policy
    topics/usage/faq_end_users
    topics/usage/user_guide
-   topics/usage/running_a_remote_worker
    topics/usage/thanks
+
+
+Volunteer documentation
+========================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Volunteer Documentation:
+
+   topics/usage/running_a_remote_worker
+   topics/development/translation
+
 
 Developer Documentation
 ========================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Developer Documentation:
 
    topics/development/getting_started
    topics/development/development
    topics/development/data_model
-   topics/development/translation
    topics/development/deployment
 
 
@@ -35,7 +45,7 @@ Advanced Topics
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Advanced Topics:
 
    topics/development/gis_and_map_information
    topics/development/writing_a_scanner

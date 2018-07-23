@@ -17,7 +17,7 @@ def test_security_headers(responses, db, faalonië):
 
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', headers=SECURITY_HEADERS)
 
-    result = json.loads(call_command('scan_security_headers', '-v3', '-o', TEST_ORGANIZATION))
+    result = json.loads(call_command('scan', 'headers', '-v3', '-o', TEST_ORGANIZATION))
 
     assert result[0]['status'] == 'success'
 
@@ -27,7 +27,7 @@ def test_security_headers_all(responses, db, faalonië):
 
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', headers=SECURITY_HEADERS)
 
-    result = json.loads(call_command('scan_security_headers', '-v3'))
+    result = json.loads(call_command('scan', 'headers', '-v3'))
 
     assert result[0]['status'] == 'success'
 
@@ -36,7 +36,7 @@ def test_security_headers_notfound(responses, db, faalonië):
     """Test invalid organization."""
 
     # should work fine, it will start a scan on nothing, so it's done quickly :)
-    result = json.loads(call_command('scan_security_headers', '-v3', '-o', NON_EXISTING_ORGANIZATION))
+    result = json.loads(call_command('scan', 'headers', '-v3', '-o', NON_EXISTING_ORGANIZATION))
     # no crashes, just an empty result.
     assert result == []
 
@@ -47,6 +47,6 @@ def test_security_headers_failure(responses, db, faalonië):
 
     responses.add(responses.GET, 'https://' + faalonië['url'].url + ':443/', status=500)
 
-    result = json.loads(call_command('scan_security_headers', '-v3', '-o', TEST_ORGANIZATION))
+    result = json.loads(call_command('scan', 'headers', '-v3', '-o', TEST_ORGANIZATION))
 
     assert result[0]['status'] == 'success'
