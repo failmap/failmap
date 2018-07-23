@@ -248,6 +248,7 @@ class ActionMixin:
 
 # http://jet.readthedocs.io/en/latest/autocomplete.html?highlight=many
 # for many values in the admin interface... for example endpoints.
+@admin.register(Organization)
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name_details', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
@@ -384,6 +385,7 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
             return queryset
 
 
+@admin.register(Url)
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
     form = MyUrlAdminForm
 
@@ -498,6 +500,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     actions.append('timeline_debug')
 
 
+@admin.register(OrganizationType)
 class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', )
     search_fields = ('name', )
@@ -505,6 +508,7 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', )
 
 
+@admin.register(Coordinate)
 class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
 
     # show Europe as default. Will probably change over time.
@@ -573,6 +577,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
         super().save_model(request, obj, form, change)
 
 
+@admin.register(Promise)
 class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('organization', 'created_on', 'expires_on')
     search_fields = ('organization',)
@@ -584,10 +589,3 @@ class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             'description': PROMISE_DESCRIPTION,
         }),
     )
-
-
-admin.site.register(Organization, OrganizationAdmin)
-admin.site.register(Url, UrlAdmin)
-admin.site.register(Coordinate, CoordinateAdmin)
-admin.site.register(OrganizationType, OrganizationTypeAdmin)
-admin.site.register(Promise, PromiseAdmin)

@@ -24,7 +24,7 @@ class OrganizationSubmissionInline(CompactInline):
     ordering = ["organization_name"]
 
 
-# Register your models here.
+@admin.register(Contest)
 class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('name', 'target_country', 'from_moment', 'until_moment')
@@ -44,6 +44,7 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 # todo: submissioninline, read only... there are going to be MANY new things...
+@admin.register(Team)
 class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('name', 'participating_in_contest', 'allowed_to_submit_things')
@@ -62,6 +63,7 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     inlines = [OrganizationSubmissionInline]
 
 
+@admin.register(UrlSubmission)
 class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('added_by_team', 'for_organization', 'url', 'has_been_accepted', 'has_been_rejected', 'added_on')
     search_fields = ('added_by_team__name', 'organization_name', 'url')
@@ -115,6 +117,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append('reject')
 
 
+@admin.register(OrganizationSubmission)
 class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('added_by_team', 'organization_name', 'has_been_accepted', 'has_been_rejected', 'added_on')
     search_fields = ('added_by_team__name', 'organization_name', 'organization_type_name')
@@ -174,9 +177,3 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, "Organisation(s) have been rejected.")
     reject.short_description = "❌  Reject"
     actions.append('reject')
-
-
-admin.site.register(Contest, ContestAdmin)
-admin.site.register(Team, TeamAdmin)
-admin.site.register(UrlSubmission, UrlSubmissionAdmin)
-admin.site.register(OrganizationSubmission, OrganizationSubmissionAdmin)

@@ -30,6 +30,7 @@ class EndpointGenericScanInline(CompactInline):
 #    extra = 0
 
 
+@admin.register(UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
     search_fields = ('url__url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
@@ -38,6 +39,7 @@ class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['discovered_on']
 
 
+@admin.register(Endpoint)
 class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'url', 'visit', 'discovered_on', 'ip_version', 'port', 'protocol', 'is_dead', 'is_dead_since',
                     'is_dead_reason')
@@ -105,6 +107,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     scan_url.short_description = "Scan (url)"
 
 
+@admin.register(TlsScan)
 class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'rating', 'rating_no_trust', 'compared_to_qualys', 'explanation',
                     'last_scan_moment', 'rating_determined_on')
@@ -129,6 +132,7 @@ class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment', 'endpoint')
 
 
+@admin.register(TlsQualysScan)
 class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',
                     'last_scan_moment', 'rating_determined_on')
@@ -174,6 +178,7 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # scan_url.short_description = "Scan (url)"
 
 
+@admin.register(TlsQualysScratchpad)
 class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('domain', 'when')
     search_fields = ('domain', 'when')
@@ -182,6 +187,7 @@ class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['when']
 
 
+@admin.register(Screenshot)
 class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'domain', 'created_on', 'filename')
     search_fields = ('endpoint__url__url', 'domain', 'created_on', 'filename')
@@ -190,6 +196,7 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['created_on']
 
 
+@admin.register(EndpointGenericScan)
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on')
@@ -208,6 +215,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['last_scan_moment', 'endpoint']
 
 
+@admin.register(UrlGenericScan)
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on')
@@ -221,19 +229,9 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ['last_scan_moment', 'url']
 
 
+@admin.register(EndpointGenericScanScratchpad)
 class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('type', 'domain', 'when', 'data')
     search_fields = ('type', 'domain', 'when', 'data')
     list_filter = ('type', 'domain', 'when', 'data')
     fields = ('type', 'domain', 'when', 'data')
-
-
-admin.site.register(TlsQualysScan, TlsQualysScanAdmin)
-admin.site.register(TlsScan, TlsScanAdmin)
-admin.site.register(TlsQualysScratchpad, TlsQualysScratchpadAdmin)
-admin.site.register(Endpoint, EndpointAdmin)
-admin.site.register(Screenshot, ScreenshotAdmin)
-admin.site.register(EndpointGenericScan, EndpointGenericScanAdmin)
-admin.site.register(UrlGenericScan, UrlGenericScanAdmin)
-admin.site.register(EndpointGenericScanScratchpad, EndpointGenericScanScratchpadAdmin)
-admin.site.register(UrlIp, UrlIpAdmin)

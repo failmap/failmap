@@ -11,6 +11,7 @@ from .geojson import import_from_scratch, update_coordinates
 from .models import AdministrativeRegion, Configuration, OrganizationRating, UrlRating
 
 
+@admin.register(OrganizationRating)
 class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_organization(self, obj):
         return format_html(
@@ -27,6 +28,7 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
 
 
+@admin.register(UrlRating)
 class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
@@ -43,6 +45,7 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 # todo: set is_imported flag after importing
+@admin.register(AdministrativeRegion)
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('country', 'organization_type', 'admin_level', 'imported')
@@ -99,6 +102,7 @@ def add_configuration(country, organization_type):
     a.save()
 
 
+@admin.register(Configuration)
 class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', )
@@ -161,9 +165,3 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
     remove_default.short_description = '😭  Remove default'
     actions.append(remove_default)
-
-
-admin.site.register(Configuration, ConfigurationAdmin)
-admin.site.register(AdministrativeRegion, AdministrativeRegionAdmin)
-admin.site.register(OrganizationRating, OrganizationRatingAdmin)
-admin.site.register(UrlRating, UrlRatingAdmin)
