@@ -7,6 +7,7 @@ urlpatterns = [
     path('scores/', views.scores),
     path('team/', views.teams),
     path('submitted_urls/', views.submitted_urls),
+    path('rules_help/', views.rules_help),
     path('submitted_organizations/', views.submitted_organizations),
     path('contests/', views.contests),
     path('submit_url/', views.submit_url),

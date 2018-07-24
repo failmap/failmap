@@ -10,13 +10,21 @@
          </div>
     {% endif %}
 
+    {%  comment %}
     {% if error %}
         <div class="alert alert-danger" role="alert">
             <strong>Error!</strong> {{ error }}
          </div>
     {% endif %}
+    {% endcomment %}
 
     <h1>Suggest a new url</h1>
+    <p>
+    It's possible to submit an URL to multiple organizations.
+    </p>
+    <p>
+    The country and organization type fields can be useful to more easily find the organization you're looking for.
+    </p>
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}
         <br />

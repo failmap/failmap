@@ -26,7 +26,7 @@
     </thead>
     <tbody>
     {% for url in submitted_urls %}
-        <tr>
+        <tr style="background-color: {{ url.added_by_team.color }};">
             <td>{{ url.added_by_team.name }}</td>
             <td>{{ url.for_organization }}</td>
             <td>{{ url.url }} </td>

@@ -4,9 +4,6 @@ from datetime import datetime
 
 import pytz
 import tldextract
-from crispy_forms.bootstrap import AppendedText, FormActions, PrependedText
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Field, Layout, Submit
 from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
@@ -15,6 +12,8 @@ from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
+from mapwidgets.widgets import GooglePointFieldWidget
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Organization, OrganizationType, Url
@@ -92,33 +91,68 @@ class TeamForm(forms.Form):
 
 # http://django-autocomplete-light.readthedocs.io/en/master/tutorial.html
 class OrganisationSubmissionForm(forms.Form):
-    field_order = ('organization_type_name', 'organization_name', 'organization_address', 'organization_evidence')
+    field_order = ('organization_country', 'organization_type_name', 'organization_name',
+                   'organization_address_geocoded', 'organization_address',
+                   'organization_evidence')
+
+    organization_country = CountryField().formfield(
+        label="Country",
+        widget=CountrySelectWidget(),
+        initial="NL"
+    )
 
     # todo: filter based on country and organization type.
     # todo: but how to suggest new organizations?
     organization_type_name = forms.ModelChoiceField(
         queryset=OrganizationType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/')
+        widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
+        label="Type"
     )
 
-    organization_name = forms.CharField()
+    organization_name = forms.CharField(
+        label="Name"
+    )
 
-    organization_wikipedia = forms.URLField()
+    organization_address_geocoded = forms.CharField(
+        widget=GooglePointFieldWidget,
+        label="Address"
+    )
 
-    organization_address = forms.CharField(widget=forms.Textarea)
+    organization_address = forms.CharField(
+        widget=forms.Textarea
+    )
 
-    organization_evidence = forms.CharField(widget=forms.Textarea)
+    organization_evidence = forms.CharField(
+        widget=forms.Textarea,
+        label="Sources verifying the existence of this organization"
+    )
+
+    organization_wikipedia = forms.URLField(
+        label="Wikipedia page",
+        help_text="To quickly find the correct wiki page, start a search by "
+                  "clicking <a href='https://en.wikipedia.org/w/index.php?search="
+                  "ministry+van+binnenlandse+zaken&title=Special:Search&go=Go'>here: search wikipedia</a>."
+    )
+
+    organization_wikidata = forms.CharField(
+        label="Wikidata code",
+        help_text="Find a Q code on <a href='https://www.wikidata.org/wiki/"
+                  "Wikidata:Main_Page' target='_blank'>wikidata</a>."
+    )
+
+    # todo: clean the geolocated address to fit the rest of the system. The ugly
+    # POINT -() etc has to be formatted according our normal layout so it can be processed in the admin
+    # interface.
 
     def clean(self):
         # verify that an organization of this type is not in the database yet...
         cleaned_data = super().clean()
         organization_type_name = cleaned_data.get("organization_type_name")
         name = cleaned_data.get("organization_name")
+        country = cleaned_data.get("organization_country")
 
-        # todo: allow adding for any country...
-        # todo: this is now a setting in the contest... should be availble somewhere...
         exists = Organization.objects.all().filter(
-            type=organization_type_name, name=name, is_dead=False, country='NL').exists()
+            type=organization_type_name, name=name, is_dead=False, country=country).exists()
 
         if exists:
             raise ValidationError(
@@ -129,11 +163,14 @@ class OrganisationSubmissionForm(forms.Form):
 
     @transaction.atomic
     def save(self, team):
+        organization_country = self.cleaned_data.get('organization_country', None)
         organization_type_name = self.cleaned_data.get('organization_type_name', None)
         organization_name = self.cleaned_data.get('organization_name', None)
         organization_address = self.cleaned_data.get('organization_address', None)
         organization_evidence = self.cleaned_data.get('organization_address', None)
         organization_wikipedia = self.cleaned_data.get('organization_wikipedia', None)
+        organization_wikidata = self.cleaned_data.get('organization_wikidata', None)
+        organization_address_geocoded = self.cleaned_data.get('organization_address_geocoded', None)
 
         if not all([organization_name, organization_type_name, organization_address, organization_evidence]):
             raise forms.ValidationError(
@@ -147,6 +184,9 @@ class OrganisationSubmissionForm(forms.Form):
             organization_name=organization_name,
             organization_type_name=organization_type_name,
             organization_wikipedia=organization_wikipedia,
+            organization_wikidata_code=organization_wikidata,
+            organization_address_geocoded=organization_address_geocoded,
+            organization_country=organization_country,
             added_on=timezone.now(),
             has_been_accepted=False,
             has_been_rejected=False
@@ -158,11 +198,13 @@ class UrlSubmissionForm(forms.Form):
     field_order = ('country', 'organization_type_name', 'for_organization', 'url',)
 
     country = CountryField().formfield(
+        label="🔍 Filter organization by country",
         required=False,
         help_text="This only helps finding the correct organization."
     )
 
     organization_type_name = forms.ModelChoiceField(
+        label="🔍 Filter organization by organization type",
         queryset=OrganizationType.objects.all(),
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/',
                                          forward=['country']),
@@ -172,34 +214,22 @@ class UrlSubmissionForm(forms.Form):
 
     for_organization = forms.ModelMultipleChoiceField(
         queryset=Organization.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(url='/game/autocomplete/organization-autocomplete/',
-                                                 forward=['organization_type_name', 'country'])
+        widget=autocomplete.ModelSelect2Multiple(
+            url='/game/autocomplete/organization-autocomplete/',
+            forward=['organization_type_name', 'country']),
+        help_text="Only approved organization are shown in this list. If your submitted organization is missing, please"
+                  " ask the competition manager to verify your organization."
     )
 
     url = forms.CharField(
-        help_text="Do NOT enter http:// or https://"
-    )
-
-    helper = FormHelper()
-    helper.form_class = 'form-horizontal'
-    helper.layout = Layout(
-        Field('text_input', css_class='input-xlarge'),
-        Field('textarea', rows="3", css_class='input-xlarge'),
-        'radio_buttons',
-        Field('checkboxes', style="background: #FAFAFA; padding: 10px;"),
-        AppendedText('appended_text', '.00'),
-        PrependedText('prepended_text', '<input type="checkbox" checked="checked" value="" id="" name="">',
-                      active=True),
-        PrependedText('prepended_text_two', '@'),
-        'multicolon_select',
-        FormActions(
-            Submit('save_changes', 'Save changes', css_class="btn-primary"),
-            Submit('cancel', 'Cancel'),
-        )
+        help_text=""
     )
 
     def clean_url(self):
         url = self.cleaned_data['url']
+
+        url = url.replace("https://", "")
+        url = url.replace("http://", "")
 
         extract = tldextract.extract(url)
         if not extract.suffix:
@@ -229,10 +259,11 @@ class UrlSubmissionForm(forms.Form):
         organisations = cleaned_data.get("for_organization")
         url = cleaned_data.get("url")
 
-        if not organisations or not url:
-            raise forms.ValidationError(
-                "Fix the errors."
-            )
+        if not organisations:
+            raise forms.ValidationError("Organization missing!")
+
+        if not url:
+            raise forms.ValidationError("Url missing!")
 
         log.info(organisations)
 

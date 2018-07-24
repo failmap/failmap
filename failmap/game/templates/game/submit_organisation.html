@@ -1,7 +1,28 @@
 {% extends 'game/base.html' %}
 {% load crispy_forms_tags %}
-
 {% block content %}
+
+    <style>
+    .mw-wrap {
+        width: 100% !important;
+    }
+</style>
+<script>
+    $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID, something) {
+        console.log("e");
+        console.log(e);
+        console.log("place");
+        console.log(place); // google place object
+        console.log("lat");
+        console.log(lat); // created marker coordinates
+        console.log("lng");
+        console.log(lng); // created marker coordinates
+        console.log("wdiget");
+        console.log(locationInputElem); // django widget textarea widget (hidden)
+        console.log("mapwrapid");
+        console.log(mapWrapID); // map widget wrapper element ID
+});
+</script>
 
     {% if success %}
         <div class="alert alert-success" role="alert">
@@ -16,6 +37,11 @@
     {% endif %}
 
     <h1>Suggest a new organisation</h1>
+    <p>
+    Suggesting a new organization correctly can take some work, as you need to find enough sources to verify the
+    organization actually exist. Please specify their website in the evidence, their wikipedia page and wikidata Q
+    number to complete the process.
+    </p>
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}
         <br />

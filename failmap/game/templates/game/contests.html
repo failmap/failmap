@@ -18,10 +18,6 @@
          </div>
     {% endif %}
 
-    <p>
-        Current Contest: {{ contest.name }}
-    </p>
-
     {% comment "Find out how to re-use a list." %}
     {% endcomment %}
 
@@ -29,24 +25,23 @@
     <table class="table">
     <thead>
     <tr>
-        <th>#</th>
         <th></th>
         <th>Name</th>
+        <th>Info</th>
         <th>From</th>
         <th>Until</th>
-        <th>Filters</th>
     </tr>
     </thead>
     <tbody>
-    {% for contest in active_contests %}
-        <tr>
-            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ contest.id }}">
+    {% for a_contest in active_contests %}
+        <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
+            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
                 <input type="submit" value="join"></form></td>
-            <td><img src="{{ contest.logo }}" height="25"/></td>
-            <td>{{ contest.name }}</td>
-            <td>{{ contest.from_moment }}</td>
-            <td>{{ contest.until_moment }} <div id="countdown_{{ contest.id }}">countdown...</div></td>
-            <td>{{ contest.filters }}</td>
+            <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
+                {{ a_contest.name }}</td>
+            <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
+            <td>{{ a_contest.from_moment }}</td>
+            <td>{{ a_contest.until_moment }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6">-</td></tr>
@@ -58,23 +53,23 @@
     <table class="table">
     <thead>
     <tr>
-        <th>#</th>
-        <th>Logo</th>
+        <th></th>
         <th>Name</th>
+        <th>Info</th>
         <th>From</th>
         <th>Until</th>
-        <th>Filters</th>
     </tr>
     </thead>
     <tbody>
-    {% for contest in future_contests %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ contest.logo }}</td>
-            <td>{{ contest.name }}</td>
-            <td>{{ contest.from }}</td>
-            <td>{{ contest.until }}</td>
-            <td>{{ contest.filters }}</td>
+    {% for a_contest in future_contests %}
+        <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
+            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
+                <input type="submit" value="join"></form></td>
+            <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
+                {{ a_contest.name }}</td>
+            <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
+            <td>{{ a_contest.from_moment }}</td>
+            <td>{{ a_contest.until_moment }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6">-</td></tr>
@@ -86,23 +81,19 @@
     <table class="table">
     <thead>
     <tr>
-        <th>#</th>
-        <th>Logo</th>
         <th>Name</th>
         <th>From</th>
         <th>Until</th>
-        <th>Filters</th>
     </tr>
     </thead>
     <tbody>
-    {% for contest in expired_contests %}
+    {% for a_contest in expired_contests %}
         <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ contest.logo }}</td>
-            <td>{{ contest.name }}</td>
-            <td>{{ contest.from }}</td>
-            <td>{{ contest.until }}</td>
-            <td>{{ contest.filters }}</td>
+            <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
+                {{ a_contest.name }}</td>
+            <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
+            <td>{{ a_contest.from_moment }}</td>
+            <td>{{ a_contest.until_moment }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="6">-</td></tr>

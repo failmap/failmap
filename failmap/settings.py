@@ -105,7 +105,8 @@ INSTALLED_APPS = [
     'bootstrapform',  # Required for nicer formatting of forms with the default templates
     'helpdesk',  # This is us!
 
-
+    'mapwidgets',
+    'colorful',
     # others:
     # 'mapwidgets',  no gdal available yet, try again later
     # 'cachalot',  # query cache, is not faster.
@@ -782,12 +783,12 @@ LOGOUT_REDIRECT_URL = '/'
 
 MAP_WIDGETS = {
     "GooglePointFieldWidget": (
-        ("zoom", 15),
-        ("mapCenterLocationName", "utrecht"),
-        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {'country': 'nl'}}),
-        ("markerFitZoom", 12),
+        ("zoom", 4),
+        ("mapCenterLocationName", "Europe"),
+        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {}}),  # 'country': 'nl'
+        ("markerFitZoom", 17),
     ),
-    "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyDQE_dmG0ceayxXQrVQbDH-D_9wB9vp7fI")
+    "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo")
 }
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'

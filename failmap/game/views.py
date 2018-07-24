@@ -13,7 +13,7 @@ from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.map.calculate import get_calculation
 from failmap.organizations.models import Organization, OrganizationType, Url
-from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
+from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
 
@@ -26,13 +26,22 @@ ten_minutes = 60 * 10
 # workaround to start a contest view, has to be rewritten to use the configured default and fallback etc
 def get_default_contest(request):
     try:
-        if request.session['contest']:
+        if request.session.get('contest', 0):
+            # log.debug("Returning a contest from session.")
             return Contest.objects.get(id=request.session['contest'])
         else:
-            return Contest.objects.first()
-    # temp supressing ALL exceptions
-    # todo: make this sane again
-    except (OperationalError, Exception, Contest.DoesNotExist):
+            # get the first contest that is currently active, if nothing is active, get the first contest.
+            try:
+                # log.debug("Trying to find the earliest active contest")
+                return Contest.objects.all().filter(
+                    until_moment__gte=datetime.now(pytz.utc),
+                    from_moment__lte=datetime.now(pytz.utc)).first()
+            except ObjectDoesNotExist:
+                # log.debug("Get the first contest ever")
+                return Contest.objects.first()
+
+    except (OperationalError, Contest.DoesNotExist):
+        # log.debug("Fallback contest value")
         return 0
 
 
@@ -95,20 +104,39 @@ def submit_organisation(request):
     return render(request, 'game/submit_organisation.html', {'form': form})
 
 
-@cache_page(ten_minutes)
 def scores(request):
 
-    teams = Team.objects.all().filter(participating_in_contest=get_default_contest(request))
+    # todo: this param handling code is absolutely disgusting, it should be more beautiful.
+    submitted_contest = request.GET.get('contest', "")
+    if submitted_contest is not None and submitted_contest.isnumeric():
+        submitted_contest = int(submitted_contest)
+    else:
+        submitted_contest = 0
+
+    if submitted_contest > -1:
+        try:
+            contest = Contest.objects.get(id=submitted_contest)
+        except ObjectDoesNotExist:
+            contest = get_default_contest(request)
+    else:
+        contest = get_default_contest(request)
+
+    teams = Team.objects.all().filter(participating_in_contest=contest)
 
     scores = []
     for team in teams:
-
-        # todo: je haalt nu ALLE scans op, niet de laatste per URL. Zelfde gedoe als altijd.
-        # todo: maak dit wel correct.
-        # Op de grote hoop zal het wel meevallen, voor het spel is het even voldoende... er zijn
-        # nog weinig urls gedeeld over organisaties / samenwerkingsverbanden enzo. Dus het toevoegen van
-        # al bestaande / gescande urls zal erg meevallen. Anders heb je mazzel.
+        """
+        Out of simplicity _ALL_ scores are retrieved instead of the last one per URL. Last one-per is not supported
+        in Django and therefore requires a lot of code. The deviation is negligible during a contest as not so much
+        will change in a day or two. On the long run it might increase the score a bit when incorrect fixes are applied
+        or a new error is found. If the discovered issue is fixed it doesn't deliver additional points.
+        """
         scans = list(TlsQualysScan.objects.all().filter(
+            endpoint__url__urlsubmission__added_by_team=team.id,
+            endpoint__url__urlsubmission__has_been_accepted=True
+        ))
+
+        scans += list(TlsScan.objects.all().filter(
             endpoint__url__urlsubmission__added_by_team=team.id,
             endpoint__url__urlsubmission__has_been_accepted=True
         ))
@@ -118,9 +146,22 @@ def scores(request):
             endpoint__url__urlsubmission__has_been_accepted=True
         ))
 
-        rejected = UrlSubmission.objects.all().filter(
+        scans += list(UrlGenericScan.objects.all().filter(
+            url__urlsubmission__added_by_team=team.id,
+            url__urlsubmission__has_been_accepted=True
+        ))
+
+        added_organizations = OrganizationSubmission.objects.all().filter(
             added_by_team=team.id,
-            has_been_rejected=True
+            has_been_accepted=True,
+            has_been_rejected=False
+
+        ).count()
+
+        rejected_urls = UrlSubmission.objects.all().filter(
+            added_by_team=team.id,
+            has_been_accepted=False,
+            has_been_rejected=True,
         ).count()
 
         final_calculation = {
@@ -136,17 +177,17 @@ def scores(request):
             final_calculation['medium'] += temp_calculation['medium']
             final_calculation['low'] += temp_calculation['low']
 
-        # todo: generic scans
-
         score_multiplier = {
             'low': 100,
             'medium': 250,
             'high': 1000,
             'rejected': 1337,
+            'organization': 500,
         }
 
         score = {
             'team': team.name,
+            'team_color': team.color,
             'high': final_calculation['high'],
             'high_multiplier': score_multiplier['high'],
             'high_score': final_calculation['high'] * score_multiplier['high'],
@@ -156,12 +197,16 @@ def scores(request):
             'low': final_calculation['low'],
             'low_multiplier': score_multiplier['low'],
             'low_score': final_calculation['low'] * score_multiplier['low'],
-            'rejected': rejected,
+            'added_organizations': added_organizations,
+            'added_organizations_multiplier': score_multiplier['organization'],
+            'added_organizations_score': added_organizations * score_multiplier['organization'],
+            'rejected': rejected_urls,
             'rejected_multiplier': score_multiplier['rejected'],
-            'rejected_score': rejected * score_multiplier['rejected'],
+            'rejected_score': rejected_urls * score_multiplier['rejected'],
             'total_score': final_calculation['high'] * score_multiplier['high'] +
             final_calculation['medium'] * score_multiplier['medium'] +
-            final_calculation['low'] * score_multiplier['low'] - rejected * score_multiplier['rejected']
+            final_calculation['low'] * score_multiplier['low'] +
+            added_organizations * score_multiplier['organization'] - rejected_urls * score_multiplier['rejected']
         }
 
         scores.append(score)
@@ -170,15 +215,16 @@ def scores(request):
     scores = sorted(scores, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
     return render(request, 'game/scores.html', {'team': get_team_info(request),
-                                                'scores': scores})
+                                                'scores': scores,
+                                                'contest': contest})
 
 
-@cache_page(ten_minutes)
 def contests(request):
 
     if request.POST:
         form = ContestForm(request.POST)
 
+        # todo: you cannot join expired contests... only active or future contests. Check this somewhere.
         if form.is_valid():
             if form.cleaned_data['id']:
                 request.session['contest'] = form.cleaned_data['id']
@@ -196,8 +242,11 @@ def contests(request):
 
     future_contests = Contest.objects.all().filter(from_moment__gte=datetime.now(pytz.utc))
 
+    # don't select a contest if you don't have one in your session.
+    contest = None
     try:
-        contest = get_default_contest(request)
+        if request.session.get("contest", 0):
+            contest = get_default_contest(request)
     except Contest.DoesNotExist:
         contest = None
 
@@ -210,7 +259,6 @@ def contests(request):
     })
 
 
-@cache_page(ten_minutes)
 def submitted_organizations(request):
     submitted_organizations = OrganizationSubmission.objects.all().filter(
         added_by_team__participating_in_contest=get_default_contest(request)).order_by('organization_name')
@@ -220,11 +268,11 @@ def submitted_organizations(request):
 
     return render(request, 'game/submitted_organizations.html', {
         'submitted_organizations': submitted_organizations,
-        'already_known_organizations': already_known_organizations})
+        'already_known_organizations': already_known_organizations,
+        'contest': get_default_contest(request)})
 
 
 # todo: contest required!
-@cache_page(ten_minutes)
 def submitted_urls(request):
     submitted_urls = UrlSubmission.objects.all().filter(
         added_by_team__participating_in_contest=get_default_contest(request)).order_by('for_organization', 'url')
@@ -235,12 +283,24 @@ def submitted_urls(request):
     # this is an expensive query, which will break with a lot of data... todo: determine when /if it breaks.
     already_known_urls = Url.objects.all().filter().exclude(id__in=submitted_urls.values('url_in_system'))
 
-    return render(request, 'game/submitted_urls.html', {'submitted_urls': submitted_urls,
-                                                        'already_known_urls': already_known_urls})
+    return render(request, 'game/submitted_urls.html',
+                  {'submitted_urls': submitted_urls,
+                   'already_known_urls': already_known_urls,
+                   'contest': get_default_contest(request)})
+
+
+@cache_page(ten_minutes)
+def rules_help(request):
+    return render(request, 'game/rules_help.html')
 
 
 @login_required(login_url='/authentication/login/')
 def teams(request):
+
+    # if you don't have a contest selected, you're required to do so...
+    # contest 0 can exist. ?
+    if request.session.get('contest', -1) < 0:
+        return redirect('/game/contests/')
 
     if request.POST:
         form = TeamForm(request.POST, contest=get_default_contest(request))

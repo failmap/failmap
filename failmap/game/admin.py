@@ -47,13 +47,13 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(Team)
 class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('name', 'participating_in_contest', 'allowed_to_submit_things')
+    list_display = ('name', 'color', 'participating_in_contest', 'allowed_to_submit_things')
     search_fields = ('name', 'participating_in_contest__name')
     list_filter = ('name', 'participating_in_contest__name', 'participating_in_contest__target_country')
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'participating_in_contest', 'allowed_to_submit_things')
+            'fields': ('name', 'color', 'participating_in_contest', 'allowed_to_submit_things')
         }),
         ('secret', {
             'fields': ('secret', ),

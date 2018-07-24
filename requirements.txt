@@ -94,7 +94,7 @@ django-fsm-log
 django-crispy-forms
 django-autocomplete-light
 geocoder
-# django-map-widgets  # uses gdal, not in alpine, cannot be fixed quickly so not using this.
+django-map-widgets  # uses gdal, now in alpine edge :)
 
 django-admin-sortable2  # nice sorting in the admin, used in map configurations.
 
@@ -107,6 +107,8 @@ django-markdown-deux
 beautifulsoup4
 lxml
 six
+
+django-colorful  # game team colors
 
 # function caching / query caching for slow stats graphs queries
 # another way has to be found, but until then

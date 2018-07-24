@@ -2,27 +2,23 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-    <h1>Submitted urls</h1>
-    <p>This is a list of submitted urls during this contest. Below it also shows the urls that already exist.
-    This information can help you to quickly determine if an organization is already being investigated and if some
-    information is still missing.</p>
-
+    <h1>Submitted organizations</h1>
     <p>
         Current Contest: {{ contest.name }}
     </p>
 
-    <h2>Submitted urls</h2>
+    <h2>Submitted organizations</h2>
+    <p>This is a list of submitted organizations during this contest. Below it also shows the urls that already exist.
+    This information can help you to quickly determine if an organization is already being investigated and if some
+    information is still missing.</p>
     <table class="table">
     <thead>
     <tr>
+        <th>Team</th>
         <th>Organization</th>
         <th>Country</th>
         <th>Type</th>
         <th>Address</th>
-        <th>Wikipedia</th>
-        <th>Wikidata</th>
-        <th>Geocode</th>
-        <th>evidence</th>
         <th>Accepted</th>
         <th>Rejected</th>
         <th>In system</th>
@@ -31,15 +27,12 @@
     </thead>
     <tbody>
     {% for organization in submitted_organizations %}
-        <tr>
+        <tr style="background-color: {{ organization.added_by_team.color }};">
+            <td>{{ organization.added_by_team.name }}</td>
             <td>{{ organization.organization_name }}</td>
             <td>{{ organization.organization_country }}</td>
             <td>{{ organization.organization_type_name }}</td>
             <td>{{ organization.organization_address }}</td>
-            <td>{{ organization.organization_wikipedia }}</td>
-            <td>{{ organization.organization_wikidata_code }}</td>
-            <td>{{ organization.organization_address_geocoded }}</td>
-            <td>{{ organization.evidence }}</td>
             <td>{{ organization.has_been_accepted }}</td>
             <td>{{ organization.has_been_rejected }}</td>
             <td>{{ organization.organization_in_system }}</td>
@@ -52,8 +45,8 @@
     </table>
 
 
-    <h2>Already known urls</h2>
-    <p>These urls where already in the database before the contest started.</p>
+    <h2>Already known organizations</h2>
+    <p>These organizations where already in the database before the contest started.</p>
     <table class="table">
     <thead>
     <tr>

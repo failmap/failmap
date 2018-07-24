@@ -1,0 +1,70 @@
+{% extends 'game/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+    <h1>Rules</h1>
+    <p>This page outlines some help / rules for joining this session.</p>
+
+    <h3>Rule 1: Quality over quantity</h3>
+    <p>Having a great dataset will increase the likelyhood of this tool being taken serious. It also makes the downloadable
+    datadumps of failmap a pleasure to use. Please take care that you're adding information that is genuine and of quality.
+        To assist you, there are pages that list already
+        <a href="/game/submitted_organizations/">known organizations</a> and
+        <a href="/game/submitted_urls/">known urls</a>: you can CTRL+F through it.</p>
+
+    <h3>Rule 2: Be excellent to each other</h3>
+    <p>Please help each other and try to answer each others questions.</p>
+
+    <h3>Rule 3: Don't cause abuse</h3>
+    <p>Make sure that you're not abusing online services or online infrastructure in your quest to find more information.
+    Usually there is a better way to find what you're looking for.</p>
+
+    <h1>Help</h1>
+
+    <h3>What kind of organizations can i add?</h3>
+    <p>There are various organization types, which all fall under "governmental" or "vital infrastructure".</p>
+    <p>You can add all governmental organizations and "agencies" that are exclusively government appointed.</p>
+    <p><b>Do not</b> submit urls of non-governmental organizations such as 3rd party companies that deliver services to the
+    government: for example, do not add the url of the webdesigner for the organization.</p>
+    <p><b>Do not</b> add urls of specific people such as linked-in pages.</p>
+
+    <h3>What can i do if i find a serious vulnerability</h3>
+    <p>Responsible disclosure. Read this: https://www.ncsc.nl/english/current-topics/news/responsible-disclosure-guideline.html</p>
+
+    <h3>Can i use automated submissions: yes, and be warned.</h3>
+    <p>Yes, you can submit urls automatically. But do make sure that you're taking into account using the CSRF value
+    and make sure your submissions are quality. Any submission that is not of quality will cost someone a lot of
+    time validating. Be sure to check first, especially on wildcard domains.</p>
+    <p>Be warned though: if you submit too much rubbish data, you / your team get kicked and all submitted data baleeted.</p>
+
+    <h3>What happens after something is added?</h3>
+    <p>For each url that has been added, an onboarding process starts. This process consists of the following steps:</p>
+    <ol>
+        <li>Trying to contact the url: finding endpoints of various services.</li>
+        <li>Perform tests on the endpoints.</li>
+        <li>If url is top level: Automatically determine if there are more subdomains.</li>
+        <li>Update the report on the website.</li>
+    </ol>
+
+    <h3>Where can i download all submitted information?</h3>
+    <p>
+        The filtered, higher quality, dataset can be downloaded from the failmap website we're currently working for.
+        Look at the bottom of the page at datasets. You'll find ready made datasets for various purposes.
+    </p>
+
+    <h3>Where can i find more domains / subdomains?</h3>
+    <p>There are many sources for subdomains:</p>
+    <ul>
+        <li>Various online services index subdomains and may have some unique ones.</li>
+        <li>If you have access to DNS servers or services, you might be able to get subdomains from that.</li>
+        <li>Certificate transparency databases such as crt.sh have long lists of subdomains and domains for which
+        TLS certificates are requested. Note that some of these may be outdated, expired and will miss all sites that
+        do not use encryption (no encryption = lots of points).</li>
+        <li>Tools like theHarvester and DNSrecon can help you find subdomains: this is also what this website does
+        after onboarding: use various standard tools to find subdomains in a friendly way.</li>
+        <li>Crawling the site, or searching using smart search queries on the larger search engines.</li>
+    </ul>
+
+
+{% endblock %}

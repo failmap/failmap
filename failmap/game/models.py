@@ -1,3 +1,4 @@
+from colorful.fields import RGBColorField
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -72,6 +73,13 @@ class Team(models.Model):
         null=True,
         blank=True,
         on_delete=models.CASCADE
+    )
+
+    color = RGBColorField(
+        colors=['#F2D7D5', '#FADBD8', '#EBDEF0', '#E8DAEF', '#D4E6F1', '#D6EAF8', '#D1F2EB', '#D0ECE7', '#D4EFDF',
+                '#D5F5E3', '#FCF3CF', '#FDEBD0', '#FAE5D3', '#F6DDCC'],
+        null=True,
+        blank=True,
     )
 
     allowed_to_submit_things = models.BooleanField(
