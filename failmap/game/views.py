@@ -5,6 +5,7 @@ import pytz
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from django.db.utils import OperationalError
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
@@ -354,8 +355,21 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
         if country:
             qs = qs.filter(country=country)
 
-        if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+        """
+        Do not search on a single character, it will give too many results. Two characters is a minimum.
+        """
+        if not self.q or len(self.q) < 3:
+            return qs
+
+        """
+        You can also search for organization type, which helps if you know the object is of a certain type.
+        It even supports multiple words, if you have a space, each word will be searched for. Up to three words...
+        """
+        if len(self.q.split(" ")) < 4:
+            for query in self.q.split(" "):
+                qs = qs.filter(Q(name__icontains=query) | Q(type__name__icontains=query))
+        else:
+            qs = qs.filter(name__icontains=self.q)
 
         return qs
 
@@ -373,6 +387,6 @@ class OrganizationTypeAutocomplete(autocomplete.Select2QuerySetView):
         #     qs = qs.filter(organization__country=country)
 
         if self.q:
-            qs = qs.filter(name__istartswith=self.q)
+            qs = qs.filter(name__icontains=self.q)
 
         return qs

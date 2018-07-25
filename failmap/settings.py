@@ -107,6 +107,7 @@ INSTALLED_APPS = [
 
     'mapwidgets',
     'colorful',
+    'django_select2',
     # others:
     # 'mapwidgets',  no gdal available yet, try again later
     # 'cachalot',  # query cache, is not faster.

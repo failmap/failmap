@@ -4,6 +4,15 @@
 
 {% block content %}
 
+    <script>
+
+    $(".js-example-tokenizer").select2({
+        tags: true,
+        tokenSeparators: [',', ' ']
+    })
+
+    </script>
+
     {% if success %}
         <div class="alert alert-success" role="alert">
             <strong>URL added!</strong> {{ url }} has been added!
@@ -20,14 +29,12 @@
 
     <h1>Suggest a new url</h1>
     <p>
-    It's possible to submit an URL to multiple organizations.
-    </p>
-    <p>
-    The country and organization type fields can be useful to more easily find the organization you're looking for.
+    It is possible to submit multiple urls to multiple organizations. Make sure that the added information is correct,
+    so that you don't bulk-submit a lot of urls for the wrong organization and vice versa.
     </p>
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}
         <br />
-        <button type="submit" class="save btn btn-lg btn-primary">DO THE THING</button>
+        <button type="submit" class="save btn btn-lg btn-primary">Yes, the information above is correct.</button>
     </form>
 {% endblock %}

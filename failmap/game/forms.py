@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
+from django_select2.forms import Select2TagWidget
 from mapwidgets.widgets import GooglePointFieldWidget
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
@@ -197,6 +198,10 @@ class OrganisationSubmissionForm(forms.Form):
 class UrlSubmissionForm(forms.Form):
     field_order = ('country', 'organization_type_name', 'for_organization', 'url',)
 
+    """
+    Disabled the country filters as it should be obvious from the organization result what type and country the
+    value is in.
+
     country = CountryField().formfield(
         label="🔍 Filter organization by country",
         required=False,
@@ -211,21 +216,45 @@ class UrlSubmissionForm(forms.Form):
         required=False,
         help_text="This only helps finding the correct organization."
     )
+    """
 
     for_organization = forms.ModelMultipleChoiceField(
+        label="Organizations",
         queryset=Organization.objects.all(),
         widget=autocomplete.ModelSelect2Multiple(
             url='/game/autocomplete/organization-autocomplete/',
             forward=['organization_type_name', 'country']),
-        help_text="Only approved organization are shown in this list. If your submitted organization is missing, please"
-                  " ask the competition manager to verify your organization."
+        help_text="Hints:"
+                  "<ul>"
+                  "<li>If you can't find the organization, try the abbreviated name.</li>"
+                  "<li>You can also search for organization type, and it's name at the same time.</li>"
+                  "<li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>"
+                  "here</a></li>"
+                  "<li>If your newly added organization is missing, please ask the competition host to verify your "
+                  "organization.</li>"
+                  "<li>Urls entered below will be added to all organizations selected here.</li>"
+                  "</ul>"
     )
 
-    url = forms.CharField(
-        help_text=""
+    # https://github.com/applegrew/django-select2/issues/33
+    # finding this took me two hours :) but it's still faster than developing it yourself.
+    websites = forms.ModelMultipleChoiceField(
+        queryset=Url.objects.all(),
+        widget=Select2TagWidget,
+        label="Websites",
+        help_text="Hints:"
+                  "<ul>"
+                  "<li>You can enter multiple sites at once using comma's or spaces as a delimiter. Example: The value "
+                  "<i>failmap.org, microsoft.com, apple.com </i> should by copy-pasting.</li>"
+                  "<li>The url will be added to all organizations selected above, be careful.</li>"
+                  "</ul>"
     )
 
-    def clean_url(self):
+    def clean_websites(self):
+        log.debug(self.cleaned_data['websites'])
+        return ""
+
+    def clean_website(self):
         url = self.cleaned_data['url']
 
         url = url.replace("https://", "")

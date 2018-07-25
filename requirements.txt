@@ -109,6 +109,7 @@ lxml
 six
 
 django-colorful  # game team colors
+django-select2  # game, add multiple urls in one go.
 
 # function caching / query caching for slow stats graphs queries
 # another way has to be found, but until then
