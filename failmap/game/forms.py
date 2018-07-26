@@ -1,8 +1,6 @@
 import logging
 import time
-from datetime import datetime
 
-import pytz
 import tldextract
 from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
@@ -38,10 +36,15 @@ class ContestForm(forms.Form):
         if not Contest.objects.all().filter(pk=id).exists():
             raise ValidationError(_('This contest does not exist.'), code='invalid',)
 
-        has_expired = Contest.objects.all().filter(pk=id, until_moment__lte=datetime.now(pytz.utc))
-        if has_expired:
-            raise ValidationError(_('This contest is already over, you cannot participate in it anymore.'),
-                                  code='invalid', )
+        """
+        We don't care if it's expired, as long as you cannot add things to expired contests it's fine. Some people that
+        joined a previous compo might still have the value set anyway and we're not going to validate the contest the
+        user is in on every request (or smart places).
+        """
+        # has_expired = Contest.objects.all().filter(pk=id, until_moment__lte=datetime.now(pytz.utc))
+        # if has_expired:
+        #     raise ValidationError(_('This contest is already over, you cannot participate in it anymore.'),
+        #                           code='invalid', )
 
 
 # todo: this doesn't work yet
@@ -239,7 +242,8 @@ class UrlSubmissionForm(forms.Form):
     # https://github.com/applegrew/django-select2/issues/33
     # finding this took me two hours :) but it's still faster than developing it yourself.
     websites = forms.ModelMultipleChoiceField(
-        queryset=Url.objects.all(),
+        # add a nonsense queryset so you can use the select2 tagging mode.
+        queryset=Url.objects.all().filter(url="thisdoesnotexistlolyoloswag!"),
         widget=Select2TagWidget,
         label="Websites",
         help_text="Hints:"

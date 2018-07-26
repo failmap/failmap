@@ -3,10 +3,12 @@ import logging
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                     Screenshot, TlsQualysScan, TlsQualysScratchpad, UrlIp)
+                                     Screenshot, TlsQualysScan, TlsQualysScratchpad, TlsScan,
+                                     UrlGenericScan, UrlIp)
 
 log = logging.getLogger(__package__)
 
@@ -57,12 +59,14 @@ def and_its_gone():
 
     # scanners
     EndpointGenericScanScratchpad.objects.all().delete()
+    UrlGenericScan.objects.all().delete()
     TlsQualysScratchpad.objects.all().delete()
     Screenshot.objects.all().delete()
     EndpointGenericScan.objects.all().delete()
     TlsQualysScan.objects.all().delete()
     Endpoint.objects.all().delete()
     UrlIp.objects.all().delete()
+    TlsScan.objects.all().delete()
 
     # organizations
     Promise.objects.all().delete()
@@ -70,3 +74,9 @@ def and_its_gone():
     Coordinate.objects.all().delete()
     Organization.objects.all().delete()
     OrganizationType.objects.all().delete()
+
+    # game
+    UrlSubmission.objects.all().delete()
+    OrganizationSubmission.objects.all().delete()
+    Team.objects.all().delete()
+    Contest.objects.all().delete()

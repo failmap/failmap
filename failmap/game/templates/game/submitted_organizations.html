@@ -1,5 +1,6 @@
 {% extends 'game/base.html' %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block content %}
     <h1>Submitted organizations</h1>
@@ -11,32 +12,31 @@
     <p>This is a list of submitted organizations during this contest. Below it also shows the urls that already exist.
     This information can help you to quickly determine if an organization is already being investigated and if some
     information is still missing.</p>
-    <table class="table">
-    <thead>
-    <tr>
-        <th>Team</th>
-        <th>Organization</th>
-        <th>Country</th>
-        <th>Type</th>
-        <th>Address</th>
-        <th>Accepted</th>
-        <th>Rejected</th>
-        <th>In system</th>
-        <th>Added on</th>
-    </tr>
-    </thead>
-    <tbody>
     {% for organization in submitted_organizations %}
-        <tr style="background-color: {{ organization.added_by_team.color }};">
-            <td>{{ organization.added_by_team.name }}</td>
+
+        {% ifchanged organization.organization_type_name %}
+            </tbody></table><h3>{{ organization.organization_type_name }}</h3><table class="table">
+                <thead>
+                <tr>
+                    <th width="20%">Organization</th>
+                    <th width="30%">Address</th>
+                    <th width="10%">Acceptation</th>
+                    <th width="20%">Added on</th>
+                </tr>
+                </thead><tbody>
+        {% endifchanged %}
+
+        <tr style="background-color: {{ organization.added_by_team.color }};" title="Added by {{ organization.added_by_team.name }}">
             <td>{{ organization.organization_name }}</td>
-            <td>{{ organization.organization_country }}</td>
-            <td>{{ organization.organization_type_name }}</td>
             <td>{{ organization.organization_address }}</td>
-            <td>{{ organization.has_been_accepted }}</td>
-            <td>{{ organization.has_been_rejected }}</td>
-            <td>{{ organization.organization_in_system }}</td>
-            <td>{{ organization.added_on }}</td>
+            {% if organization.has_been_accepted %}
+            <td style="color: green;">accepted</td>
+            {% elif organization.has_been_rejected %}
+            <td style="color: red;">rejected</td>
+            {% else %}
+            <td style="color: gray;">pending</td>
+            {% endif %}
+            <td>{{ organization.added_on|naturaltime  }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7">-</td></tr>
@@ -44,23 +44,26 @@
     </tbody>
     </table>
 
-
     <h2>Already known organizations</h2>
     <p>These organizations where already in the database before the contest started.</p>
-    <table class="table">
-    <thead>
-    <tr>
-        <th>name</th>
-        <th>type</th>
-        <th>country</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for organization in already_known_urls %}
+
+    {% for organization in already_known_organizations %}
+        {% ifchanged organization.type.name %}
+            </tbody></table><h3>{{ organization.type.name }}</h3><table class="table">
+                <thead>
+                <tr>
+                    <th width="50%">Name</th>
+                    <th width="15%">Twitter</th>
+                    <th width="15%">Wikidata</th>
+                    <th width="20%">Wikipedia</th>
+                </tr>
+                </thead><tbody>
+        {% endifchanged %}
         <tr>
             <td>{{ organization.name }}</td>
-            <td>{{ organization.type.name }} </td>
-            <td>{{ organization.country }}</td>
+            <td>{{ organization.twitter_handle }}</td>
+            <td>{{ organization.wikidata }}</td>
+            <td>{{ organization.wikipedia }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7">-</td></tr>

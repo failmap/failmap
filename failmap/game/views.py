@@ -225,7 +225,6 @@ def contests(request):
     if request.POST:
         form = ContestForm(request.POST)
 
-        # todo: you cannot join expired contests... only active or future contests. Check this somewhere.
         if form.is_valid():
             if form.cleaned_data['id']:
                 request.session['contest'] = form.cleaned_data['id']
@@ -259,13 +258,19 @@ def contests(request):
         'error': form.errors
     })
 
+# todo: validate organizatio type name...
+
 
 def submitted_organizations(request):
-    submitted_organizations = OrganizationSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=get_default_contest(request)).order_by('organization_name')
+    contest = get_default_contest(request)
 
-    already_known_organizations = Organization.objects.all().filter().exclude(
-        id__in=submitted_organizations.values('organization_in_system'))
+    submitted_organizations = OrganizationSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=contest
+    ).order_by('organization_type_name', 'organization_name')
+
+    already_known_organizations = Organization.objects.all().filter(country=contest.target_country).exclude(
+        id__in=submitted_organizations.values('organization_in_system').filter(organization_in_system__isnull=False)
+    ).select_related('type').order_by('type__name', 'name')
 
     return render(request, 'game/submitted_organizations.html', {
         'submitted_organizations': submitted_organizations,
@@ -275,19 +280,26 @@ def submitted_organizations(request):
 
 # todo: contest required!
 def submitted_urls(request):
-    submitted_urls = UrlSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=get_default_contest(request)).order_by('for_organization', 'url')
+    """
+    todo: overhaul to vue
+    The result set is extremely fast, but rendering takes up a few seconds. This should be done on the client to
+    save resources. This requires an overhaul of the system to Vue (as we do with the normal website).
+    """
+    contest = get_default_contest(request)
 
-    # todo: query doesn't work yet
-    # Another competition might be adding urls too.
-    # todo: show all other urls for this competition filter.
-    # this is an expensive query, which will break with a lot of data... todo: determine when /if it breaks.
-    already_known_urls = Url.objects.all().filter().exclude(id__in=submitted_urls.values('url_in_system'))
+    submitted_urls = UrlSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=contest).order_by(
+        'for_organization', 'url').select_related('added_by_team', 'for_organization', 'url_in_system')
+
+    # sqlite, when there is a NULL in the IN query, the set is NULL and you'll get nothing back.
+    already_known_urls = Url.objects.all().filter(organization__country=contest.target_country).exclude(
+        id__in=submitted_urls.values('url_in_system').filter(url_in_system__isnull=False)
+    ).order_by('url')  # No join / cartesian product for us :( .select_related('organization')
 
     return render(request, 'game/submitted_urls.html',
                   {'submitted_urls': submitted_urls,
                    'already_known_urls': already_known_urls,
-                   'contest': get_default_contest(request)})
+                   'contest': contest})
 
 
 @cache_page(ten_minutes)
@@ -309,6 +321,7 @@ def teams(request):
         if form.is_valid():
             if form.cleaned_data['team']:
                 request.session['team'] = form.cleaned_data['team'].id
+                return redirect('/game/scores/')
             else:
                 request.session['team'] = None
 
@@ -340,9 +353,6 @@ def get_team_info(request):
 
 class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        # Todo: Don't forget to filter out results depending on the visitor !
-        # if not self.request.user.is_authenticated():
-        #     return Organization.objects.none()
 
         qs = Organization.objects.all()
 
@@ -381,7 +391,7 @@ class OrganizationTypeAutocomplete(autocomplete.Select2QuerySetView):
 
         # country = self.forwarded.get('country', None)
         #
-        # todo: this gives a carthesian product, of course. Distinct on fields not supported by sqlite...
+        # todo: this gives a cartesian product, of course. Distinct on fields not supported by sqlite...
         # so that doesn't work during development.
         # if country:
         #     qs = qs.filter(organization__country=country)

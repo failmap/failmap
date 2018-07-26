@@ -12,7 +12,6 @@
         <th>&nbsp;</th>
         <th>&nbsp;</th>
         <th>&nbsp;</th>
-        <th>&nbsp;</th>
     </tr>
     <tr>
         <th>Rank</th>
@@ -33,7 +32,7 @@
             <td>{{ score.high }} * {{ score.high_multiplier }} = {{ score.high_score }}</td>
             <td>{{ score.medium }} * {{ score.medium_multiplier }} = {{ score.medium_score }}</td>
             <td>{{ score.low }} * {{ score.low_multiplier }} = {{ score.low_score }}</td>
-            <td>{{ score.rejected }} * {{ score.rejected_multiplier }} = {{ score.rejected_score }}</td>
+            <td>{{ score.rejected }} * -{{ score.rejected_multiplier }} = -{{ score.rejected_score }}</td>
             <td>{{ score.added_organizations }} * {{ score.added_organizations_multiplier }} = {{ score.added_organizations_score }}</td>
             <td>{{ score.total_score }}</td>
         </tr>
@@ -42,5 +41,10 @@
     {% endfor %}
     </tbody>
     </table>
+
+    {% if team.name %}
+        <a href="/game/submit_organization" type="button" class="btn btn-success bt-lg">Submit Organization</a>
+        <a href="/game/submit_url" type="button" class="btn btn-success bt-lg">Submit URL</a>
+    {% endif %}
 
 {% endblock %}

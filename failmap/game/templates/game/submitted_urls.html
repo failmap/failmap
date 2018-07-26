@@ -1,5 +1,6 @@
 {% extends 'game/base.html' %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block content %}
     <h1>Submitted urls</h1>
@@ -12,30 +13,29 @@
     </p>
 
     <h2>Submitted urls</h2>
-    <table class="table">
-    <thead>
-    <tr>
-        <th>Team</th>
-        <th>Organization</th>
-        <th>Url</th>
-        <th>Accepted</th>
-        <th>Rejected</th>
-        <th>In System?</th>
-        <th>Process</th>
-    </tr>
-    </thead>
-    <tbody>
     {% for url in submitted_urls %}
-        <tr style="background-color: {{ url.added_by_team.color }};">
-            <td>{{ url.added_by_team.name }}</td>
-            <td>{{ url.for_organization }}</td>
-            <td>{{ url.url }} </td>
-            <td>{{ url.has_been_accepted }}</td>
-            <td>{{ url.has_been_rejected }}</td>
-            <td>{{ url.url_in_system }}</td>
-            <td>{{ url.added_on }}</td>
+        {% ifchanged url.for_organization %}
+            </table><h3>{{ url.for_organization }}</h3><table class="table">
+            <tr>
+                <th width="50%">Url</th>
+                <th width="10%">Acceptation</th>
+                <th width="30%">Added when</th>
+                <th width="10%">Processed</th>
+            </tr>
+        {% endifchanged %}
+
+        <tr style="background-color: {{ url.added_by_team.color }};" title="Added by {{ url.added_by_team.name }}">
+            <td>{{ url.url }} (try: <a href="http://{{ url.url }}" target="_blank">http</a>,
+                              <a href="https://{{ url.url }}" target="_blank">https</a>)</td>
+            {% if url.has_been_accepted %}
+            <td style="color: green;">accepted</td>
+            {% elif url.has_been_rejected %}
+            <td style="color: red;">rejected</td>
+            {% else %}
+            <td style="color: gray;">pending</td>
+            {% endif %}
+            <td>{{ url.added_on|naturaltime }}</td>
             <td>{{ url.onboarding_stage }}</td>
-            <td>{{ url.onboarded }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7">-</td></tr>
@@ -46,15 +46,16 @@
 
     <h2>Already known urls</h2>
     <p>These urls where already in the database before the contest started.</p>
+    <p>These can be used to get some inspiration for finding new urls. Be careful of adding wildcard urls: it will
+    bite you if they don't exist (= all resolve to the same site / services).</p>
     <table class="table">
     <thead>
     <tr>
         <th>Url</th>
-        <th>is_dead</th>
-        <th>is_resolvable</th>
-        <th>is_wildcard</th>
-        <th>is_wildcard</th>
-        <th>is_wildcard</th>
+        <th>Dead (administrative)</th>
+        <th>Resolvable</th>
+        <th>Wildcard DNS (danger)</th>
+        <th>Processed</th>
     </tr>
     </thead>
     <tbody>
@@ -65,7 +66,6 @@
             <td>{{ url.is_dead }}</td>
             <td>{{ url.uses_dns_wildcard }}</td>
             <td>{{ url.onboarding_stage }}</td>
-            <td>{{ url.onboarded }}</td>
         </tr>
         {% empty %}
         <tr><td colspan="7">-</td></tr>
