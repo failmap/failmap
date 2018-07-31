@@ -1,5 +1,5 @@
 # base build on small footprint image
-FROM python:3.6-alpine3.7 as build
+FROM python:3.6-alpine3.8 as build
 
 RUN apk --no-cache add \
   build-base \
@@ -41,7 +41,7 @@ RUN tools/docker-install-dnscheck.sh
 RUN npm install osmtogeojson
 
 # restart with a clean image
-FROM python:3.6-alpine3.7
+FROM python:3.6-alpine3.8
 
 # mailcap includes mimetypes required by uwsgi
 RUN apk --no-cache add \
