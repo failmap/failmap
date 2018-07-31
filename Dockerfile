@@ -51,7 +51,7 @@ RUN apk --no-cache add \
   libressl \
   libxml2 \
   libxslt \
-  mariadb-client \
+  mariadb-connector-c \
   postgresql-libs \
   postgresql-client \
   sqlite \
