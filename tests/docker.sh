@@ -7,9 +7,9 @@ set -xe
 host=${1:-localhost}
 
 if test -f /bin/busybox;then
-  timeout="timeout -t ${TIMEOUT:-15}"
+  timeout="timeout -t ${TIMEOUT:-30}"
 else
-  timeout="timeout ${TIMEOUT:-15}"
+  timeout="timeout ${TIMEOUT:-30}"
 fi
 
 handle_exception(){
