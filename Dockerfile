@@ -52,7 +52,6 @@ RUN apk --no-cache add \
   libxml2 \
   libxslt \
   mariadb-client \
-  mariadb-client-libs \
   postgresql-libs \
   postgresql-client \
   sqlite \
