@@ -15,7 +15,7 @@ test: &test_template
   cache:
     paths:
       - "$CI_PROJECT_DIR/.pip-cache"
-    key: pr_pip_cache
+    key: "$CI_JOB_NAME"
 
   script:
     - tox -e test
@@ -152,7 +152,11 @@ image_test:
   cache:
     paths:
       - "$CI_PROJECT_DIR/.pip-cache"
-    key: pr_pip_cache
+    # use cache from 'test' job to import it in docker container
+    # for quicker docker builds
+    key: "test"
+    # don't update the cache after run as it will not be updated
+    # by this job 
     policy: pull
 
   services:
