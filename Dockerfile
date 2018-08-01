@@ -45,6 +45,8 @@ RUN npm install osmtogeojson
 # restart with a clean image
 FROM failmap/o-saft:latest
 
+USER root
+
 # mailcap includes mimetypes required by uwsgi
 RUN apk --no-cache add \
   zlib\
