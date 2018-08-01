@@ -12,8 +12,13 @@ else
   timeout="timeout ${TIMEOUT:-30}"
 fi
 
+if test "$(uname -s)" == Darwin && ! command -v timeout;then
+  timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
+fi
+
+
 handle_exception(){
-  docker stop failmap-$$ &
+  docker stop failmap-$$ >/dev/null 2>&1 &
 }
 
 # start docker container
@@ -26,7 +31,7 @@ trap "handle_exception" EXIT
 
 # wait for server to be ready
 sleep 3
-$timeout /bin/sh -c "while ! curl -sSIk http://$host:$port | grep 200\ OK;do sleep 1;done"
+$timeout /bin/sh -c "while ! curl -sSIk http://$host:$port | grep 200\\ OK;do sleep 1;done"
 
 # index page
 curl -s "http://$host:$port" |grep MSPAINT.EXE
@@ -37,6 +42,7 @@ curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/m
 # admin login
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ "http://$host:$port/admin/login/"|grep 200\ OK
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=$(grep csrftoken cookie-$$ | cut -f 7)&username=admin&password=faalkaart" "http://$host:$port/admin/login/"|grep 302\ Found
+rm -f cookie-$$
 
 # cleanup
 docker stop failmap-$$ || true
