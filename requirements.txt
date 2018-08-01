@@ -5,7 +5,7 @@
 # Django jet is blocking migration to 2.0
 # error:     from django.views.i18n import javascript_catalog
 # ImportError: cannot import name 'javascript_catalog'
-django
+django<2.1
 django-jet
 django-countries
 django-leaflet  # geojson editor in admin
