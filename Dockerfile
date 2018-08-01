@@ -1,5 +1,5 @@
 # base build on small footprint image
-FROM python:3.6-alpine3.8 as build
+FROM alpine:3.8 as build
 
 RUN apk --no-cache add \
   build-base \
@@ -20,19 +20,20 @@ RUN apk --no-cache add \
   nodejs-npm \
   libxml2-dev \
   libxslt-dev \
+  python3-dev \ 
   git
 
 # install app and dependencies in a artifact-able directory
-RUN pip install virtualenv
+RUN /usr/bin/pip3 install virtualenv
 RUN virtualenv /pyenv
 
 # install requirements seperately as they change less often then source, improved caching
 COPY requirements.txt /source/
 # copy pip cache to improve build speeds
 COPY ./.pip-cache/ /root/.cache/pip/
-RUN /pyenv/bin/pip install -r /source/requirements.txt
+RUN /pyenv/bin/pip3 install -r /source/requirements.txt
 COPY requirements.deploy.txt /source/
-RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
+RUN /pyenv/bin/pip3 install -r /source/requirements.deploy.txt
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -60,6 +61,7 @@ RUN apk --no-cache add \
   postgresql-client \
   sqlite \
   mailcap \
+  python3 \
   # runtime dependencies for dnscheck perl module
   perl \
   perl-config-any \
@@ -109,7 +111,7 @@ COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
 
 # Install app by linking source into virtualenv. This is against convention
 # but allows the source to be overwritten by a volume during development.
-RUN /pyenv/bin/pip install -e /source/ --no-deps
+RUN /pyenv/bin/pip3 install -e /source/ --no-deps
 
 WORKDIR /
 
