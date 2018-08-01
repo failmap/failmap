@@ -156,7 +156,8 @@ image_test:
     GIT_SUBMODULE_STRATEGY: recursive
 
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+    # cache previous build image if available for quicker build
+    - docker pull failmap/failmap:latest || true
 
   script:
     # build docker image to test building
