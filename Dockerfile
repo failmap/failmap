@@ -28,6 +28,8 @@ RUN virtualenv /pyenv
 
 # install requirements seperately as they change less often then source, improved caching
 COPY requirements.txt /source/
+# copy pip cache to improve build speeds
+COPY .pip-cache/ /root/.cache/pip/
 RUN /pyenv/bin/pip install -r /source/requirements.txt
 COPY requirements.deploy.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt

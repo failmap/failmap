@@ -3,7 +3,6 @@
 set -e -o pipefail
 
 # build failmap docker image
-
 docker build . --tag registry.gitlab.com/failmap/failmap:latest
 
 
