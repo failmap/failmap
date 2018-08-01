@@ -172,10 +172,6 @@ image_test:
     - docker pull failmap/failmap:latest || true
 
   script:
-    - ls -la
-    - ls -la .pip-cache || true
-    - find / -type d -name .pip-cache
-    - "false"
     # build docker image to test building
     - time docker build . --tag failmap/failmap:latest
 
