@@ -6,4 +6,5 @@ set -e -o pipefail
 docker build . --tag failmap/failmap:latest
 
 docker run -ti --name failmap-$$ failmap/failmap:latest --help
-docker cp failmap-$$:/root/.cache/pip .pip-cache/
+docker cp failmap-$$:/root/.cache/pip/ .pip-cache/
+docker rm failmap-$$

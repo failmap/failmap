@@ -18,7 +18,7 @@ fi
 
 
 handle_exception(){
-  docker stop failmap-$$ >/dev/null 2>&1 &
+  docker stop failmap-$$ &
 }
 
 # start docker container
@@ -26,6 +26,7 @@ docker run --rm --name failmap-$$ -e "ALLOWED_HOSTS=$host" -p 8000 -d \
   "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}" \
   production --migrate --loaddata development
 docker logs failmap-$$ -f 2>&1 | awk '$0="docker: "$0' &
+logs_pid=$!
 port="$(docker port failmap-$$ 8000/tcp | cut -d: -f2)"
 trap "handle_exception" EXIT
 
@@ -42,9 +43,12 @@ curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/m
 # admin login
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ "http://$host:$port/admin/login/"|grep 200\ OK
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=$(grep csrftoken cookie-$$ | cut -f 7)&username=admin&password=faalkaart" "http://$host:$port/admin/login/"|grep 302\ Found
-rm -f cookie-$$
+# test if osaft binary runs
+docker exec failmap-$$ /O-Saft/o-saft
 
 # cleanup
+rm -f cookie-$$
+kill -15 "$logs_pid"
 docker stop failmap-$$ || true
 trap "" EXIT
 
