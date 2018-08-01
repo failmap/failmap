@@ -30,6 +30,7 @@ RUN virtualenv /pyenv
 COPY requirements.txt /source/
 # copy pip cache to improve build speeds
 COPY ./.pip-cache/* /root/.cache/pip/
+RUN ls /root/.cache/pip/
 RUN /pyenv/bin/pip install -r /source/requirements.txt
 COPY requirements.deploy.txt /source/
 RUN /pyenv/bin/pip install -r /source/requirements.deploy.txt
