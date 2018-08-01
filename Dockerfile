@@ -41,7 +41,7 @@ RUN tools/docker-install-dnscheck.sh
 RUN npm install osmtogeojson
 
 # restart with a clean image
-FROM python:3.6-alpine3.8
+FROM failmap/o-saft:latest
 
 # mailcap includes mimetypes required by uwsgi
 RUN apk --no-cache add \
