@@ -153,6 +153,7 @@ image_test:
     paths:
       - "$CI_PROJECT_DIR/.pip-cache"
     key: pr_pip_cache
+    policy: pull
 
   services:
     - docker:dind
