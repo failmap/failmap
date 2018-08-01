@@ -4,9 +4,6 @@ stages:
   - staging
   - production
 
-before_script:
-  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-
 # functional testing
 test: &test_template
   stage: test
@@ -158,6 +155,9 @@ image_test:
     SYSTEM_TEST_TIMEOUT: 120
     GIT_SUBMODULE_STRATEGY: recursive
 
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+
   script:
     # build docker image to test building
     - time docker build . --tag failmap/failmap:latest
@@ -182,6 +182,9 @@ test_system:
   variables:
     SYSTEM_TEST_TIMEOUT: 120
     IMAGE: failmap/failmap:build
+
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
 
   script:
     - time tox -e system
@@ -223,6 +226,9 @@ production:
   image: failmap/ci:docker-git
   services:
   - docker:dind
+
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
 
   script:
     - export tag=$(git describe --exact-match --tags --abbrev=0)
