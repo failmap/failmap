@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=30)),
-                ('image', models.CharField(default='registry.gitlab.com/failmap/failmap:latest', max_length=200)),
+                ('image', models.CharField(default='failmap/failmap:latest', max_length=200)),
                 ('command', models.CharField(default='celery worker --log info --concurrency 1', max_length=200)),
             ],
         ),
