@@ -12,7 +12,7 @@ from failmap.celery import app, waitsome
 log = logging.getLogger(__name__)
 
 
-TIMEOUT = 30
+TIMEOUT = 60
 
 
 @pytest.fixture()
