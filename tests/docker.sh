@@ -17,9 +17,9 @@ if test "$(uname -s)" == Darwin && ! command -v timeout;then
 fi
 
 
-handle_exception(){
+exit_cleanup(){
   kill -15 "$logs_pid"
-  docker stop failmap-$$ &
+  docker stop failmap-$$ >/dev/null &
 }
 
 # start docker container
@@ -29,13 +29,11 @@ docker run --rm --name failmap-$$ -e "ALLOWED_HOSTS=$host" -p 8000 -d \
 docker logs failmap-$$ -f 2>&1 | awk '$0="docker: "$0' &
 logs_pid=$!
 port="$(docker port failmap-$$ 8000/tcp | cut -d: -f2)"
-trap "handle_exception" EXIT
+trap "exit_cleanup" EXIT
 
 # wait for server to be ready
 sleep 3
 $timeout /bin/sh -c "while ! curl -sSIk http://$host:$port 2>/dev/null| grep 200\\ OK;do sleep 1;done"
-
-inspec exec tests/docker.rb -t docker://failmap-$$
 
 # index page
 curl -s "http://$host:$port" |grep MSPAINT.EXE
@@ -47,11 +45,10 @@ curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/m
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ "http://$host:$port/admin/login/"|grep 200\ OK
 curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=$(grep csrftoken cookie-$$ | cut -f 7)&username=admin&password=faalkaart" "http://$host:$port/admin/login/"|grep 302\ Found
 
+# Test if o-saft runs
+docker exec failmap-$$ /O-Saft/o-saft
+
 # cleanup
 rm -f cookie-$$
-kill -15 "$logs_pid"
-sleep 1
-docker stop failmap-$$ || true
-trap "" EXIT
 
 echo "All good!"
