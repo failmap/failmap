@@ -38,7 +38,7 @@ services:
 
   # task executer
   worker:
-    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    image: "${IMAGE:-failmap/failmap:latest}"
     stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker
@@ -54,7 +54,7 @@ services:
 
   # web interfaces
   admin:
-    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    image: "${IMAGE:-failmap/failmap:latest}"
     stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker
@@ -72,7 +72,7 @@ services:
     command: production --migrate --loaddata development
 
   frontend:
-    image: "${IMAGE:-registry.gitlab.com/failmap/failmap:latest}"
+    image: "${IMAGE:-failmap/failmap:latest}"
     stop_signal: KILL  # tests run in ephemeral container, no need to wait for clean shutdown
     links:
       - broker

@@ -63,7 +63,7 @@
   pk: 1
   fields:
     name: Scanner worker
-    image: registry.gitlab.com/failmap/failmap:latest
+    image: failmap/failmap:latest
     command: celery worker --loglevel=info --concurrency=2
     volumes: client-certificate:/client-certificate
     instance_type: S3

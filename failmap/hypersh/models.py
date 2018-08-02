@@ -12,7 +12,7 @@ from raven.contrib.django.raven_compat.models import client
 
 from ..celery import app
 
-DEFAULT_IMAGE = 'registry.gitlab.com/failmap/failmap:latest'
+DEFAULT_IMAGE = 'failmap/failmap:latest'
 DEFAULT_COMMAND = 'celery worker --loglevel=info --concurrency=1'
 
 MAX_ERROR_COUNT = 5

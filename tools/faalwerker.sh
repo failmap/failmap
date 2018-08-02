@@ -12,7 +12,7 @@ tail -f $logfile 1>&3 &
 
 faalgastnaam="$(hostname -f)"
 faalcontainernaamvoorvoegsel=failmap-worker
-faalcontainerfaalimagenaam=registry.gitlab.com/failmap/failmap:latest
+faalcontainerfaalimagenaam=failmap/failmap:latest
 faalredis=redis://faalkaart.nl:1337/0
 faalp12bestand="$(realpath client.p12)"
 faallogfaallevel=info

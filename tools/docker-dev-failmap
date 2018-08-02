@@ -4,4 +4,4 @@ set -e -o pipefail
 
 # run failmap in a docker container with current source
 
-docker run -ti -v "$PWD:/source/" registry.gitlab.com/failmap/failmap:latest "$@"
+docker run -ti -v "$PWD:/source/" failmap/failmap:latest "$@"

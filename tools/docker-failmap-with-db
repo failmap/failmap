@@ -6,4 +6,4 @@ set -e -o pipefail
 
 database=$(realpath ${DB_NAME:-db.sqlite3})
 
-docker run -ti -v "$database:/db.sqlite3" registry.gitlab.com/failmap/failmap:latest "$@"
+docker run -ti -v "$database:/db.sqlite3" failmap/failmap:latest "$@"
