@@ -4,7 +4,7 @@ Failmap uses the Django translation system.
 
 We've tried to automate most of the quirks this system has to make translations straightforward.
 
-This tutorial assumes you've got a working installation, follow the (quickstart)[getting_started.md]
+This tutorial assumes you've got a working installation, follow the [quickstart](getting_started.md)
 
 ## Adding a language
 A list of languages is stored in /failmap/settings.py. You can modify the LANGUAGES variable to add your language. We

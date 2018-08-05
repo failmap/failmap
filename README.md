@@ -48,7 +48,7 @@ apt-get install git python3 direnv
 yum install git python3 direnv
 ```
 
-Or download and install each package seperately:
+Or download and install each package separately:
 
 - [git](https://git-scm.com/downloads) (download and install)
 - [python3.6](https://www.python.org/downloads/) (download and install)
@@ -89,7 +89,7 @@ eval `direnv hook tcsh`
 
 
 ## 3: Generic install steps
-Install Tox, which helps to install the rest of the dependancies of this project:
+Install Tox, which helps to install the rest of the dependencies of this project:
 
 ```bash
 pip3 install --user tox
@@ -121,7 +121,7 @@ Running Tox once creates a development Virtualenv in .tox/default/ which is auto
 tox
 ```
 
-After completing succesfully Failmap is available to run. For example, to show a list of commands:
+After completing successfully Failmap is available to run. For example, to show a list of commands:
 
 ```bash
 failmap help
