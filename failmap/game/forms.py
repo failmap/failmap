@@ -6,6 +6,7 @@ from dal import autocomplete
 # from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
 from django.db import transaction
+from django.db.models.functions import Lower
 from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -199,17 +200,78 @@ class OrganisationSubmissionForm(forms.Form):
 
 
 class UrlSubmissionForm(forms.Form):
-    field_order = ('country', 'organization_type_name', 'for_organization', 'url',)
+
+    contest = None
+    team = None
+
+    def __init__(self, *args, **kwargs):
+
+        self.contest = kwargs.pop('contest', None)
+        self.team = kwargs.pop('team', None)
+
+        # log.debug(args)
+        # z = QueryDict.copy(args)
+        # log.debug(z.get('websites', None))
+        super(UrlSubmissionForm, self).__init__(*args, **kwargs)
+
+        # So apparently i've got to "inject" the choices into the websites.
+        # And we do that by creating tupels of whatever has just been sent... because there is no XSS risk there
+        # at all...
+        # I'd rather overwrite the clean method, but that doesn't seem to be possible.
+        # self.fields["websites"].choices = [("a", "a")]
+
+        self.fields['for_organization'] = forms.ModelMultipleChoiceField(
+            label="Organizations",
+            queryset=Organization.objects.all().filter(country=self.contest.target_country, is_dead=False
+                                                       ).order_by(Lower('name')),
+            widget=autocomplete.ModelSelect2Multiple(
+                url='/game/autocomplete/organization-autocomplete/',
+                forward=['organization_type_name', 'country']),
+            help_text="Hints:"
+                      "<ul>"
+                      "<li>If you can't find the organization, try the abbreviated name.</li>"
+                      "<li>You can also search for organization type, and it's name at the same time.</li>"
+                      "<li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>"
+                      "here</a></li>"
+                      "<li>If your newly added organization is missing, please ask the competition host to verify your "
+                      "organization.</li>"
+                      "<li>Urls entered below will be added to all organizations selected here.</li>"
+                      "</ul>"
+        )
+
+        # https://github.com/applegrew/django-select2/issues/33
+        # finding this took me two hours :) but it's still faster than developing it yourself.
+        # empty choices allows adding whatever you want yourself.
+        # The trick is not to use a MultipleChoiceField, as the clean_function is not hit. But you CAN use a charfield
+        # and then see what's being submitted the normal way.
+        self.fields['websites'] = forms.CharField(
+            # add a nonsense queryset so you can use the select2 tagging mode.
+            # queryset=Url.objects.all().filter(url="thisdoesnotexistlolyoloswag!"),
+            widget=Select2TagWidget,
+            label="Addresses of Services, Websites and other online presence.",
+            help_text="Hints:"
+                      "<ul>"
+                      "<li>You can enter multiple sites at once using comma's or spaces as a delimiter. "
+                      "Example: The value "
+                      "<i>failmap.org, microsoft.com, apple.com </i> should by copy-pasting.</li>"
+                      "<li>The url will be added to all organizations selected above, be careful.</li>"
+                      "<li>It's not possible to enter IP addresses, as the IP's behind services/organizations "
+                      "often change.</li>"
+                      "</ul>",
+        )
+
+        # Helps Django Autocomplete light with selecting the right autocompleted values.
+        self.fields['country'] = CountryField().formfield(
+            label="🔍 Filter organization by country",
+            required=False,
+            help_text="This only helps finding the correct organization.",
+            initial=self.contest.target_country,
+            widget=forms.HiddenInput()
+        )
 
     """
-    Disabled the country filters as it should be obvious from the organization result what type and country the
-    value is in.
-
-    country = CountryField().formfield(
-        label="🔍 Filter organization by country",
-        required=False,
-        help_text="This only helps finding the correct organization."
-    )
+    The organization type name should be obvious from the object description. This was disabled due to the extra
+    query.
 
     organization_type_name = forms.ModelChoiceField(
         label="🔍 Filter organization by organization type",
@@ -221,102 +283,103 @@ class UrlSubmissionForm(forms.Form):
     )
     """
 
-    for_organization = forms.ModelMultipleChoiceField(
-        label="Organizations",
-        queryset=Organization.objects.all(),
-        widget=autocomplete.ModelSelect2Multiple(
-            url='/game/autocomplete/organization-autocomplete/',
-            forward=['organization_type_name', 'country']),
-        help_text="Hints:"
-                  "<ul>"
-                  "<li>If you can't find the organization, try the abbreviated name.</li>"
-                  "<li>You can also search for organization type, and it's name at the same time.</li>"
-                  "<li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>"
-                  "here</a></li>"
-                  "<li>If your newly added organization is missing, please ask the competition host to verify your "
-                  "organization.</li>"
-                  "<li>Urls entered below will be added to all organizations selected here.</li>"
-                  "</ul>"
-    )
+    @staticmethod
+    def filter_websites(sites):
+        incomplete = []
+        not_resolvable = []
+        valid = []
 
-    # https://github.com/applegrew/django-select2/issues/33
-    # finding this took me two hours :) but it's still faster than developing it yourself.
-    websites = forms.ModelMultipleChoiceField(
-        # add a nonsense queryset so you can use the select2 tagging mode.
-        queryset=Url.objects.all().filter(url="thisdoesnotexistlolyoloswag!"),
-        widget=Select2TagWidget,
-        label="Websites",
-        help_text="Hints:"
-                  "<ul>"
-                  "<li>You can enter multiple sites at once using comma's or spaces as a delimiter. Example: The value "
-                  "<i>failmap.org, microsoft.com, apple.com </i> should by copy-pasting.</li>"
-                  "<li>The url will be added to all organizations selected above, be careful.</li>"
-                  "</ul>"
-    )
+        for url in sites:
+            url = url.replace("https://", "")
+            url = url.replace("http://", "")
+
+            extract = tldextract.extract(url)
+            if not extract.suffix:
+                incomplete.append(url)
+                continue
+
+            # tld extract has also removed ports, usernames, passwords and other nonsense.
+            url = "%s.%s" % (extract.domain, extract.suffix)
+
+            # see if the URL resolves at all:
+            if not resolves(url):
+                not_resolvable.append(url)
+                continue
+
+            valid.append(url)
+
+        return incomplete, not_resolvable, valid
 
     def clean_websites(self):
-        log.debug(self.cleaned_data['websites'])
-        return ""
+        sites = self.data.getlist('websites', [])
+        incomplete, not_resolvable, valid = self.filter_websites(sites)
 
-    def clean_website(self):
-        url = self.cleaned_data['url']
+        if incomplete:
+            raise ValidationError('The following websites are not complete and have been removed: '
+                                  '%s. Please review your submission and try again.' % incomplete, code='not_complete')
 
-        url = url.replace("https://", "")
-        url = url.replace("http://", "")
+        if not_resolvable:
+            raise ValidationError('The following sites are not resolvable and have been removed: %s. '
+                                  'Please review your submission and try again.'
+                                  % not_resolvable,
+                                  code='not_resolvable')
 
-        extract = tldextract.extract(url)
-        if not extract.suffix:
-            raise ValidationError(
-                _('Invalid or missing suffix (like .com etc): %(url)s'),
-                code='invalid',
-                params={'url': url},
-            )
+        self.fields["websites"].choices = valid
+        self.fields["websites"].initial = valid
+        self.fields["websites"].value = valid
 
-        # see if the URL resolves at all:
-        if not resolves(url):
-            raise ValidationError(
-                _('URL does not resolve (anymore): %(url)s.'),
-                code='does_not_resolve',
-                params={'url': url},
-            )
+        return valid
 
-        return url
+    # todo: clean organizations... je mag er niet teveel van hebben, dat is niet geloofwaardig.
 
-    # clean moet NA de velden... niet VOOR de velden...
+    def clean_for_organization(self):
+        if not self.contest:
+            raise ValidationError('You\'re not in a contest', 'no_contest')
+
+        # mandatory check is done elsewhere.
+        # You'll be getting a list of numbers.
+        organizations = self.data.getlist('for_organization', [])
+
+        existing = []
+
+        for organization in organizations:
+            if not Organization.objects.filter(pk=organization,
+                                               country=self.contest.target_country, is_dead=False).exists():
+                raise ValidationError('One or more selected organizations do not exist anymore: %s' % organization)
+
+        return existing
+
     def clean(self):
-
-        # this is a (i think) dirty hack. The clean should be called after all fields have been validated.
-        # but this is run even though there are ValidationErrors on fields.
-
-        cleaned_data = super().clean()
-        organisations = cleaned_data.get("for_organization")
-        url = cleaned_data.get("url")
+        organisations = self.data.getlist('for_organization', [])
+        websites = self.clean_websites()
 
         if not organisations:
             raise forms.ValidationError("Organization missing!")
 
-        if not url:
-            raise forms.ValidationError("Url missing!")
+        if not websites:
+            raise forms.ValidationError("Websites missing!")
 
         log.info(organisations)
 
         # todo: raise multiple validation errors, so you can delete multiple organizations in the list
-        # perhaps, use the add error.
+        # todo: ignore things that are already in the list: giving an error is obnoxious. Just ignore it / delete
+        # those entries.
         for organization in organisations:
-            if Url.objects.all().filter(url=url, organization=organization).exists():
-                raise ValidationError(
-                    _('This URL %(url)s is already in the production data for organization %(organization)s'),
-                    code='invalid',
-                    params={'url': url, 'organization': organization},
-                )
+            for website in websites:
+                if Url.objects.all().filter(url=website, organization=organization).exists():
+                    raise ValidationError(
+                        _('This URL %(url)s is already in the production data for organization %(organization)s'),
+                        code='invalid',
+                        params={'websites': websites, 'organization': organization},
+                    )
 
-        # See if the URL is already suggested for these organizations
-            if UrlSubmission.objects.all().filter(url=url, for_organization=organization).exists():
-                raise ValidationError(
-                    _('This URL %(url)s is already suggested for organization %(organization)s'),
-                    code='invalid',
-                    params={'url': url, 'organization': organization},
-                )
+            # See if the URL is already suggested for these organizations
+                if UrlSubmission.objects.all().filter(url=website, for_organization=organization).exists():
+                    raise ValidationError(
+                        _('This URL %(url)s is already suggested for organization %(organization)s'),
+                        code='invalid',
+                        params={'url': website, 'organization': organization},
+                    )
 
         # See if the URL already exists, for these organizations
 
@@ -324,27 +387,30 @@ class UrlSubmissionForm(forms.Form):
     @transaction.atomic
     def save(self, team):
         # validate again to prevent race conditions
-        self.clean_url()
+        self.clean_websites()
         self.clean()
 
+        log.debug(self)
+
         organizations = self.cleaned_data.get('for_organization', None)
-        url = self.cleaned_data.get('url', None)
+        websites = self.cleaned_data.get('websites', None)
 
         # a horrible error...
-        if not organizations or not url:
+        if not organizations or not websites:
             raise forms.ValidationError(
                 "Race condition error: while form was submitted duplicated where created. Try again to see duplicated."
             )
 
         for organization in organizations:
-            submission = UrlSubmission(
-                added_by_team=Team.objects.get(pk=team),
-                for_organization=organization,
-                url=url,
-                added_on=timezone.now(),
-                has_been_accepted=False,
-            )
-            submission.save()
+            for website in websites:
+                submission = UrlSubmission(
+                    added_by_team=Team.objects.get(pk=team),
+                    for_organization=organization,
+                    url=website,
+                    added_on=timezone.now(),
+                    has_been_accepted=False,
+                )
+                submission.save()
 
     # class Meta:
         # model = UrlSubmission  # not bound to a model, we have to write save ourselves since we want to do

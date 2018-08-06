@@ -6,6 +6,7 @@ from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.db.utils import OperationalError
 from django.shortcuts import redirect, render
 from django.views.decorators.cache import cache_page
@@ -55,7 +56,7 @@ def submit_url(request):
         return redirect('/game/team/')
 
     if request.POST:
-        form = UrlSubmissionForm(request.POST)
+        form = UrlSubmissionForm(request.POST, team=request.session.get('team'), contest=get_default_contest(request))
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
@@ -69,13 +70,13 @@ def submit_url(request):
                 'for_organization': form.cleaned_data.get('for_organization')
             }
             added_url = form.cleaned_data.get('url')
-            form = UrlSubmissionForm(data)
+            form = UrlSubmissionForm(data, team=request.session.get('team'), contest=get_default_contest(request))
 
             return render(request, 'game/submit_url.html', {'form': form, 'success': True,
-                                                            'url': added_url})
+                                                            'url': added_url, })
 
     else:
-        form = UrlSubmissionForm()
+        form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
     return render(request, 'game/submit_url.html', {'form': form,
                                                     'error': form.errors})
@@ -352,9 +353,13 @@ def get_team_info(request):
 
 
 class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
+
+    # allow a bit of scrolling
+    paginate_by = 100
+
     def get_queryset(self):
 
-        qs = Organization.objects.all()
+        qs = Organization.objects.all().filter(is_dead=False).order_by(Lower('name'))
 
         organization_type = self.forwarded.get('organization_type_name', None)
         country = self.forwarded.get('country', None)
