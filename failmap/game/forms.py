@@ -96,6 +96,17 @@ class TeamForm(forms.Form):
 
 # http://django-autocomplete-light.readthedocs.io/en/master/tutorial.html
 class OrganisationSubmissionForm(forms.Form):
+
+    contest = None
+    team = None
+
+    def __init__(self, *args, **kwargs):
+
+        self.contest = kwargs.pop('contest', None)
+        self.team = kwargs.pop('team', None)
+
+        super(OrganisationSubmissionForm, self).__init__(*args, **kwargs)
+
     field_order = ('organization_country', 'organization_type_name', 'organization_name',
                    'organization_address_geocoded', 'organization_address',
                    'organization_evidence')
@@ -166,6 +177,14 @@ class OrganisationSubmissionForm(forms.Form):
                 params={'organization': name},
             )
 
+        # team not participating in contest
+        if not Team.objects.all().filter(pk=self.team, participating_in_contest=self.contest).exists():
+            raise ValidationError("This team does not participate in this contest.")
+
+        # check if the contest is expired
+        if timezone.now() > self.contest.until_moment:
+            raise ValidationError("This contest has expired. You can't submit anything anymore. Too bad.")
+
     @transaction.atomic
     def save(self, team):
         organization_country = self.cleaned_data.get('organization_country', None)
@@ -209,16 +228,7 @@ class UrlSubmissionForm(forms.Form):
         self.contest = kwargs.pop('contest', None)
         self.team = kwargs.pop('team', None)
 
-        # log.debug(args)
-        # z = QueryDict.copy(args)
-        # log.debug(z.get('websites', None))
         super(UrlSubmissionForm, self).__init__(*args, **kwargs)
-
-        # So apparently i've got to "inject" the choices into the websites.
-        # And we do that by creating tupels of whatever has just been sent... because there is no XSS risk there
-        # at all...
-        # I'd rather overwrite the clean method, but that doesn't seem to be possible.
-        # self.fields["websites"].choices = [("a", "a")]
 
         self.fields['for_organization'] = forms.ModelMultipleChoiceField(
             label="Organizations",
@@ -239,24 +249,42 @@ class UrlSubmissionForm(forms.Form):
                       "</ul>"
         )
 
+        # try and inject values into the tagswidget
+        try:
+            sites = self.data.getlist('websites', [])
+            incomplete, not_resolvable, valid = self.filter_websites(sites)
+            # log.debug("incomplete: %s, not_resolvable: %s, valid: %s" % (incomplete, not_resolvable, valid))
+            initial = valid
+            choices = []
+            for site in valid:
+                choices.append((site, site))
+            # log.debug("things where submitted: %s" % valid)
+        except AttributeError:
+            # nothing was submitted
+            initial = []
+            choices = []
+
+        def getChoices():
+            return [("a", "a"), ('repelsteeltje', 'repelsteeltje'), ('elger.nl', 'elger.nl')]
+
         # https://github.com/applegrew/django-select2/issues/33
         # finding this took me two hours :) but it's still faster than developing it yourself.
-        # empty choices allows adding whatever you want yourself.
-        # The trick is not to use a MultipleChoiceField, as the clean_function is not hit. But you CAN use a charfield
-        # and then see what's being submitted the normal way.
-        self.fields['websites'] = forms.CharField(
-            # add a nonsense queryset so you can use the select2 tagging mode.
-            # queryset=Url.objects.all().filter(url="thisdoesnotexistlolyoloswag!"),
+        # The issue was the documentation was not online.
+
+        self.fields['websites'] = forms.MultipleChoiceField(
             widget=Select2TagWidget,
+            choices=choices,
+            initial=initial,
             label="Addresses of Services, Websites and other online presence.",
             help_text="Hints:"
                       "<ul>"
-                      "<li>You can enter multiple sites at once using comma's or spaces as a delimiter. "
+                      "<li>You can enter multiple sites at once using comma or space as a delimiter. "
                       "Example: The value "
                       "<i>failmap.org, microsoft.com, apple.com </i> should by copy-pasting.</li>"
                       "<li>The url will be added to all organizations selected above, be careful.</li>"
                       "<li>It's not possible to enter IP addresses, as the IP's behind services/organizations "
                       "often change.</li>"
+                      "<li>Urls that don't resolve or are in incorrect format will be automatically removed.</li>"
                       "</ul>",
         )
 
@@ -311,8 +339,12 @@ class UrlSubmissionForm(forms.Form):
         return incomplete, not_resolvable, valid
 
     def clean_websites(self):
-        sites = self.data.getlist('websites', [])
-        incomplete, not_resolvable, valid = self.filter_websites(sites)
+        try:
+            sites = self.data.getlist('websites', [])
+            incomplete, not_resolvable, valid = self.filter_websites(sites)
+        except AttributeError:
+            # nothing submitted
+            incomplete, not_resolvable, valid = [], [], []
 
         if incomplete:
             raise ValidationError('The following websites are not complete and have been removed: '
@@ -324,13 +356,7 @@ class UrlSubmissionForm(forms.Form):
                                   % not_resolvable,
                                   code='not_resolvable')
 
-        self.fields["websites"].choices = valid
-        self.fields["websites"].initial = valid
-        self.fields["websites"].value = valid
-
         return valid
-
-    # todo: clean organizations... je mag er niet teveel van hebben, dat is niet geloofwaardig.
 
     def clean_for_organization(self):
         if not self.contest:
@@ -338,82 +364,88 @@ class UrlSubmissionForm(forms.Form):
 
         # mandatory check is done elsewhere.
         # You'll be getting a list of numbers.
-        organizations = self.data.getlist('for_organization', [])
+        try:
+            organizations = self.data.getlist('for_organization', [])
+        except AttributeError:
+            organizations = []
 
         existing = []
+
+        log.debug('organizations: %s', organizations)
 
         for organization in organizations:
             if not Organization.objects.filter(pk=organization,
                                                country=self.contest.target_country, is_dead=False).exists():
-                raise ValidationError('One or more selected organizations do not exist anymore: %s' % organization)
+                continue
+            else:
+                existing.append(organization)
+
+        if not existing:
+            raise forms.ValidationError('No existing organizations selected. ALl non-existing organizations have been'
+                                        'filtered out of below input to save you some time.')
 
         return existing
 
     def clean(self):
-        organisations = self.data.getlist('for_organization', [])
+        try:
+            organizations = self.data.getlist('for_organization', [])
+        except AttributeError:
+            organizations = []
+
         websites = self.clean_websites()
 
-        if not organisations:
+        if not organizations:
             raise forms.ValidationError("Organization missing!")
 
         if not websites:
             raise forms.ValidationError("Websites missing!")
 
-        log.info(organisations)
+        # team not participating in contest
+        if not Team.objects.all().filter(pk=self.team, participating_in_contest=self.contest).exists():
+            raise ValidationError("This team does not participate in this contest.")
 
-        # todo: raise multiple validation errors, so you can delete multiple organizations in the list
-        # todo: ignore things that are already in the list: giving an error is obnoxious. Just ignore it / delete
-        # those entries.
-        for organization in organisations:
+        # check if the contest is expired
+        if timezone.now() > self.contest.until_moment:
+            raise ValidationError("This contest has expired. You can't submit anything anymore. Too bad.")
+
+        new = []
+        for organization in organizations:
             for website in websites:
+
                 if Url.objects.all().filter(url=website, organization=organization).exists():
-                    raise ValidationError(
-                        _('This URL %(url)s is already in the production data for organization %(organization)s'),
-                        code='invalid',
-                        params={'websites': websites, 'organization': organization},
-                    )
+                    # This URL %(url)s is already in the production data for organization %(organization)s
+                    continue
 
-            # See if the URL is already suggested for these organizations
                 if UrlSubmission.objects.all().filter(url=website, for_organization=organization).exists():
-                    raise ValidationError(
-                        _('This URL %(url)s is already suggested for organization %(organization)s'),
-                        code='invalid',
-                        params={'url': website, 'organization': organization},
-                    )
+                    # This URL %(url)s is already suggested for organization %(organization)s
+                    continue
 
-        # See if the URL already exists, for these organizations
+                new.append(website)
 
-    # todo: check if the team belongs to the contest... (elsewhere)
+        self.cleaned_data['websites'] = new
+
     @transaction.atomic
-    def save(self, team):
-        # validate again to prevent race conditions
+    def save(self):
+
+        # validate again to prevent duplicates
         self.clean_websites()
         self.clean()
-
-        log.debug(self)
 
         organizations = self.cleaned_data.get('for_organization', None)
         websites = self.cleaned_data.get('websites', None)
 
-        # a horrible error...
-        if not organizations or not websites:
-            raise forms.ValidationError(
-                "Race condition error: while form was submitted duplicated where created. Try again to see duplicated."
-            )
+        log.debug('adding new')
+        log.debug('organizations: %s', organizations)
+        log.debug('websites: %s', websites)
 
         for organization in organizations:
             for website in websites:
+
                 submission = UrlSubmission(
-                    added_by_team=Team.objects.get(pk=team),
-                    for_organization=organization,
+                    added_by_team=Team.objects.get(pk=self.team),
+                    for_organization=Organization.objects.get(pk=organization),
                     url=website,
                     added_on=timezone.now(),
                     has_been_accepted=False,
                 )
                 submission.save()
-
-    # class Meta:
-        # model = UrlSubmission  # not bound to a model, we have to write save ourselves since we want to do
-        # a bit of dirty hacks (to prevent more N-N fields).
-
-        # fields = ('url', 'for_organization', )

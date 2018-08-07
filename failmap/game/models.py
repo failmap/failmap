@@ -164,12 +164,14 @@ class OrganizationSubmission(models.Model):
 
     has_been_accepted = models.BooleanField(
         default=False,
-        help_text="If the admin likes it, they can accept the submission to be part of the real system"
+        help_text="If the admin likes it, they can accept the submission to be part of the real system",
+        db_index=True
     )
 
     has_been_rejected = models.BooleanField(
         default=False,
-        help_text="Nonsense organizations can be rejected."
+        help_text="Nonsense organizations can be rejected.",
+        db_index=True
     )
 
     added_on = models.DateTimeField(
@@ -228,12 +230,14 @@ class UrlSubmission(models.Model):
 
     has_been_accepted = models.BooleanField(
         default=False,
-        help_text="If the admin likes it, they can accept the submission to be part of the real system"
+        help_text="If the admin likes it, they can accept the submission to be part of the real system",
+        db_index=True
     )
 
     has_been_rejected = models.BooleanField(
         default=False,
-        help_text="Rejected urls makes for deduction in points."
+        help_text="Rejected urls makes for deduction in points.",
+        db_index=True
     )
 
     added_on = models.DateTimeField(

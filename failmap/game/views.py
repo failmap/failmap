@@ -5,7 +5,7 @@ import pytz
 from dal import autocomplete
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.db.utils import OperationalError
 from django.shortcuts import redirect, render
@@ -60,17 +60,12 @@ def submit_url(request):
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
-            form.save(team=request.session.get('team'))
+            form.save()
 
             # don't add the URL, so you can quickly add urls to the same organization.
             # this will cause some noise, but also more entries.
-            data = {
-                'organization_type_name': form.cleaned_data.get('organization_type_name'),
-                'country': form.cleaned_data.get('country'),
-                'for_organization': form.cleaned_data.get('for_organization')
-            }
-            added_url = form.cleaned_data.get('url')
-            form = UrlSubmissionForm(data, team=request.session.get('team'), contest=get_default_contest(request))
+            added_url = form.cleaned_data.get('websites')
+            form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
             return render(request, 'game/submit_url.html', {'form': form, 'success': True,
                                                             'url': added_url, })
@@ -90,18 +85,19 @@ def submit_organisation(request):
         return redirect('/game/team/')
 
     if request.POST:
-        form = OrganisationSubmissionForm(request.POST)
+        form = OrganisationSubmissionForm(request.POST, team=request.session.get('team'),
+                                          contest=get_default_contest(request))
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
             form.save(team=request.session.get('team'))
 
-            form = OrganisationSubmissionForm()
+            form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
             return render(request, 'game/submit_organisation.html', {'form': form, 'success': True})
 
     else:
-        form = OrganisationSubmissionForm()
+        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
     return render(request, 'game/submit_organisation.html', {'form': form})
 
@@ -236,12 +232,30 @@ def contests(request):
     else:
         form = ContestForm()
 
-    expired_contests = Contest.objects.all().filter(until_moment__lt=datetime.now(pytz.utc))
+    expired_contests = Contest.objects.all().filter(
+        until_moment__lt=datetime.now(pytz.utc)
+    ).annotate(
+        teams=Count('team', distinct=True)
+    ).annotate(
+        urls=Count('team__urlsubmission')
+    )
 
-    active_contests = Contest.objects.all().filter(from_moment__lt=datetime.now(pytz.utc),
-                                                   until_moment__gte=datetime.now(pytz.utc))
+    active_contests = Contest.objects.all().filter(
+        from_moment__lt=datetime.now(pytz.utc),
+        until_moment__gte=datetime.now(pytz.utc)
+    ).annotate(
+        teams=Count('team', distinct=True)
+    ).annotate(
+        urls=Count('team__urlsubmission')
+    )
 
-    future_contests = Contest.objects.all().filter(from_moment__gte=datetime.now(pytz.utc))
+    future_contests = Contest.objects.all().filter(
+        from_moment__gte=datetime.now(pytz.utc)
+    ).annotate(
+        teams=Count('team', distinct=True)
+    ).annotate(
+        urls=Count('team__urlsubmission')
+    )
 
     # don't select a contest if you don't have one in your session.
     contest = None

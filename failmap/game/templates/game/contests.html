@@ -27,7 +27,9 @@
     <thead>
     <tr>
         <th width="10%"></th>
-        <th width="40%">Name</th>
+        <th width="30%">Name</th>
+        <th width="5%">Teams</th>
+        <th width="5%">Urls</th>
         <th width="10%">Info</th>
         <th width="20%">From</th>
         <th width="20%">Until</th>
@@ -40,6 +42,8 @@
                 <input type="submit" value="join" class="btn btn-primary"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
+            <td>{{ a_contest.teams }}</td>
+            <td>{{ a_contest.urls }}</td>
             <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
             <td><span title="{{ a_contest.from_moment }}">{{ a_contest.from_moment|naturaltime }}</span></td>
             <td><span title="{{ a_contest.until_moment }}">{{ a_contest.until_moment|naturaltime }}</span></td>
@@ -55,7 +59,9 @@
     <thead>
     <tr>
         <th width="10%"></th>
-        <th width="40%">Name</th>
+        <th width="30%">Name</th>
+        <th width="5%">Teams</th>
+        <th width="5%">Urls</th>
         <th width="10%">Info</th>
         <th width="20%">From</th>
         <th width="20%">Until</th>
@@ -68,6 +74,8 @@
                 <input type="submit" value="join" class="btn btn-primary"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
+            <td>{{ a_contest.teams }}</td>
+            <td>{{ a_contest.urls }}</td>
             <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
             <td><span title="{{ a_contest.from_moment }}">{{ a_contest.from_moment|naturaltime }}</span></td>
             <td><span title="{{ a_contest.until_moment }}">{{ a_contest.until_moment|naturaltime }}</span></td>
@@ -83,7 +91,9 @@
     <thead>
     <tr>
         <th width="10%"></th>
-        <th width="40%">Name</th>
+        <th width="30%">Name</th>
+        <th width="5%">Teams</th>
+        <th width="5%">Urls</th>
         <th width="10%">Info</th>
         <th width="20%">From</th>
         <th width="20%">Until</th>
@@ -91,11 +101,13 @@
     </thead>
     <tbody>
     {% for a_contest in expired_contests %}
-        <tr>
+        <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
             <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
                 <input type="submit" value="join" class="btn btn-primary"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
+            <td>{{ a_contest.teams }}</td>
+            <td>{{ a_contest.urls }}</td>
             <td><a href="/game/scores/?contest={{ a_contest.id }}">view scores</a></td>
             <td>{{ a_contest.from_moment }}</td>
             <td>{{ a_contest.until_moment }}</td>
