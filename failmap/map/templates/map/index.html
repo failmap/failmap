@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no, minimal-ui">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1.5, user-scalable=yes, minimal-ui">
     <meta name="theme-color" content="Tomato"/>
     <!-- export variables to javascript from server configuration -->
     <meta name="mailto" content="{{ config.PROJECT_MAIL }}">
@@ -39,6 +39,8 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.Default.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
 
@@ -49,6 +51,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/bootstrap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/leaflet-src.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster-src.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.js' %}"></script>
@@ -64,6 +67,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.min.js' %}"></script>
@@ -886,7 +890,7 @@
             <div class="row">
                 <div class="col-md-12">
                     <h4>{% trans "Overall" %}</h4>
-                    <svg id="graph_total" width="1110" height="300"></svg>
+                    <svg id="graph_total" width="555" height="300"></svg>
                 </div>
             </div>
 

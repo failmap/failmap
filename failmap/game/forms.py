@@ -122,7 +122,8 @@ class OrganisationSubmissionForm(forms.Form):
     organization_type_name = forms.ModelChoiceField(
         queryset=OrganizationType.objects.all(),
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
-        label="Type"
+        label="Type",
+        help_text="All types are rendered as separate layers on the map."
     )
 
     organization_name = forms.CharField(
@@ -236,7 +237,8 @@ class UrlSubmissionForm(forms.Form):
                                                        ).order_by(Lower('name')),
             widget=autocomplete.ModelSelect2Multiple(
                 url='/game/autocomplete/organization-autocomplete/',
-                forward=['organization_type_name', 'country']),
+                forward=['organization_type_name', 'country']
+            ),
             help_text="Hints:"
                       "<ul>"
                       "<li>If you can't find the organization, try the abbreviated name.</li>"

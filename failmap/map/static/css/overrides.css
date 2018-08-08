@@ -4,6 +4,7 @@ Overrides some values given in CSS from frameworks and third party stuff.
 
 body {
     height: 100%;
+    width: 100%;
 }
 
 #history {

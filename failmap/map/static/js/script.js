@@ -91,7 +91,7 @@ var dynamic_translations = function(){
 };
 
 $(document).ready(function () {
-    failmap.initializemap("nl");
+    failmap.initialize("nl");
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 

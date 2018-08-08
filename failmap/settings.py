@@ -53,7 +53,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'ditisgeengeheimvriendachtjedatditeenw
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', False)
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,::1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,::1,100.66.10.138,100.66.10.142').split(',')
 
 # allow better debugging for these clients
 # https://docs.djangoproject.com/en/1.11/ref/settings/#internal-ips
