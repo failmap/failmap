@@ -417,10 +417,10 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
 
     # if the file has been downloaded recently, don't do that again.
     four_hours_ago = time.time() - 14400
-    if os.path.isfile(filename + ".geojson") and four_hours_ago < os.path.getmtime(filename):
+    if os.path.isfile(filename + ".polygons") and four_hours_ago < os.path.getmtime(filename):
         log.debug("Already downloaded a coordinate file in the past four hours. Using that one.")
-        log.debug(filename + ".geojson")
-        return json.load(open(filename + ".geojson"))
+        log.debug(filename + ".polygons")
+        return json.load(open(filename + ".polygons"))
 
     """
         The overpass query interface can be found here: https://overpass-turbo.eu/
@@ -466,16 +466,16 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
                 f.write(block)
                 f.flush()
 
-    log.info("Converting OSM file to geojson. This also can take a while...")
+    log.info("Converting OSM file to polygons. This also can take a while...")
     try:
-        with open(filename + ".geojson", "w") as outfile:
+        with open(filename + ".polygons", "w") as outfile:
             subprocess.call(["osmtogeojson", filename], stdout=outfile)
     except subprocess.CalledProcessError:
-        log.exception("Error while converting to geojson.")
+        log.exception("Error while converting to polygons.")
     except OSError:
         log.exception("osmtogeojson tool not found.")
 
-    return json.load(open(filename + ".geojson"))
+    return json.load(open(filename + ".polygons"))
 
 
 def osmtogeojson_available():

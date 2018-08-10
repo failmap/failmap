@@ -1026,9 +1026,9 @@ function views() {
                 // this will go wrong when we group points / use other layers.
                 // this will crash the first time...
 
-                if ((failmap !== undefined) && (failmap.geojson.clearLayers !== undefined)) {
-                    failmap.geojson.clearLayers();
-                    failmap.geojson = null;
+                if ((failmap !== undefined) && (failmap.polygons.clearLayers !== undefined)) {
+                    failmap.polygons.clearLayers();
+                    failmap.polygons = null;
                 }
             }
         },
@@ -1073,27 +1073,8 @@ function views() {
                 $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
                     self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
                     self.loading = true;
-                    // if there is one already, overwrite the attributes...
-                    if (failmap.geojson) {
-                        // here we add all features that are not part of the current map at all
-                        // and delete the ones that are not in the current set
-                        failmap.clean_map(mapdata);
 
-                        // here we can update existing layers (and add ones with the same name)
-                        failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
-                    } else {
-                        // first time load.
-                        failmap.geojson = L.geoJson(mapdata, {
-                            style: failmap.style,
-                            pointToLayer: failmap.pointToLayer,
-                            onEachFeature: failmap.onEachFeature
-                        }).addTo(failmap.map); // only if singleton, its somewhat dirty.
-                        // fit the map automatically, regardless of the initial positions
-
-                        if (mapdata.features.length > 0) {
-                            failmap.map.fitBounds(failmap.geojson.getBounds());
-                        }
-                    }
+                    failmap.plotdata(mapdata);
 
                     // make map features (organization data) available to other vues
                     // do not update this attribute if an empty list is returned as currently

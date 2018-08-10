@@ -1,8 +1,27 @@
 var failmap = {
 
     map: null, // map showing geographical regions + markers
-    geojson: L.geoJson(),  // geographical regions
-    markers: L.markerClusterGroup(),  // markers (single points)
+    polygons: L.geoJson(),  // geographical regions
+    // todo: if you click the group too fast: Marker.js:181 Uncaught TypeError:
+    // Cannot read property 'createIcon' of undefined
+    markers: L.markerClusterGroup({iconCreateFunction: function(cluster){
+        // getAllChildMarkers()
+        // if 1 is red, marker is red else if 1 is orange, else green else gray.
+        var css_class = "unknown";
+
+        // good, medium, bad
+        // todo: if red, break
+        cluster.getAllChildMarkers().forEach(function (point){
+            if (point.feature.properties.color === "red") {
+                css_class = "red";
+            }
+        });
+
+        return L.divIcon({
+            html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+            className: 'marker-cluster marker-cluster-' + css_class,
+            iconSize: new L.Point(40, 40) });
+    }}),
     info: L.control(),
     legend: L.control({position: 'bottomright'}),
     hovered_organization: "",
@@ -82,6 +101,7 @@ var failmap = {
             }
         });
 
+        // controls in sidepanels
         var html = "<div id=\"fullscreen\">" +
             "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
@@ -167,6 +187,7 @@ var failmap = {
     },
 
     pointToLayer: function (geoJsonPoint, latlng) {
+        console.log(latlng);
         switch (geoJsonPoint.properties.color){
             case "red": return L.marker(latlng, {icon: failmap.redIcon});
             case "orange": return L.marker(latlng, {icon: failmap.orangeIcon});
@@ -206,7 +227,7 @@ var failmap = {
             if (e.target.feature.geometry.type === "Polygon")
                 e.target.setStyle(failmap.searchResultStyle(e.target.feature));
         } else {
-            failmap.geojson.resetStyle(e.target);
+            failmap.polygons.resetStyle(e.target);
         }
         failmap.info.update();
     },
@@ -223,7 +244,7 @@ var failmap = {
         query = query.toLowerCase();
         if ((query === "") || (!query)) {
             // reset
-            failmap.geojson.eachLayer(function (layer) {
+            failmap.polygons.eachLayer(function (layer) {
                 switch (layer.feature.geometry.type){
                     case "MultiPolygon": layer.setStyle(failmap.style(layer.feature)); break;
                     case "Polygon": layer.setStyle(failmap.style(layer.feature)); break;
@@ -233,7 +254,7 @@ var failmap = {
             });
         } else {
             // text match
-            failmap.geojson.eachLayer(function (layer) {
+            failmap.polygons.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     switch (layer.feature.geometry.type){
                         case "MultiPolygon": layer.setStyle(failmap.searchResultStyle(layer.feature)); break;
@@ -253,38 +274,70 @@ var failmap = {
         }
     },
 
-    /* Transition, which is much smoother. */
-    loadmap: function (category, weeknumber) {
-        $.getJSON('/data/map/' + category + '/' + weeknumber, function (mapdata) {
-            // if there is one already, overwrite the attributes...
-            if (failmap.geojson) {
-                // add all features that are not part of the current map at all
-                // and delete the ones that are not in the current set
-                failmap.clean_map(mapdata);
+    plotdata: function (mapdata) {
+        // mapdata is a mix of polygons and multipolygons, and whatever other geojson types.
+        regions = [];
+        points = [];
 
-                // update existing layers (and add ones with the same name)
-                failmap.geojson.eachLayer(function (layer) {failmap.recolormap(mapdata, layer)});
-            } else {
-                failmap.geojson = L.geoJson(mapdata, {
-                    style: failmap.style,
-                    pointToLayer: failmap.pointToLayer,
-                    onEachFeature: failmap.onEachFeature
-                }).addTo(failmap.map); // only if singleton, its somewhat dirty.
-                // fit the map automatically, regardless of the initial positions
-                failmap.map.fitBounds(failmap.geojson.getBounds());
+        // the data is plotted on two separate layers which both have special properties.
+        // both layers have a different way of searching, clicking behaviour and so forth.
+        for(var i=0; i<mapdata.features.length; i++){
+            switch (mapdata.features[i].geometry.type){
+                case "Polygon":
+                case "MultiPolygon":
+                    regions.push(mapdata.features[i]);
+                break;
+                case "Point":
+                    points.push(mapdata.features[i]);
+                break;
             }
-        });
-    },
+        }
 
-    refit: function() {
-        failmap.map.fitBounds(failmap.geojson.getBounds());
+        // if there is one already, overwrite the attributes...
+        if (failmap.polygons) {
+            // add all features that are not part of the current map at all
+            // and delete the ones that are not in the current set
+            failmap.clean_map(regions);
+
+            // update existing layers (and add ones with the same name)
+            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(regions, layer)});
+        } else {
+            // add regions
+            failmap.polygons = L.geoJson(regions, {
+                style: failmap.style,
+                pointToLayer: failmap.pointToLayer,
+                onEachFeature: failmap.onEachFeature
+            }).addTo(failmap.map); // only if singleton, its somewhat dirty.
+
+            // and points
+            points.forEach(function(point){
+                console.log(point);
+                pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
+
+                pointlayer.on({
+                    mouseover: failmap.highlightFeature,
+                    mouseout: failmap.resetHighlight,
+                    click: failmap.showreport
+                });
+
+                // allow opening of reports and such in the old way.
+                pointlayer.feature = {"properties": point.properties};
+                console.log(pointlayer);
+
+                failmap.markers.addLayer(pointlayer);
+            });
+            failmap.map.addLayer(failmap.markers);
+
+            // fit the map automatically, regardless of the initial positions
+            failmap.map.fitBounds(failmap.polygons.getBounds());
+        }
     },
 
     clean_map: function(mapdata) {
         // add layers to the map that are only in the new dataset (new)
         for (var i = 0; i < mapdata.features.length; i++) {
             var found = false;
-            failmap.geojson.eachLayer(function bla(layer){
+            failmap.polygons.eachLayer(function bla(layer){
                 if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
                     found = true;
                 }
@@ -292,12 +345,12 @@ var failmap = {
             //console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
             if (!found) {
                 // console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
-                failmap.geojson.addData(mapdata.features[i]);
+                failmap.polygons.addData(mapdata.features[i]);
             }
         }
 
         // remove existing layers that are not in the new dataset
-        failmap.geojson.eachLayer(function bla(layer){
+        failmap.polygons.eachLayer(function bla(layer){
             var found = false;
             for (var i = 0; i < mapdata.features.length; i++) {
                 if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
@@ -306,7 +359,7 @@ var failmap = {
             }
             // console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
             if (!found){
-                failmap.geojson.removeLayer(layer);
+                failmap.polygons.removeLayer(layer);
                 // failmap.deleteLayerByName(mapdata.features[i].properties.organization_name);
             }
 
@@ -315,9 +368,9 @@ var failmap = {
 
     deleteLayerByName: function (name) {
         console.log("Deleting layer named: " + name);
-        failmap.geojson.eachLayer(function bla(layer) {
+        failmap.polygons.eachLayer(function bla(layer) {
             if (layer.feature.properties.organization_name === name) {
-                failmap.geojson.removeLayer(layer);
+                failmap.polygons.removeLayer(layer);
             }
         })
     },
@@ -327,6 +380,12 @@ var failmap = {
         var existing_feature = layer.feature;
 
         // mapdata.onEachFeature(function (new_feature){ doesn;'t work
+
+        mapdata.features.forEach(function (new_feature){
+
+
+        });
+
         for (i = 0; i < mapdata.features.length; i++) {
             new_feature = mapdata.features[i];
             if (existing_feature.properties.organization_name === new_feature.properties.organization_name) {
@@ -337,8 +396,8 @@ var failmap = {
                 if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)){
                     // Geometry changed, updating shape. Will not fade.
                     // It seems not possible to update the geometry of a shape, too bad.
-                    failmap.geojson.removeLayer(layer);
-                    failmap.geojson.addData(new_feature);
+                    failmap.polygons.removeLayer(layer);
+                    failmap.polygons.addData(new_feature);
 
                 } else {
                     // colors changed, shapes / points on the map stay the same.
@@ -365,6 +424,8 @@ var failmap = {
     },
 
     showreport: function (e) {
+        console.log(e);
+
         let organization_id = e.target.feature.properties['organization_id'];
         if (failmap.map.isFullscreen()) {
             // var layer = e.target;

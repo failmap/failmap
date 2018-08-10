@@ -490,6 +490,8 @@ COMPRESS_STORAGE = (
 
 # Disable caching during development and production.
 # Django only emits caching headers, the webserver/caching-proxy makes sure the rest of the caching is handled.
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
@@ -764,9 +766,18 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('Reporting', ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
                    'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
                    'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-                   'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT')),
+                   'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_FTP')),
     ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL'))
 ])
+
+# Check for constance configuration issues:
+# See also: https://github.com/jazzband/django-constance/issues/293
+variables_in_fieldsets = [i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in sub]
+variables_in_config = [x for x in CONSTANCE_CONFIG]
+missing = set(variables_in_config) - set(variables_in_fieldsets)
+if missing:
+    raise EnvironmentError("Constance config variables %s are missing in constance config fieldsets." % missing)
+
 # End constance settings
 ########
 
