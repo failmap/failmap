@@ -11,9 +11,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
-from django_countries.widgets import CountrySelectWidget
 from django_select2.forms import Select2TagWidget
-from mapwidgets.widgets import GooglePointFieldWidget
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Organization, OrganizationType, Url
@@ -107,54 +105,56 @@ class OrganisationSubmissionForm(forms.Form):
 
         super(OrganisationSubmissionForm, self).__init__(*args, **kwargs)
 
-    field_order = ('organization_country', 'organization_type_name', 'organization_name',
-                   'organization_address_geocoded', 'organization_address',
-                   'organization_evidence')
-
-    organization_country = CountryField().formfield(
-        label="Country",
-        widget=CountrySelectWidget(),
-        initial="NL"
-    )
-
-    # todo: filter based on country and organization type.
-    # todo: but how to suggest new organizations?
-    organization_type_name = forms.ModelChoiceField(
-        queryset=OrganizationType.objects.all(),
-        widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
-        label="Type",
-        help_text="All types are rendered as separate layers on the map."
-    )
-
     organization_name = forms.CharField(
         label="Name"
     )
 
-    organization_address_geocoded = forms.CharField(
-        widget=GooglePointFieldWidget,
-        label="Address"
+    latitude = forms.DecimalField(
+        max_digits=9,
+        decimal_places=6,
     )
+
+    longitude = forms.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+    )
+
+    # "The full address of this organization, at it's current address. If there are multiple addresses, "
+    # "take the one that's the most important. If they are equally important, just add them with a location"
+    # "address. The points will be merged lateron."
 
     organization_address = forms.CharField(
-        widget=forms.Textarea
-    )
-
-    organization_evidence = forms.CharField(
         widget=forms.Textarea,
-        label="Sources verifying the existence of this organization"
+        required=True
     )
 
     organization_wikipedia = forms.URLField(
         label="Wikipedia page",
-        help_text="To quickly find the correct wiki page, start a search by "
+        help_text="Autofilled. Might be wrong. To quickly find the correct wiki page, start a search by "
                   "clicking <a href='https://en.wikipedia.org/w/index.php?search="
-                  "ministry+van+binnenlandse+zaken&title=Special:Search&go=Go'>here: search wikipedia</a>."
+                  "ministry+van+binnenlandse+zaken&title=Special:Search&go=Go'>here: search wikipedia</a>.",
+        required=False
     )
 
     organization_wikidata = forms.CharField(
         label="Wikidata code",
-        help_text="Find a Q code on <a href='https://www.wikidata.org/wiki/"
-                  "Wikidata:Main_Page' target='_blank'>wikidata</a>."
+        help_text="Autofilled. Might be wrong. Find a Q code on <a href='https://www.wikidata.org/wiki/"
+                  "Wikidata:Main_Page' target='_blank'>wikidata</a>.",
+        required=False
+    )
+
+    organization_type_name = forms.ModelChoiceField(
+        queryset=OrganizationType.objects.all(),
+        widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
+        label="Type / Map Layer",
+        help_text="Types are rendered as separate layers on the map."
+    )
+
+    organization_evidence = forms.CharField(
+        widget=forms.Textarea,
+        label="Sources verifying the existence of this organization",
+        required=False,
+        help_text=""
     )
 
     # todo: clean the geolocated address to fit the rest of the system. The ugly
@@ -166,7 +166,7 @@ class OrganisationSubmissionForm(forms.Form):
         cleaned_data = super().clean()
         organization_type_name = cleaned_data.get("organization_type_name")
         name = cleaned_data.get("organization_name")
-        country = cleaned_data.get("organization_country")
+        country = self.contest.target_country
 
         exists = Organization.objects.all().filter(
             type=organization_type_name, name=name, is_dead=False, country=country).exists()
@@ -195,6 +195,7 @@ class OrganisationSubmissionForm(forms.Form):
         organization_evidence = self.cleaned_data.get('organization_address', None)
         organization_wikipedia = self.cleaned_data.get('organization_wikipedia', None)
         organization_wikidata = self.cleaned_data.get('organization_wikidata', None)
+        # organization_address_geocoded comes from the new input... todo
         organization_address_geocoded = self.cleaned_data.get('organization_address_geocoded', None)
 
         if not all([organization_name, organization_type_name, organization_address, organization_evidence]):
@@ -217,6 +218,13 @@ class OrganisationSubmissionForm(forms.Form):
             has_been_rejected=False
         )
         submission.save()
+
+    # based on: https://www.gyford.com/phil/writing/2017/03/16/django-admin-map/
+    # Loading this JS AFTER via the media options doesn't work...
+    class Media:
+        css = {
+            'all': ('css/location_picker.css',),
+        }
 
 
 class UrlSubmissionForm(forms.Form):

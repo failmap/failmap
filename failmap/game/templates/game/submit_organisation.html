@@ -2,49 +2,239 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
-    <style>
-    .mw-wrap {
-        width: 100% !important;
-    }
-</style>
-<script>
-    $(document).on("google_point_map_widget:marker_create", function (e, place, lat, lng, locationInputElem, mapWrapID, something) {
-        console.log("e");
-        console.log(e);
-        console.log("place");
-        console.log(place); // google place object
-        console.log("lat");
-        console.log(lat); // created marker coordinates
-        console.log("lng");
-        console.log(lng); // created marker coordinates
-        console.log("wdiget");
-        console.log(locationInputElem); // django widget textarea widget (hidden)
-        console.log("mapwrapid");
-        console.log(mapWrapID); // map widget wrapper element ID
-});
-</script>
-
     {% if success %}
         <div class="alert alert-success" role="alert">
             <strong>Organization added!</strong> organization has been added!
-         </div>
+        </div>
     {% endif %}
 
     {% if error %}
         <div class="alert alert-danger" role="alert">
             <strong>Error!</strong> {{ error }}
-         </div>
+        </div>
     {% endif %}
 
     <h1>Suggest a new organisation</h1>
     <p>
-    Suggesting a new organization correctly can take some work, as you need to find enough sources to verify the
-    organization actually exist. Please specify their website in the evidence, their wikipedia page and wikidata Q
-    number to complete the process.
+        Suggesting a new organization correctly can take some work, as you need to find enough sources to verify the
+        organization actually exist. Please specify their website in the evidence, their wikipedia page and wikidata Q
+        number to complete the process.
     </p>
+
+    <div class="pac-card" id="pac-card">
+        <div>
+            <div id="title">
+                Autocomplete search
+            </div>
+            <div id="type-selector" class="pac-controls">
+                <input type="radio" name="type" id="changetype-all" checked="checked">
+                <label for="changetype-all">All</label>
+
+                <input type="radio" name="type" id="changetype-establishment">
+                <label for="changetype-establishment">Establishments</label>
+
+                <input type="radio" name="type" id="changetype-address">
+                <label for="changetype-address">Addresses</label>
+
+                <input type="radio" name="type" id="changetype-geocode">
+                <label for="changetype-geocode">Geocodes</label>
+            </div>
+            <div id="strict-bounds-selector" class="pac-controls">
+                <input type="checkbox" id="use-strict-bounds" value="">
+                <label for="use-strict-bounds">Strict Bounds</label>
+            </div>
+        </div>
+        <div id="pac-container">
+            <input id="pac-input" type="text"
+                   placeholder="Enter a location">
+        </div>
+    </div>
+    <div id="map33"></div>
+    <div id="infowindow-content">
+        <img src="" width="16" height="16" id="place-icon">
+        <span id="place-name" class="title"></span><br>
+        <span id="place-address"></span>
+    </div>
+
+
     <form method="POST" class="uniForm">{% csrf_token %}
         {{ form | crispy }}
-        <br />
+        <br/>
         <button type="submit" class="save btn btn-lg btn-primary">SAVE THIS THING NOW!</button>
     </form>
+
+    <script>
+        // Google Maps is a conscious choice: OSM nominatim didn't find any of the top 10 british government organizations
+        // which makes the feature not fit for this purpose. google maps found all of them in the right country.
+        // Hope the situation changes.
+
+        // take marker to global scope, so we can easily read coords
+        var marker = null;
+
+        function updateFormData(place) {
+            $('#id_organization_name').val(place.name);
+            $('#id_latitude').val(place.geometry.location.lat());
+            $('#id_longitude').val(place.geometry.location.lng());
+            $('#id_organization_address').val(place.formatted_address);
+        }
+
+        function updateMarker(marker) {
+            $('#id_latitude').val(marker.position.lat());
+            $('#id_longitude').val(marker.position.lng());
+        }
+
+        // this is added here because it seems forms.Media does not support loading AFter things...
+        function initMap() {
+            var map = new google.maps.Map(document.getElementById('map33'), {
+                center: {lat: -33.8688, lng: 151.2195},
+                zoom: 13
+            });
+            var card = document.getElementById('pac-card');
+            var input = document.getElementById('pac-input');
+            var types = document.getElementById('type-selector');
+            var strictBounds = document.getElementById('strict-bounds-selector');
+
+            map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
+
+            // todo: what to do with the ambassy? Where should we locate that? Or should we point that to the
+            // same location as ministries of foreign affairs?
+            var options = {
+                componentRestrictions: {country: 'gb'}
+            };
+            var autocomplete = new google.maps.places.Autocomplete(input, options);
+
+            // Bind the map's bounds (viewport) property to the autocomplete object,
+            // so that the autocomplete requests use the current map bounds for the
+            // bounds option in the request.
+            autocomplete.bindTo('bounds', map);
+
+            // Set the data fields to return when the user selects a place.
+            // todo: in the future store all fields individually. Currently we don't need them.
+            autocomplete.setFields(['geometry', 'icon', 'name', 'formatted_address']);
+
+            var infowindow = new google.maps.InfoWindow();
+            var infowindowContent = document.getElementById('infowindow-content');
+            infowindow.setContent(infowindowContent);
+
+            var marker = new google.maps.Marker({
+                map: map,
+                draggable: true,
+                anchorPoint: new google.maps.Point(0, -29),
+                title: "You can drag this marker.",
+                visible: true
+            });
+
+            // marker.addListener('drag', function() {
+            // #    updateMarker(marker);
+            // });
+
+            marker.addListener('mouseup', function () {
+                updateMarker(marker);
+            });
+
+            autocomplete.addListener('place_changed', function () {
+                infowindow.close();
+                marker.setVisible(false);
+                // Places Details (price starting at 0.017 USD per session)
+                //
+                var place = autocomplete.getPlace();
+                console.log(place);
+                updateFormData(place);
+                searchWikipedia(place.name);
+                searchWikidata(place.name);
+
+                if (!place.geometry) {
+                    // User entered the name of a Place that was not suggested and
+                    // pressed the Enter key, or the Place Details request failed.
+                    window.alert("No details available for input: '" + place.name + "'");
+                    return;
+                }
+
+                // If the place has a geometry, then present it on a map.
+                if (place.geometry.viewport) {
+                    map.fitBounds(place.geometry.viewport);
+                } else {
+                    map.setCenter(place.geometry.location);
+                    map.setZoom(17);  // Why 17? Because it looks good.
+                }
+                marker.setPosition(place.geometry.location);
+                marker.setVisible(true);
+
+
+                var address = '';
+                if (place.address_components) {
+                    address = [
+                        (place.address_components[0] && place.address_components[0].short_name || ''),
+                        (place.address_components[1] && place.address_components[1].short_name || ''),
+                        (place.address_components[2] && place.address_components[2].short_name || '')
+                    ].join(' ');
+                }
+
+                infowindowContent.children['place-icon'].src = place.icon;
+                infowindowContent.children['place-name'].textContent = place.name;
+                infowindowContent.children['place-address'].textContent = address;
+                infowindow.open(map, marker);
+            });
+
+            // Sets a listener on a radio button to change the filter type on Places
+            // Autocomplete.
+            function setupClickListener(id, types) {
+                var radioButton = document.getElementById(id);
+                radioButton.addEventListener('click', function () {
+                    autocomplete.setTypes(types);
+                });
+            }
+
+            setupClickListener('changetype-all', []);
+            setupClickListener('changetype-address', ['address']);
+            setupClickListener('changetype-establishment', ['establishment']);
+            setupClickListener('changetype-geocode', ['geocode']);
+
+            document.getElementById('use-strict-bounds')
+                .addEventListener('click', function () {
+                    console.log('Checkbox clicked! New state=' + this.checked);
+                    autocomplete.setOptions({strictBounds: this.checked});
+                });
+        }
+
+        // todo: results depend very much on the country you're searching for.
+        // thanks to: https://freshman.tech/wikipedia-javascript/
+        // todo: we can make it a choice field, so the user can select out of the N choices that where returned.
+        function searchWikipedia(searchQuery) {
+            // https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=Department%20for%20Educations
+            const endpoint = `https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=${searchQuery}`;
+
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                        console.log(data);
+
+                        $('#id_organization_wikipedia').val("https://en.wikipedia.org/wiki/" + data.query.search[0].title);
+
+                })
+
+                .catch(() => {console.log('An error occurred'); $('#id_organization_wikipedia').val("");}
+            );
+        }
+
+        // has no specific language or region, which might be problematic.
+        function searchWikidata(searchQuery) {
+            // https://en.wikipedia.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=Department%20for%20Educations
+            const endpoint = `https://www.wikidata.org/w/api.php?action=query&list=search&prop=info&inprop=url&utf8=&format=json&origin=*&srlimit=1&srsearch=${searchQuery}`;
+
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                        console.log(data);
+
+                        $('#id_organization_wikidata').val(data.query.search[0].title);
+
+                })
+
+                .catch(() => {console.log('An error occurred'); $('#id_organization_wikidata').val("");}
+            );
+        }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initMap"
+            async defer></script>
 {% endblock %}

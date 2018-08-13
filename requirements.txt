@@ -93,8 +93,6 @@ django-fsm-log
 # game requirements
 django-crispy-forms
 django-autocomplete-light
-geocoder
-django-map-widgets  # uses gdal, now in alpine edge :)
 
 django-admin-sortable2  # nice sorting in the admin, used in map configurations.
 

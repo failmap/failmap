@@ -793,17 +793,10 @@ LOGIN_REDIRECT_URL = '/game/'
 LOGIN_URL = '/authentication/login/'
 LOGOUT_REDIRECT_URL = '/'
 
-MAP_WIDGETS = {
-    "GooglePointFieldWidget": (
-        ("zoom", 4),
-        ("mapCenterLocationName", "Europe"),
-        ("GooglePlaceAutocompleteOptions", {'componentRestrictions': {}}),  # 'country': 'nl'
-        ("markerFitZoom", 17),
-    ),
-    "GOOGLE_MAP_API_KEY": os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo")
-}
-
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo")
+
 # End game settigns
 #######
 

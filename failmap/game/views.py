@@ -3,6 +3,7 @@ from datetime import datetime
 
 import pytz
 from dal import autocomplete
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
@@ -97,9 +98,10 @@ def submit_organisation(request):
             return render(request, 'game/submit_organisation.html', {'form': form, 'success': True})
 
     else:
-        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
+        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request),)
 
-    return render(request, 'game/submit_organisation.html', {'form': form})
+    return render(request, 'game/submit_organisation.html', {'form': form,
+                                                             'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY})
 
 
 def scores(request):
@@ -404,16 +406,12 @@ class OrganizationAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class OrganizationTypeAutocomplete(autocomplete.Select2QuerySetView):
+
+    paginate_by = 100
+
     def get_queryset(self):
 
-        qs = OrganizationType.objects.all().filter()
-
-        # country = self.forwarded.get('country', None)
-        #
-        # todo: this gives a cartesian product, of course. Distinct on fields not supported by sqlite...
-        # so that doesn't work during development.
-        # if country:
-        #     qs = qs.filter(organization__country=country)
+        qs = OrganizationType.objects.all().filter().order_by('name')
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

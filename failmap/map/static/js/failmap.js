@@ -382,45 +382,44 @@ var failmap = {
         // mapdata.onEachFeature(function (new_feature){ doesn;'t work
 
         mapdata.features.forEach(function (new_feature){
+            if (existing_feature.properties.organization_name !== new_feature.properties.organization_name) {
+                return;
+            }
+            if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)) {
+                // Geometry changed, updating shape. Will not fade.
+                // It seems not possible to update the geometry of a shape, too bad.
+                failmap.polygons.removeLayer(layer);
+                failmap.polygons.addData(new_feature);
 
-
-        });
-
-        for (i = 0; i < mapdata.features.length; i++) {
-            new_feature = mapdata.features[i];
-            if (existing_feature.properties.organization_name === new_feature.properties.organization_name) {
-
-                // No simple array comparison in JS
-                // So new_feature.geometry.coordinates !== existing_feature.geometry.coordinates will not work.
-                // https://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript#19746771
-                if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)){
-                    // Geometry changed, updating shape. Will not fade.
-                    // It seems not possible to update the geometry of a shape, too bad.
-                    failmap.polygons.removeLayer(layer);
-                    failmap.polygons.addData(new_feature);
-
-                } else {
-                    // colors changed, shapes / points on the map stay the same.
-                    existing_feature.properties.Overall = new_feature.properties.Overall;
-                    existing_feature.properties.color = new_feature.properties.color;
-                    // make the transition
-                    switch(existing_feature.geometry.type){
-                        case "Polygon":
-                        case "MultiPolygon":
-                            layer.setStyle(failmap.style(layer.feature)); break;
-                        case "Point":
-                            switch(layer.feature.properties.color) {
-                                case "red": layer.setIcon(failmap.redIcon); break;
-                                case "orange": layer.setIcon(failmap.orangeIcon); break;
-                                case "green": layer.setIcon(failmap.greenIcon); break;
-                                default: layer.setIcon(failmap.grayIcon);
-                            }
-                            break;
-                    }
+            } else {
+                // colors changed, shapes / points on the map stay the same.
+                existing_feature.properties.Overall = new_feature.properties.Overall;
+                existing_feature.properties.color = new_feature.properties.color;
+                // make the transition
+                switch (existing_feature.geometry.type) {
+                    case "Polygon":
+                    case "MultiPolygon":
+                        layer.setStyle(failmap.style(layer.feature));
+                        break;
+                    case "Point":
+                        switch (layer.feature.properties.color) {
+                            case "red":
+                                layer.setIcon(failmap.redIcon);
+                                break;
+                            case "orange":
+                                layer.setIcon(failmap.orangeIcon);
+                                break;
+                            case "green":
+                                layer.setIcon(failmap.greenIcon);
+                                break;
+                            default:
+                                layer.setIcon(failmap.grayIcon);
+                        }
+                        break;
                 }
             }
-        }
 
+        });
     },
 
     showreport: function (e) {
