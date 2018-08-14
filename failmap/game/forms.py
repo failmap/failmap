@@ -3,7 +3,6 @@ import time
 
 import tldextract
 from dal import autocomplete
-# from django.contrib.gis import forms  # needs gdal, which...
 from django import forms
 from django.db import transaction
 from django.db.models.functions import Lower
@@ -16,9 +15,6 @@ from django_select2.forms import Select2TagWidget
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.scanner.http import resolves
-
-# todo: callback on edit address, put result in leaflet:
-
 
 log = logging.getLogger(__package__)
 
@@ -46,10 +42,6 @@ class ContestForm(forms.Form):
         #                           code='invalid', )
 
 
-# todo: this doesn't work yet
-# don't show the secret (only in the source)
-# should this be in forms.py or in admin.py?
-# https://stackoverflow.com/questions/17523263/how-to-create-password-field-in-model-django
 class TeamForm(forms.Form):
 
     contest = Contest()
@@ -72,8 +64,8 @@ class TeamForm(forms.Form):
         team = cleaned_data.get("team")
         secret = cleaned_data.get("secret")
 
-        # validate secret, add some timing...
-        time.sleep(1)  # wait a second to deter brute force attacks (you can still do them)
+        # wait a second to deter brute force attacks (you can still do them)
+        time.sleep(1)
 
         # it's possible NOT to select a team, in that case, don't try and validate secret.
         if team:
@@ -85,14 +77,7 @@ class TeamForm(forms.Form):
                     code='invalid',
                 )
 
-    # class Meta:
-        # model = UrlSubmission  # not bound to a model, we have to write save ourselves since we want to do
-        # a bit of dirty hacks (to prevent more N-N fields).
 
-        # fields = ('team', 'secret', )
-
-
-# http://django-autocomplete-light.readthedocs.io/en/master/tutorial.html
 class OrganisationSubmissionForm(forms.Form):
 
     contest = None
@@ -110,13 +95,13 @@ class OrganisationSubmissionForm(forms.Form):
     )
 
     latitude = forms.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=21,
+        decimal_places=17,
     )
 
     longitude = forms.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=21,
+        decimal_places=17,
     )
 
     # "The full address of this organization, at it's current address. If there are multiple addresses, "
@@ -157,9 +142,7 @@ class OrganisationSubmissionForm(forms.Form):
         help_text=""
     )
 
-    # todo: clean the geolocated address to fit the rest of the system. The ugly
-    # POINT -() etc has to be formatted according our normal layout so it can be processed in the admin
-    # interface.
+    # todo: clean the geolocated address to fit the rest of the system.
 
     def clean(self):
         # verify that an organization of this type is not in the database yet...
@@ -173,7 +156,7 @@ class OrganisationSubmissionForm(forms.Form):
 
         if exists:
             raise ValidationError(
-                _('This organization %(organization)s already exists in the database for this group.'),
+                _('This organization %(organization)s already exists in the database for this type / layer.'),
                 code='invalid',
                 params={'organization': name},
             )
@@ -188,20 +171,15 @@ class OrganisationSubmissionForm(forms.Form):
 
     @transaction.atomic
     def save(self, team):
-        organization_country = self.cleaned_data.get('organization_country', None)
-        organization_type_name = self.cleaned_data.get('organization_type_name', None)
+        organization_country = self.contest.target_country
         organization_name = self.cleaned_data.get('organization_name', None)
+        lat = self.cleaned_data.get('latitude', None)
+        lng = self.cleaned_data.get('longitude', None)
         organization_address = self.cleaned_data.get('organization_address', None)
-        organization_evidence = self.cleaned_data.get('organization_address', None)
         organization_wikipedia = self.cleaned_data.get('organization_wikipedia', None)
         organization_wikidata = self.cleaned_data.get('organization_wikidata', None)
-        # organization_address_geocoded comes from the new input... todo
-        organization_address_geocoded = self.cleaned_data.get('organization_address_geocoded', None)
-
-        if not all([organization_name, organization_type_name, organization_address, organization_evidence]):
-            raise forms.ValidationError(
-                "Missing some fields..."
-            )
+        organization_type_name = self.cleaned_data.get('organization_type_name', None)
+        organization_evidence = self.cleaned_data.get('organization_evidence', None)
 
         submission = OrganizationSubmission(
             added_by_team=Team.objects.get(pk=team),
@@ -211,7 +189,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_type_name=organization_type_name,
             organization_wikipedia=organization_wikipedia,
             organization_wikidata_code=organization_wikidata,
-            organization_address_geocoded=organization_address_geocoded,
+            organization_address_geocoded=[lng, lat],
             organization_country=organization_country,
             added_on=timezone.now(),
             has_been_accepted=False,
@@ -430,7 +408,9 @@ class UrlSubmissionForm(forms.Form):
                     # This URL %(url)s is already suggested for organization %(organization)s
                     continue
 
-                new.append(website)
+                # only add it once to the new list :)
+                if website not in new:
+                    new.append(website)
 
         self.cleaned_data['websites'] = new
 

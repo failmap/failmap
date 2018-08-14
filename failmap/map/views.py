@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import pytz
 import simplejson as json
 from cacheops import cached
+from constance import config
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
@@ -66,11 +67,11 @@ def get_country(code: str):
     match = re.search(r"[A-Z]{2}", code)
     if not match:
         # https://what-if.xkcd.com/53/
-        return "NL"
+        return config.PROJECT_COUNTRY
 
     # check if we have a country like that in the db:
     if not Organization.objects.all().filter(country=code).exists():
-        return "NL"
+        return config.PROJECT_COUNTRY
 
     return code
 
@@ -82,7 +83,7 @@ def get_default_country(request, ):
     ).order_by('display_order').values_list('country', flat=True).first()
 
     if not country:
-        return 'NL'
+        return config.PROJECT_COUNTRY
 
     return JsonResponse([country], safe=False, encoder=JSEncoder)
 
@@ -237,6 +238,7 @@ def index(request):
         'version': __version__,
         'admin': settings.ADMIN,
         'sentry_token': settings.SENTRY_TOKEN,
+        'country': config.PROJECT_COUNTRY
     })
 
 

@@ -1,6 +1,7 @@
 // Registry Sentry for error reporting
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
 let version = document.head.querySelector("[name=version]").getAttribute('content');
+let country = document.head.querySelector("[name=country]").getAttribute('content');
 if (sentry_token) {
     Raven.config(sentry_token, {release: version}).install();
 }
@@ -91,7 +92,7 @@ var dynamic_translations = function(){
 };
 
 $(document).ready(function () {
-    failmap.initialize("nl");
+    failmap.initialize(country);
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 

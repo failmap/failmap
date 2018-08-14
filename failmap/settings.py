@@ -105,7 +105,7 @@ INSTALLED_APPS = [
     'bootstrapform',  # Required for nicer formatting of forms with the default templates
     'helpdesk',  # This is us!
 
-    'mapwidgets',
+    # 'mapwidgets', # we don't support gdal, as it's not in alpine stable yet.
     'colorful',
     'django_select2',
     # others:
@@ -638,6 +638,7 @@ CONSTANCE_CONFIG = {
     'COMMENTS': ('', 'Some comments by you that say a little bit about why below settings are the way they are.', str),
 
     'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
+    'PROJECT_COUNTRY': ('NL', 'Two letter ISO code of the country that should be shown.', str),
     'PROJECT_TAGLINE': ('', 'Tagline for this project.', str),
     'PROJECT_WEBSITE': ('', 'The url where this site is located.', str),
     'PROJECT_MAIL': ('', 'The address where people can contact for more info about this project.', str),
@@ -646,6 +647,10 @@ CONSTANCE_CONFIG = {
     'PROJECT_TWITTER': ('', 'The twitter address where people can follow this project. Include the @!', str),
     'PROJECT_FACEBOOK': ('', 'The facebook address where people can follow this project. Has to be a complete url.',
                          str),
+
+
+    'GOOGLE_MAPS_API_KEY': ('AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo',
+                            'API Key of google maps that can be used in the game / adding section.', str),
 
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
@@ -737,8 +742,8 @@ CONSTANCE_CONFIG = {
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('General', ('COMMENTS', )),
 
-    ('Project', ('PROJECT_NAME', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL', 'PROJECT_ISSUE_MAIL',
-                 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
+    ('Project', ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
+                 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
 
     ('Responsible', ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
                      'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
@@ -767,6 +772,9 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                    'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
                    'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
                    'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_FTP')),
+
+    ('Game', ('GOOGLE_MAPS_API_KEY',)),
+
     ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL'))
 ])
 
@@ -794,8 +802,6 @@ LOGIN_URL = '/authentication/login/'
 LOGOUT_REDIRECT_URL = '/'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
-
-GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAP_API_KEY', "AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo")
 
 # End game settigns
 #######
@@ -900,7 +906,13 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'contest'},
         {'name': 'team'},
         {'name': 'organizationsubmission'},
+        {'label': _('New organizations'),
+         'url': '/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
+         'url_blank': False},
         {'name': 'urlsubmission'},
+        {'label': _('New urls'),
+         'url': '/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
+         'url_blank': False},
     ]},
 ]
 # end django jet menu configuration

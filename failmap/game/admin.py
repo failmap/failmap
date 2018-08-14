@@ -1,11 +1,13 @@
 import logging
 
 from django.contrib import admin
+from django.db import transaction
+from django.utils import timezone
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
-from failmap.organizations.models import Organization, OrganizationType, Url
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 
@@ -77,6 +79,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     actions = []
 
+    @transaction.atomic
     def accept(self, request, queryset):
         for urlsubmission in queryset:
 
@@ -85,6 +88,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             if urlsubmission.has_been_accepted or urlsubmission.has_been_rejected:
                 continue
 
+            # it's possible that the url already is in the system. If so, tie that to the submitted organization.
             try:
                 url = Url.objects.all().get(url=urlsubmission.url)
             except Url.DoesNotExist:
@@ -92,13 +96,14 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 url = Url(url=urlsubmission.url)
                 url.save()
 
-            # organization might also be added... that not really a problem.
+            # the organization is already inside the submission and should exist in most cases.
             try:
                 url.organization.add(urlsubmission.for_organization)
                 url.save()
             except Exception as e:
                 log.error(e)
 
+            # add some tracking data to the submission
             urlsubmission.url_in_system = url
             urlsubmission.has_been_accepted = True
             urlsubmission.save()
@@ -107,6 +112,7 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     accept.short_description = "✅  Accept"
     actions.append('accept')
 
+    @transaction.atomic
     def reject(self, request, queryset):
         for urlsubmission in queryset:
             urlsubmission.has_been_rejected = True
@@ -126,11 +132,13 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'added_by_team__participating_in_contest__name')
 
     fields = ('added_by_team', 'organization_country', 'organization_type_name', 'organization_name',
-              'organization_address', 'organization_address_geocoded', 'organization_in_system', 'has_been_accepted',
-              'has_been_rejected', 'added_on')
+              'organization_address', 'organization_address_geocoded', 'organization_wikipedia',
+              'organization_wikidata_code', 'has_been_accepted',
+              'has_been_rejected', 'organization_in_system', 'added_on',)
 
     actions = []
 
+    @transaction.atomic
     def accept(self, request, queryset):
         for osm in queryset:
 
@@ -140,13 +148,14 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 continue
 
             try:
-                # todo: set country to config of competition, if any
                 # this might revive some old organizations, so domain knowledge is required.
+                # In this case the organization already exists with the same name, type and alive.
+                # this means we don't need to add a new one, or with new coordinates.
                 Organization.objects.all().get(
                     name=osm.organization_name,
-                    country='NL',
+                    country=osm.organization_country,
                     is_dead=False,
-                    type=OrganizationType.objects.get(name=osm.organization_type_name)).exists()
+                    type=OrganizationType.objects.get(name=osm.organization_type_name))
             except Organization.DoesNotExist:
                 # Create a new one
                 # address and evidence are saved elsewhere. Since we have a reference we can auto-update after
@@ -154,13 +163,25 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 # adding this data in the system again(?)
                 new_org = Organization(
                     name=osm.organization_name,
-                    country='NL',
+                    country=osm.organization_country,
                     is_dead=False,
                     type=OrganizationType.objects.get(name=osm.organization_type_name),
+                    created_on=timezone.now(),
                 )
-
                 new_org.save()
 
+                # of course it has a new coordinate
+                new_coordinate = Coordinate(
+                    organization=new_org,
+                    geojsontype="Point",
+                    area=osm.organization_address_geocoded,
+                    edit_area=osm.organization_address_geocoded,
+                    created_on=timezone.now(),
+                    creation_metadata="Accepted organization submission"
+                )
+                new_coordinate.save()
+
+                # and save tracking information
                 osm.organization_in_system = new_org
                 osm.has_been_accepted = True
                 osm.save()
@@ -169,6 +190,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     accept.short_description = "✅  Accept"
     actions.append('accept')
 
+    @transaction.atomic
     def reject(self, request, queryset):
         for organizationsubmission in queryset:
             organizationsubmission.has_been_rejected = True

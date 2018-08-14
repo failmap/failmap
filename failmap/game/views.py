@@ -2,8 +2,9 @@ import logging
 from datetime import datetime
 
 import pytz
+from babel import languages
+from constance import config
 from dal import autocomplete
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
@@ -85,23 +86,31 @@ def submit_organisation(request):
     if not request.session.get('team'):
         return redirect('/game/team/')
 
+    contest = get_default_contest(request)
+    language = languages.get_official_languages(contest.target_country)[0]
+
     if request.POST:
-        form = OrganisationSubmissionForm(request.POST, team=request.session.get('team'),
-                                          contest=get_default_contest(request))
+        form = OrganisationSubmissionForm(request.POST, team=request.session.get('team'), contest=contest)
 
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
             form.save(team=request.session.get('team'))
-
-            form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
-
-            return render(request, 'game/submit_organisation.html', {'form': form, 'success': True})
+            form = OrganisationSubmissionForm(team=request.session.get('team'), contest=contest)
+            return render(request, 'game/submit_organisation.html',
+                          {'form': form,
+                           'success': True,
+                           'GOOGLE_MAPS_API_KEY': config.GOOGLE_MAPS_API_KEY,
+                           'target_country': contest.target_country,
+                           'language': language
+                           })
 
     else:
-        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request),)
+        form = OrganisationSubmissionForm(team=request.session.get('team'), contest=contest,)
 
     return render(request, 'game/submit_organisation.html', {'form': form,
-                                                             'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY})
+                                                             'GOOGLE_MAPS_API_KEY': config.GOOGLE_MAPS_API_KEY,
+                                                             'target_country': contest.target_country,
+                                                             'language': language})
 
 
 def scores(request):

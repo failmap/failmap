@@ -306,7 +306,9 @@ class GenericScanMixin(models.Model):
     )
     domain = models.CharField(
         max_length=255,
-        help_text="Deprecated. Text value representing the url scanned."
+        help_text="Deprecated. Text value representing the url scanned.",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -364,7 +366,8 @@ class EndpointGenericScanScratchpad(models.Model):
     domain = models.CharField(
         max_length=255,
         help_text="Deprecated. Used when there is no known Endpoint.",
-        blank=True
+        blank=True,
+        null=True
     )
     when = models.DateTimeField(
         auto_now_add=True
@@ -377,7 +380,8 @@ class EndpointGenericScanScratchpad(models.Model):
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE)
-    domain = models.CharField(max_length=255, help_text="Deprecated. Used when there is no known URL.", blank=True)
+    domain = models.CharField(max_length=255, help_text="Deprecated. Used when there is no known URL.",
+                              blank=True, null=True)
     filename = models.CharField(max_length=255)
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)

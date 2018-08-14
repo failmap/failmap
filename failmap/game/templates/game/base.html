@@ -5,8 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Failmap - THE GAME</title>
-   {% leaflet_js plugins="forms" %}
-   {% leaflet_css plugins="forms" %}
+    {% leaflet_js plugins="forms" %}
+    {% leaflet_css plugins="forms" %}
     <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
@@ -18,55 +18,53 @@
 
     <style>
         body {
-          min-height: 2000px;
-          padding-top: 70px;
+            padding-top: 70px;
         }
+
         .dropdown:hover .dropdown-menu {
-          display: block;
+            display: block;
         }
 
-              /* Sticky footer styles
-      -------------------------------------------------- */
+        html,
+        body {
+            height: 100%;
+            /* The html and body elements cannot have any padding or margin. */
+        }
 
-      html,
-      body {
-        height: 100%;
-        /* The html and body elements cannot have any padding or margin. */
-      }
+        /* Wrapper for page content to push down footer */
+        #wrap {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            /* Negative indent footer by it's height */
+            margin: 0 auto -30px;
+        }
 
-      /* Wrapper for page content to push down footer */
-      #wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -30px;
-      }
-
-      /* Set the fixed height of the footer here */
-      #push,
-      #footer {
-          height: 30px;
-          margin-top: 3px;
-          font-size: 0.9em;
-          font-style: italic;
-          border-top: 1px solid black;
-      }
-      #footer {
-        background-color: #f5f5f5;
-      }
-
-      /* Lastly, apply responsive CSS fixes as necessary */
-      @media (max-width: 767px) {
+        /* Set the fixed height of the footer here */
+        #push,
         #footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
+            height: 30px;
+            margin-top: 58px;
+            font-size: 0.9em;
+            font-style: italic;
+            border-top: 1px solid #b9b6b6;
+            padding: 5px;
+            color: #8e8c8c
         }
-      }
 
+        #footer {
+            background-color: #f7f3ee;
+        }
 
+        /* Lastly, apply responsive CSS fixes as necessary */
+        @media (max-width: 767px) {
+            #footer {
+                margin-left: -20px;
+                margin-right: -20px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
 
     </style>
 </head>
@@ -74,20 +72,32 @@
 
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
-        <div class="navbar-collapse">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target=".navbar-collapse">
+                <span class="sr-only">{% trans "Toggle navigation" %}</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i>{% trans "Game" %}</a>
+        </div>
+        <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-left">
                 <li><a href="/game/scores/">Scores</a></li>
                 <li><a href="/game/contests/">Contest</a></li>
                 <li><a href="/game/team/">Teams</a></li>
                 <li class="dropdown">
-                    <a href="/game/submit_organization/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Submit Organization <span class="caret"></span></a>
+                    <a href="/game/submit_organization/" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-haspopup="true" aria-expanded="false">Submit Organization <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/game/submit_organization/">Submit Organization</a></li>
                         <li><a href="/game/submitted_organizations/">Submitted Organizations</a></li>
                     </ul>
                 </li>
                 <li class="dropdown">
-                    <a href="/game/submit_url/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Submit Url<span class="caret"></span></a>
+                    <a href="/game/submit_url/" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-haspopup="true" aria-expanded="false">Submit Url<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/game/submit_url/">Submit Url</a></li>
                         <li><a href="/game/submitted_urls/">Submitted Urls</a></li>
@@ -97,7 +107,8 @@
             <ul class="nav navbar-nav navbar-right">
                 <li><a href="/game/rules_help/">? Rules / Help</a></li>
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Log on/off<span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false">Log on/off<span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="/authentication/logout/">Logout</a></li>
                         <li><a href="/authentication/login/">Login</a></li>
@@ -111,17 +122,19 @@
 <div id="wrap">
     <div class="container">
 
-    {% block content %}
-    {% endblock %}
+        {% block content %}
+        {% endblock %}
 
     </div>
 </div>
 
 <div id="footer">
-  <div class="container">
-      All entered data can be downloaded from the Failmap Website of your country. For a list, see <a href="https://failmap.org">failmap.org</a>.
-      You can then process it further yourself or import it in another open source <a href="https://gitlab.com/failmap/">failmap instance</a>.
-  </div>
+    <div class="container">
+        All entered data can be downloaded from the Failmap Website of your country. For a list, see <a
+            href="https://failmap.org">failmap.org</a>.
+        You can then process it further yourself or import it in another open source <a
+            href="https://gitlab.com/failmap/">failmap instance</a>.
+    </div>
 </div>
 </body>
 </html>
