@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-03 19:01+0000\n"
+"POT-Creation-Date: 2018-08-15 11:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -84,50 +84,62 @@ msgid ""
 msgstr ""
 
 #: static/admin/js/calendar.js:12 static/js/graphs.js:29
+#: static/monitoryour/js/graphs.js:29
 msgid "January"
 msgstr ""
 
 #: static/admin/js/calendar.js:13 static/js/graphs.js:29
+#: static/monitoryour/js/graphs.js:29
 msgid "February"
 msgstr ""
 
 #: static/admin/js/calendar.js:14 static/js/graphs.js:29
+#: static/monitoryour/js/graphs.js:29
 msgid "March"
 msgstr ""
 
 #: static/admin/js/calendar.js:15 static/js/graphs.js:30
+#: static/monitoryour/js/graphs.js:30
 msgid "April"
 msgstr ""
 
 #: static/admin/js/calendar.js:16 static/js/graphs.js:30 static/js/graphs.js:34
+#: static/monitoryour/js/graphs.js:30 static/monitoryour/js/graphs.js:34
 msgid "May"
 msgstr ""
 
 #: static/admin/js/calendar.js:17 static/js/graphs.js:30
+#: static/monitoryour/js/graphs.js:30
 msgid "June"
 msgstr ""
 
 #: static/admin/js/calendar.js:18 static/js/graphs.js:31
+#: static/monitoryour/js/graphs.js:31
 msgid "July"
 msgstr ""
 
 #: static/admin/js/calendar.js:19 static/js/graphs.js:31
+#: static/monitoryour/js/graphs.js:31
 msgid "August"
 msgstr ""
 
 #: static/admin/js/calendar.js:20 static/js/graphs.js:31
+#: static/monitoryour/js/graphs.js:31
 msgid "September"
 msgstr ""
 
 #: static/admin/js/calendar.js:21 static/js/graphs.js:32
+#: static/monitoryour/js/graphs.js:32
 msgid "October"
 msgstr ""
 
 #: static/admin/js/calendar.js:22 static/js/graphs.js:32
+#: static/monitoryour/js/graphs.js:32
 msgid "November"
 msgstr ""
 
 #: static/admin/js/calendar.js:23 static/js/graphs.js:32
+#: static/monitoryour/js/graphs.js:32
 msgid "December"
 msgstr ""
 
@@ -180,402 +192,471 @@ msgstr ""
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js:71 static/js/views.js:691 static/js/views.js:696
-#: static/js/views.js:699
+#: static/js/failmap.js:79 static/js/views.js:838 static/js/views.js:843
+#: static/js/views.js:846 static/monitoryour/js/failmap.js:71
+#: static/monitoryour/js/views.js:817 static/monitoryour/js/views.js:822
+#: static/monitoryour/js/views.js:825
 msgid "View Full Screen"
 msgstr ""
 
-#: static/js/failmap.js:118
+#: static/js/failmap.js:110 static/monitoryour/js/failmap.js:118
 msgid "Search organization"
 msgstr ""
 
-#: static/js/failmap.js:139 static/js/failmap.js:143
-msgid "High"
+#: static/js/failmap.js:114 static/monitoryour/js/failmap.js:209
+msgid "Perfect"
 msgstr ""
 
-#: static/js/failmap.js:140 static/js/failmap.js:144
-msgid "Medium"
-msgstr ""
-
-#: static/js/failmap.js:141 static/js/failmap.js:145
-msgid "Low"
-msgstr ""
-
-#: static/js/failmap.js:173
-msgid "Loading"
-msgstr ""
-
-#: static/js/failmap.js:191
-msgid "Url"
-msgstr ""
-
-#: static/js/failmap.js:192
-msgid "H"
-msgstr ""
-
-#: static/js/failmap.js:193
-msgid "M"
-msgstr ""
-
-#: static/js/failmap.js:194
-msgid "L"
-msgstr ""
-
-#: static/js/failmap.js:213
+#: static/js/failmap.js:115 static/monitoryour/js/failmap.js:210
 msgid "Good"
 msgstr ""
 
-#: static/js/failmap.js:214
+#: static/js/failmap.js:116 static/monitoryour/js/failmap.js:211
 msgid "Mediocre"
 msgstr ""
 
-#: static/js/failmap.js:215
+#: static/js/failmap.js:117 static/monitoryour/js/failmap.js:212
 msgid "Bad"
 msgstr ""
 
-#: static/js/failmap.js:216
+#: static/js/failmap.js:118 static/monitoryour/js/failmap.js:213
 msgid "Unknown"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/failmap.js:119 static/monitoryour/js/failmap.js:215
+msgid "legend_basic_security"
+msgstr ""
+
+#: static/js/failmap.js:160 static/js/failmap.js:164
+#: static/monitoryour/js/failmap.js:139 static/monitoryour/js/failmap.js:143
+msgid "High"
+msgstr ""
+
+#: static/js/failmap.js:161 static/js/failmap.js:165
+#: static/monitoryour/js/failmap.js:140 static/monitoryour/js/failmap.js:144
+msgid "Medium"
+msgstr ""
+
+#: static/js/failmap.js:162 static/js/failmap.js:166
+#: static/monitoryour/js/failmap.js:141 static/monitoryour/js/failmap.js:145
+msgid "Low"
+msgstr ""
+
+#: static/js/graphs.js:33 static/monitoryour/js/graphs.js:33
 msgid "Jan"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/graphs.js:33 static/monitoryour/js/graphs.js:33
 msgid "Feb"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/graphs.js:33 static/monitoryour/js/graphs.js:33
 msgid "Mar"
 msgstr ""
 
-#: static/js/graphs.js:34
+#: static/js/graphs.js:34 static/monitoryour/js/graphs.js:34
 msgid "Apr"
 msgstr ""
 
-#: static/js/graphs.js:34
+#: static/js/graphs.js:34 static/monitoryour/js/graphs.js:34
 msgid "Jun"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js:35 static/monitoryour/js/graphs.js:35
 msgid "Jul"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js:35 static/monitoryour/js/graphs.js:35
 msgid "Aug"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js:35 static/monitoryour/js/graphs.js:35
 msgid "Sept"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js:36 static/monitoryour/js/graphs.js:36
 msgid "Oct"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js:36 static/monitoryour/js/graphs.js:36
 msgid "Nov"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js:36 static/monitoryour/js/graphs.js:36
 msgid "Dec"
 msgstr ""
 
-#: static/js/graphs.js:145
+#: static/js/graphs.js:145 static/monitoryour/js/graphs.js:145
 msgid "low"
 msgstr ""
 
-#: static/js/graphs.js:147
+#: static/js/graphs.js:147 static/monitoryour/js/graphs.js:147
 msgid "medium"
 msgstr ""
 
-#: static/js/graphs.js:149
+#: static/js/graphs.js:149 static/monitoryour/js/graphs.js:149
 msgid "high"
 msgstr ""
 
-#: static/js/script.js:12
+#: static/js/script.js:12 static/monitoryour/js/script.js:12
 msgid "2 weeks ago"
 msgstr ""
 
-#: static/js/script.js:13
+#: static/js/script.js:13 static/monitoryour/js/script.js:13
 msgid "3 weeks ago"
 msgstr ""
 
-#: static/js/script.js:14
+#: static/js/script.js:14 static/monitoryour/js/script.js:14
 msgid "1 month ago"
 msgstr ""
 
-#: static/js/script.js:15
+#: static/js/script.js:15 static/monitoryour/js/script.js:15
 msgid "2 months ago"
 msgstr ""
 
-#: static/js/script.js:16
+#: static/js/script.js:16 static/monitoryour/js/script.js:16
 msgid "3 months ago"
 msgstr ""
 
-#: static/js/script.js:17
+#: static/js/script.js:17 static/monitoryour/js/script.js:17
 msgid "7 days ago"
 msgstr ""
 
-#: static/js/script.js:18
+#: static/js/script.js:18 static/monitoryour/js/script.js:18
 msgid "now"
 msgstr ""
 
-#: static/js/script.js:21
+#: static/js/script.js:21 static/monitoryour/js/script.js:21
 msgid "Has a secure equivalent, which wasn't so in the past."
 msgstr ""
 
-#: static/js/script.js:23
+#: static/js/script.js:23 static/monitoryour/js/script.js:23
 msgid ""
 "Site does not redirect to secure url, and has no secure alternative on a "
 "standard port."
 msgstr ""
 
-#: static/js/script.js:24
+#: static/js/script.js:24 static/monitoryour/js/script.js:24
 msgid ""
 "Redirects to a secure site, while a secure counterpart on the standard port "
 "is missing."
 msgstr ""
 
-#: static/js/script.js:25
+#: static/js/script.js:25 static/monitoryour/js/script.js:25
 msgid "Broken Transport Security, rated F"
 msgstr ""
 
-#: static/js/script.js:26
+#: static/js/script.js:26 static/monitoryour/js/script.js:26
 msgid "Certificate not valid for domain name."
 msgstr ""
 
-#: static/js/script.js:27
+#: static/js/script.js:27 static/monitoryour/js/script.js:27
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated C."
 msgstr ""
 
-#: static/js/script.js:28
+#: static/js/script.js:28 static/monitoryour/js/script.js:28
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated B."
 msgstr ""
 
-#: static/js/script.js:29
+#: static/js/script.js:29 static/monitoryour/js/script.js:29
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A-."
 msgstr ""
 
-#: static/js/script.js:30
+#: static/js/script.js:30 static/monitoryour/js/script.js:30
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A."
 msgstr ""
 
-#: static/js/script.js:31
+#: static/js/script.js:31 static/monitoryour/js/script.js:31
 msgid "Less than optimal Transport Security, rated C."
 msgstr ""
 
-#: static/js/script.js:32
+#: static/js/script.js:32 static/monitoryour/js/script.js:32
 msgid "Less than optimal Transport Security, rated B."
 msgstr ""
 
-#: static/js/script.js:33
+#: static/js/script.js:33 static/monitoryour/js/script.js:33
 msgid "Good Transport Security, rated A-."
 msgstr ""
 
-#: static/js/script.js:34
+#: static/js/script.js:34 static/monitoryour/js/script.js:34
 msgid "Good Transport Security, rated A."
 msgstr ""
 
-#: static/js/script.js:35
+#: static/js/script.js:35 static/monitoryour/js/script.js:35
 msgid "Perfect Transport Security, rated A+."
 msgstr ""
 
-#: static/js/script.js:36
+#: static/js/script.js:36 static/monitoryour/js/script.js:36
 msgid "X-Content-Type-Options header present."
 msgstr ""
 
-#: static/js/script.js:37
+#: static/js/script.js:37 static/monitoryour/js/script.js:37
 msgid "Missing X-Content-Type-Options header."
 msgstr ""
 
-#: static/js/script.js:38
+#: static/js/script.js:38 static/monitoryour/js/script.js:38
 msgid "X-XSS-Protection header present."
 msgstr ""
 
-#: static/js/script.js:39
+#: static/js/script.js:39 static/monitoryour/js/script.js:39
 msgid "Missing X-XSS-Protection header."
 msgstr ""
 
-#: static/js/script.js:40
+#: static/js/script.js:40 static/monitoryour/js/script.js:40
 msgid "X-Frame-Options header present."
 msgstr ""
 
-#: static/js/script.js:41
+#: static/js/script.js:41 static/monitoryour/js/script.js:41
 msgid "Missing X-Frame-Options header."
 msgstr ""
 
-#: static/js/script.js:42
+#: static/js/script.js:42 static/monitoryour/js/script.js:42
 msgid "Strict-Transport-Security header present."
 msgstr ""
 
-#: static/js/script.js:43
+#: static/js/script.js:43 static/monitoryour/js/script.js:43
 msgid "Missing Strict-Transport-Security header."
 msgstr ""
 
-#: static/js/script.js:44
+#: static/js/script.js:44 static/monitoryour/js/script.js:44
 msgid ""
 "Missing Strict-Transport-Security header. Offers no insecure alternative "
 "service."
 msgstr ""
 
+#: static/js/script.js:45 static/monitoryour/js/script.js:45
+msgid "DNSSEC is incorrectly or not configured (errors found)."
+msgstr ""
+
+#: static/js/script.js:46 static/monitoryour/js/script.js:46
+msgid "DNSSEC seems to be implemented sufficiently."
+msgstr ""
+
 #: static/js/script.js:47
-msgid "report_header_tls_qualys"
+msgid "FTP Server only supports insecure SSL protocol."
 msgstr ""
 
 #: static/js/script.js:48
-msgid "report_header_plain_https"
+msgid "FTP Server does not configured to show if encryption is available."
 msgstr ""
 
 #: static/js/script.js:49
-msgid "report_header_security_headers_x_xss_protection"
+msgid "FTP Server supports TLS encryption protocol."
 msgstr ""
 
 #: static/js/script.js:50
-msgid "report_header_security_headers_x_frame_options"
+msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr ""
 
 #: static/js/script.js:51
+msgid ""
+"An FTP connection could not be established properly. Not possible to verify "
+"encryption."
+msgstr ""
+
+#: static/js/script.js:55 static/monitoryour/js/script.js:49
+msgid "report_header_tls_qualys"
+msgstr ""
+
+#: static/js/script.js:56 static/monitoryour/js/script.js:50
+msgid "report_header_plain_https"
+msgstr ""
+
+#: static/js/script.js:57 static/monitoryour/js/script.js:51
+msgid "report_header_security_headers_x_xss_protection"
+msgstr ""
+
+#: static/js/script.js:58 static/monitoryour/js/script.js:52
+msgid "report_header_security_headers_x_frame_options"
+msgstr ""
+
+#: static/js/script.js:59 static/monitoryour/js/script.js:53
 msgid "report_header_security_headers_x_content_type_options"
 msgstr ""
 
-#: static/js/script.js:52
+#: static/js/script.js:60 static/monitoryour/js/script.js:54
 msgid "report_header_security_headers_strict_transport_security"
 msgstr ""
 
-#: static/js/script.js:53
+#: static/js/script.js:61 static/monitoryour/js/script.js:55
 msgid "report_header_DNSSEC"
 msgstr ""
 
-#: static/js/script.js:56
+#: static/js/script.js:62
+msgid "report_header_ftp"
+msgstr ""
+
+#: static/js/script.js:65 static/monitoryour/js/script.js:58
 msgid "category_menu_municipality"
 msgstr ""
 
-#: static/js/script.js:57
+#: static/js/script.js:66 static/monitoryour/js/script.js:59
 msgid "category_menu_cyber"
 msgstr ""
 
-#: static/js/script.js:58
+#: static/js/script.js:67 static/monitoryour/js/script.js:60
 msgid "category_menu_unknown"
 msgstr ""
 
-#: static/js/script.js:59
+#: static/js/script.js:68 static/monitoryour/js/script.js:61
 msgid "category_menu_water_board"
 msgstr ""
 
-#: static/js/script.js:60
+#: static/js/script.js:69 static/monitoryour/js/script.js:62
 msgid "category_menu_province"
 msgstr ""
 
-#: static/js/script.js:61
+#: static/js/script.js:70 static/monitoryour/js/script.js:63
 msgid "category_menu_hacking"
 msgstr ""
 
-#: static/js/script.js:63
+#: static/js/script.js:72 static/monitoryour/js/script.js:65
 msgid "category_menu_bundesland"
 msgstr ""
 
-#: static/js/script.js:64
+#: static/js/script.js:73 static/monitoryour/js/script.js:66
 msgid "category_menu_regierungsbezirk"
 msgstr ""
 
-#: static/js/script.js:65
+#: static/js/script.js:74 static/monitoryour/js/script.js:67
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr ""
 
-#: static/js/script.js:66
+#: static/js/script.js:75 static/monitoryour/js/script.js:68
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
-#: static/js/script.js:67
+#: static/js/script.js:76 static/monitoryour/js/script.js:69
 msgid "category_menu_stadt_gemeinde"
 msgstr ""
 
-#: static/js/script.js:68
+#: static/js/script.js:77 static/monitoryour/js/script.js:70
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:69
+#: static/js/script.js:78 static/monitoryour/js/script.js:71
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:72
+#: static/js/script.js:81 static/monitoryour/js/script.js:74
 msgid "country_NL"
 msgstr ""
 
-#: static/js/script.js:73
+#: static/js/script.js:82 static/monitoryour/js/script.js:75
 msgid "country_DE"
 msgstr ""
 
-#: static/js/script.js:74
+#: static/js/script.js:83 static/monitoryour/js/script.js:76
 msgid "country_SE"
 msgstr ""
 
-#: static/js/script.js:75
+#: static/js/script.js:84 static/monitoryour/js/script.js:77
 msgid "country_AT"
 msgstr ""
 
-#: static/js/views.js:44
+#: static/js/script.js:87 static/monitoryour/js/script.js:80
+msgid "One week earlier"
+msgstr ""
+
+#: static/js/script.js:88 static/monitoryour/js/script.js:81
+msgid "One week later"
+msgstr ""
+
+#: static/js/script.js:89 static/monitoryour/js/script.js:82
+msgid "Moment"
+msgstr ""
+
+#: static/js/script.js:90 static/monitoryour/js/script.js:83
+msgid "Risks"
+msgstr ""
+
+#: static/js/views.js:44 static/monitoryour/js/views.js:44
 msgid "week"
 msgstr ""
 
-#: static/js/views.js:151 static/js/views.js:154 static/js/views.js:157
-#: static/js/views.js:159 static/js/views.js:161
-msgid "Documentation"
-msgstr ""
-
-#: static/js/views.js:152 static/js/views.js:155
+#: static/js/views.js:154 static/js/views.js:157 static/js/views.js:166
+#: static/js/views.js:169 static/monitoryour/js/views.js:155
+#: static/monitoryour/js/views.js:158 static/monitoryour/js/views.js:167
 msgid "Second opinion"
 msgstr ""
 
-#: static/js/views.js:177
+#: static/js/views.js:155 static/js/views.js:158 static/js/views.js:160
+#: static/js/views.js:162 static/js/views.js:164 static/js/views.js:167
+#: static/js/views.js:170 static/monitoryour/js/views.js:154
+#: static/monitoryour/js/views.js:157 static/monitoryour/js/views.js:160
+#: static/monitoryour/js/views.js:162 static/monitoryour/js/views.js:164
+#: static/monitoryour/js/views.js:166
+msgid "Documentation"
+msgstr ""
+
+#: static/js/views.js:186 static/monitoryour/js/views.js:183
 msgid "score perfect"
 msgstr ""
 
-#: static/js/views.js:179
+#: static/js/views.js:188 static/monitoryour/js/views.js:185
 msgid "score high"
 msgstr ""
 
-#: static/js/views.js:181
+#: static/js/views.js:190 static/monitoryour/js/views.js:187
 msgid "score medium"
 msgstr ""
 
-#: static/js/views.js:183
+#: static/js/views.js:192 static/monitoryour/js/views.js:189
 msgid "score low"
 msgstr ""
 
-#: static/js/views.js:321 static/js/views.js:326
+#: static/js/views.js:367 static/js/views.js:372
+#: static/monitoryour/js/views.js:364 static/monitoryour/js/views.js:369
 msgid "top congratulations"
 msgstr ""
 
-#: static/js/views.js:322 static/js/views.js:327
+#: static/js/views.js:368 static/js/views.js:373
+#: static/monitoryour/js/views.js:365 static/monitoryour/js/views.js:370
 msgid "top position"
 msgstr ""
 
-#: static/js/views.js:323
+#: static/js/views.js:369 static/monitoryour/js/views.js:366
 msgid "top fail on failmap"
 msgstr ""
 
-#: static/js/views.js:324 static/js/views.js:329
+#: static/js/views.js:370 static/js/views.js:375
+#: static/monitoryour/js/views.js:367 static/monitoryour/js/views.js:372
 msgid "hastag fail"
 msgstr ""
 
-#: static/js/views.js:324 static/js/views.js:329
+#: static/js/views.js:370 static/js/views.js:375
+#: static/monitoryour/js/views.js:367 static/monitoryour/js/views.js:372
 msgid "hastag failmap"
 msgstr ""
 
-#: static/js/views.js:328
+#: static/js/views.js:374 static/monitoryour/js/views.js:371
 msgid "top win on failmap"
 msgstr ""
 
-#: static/js/views.js:697
+#: static/js/views.js:844 static/monitoryour/js/views.js:823
 msgid "Exit Full Screen"
+msgstr ""
+
+#: static/monitoryour/js/failmap.js:187
+msgid "Url"
+msgstr ""
+
+#: static/monitoryour/js/failmap.js:188
+msgid "H"
+msgstr ""
+
+#: static/monitoryour/js/failmap.js:189
+msgid "M"
+msgstr ""
+
+#: static/monitoryour/js/failmap.js:190
+msgid "L"
 msgstr ""

@@ -238,7 +238,8 @@ def index(request):
         'version': __version__,
         'admin': settings.ADMIN,
         'sentry_token': settings.SENTRY_TOKEN,
-        'country': config.PROJECT_COUNTRY
+        'country': config.PROJECT_COUNTRY,
+        'debug': settings.DEBUG
     })
 
 

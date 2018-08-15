@@ -23,7 +23,6 @@ var failmap = {
             iconSize: new L.Point(40, 40) });
     }}),
     info: L.control(),
-    legend: L.control({position: 'bottomright'}),
     hovered_organization: "",
     proxy_tiles: true,
 
@@ -38,7 +37,7 @@ var failmap = {
     orangeIcon: new L.Icon({iconUrl: 'static/images/orange-dot.png'}),
     grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
 
-    initialize: function (country_code) {
+    initialize: function (country_code, debug) {
         // don't name this variable location, because that redirects the browser.
         loc = this.initial_location(country_code);
         this.map = L.map('map',
@@ -46,30 +45,6 @@ var failmap = {
             ).setView(loc.coordinates, loc.zoomlevel);
 
         this.map.scrollWheelZoom.disable();
-        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
-        let tile_uri_params = 'access_token={accessToken}';
-        let tile_uri = tile_uri_base + '?' + tile_uri_params;
-
-        // allow tiles to be fetched through a proxy to apply our own caching rules
-        // and prevent exhausion of free mapbox account credits
-        if (this.proxy_tiles) {
-            tile_uri = '/proxy/' + tile_uri_base;
-        }
-
-        L.tileLayer(tile_uri, {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
-            'Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
-            id: 'mapbox.light',
-            accessToken: 'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
-        }).addTo(this.map);
-
-        // we have our own fullscreen control
-        // L.control.fullscreen().addTo(this.map);
-
-        // console.log(this.map.isFullscreen());
 
         this.map.on('fullscreenchange', function () {
             if (failmap.map.isFullscreen()) {
@@ -109,15 +84,49 @@ var failmap = {
         this.add_div('<div id="historycontrol"></div>', "info", false);
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
         this.add_info();
-        this.add_div("<div id=\"domainlist\"></div>", "info", false);
+        this.add_div("<div id='domainlist'></div>", "info", false);
         var labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
         labels.push('<i style="background:' + failmap.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
         labels.push('<i style="background:' + failmap.getColorCode('red') + '"></i> '+ gettext('Bad'));
         labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
-        this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend", false);
+        this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
+
+        if (debug)
+            this.emptyTiles();
+        else
+            this.loadTiles();
+    },
+
+    loadTiles: function(){
+        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
+        let tile_uri_params = 'access_token={accessToken}';
+        let tile_uri = tile_uri_base + '?' + tile_uri_params;
+
+        // allow tiles to be fetched through a proxy to apply our own caching rules
+        // and prevent exhausion of free mapbox account credits
+        if (this.proxy_tiles) {
+            tile_uri = '/proxy/' + tile_uri_base;
+        }
+
+        // given tiles are proxies, the amount of connections might be maxed. Loading this last creates a bit more
+        // faster design.
+        L.tileLayer(tile_uri, {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
+            'Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            id: 'mapbox.light',
+            accessToken: 'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
+        }).addTo(this.map);
+    },
+
+    // this is an empty tiles layer to make sure markers load. This can be useful for testing so things load faster.
+    emptyTiles: function(){
+        L.tileLayer("",{}).addTo(this.map);
     },
 
     // To help you get the coordinates;
@@ -369,8 +378,8 @@ var failmap = {
     },
 
     // where you don't need to access the div again with js:
-    add_div: function(html, style, clickable) {
-        new_div = L.control();
+    add_div: function(html, style, clickable, control_options) {
+        new_div = L.control(control_options);
         new_div.onAdd = function () {
             this._div = L.DomUtil.create('div', style);
             this._div.innerHTML = html;
@@ -570,6 +579,11 @@ var failmap = {
     },
 
     clean_map: function(mapdata) {
+
+        // case when data is not loaded. todo: fix the cause of this.
+        if (!mapdata.features)
+            return;
+
         // add layers to the map that are only in the new dataset (new)
         for (var i = 0; i < mapdata.features.length; i++) {
             var found = false;
@@ -615,7 +629,9 @@ var failmap = {
     recolormap: function (mapdata, layer) {
         var existing_feature = layer.feature;
 
-        // mapdata.onEachFeature(function (new_feature){ doesn;'t work
+        // case when data is not loaded. todo: fix the cause of this.
+        if (!mapdata.features)
+            return;
 
         mapdata.features.forEach(function (new_feature){
             if (existing_feature.properties.organization_name !== new_feature.properties.organization_name) {

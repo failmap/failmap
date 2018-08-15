@@ -249,8 +249,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # http://stackoverflow.com/questions/1832709/django-how-to-make-translation-work
 # shoddy documentation on dashes and underscores... different than the "ll" suggestion.
 # LANGUAGE_CODE = 'en-gb'
+# Less text is better :) See: https://www.youtube.com/watch?v=0j74jcxSunY
 LANGUAGES = (
-    # ('en', 'English'),  # temporarily disable english until those translations are fixed.
+    ('en', 'English'),
     ('nl', 'Dutch'),
     # This helps to find missing translations. Using this language the goal is to replace all text
     # strings with a single rainbow. In the end there should be no text, only rainbows! 🌈
@@ -258,7 +259,8 @@ LANGUAGES = (
 )
 
 # There is no 🌈🦄 translation for humanize. Instead you'll get the english fallback values.
-LANGUAGE_CODE = 'nl'
+# language is now depending on the user agent.
+# LANGUAGE_CODE = 'en'
 
 LANGUAGE_COOKIE_NAME = 'language'
 

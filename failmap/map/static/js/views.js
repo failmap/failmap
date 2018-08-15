@@ -57,6 +57,10 @@ var state_mixin = {
     methods: {
        set_state: function(country, category) {
 
+           // do not set the state or call any action when the html element has not been created. See configuration.
+           if (!document.getElementById(this.$options.el.replace("#","")))
+               return;
+
            // prevent loading when things didn't change.
            if (country === this.country && category === this.category)
                return;
@@ -438,7 +442,7 @@ function views() {
     // You can try with:
     // vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"]
     window.vueCategoryNavbar = new Vue({
-        name: "CategoryNavbar",
+        name: "categorynavbar",
 
         mixins: [translation_mixin, state_mixin],
 
@@ -498,7 +502,7 @@ function views() {
     // test with:
     // vueCountryNavbar.countries = ["NL", "DE", "SE"]
     window.vueCountryNavbar = new Vue({
-        name: "CountryNavbar",
+        name: "countrynavbar",
         mixins: [translation_mixin],
 
         el: '#countrynavbar',
@@ -541,7 +545,7 @@ function views() {
     });
 
     window.vueGraphs = new Vue({
-        name: "Graphs",
+        name: "graphs",
 
         mixins: [state_mixin],
 
@@ -580,7 +584,7 @@ function views() {
     });
 
     window.vueStatistics = new Vue({
-        name: "Statistics",
+        name: "statistics",
 
         mixins: [state_mixin],
         el: '#statistics',
@@ -698,7 +702,7 @@ function views() {
     });
 
     window.vueDomainlist = new Vue({
-        name: "DomainList",
+        name: "domainlist",
 
         mixins: [state_mixin],
         el: '#domainlist',
@@ -734,7 +738,7 @@ function views() {
     // ticker
     // todo: determine the scroll time dynamically, as it might be too fast / too slow depending on the data.
     window.vueTicker = new Vue({
-        name: "Ticker",
+        name: "ticker",
 
         mixins: [state_mixin],
         el: '#ticker',
@@ -811,7 +815,7 @@ function views() {
     });
 
     window.vueExport = new Vue({
-        name: "Export",
+        name: "export",
 
         mixins: [translation_mixin, state_mixin],
         el: '#export',
@@ -831,7 +835,7 @@ function views() {
 
 
     window.vueFullscreen = new Vue({
-        name: "Fullscreen",
+        name: "fullscreen",
 
         el: '#fullscreen',
         data: {
@@ -850,7 +854,7 @@ function views() {
     });
 
     window.vueTopfail = new Vue({
-        name: "TopFail",
+        name: "topfail",
 
         el: '#topfail',
         data: {
@@ -861,7 +865,7 @@ function views() {
     });
 
     window.vueTopwin = new Vue({
-        name: "TopWin",
+        name: "topwin",
         el: '#topwin',
         data: {
             data_url: "/data/topwin/",
@@ -872,49 +876,49 @@ function views() {
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
     window.vueLatestTlsQualys = new Vue({
-        name: "LatestTlsQualys",
+        name: "latest_tls_qualys",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_tls_qualys',
         data: {scan: "tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
-        name: "LatestPlainHttps",
+        name: "latest_plain_https",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_plain_https',
         data: {scan: "plain_https"}
     });
 
     window.vueLatestFtp = new Vue({
-        name: "LatestFtp",
+        name: "latest_ftp",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_ftp',
         data: {scan: "ftp"}
     });
 
     window.vueLatestHSTS = new Vue({
-        name: "LatestHSTS",
+        name: "latest_security_headers_strict_transport_security",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_strict_transport_security',
         data: {scan: "Strict-Transport-Security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
-        name: "LatestXContentTypeOptions",
+        name: "latest_security_headers_x_frame_options",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_frame_options',
         data: {scan: "X-Content-Type-Options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
-        name: "LatestXFrameOptions",
+        name: "latest_security_headers_x_content_type_options",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_content_type_options',
         data: {scan: "X-Frame-Options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
-        name: "LatestXXSSProtection",
+        name: "latest_security_headers_x_xss_protection",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_xss_protection',
         data: {scan: "X-XSS-Protection"}
@@ -1126,7 +1130,7 @@ function views() {
 
 
     window.vueReport = new Vue({
-        name: "Report",
+        name: "report",
         el: '#report',
         mixins: [state_mixin, report_mixin],
 
@@ -1184,7 +1188,7 @@ function views() {
           "security_headers_strict_transport_security": [
     * */
     window.vueImprovements = new Vue({
-        name: "Improvements",
+        name: "issue_improvements",
         el: '#issue_improvements',
         mixins: [state_mixin],
 
@@ -1256,7 +1260,7 @@ function views() {
     });
 
     window.vueFullScreenReport = new Vue({
-        name: "FullScreenReport",
+        name: "fullscreenreport",
         el: '#fullscreenreport',
         mixins: [state_mixin, report_mixin],
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-10 10:59+0000\n"
+"POT-Creation-Date: 2018-08-15 11:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,75 +18,65 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/game/forms.py:68
+#: failmap/game/forms.py:32
+msgid "This contest does not exist."
+msgstr ""
+
+#: failmap/game/forms.py:76
 msgid "Incorrect secret or team. Try again!"
 msgstr ""
 
-#: failmap/game/forms.py:111
+#: failmap/game/forms.py:159
 #, python-format
 msgid ""
 "This organization %(organization)s already exists in the database for this "
-"group."
+"type / layer."
 msgstr ""
 
-#: failmap/game/forms.py:193
-#, python-format
-msgid "Invalid or missing suffix (like .com etc): %(url)s"
-msgstr ""
-
-#: failmap/game/forms.py:201
-#, python-format
-msgid "URL does not resolve (anymore): %(url)s."
-msgstr ""
-
-#: failmap/game/forms.py:230
-#, python-format
-msgid ""
-"This URL %(url)s is already in the production data for organization "
-"%(organization)s"
-msgstr ""
-
-#: failmap/game/forms.py:238
-#, python-format
-msgid "This URL %(url)s is already suggested for organization %(organization)s"
-msgstr ""
-
-#: failmap/game/models.py:15
+#: failmap/game/models.py:16
 msgid "Contest name"
 msgstr ""
 
-#: failmap/game/models.py:47
+#: failmap/game/models.py:48
 msgid "contest"
 msgstr ""
 
-#: failmap/game/models.py:48
+#: failmap/game/models.py:49
 msgid "contests"
 msgstr ""
 
-#: failmap/game/models.py:60
+#: failmap/game/models.py:61
 msgid "Team name"
 msgstr ""
 
-#: failmap/game/models.py:83
+#: failmap/game/models.py:91
 msgid "team"
 msgstr ""
 
-#: failmap/game/models.py:84
+#: failmap/game/models.py:92
 msgid "teams"
 msgstr ""
 
-#: failmap/game/models.py:173
+#: failmap/game/models.py:190
 msgid "organisation submission"
 msgstr ""
 
-#: failmap/game/models.py:174
+#: failmap/game/models.py:191
 msgid "organisation submissions"
 msgstr ""
 
-#: failmap/game/models.py:237
+#: failmap/game/models.py:256
 msgid "url submission"
 msgstr ""
 
-#: failmap/game/models.py:238
+#: failmap/game/models.py:257
 msgid "url submissions"
+msgstr ""
+
+#: failmap/game/templates/game/base.html:78
+msgid "Toggle navigation"
+msgstr ""
+
+#: failmap/game/templates/game/base.html:83
+msgid "Game"
 msgstr ""

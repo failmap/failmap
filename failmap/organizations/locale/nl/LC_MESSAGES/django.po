@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-10 10:59+0000\n"
+"POT-Creation-Date: 2018-08-15 11:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/organizations/admin.py:327
+#: failmap/organizations/admin.py:330
 #, python-format
 msgid ""
 "Url %s is already matched to \"%s\", and is alive. Please add any remaining "
@@ -26,7 +26,7 @@ msgid ""
 "url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:344
+#: failmap/organizations/admin.py:347
 #, python-format
 msgid ""
 "This url %s already exists and is alive. Please add the desired "
@@ -36,15 +36,15 @@ msgid ""
 "Search for <a href=\"../?url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:354
+#: failmap/organizations/admin.py:357
 msgid "Has endpoint scans (todo)"
 msgstr ""
 
-#: failmap/organizations/admin.py:368
+#: failmap/organizations/admin.py:371
 msgid "Yes"
 msgstr "Ja"
 
-#: failmap/organizations/admin.py:369
+#: failmap/organizations/admin.py:372
 msgid "No"
 msgstr "Nee"
 
@@ -68,26 +68,26 @@ msgstr "organisatie"
 msgid "organizations"
 msgstr "organisaties"
 
-#: failmap/organizations/models.py:170
+#: failmap/organizations/models.py:171
 msgid "coordinate"
 msgstr "coordinaat"
 
-#: failmap/organizations/models.py:171
+#: failmap/organizations/models.py:172
 msgid "coordinates"
 msgstr "coordinaten"
 
-#: failmap/organizations/models.py:251
+#: failmap/organizations/models.py:264
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""
 
-#: failmap/organizations/models.py:254
+#: failmap/organizations/models.py:267
 msgid "Url already exists, existing url is alive and resolvable."
 msgstr "URL bestaat al, het bestaande URL is in leven en bereikbaar."
 
-#: failmap/organizations/models.py:347
+#: failmap/organizations/models.py:360
 msgid "promise"
 msgstr "belofte"
 
-#: failmap/organizations/models.py:348
+#: failmap/organizations/models.py:361
 msgid "promises"
 msgstr "beloften"

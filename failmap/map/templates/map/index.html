@@ -11,11 +11,14 @@
     <meta name="sentry_token" content="{{ sentry_token }}">
     <meta name="version" content="{{ version }}">
     <meta name="country" content="{{ country }}">
+    <meta name="debug" content="{{ debug }}">
 
     <title>{% trans "Site Title" %}</title>
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no">
+
     <link rel="shortcut icon" type="image/png" href="{% static 'favicons/favicon.ico' %}"/>
     <link rel="apple-touch-icon" href="{% static 'favicons/apple-icon.png' %}">
     <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicons/apple-icon-57x57.png' %}">
@@ -1308,7 +1311,8 @@
     </table>
 </script>
 <script type="x-template" id="historycontrol_template">
-    <div>
+    <div id="historycontrol">
+    {% if config.SHOW_DNS_DNSSEC or config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS or config.SHOW_FTP or config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO or config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
         <h4>{% trans "Risks" %}</h4>
         {% if config.SHOW_DNS_DNSSEC %}
         <input type='checkbox' v-model="DNSSEC" name="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
@@ -1335,6 +1339,7 @@
         <input type='checkbox' v-model="security_headers_x_content_type_options" name="X_CONTENT" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
         {% endif %}
         <br />
+    {% endif %}
         <h4>{% trans "Moment" %}</h4>
         <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
         <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>
@@ -1343,7 +1348,7 @@
     </div>
 </script>
 <script type="x-template" id="domainlist_template">
-    <div>
+    <div id="domainlist">
         <div v-if="urls">
             <table width='100%'>
                 <thead>
