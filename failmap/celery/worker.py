@@ -10,6 +10,7 @@ import OpenSSL
 from constance import config
 from django.conf import settings
 from kombu import Queue
+from retry import retry
 
 log = logging.getLogger(__name__)
 
@@ -127,6 +128,7 @@ def worker_configuration():
     return {'task_queues': WORKER_QUEUE_CONFIGURATION[role]}
 
 
+@retry(tries=3, delay=5)
 def worker_verify_role_capabilities(role):
     """Determine if chosen role can be performed on this host (eg: ipv6 connectivity.)"""
 
