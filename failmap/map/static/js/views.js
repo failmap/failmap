@@ -155,23 +155,23 @@ var report_mixin = {
         // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
         second_opinion_links: function (rating, url) {
             if (rating.type === "security_headers_strict_transport_security")
-                return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
+                return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "tls_qualys")
-                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a>' +
-                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
+                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "security_headers_x_xss_protection")
-                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
+                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "security_headers_x_frame_options")
-                return  '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
+                return  '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
             if (rating.type === "security_headers_x_content_type_options")
-                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
+                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "DNSSEC")
-                return  '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (verisign)</a>' +
-                        '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
+                return  '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (verisign)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "ftp")
-                return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a>' +
-                        '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm btn-secondary"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
+                return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
         },
         total_awarded_points: function (high, medium, low) {
             var marker = vueReport.make_marker(high, medium, low);
@@ -249,9 +249,9 @@ var report_mixin = {
         create_twitter_link: function (name, twitter_handle, points) {
             if (twitter_handle) {
                 if (points) {
-                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
+                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" alt="twitter_logo" width="14" /> ' + this.translate('Tweet') + '</a>';
                 } else {
-                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" width="14" />' + this.translate('Tweet') + '</a>';
+                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" alt="twitter_logo" width="14" /> ' + this.translate('Tweet') + '</a>';
                 }
             }
         },

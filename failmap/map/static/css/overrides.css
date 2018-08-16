@@ -18,7 +18,7 @@ body {
 }
 
 #map {
-    height: calc(100vh - 50px);
+    height: calc(100vh - 55px);
 }
 
 .info {
@@ -31,6 +31,18 @@ body {
     border-radius: 4px;
     border: 2px solid rgba(0,0,0,0.2);
     background-clip: padding-box;
+}
+
+/* Hide info boxes on mobile / small resolutions */
+@media screen and (max-width: 768px) {
+    .info {
+        visibility: hidden;
+    }
+}
+
+.finding_block{
+    margin-left: 20px;
+    margin-bottom: 20px;
 }
 
 .info_nobackground {
@@ -87,7 +99,7 @@ body {
 
 /* bootstrap fixed menu terribleness... always overlaps content. */
 body {
-    padding-top: 50px;
+    padding-top: 62px;
 }
 
 /* prevent dynamic content loading in the div before this element to scroll
@@ -99,7 +111,7 @@ div#report {
 
 @media screen and (max-width: 768px) {
     body {
-        padding-top: 50px;
+        padding-top: 55px;
     }
 }
 
@@ -185,99 +197,6 @@ div#report {
     float: left;
 }
 
-.Donate {
-    border: 1px solid silver;
-    padding: 4px;
-    width: 60px;
-    font-size: 18px;
-    display: block;
-    float: left;
-    margin-right: 5px;
-    text-align: center;
-}
-
-.Donate.a5 {
-    background-color: #B3C1C4;
-}
-
-.Donate.a5 a:link {
-    color: #828578;
-}
-
-.Donate.a10 {
-    background-color: #EFB8BF;
-}
-
-.Donate.a10 a:link {
-    color: #B65145;
-}
-
-.Donate.a20 {
-    background-color: #A9C7DE;
-}
-
-.Donate.a20 a:link {
-    color: #5F627F;
-}
-
-.Donate.a50 {
-    background-color: #FACA8E;
-}
-
-.Donate.a50 a:link {
-    color: #957C62;
-}
-
-.Donate.a100 {
-    background-color: #90C280;
-}
-
-.Donate.a100 a:link {
-    color: #616231;
-}
-
-.Donate.a200 {
-    background-color: #F8DD58;
-}
-
-.Donate.a200 a:link {
-    color: #938443;
-}
-
-.Donate.a500 {
-    background-color: #CDA1BE;
-}
-
-.Donate.a500 a:link {
-    color: #72475A;
-}
-
-.Donate.aother {
-    width: 200px;
-    background-color: pink;
-}
-
-.Donate.aother a:link, .Donate.aother a:visited {
-    color: darkgray;
-}
-
-.donate-title {
-    background-color: darkgray;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    padding-left: 17px;
-    color: white;
-    margin-top: 11px;
-}
-
-.donate-content {
-    background-color: lightgray;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    padding-bottom: 15px;
-    padding-top: 9px;
-}
-
 .reportlist h3 {
     font-size: 17px;
 }
@@ -339,31 +258,6 @@ div#report {
     margin-left: 5px;
 }
 
-.fail_logo {
-    background-color: black;
-    padding: 5px;
-    border: 3px inset;
-}
-
-.fail_logo img {
-    width: 100%;
-}
-
-.sidn_logo img {
-    margin-left: -6px; /* todo: remove margin of the logo image. */
-    width: 100%;
-    padding-bottom: 11px;
-}
-
-.git_logo {
-    padding: 10px;
-    padding-bottom: 17px;
-}
-
-.git_logo img {
-    height: 70px;
-}
-
 .logo {
     width: 100%;
     text-align: center;
@@ -408,9 +302,9 @@ div#report {
     font-family: consolas;
 }
 
-.navbar-default {
+.navbar-custom {
+    -webkit-backdrop-filter: blur(20px);
     background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.9) 0, rgba(255, 255, 255, 0.8) 100%) !important;
-    backdrop-filter: blur(10px);
     background-color: transparent !important;
 }
 
@@ -458,7 +352,7 @@ path {
 .backtomap {
     float: right;
     position: relative;
-    top: -15px;
+    top: 70px;
 }
 
 .organization_points {
@@ -580,7 +474,7 @@ path {
     width: 10em;
     height: 13em;
     border-radius: 6px;
-    margin: 10px;
+    margin-right: 20px;
     text-align: center;
     padding: 13px;
 }
@@ -593,7 +487,6 @@ path {
 .score_value {
     font-size: 5em;
     background-color: #ffffffcf;
-    width: 113px;
     display: block;
     border-radius: 10px;
 }
@@ -679,7 +572,7 @@ path {
 */
 
 section {
-    margin-bottom: 55px;
+    margin-bottom: 140px;
 
 }
 
@@ -753,16 +646,17 @@ th.active .arrow {
 }
 
 /* Report printing in chrome / safari, so it looks nice */
-* {
-    -webkit-print-color-adjust: exact !important;   /* Chrome, Safari */
-    color-adjust: exact !important;                 /*Firefox*/
-}
 
 @media print {
     .noprint {display:none !important;}
     a:link:after, a:visited:after {
       display: none;
       content: "";
+    }
+
+    * {
+        -webkit-print-color-adjust: exact !important;   /* Chrome, Safari */
+        color-adjust: exact !important;                 /*Firefox*/
     }
 }
 

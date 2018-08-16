@@ -41,8 +41,7 @@
 
     {% compress css %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap_v3.3.6.min.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
@@ -98,56 +97,56 @@
 </head>
 
 <body role="document">
-<nav class="navbar navbar-default navbar-fixed-top">
+
+<nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom">
     <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target=".navbar-collapse">
-                <span class="sr-only">{% trans "Toggle navigation" %}</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i> {% trans "Map" %}</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
+    <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i> {% trans "Map" %}</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav mr-auto">
 
-                {% if config.SHOW_INTRO %}
-                <li><a href="#info">{% trans "Info" %}</a></li>
-                {% endif %}
-
-                {% if config.SHOW_GOOD_BAD %}
-                <li><a href="#charts">{% trans "Charts" %}</a></li>
-                {% endif %}
-
-                <li><a href="#reports">{% trans "Reports" %}</a></li>
-
-                {% if config.SHOW_EXTENSIVE_STATISTICS %}
-                <li><a href="#extensive_statistics">{% trans "Statistics" %}</a></li>
-                {% endif %}
-
-                {% if config.SHOW_DATASETS %}
-                <li><a href="#datasets">{% trans "Datasets" %}</a></li>
-                {% endif %}
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-            {% if debug %}
-                <li><span style="margin-top:10px;" class='btn btn-danger btn-sm btn-block'>{% trans "DEBUG" %}</span></li>
+            {% if config.SHOW_INTRO %}
+            <li class="nav-item"><a class="nav-link" href="#info">{% trans "Info" %}</a></li>
             {% endif %}
-            {% if admin %}
-                <li><span class="navbar-text"><span class="label label-default">{{ version }}</span></span></li>
-                <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-						{% else %}
-								<li><a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a></li>
-                <li><a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a></li>
+
+            {% if config.SHOW_GOOD_BAD %}
+            <li class="nav-item"><a class="nav-link" href="#charts">{% trans "Charts" %}</a></li>
             {% endif %}
-            </ul>
-        </div><!--/.nav-collapse -->
+
+            <li class="nav-item"><a class="nav-link" href="#reports">{% trans "Reports" %}</a></li>
+
+            {% if config.SHOW_EXTENSIVE_STATISTICS %}
+            <li class="nav-item"><a class="nav-link" href="#extensive_statistics">{% trans "Statistics" %}</a></li>
+            {% endif %}
+
+            {% if config.SHOW_DATASETS %}
+            <li class="nav-item"><a class="nav-link" href="#datasets">{% trans "Datasets" %}</a></li>
+            {% endif %}
+        </ul>
+        {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
+        <ul class="navbar-nav navbar-right ml-auto">
+        {% if debug %}
+            <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'>{% trans "DEBUG" %}</span></li>
+        {% endif %}
+        {% if admin %}
+            <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+        {% else %}
+            <li class="nav-item nav-link" style="padding-right:20px;">
+                <a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a>
+            </li>
+            <li class="nav-item nav-link" style="padding-right:20px;">
+                <a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
+            </li>
+        {% endif %}
+        </ul>
+    </div>
     </div>
 </nav>
 
-<nav class="navbar navbar-default navbar-static-top" id="countrynavbar" v-if="countries.length > 1" v-cloak>
+<nav class="navbar navbar-light fixed-top" id="countrynavbar" v-if="countries.length > 1" v-cloak>
     <div class="container">
         <div class="navbar-collapse">
             <ul class="nav navbar-nav navbar-center">
@@ -161,7 +160,7 @@
     </div>
 </nav>
 
-<nav class="navbar navbar-default navbar-static-top" id="categorynavbar" v-if="categories.length > 1" v-cloak>
+<nav class="navbar navbar-light fixed-top" id="categorynavbar" v-if="categories.length > 1" v-cloak>
     <div class="container">
         <div class="navbar-collapse">
             <ul class="nav navbar-nav navbar-center">
@@ -183,48 +182,9 @@
     <div class="container theme-showcase" role="main">
         <a name="info" class="jumptonav"></a>
         <div class="jumbotron">
-            <h1>{% trans "What do i see?" %}</h1>
-            <p>{% trans "whats do i see explained" %}</p>
+            <h1 class="display-4">{% trans "What do i see?" %}</h1>
+            <p class="lead">{% trans "whats do i see explained" %}</p>
             <p>{% blocktrans with RESPONSIBLE_ORGANIZATION_NAME=config.RESPONSIBLE_ORGANIZATION_NAME PROJECT_ISSUE_MAIL=config.PROJECT_ISSUE_MAIL %} This website is run by {{ RESPONSIBLE_ORGANIZATION_NAME }}. To submit new domains, or ask questions, contact us via: {{ PROJECT_ISSUE_MAIL }}.{% endblocktrans %}</p>
-        </div>
-
-        <div class="row">
-            <div class="col-md-2">
-                <div style="background-image: url('{% static 'images/logo_tile.jpg' %}'); height: 360px;border-radius: 25px;text-align: center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"
-                width="100%">
-                    <span style="font-size: 18em; font-weight: bold; font-family: arial; color: white;"></span>
-                </div>
-            </div>
-            <div class="col-md-5">
-                <h2>Controleer het zelf!</h2>
-                <p>Deze website hoef je niet te geloven: daarom is deze website en alle achterliggende software
-                    <a href="https://gitlab.com/failmap/failmap" targer="blank">open source</a>. Hierdoor kan iedereen
-                    zelf controleren of de overheid haar veiligheid op orde heeft.</p>
-                <p>Door zelf te controleren help je je eigen gegevens beter te beschermen.</p>
-                <p>Heb je vragen, of kom je er niet uit? Dan helpen wij je op weg!</p>
-                <p><a href="https://gitlab.com/failmap/failmap" class="btn btn-lg btn-success"><i class="fas fa-eye"></i> Ik wil deze software!</a></p>
-            </div>
-            <div class="col-md-5">
-                <h2>Uw branche of onderneming?</h2>
-                <p>Alles op orde? Gebruik deze monitor voor uw branch of onderneming en weet het zeker! De Internet Cleanup
-                    Foundation biedt professionele ondersteuning en ontneemt alle zorgen rondom techniek.
-                </p>
-                <p>
-                    Belangrijkste voordelen:
-                    <ul>
-                        <li>Ontdek kwetsbare vergeten sites</li>
-                        <li>Dagelijkse controle</li>
-                        <li>Status in een oogopslag</li>
-                        <li>U bepaalt wie de resultaten ziet</li>
-                        <li>Hosting on premise of in de cloud</li>
-                        <li>Altijd de laatste versie</li>
-                        <li>Ondersteuning en advies</li>
-                    </ul>
-                </p>
-                <p>
-                    <a href="mailto:info@internetcleanup.foundation?subject=Vertel%20me%20meer!&body=Beste," class="btn btn-lg btn-info"><i class="fas fa-globe"></i> Vertel me meer!</a>
-                </p>
-            </div>
         </div>
     </div>
 </section>
@@ -236,11 +196,11 @@
 
        <div id="charts">
             <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="charts" class="jumptonav"></a>
                 <h2>{% trans "Charts" %}</h2>
                 <p>{% trans "Chart introduction" %}</p>
                 <p></p>
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
             </div>
             <div class="row">
                 {% include "map/topfail.html" %}
@@ -256,12 +216,12 @@
         <div class="page-header" id="report">
             <div>
                 <div class="page-header">
+                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                     <a name="reports" id="report-anchor" class="jumptonav"></a>
                     <h2><span class="organization_points"></span>{% trans "Report" %}</h2>
-                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 </div>
-                <div>
-                    <div>
+                <div class="row">
+                    <div class="col-md-12">
                         {% trans "Show report for organization" %}:
                         {% verbatim %}
                         <select v-model="selected">
@@ -272,14 +232,14 @@
                         <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span>
                         {% endverbatim %}
                     </div>
-                    <br/>
-
-                    <div v-if="name" id="reportcontent">
+                </div>
+                <div class="row">
+                    <div v-if="name" id="reportcontent" class="col-md-12">
                         <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
                         <br />
-                        <a @click="closereport()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
-                        <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
-                        <br />
+                        <a @click="closereport()" class="btn btn-primary" style="color:white;"><i class="fas fa-times"></i> {% trans "close report" %}</a>
+                        <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+                        <br /><br />
                         <div class="score high">
                             <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
                             <span class="score_label">{% trans "High" %}</span>
@@ -325,10 +285,8 @@
                                 </div>
                                 <div class="col-md-8">
                                     <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                                    <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                                          :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                                    <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
-                                       class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
+                                    <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                                    <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                                         {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
                                 </div>
                             </div>
@@ -343,14 +301,11 @@
                                     {% verbatim %}
                                     <div v-for="rating in url.ratings">
                                         <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                        &nbsp; &nbsp; <span
-                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                        translate(rating.explanation) }}<br/>
-                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                        {{ humanize(rating.last_scan) }} <br/>
-                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                        <br/>
+                                        <div class="finding_block">
+                                            <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                            {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
+                                            <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -373,14 +328,11 @@
                                     <div>
                                         <div v-for="rating in endpoint.ratings">
                                             <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                            &nbsp; &nbsp; <span
-                                                v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                            translate(rating.explanation) }}<br/>
-                                            &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                            humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                            {{ humanize(rating.last_scan) }} <br/>
-                                            &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                            <br/>
+                                            <div class="finding_block">
+                                                <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                                {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
+                                                <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -401,9 +353,9 @@
         {% if config.SHOW_STATS_NUMBERS %}
         <div id="statistics" v-cloak>
             <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="extensive_statistics" class="jumptonav"></a>
                 <h2>{% trans "Extensive statistics" %}</h2>
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -418,16 +370,16 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-success" :style="{width:greenpercentage}">
+                        <div class="progress-bar bg-success" :style="{width:greenpercentage}">
                             <span class="sr-only">{% trans "stats remark green" %}</span>
                         </div>
-                        <div class="progress-bar progress-bar-warning" :style="{width:orangepercentage}">
+                        <div class="progress-bar bg-warning" :style="{width:orangepercentage}">
                             <span class="sr-only">{% trans "stats remark orange" %}</span>
                         </div>
-                        <div class="progress-bar progress-bar-danger" :style="{width:redpercentage}">
+                        <div class="progress-bar bg-danger" :style="{width:redpercentage}">
                             <span class='sr-only'>{% trans "stats remark red" %}</span>
                         </div>
-                        <div class="progress-bar progress-bar-basic" :style="{width:unknownpercentage}">
+                        <div class="progress-bar bg-basic" :style="{width:unknownpercentage}">
                             <span class='sr-only'>{% trans "stats remark gray" %}</span>
                         </div>
                     </div>
@@ -435,11 +387,11 @@
                     <table class="table">
                         <thead>
                         <tr>
-                            <th width="30%">{% trans "When" %}</th>
-                            <th width="15%">{% trans "Number" %}</th>
-                            <th width="18%">{% trans "Good" %}</th>
-                            <th width="18%">{% trans "Average" %}</th>
-                            <th width="18%">{% trans "Bad" %}</th>
+                            <th width="25%">{% trans "When" %}</th>
+                            <th width="5%">{% trans "Number" %}</th>
+                            <th width="20%">{% trans "Good" %}</th>
+                            <th width="20%">{% trans "Average" %}</th>
+                            <th width="20%">{% trans "Bad" %}</th>
                         </tr>
                         </thead>
                         <tbody v-if="data.data">
@@ -447,15 +399,15 @@
                         <tr v-for="(x, key) in data.data">
                             <td>{{ translate(key) }}</td>
                             <td>{{ x["included_organizations"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, white ' + x['green percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green percentage'] + '%, transparent ' + x['green percentage'] + '%, transparent 100%);'">
                                 {{ x["green"] }}
                                 <small>({{ x["green percentage"] }}%)</small>
                             </td>
-                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, white ' + x['orange percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange percentage'] + '%, transparent ' + x['orange percentage'] + '%, transparent 100%);'">
                                 {{ x["orange"] }}
                                 <small>({{ x["orange percentage"] }}%)</small>
                             </td>
-                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red percentage'] + '%, white ' + x['red percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red percentage'] + '%, transparent ' + x['red percentage'] + '%, transparent 100%);'">
                                 {{ x["red"] }}
                                 <small>({{ x["red percentage"] }}%)</small>
                             </td>
@@ -466,24 +418,24 @@
                 </div>
                 <div class="col-md-6">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-success" :style="{width:greenurlpercentage}">
-                            <span class="sr-only">Oh, wow!</span>
+                        <div class="progress-bar bg-success" :style="{width:greenurlpercentage}">
+                            <span class="sr-only">{% trans "stats remark green" %}</span>
                         </div>
-                        <div class="progress-bar progress-bar-warning" :style="{width:orangeurlpercentage}">
-                            <span class="sr-only">Pretty fair, but not really there.</span>
+                        <div class="progress-bar bg-warning" :style="{width:orangeurlpercentage}">
+                            <span class="sr-only">{% trans "stats remark orange" %}</span>
                         </div>
-                        <div class="progress-bar progress-bar-danger" :style="{width:redurlpercentage}">
-                            <span class='sr-only'>They have a lot to learn.</span>
+                        <div class="progress-bar bg-danger" :style="{width:redurlpercentage}">
+                            <span class='sr-only'>{% trans "stats remark red" %}</span>
                         </div>
                     </div>
                     <table class="table">
                         <thead>
                         <tr>
-                            <th width="30%">{% trans "When" %}</th>
-                            <th width="15%">{% trans "Number" %}</th>
-                            <th width="18%">{% trans "Good" %}</th>
-                            <th width="18%">{% trans "Average" %}</th>
-                            <th width="18%">{% trans "Bad" %}</th>
+                            <th width="25%">{% trans "When" %}</th>
+                            <th width="5%">{% trans "Number" %}</th>
+                            <th width="20%">{% trans "Good" %}</th>
+                            <th width="20%">{% trans "Average" %}</th>
+                            <th width="20%">{% trans "Bad" %}</th>
                         </tr>
                         </thead>
                         <tbody v-if="data.data">
@@ -491,15 +443,15 @@
                         <tr v-for="(x, key) in data.data">
                             <td>{{ translate(key) }}</td>
                             <td>{{ x["total_urls"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, white ' + x['green url percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #dff9d7 0%, #dff9d7 ' + x['green url percentage'] + '%, transparent ' + x['green url percentage'] + '%, transparent 100%);'">
                                 {{ x["green_urls"] }}
                                 <small>({{ x["green url percentage"] }}%)</small>
                             </td>
-                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, white ' + x['orange url percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #ffefd3 0%, #ffefd3 ' + x['orange url percentage'] + '%, transparent ' + x['orange url percentage'] + '%, transparent 100%);'">
                                 {{ x["orange_urls"] }}
                                 <small>({{ x["orange url percentage"] }}%)</small>
                             </td>
-                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red url percentage'] + '%, white ' + x['red url percentage'] + '%, white 100%);'">
+                            <td :style="'background: linear-gradient(0deg, #fbeaea 0%, #fbeaea ' + x['red url percentage'] + '%, transparent ' + x['red url percentage'] + '%, transparent 100%);'">
                                 {{ x["red_urls"] }}
                                 <small>({{ x["red url percentage"] }}%)</small>
                             </td>
@@ -1062,11 +1014,11 @@
     <div class="container">
         <div id="export">
             <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="datasets" class="jumptonav"></a>
                 <h2>{% trans "Datasets" %}</h2>
                 {% trans "Datasets explanation" %}
                 <p></p>
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
             </div>
             <div class="row">
                 <div class="col-md-12">
@@ -1205,85 +1157,105 @@
 </div>
 
 </body>
+
 <script type="x-template" id="fullscreenreport">
     {% verbatim %}
     <div class="page-header" id="fullscreenreport" v-if="visible">
         <div v-if="name" class="fullscreenlayout">
-            <h1>
-                {{ name }}
-            </h1>
             <p class="closebutton" onclick="vueFullScreenReport.hide()">
                 X
             </p>
-            <div>{% endverbatim %}
+
+            <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
+            <br />
+            <a @click="vueFullScreenReport.hide()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
+            <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+            <br />
+
+            <div class="score high">
+                <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
+                <span class="score_label">{% trans "High" %}</span>
+            </div>
+
+            <div class="score medium">
+                <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
+                <span class="score_label">{% trans "Medium" %}</span>
+            </div>
+
+            <div class="score low">
+                <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
+                <span class="score_label">{% trans "Low" %}</span>
+            </div>
+
+            <br style="clear: both">
+            <br />
+            <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
+            <br/>
+            <ul>
+            <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
+            </li>
+            <li>{% trans "RSS change feed teaser" %}
+            <a :href="'/data/updates_on_organization_feed/' + selected"
+            target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
+            <li>
+            {% trans "Report share result question" %} {% verbatim %}<span
+                v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
+            </li>
+            <li>
+            {% trans "Report ask domains leader" %} <a
+                :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+            </li>
+            </ul>
+
+            <div>
                <!-- copy of report -->
-                {% trans "Report share result question" %} {% verbatim %}<span
-                        v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-                    <br/>
-                    {% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}<br/>
-                    {% trans "Score" %}<span v-if="promise"><strong>*</strong></span>:<br/>
-                    {% trans "High" %}: {% verbatim %}{{ high }}{% endverbatim %} <br/>
-                    {% trans "Medium" %}: {% verbatim %}{{ medium }}{% endverbatim %} <br/>
-                    {% trans "Low" %}: {% verbatim %}{{ low }}{% endverbatim %} <br/>
-                    {% trans "congratulations" %}!
-                    <br/>
-                    <br/>
-                    {% trans "Report ask pentest leader" %} <a
-                        :href="'mailto:' + mailto + '?subject={% trans "Report ask pentest subject" %}' + name + '&body={% trans "Report ask pentest body" %}'">{% trans "Report ask request pentest" %}</a><br/>
-                    {% trans "Report ask domains leader" %} <a
-                        :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-                    <br/>
-                    {% verbatim %}
-                    <div v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
+                <br/>
+                {% verbatim %}
+                <div v-for="url in urls" class="perurl"
+                     :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
+
+                    <div class="col-md-4">
+                        &nbsp;
                     </div>
-                    {% endverbatim %}
-                    <br/>
-                    {% verbatim %}
-                    <div v-for="url in urls" class="perurl"
-                         :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', white);'">
+                    <div class="col-md-8">
+                        <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                        <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
+                              :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                        <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
+                           class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
+                            {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                    </div>
 
-                        <div class="col-md-4">
-                            &nbsp;
+                    <div v-for="endpoint in url.endpoints">
+                        <div class="col-md-4 giveroom">
+                            <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
+                               target="_blank"
+                               :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
+                                     class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                    :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
+                                />
+                            </a>
                         </div>
-                        <div class="col-md-8">
-                            <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                            <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                                  :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                            <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
-                               class="btn btn-default btn-sm" style="margin-top: 11px;" role="button">
-                                {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
-                        </div>
+                        <div class="col-md-8 giveroom">
+                            <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
 
-                        <div v-for="endpoint in url.endpoints">
-                            <div class="col-md-4 giveroom">
-                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
-                                   target="_blank"
-                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
-                                    <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
-                                        :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
-                                    />
-                                </a>
-                            </div>
-                            <div class="col-md-8 giveroom">
-                                <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
-
-                                <div>
-                                    <div v-for="rating in endpoint.ratings">
-                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                        &nbsp; &nbsp; <span
-                                            v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                        translate(rating.explanation) }}<br/>
-                                        &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                        humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                        {{ humanize(rating.last_scan) }} <br/>
-                                        &nbsp; &nbsp; <span v-html="second_opinion_links(rating, url)"> </span>
-                                        <br/>
-                                    </div>
+                            <div>
+                                <div v-for="rating in endpoint.ratings">
+                                    <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                    &nbsp; &nbsp; <span
+                                        v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
+                                    translate(rating.explanation) }}<br/>
+                                    &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
+                                    humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
+                                    {{ humanize(rating.last_scan) }} <br/>
+                                    &nbsp; &nbsp; <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                    <br/>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
                 <!-- end copy of report -->
             </div>
         </div>
@@ -1344,7 +1316,7 @@
     {% endif %}
         <h4>{% trans "Moment" %}</h4>
         <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
-        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/>
+        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
         <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
         <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
     </div>
