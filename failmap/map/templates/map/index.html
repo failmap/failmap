@@ -2,9 +2,11 @@
 <html lang="nl">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="Security issues of organizations in {{ country }} displayed a map">
 
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=1.5, user-scalable=yes, minimal-ui">
+    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=5, user-scalable=yes, minimal-ui">
     <meta name="theme-color" content="Tomato"/>
+
     <!-- export variables to javascript from server configuration -->
     <meta name="mailto" content="{{ config.PROJECT_MAIL }}">
     <meta name="issue_mailto" content="{{ config.PROJECT_ISSUE_MAIL }}">
@@ -137,8 +139,8 @@
                 <li><span class="navbar-text"><span class="label label-default">{{ version }}</span></span></li>
                 <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
 						{% else %}
-								<li><a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" width="24px" class="d-inline-block align-top"/></a></li>
-                <li><a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo.png' %}" width="24px" class="d-inline-block align-top"/></a></li>
+								<li><a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a></li>
+                <li><a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a></li>
             {% endif %}
             </ul>
         </div><!--/.nav-collapse -->
@@ -188,7 +190,7 @@
 
         <div class="row">
             <div class="col-md-2">
-                <div style="background-image: url('{% static 'images/logo_tile.png' %}'); height: 360px;border-radius: 25px;text-align: center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"
+                <div style="background-image: url('{% static 'images/logo_tile.jpg' %}'); height: 360px;border-radius: 25px;text-align: center;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);"
                 width="100%">
                     <span style="font-size: 18em; font-weight: bold; font-family: arial; color: white;"></span>
                 </div>
@@ -1139,16 +1141,16 @@
             <div class="col-md-3">
                 <b>{% trans "About this website" %}</b>
                 <ul>
-                    <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank">{% trans "Get the sourcecode" %}</a></li>
-                    <li>📖 <a href="https://docs.failmap.org" target="_blank">{% trans "Documentation" %}</a></li>
+                    <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank" rel="noopener">{% trans "Get the sourcecode" %}</a></li>
+                    <li>📖 <a href="https://docs.failmap.org" target="_blank" rel="noopener">{% trans "Documentation" %}</a></li>
                 </ul>
             </div>
 
             <div class="col-md-3">
                 <b>{% trans "Made possible by" %}</b>
                 <ul>
-                    <li>🗺️ <a href="https://internetcleanup.foundation" target="_blank">Internet Cleanup Foundation</a></li>
-                    <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank">SIDN fonds</a></li>
+                    <li>🗺️ <a href="https://internetcleanup.foundation" target="_blank" rel="noopener">Internet Cleanup Foundation</a></li>
+                    <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank" rel="noopener">SIDN fonds</a></li>
                 </ul>
             </div>
             <div class="col-md-3">
@@ -1158,7 +1160,7 @@
 
                 <ul>
                     {% if config.RESPONSIBLE_ORGANIZATION_WEBSITE %}
-                    <li>🖥️ <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank">{{ config.RESPONSIBLE_ORGANIZATION_NAME }}</a></li>
+                    <li>🖥️ <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank" rel="noopener">{{ config.RESPONSIBLE_ORGANIZATION_NAME }}</a></li>
                     {% endif %}
 
                     <li>{% trans "Contact" %}:
@@ -1167,23 +1169,23 @@
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_TWITTER %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank"><i class="fab fa-twitter-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank" rel="noopener"><i class="fab fa-twitter-square"></i></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_FACEBOOK %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank" rel="noopener"><i class="fab fa-facebook-square"></i></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_LINKEDIN %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank"><i class="fas fa-linkedin"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank" rel="noopener"><i class="fas fa-linkedin"></i></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_WHATSAPP %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank"><i class="fab fa-whatsapp-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp-square"></i></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_PHONE %}
-                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank"><i class="fas fa-phone-square"></i></a>
+                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank" rel="noopener"><i class="fas fa-phone-square"></i></a>
                         {% endif %}
                     </li>
                 </ul>
@@ -1371,7 +1373,7 @@
         </div>
     </div>
 </script>
-<iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
+<iframe name="print_frame" title="Print frame, used to load reports when clicking print." width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>
 <!--
 This page was generated with MSPAINT.EXE on {{ timestamp }} in over 9000 seconds, version: {{ version }}.

@@ -136,6 +136,7 @@ var failmap = {
     initial_location: function(country_code) {
 
         // you might want to set the zoomlevel
+        // data from: https://worldmap.harvard.edu/data/geonode:country_centroids_az8
         let startpositions = {
                 'AD':{"coordinates": [42.54229102, 1.56054378], "zoomlevel":6},
                 'AE':{"coordinates": [23.90528188, 54.3001671], "zoomlevel":6},
