@@ -399,8 +399,14 @@ path {
     font-size: 12px;
 }
 
-.selected_category, .selected_country {
-    background-color: lightblue;
+.selected_country {
+    background-color: #e8e8e8;
+    border-top: 4px solid blue;
+    color: black;
+}
+
+.selected_category {
+    background-color: #e8e8e8;
     border-bottom: 4px solid blue;
     color: black;
 }
