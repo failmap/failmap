@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-15 11:12+0000\n"
+"POT-Creation-Date: 2018-08-16 13:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,7 @@ msgstr ""
 
 #: failmap/map/static/js/failmap.js:85
 msgid "Search organization"
-msgstr ""
+msgstr "Search organization..."
 
 #: failmap/map/static/js/failmap.js:89
 msgid "Perfect"
@@ -49,19 +49,19 @@ msgstr ""
 
 #: failmap/map/static/js/failmap.js:94
 msgid "legend_basic_security"
-msgstr ""
-
-#: failmap/map/static/js/failmap.js:405 failmap/map/static/js/failmap.js:409
-msgid "High"
-msgstr ""
+msgstr "The basic security is:"
 
 #: failmap/map/static/js/failmap.js:406 failmap/map/static/js/failmap.js:410
-msgid "Medium"
-msgstr ""
+msgid "High"
+msgstr "High risk"
 
 #: failmap/map/static/js/failmap.js:407 failmap/map/static/js/failmap.js:411
+msgid "Medium"
+msgstr "Medium risk"
+
+#: failmap/map/static/js/failmap.js:408 failmap/map/static/js/failmap.js:412
 msgid "Low"
-msgstr ""
+msgstr "Low risk"
 
 #: failmap/map/static/js/graphs.js:29
 msgid "January"
@@ -469,35 +469,35 @@ msgstr ""
 
 #: failmap/map/static/js/views.js:190
 msgid "score perfect"
-msgstr ""
+msgstr "perfect"
 
 #: failmap/map/static/js/views.js:192
 msgid "score high"
-msgstr ""
+msgstr "high"
 
 #: failmap/map/static/js/views.js:194
 msgid "score medium"
-msgstr ""
+msgstr "medium"
 
 #: failmap/map/static/js/views.js:196
 msgid "score low"
-msgstr ""
+msgstr "low"
 
 #: failmap/map/static/js/views.js:371 failmap/map/static/js/views.js:376
 msgid "top congratulations"
-msgstr ""
+msgstr "congratulations"
 
 #: failmap/map/static/js/views.js:372 failmap/map/static/js/views.js:377
 msgid "top position"
-msgstr ""
+msgstr "position"
 
 #: failmap/map/static/js/views.js:373
 msgid "top fail on failmap"
-msgstr ""
+msgstr "worst organizations on the map"
 
 #: failmap/map/static/js/views.js:374 failmap/map/static/js/views.js:379
 msgid "hastag fail"
-msgstr ""
+msgstr "fail"
 
 #: failmap/map/static/js/views.js:374 failmap/map/static/js/views.js:379
 msgid "hastag failmap"

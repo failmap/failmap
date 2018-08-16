@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-15 11:12+0000\n"
+"POT-Creation-Date: 2018-08-16 13:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,15 +51,15 @@ msgstr "Onbekend"
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
 
-#: failmap/map/static/js/failmap.js:405 failmap/map/static/js/failmap.js:409
+#: failmap/map/static/js/failmap.js:406 failmap/map/static/js/failmap.js:410
 msgid "High"
 msgstr "Hoog risico"
 
-#: failmap/map/static/js/failmap.js:406 failmap/map/static/js/failmap.js:410
+#: failmap/map/static/js/failmap.js:407 failmap/map/static/js/failmap.js:411
 msgid "Medium"
 msgstr "Midden risico"
 
-#: failmap/map/static/js/failmap.js:407 failmap/map/static/js/failmap.js:411
+#: failmap/map/static/js/failmap.js:408 failmap/map/static/js/failmap.js:412
 msgid "Low"
 msgstr "Laag risico"
 
@@ -504,7 +504,7 @@ msgstr "positie"
 
 #: failmap/map/static/js/views.js:373
 msgid "top fail on failmap"
-msgstr "slechtste organisaties op faalkaart"
+msgstr "slechtste organisaties op de kaart"
 
 #: failmap/map/static/js/views.js:374 failmap/map/static/js/views.js:379
 msgid "hastag fail"

@@ -1,5 +1,5 @@
 <!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %}
-<html lang="nl">
+<html lang="{{ language }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="description" content="Security issues of organizations in {{ country }} displayed a map">
@@ -265,10 +265,6 @@
                         <li>{% trans "RSS change feed teaser" %}
                         <a :href="'/data/updates_on_organization_feed/' + selected"
                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
-                        <li>
-                        {% trans "Report share result question" %} {% verbatim %}<span
-                            v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-                        </li>
                         <li>
                         {% trans "Report ask domains leader" %} <a
                             :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
@@ -924,7 +920,7 @@
         <div id="latest_scans" class="stats_part">
             <div class="page-header">
                 <h3>{% trans "Latest changes" %}</h3>
-                {% trans "Latest changes explanation" %}
+                <p>{% trans "Latest changes explanation" %}</p>
             </div>
             {% if config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS %}
             <div class="row">
@@ -1197,10 +1193,6 @@
             <li>{% trans "RSS change feed teaser" %}
             <a :href="'/data/updates_on_organization_feed/' + selected"
             target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
-            <li>
-            {% trans "Report share result question" %} {% verbatim %}<span
-                v-html="create_twitter_link(name, twitter_handle, points)"></span>{% endverbatim %}<br/>
-            </li>
             <li>
             {% trans "Report ask domains leader" %} <a
                 :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>

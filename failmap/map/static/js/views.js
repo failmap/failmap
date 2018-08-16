@@ -5,9 +5,9 @@
 // // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
 
 function debounce(func, wait, immediate) {
-    var timeout;
+    let timeout;
     return function () {
-        var context = this, args = arguments;
+        let context = this, args = arguments;
         clearTimeout(timeout);
         timeout = setTimeout(function () {
             timeout = null;
@@ -24,9 +24,9 @@ function roundTo(n, digits) {
         digits = 0;
     }
 
-    var multiplicator = Math.pow(10, digits);
+    let multiplicator = Math.pow(10, digits);
     n = parseFloat((n * multiplicator).toFixed(11));
-    var test = (Math.round(n) / multiplicator);
+    let test = (Math.round(n) / multiplicator);
     return +(test.toFixed(digits));
 }
 
@@ -34,7 +34,7 @@ function roundTo(n, digits) {
 // support for week numbers in javascript
 // https://stackoverflow.com/questions/7765767/show-week-number-with-javascript
 Date.prototype.getWeek = function () {
-    var onejan = new Date(this.getFullYear(), 0, 1);
+    let onejan = new Date(this.getFullYear(), 0, 1);
     return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
 };
 
@@ -72,7 +72,7 @@ var state_mixin = {
     }
 };
 
-var category_mixin = {
+const category_mixin = {
     data: {
         category: ""
     },
@@ -84,7 +84,7 @@ var category_mixin = {
     }
 };
 
-var country_mixin = {
+const country_mixin = {
     data: {
         country: ""
     },
@@ -100,7 +100,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-var report_mixin = {
+const report_mixin = {
     data: {
         calculation: '',
         rating: 0,
@@ -174,15 +174,15 @@ var report_mixin = {
                         '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
         },
         total_awarded_points: function (high, medium, low) {
-            var marker = vueReport.make_marker(high, medium, low);
+            let marker = vueReport.make_marker(high, medium, low);
             return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
         },
         organization_points: function (high, medium, low) {
-            var marker = vueReport.make_marker(high, medium, low);
+            let marker = vueReport.make_marker(high, medium, low);
             return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
         },
         awarded_points: function (high, medium, low) {
-            var marker = vueReport.make_marker(high, medium, low);
+            let marker = vueReport.make_marker(high, medium, low);
             return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
         },
         make_marker: function (high, medium, low) {
@@ -221,7 +221,7 @@ var report_mixin = {
 
             vueReport.loading = true;
             vueReport.name = null;
-            var self = this;
+            let self = this;
             $.getJSON('/data/report/' + this.country + '/' + this.category + '/' + organization_id + '/' + weeks_ago, function (data) {
                 self.loading = false;
                 self.urls = data.calculation["organization"]["urls"];
@@ -246,15 +246,6 @@ var report_mixin = {
             location.hash = "#loading";
             location.hash = "#report";
         },
-        create_twitter_link: function (name, twitter_handle, points) {
-            if (twitter_handle) {
-                if (points) {
-                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft ' + points + ' punten op Faalkaart! Bescherm mijn gegevens beter! 🥀&hashtags=' + name + ',faal,faalkaart"><img src="/static/images/twitterwhite.png" alt="twitter_logo" width="14" /> ' + this.translate('Tweet') + '</a>';
-                } else {
-                    return "<a role='button' class='btn btn-xs btn-info' target='_blank' href=\"https://twitter.com/intent/tweet?screen_name=" + twitter_handle + '&text=' + name + ' heeft alles op orde! 🌹&hashtags=' + name + ',win,faalkaart"><img src="/static/images/twitterwhite.png" alt="twitter_logo" width="14" /> ' + this.translate('Tweet') + '</a>';
-                }
-            }
-        },
         formatDate: function (date) {
             return new Date(date).toISOString().substring(0, 10)
         },
@@ -262,11 +253,10 @@ var report_mixin = {
             this.name = "";
         },
         printreport: function(divId){
-            css1 = new String ('<link href="/static/css/vendor/bootstrap_v3.3.6.min.css" rel="stylesheet" type="text/css">');
-            css2 = new String ('<link href="/static/css/vendor/bootstrap-theme_v3.3.6.min.css" rel="stylesheet" type="text/css">');
+            css1 = new String ('<link href="/static/css/vendor/bootstrap.min.css" rel="stylesheet" type="text/css">');
             css3 = new String ('<link href="/static/css/vendor/fa-svg-with-js.css" rel="stylesheet" type="text/css">');
             css4 = new String ('<link href="/static/css/overrides.css" rel="stylesheet" type="text/css">');
-            window.frames["print_frame"].document.body.innerHTML=css1 + css2 + css3 + css4 + document.getElementById(divId).innerHTML;
+            window.frames["print_frame"].document.body.innerHTML=css1 + css3 + css4 + document.getElementById(divId).innerHTML;
 
             // there is no real guarantee that the content / css has loaded...
             // even load doesn't do that it seems.
@@ -281,7 +271,7 @@ var report_mixin = {
 
 
 // 6 requests is expensive. Could be one with increased complexity.
-var latest_mixin = {
+const latest_mixin = {
     template: '#latest_table',
     mounted: function () {
         this.load()
@@ -292,7 +282,7 @@ var latest_mixin = {
             if (!this.country || !this.category)
                 return;
 
-            var self = this;
+            let self = this;
             $.getJSON( this.data_url + this.country + '/' + this.category + '/' + this.scan, function (data) {
                 self.scans = data.scans;
             });
@@ -318,7 +308,7 @@ var latest_mixin = {
 };
 
 
-var translation_mixin = {
+const translation_mixin = {
     methods: {
         translate: function (string) {
             return gettext(string);
@@ -327,7 +317,7 @@ var translation_mixin = {
 };
 
 
-var top_mixin = {
+const top_mixin = {
     mounted: function () {
         this.load(0)
     },
@@ -359,26 +349,11 @@ var top_mixin = {
             if (weeknumber === undefined)
                 weeknumber = 0;
 
-            var self = this;
+            let self = this;
             $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                 self.data = data.ranking;
                 self.metadata  = data.metadata;
             });
-        },
-        twitter_message: function (chart, rank){
-            message = "https://twitter.com/intent/tweet?screen_name=" + rank.organization_twitter + "&text=";
-            if (chart === 'fail') {
-                message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
-                    + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
-                    + gettext("top fail on failmap") + ' 🥀' +
-                    '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
-            } else {
-                message += rank.organization_twitter + ' ' + gettext("top congratulations") + ' '
-                    + rank.organization_name + ' ' + gettext("top position") + ' ' + rank.rank + ' '
-                    + gettext("top win on failmap") + ' 🌹' +
-                    '&hashtags=' + rank.organization_name + ',' + gettext("hastag fail") + ',' + gettext("hastag failmap");
-            }
-            return message
         },
         sortBy: function (key) {
             this.sortKey = key;
@@ -387,10 +362,10 @@ var top_mixin = {
     },
     computed: {
         filteredData: function () {
-          var sortKey = this.sortKey;
-          var filterKey = this.filterKey && this.filterKey.toLowerCase();
-          var order = this.sortOrders[sortKey] || 1;
-          var data = this.data;
+          let sortKey = this.sortKey;
+          let filterKey = this.filterKey && this.filterKey.toLowerCase();
+          let order = this.sortOrders[sortKey] || 1;
+          let data = this.data;
           if (filterKey) {
             data = data.filter(function (row) {
               return Object.keys(row).some(function (key) {
@@ -464,7 +439,7 @@ function views() {
                 vueMap.set_state(this.country, category_name);
             },
             default_category: function(){
-                var self = this;
+                let self = this;
 
                 // there is a difference between the initial load and later loads. On later loads you need to
                 // get the default for a country, when a country is clicked. But on the first load
@@ -484,7 +459,7 @@ function views() {
                 }
             },
             load_categories: function() {
-                var self = this;
+                let self = this;
                 $.getJSON('/data/categories/' + this.country + '/', function (categories) {
                     // it's fine to clear the navbar if there are no categories for this country
                     self.categories = categories;
@@ -527,14 +502,14 @@ function views() {
             // todo: should be implemented as watch.
 
             load_countries: function() {
-                var self = this;
+                let self = this;
                 $.getJSON('/data/countries/', function (countries) {
                     // it's fine to clear the navbar if there are no categories for this country
                     self.countries = countries;
                 });
             },
             default_country: function(){
-                var self = this;
+                let self = this;
                 $.getJSON('/data/default_country/', function (countries) {
                     // it's fine to clear the navbar if there are no categories for this country
                     self.set_country(countries[0]);
@@ -567,7 +542,7 @@ function views() {
                 if (!this.country || !this.category)
                     return;
 
-                var self = this;
+                let self = this;
                 d3.json("data/vulnstats/" + this.country + '/' + this.category + "/0", function (error, data) {
                     d3stats();
                     self.d3stats.stacked_area_chart("graph_total", error, data.total);
@@ -612,7 +587,7 @@ function views() {
 
             orangepercentage: function () {
                 if (this.data.data) {
-                    var score = 100 -
+                    let score = 100 -
                         roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
                         roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
                         roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
@@ -633,7 +608,7 @@ function views() {
 
             orangeurlpercentage: function () {
                 if (this.data.data) {
-                    var score = 100 -
+                    let score = 100 -
                         roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
                         roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
                     return roundTo(score, 2) + "%";
@@ -641,10 +616,10 @@ function views() {
                 return 0
             },
             filteredData: function () {
-                var sortKey = this.sortKey;
-                var filterKey = this.filterKey && this.filterKey.toLowerCase();
-                var order = this.sortOrders[sortKey] || 1;
-                var data = this.services;
+                let sortKey = this.sortKey;
+                let filterKey = this.filterKey && this.filterKey.toLowerCase();
+                let order = this.sortOrders[sortKey] || 1;
+                let data = this.services;
                 if (filterKey) {
                     data = data.filter(function (row) {
                         return Object.keys(row).some(function (key) {
@@ -671,14 +646,14 @@ function views() {
                 if (weeknumber === undefined)
                     weeknumber = 0;
 
-                var self = this;
+                let self = this;
                 $.getJSON('/data/stats/' + this.country + '/' + this.category + '/' + weeknumber, function (data) {
                     self.data = data;
 
                     self.endpoints_now = data.data.now['endpoints'];
 
-                    for(var i=0; i<data.data.now['endpoint'].length; i++){
-                        var z = data.data.now['endpoint'][i][1];
+                    for(let i=0; i<data.data.now['endpoint'].length; i++){
+                        let z = data.data.now['endpoint'][i][1];
                         self.services.push({
                             'amount': z.amount,
                             'ip_version': z.ip_version,
@@ -965,7 +940,7 @@ function views() {
         },
         computed: {
             visibleweek: function () {
-                var x = new Date();
+                let x = new Date();
                 x.setDate(x.getDate() - this.week * 7);
                 return x.humanTimeStamp();
             },
@@ -1072,7 +1047,7 @@ function views() {
                 if (week === undefined)
                     week = 0;
 
-                var self = this;
+                let self = this;
                 self.loading = true;
                 $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
                     self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
@@ -1218,7 +1193,7 @@ function views() {
                     weeks_ago = 0;
                 }
 
-                var self = this;
+                let self = this;
                 $.getJSON('/data/improvements/' + this.country + '/' + this.category + '/' + weeks_ago + '/0', function (data) {
                     if ($.isEmptyObject(data)) {
                         self.data = null;
