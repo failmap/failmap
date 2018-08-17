@@ -1,5 +1,6 @@
 import collections
 import logging
+import re
 from datetime import datetime, timedelta
 
 import pytz
@@ -10,6 +11,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.syndication.views import Feed
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Count
@@ -21,13 +23,12 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 from simplejson.errors import JSONDecodeError
 
-from failmap.map.models import OrganizationRating, UrlRating
+from failmap.map.models import Configuration, OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
 from .. import __version__
 from ..app.common import JSEncoder
-from ..map.models import Configuration
 from .calculate import get_calculation
 
 log = logging.getLogger(__package__)
@@ -40,9 +41,25 @@ ten_minutes = 60 * 10
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
 
+# This list changes roughly every second.
+COUNTRIES = ['AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD',
+             'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BW', 'BY', 'BZ', 'CA', 'CD',
+             'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK',
+             'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB',
+             'GD', 'GE', 'GG', 'GH', 'GL', 'GM', 'GN', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR',
+             'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG',
+             'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU',
+             'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MV', 'MO', 'MP', 'MR', 'MS',
+             'MT', 'MU', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ',
+             'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RO', 'RS',
+             'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST',
+             'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TW', 'TZ',
+             'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'WF', 'WS', 'YE', 'ZA', 'ZM', 'ZW', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU']
 
 # even while this might be a bit expensive (caching helps), it still is more helpful then
 # defining everything by hand.
+
+
 def get_organization_type(name: str):
     try:
         return OrganizationType.objects.get(name=name).id
@@ -60,8 +77,8 @@ def get_organization_type(name: str):
 def get_country(code: str):
     import re
 
-    # handle default, save a regex
-    if code in ["NL", "DE", "SE"]:
+    # existing countries. Yes, you can add fictional countries if you would like to, that will be handled below.
+    if code in COUNTRIES:
         return code
 
     match = re.search(r"[A-Z]{2}", code)
@@ -74,6 +91,16 @@ def get_country(code: str):
         return config.PROJECT_COUNTRY
 
     return code
+
+
+def get_defaults(request, ):
+    data = Configuration.objects.all().filter(
+        is_displayed=True,
+        is_the_default_option=True
+    ).order_by('display_order').values('country', 'organization_type__name').first()
+
+    return JsonResponse({'country': data['country'], 'category': data['organization_type__name']},
+                        safe=False, encoder=JSEncoder)
 
 
 def get_default_country(request, ):
@@ -702,7 +729,15 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
         # too bad https://github.com/Suor/django-cacheops
         # it's the elephant in the room in the documentation: all are explained except this one.
         # we can of course do function caching :)
-        ratings = rawOrganizationRatingQuery(sql)
+
+        # caching for about 30 minutes.
+        # But is it really set if the process is killed? Is the process killed?
+        pattern = re.compile('[\W_]+')
+        cache_key = pattern.sub('', "stats sql %s %s %s" % (country, organization_type, when))
+        ratings = cache.get('cache_key')
+        if not ratings:
+            ratings = rawOrganizationRatingQuery(sql)
+            cache.set(cache_key, ratings, 1800)
 
         noduplicates = []
         for rating in ratings:
@@ -833,7 +868,6 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
 
 @cache_page(one_hour)
 def vulnerability_graphs(request, country: str="NL", organization_type="municipality", weeks_back=0):
-
     # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
     # they might.
     # also: it's "1 days ago", not "1 day ago".
@@ -854,7 +888,7 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
     for stat in timeframes:
         measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
         when = stats_determine_when(stat, weeks_back)
-        print("%s: %s" % (stat, when))
+        log.debug("%s: %s" % (stat, when))
 
         # about 1 second per query, while it seems to use indexes.
         # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
@@ -894,7 +928,13 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
 
         # print(sql)
 
-        urlratings = rawUrlRatingQuery(sql)
+        # caching for about 30 minutes.
+        pattern = re.compile('[\W_]+')
+        cache_key = pattern.sub('', "graphs sql %s %s %s" % (country, organization_type, when))
+        urlratings = cache.get('cache_key')
+        if not urlratings:
+            urlratings = rawUrlRatingQuery(sql)
+            cache.set(cache_key, urlratings, 1800)
 
         # group by vulnerability type
         for urlrating in urlratings:
@@ -1240,9 +1280,10 @@ def ticker(request, country: str="NL", organization_type: str="municipality",
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
-@cache_page(four_hours)
+# @cache_page(four_hours)
 def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0,
              url_scan_types: dict=None, endpoint_scan_types: dict=None, ):
+
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:

@@ -1,3 +1,5 @@
+
+
 var failmap = {
 
     map: null, // map showing geographical regions + markers
@@ -56,12 +58,12 @@ var failmap = {
         });
 
         //
-        var currentHash = ""
+        let currentHash = "";
         $(document).scroll(function () {
             let current_anchor = $('a.jumptonav').filter(function () {
-                var top = window.pageYOffset;
-                var distance = top - $(this).offset().top;
-                var hash = $(this).attr('name');
+                let top = window.pageYOffset;
+                let distance = top - $(this).offset().top;
+                let hash = $(this).attr('name');
                 // 30 is an arbitrary padding choice,
                 // if you want a precise check then use distance===0
                 if (distance < 30 && distance > -30 && currentHash != hash) {
@@ -69,7 +71,7 @@ var failmap = {
                 }
             }).first();
 
-            var hash = current_anchor.attr('name');
+            let hash = current_anchor.attr('name');
             if (hash != undefined) {
                 history.replaceState({}, '', '#' + hash);
                 currentHash = hash;
@@ -77,7 +79,7 @@ var failmap = {
         });
 
         // controls in sidepanels
-        var html = "<div id=\"fullscreen\">" +
+        let html = "<div id=\"fullscreen\">" +
             "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
         this.add_div(html, "info_nobackground", false);
@@ -85,7 +87,7 @@ var failmap = {
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
         this.add_info();
         this.add_div("<div id='domainlist'></div>", "info", false);
-        var labels=[];
+        let labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
         labels.push('<i style="background:' + failmap.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
@@ -278,13 +280,13 @@ var failmap = {
                 'ML':{"coordinates": [17.34581581, -3.54269065], "zoomlevel":6},
                 'MM':{"coordinates": [21.18566599, 96.48843321], "zoomlevel":6},
                 'MN':{"coordinates": [46.82681544, 103.0529977], "zoomlevel":6},
+                'MV':{"coordinates": [3.7287092, 73.45713004], "zoomlevel":6},
                 'MO':{"coordinates": [22.22311688, 113.5093212], "zoomlevel":6},
                 'MP':{"coordinates": [15.82927563, 145.6196965], "zoomlevel":6},
                 'MR':{"coordinates": [20.25736706, -10.34779815], "zoomlevel":6},
                 'MS':{"coordinates": [16.73941406, -62.18518546], "zoomlevel":6},
                 'MT':{"coordinates": [35.92149632, 14.40523316], "zoomlevel":6},
                 'MU':{"coordinates": [-20.27768704, 57.57120551], "zoomlevel":6},
-                'MV':{"coordinates": [3.7287092, 73.45713004], "zoomlevel":6},
                 'MW':{"coordinates": [-13.21808088, 34.28935599], "zoomlevel":6},
                 'MX':{"coordinates": [23.94753724, -102.5234517], "zoomlevel":6},
                 'MY':{"coordinates": [3.78986846, 109.6976228], "zoomlevel":6},
@@ -361,18 +363,18 @@ var failmap = {
                 'UY':{"coordinates": [-32.79951534, -56.01807053], "zoomlevel":6},
                 'UZ':{"coordinates": [41.75554225, 63.14001528], "zoomlevel":6},
                 'VA':{"coordinates": [41.90174985, 12.43387177], "zoomlevel":6},
-                'VC':{"coordinates": [13.22472269, -61.20129695], "zoomlevel":6},
-                'VE':{"coordinates": [7.12422421, -66.18184123], "zoomlevel":6},
-                'VG':{"coordinates": [18.52585755, -64.47146992], "zoomlevel":6},
-                'VI':{"coordinates": [17.95500624, -64.80301538], "zoomlevel":6},
-                'VN':{"coordinates": [16.6460167, 106.299147], "zoomlevel":6},
-                'VU':{"coordinates": [-16.22640909, 167.6864464], "zoomlevel":6},
                 'WF':{"coordinates": [-13.88737039, -177.3483483], "zoomlevel":6},
                 'WS':{"coordinates": [-13.75324346, -172.1648506], "zoomlevel":6},
                 'YE':{"coordinates": [15.90928005, 47.58676189], "zoomlevel":6},
                 'ZA':{"coordinates": [-29.00034095, 25.08390093], "zoomlevel":6},
                 'ZM':{"coordinates": [-13.45824152, 27.77475946], "zoomlevel":6},
                 'ZW':{"coordinates": [-19.00420419, 29.8514412], "zoomlevel":6},
+                'VC':{"coordinates": [13.22472269, -61.20129695], "zoomlevel":6},
+                'VE':{"coordinates": [7.12422421, -66.18184123], "zoomlevel":6},
+                'VG':{"coordinates": [18.52585755, -64.47146992], "zoomlevel":6},
+                'VI':{"coordinates": [17.95500624, -64.80301538], "zoomlevel":6},
+                'VN':{"coordinates": [16.6460167, 106.299147], "zoomlevel":6},
+                'VU':{"coordinates": [-16.22640909, 167.6864464], "zoomlevel":6},
             };
 
         return startpositions[country_code];
@@ -433,7 +435,7 @@ var failmap = {
     },
 
     pointToLayer: function (geoJsonPoint, latlng) {
-        console.log(latlng);
+        // console.log(latlng);
         switch (geoJsonPoint.properties.color){
             case "red": return L.marker(latlng, {icon: failmap.redIcon});
             case "orange": return L.marker(latlng, {icon: failmap.orangeIcon});
@@ -443,7 +445,7 @@ var failmap = {
     },
 
     highlightFeature: function (e) {
-        var layer = e.target;
+        let layer = e.target;
 
         // doesn't work for points, only for polygons and lines
         if (typeof layer.setStyle === "function") {
@@ -479,7 +481,7 @@ var failmap = {
     },
 
     isSearchedFor: function (feature) {
-        x = $('#searchbar').val();
+        x = document.getElementById('searchbar').value;
         x = x.toLowerCase();
         if (!x || x === "")
             return false;
@@ -521,9 +523,10 @@ var failmap = {
     },
 
     plotdata: function (mapdata) {
+        console.log("plotting");
         // mapdata is a mix of polygons and multipolygons, and whatever other geojson types.
-        regions = [];
-        points = [];
+        regions = []; // to polygons
+        points = []; // to markers
 
         // the data is plotted on two separate layers which both have special properties.
         // both layers have a different way of searching, clicking behaviour and so forth.
@@ -540,10 +543,10 @@ var failmap = {
         }
 
         // if there is one already, overwrite the attributes...
-        if (failmap.polygons) {
+        if (failmap.polygons.getLayers().length) {
             // add all features that are not part of the current map at all
             // and delete the ones that are not in the current set
-            failmap.clean_map(regions);
+            failmap.clean_map(regions, points);
 
             // update existing layers (and add ones with the same name)
             failmap.polygons.eachLayer(function (layer) {failmap.recolormap(regions, layer)});
@@ -556,79 +559,83 @@ var failmap = {
             }).addTo(failmap.map); // only if singleton, its somewhat dirty.
 
             // and points
-            points.forEach(function(point){
-                console.log(point);
-                pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
-
-                pointlayer.on({
-                    mouseover: failmap.highlightFeature,
-                    mouseout: failmap.resetHighlight,
-                    click: failmap.showreport
-                });
-
-                // allow opening of reports and such in the old way.
-                pointlayer.feature = {"properties": point.properties};
-                console.log(pointlayer);
-
-                failmap.markers.addLayer(pointlayer);
-            });
-            failmap.map.addLayer(failmap.markers);
+            failmap.add_points(points);
 
             // fit the map automatically, regardless of the initial positions
-            failmap.map.fitBounds(failmap.polygons.getBounds());
+            if (failmap.polygons.getLayers().length)
+                failmap.map.fitBounds(failmap.polygons.getBounds());
         }
     },
 
-    clean_map: function(mapdata) {
+    add_points: function(points) {
+        points.forEach(function(point){
+            // console.log(point);
+            pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
+            pointlayer.on({
+                mouseover: failmap.highlightFeature,
+                mouseout: failmap.resetHighlight,
+                click: failmap.showreport
+            });
+
+            // allow opening of reports and such in the old way.
+            pointlayer.feature = {"properties": point.properties};
+            // console.log(pointlayer);
+
+            failmap.markers.addLayer(pointlayer);
+        });
+        failmap.map.addLayer(failmap.markers);
+    },
+
+    clean_map: function(regions, points) {
+        // first version: just delete all points.
+        // failmap.markers.clearMarkers();
+        failmap.markers.clearLayers();
+        //failmap.map.removeLayer(failmap.markers);
+
+        failmap.add_points(points);
+
+        // cleaning regions.
         // case when data is not loaded. todo: fix the cause of this.
-        if (!mapdata.features)
+        if (!regions.length) {
+            failmap.polygons.clearLayers();
             return;
+        }
 
         // add layers to the map that are only in the new dataset (new)
-        for (var i = 0; i < mapdata.features.length; i++) {
-            var found = false;
-            failmap.polygons.eachLayer(function bla(layer){
-                if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
+        regions.forEach(function (region){
+            let found = false;
+            failmap.polygons.eachLayer(function (layer){
+                if (layer.feature.properties.organization_name === region.properties.organization_name)
                     found = true;
-                }
             });
             //console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
             if (!found) {
                 // console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
-                failmap.polygons.addData(mapdata.features[i]);
+                failmap.polygons.addData(region);
             }
-        }
+        });
 
         // remove existing layers that are not in the new dataset
-        failmap.polygons.eachLayer(function bla(layer){
-            var found = false;
-            for (var i = 0; i < mapdata.features.length; i++) {
-                if (layer.feature.properties.organization_name === mapdata.features[i].properties.organization_name) {
+        failmap.polygons.eachLayer(function (layer){
+            let found = false;
+
+            regions.forEach(function (region){
+                if (layer.feature.properties.organization_name === region.properties.organization_name)
                     found = true;
-                }
-            }
+            });
+
             // console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
             if (!found){
                 failmap.polygons.removeLayer(layer);
-                // failmap.deleteLayerByName(mapdata.features[i].properties.organization_name);
             }
-
         });
     },
 
-    deleteLayerByName: function (name) {
-        console.log("Deleting layer named: " + name);
-        failmap.polygons.eachLayer(function bla(layer) {
-            if (layer.feature.properties.organization_name === name) {
-                failmap.polygons.removeLayer(layer);
-            }
-        })
-    },
 
     // overwrite some properties
     recolormap: function (mapdata, layer) {
-        var existing_feature = layer.feature;
+        let existing_feature = layer.feature;
 
         // case when data is not loaded. todo: fix the cause of this.
         if (!mapdata.features)
@@ -676,7 +683,7 @@ var failmap = {
     },
 
     showreport: function (e) {
-        console.log(e);
+        // console.log(e);
 
         let organization_id = e.target.feature.properties['organization_id'];
         if (failmap.map.isFullscreen()) {

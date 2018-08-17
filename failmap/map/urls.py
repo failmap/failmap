@@ -31,6 +31,7 @@ urlpatterns = [
     path('data/countries/', views.get_countries),
     path('data/default_country/', views.get_default_country),
     path('data/default_category/', views.get_default_category),
+    path('data/defaults/', views.get_defaults),
     path('data/default_category_for_country/<c:country>/', views.get_default_category_for_country),
     path('data/categories/<c:country>/', views.get_categories),
     path('data/vulnstats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),

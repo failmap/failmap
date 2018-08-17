@@ -96,7 +96,7 @@
     <link rel="manifest" href="/manifest.json">
 </head>
 
-<body role="document">
+<body role="document" onload="document_ready();">
 
 <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom">
     <div class="container">
@@ -146,32 +146,34 @@
     </div>
 </nav>
 
-<nav class="navbar navbar-expand-md navbar-light" id="countrynavbar" v-if="countries.length > 1" v-cloak style="background-color: ghostwhite">
-    <div class="container">
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item" v-for="(x, key) in countries" v-bind:class="[selected == x ? 'selected_country' : '']">
-                    <a  class="nav-link" v-on:click="set_country(x)">
-                        <img :src="'static/flags/' + x + '.gif'" width="16" height="10">
-                        {% verbatim %}{{ translate("country_" + x) }}{% endverbatim %}</a>
-                </li>
-            </ul>
+<div id="map_state_bar">
+    <nav class="navbar navbar-expand-md navbar-light" id="countrynavbar" v-if="countries.length > 1" v-cloak style="background-color: ghostwhite">
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item" v-for="(x, key) in countries" v-bind:class="[selected_country == x ? 'selected_country' : '']">
+                        <a  class="nav-link" v-on:click="set_country(x)">
+                            <img :src="'static/flags/' + x + '.gif'" width="16" height="10">
+                            {% verbatim %}{{ translate("country_" + x) }}{% endverbatim %}</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<nav class="navbar navbar-expand-md navbar-light" id="categorynavbar" v-if="categories.length > 1" v-cloak>
-    <div class="container">
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item" v-for="(x, key) in categories" v-bind:class="[selected == x ? 'selected_category' : '']">
-                    <a class="nav-link" v-on:click="set_category(x)">
-                        {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-md navbar-light" id="categorynavbar" v-if="categories.length > 1" v-cloak>
+        <div class="container">
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item" v-for="(x, key) in categories" v-bind:class="[selected_category == x ? 'selected_category' : '']">
+                        <a class="nav-link" v-on:click="set_category(x)">
+                            {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
+</div>
 
 <section>
     <div id='map'></div>

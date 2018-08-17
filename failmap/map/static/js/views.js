@@ -46,7 +46,7 @@ Date.prototype.humanTimeStamp = function () {
 
 // todo: the week should also be in the state.
 // and this is where we slowly creep towards vuex.
-var state_mixin = {
+const state_mixin = {
     data: {
         category: "",
         country: ""
@@ -69,30 +69,6 @@ var state_mixin = {
            this.category = category;
            this.load();
        }
-    }
-};
-
-const category_mixin = {
-    data: {
-        category: ""
-    },
-    watch: {
-        category: function (newCategory, oldCategory) {
-            // refresh the views :)
-            this.load()
-        }
-    }
-};
-
-const country_mixin = {
-    data: {
-        country: ""
-    },
-    watch: {
-        country: function (newCountry, oldCountry) {
-            // refresh the views :)
-            this.load()
-        }
     }
 };
 
@@ -392,136 +368,26 @@ const top_mixin = {
 
 
 function extracrunchycyber(){
-    vueCountryNavbar.countries = ["NL", "DE"];
+    vueMapStateBar.countries = ["NL", "DE"];
 }
 
 
 function extra() {
-    vueCountryNavbar.countries = ["NL", "DE", "SE"];
-    vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"];
+    vueMapStateBar.countries = ["NL", "DE", "SE"];
+    vueMapStateBar.categories = ["municipality", "cyber", "unknown"];
 }
 
-
 function germany() {
-    vueCountryNavbar.countries = ["NL", "DE"];
-    vueCategoryNavbar.categories = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
+    vueMapStateBar.countries = ["NL", "DE"];
+    vueMapStateBar.categories = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
     "samtgemeinde_verwaltungsgemeinschaft"];
-    // too big to import, too detailed?
-    // "stadt_gemeinde", "stadtbezirk_gemeindeteil_mit_selbstverwaltung",
-    // "stadtbezirk_gemeindeteil_mit_selbstverwaltung", "stadtteil_gemeindeteil_ohne_selbstverwaltung"
 }
 
 
 function views() {
 
-    // You can try with:
-    // vueCategoryNavbar.categories = ["municipality", "cyber", "unknown"]
-    window.vueCategoryNavbar = new Vue({
-        name: "categorynavbar",
-
-        mixins: [translation_mixin, state_mixin],
-
-        el: '#categorynavbar',
-
-        data: {
-            categories: [""],
-            selected: "",
-            country: ""
-        },
-
-        mounted: function() {
-            this.default_category();
-        },
-
-        methods: {
-            set_category: function (category_name) {
-                this.selected = category_name;
-                vueMap.set_state(this.country, category_name);
-            },
-            default_category: function(){
-                let self = this;
-
-                // there is a difference between the initial load and later loads. On later loads you need to
-                // get the default for a country, when a country is clicked. But on the first load
-                // you need to select whatever the default is for that country.
-
-                if (!this.selected) {
-                    $.getJSON('/data/default_category/', function (categories) {
-                        // it's fine to clear the navbar if there are no categories for this country
-                        self.set_category(categories[0])
-                    });
-                } else {
-                    // should be handled by load_categories...
-                    $.getJSON('/data/default_category_for_country/' + this.country + '', function (categories) {
-                        // it's fine to clear the navbar if there are no categories for this country
-                        self.set_category(categories[0])
-                    });
-                }
-            },
-            load_categories: function() {
-                let self = this;
-                $.getJSON('/data/categories/' + this.country + '/', function (categories) {
-                    // it's fine to clear the navbar if there are no categories for this country
-                    self.categories = categories;
-                    vueExport.categories = categories;
-
-                    // but then don't clear the current category, so it's easier to go back
-                    if (categories.length) {
-                        self.set_category(categories[0]);
-                    }
-                })
-            }
-        }
-    });
-
-    // test with:
-    // vueCountryNavbar.countries = ["NL", "DE", "SE"]
-    window.vueCountryNavbar = new Vue({
-        name: "countrynavbar",
-        mixins: [translation_mixin],
-
-        el: '#countrynavbar',
-
-        data: {
-            countries: [""],
-            selected: ""
-        },
-
-        mounted: function() {
-            this.default_country();
-        },
-
-        methods: {
-            set_country: function (country) {
-                // todo: we need to find a way to set both country and category at the same time in vuemap: now it first
-                // tries to load some nonsense combination (or the wrong combination), which delays results.
-                vueCategoryNavbar.country = country;
-                vueCategoryNavbar.load_categories();
-                this.selected = country;
-            },
-            // todo: should be implemented as watch.
-
-            load_countries: function() {
-                let self = this;
-                $.getJSON('/data/countries/', function (countries) {
-                    // it's fine to clear the navbar if there are no categories for this country
-                    self.countries = countries;
-                });
-            },
-            default_country: function(){
-                let self = this;
-                $.getJSON('/data/default_country/', function (countries) {
-                    // it's fine to clear the navbar if there are no categories for this country
-                    self.set_country(countries[0]);
-                });
-                this.load_countries();
-            }
-        }
-    });
-
     window.vueGraphs = new Vue({
         name: "graphs",
-
         mixins: [state_mixin],
 
         // the mixin requires data to exist, otherwise massive warnings.
@@ -899,243 +765,6 @@ function views() {
         data: {scan: "X-XSS-Protection"}
     });
 
-// there are some issues with having the map in a Vue. Somehow the map doesn't
-// render. So we're currently not using that feature over there.
-// It's also hard, since then we have to have themap, historycontrol, fullscreenreport, domainlist
-// it's just too much in single vue.
-// also: the fullscreen report only loads from something ON the map.
-// and all of this for a loading indicator per vue :))
-// knowing fullscreen here would be nice...
-// state is managed here.
-    window.vueMap = new Vue({
-        name: "Map",
-
-        mounted: function () {
-            // wait until the default category and default languages have been set...
-            this.load(this.week)
-        },
-        mixins: [category_mixin, country_mixin],
-
-        el: '#historycontrol',
-        template: '#historycontrol_template',
-        data: {
-            // # historyslider
-            loading: false,
-            week: 0,
-            selected_organization: -1,
-            features: null,
-
-            // show individual vulnerabilities
-            // url
-            DNSSEC: false,
-
-            // endpoint
-            security_headers_strict_transport_security: false,
-            security_headers_x_content_type_options: false,
-            security_headers_x_frame_options: false,
-            security_headers_x_xss_protection: false,
-            tls_qualys: false,
-            plain_https: false,
-            ftp: false
-        },
-        computed: {
-            visibleweek: function () {
-                let x = new Date();
-                x.setDate(x.getDate() - this.week * 7);
-                return x.humanTimeStamp();
-            },
-            // todo: add debouncing.
-            desired_url_scans: function(){
-                return '{"DNSSEC": "' + this.DNSSEC + '"}'
-            },
-            desired_endpoint_scans: function(){
-                return '{"security_headers_strict_transport_security": "' + this.security_headers_strict_transport_security + '", ' +
-                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
-                    '"security_headers_x_frame_options": "' + this.security_headers_x_frame_options + '", ' +
-                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
-                    '"tls_qualys": "' + this.tls_qualys + '", ' +
-                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
-                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
-                    '"ftp": "' + this.ftp + '", ' +
-                    '"plain_https": "' + this.plain_https + '"}'
-            }
-
-        },
-        watch: {
-            // todo: add all of these in one variables, so you can set more than one at the same time, which
-            // saves on loads.
-            DNSSEC: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            security_headers_strict_transport_security: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            security_headers_x_content_type_options: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            security_headers_x_frame_options: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            security_headers_x_xss_protection: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            tls_qualys: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            plain_https: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-            ftp: function(newsetting, oldsetting){
-                this.load(this.week)
-            },
-
-            category: function (newCategory, oldCategory) {
-                if (newCategory === oldCategory)
-                    return;
-
-                // refresh the views :)
-                vueMap.show_week();
-            },
-            country: function (newCountry, oldCountry) {
-                if (newCountry === oldCountry)
-                    return;
-
-                // retoggle map focus in an ugly way,
-                // it was never meant to work with multiple countries, so cutting corners here...
-                // this will go wrong when we group points / use other layers.
-                // this will crash the first time...
-
-                if ((failmap !== undefined) && (failmap.polygons.clearLayers !== undefined)) {
-                    failmap.polygons.clearLayers();
-                    failmap.polygons = null;
-                }
-            }
-        },
-        methods: {
-            set_state: function(country, category){
-                this.category = category;
-                this.country = country;
-
-                // todo: make this dependent on what is shown or not in the settings.
-                vueTopfail.set_state(this.country, this.category);
-                vueTopwin.set_state(this.country, this.category);
-                vueStatistics.set_state(this.country, this.category);
-                vueLatestPlainHttps.set_state(this.country, this.category);
-                vueLatestFtp.set_state(this.country, this.category);
-                vueLatestTlsQualys.set_state(this.country, this.category);
-                vueLatestXContentTypeOptions.set_state(this.country, this.category);
-                vueLatestHSTS.set_state(this.country, this.category);
-                vueLatestXFrameOptions.set_state(this.country, this.category);
-                vueLatestXXSSProtection.set_state(this.country, this.category);
-                vueGraphs.set_state(this.country, this.category);
-                vueImprovements.set_state(this.country, this.category);
-                vueExport.set_state(this.country, this.category);
-                vueDomainlist.set_state(this.country, this.category);
-                vueTicker.set_state(this.country, this.category);
-
-                // this needs state as the organizaton name in itself is not unique.
-                vueReport.set_state(this.country, this.category);
-                vueFullScreenReport.set_state(this.country, this.category);
-            },
-            // slowly moving the failmap into a vue.
-            load: function (week) {
-
-                if (!this.country || !this.category) {
-                    return
-                }
-
-                if (week === undefined)
-                    week = 0;
-
-                let self = this;
-                self.loading = true;
-                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
-                    self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
-                    self.loading = true;
-
-                    failmap.plotdata(mapdata);
-
-                    // make map features (organization data) available to other vues
-                    // do not update this attribute if an empty list is returned as currently
-                    // the map does not remove organizations for these kind of responses.
-                    if (mapdata.features.length > 0) {
-                        self.features = mapdata.features;
-                    }
-                    self.loading = false;
-                });
-
-            },
-            next_week: function () {
-                if (this.week > 0) {
-                    this.week -= 1;
-                    this.show_week();
-                }
-            },
-            previous_week: function () {
-                // caused 1, 11, 111 :) lol
-                if (this.week <= 52) {
-                    this.week += 1;
-                    this.show_week();
-                }
-            },
-            show_week: function (e) {
-                if (e) {
-                    this.week = parseInt(e.target.value);
-                }
-
-                this.load(this.week);
-
-                // nobody understands that when you drag the map slider, the rest
-                // of the site and all reports are also old.
-                // so don't. Add matching UI elsewhere...
-                // vueTopfail.load(this.week);
-
-
-                if (this.selected_organization > -1) {
-                    console.log(selected_organization);
-                    // todo: requests the "report" page 3x.
-                    // due to asyncronous it's hard to just "copy" results.
-                    // vueReport.load(vueMap.selected_organization, this.week);
-                    // vueFullScreenReport.load(vueMap.selected_organization, this.week);
-                    vueDomainlist.load(this.selected_organization, this.week);
-                }
-            }
-        }
-    });
-
-
-    window.vueReport = new Vue({
-        name: "report",
-        el: '#report',
-        mixins: [state_mixin, report_mixin],
-
-        computed: {
-            // load list of organizations from map features
-            organizations: function () {
-                if (vueMap.features != null) {
-                    let organizations = vueMap.features.map(function (feature) {
-                        return {
-                            "id": feature.properties.organization_id,
-                            "name": feature.properties.organization_name,
-                            "slug": feature.properties.organization_slug
-                        }
-                    });
-                    return organizations.sort(function (a, b) {
-                        if (a['name'] > b['name']) return 1;
-                        if (a['name'] < b['name']) return -1;
-                        return 0;
-                    });
-                }
-            }
-        },
-        watch: {
-            selected: function () {
-                // load selected organization id
-                this.load(this.selected);
-            }
-        }
-
-    });
 
     /*
     * {
@@ -1234,6 +863,8 @@ function views() {
         }
     });
 
+
+
     window.vueFullScreenReport = new Vue({
         name: "fullscreenreport",
         el: '#fullscreenreport',
@@ -1243,6 +874,296 @@ function views() {
             // you cannot run filters in rawHtml, so this doesn't work.
             // therefore we explicitly do this elsewhere
         }
+    });
+
+    // there are some issues with having the map in a Vue. Somehow the map doesn't
+    // render. So we're currently not using that feature over there.
+    // It's also hard, since then we have to have themap, historycontrol, fullscreenreport, domainlist
+    // it's just too much in single vue.
+    // also: the fullscreen report only loads from something ON the map.
+    // and all of this for a loading indicator per vue :))
+    // knowing fullscreen here would be nice...
+    // state is managed here.
+    window.vueMap = new Vue({
+        name: "Map",
+
+        mounted: function () {
+            // wait until the default category and default languages have been set...
+            // this.load(this.week)
+        },
+        mixins: [state_mixin],
+
+        el: '#historycontrol',
+        template: '#historycontrol_template',
+        data: {
+            // # historyslider
+            loading: false,
+            week: 0,
+            selected_organization: -1,
+            features: null,
+
+            // show individual vulnerabilities
+            // url
+            DNSSEC: false,
+
+            // endpoint
+            security_headers_strict_transport_security: false,
+            security_headers_x_content_type_options: false,
+            security_headers_x_frame_options: false,
+            security_headers_x_xss_protection: false,
+            tls_qualys: false,
+            plain_https: false,
+            ftp: false
+        },
+        computed: {
+            visibleweek: function () {
+                let x = new Date();
+                x.setDate(x.getDate() - this.week * 7);
+                return x.humanTimeStamp();
+            },
+            // todo: add debouncing.
+            desired_url_scans: function(){
+                return '{"DNSSEC": "' + this.DNSSEC + '"}'
+            },
+            desired_endpoint_scans: function(){
+                return '{"security_headers_strict_transport_security": "' + this.security_headers_strict_transport_security + '", ' +
+                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
+                    '"security_headers_x_frame_options": "' + this.security_headers_x_frame_options + '", ' +
+                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
+                    '"tls_qualys": "' + this.tls_qualys + '", ' +
+                    '"security_headers_x_content_type_options": "' + this.security_headers_x_content_type_options + '", ' +
+                    '"security_headers_x_xss_protection": "' + this.security_headers_x_xss_protection + '", ' +
+                    '"ftp": "' + this.ftp + '", ' +
+                    '"plain_https": "' + this.plain_https + '"}'
+            }
+
+        },
+        watch: {
+            // todo: add all of these in one variables, so you can set more than one at the same time, which
+            // saves on loads.
+            DNSSEC: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_strict_transport_security: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_content_type_options: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_frame_options: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            security_headers_x_xss_protection: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            tls_qualys: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            plain_https: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+            ftp: function(newsetting, oldsetting){
+                this.load(this.week)
+            },
+        },
+        methods: {
+            set_state: function(country, category){
+                console.log("Set state");
+                this.country = country;
+                this.category = category;
+                vueMap.show_week();
+
+                // todo: make this dependent on what is shown or not in the settings.
+                vueTopfail.set_state(this.country, this.category);
+                vueTopwin.set_state(this.country, this.category);
+                vueStatistics.set_state(this.country, this.category);
+                vueLatestPlainHttps.set_state(this.country, this.category);
+                vueLatestFtp.set_state(this.country, this.category);
+                vueLatestTlsQualys.set_state(this.country, this.category);
+                vueLatestXContentTypeOptions.set_state(this.country, this.category);
+                vueLatestHSTS.set_state(this.country, this.category);
+                vueLatestXFrameOptions.set_state(this.country, this.category);
+                vueLatestXXSSProtection.set_state(this.country, this.category);
+                vueGraphs.set_state(this.country, this.category);
+                vueImprovements.set_state(this.country, this.category);
+                vueExport.set_state(this.country, this.category);
+                vueDomainlist.set_state(this.country, this.category);
+                vueTicker.set_state(this.country, this.category);
+
+                // this needs state as the organizaton name in itself is not unique.
+                vueReport.set_state(this.country, this.category);
+                vueFullScreenReport.set_state(this.country, this.category);
+            },
+            // slowly moving the failmap into a vue. NOPE. denied.
+            load: function (week) {
+                console.log("load");
+                if (!this.country || !this.category) {
+                    console.log("No country or category");
+                    return
+                }
+
+                if (week === undefined)
+                    week = 0;
+
+                let self = this;
+                self.loading = true;
+                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
+                    self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
+                    self.loading = true;
+
+                    failmap.plotdata(mapdata);
+
+                    // make map features (organization data) available to other vues
+                    // do not update this attribute if an empty list is returned as currently
+                    // the map does not remove organizations for these kind of responses.
+                    if (mapdata.features.length > 0) {
+                        self.features = mapdata.features;
+                    }
+                    self.loading = false;
+                });
+
+            },
+            next_week: function () {
+                if (this.week > 0) {
+                    this.week -= 1;
+                    this.show_week();
+                }
+            },
+            previous_week: function () {
+                // caused 1, 11, 111 :) lol
+                if (this.week <= 52) {
+                    this.week += 1;
+                    this.show_week();
+                }
+            },
+            show_week: function (e) {
+                if (e) {
+                    this.week = parseInt(e.target.value);
+                }
+
+                this.load(this.week);
+
+                // nobody understands that when you drag the map slider, the rest
+                // of the site and all reports are also old.
+                // so don't. Add matching UI elsewhere...
+                // vueTopfail.load(this.week);
+
+                if (this.selected_organization > -1) {
+                    // console.log(selected_organization);
+                    // todo: requests the "report" page 3x.
+                    // due to asyncronous it's hard to just "copy" results.
+                    // vueReport.load(vueMap.selected_organization, this.week);
+                    // vueFullScreenReport.load(vueMap.selected_organization, this.week);
+                    vueDomainlist.load(this.selected_organization, this.week);
+                }
+            }
+        }
+    });
+
+    // merged category and country navbars to have a single point of setting the state at startup.
+    window.vueMapStateBar = new Vue({
+        name: "MapStateBar",
+        mixins: [translation_mixin],
+        el: '#map_state_bar',
+
+        data: {
+            categories: [""],
+            countries: [""],
+            selected_category: "",
+            selected_country: "",
+            default_category: "",
+            default_country: ""
+        },
+
+        mounted: function() {
+            this.get_defaults();
+        },
+
+        // todo: load the map without parameters should result in the default settings to save a round trip.
+        methods: {
+            get_defaults: function() {
+                fetch('/data/defaults/').then(response => response.json()).then(data => {
+                    this.selected_category = data.category;
+                    this.selected_country = data.country;
+                    this.default_category = data.category;
+                    this.default_country = data.country;
+                    vueMap.set_state(this.selected_country, this.selected_category);
+                    this.get_countries();
+                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            },
+            get_countries: function() {
+                fetch('/data/countries/').then(response => response.json()).then(countries => {
+                    // it's fine to clear the navbar if there are no categories for this country
+                    this.countries = countries;
+
+                    // this is async, therefore you cannot call countries and then categories. You can only do while...
+                    this.get_categories();
+                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            },
+            get_categories: function() {
+                fetch('/data/categories/' + this.selected_country + '/').then(response => response.json()).then(categories => {
+                    // it's fine to clear the navbar if there are no categories for this country
+                    this.categories = categories;
+                    vueExport.categories = categories;  // todo: Move this to map? Can't. Figure out.
+                });
+            },
+            set_country: function(country_name) {
+                // when changing the country, a new set of categories will appear.
+                this.selected_country = country_name;
+
+                // the first category of the country is the default. Load the map and set that one.
+                fetch('/data/categories/' + this.selected_country + '/').then(response => response.json()).then(categories => {
+                    // yes, there are categories.
+                    if (categories.length) {
+                        this.categories = categories;
+                        this.selected_category = categories[0];
+                        vueMap.set_state(this.selected_country, this.selected_category);
+                    } else {
+                        this.categories = [""];
+                        vueMap.set_state(this.selected_country, this.selected_category);
+                    }
+                });
+            },
+            set_category: function(category_name){
+                this.selected_category = category_name;
+                vueMap.set_state(this.selected_country, this.selected_category);
+            }
+        }
+    });
+
+    window.vueReport = new Vue({
+        name: "report",
+        el: '#report',
+        mixins: [state_mixin, report_mixin],
+
+        computed: {
+            // load list of organizations from map features
+            // todo: this doesn't update when region changes.
+            // todo: get map data from somewhere else. This should be placed elsewhere.
+            organizations: function () {
+                if (vueMap.features != null) {
+                    let organizations = vueMap.features.map(function (feature) {
+                        return {
+                            "id": feature.properties.organization_id,
+                            "name": feature.properties.organization_name,
+                            "slug": feature.properties.organization_slug
+                        }
+                    });
+                    return organizations.sort(function (a, b) {
+                        if (a['name'] > b['name']) return 1;
+                        if (a['name'] < b['name']) return -1;
+                        return 0;
+                    });
+                }
+            }
+        },
+        watch: {
+            selected: function () {
+                // load selected organization id
+                this.load(this.selected);
+            }
+        }
+
     });
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
     // vueMap.load(0);

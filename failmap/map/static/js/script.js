@@ -324,7 +324,7 @@ var dynamic_translations = function(){
     gettext('Risks');
 };
 
-$(document).ready(function () {
+let document_ready = function() {
     failmap.initialize(country, debug);
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
@@ -336,4 +336,4 @@ $(document).ready(function () {
         location.href = '#report';
         vueReport.selected = organization_name;
     }
-});
+};
