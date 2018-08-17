@@ -132,14 +132,19 @@ def worker_configuration():
 def worker_verify_role_capabilities(role):
     """Determine if chosen role can be performed on this host (eg: ipv6 connectivity.)"""
 
+    failed = False
+
     if role in IPV6_ROLES:
         # verify if a https connection to a IPv6 website can be made
         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
         try:
             s.connect((config.IPV6_TEST_DOMAIN, 443))
+        except socket.gaierror:
+            # docker container DNS might not be ready, retry
+            raise
         except BaseException:
             log.warning('Failed to connect to ipv6 test domain %s via IPv6', config.IPV6_TEST_DOMAIN, exc_info=True)
-            return False
+            failed = True
 
     if role in CONNECTIVITY_ROLES:
         # verify if a https connection to a website can be made
@@ -147,11 +152,14 @@ def worker_verify_role_capabilities(role):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         try:
             s.connect((config.CONNECTIVITY_TEST_DOMAIN, 443))
+        except socket.gaierror:
+            # docker container DNS might not be ready, retry
+            raise
         except BaseException:
-            log.warning('Failed to connect to test domain %s', config.CONNECTIVITY_TEST_DOMAIN, exc_info=True)
-            return False
+            log.warning('Failed to connect to test domain %s via IPv4', config.CONNECTIVITY_TEST_DOMAIN, exc_info=True)
+            failed = True
 
-    return True
+    return not failed
 
 
 def tls_client_certificate():
