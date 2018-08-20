@@ -416,7 +416,7 @@ path {
     margin-bottom: 0 !important;
 }
 
-.improvements_good {
+.improvements_good, .improvements_neutral {
     color: green;
     font-size: 40px;
 }
@@ -426,7 +426,7 @@ path {
     font-size: 40px;
 }
 
-.improvements_good_large {
+.improvements_good_large, .improvements_neutral_large {
     color: green;
     font-size: 100px;
 }
@@ -445,11 +445,19 @@ path {
 }
 
 .improvements_bad:before {
-   content: "+";
+   content: "";
 }
 
 .improvements_bad_large:before {
-   content: "+";
+   content: "";
+}
+
+.improvements_neutral:before {
+   content: "";
+}
+
+.improvements_neutral_large:before {
+   content: "";
 }
 
 .number-sm {

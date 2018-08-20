@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-16 14:07+0000\n"
+"POT-Creation-Date: 2018-08-20 09:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,50 +18,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:54 failmap/map/static/js/views.js:817
-#: failmap/map/static/js/views.js:822 failmap/map/static/js/views.js:825
+#: failmap/map/static/js/failmap.js:56 failmap/map/static/js/views.js:684
+#: failmap/map/static/js/views.js:689 failmap/map/static/js/views.js:692
 msgid "View Full Screen"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:85
+#: failmap/map/static/js/failmap.js:87
 msgid "Search organization"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:89
+#: failmap/map/static/js/failmap.js:91
 #, fuzzy
 #| msgid "score perfect"
 msgid "Perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:90
+#: failmap/map/static/js/failmap.js:92
 msgid "Good"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:91
+#: failmap/map/static/js/failmap.js:93
 msgid "Mediocre"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:92
+#: failmap/map/static/js/failmap.js:94
 msgid "Bad"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:93
+#: failmap/map/static/js/failmap.js:95
 msgid "Unknown"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:94
+#: failmap/map/static/js/failmap.js:96
 msgid "legend_basic_security"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:406 failmap/map/static/js/failmap.js:410
+#: failmap/map/static/js/failmap.js:408 failmap/map/static/js/failmap.js:412
 msgid "High"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:407 failmap/map/static/js/failmap.js:411
+#: failmap/map/static/js/failmap.js:409 failmap/map/static/js/failmap.js:413
 msgid "Medium"
 msgstr "🌈"
 
-#: failmap/map/static/js/failmap.js:408 failmap/map/static/js/failmap.js:412
+#: failmap/map/static/js/failmap.js:410 failmap/map/static/js/failmap.js:414
 msgid "Low"
 msgstr "🌈"
 
@@ -1839,35 +1839,35 @@ msgstr "🌈"
 msgid "week"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:158 failmap/map/static/js/views.js:161
-#: failmap/map/static/js/views.js:170 failmap/map/static/js/views.js:173
+#: failmap/map/static/js/views.js:134 failmap/map/static/js/views.js:137
+#: failmap/map/static/js/views.js:146 failmap/map/static/js/views.js:149
 msgid "Second opinion"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:159 failmap/map/static/js/views.js:162
-#: failmap/map/static/js/views.js:164 failmap/map/static/js/views.js:166
-#: failmap/map/static/js/views.js:168 failmap/map/static/js/views.js:171
-#: failmap/map/static/js/views.js:174
+#: failmap/map/static/js/views.js:135 failmap/map/static/js/views.js:138
+#: failmap/map/static/js/views.js:140 failmap/map/static/js/views.js:142
+#: failmap/map/static/js/views.js:144 failmap/map/static/js/views.js:147
+#: failmap/map/static/js/views.js:150
 msgid "Documentation"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:190
+#: failmap/map/static/js/views.js:166
 msgid "score perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:192
+#: failmap/map/static/js/views.js:168
 msgid "score high"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:194
+#: failmap/map/static/js/views.js:170
 msgid "score medium"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:196
+#: failmap/map/static/js/views.js:172
 msgid "score low"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:823
+#: failmap/map/static/js/views.js:690
 msgid "Exit Full Screen"
 msgstr "🌈"
 

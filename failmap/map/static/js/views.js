@@ -857,8 +857,12 @@ function views() {
                 });
             },
             goodbad: function (value) {
-                if (value > -1)
+                if (value === 0)
+                    return "improvements_neutral";
+
+                if (value > 0)
                     return "improvements_good";
+
                 return "improvements_bad"
             }
         }

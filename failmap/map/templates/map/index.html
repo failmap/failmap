@@ -763,7 +763,7 @@
             </div>
             <div class="row">
                 <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "High risk" %}</h4>
+                    <h4>{% trans "High risk improvements" %}</h4>
                     {% verbatim %}
                         <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
                     {% endverbatim %}
@@ -785,9 +785,9 @@
 
                 </div>
                 <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Medium risk" %}</h4>
+                    <h4>{% trans "Medium risk improvements" %}</h4>
                     {% verbatim %}
-                        <span :class="goodbad(overall.high) + '_large'">{{ overall.medium }}</span>
+                        <span :class="goodbad(overall.medium) + '_large'">{{ overall.medium }}</span>
                     {% endverbatim %}
 
                     <table class="table table-striped">
@@ -811,9 +811,9 @@
                     </table>
                 </div>
                 <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Low risk" %}</h4>
+                    <h4>{% trans "Low risk improvements" %}</h4>
                     {% verbatim %}
-                        <span :class="goodbad(overall.high) + '_large'">{{ overall.low }}</span>
+                        <span :class="goodbad(overall.low) + '_large'">{{ overall.low }}</span>
                     {% endverbatim %}
 
                     <table class="table table-striped">
