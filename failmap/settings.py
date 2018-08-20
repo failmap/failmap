@@ -152,6 +152,11 @@ MIDDLEWARE = [
     'django.contrib.admindocs.middleware.XViewMiddleware',  # admindocs
 ]
 
+if DEBUG:
+    # usage:
+    # http://localhost:8000/data/vulnstats/NL/municipality/0?prof&count=100000&sort=cumtime
+    MIDDLEWARE += ['django_cprofile_middleware.middleware.ProfilerMiddleware']
+
 ROOT_URLCONF = 'failmap.urls'
 
 # template needed for admin template
@@ -497,8 +502,6 @@ COMPRESS_STORAGE = (
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
-        # 'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        # 'LOCATION': 'unique-snowflake',
     }
 }
 
@@ -924,6 +927,9 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 
 ########
 # Begin Cacheops
+#         # django cacheops doesn't work with raw.
+#         # too bad https://github.com/Suor/django-cacheops
+#         # it's the elephant in the room in the documentation: all are explained except this one.
 
 # Cacheops has been added to improve the retrieval of graphs-queries. At the time of writing it's only in use
 # there using a hack to improve querying speed.
@@ -943,18 +949,16 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 # If redis is not available, that is not a problem. For example: certain development scenario's or when redis fails.
 # in that case a limited set of functions are performed without caching (and thus slower) but without crashes.
 # If it's too slow, the webserver will kill it anyway, or in dev environments it will take longer.
-CACHEOPS_DEGRADE_ON_FAILURE = True
+# CACHEOPS_DEGRADE_ON_FAILURE = True
 
-CACHEOPS_REDIS = {
-    'host': 'localhost',  # redis-server is on same machine
-    'port': 6379,        # default redis port
-    'db': 1,             # SELECT non-default redis database
-                         # using separate redis db or redis instance
-                         # is highly recommended
-
-    'socket_timeout': 3,   # connection timeout in seconds, optional
-}
-
-
+# CACHEOPS_REDIS = {
+#     'host': 'localhost',  # redis-server is on same machine
+#     'port': 6379,        # default redis port
+#     'db': 1,             # SELECT non-default redis database
+#                          # using separate redis db or redis instance
+#                          # is highly recommended
+#
+#     'socket_timeout': 3,   # connection timeout in seconds, optional
+# }
 # End cacheops
 ########

@@ -111,4 +111,6 @@ django-select2  # game, add multiple urls in one go.
 
 # function caching / query caching for slow stats graphs queries
 # another way has to be found, but until then
-django-cacheops
+# django-cacheops <-- doesn't do raw queries, so forget it.
+# and when wrapping raw queries it is more heavy than just using djangos caching framework.
+# django-redis  # caching of graph resultsets

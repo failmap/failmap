@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 import pytz
 import simplejson as json
-from cacheops import cached
 from constance import config
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -678,23 +677,6 @@ def stats_determine_when(stat, weeks_back=0):
     return dt
 
 
-# Django Cacheops doesn't support caching of raw querysets, but it does support
-# function caching with complex output. So this is a hack to use cacheops on a raw queryset.
-@cached(timeout=one_hour)
-def rawOrganizationRatingQuery(query):
-    s = list(OrganizationRating.objects.raw(query))
-    return s
-
-# Django Cacheops doesn't support caching of raw querysets, but it does support
-# function caching with complex output. So this is a hack to use cacheops on a raw queryset.
-
-
-@cached(timeout=one_hour)
-def rawUrlRatingQuery(query):
-    s = list(UrlRating.objects.raw(query))
-    return s
-
-
 @cache_page(one_hour)
 def stats(request, country: str="NL", organization_type="municipality", weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
@@ -733,10 +715,10 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
         # caching for about 30 minutes.
         # But is it really set if the process is killed? Is the process killed?
         pattern = re.compile('[\W_]+')
-        cache_key = pattern.sub('', "stats sql %s %s %s" % (country, organization_type, when))
-        ratings = cache.get('cache_key')
+        cache_key = pattern.sub('', "stats sql %s %s %s" % (country, organization_type, weeks_back))
+        ratings = cache.get(cache_key)
         if not ratings:
-            ratings = rawOrganizationRatingQuery(sql)
+            ratings = OrganizationRating.objects.raw(sql)
             cache.set(cache_key, ratings, 1800)
 
         noduplicates = []
@@ -883,7 +865,8 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
     # print([timeframe for timeframe in timeframes])
 
     stats = {}
-    scan_types = ['total']
+    scan_types = set('total')  # set instead of list to prevent checking if something is in there already.
+    alphanum_only = re.compile('[\W_]+')
 
     for stat in timeframes:
         measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
@@ -895,46 +878,52 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
         # see map_data for more info.
 
         # this query removes the double urls (see below) and makes the joins straightforward. But it's way slower.
-        sql = """SELECT MAX(map_urlrating.id) as id, map_urlrating2.calculation FROM map_urlrating
-               INNER JOIN url ON map_urlrating.url_id = url.id
-               INNER JOIN url_organization on url.id = url_organization.url_id
-               INNER JOIN organization ON url_organization.organization_id = organization.id
-               INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
-                WHERE organization.type_id = '%(OrganizationTypeId)s'
-                AND organization.country = '%(country)s'
-                AND map_urlrating.`when` <= '%(when)s'
-                GROUP BY map_urlrating.url_id
-            """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
-
-        # The ID is included for convenience of the rawquery.
-        # This query will deliver double ratings for urls that are doubly listed, which is dubious.
-        # this happens because multiple organizations can have the same URL.
-        # It's fair that there are more issues if more organizations share the same url?
-        sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation FROM
-                   map_urlrating
-               INNER JOIN
-               (SELECT MAX(id) as id2 FROM map_urlrating or2
-               WHERE `when` <= '%(when)s' GROUP BY url_id) as x
-               ON x.id2 = map_urlrating.id
-               INNER JOIN url ON map_urlrating.url_id = url.id
-               INNER JOIN url_organization on url.id = url_organization.url_id
-               INNER JOIN organization ON url_organization.organization_id = organization.id
-               INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
-                WHERE organization.type_id = '%(OrganizationTypeId)s'
-                AND organization.country = '%(country)s'
-            """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
-
-        # print(sql)
+        # In the end this would be the query we should use... but can't right now
+        # sql = """SELECT MAX(map_urlrating.id) as id, map_urlrating2.calculation FROM map_urlrating
+        #        INNER JOIN url ON map_urlrating.url_id = url.id
+        #        INNER JOIN url_organization on url.id = url_organization.url_id
+        #        INNER JOIN organization ON url_organization.organization_id = organization.id
+        #        INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
+        #         WHERE organization.type_id = '%(OrganizationTypeId)s'
+        #         AND organization.country = '%(country)s'
+        #         AND map_urlrating.`when` <= '%(when)s'
+        #         GROUP BY map_urlrating.url_id
+        #     """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+        #            "country": get_country(country)}
 
         # caching for about 30 minutes.
-        pattern = re.compile('[\W_]+')
-        cache_key = pattern.sub('', "graphs sql %s %s %s" % (country, organization_type, when))
-        urlratings = cache.get('cache_key')
+        # which works pretty OK, but then the calculation takes too long for a function result to get stored.
+        # The cache eats 8.5 seconds.
+        # mainly {built-in method _pickle.loads}... That's because the reports are so large.
+        cache_key = str(alphanum_only.sub('', "grs %s %s %s %s" % (country, organization_type, stat, weeks_back)))
+        log.debug('retrieving %s' % cache_key)
+        urlratings = cache.get(cache_key)
         if not urlratings:
-            urlratings = rawUrlRatingQuery(sql)
-            cache.set(cache_key, urlratings, 1800)
+            # parse the query here instead of outside the function to save a second or so.
+            # The ID is included for convenience of the rawquery.
+            # This query will deliver double ratings for urls that are doubly listed, which is dubious.
+            # this happens because multiple organizations can have the same URL.
+            # It's fair that there are more issues if more organizations share the same url?
+            sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation as calculation FROM
+                       map_urlrating
+                   INNER JOIN
+                   (SELECT MAX(id) as id2 FROM map_urlrating or2
+                   WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+                   ON x.id2 = map_urlrating.id
+                   INNER JOIN url ON map_urlrating.url_id = url.id
+                   INNER JOIN url_organization on url.id = url_organization.url_id
+                   INNER JOIN organization ON url_organization.organization_id = organization.id
+                   INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
+                    WHERE organization.type_id = '%(OrganizationTypeId)s'
+                    AND organization.country = '%(country)s'
+                """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+                       "country": get_country(country)}
+
+            # log.debug(sql)
+
+            urlratings = UrlRating.objects.raw(sql)
+            log.debug('Set %s as %s' % (cache_key, urlratings))
+            cache.set(cache_key, list(urlratings), 1800)
 
         # group by vulnerability type
         for urlrating in urlratings:
@@ -948,8 +937,8 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                 if rating['type'] not in measurement:
                     measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
 
-                if rating['type'] not in scan_types:
-                    scan_types.append(rating['type'])
+                # if rating['type'] not in scan_types:
+                scan_types.add(rating['type'])
 
                 measurement[rating['type']]['high'] += rating['high']
                 measurement[rating['type']]['medium'] += rating['medium']
@@ -965,8 +954,8 @@ def vulnerability_graphs(request, country: str="NL", organization_type="municipa
                     if rating['type'] not in measurement:
                         measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
 
-                    if rating['type'] not in scan_types:
-                        scan_types.append(rating['type'])
+                    # if rating['type'] not in scan_types:
+                    scan_types.add(rating['type'])
 
                     measurement[rating['type']]['high'] += rating['high']
                     measurement[rating['type']]['medium'] += rating['medium']

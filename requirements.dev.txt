@@ -42,3 +42,4 @@ pydotplus  # generating graphs with the docs command...
 git+https://github.com/gorakhargosh/watchdog.git@d33bee0290e00ecb3570dd938db72a2550933586#egg=watchdog
 
 ipython  # failmap shell -i ipython
+django-cprofile-middleware
