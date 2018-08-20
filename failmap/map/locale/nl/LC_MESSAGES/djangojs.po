@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-20 09:29+0000\n"
+"POT-Creation-Date: 2018-08-20 09:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:56 failmap/map/static/js/views.js:684
-#: failmap/map/static/js/views.js:689 failmap/map/static/js/views.js:692
+#: failmap/map/static/js/failmap.js:56 failmap/map/static/js/views.js:693
+#: failmap/map/static/js/views.js:698 failmap/map/static/js/views.js:701
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -1880,7 +1880,7 @@ msgstr "midden"
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:690
+#: failmap/map/static/js/views.js:699
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 

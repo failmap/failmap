@@ -552,7 +552,7 @@ def top_fail(request, country: str="NL", organization_type="municipality", weeks
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
-            LIMIT 10
+            LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
 
@@ -631,7 +631,7 @@ def top_win(request, country: str="NL", organization_type="municipality", weeks_
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
-            LIMIT 10
+            LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
     cursor.execute(sql)

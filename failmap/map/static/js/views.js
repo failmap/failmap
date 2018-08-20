@@ -303,7 +303,8 @@ const top_mixin = {
 
     },
     data: {
-        data: Array,
+        data: Array, // a short list of 10 items.
+        fulldata: Array, // a much larger list.
         columns: ['rank', 'high', 'medium', 'low', 'organization_id'],
         sortKey: '',
         metadata: {},
@@ -328,13 +329,21 @@ const top_mixin = {
 
             let self = this;
             $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
-                self.data = data.ranking;
+                self.data = data.ranking.slice(0,10);
+                self.fulldata = data.ranking;
                 self.metadata  = data.metadata;
             });
         },
         sortBy: function (key) {
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1
+        },
+        swapFull: function(){
+            console.log('swap');
+            temp = Array;
+            temp = this.data;
+            this.data = this.fulldata;
+            this.fulldata = temp;
         }
     },
     computed: {

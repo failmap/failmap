@@ -1,11 +1,15 @@
 {% load static %} {% load i18n %}
-<div class="col-md-6">
+<div class="col-md-12">
     <div id="topfail">
 
         <h3>{% trans "Top Fail" %}</h3>
 
         <p v-if="metadata">{% trans "This is the top fail from" %} {% verbatim %}{{
             humanize(metadata.data_from_time) }}{% endverbatim %}</p>
+
+        <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()">
+            <i class='fas fa-plus-square'></i> {% trans "Expand/shorten list" %}
+        </span>
 
         <table class="table table-striped" id="topfail_table">
             <thead>
@@ -31,7 +35,7 @@
             {% verbatim %}
             <tr v-for='rank in filteredData'>
                 <td>{{ rank['rank'] }}</td>
-                <td><a v-on:click="showReport(rank.organization_id)">{{ rank['organization_name'] }}</a></td>
+                <td><a v-on:click="showReport(rank.organization_id)">🔍 {{ rank['organization_name'] }}</a></td>
                 <td>{{ rank['high'] }}</td>
                 <td>{{ rank['medium'] }}</td>
                 <td>{{ rank['low'] }}</td>
