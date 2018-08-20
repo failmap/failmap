@@ -249,19 +249,20 @@ const report_mixin = {
 // 6 requests is expensive. Could be one with increased complexity.
 const latest_mixin = {
     template: '#latest_table',
-    mounted: function () {
-        this.load()
-    },
     methods: {
         load: function(){
 
-            if (!this.country || !this.category)
+            if (!this.country || !this.category) {
+                console.log('No country or category');
                 return;
+            } else {
+                console.log('loading latest')
+            }
 
-            let self = this;
-            $.getJSON( this.data_url + this.country + '/' + this.category + '/' + this.scan, function (data) {
-                self.scans = data.scans;
-            });
+            fetch(this.data_url + this.country + '/' + this.category + '/' + this.scan)
+                .then(response => response.json()).then(data => {
+                    this.scans = data.scans;
+            }).catch((fail) => {console.log('An error occurred: ' + fail)});
         },
         rowcolor: function (scan) {
             if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
@@ -720,49 +721,49 @@ function views() {
         name: "latest_tls_qualys",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_tls_qualys',
-        data: {scan: "tls_qualys"}
+        data: {scan: "tls_qualys", element_id: "latest_tls_qualys"}
     });
 
     window.vueLatestPlainHttps = new Vue({
         name: "latest_plain_https",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_plain_https',
-        data: {scan: "plain_https"}
+        data: {scan: "plain_https", element_id: "latest_plain_https"}
     });
 
     window.vueLatestFtp = new Vue({
         name: "latest_ftp",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_ftp',
-        data: {scan: "ftp"}
+        data: {scan: "ftp", element_id: "latest_ftp"}
     });
 
     window.vueLatestHSTS = new Vue({
         name: "latest_security_headers_strict_transport_security",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_strict_transport_security',
-        data: {scan: "Strict-Transport-Security"}
+        data: {scan: "Strict-Transport-Security", element_id: "latest_security_headers_strict_transport_security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
         name: "latest_security_headers_x_frame_options",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_frame_options',
-        data: {scan: "X-Content-Type-Options"}
+        data: {scan: "X-Content-Type-Options", element_id: "latest_security_headers_x_frame_options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
         name: "latest_security_headers_x_content_type_options",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_content_type_options',
-        data: {scan: "X-Frame-Options"}
+        data: {scan: "X-Frame-Options", element_id: "latest_security_headers_x_content_type_options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
         name: "latest_security_headers_x_xss_protection",
         mixins: [latest_mixin, state_mixin],
         el: '#latest_security_headers_x_xss_protection',
-        data: {scan: "X-XSS-Protection"}
+        data: {scan: "X-XSS-Protection", element_id: "latest_security_headers_x_xss_protection"}
     });
 
 
