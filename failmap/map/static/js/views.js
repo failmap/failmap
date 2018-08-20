@@ -213,7 +213,7 @@ const report_mixin = {
 
                 // include id in anchor to allow url sharing
                 let newHash = 'report-' + self.slug;
-                $('a#report-anchor').attr('name', newHash)
+                $('a#report-anchor').attr('name', newHash);
                 history.replaceState({}, '', '#' + newHash);
             });
         },
@@ -889,7 +889,9 @@ function views() {
 
         mounted: function () {
             // wait until the default category and default languages have been set...
-            // this.load(this.week)
+
+            // initial load.
+            this.load(0)
         },
         mixins: [state_mixin],
 
@@ -967,13 +969,20 @@ function views() {
             },
         },
         methods: {
-            set_state: function(country, category){
+            set_state: function(country, category, skip_map){
                 console.log("Set state");
                 this.country = country;
                 this.category = category;
-                vueMap.show_week();
 
-                // todo: make this dependent on what is shown or not in the settings.
+                // skip_map is used in loading the defaults, where the map is already (probably) loaded.
+                // The first time the map loads based on the default settings in the backend. This shows the map
+                // faster as it saves a roundtrip. Loading the map faster is a better experience for visitors.
+                if (skip_map) {
+                    console.log('Skipping the map on the default load.');
+                } else {
+                    vueMap.show_week();
+                }
+
                 vueTopfail.set_state(this.country, this.category);
                 vueTopwin.set_state(this.country, this.category);
                 vueStatistics.set_state(this.country, this.category);
@@ -996,32 +1005,41 @@ function views() {
             },
             // slowly moving the failmap into a vue. NOPE. denied.
             load: function (week) {
-                console.log("load");
-                if (!this.country || !this.category) {
-                    console.log("No country or category");
-                    return
-                }
-
                 if (week === undefined)
                     week = 0;
 
                 let self = this;
                 self.loading = true;
-                $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
-                    self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
-                    self.loading = true;
 
-                    failmap.plotdata(mapdata);
+                // the first time the map defaults are loaded, this saves a trip to the server of what the defaults are
+                // it's possible that this is slower than the rest of the code, and thus a normal map is loaded.
+                if (!this.country || !this.category) {
+                    $.getJSON('/data/map_default/' + week + '/' +
+                        self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
+                        self.loading = true;
+                        failmap.plotdata(mapdata);
 
-                    // make map features (organization data) available to other vues
-                    // do not update this attribute if an empty list is returned as currently
-                    // the map does not remove organizations for these kind of responses.
-                    if (mapdata.features.length > 0) {
-                        self.features = mapdata.features;
-                    }
-                    self.loading = false;
-                });
+                        if (mapdata.features.length > 0) {
+                            self.features = mapdata.features;
+                        }
+                        self.loading = false;
+                    });
+                } else {
+                    $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week + '/' +
+                        self.desired_url_scans + '/' + self.desired_endpoint_scans + '/', function (mapdata) {
+                        self.loading = true;
 
+                        failmap.plotdata(mapdata);
+
+                        // make map features (organization data) available to other vues
+                        // do not update this attribute if an empty list is returned as currently
+                        // the map does not remove organizations for these kind of responses.
+                        if (mapdata.features.length > 0) {
+                            self.features = mapdata.features;
+                        }
+                        self.loading = false;
+                    });
+                }
             },
             next_week: function () {
                 if (this.week > 0) {
@@ -1087,7 +1105,8 @@ function views() {
                     this.selected_country = data.country;
                     this.default_category = data.category;
                     this.default_country = data.country;
-                    vueMap.set_state(this.selected_country, this.selected_category);
+                    // done in the map.
+                    vueMap.set_state(this.selected_country, this.selected_category, true);
                     this.get_countries();
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
             },

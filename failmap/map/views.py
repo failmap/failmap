@@ -1280,6 +1280,16 @@ def ticker(request, country: str="NL", organization_type: str="municipality",
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
+def map_default(request, weeks_back: int=0, url_scan_types: dict=None, endpoint_scan_types: dict=None, ):
+    defaults = Configuration.objects.all().filter(
+        is_displayed=True,
+        is_the_default_option=True
+    ).order_by('display_order').values('country', 'organization_type__name').first()
+
+    return map_data(request, defaults['country'], defaults['organization_type__name'], weeks_back,
+                    url_scan_types, endpoint_scan_types)
+
+
 # @cache_page(four_hours)
 def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0,
              url_scan_types: dict=None, endpoint_scan_types: dict=None, ):

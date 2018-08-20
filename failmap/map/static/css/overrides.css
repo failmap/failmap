@@ -11,6 +11,7 @@ body {
     margin-bottom: 10px;
     outline: none;
     direction: rtl;
+    width: 100%;
 }
 
 #next_week {
