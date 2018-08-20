@@ -22,6 +22,14 @@
     background-color: rgba(240, 132, 38, 0.6);
 }
 
+.marker-cluster-yellow {
+    background-color: rgba(241, 237, 75, 0.6);
+}
+
+.marker-cluster-yellow div {
+    background-color: rgba(255, 249, 30, 0.6);
+}
+
 .marker-cluster-red {
     background-color: rgba(253, 156, 115, 0.6);
 }

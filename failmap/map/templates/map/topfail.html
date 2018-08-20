@@ -9,27 +9,28 @@
 
         <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()">
             <i class='fas fa-plus-square'></i> {% trans "Expand/shorten list" %}
-        </span>
+        </span><br/><br/>
 
         <table class="table table-striped" id="topfail_table">
             <thead>
-         <tr>
-            <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
-                <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
-          </span></th>
-            <th @click="sortBy('organization_id')" :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
-                <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'">
-          </span></th>
-            <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
-                <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'">
-          </span></th>
-            <th @click="sortBy('medium')" :class="{ active: sortKey == 'medium' }">{% trans "Medium" %}
-                <span class="arrow" :class="sortOrders['medium'] > 0 ? 'asc' : 'dsc'">
-          </span></th>
-            <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
-                <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
-          </span></th>
-        </tr>
+            <tr>
+                <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
+                    <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
+                <th @click="sortBy('organization_id')"
+                    :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
+                    <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
+                <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
+                    <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
+                <th @click="sortBy('medium')" :class="{ active: sortKey == 'medium' }">{% trans "Medium" %}
+                    <span class="arrow" :class="sortOrders['medium'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
+                <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
+                    <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
+            </tr>
             </thead>
             <tbody>
             {% verbatim %}

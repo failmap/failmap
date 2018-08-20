@@ -1,6 +1,6 @@
 
 
-var failmap = {
+const failmap = {
 
     map: null, // map showing geographical regions + markers
     polygons: L.geoJson(),  // geographical regions
@@ -9,15 +9,25 @@ var failmap = {
     markers: L.markerClusterGroup({iconCreateFunction: function(cluster){
         // getAllChildMarkers()
         // if 1 is red, marker is red else if 1 is orange, else green else gray.
-        var css_class = "unknown";
+        let css_class = "unknown";
 
         // good, medium, bad
         // todo: if red, break
-        cluster.getAllChildMarkers().forEach(function (point){
+        // you can't break a forEach, therefore we're using an old school for loop here
+        let childmarkers = cluster.getAllChildMarkers();
+        let colors = ["unknown", "green", "yellow", "orange"];
+        let selected_color = 0;
+
+        for (let point of childmarkers) {
             if (point.feature.properties.color === "red") {
-                css_class = "red";
+                css_class = "red"; break;
             }
-        });
+
+            if (colors.indexOf(point.feature.properties.color) > selected_color){
+                selected_color = colors.indexOf(point.feature.properties.color);
+                css_class = point.feature.properties.color;
+            }
+        }
 
         return L.divIcon({
             html: '<div><span>' + cluster.getChildCount() + '</span></div>',
@@ -37,6 +47,7 @@ var failmap = {
     greenIcon: new L.Icon({iconUrl: 'static/images/green-dot.png'}),
     redIcon: new L.Icon({iconUrl: 'static/images/red-dot.png'}),
     orangeIcon: new L.Icon({iconUrl: 'static/images/orange-dot.png'}),
+    yellowIcon: new L.Icon({iconUrl: 'static/images/yellow-dot.png'}),
     grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
 
     initialize: function (country_code, debug) {
@@ -66,13 +77,13 @@ var failmap = {
                 let hash = $(this).attr('name');
                 // 30 is an arbitrary padding choice,
                 // if you want a precise check then use distance===0
-                if (distance < 30 && distance > -30 && currentHash != hash) {
+                if (distance < 30 && distance > -30 && currentHash !== hash) {
                     return true;
                 }
             }).first();
 
             let hash = current_anchor.attr('name');
-            if (hash != undefined) {
+            if (hash !== undefined) {
                 history.replaceState({}, '', '#' + hash);
                 currentHash = hash;
             }
@@ -83,7 +94,7 @@ var failmap = {
             "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
         this.add_div(html, "info_nobackground", false);
-        this.add_div('<div id="historycontrol"></div>', "info", false);
+        this.add_div('<div id="historycontrol"></div>', "info", true);
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
         this.add_info();
         this.add_div("<div id='domainlist'></div>", "info", false);
@@ -440,6 +451,7 @@ var failmap = {
             case "red": return L.marker(latlng, {icon: failmap.redIcon});
             case "orange": return L.marker(latlng, {icon: failmap.orangeIcon});
             case "green": return L.marker(latlng, {icon: failmap.greenIcon});
+            case "yellow": return L.marker(latlng, {icon: failmap.yellowIcon});
         }
         return L.marker(latlng, {icon: failmap.grayIcon});
     },
@@ -493,37 +505,21 @@ var failmap = {
         if ((query === "") || (!query)) {
             // reset
             failmap.polygons.eachLayer(function (layer) {
-                switch (layer.feature.geometry.type){
-                    case "MultiPolygon": layer.setStyle(failmap.style(layer.feature)); break;
-                    case "Polygon": layer.setStyle(failmap.style(layer.feature)); break;
-                    // no default.
-                    // todo: point.
-                }
+                layer.setStyle(failmap.style(layer.feature));
             });
         } else {
             // text match
             failmap.polygons.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
-                    switch (layer.feature.geometry.type){
-                        case "MultiPolygon": layer.setStyle(failmap.searchResultStyle(layer.feature)); break;
-                        case "Polygon": layer.setStyle(failmap.searchResultStyle(layer.feature)); break;
-                        // no default.
-                        // todo: point.
-                    }
+                    layer.setStyle(failmap.searchResultStyle(layer.feature));
                 } else {
-                    switch (layer.feature.geometry.type) {
-                        case "MultiPolygon": layer.setStyle(failmap.style(layer.feature)); break;
-                        case "Polygon": layer.setStyle(failmap.style(layer.feature)); break;
-                        // no default.
-                        // todo: point.
-                    }
+                    layer.setStyle(failmap.style(layer.feature));
                 }
             });
         }
     },
 
     plotdata: function (mapdata) {
-        console.log("plotting");
         // mapdata is a mix of polygons and multipolygons, and whatever other geojson types.
         regions = []; // to polygons
         points = []; // to markers
@@ -549,7 +545,7 @@ var failmap = {
             failmap.clean_map(regions, points);
 
             // update existing layers (and add ones with the same name)
-            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(regions, layer)});
+            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
         } else {
             // add regions
             failmap.polygons = L.geoJson(regions, {
@@ -634,14 +630,10 @@ var failmap = {
 
 
     // overwrite some properties
-    recolormap: function (mapdata, layer) {
+    recolormap: function (features, layer) {
         let existing_feature = layer.feature;
 
-        // case when data is not loaded. todo: fix the cause of this.
-        if (!mapdata.features)
-            return;
-
-        mapdata.features.forEach(function (new_feature){
+        features.forEach(function (new_feature){
             if (existing_feature.properties.organization_name !== new_feature.properties.organization_name) {
                 return;
             }
@@ -650,7 +642,6 @@ var failmap = {
                 // It seems not possible to update the geometry of a shape, too bad.
                 failmap.polygons.removeLayer(layer);
                 failmap.polygons.addData(new_feature);
-
             } else {
                 // colors changed, shapes / points on the map stay the same.
                 existing_feature.properties.Overall = new_feature.properties.Overall;
@@ -668,6 +659,9 @@ var failmap = {
                                 break;
                             case "orange":
                                 layer.setIcon(failmap.orangeIcon);
+                                break;
+                            case "yellow":
+                                layer.setIcon(failmap.yellowIcon);
                                 break;
                             case "green":
                                 layer.setIcon(failmap.greenIcon);

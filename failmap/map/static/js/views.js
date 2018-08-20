@@ -253,10 +253,7 @@ const latest_mixin = {
         load: function(){
 
             if (!this.country || !this.category) {
-                console.log('No country or category');
                 return;
-            } else {
-                console.log('loading latest')
             }
 
             fetch(this.data_url + this.country + '/' + this.category + '/' + this.scan)
@@ -339,7 +336,6 @@ const top_mixin = {
             this.sortOrders[key] = this.sortOrders[key] * -1
         },
         swapFull: function(){
-            console.log('swap');
             temp = Array;
             temp = this.data;
             this.data = this.fulldata;
