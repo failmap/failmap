@@ -416,6 +416,10 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
                            "are rarely used due to drawbacks).",
             'fields': ('is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
+        ('computed', {
+            'description': 'These values are automatically computed on save. Do not modify them by hand.',
+            'fields': ('computed_subdomain', 'computed_domain', 'computed_suffix')
+        })
     )
     readonly_fields = ['created_on', 'onboarded']
 

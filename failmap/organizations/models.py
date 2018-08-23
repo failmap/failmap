@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timedelta
 
 import pytz
+import tldextract
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -173,23 +174,37 @@ class Coordinate(models.Model):
 
 
 class Url(models.Model):
-    organization_old = models.ForeignKey(Organization, null=True, on_delete=models.PROTECT)
+    organization_old = models.ForeignKey(
+        Organization,
+        null=True,
+        on_delete=models.PROTECT
+    )
 
-    organization = models.ManyToManyField(Organization, related_name="u_many_o_upgrade")
+    organization = models.ManyToManyField(
+        Organization,
+        related_name="u_many_o_upgrade"
+    )
 
     url = models.CharField(
-        max_length=150,
+        max_length=255,
         help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
     )
 
-    created_on = models.DateTimeField(auto_now_add=True, blank=True, null=True)
+    created_on = models.DateTimeField(
+        auto_now_add=True,
+        blank=True,
+        null=True
+    )
 
     not_resolvable = models.BooleanField(
         default=False,
         help_text="Url is not resolvable (anymore) and will not be picked up by scanners anymore."
                   "When the url is not resolvable, ratings from the past will still be shown(?)#")
 
-    not_resolvable_since = models.DateTimeField(blank=True, null=True)
+    not_resolvable_since = models.DateTimeField(
+        blank=True,
+        null=True
+    )
 
     not_resolvable_reason = models.CharField(
         max_length=255,
@@ -229,8 +244,33 @@ class Url(models.Model):
                   " have been found. completed: onboarding is done, also onboarded flag is set."
     )
 
-    onboarding_stage_set_on = models.DateTimeField(blank=True, null=True,
-                                                   help_text="When the onboarding stage was hit. Helps with time-outs.")
+    computed_subdomain = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten.",
+        db_index=True
+    )
+
+    computed_domain = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten."
+    )
+
+    computed_suffix = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Automatically computed by tldextract on save. Data entered manually will be overwritten."
+    )
+
+    onboarding_stage_set_on = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When the onboarding stage was hit. Helps with time-outs."
+    )
 
     onboarded = models.BooleanField(
         default=False,
@@ -238,8 +278,12 @@ class Url(models.Model):
                   "These tests are usually run very quickly to get a first glimpse of the url."
                   "This test is run once.")
 
-    onboarded_on = models.DateTimeField(auto_now_add=True, blank=True, null=True,
-                                        help_text="The moment the onboard process finished.")
+    onboarded_on = models.DateTimeField(
+        auto_now_add=True,
+        blank=True,
+        null=True,
+        help_text="The moment the onboard process finished."
+    )
 
     class Meta:
         managed = True
@@ -280,6 +324,17 @@ class Url(models.Model):
         # this field to be here somehow, but it isn't.
         # a warning might be possible after the insert, but then you've got two urls already.
         # this is really a shortcoming of Django.
+
+    def save(self, *args, **kwarg):
+
+        # handle computed values
+
+        result = tldextract.extract(self.url)
+        self.computed_subdomain = result.subdomain
+        self.computed_domain = result.domain
+        self.computed_suffix = result.suffix
+
+        super(Url, self).save(*args, **kwarg)
 
     def is_top_level(self):
         # count the number of dots. Should be one.

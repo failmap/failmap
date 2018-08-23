@@ -89,7 +89,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     # todo: functional decomposition
 
     # merge
-    toplevel_filter = {"url__iregex": "^[^.]*\\.[^.]*$"}
+    toplevel_filter = {"computed_subdomain": ""}
 
     # merge using python 3.6 syntax
     # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
@@ -242,14 +242,14 @@ def dnsrecon_default(urls):
 
 def toplevel_urls(organizations):
     return Url.objects.all().filter(organization__in=organizations,
-                                    url__iregex="^[^.]*\.[^.]*$")
+                                    computed_subdomain="")
 
 
 # This helps to determine at database level if the DNS uses wildcards, so it can be dealt
 # with in another way.
 def toplevel_urls_without_wildcards(organizations):
     return Url.objects.all().filter(organization__in=organizations,
-                                    url__iregex="^[^.]*\.[^.]*$",
+                                    computed_subdomain="",
                                     uses_dns_wildcard=False)
 
 

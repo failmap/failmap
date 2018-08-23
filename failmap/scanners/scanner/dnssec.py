@@ -61,7 +61,7 @@ def compose_task(
         return group()
 
     # DNSSEC only works on top level urls
-    urls_filter = dict(urls_filter, **{"url__iregex": "^[^.]*\.[^.]*$"})
+    urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
 
     urls = []
 

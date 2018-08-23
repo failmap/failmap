@@ -1018,7 +1018,7 @@ def wanted_urls(request):
         od["urls"] = organization.n_urls
 
         topleveldomains = Url.objects.all().filter(organization=organization,
-                                                   url__iregex="^[^.]*\.[^.]*$")
+                                                   computed_subdomain="")
         for topleveldomain in topleveldomains:
             od["top_level_urls"] = []
             od["top_level_urls"].append({"url": topleveldomain.url})
