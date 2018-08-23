@@ -1,0 +1,273 @@
+[
+  {
+    "model": "django_celery_beat.solarschedule",
+    "pk": 1,
+    "fields": {
+      "event": "dusk_civil",
+      "latitude": "51.954782",
+      "longitude": "5.873461"
+    }
+  },
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 1,
+    "fields": {
+      "every": 1,
+      "period": "days"
+    }
+  },
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 2,
+    "fields": {
+      "every": 3,
+      "period": "days"
+    }
+  },
+  {
+    "model": "django_celery_beat.intervalschedule",
+    "pk": 3,
+    "fields": {
+      "every": 1,
+      "period": "minutes"
+    }
+  },
+  {
+    "model": "django_celery_beat.crontabschedule",
+    "pk": 1,
+    "fields": {
+      "minute": "0",
+      "hour": "*",
+      "day_of_week": "*",
+      "day_of_month": "*",
+      "month_of_year": "*"
+    }
+  },
+  {
+    "model": "django_celery_beat.crontabschedule",
+    "pk": 2,
+    "fields": {
+      "minute": "25",
+      "hour": "09",
+      "day_of_week": "*",
+      "day_of_month": "*",
+      "month_of_year": "*"
+    }
+  },
+  {
+    "model": "django_celery_beat.crontabschedule",
+    "pk": 3,
+    "fields": {
+      "minute": "0",
+      "hour": "4",
+      "day_of_week": "*",
+      "day_of_month": "*",
+      "month_of_year": "*"
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictasks",
+    "pk": 1,
+    "fields": {
+      "last_update": "2018-08-23T09:08:02Z"
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 1,
+    "fields": {
+      "name": "Rebuild ratings",
+      "task": "failmap.app.models.create_job",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.map.rating\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:43Z",
+      "total_run_count": 206,
+      "date_changed": "2018-08-23T04:03:14Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 2,
+    "fields": {
+      "name": "scan-tls-qualys",
+      "task": "failmap.app.models.create_job",
+      "interval": 2,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.tls_qualys\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-22T10:17:20Z",
+      "total_run_count": 47,
+      "date_changed": "2018-08-22T10:19:30Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 3,
+    "fields": {
+      "name": "scan-plain-http",
+      "task": "failmap.app.models.create_job",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.plain_http\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:26Z",
+      "total_run_count": 206,
+      "date_changed": "2018-08-23T04:03:14Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 4,
+    "fields": {
+      "name": "celery.backend_cleanup",
+      "task": "celery.backend_cleanup",
+      "interval": null,
+      "crontab": 3,
+      "solar": null,
+      "args": "[]",
+      "kwargs": "{}",
+      "queue": null,
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:00Z",
+      "total_run_count": 281,
+      "date_changed": "2018-08-23T04:00:10Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 5,
+    "fields": {
+      "name": "scan-security-headers",
+      "task": "failmap.app.models.create_job",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.security_headers\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:59Z",
+      "total_run_count": 206,
+      "date_changed": "2018-08-23T04:03:14Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 6,
+    "fields": {
+      "name": "discover-endpoints",
+      "task": "failmap.app.models.create_job",
+      "interval": 2,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.http\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:00Z",
+      "total_run_count": 56,
+      "date_changed": "2018-08-23T04:00:10Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 7,
+    "fields": {
+      "name": "dnssec",
+      "task": "failmap.app.models.create_job",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.dnssec\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T04:00:00Z",
+      "total_run_count": 157,
+      "date_changed": "2018-08-23T04:00:10Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 8,
+    "fields": {
+      "name": "ftp",
+      "task": "failmap.app.models.create_job",
+      "interval": 1,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.ftp\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-22T15:11:00Z",
+      "total_run_count": 34,
+      "date_changed": "2018-08-22T15:14:00Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 9,
+    "fields": {
+      "name": "Onboard",
+      "task": "failmap.app.models.create_job",
+      "interval": 3,
+      "crontab": null,
+      "solar": null,
+      "args": "[\"failmap.scanners.scanner.onboard\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "expires": null,
+      "enabled": true,
+      "last_run_at": "2018-08-23T09:12:05Z",
+      "total_run_count": 4,
+      "date_changed": "2018-08-23T09:12:45Z",
+      "description": ""
+    }
+  }
+]
