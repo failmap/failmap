@@ -329,6 +329,9 @@ let document_ready = function() {
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 
+    // date and time to the current locale, whatever it may be:
+    moment.locale(window.navigator.userLanguage || window.navigator.language);
+
     // if browser contains report anchor with organization id load that organization
     let match = RegExp('report-([a-z-]+)').exec(location.hash);
     if (match) {

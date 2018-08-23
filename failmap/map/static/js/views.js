@@ -120,7 +120,8 @@ const report_mixin = {
             return "#" + url.replace(/[^0-9a-z]/gi, '')
         },
         humanize: function (date) {
-            return new Date(date).humanTimeStamp()
+            // It's better to show how much time was between the last scan and now. This is easier to understand.
+            return moment(date).fromNow();
         },
         translate: function(string){
             return gettext(string);

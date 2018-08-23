@@ -62,6 +62,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -78,6 +79,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -1189,7 +1191,9 @@
 
             <br style="clear: both">
             <br />
-            <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
+            <i>{% trans "Report from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
+            <br />
+            <i>{% trans "Scans are performed on a daily to weekly basis." %}</i><br/>
             <br/>
             <ul>
             <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
