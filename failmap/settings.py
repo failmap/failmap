@@ -559,8 +559,6 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 2
 # numer of tasks to be executed in parallel by celery
 CELERY_WORKER_CONCURRENCY = 10
 
-MAPBOX_TOKEN = "pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw"
-
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
 STATSD_HOST = os.environ.get('STATSD_HOST', '127.0.0.1')
@@ -659,6 +657,9 @@ CONSTANCE_CONFIG = {
     'GOOGLE_MAPS_API_KEY': ('AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo',
                             'API Key of google maps that can be used in the game / adding section.', str),
 
+    'MAPBOX_ACCESS_TOKEN': ('pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
+                            'Access token for Mapbox', str),
+
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
                                                 ' not be translated.', str),
@@ -747,7 +748,7 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
-    ('General', ('COMMENTS', )),
+    ('General', ('COMMENTS', 'MAPBOX_ACCESS_TOKEN')),
 
     ('Project', ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
                  'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),

@@ -2,6 +2,7 @@
 let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
 let version = document.head.querySelector("[name=version]").getAttribute('content');
 let country = document.head.querySelector("[name=country]").getAttribute('content');
+let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
 let debug = document.head.querySelector("[name=debug]").getAttribute('content');
 if (sentry_token) {
     Raven.config(sentry_token, {release: version}).install();
@@ -325,7 +326,7 @@ var dynamic_translations = function(){
 };
 
 let document_ready = function() {
-    failmap.initialize(country, debug);
+    failmap.initialize(mapbox_token, country, debug);
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 

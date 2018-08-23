@@ -1,6 +1,6 @@
 # urls for scanners, maybe in their own url files
 import proxy.views
-from django.conf import settings
+from constance import config
 from django.conf.urls import url
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
@@ -60,9 +60,9 @@ urlpatterns = [
 
     # Proxy maptile requests,
     # In production this can be done by caching proxy, this makes sure it works for dev. as well.
-    url(r'^proxy/(?P<url>https://api.tiles.mapbox.com/v4/.*.png$)',
+    url(r'^proxy/(?P<url>https://api.mapbox.com/styles/v1/mapbox/.*./$)',
         proxy.views.proxy_view,
-        {"requests_args": {"params": {"access_token": settings.MAPBOX_TOKEN}}}),
+        {"requests_args": {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}}}),
 
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/

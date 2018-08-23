@@ -3,6 +3,8 @@
 const failmap = {
 
     map: null, // map showing geographical regions + markers
+    mapbox_token: '',
+
     polygons: L.geoJson(),  // geographical regions
     // todo: if you click the group too fast: Marker.js:181 Uncaught TypeError:
     // Cannot read property 'createIcon' of undefined
@@ -50,11 +52,13 @@ const failmap = {
     yellowIcon: new L.Icon({iconUrl: 'static/images/yellow-dot.png'}),
     grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
 
-    initialize: function (country_code, debug) {
+    initialize: function (mapbox_token, country_code, debug) {
+        this.mapbox_token = mapbox_token;
+
         // don't name this variable location, because that redirects the browser.
         loc = this.initial_location(country_code);
         this.map = L.map('map',
-            { dragging: !L.Browser.mobile, touchZoom: true, tap: false}
+            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, }
             ).setView(loc.coordinates, loc.zoomlevel);
 
         this.map.scrollWheelZoom.disable();
@@ -114,7 +118,8 @@ const failmap = {
     },
 
     loadTiles: function(){
-        let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
+        // let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
+        let tile_uri_base = 'https://api.mapbox.com/styles/v1/mapbox/{style}/tiles/{z}/{x}/{y}/';
         let tile_uri_params = 'access_token={accessToken}';
         let tile_uri = tile_uri_base + '?' + tile_uri_params;
 
@@ -133,7 +138,10 @@ const failmap = {
             'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
             'Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
             id: 'mapbox.light',
-            accessToken: 'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
+            accessToken: this.mapbox_token,
+            style: 'light-v9', // 'dark-v9' for dark mode,
+            tileSize: 512,
+            zoomOffset: -1
         }).addTo(this.map);
     },
 
