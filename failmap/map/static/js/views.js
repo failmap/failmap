@@ -1195,6 +1195,46 @@ function views() {
         }
 
     });
+
+    window.vueInfo = new Vue({
+        name: 'infobox',
+        el: '#infobox',
+        template: '#map_item_hover',
+
+        data:{
+            properties: {
+                organization_name: "",
+                high: 0,
+                medium: 0,
+                low: 0
+            }
+        },
+
+        computed: {
+            high: function () {
+                return this.perc(this.properties.high, this.total);
+            },
+            medium: function () {
+                return this.perc(this.properties.medium, this.total);
+            },
+            low: function () {
+                return this.perc(this.properties.low, this.total);
+            },
+            unknown: function () {
+                return 0;
+            },
+            total: function(){
+                return this.properties.high + this.properties.medium + this.properties.low;
+            }
+        },
+
+        methods: {
+            perc: function (amount, total) {
+                return (!amount || !total) ? "0%" : roundTo(amount / total * 100, 2) + "%";
+            },
+        }
+
+    });
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
     // vueMap.load(0);
 }

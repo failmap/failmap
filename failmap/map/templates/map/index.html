@@ -1287,8 +1287,14 @@
 </script>
 <script type="x-template" id="historycontrol_template">
     <div id="historycontrol">
+        <h4>{% trans "Moment" %}</h4>
+        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
+        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
+        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
+        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
+        <br />
     {% if config.SHOW_DNS_DNSSEC or config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS or config.SHOW_FTP or config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO or config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
-        <h4>{% trans "Risks" %}</h4>
+        <h4>{% trans "Risk filter" %}</h4>
         {% if config.SHOW_DNS_DNSSEC %}
         <input type='checkbox' v-model="DNSSEC" name="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
         {% endif %}
@@ -1313,32 +1319,28 @@
         {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
         <input type='checkbox' v-model="security_headers_x_content_type_options" name="X_CONTENT" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
         {% endif %}
-        <br />
     {% endif %}
-        <h4>{% trans "Moment" %}</h4>
-        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
-        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
-        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
-        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
     </div>
 </script>
 <script type="x-template" id="domainlist_template">
     <div id="domainlist">
-        <div v-if="urls">
+        <div v-if="urls.length > 1" v-cloak>
             <table width='100%'>
                 <thead>
-                    <tr><th>{% trans "Url" %}</th>
-                    <th width='7%'>{% trans "H" %}</th>
-                    <th width='7%'>{% trans "M" %}</th>
-                    <th width='7%'>{% trans "L" %}</th></tr>
+                    <tr>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "H" %}</th>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "M" %}</th>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "L" %}</th>
+                        <th>{% trans "Url" %}</th>
+                    </tr>
                 </thead>
                 {% verbatim %}
                 <tbody>
                     <tr v-for="url in urls">
-                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.url }}</span></td>
                         <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.high }}</span></td>
                         <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.medium }}</span></td>
                         <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.low }}</span></td>
+                        <td nowrap><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.url }}</span></td>
                     </tr>
                 </tbody>
                 {% endverbatim %}
@@ -1346,6 +1348,22 @@
         </div>
     </div>
 </script>
+{% verbatim %}
+<script type="x-template" id="map_item_hover">
+    <div id="map_hover_info_contents">
+        <div v-if="properties.organization_name" v-cloak>
+            <h4>{{ properties.organization_name }}</h4>
+            <div class="progress">
+                <div class="progress-bar bg-success" :style="{width:unknown}"></div>
+                <div class="progress-bar bg-success" :style="{width:high}"></div>
+                <div class="progress-bar bg-warning" :style="{width:medium}"></div>
+                <div class="progress-bar bg-danger" :style="{width:low}"></div>
+            </div>
+        </div>
+    </div>
+</script>
+{% endverbatim %}
+
 <iframe name="print_frame" title="Print frame, used to load reports when clicking print." width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>
 <!--

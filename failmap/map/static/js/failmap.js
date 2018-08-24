@@ -1,9 +1,8 @@
-
-
 const failmap = {
 
     map: null, // map showing geographical regions + markers
     mapbox_token: '',
+    proxy_tiles: true,
 
     polygons: L.geoJson(),  // geographical regions
     // todo: if you click the group too fast: Marker.js:181 Uncaught TypeError:
@@ -36,21 +35,12 @@ const failmap = {
             className: 'marker-cluster marker-cluster-' + css_class,
             iconSize: new L.Point(40, 40) });
     }}),
-    info: L.control(),
-    hovered_organization: "",
-    proxy_tiles: true,
 
-    PointIcon: L.Icon.extend({
-        options: {shadowUrl: '', iconSize: [16, 16], shadowSize: [0, 0], iconAnchor: [8, 8], shadowAnchor: [0, 0],
-            popupAnchor: [-3, -76]
-        }
-    }),
-
-    greenIcon: new L.Icon({iconUrl: 'static/images/green-dot.png'}),
-    redIcon: new L.Icon({iconUrl: 'static/images/red-dot.png'}),
-    orangeIcon: new L.Icon({iconUrl: 'static/images/orange-dot.png'}),
-    yellowIcon: new L.Icon({iconUrl: 'static/images/yellow-dot.png'}),
-    grayIcon: new L.Icon({iconUrl: 'static/images/gray-dot.png'}),
+    greenIcon: new L.divIcon({className: 'leaflet-marker-green'}),
+    redIcon: new L.divIcon({className: 'leaflet-marker-red'}),
+    orangeIcon: new L.divIcon({className: 'leaflet-marker-orange'}),
+    yellowIcon: new L.divIcon({className: 'leaflet-marker-yellow'}),
+    grayIcon: new L.divIcon({className: 'leaflet-marker-gray'}),
 
     initialize: function (mapbox_token, country_code, debug) {
         this.mapbox_token = mapbox_token;
@@ -98,9 +88,11 @@ const failmap = {
             "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
         this.add_div(html, "info_nobackground", false);
+
         this.add_div('<div id="historycontrol"></div>', "info", true);
+
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
-        this.add_info();
+        this.add_div("<div id='infobox'></div>", "info", true);
         this.add_div("<div id='domainlist'></div>", "info", false);
         let labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
@@ -412,33 +404,6 @@ const failmap = {
         new_div.addTo(this.map);
     },
 
-    add_info: function () {
-        this.info.onAdd = function (map) {
-            this._div = L.DomUtil.create('div', 'info');
-            L.DomEvent.disableClickPropagation(this._div);
-            return this._div;
-        };
-
-        this.info.update = function (props) {
-            var sometext = "";
-            if (props) {
-                sometext += "<h4>" + props.organization_name + "</h4>";
-                if (props.high || props.medium || props.low) {
-                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColorCode('red') + '">' + props.high + '</span><br />';
-                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColorCode('orange') + '">' + props.medium + '</span><br />';
-                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColorCode('green') + '">' + props.low + '</span><br />';
-                } else {
-                    sometext += '<b>' + gettext('High') + ': </b><span style="color: ' + failmap.getColorCode('red') + '">0</span><br />';
-                    sometext += '<b>' + gettext('Medium') + ': </b><span style="color: ' + failmap.getColorCode('orange') + '">0</span><br />';
-                    sometext += '<b>' + gettext('Low') + ': </b><span style="color: ' + failmap.getColorCode('green') + '">0</span><br />';
-                }
-                this._div.innerHTML = sometext;
-            }
-        };
-
-        this.info.addTo(this.map);
-    },
-
     getColorCode: function (d) {
         return d === "red" ? '#bd383c' : d === "orange" ? '#fc9645' : d === "yellow" ? '#d3fc6a' : d === "green" ? '#62fe69' : '#c1bcbb';
     },
@@ -474,7 +439,7 @@ const failmap = {
                 layer.bringToFront();
             }
         }
-        failmap.info.update(layer.feature.properties);
+        vueInfo.properties = layer.feature.properties;
         vueDomainlist.load(layer.feature.properties.organization_id, vueMap.week);
     },
 
@@ -497,7 +462,7 @@ const failmap = {
         } else {
             failmap.polygons.resetStyle(e.target);
         }
-        failmap.info.update();
+        // vueInfo.data = Array;
     },
 
     isSearchedFor: function (feature) {

@@ -30,7 +30,7 @@ body {
     background: rgba(255, 255, 255, 1);
     /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); */
     border-radius: 4px;
-    border: 2px solid rgba(0,0,0,0.2);
+    /* border: 2px solid rgba(0,0,0,0.2); */
     background-clip: padding-box;
 }
 
@@ -87,7 +87,7 @@ body {
 }
 
 #domainlist {
-    width: 264px;
+    width: 293px;
     overflow-y: auto;
     overflow-x: hidden;
     max-height: 650px;
@@ -696,3 +696,70 @@ th.active .arrow {
 .gitter-chat-embed {
     z-index: 10000;
 }
+
+
+/* Make a single menu, not separate controls. Todo: only when there is room... */
+@media screen and (min-width: 768px) {
+    .leaflet-top.leaflet-right {
+        height: calc(100% - 184px);
+        background-color: rgba(255, 255, 255, 1.8);
+        padding-left: 10px;
+        margin-bottom: 10px;
+        overflow-y: scroll;
+        border-left: 2px solid #b3b3b3;
+        pointer-events: initial;
+    }
+}
+
+/* Markers with CSS only, no (slow) images, and easy to change color. */
+
+.leaflet-marker-red
+{
+    background-color: rgba(255,0,0,0.6);
+    border: 2px solid rgba(179,0,0,0.5);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    line-height:30px;
+}
+
+.leaflet-marker-orange
+{
+    background-color: rgba(255, 125, 0, 0.6);
+    border: 2px solid rgba(162, 85, 0, 0.5);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    line-height:30px;
+}
+
+.leaflet-marker-green
+{
+    background-color: rgba(32, 255, 0, 0.6);
+    border: 2px solid rgba(0, 162, 2, 0.50);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    line-height:30px;
+}
+
+.leaflet-marker-yellow
+{
+    background-color: rgba(253, 255, 5, 0.6);
+    border: 2px solid rgba(179, 172, 0, 0.5);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    line-height:30px;
+}
+
+.leaflet-marker-gray
+{
+    background-color: rgba(255, 248, 241, 0.6);
+    border: 2px solid rgba(178, 179, 178, 0.5);
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+    line-height:30px;
+}
+
