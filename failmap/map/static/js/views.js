@@ -303,7 +303,7 @@ const top_mixin = {
     data: {
         data: Array, // a short list of 10 items.
         fulldata: Array, // a much larger list.
-        columns: ['rank', 'high', 'medium', 'low', 'organization_id'],
+        columns: ['rank', 'high', 'medium', 'low', 'organization_id', 'total_urls', 'total_endpoints'],
         sortKey: '',
         metadata: {},
         key: {}

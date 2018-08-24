@@ -534,7 +534,9 @@ def top_fail(request, country: str="NL", organization_type="municipality", weeks
                 organization.twitter_handle,
                 high,
                 medium,
-                low
+                low,
+                total_urls,
+                total_endpoints
             FROM map_organizationrating
             INNER JOIN
               organization on organization.id = map_organizationrating.organization_id
@@ -571,6 +573,8 @@ def top_fail(request, country: str="NL", organization_type="municipality", weeks
             "high": i[6],
             "medium": i[7],
             "low": i[8],
+            "total_urls": i[9],
+            "total_endpoints": i[10]
         }
         rank = rank + 1
 
@@ -602,7 +606,6 @@ def top_win(request, country: str="NL", organization_type="municipality", weeks_
     }
 
     cursor = connection.cursor()
-
     sql = '''
             SELECT
                 rating,
@@ -613,7 +616,9 @@ def top_win(request, country: str="NL", organization_type="municipality", weeks_
                 organization.twitter_handle,
                 high,
                 medium,
-                low
+                low,
+                total_urls,
+                total_endpoints
             FROM map_organizationrating
             INNER JOIN
               organization on organization.id = map_organizationrating.organization_id
@@ -648,7 +653,9 @@ def top_win(request, country: str="NL", organization_type="municipality", weeks_
             "data_from": i[4],
             "high": i[6],
             "medium": i[7],
-            "low": i[8]
+            "low": i[8],
+            "total_urls": i[9],
+            "total_endpoints": i[10]
         }
         rank = rank + 1
 

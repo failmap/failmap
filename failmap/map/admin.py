@@ -21,7 +21,12 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('organization', 'high', 'medium', 'low', 'when', 'inspect_organization')
     search_fields = (['organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
     list_filter = ('organization', 'organization__country', 'organization__type__name', 'rating', 'when')
-    fields = ('organization', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    fields = ('organization', 'rating', 'high', 'medium', 'low',
+              'total_urls', 'high_urls', 'medium_urls', 'low_urls',
+              'total_endpoints', 'high_endpoints', 'medium_endpoints', 'low_endpoints',
+              'total_url_issues', 'url_issues_high', 'url_issues_medium', 'url_issues_low',
+              'total_endpoint_issues', 'endpoint_issues_high', 'endpoint_issues_medium', 'endpoint_issues_low',
+              'when', 'calculation')
 
     ordering = ["-when"]
 
@@ -37,7 +42,11 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'high', 'medium', 'low', 'when', 'inspect_url')
     search_fields = (['url__organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
     list_filter = ('url', 'rating', 'when')
-    fields = ('url', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    fields = ('url', 'total_issues', 'rating', 'high', 'medium', 'low',
+              'total_endpoints', 'high_endpoints', 'medium_endpoints', 'low_endpoints',
+              'total_url_issues', 'url_issues_high', 'url_issues_medium', 'url_issues_low',
+              'total_endpoint_issues', 'endpoint_issues_high', 'endpoint_issues_medium', 'endpoint_issues_low',
+              'when', 'calculation')
 
     ordering = ["-when"]
 

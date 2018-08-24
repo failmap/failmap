@@ -12,7 +12,7 @@
         </span><br/><br/>
 
         <table class="table table-striped" id="topwin_table">
-            <thead>.00
+            <thead>
             <tr>
                 <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
                     <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
@@ -21,6 +21,12 @@
                     :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
                     <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'">
               </span></th>
+                <th @click="sortBy('total_urls')" :class="{ active: sortKey == 'total_urls' }">{% trans "Urls" %}
+                    <span class="arrow" :class="sortOrders['total_urls'] > 0 ? 'asc' : 'dsc'"></span>
+                </th>
+                <th @click="sortBy('total_endpoints')" :class="{ active: sortKey == 'total_endpoints' }">{% trans "Services" %}
+                    <span class="arrow" :class="sortOrders['total_endpoints'] > 0 ? 'asc' : 'dsc'"></span>
+                </th>
                 <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
                     <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'">
               </span></th>
@@ -37,6 +43,8 @@
             <tr v-for='rank in filteredData'>
                 <td>{{ rank['rank'] }}</td>
                 <td><a v-on:click="showReport(rank['organization_id'])">🔍 {{ rank['organization_name'] }}</a></td>
+                <td>{{ rank['total_urls'] }}</td>
+                <td>{{ rank['total_endpoints'] }}</td>
                 <td>{{ rank['high'] }}</td>
                 <td>{{ rank['medium'] }}</td>
                 <td>{{ rank['low'] }}</td>
