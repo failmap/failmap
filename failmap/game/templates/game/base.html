@@ -10,9 +10,7 @@
     <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap_v3.3.6.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-theme_v3.3.6.min.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap.min.css' %}">
 
     {{ form.media }}
 
@@ -70,49 +68,40 @@
 </head>
 <body>
 
-<nav class="navbar navbar-custom navbar-fixed-top">
+<nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom" style="background-color: whitesmoke !important;">
     <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target=".navbar-collapse">
-                <span class="sr-only">{% trans "Toggle navigation" %}</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i>{% trans "Game" %}</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav navbar-left">
-                <li><a href="/game/scores/">Scores</a></li>
-                <li><a href="/game/contests/">Contest</a></li>
-                <li><a href="/game/team/">Teams</a></li>
-                <li class="dropdown">
-                    <a href="/game/submit_organization/" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-haspopup="true" aria-expanded="false">Submit Organization <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/game/submit_organization/">Submit Organization</a></li>
-                        <li><a href="/game/submitted_organizations/">Submitted Organizations</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="/game/submit_url/" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-haspopup="true" aria-expanded="false">Submit Url<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/game/submit_url/">Submit Url</a></li>
-                        <li><a href="/game/submitted_urls/">Submitted Urls</a></li>
-                    </ul>
+        <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i> {% trans "Game" %}</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="{% trans "Toggle navigation" %}">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="/game/scores/">Scores</a></li>
+                <li class="nav-item"><a class="nav-link" href="/game/contests/">Contest</a></li>
+                <li class="nav-item"><a class="nav-link" href="/game/team/">Teams</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Submit Organization <span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/game/submit_organization/">Submit Organization</a>
+                        <a class="dropdown-item" href="/game/submitted_organizations/">Submitted Organizations</a>
+                    </div>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Submit Url<span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                        <a class="dropdown-item" href="/game/submit_url/">Submit Url</a>
+                        <a class="dropdown-item" href="/game/submitted_urls/">Submitted Urls</a>
+                    </div>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/game/rules_help/">? Rules / Help</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                       aria-expanded="false">Log on/off<span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/authentication/logout/">Logout</a></li>
-                        <li><a href="/authentication/login/">Login</a></li>
-                    </ul>
+                <li class="nav-item"><a class="nav-link" href="/game/rules_help/">? Rules / Help</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Log on/off<span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                        <a class="dropdown-item" href="/authentication/logout/">Logout</a>
+                        <a class="dropdown-item" href="/authentication/login/">Login</a>
+                    </div>
                 </li>
             </ul>
         </div>
