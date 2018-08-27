@@ -92,8 +92,7 @@ const failmap = {
         this.add_div('<div id="historycontrol"></div>', "info", true);
 
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
-        this.add_div("<div id='infobox'></div>", "info", true);
-        this.add_div("<div id='domainlist'></div>", "info", false);
+        this.add_div("<div><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info", true);
         let labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));

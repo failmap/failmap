@@ -1292,7 +1292,7 @@
         <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
         <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
         <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
-        <br />
+        <br /><br />
     {% if config.SHOW_DNS_DNSSEC or config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS or config.SHOW_FTP or config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO or config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
         <h4>{% trans "Risk filter" %}</h4>
         {% if config.SHOW_DNS_DNSSEC %}
@@ -1354,10 +1354,10 @@
         <div v-if="properties.organization_name" v-cloak>
             <h4>{{ properties.organization_name }}</h4>
             <div class="progress">
-                <div class="progress-bar bg-success" :style="{width:unknown}"></div>
-                <div class="progress-bar bg-success" :style="{width:high}"></div>
+                <div class="progress-bar bg-danger" :style="{width:high}"></div>
                 <div class="progress-bar bg-warning" :style="{width:medium}"></div>
-                <div class="progress-bar bg-danger" :style="{width:low}"></div>
+                <div class="progress-bar bg-success" :style="{width:low}"></div>
+                <div class="progress-bar bg-success" :style="{width:perfect}"></div>
             </div>
         </div>
     </div>

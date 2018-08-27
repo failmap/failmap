@@ -794,11 +794,13 @@ def rate_organization_on_moment(organization: Organization, when: datetime=None)
 
         total_urls += 1
 
+        # url can only be in one category (otherwise there are urls in multiple categories which makes it
+        # hard to display)
         if urlrating.high_endpoints:
             high_urls += 1
-        if urlrating.medium_endpoints:
+        elif urlrating.medium_endpoints:
             medium_urls += 1
-        if urlrating.low_endpoints:
+        elif urlrating.low_endpoints:
             low_urls += 1
 
         url_calculations.append(urlrating.calculation)

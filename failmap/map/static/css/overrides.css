@@ -702,12 +702,12 @@ th.active .arrow {
 @media screen and (min-width: 768px) {
     .leaflet-top.leaflet-right {
         height: calc(100% - 184px);
-        background-color: rgba(255, 255, 255, 1.8);
+        /*background-color: rgba(255, 255, 255, 1.8);
         padding-left: 10px;
         margin-bottom: 10px;
         overflow-y: scroll;
         border-left: 2px solid #b3b3b3;
-        pointer-events: initial;
+        pointer-events: initial;*/
     }
 }
 

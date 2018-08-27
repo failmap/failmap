@@ -1386,7 +1386,12 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
             or3.calculation,
             map_organizationrating.high,
             map_organizationrating.medium,
-            map_organizationrating.low
+            map_organizationrating.low,
+            map_organizationrating.total_issues,
+            map_organizationrating.total_urls,
+            map_organizationrating.high_urls,
+            map_organizationrating.medium_urls,
+            map_organizationrating.low_urls
         FROM map_organizationrating
         INNER JOIN
           (SELECT id as stacked_organization_id
@@ -1486,7 +1491,11 @@ def map_data(request, country: str="NL", organization_type: str="municipality", 
                     "medium": medium,
                     "low": low,
                     "data_from": when,
-                    "color": color
+                    "color": color,
+                    "total_urls": i[11],  # = 100%
+                    "high_urls": i[12],
+                    "medium_urls": i[13],
+                    "low_urls": i[14],
                 },
             "geometry":
                 {

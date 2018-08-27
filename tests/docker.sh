@@ -38,7 +38,7 @@ $timeout /bin/sh -c "while ! curl -sSIk http://$host:$port 2>/dev/null| grep 200
 # index page
 curl -s "http://$host:$port" |grep MSPAINT.EXE
 # static files
-curl -sI "http://$host:$port/static/images/red-dot.png" |grep 200\ OK
+curl -sI "http://$host:$port/static/images/fail_logo.png" |grep 200\ OK
 # compressed static files
 curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/manifest.json"|sed -n 's,.*\(CACHE/js/.*js\).*,\1,p')"|grep 200\ OK
 # admin login

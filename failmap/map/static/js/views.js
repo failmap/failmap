@@ -1206,19 +1206,28 @@ function views() {
                 organization_name: "",
                 high: 0,
                 medium: 0,
-                low: 0
+                low: 0,
+                high_urls: 0,
+                medium_urls: 0,
+                low_urls: 0,
+                total_urls: 0
             }
         },
 
         computed: {
             high: function () {
-                return this.perc(this.properties.high, this.total);
+                return this.perc(this.properties.high_urls, this.properties.total_urls);
             },
             medium: function () {
-                return this.perc(this.properties.medium, this.total);
+                return this.perc(this.properties.medium_urls, this.properties.total_urls);
             },
             low: function () {
-                return this.perc(this.properties.low, this.total);
+                return this.perc(this.properties.low_urls, this.properties.total_urls);
+            },
+            perfect: function () {
+                return this.perc(this.properties.total_urls -
+                    (this.properties.low_urls + this.properties.medium_urls + this.properties.high_urls),
+                    this.properties.total_urls);
             },
             unknown: function () {
                 return 0;
