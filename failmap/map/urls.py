@@ -27,7 +27,7 @@ urlpatterns = [
     path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
     path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>/<json:url_scan_types>/'
          '<json:endpoint_scan_types>/', views.map_data),
-    path('data/map_default/<w:weeks_back>/<json:url_scan_types>/<json:endpoint_scan_types>/', views.map_data),
+    path('data/map_default/<w:weeks_back>/<json:url_scan_types>/<json:endpoint_scan_types>/', views.map_default),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
     path('data/countries/', views.get_countries),
     path('data/default_country/', views.get_default_country),
