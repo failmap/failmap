@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-20 09:59+0000\n"
+"POT-Creation-Date: 2018-08-27 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -78,12 +78,12 @@ msgstr "url inzending"
 msgid "url submissions"
 msgstr "url inzendingen"
 
-#: failmap/game/templates/game/base.html:78
-msgid "Toggle navigation"
+#: failmap/game/templates/game/base.html:73
+msgid "Game"
 msgstr ""
 
-#: failmap/game/templates/game/base.html:83
-msgid "Game"
+#: failmap/game/templates/game/base.html:74
+msgid "Toggle navigation"
 msgstr ""
 
 #~ msgid "Invalid or missing suffix (like .com etc): %(url)s"

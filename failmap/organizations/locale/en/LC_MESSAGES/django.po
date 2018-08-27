@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-20 09:59+0000\n"
+"POT-Creation-Date: 2018-08-27 15:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,46 +47,46 @@ msgstr ""
 msgid "No"
 msgstr ""
 
-#: failmap/organizations/models.py:19
+#: failmap/organizations/models.py:20
 msgid "organization type"
 msgstr ""
 
-#: failmap/organizations/models.py:23
+#: failmap/organizations/models.py:24
 msgid "organization_type"
 msgstr ""
 
-#: failmap/organizations/models.py:24
+#: failmap/organizations/models.py:25
 msgid "organization_types"
 msgstr ""
 
-#: failmap/organizations/models.py:96
+#: failmap/organizations/models.py:97
 msgid "organization"
 msgstr ""
 
-#: failmap/organizations/models.py:97
+#: failmap/organizations/models.py:98
 msgid "organizations"
 msgstr ""
 
-#: failmap/organizations/models.py:171
+#: failmap/organizations/models.py:172
 msgid "coordinate"
 msgstr ""
 
-#: failmap/organizations/models.py:172
+#: failmap/organizations/models.py:173
 msgid "coordinates"
 msgstr ""
 
-#: failmap/organizations/models.py:264
+#: failmap/organizations/models.py:308
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""
 
-#: failmap/organizations/models.py:267
+#: failmap/organizations/models.py:311
 msgid "Url already exists, existing url is alive and resolvable."
 msgstr ""
 
-#: failmap/organizations/models.py:360
+#: failmap/organizations/models.py:415
 msgid "promise"
 msgstr ""
 
-#: failmap/organizations/models.py:361
+#: failmap/organizations/models.py:416
 msgid "promises"
 msgstr ""

@@ -71,6 +71,11 @@ var dynamic_translations = function(){
     gettext('category_menu_water_board');
     gettext('category_menu_province');
     gettext('category_menu_hacking');
+    gettext('category_menu_country');
+    gettext('category_menu_region');
+    gettext('category_menu_county');
+    gettext('category_menu_district');
+
     // and germany
     gettext('category_menu_bundesland');
     gettext('category_menu_regierungsbezirk');

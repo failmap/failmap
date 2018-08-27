@@ -1,6 +1,7 @@
 import json
 import logging
 import os.path
+import re
 import subprocess
 import time
 from datetime import datetime
@@ -412,7 +413,8 @@ def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
     :return: dictionary
     """
 
-    filename = "%s_%s_%s.osm" % (country, organization_type, datetime.now(pytz.utc).date())
+    filename = "%s_%s_%s.osm" % (re.sub(r'\W+', '', country), re.sub(r'\W+', '', organization_type),
+                                 datetime.now(pytz.utc).date())
     filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
 
     # if the file has been downloaded recently, don't do that again.

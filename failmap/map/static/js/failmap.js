@@ -518,6 +518,10 @@ const failmap = {
 
             // update existing layers (and add ones with the same name)
             failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
+
+            // fit the map automatically, regardless of the initial positions
+            if (failmap.polygons.getLayers().length)
+                failmap.map.fitBounds(failmap.polygons.getBounds());
         } else {
             // add regions
             failmap.polygons = L.geoJson(regions, {
