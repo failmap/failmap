@@ -110,7 +110,7 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
                       endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover("nsec"):
+    if not allowed_to_discover("nsec_compose_task"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
@@ -131,7 +131,7 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
                                           endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover("certificate_transparency"):
+    if not allowed_to_discover("certificate_transparency_compose_task"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
@@ -139,6 +139,31 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                           endpoints_filter=endpoints_filter)
 
     task = group(certificate_transparency_scan.si([url]) for url in urls)
+    return task
+
+
+@app.task(ignore_result=True, queue="scanners")
+def compose_discover_task(organizations_filter: dict = dict(),
+                          urls_filter: dict = dict(),
+                          endpoints_filter: dict = dict(),) -> Task:
+
+    # these approaches have the highest chance of getting new subdomains.
+    if not allowed_to_discover("certificate_transparency_compose_task"):
+        log.info("Not allowed to scan for certificate_transparency")
+        return group()
+
+    if not allowed_to_discover("nsec_compose_task"):
+        log.info("Not allowed to scan for nsec")
+        return group()
+
+    urls = url_by_filters(organizations_filter=organizations_filter,
+                          urls_filter=urls_filter,
+                          endpoints_filter=endpoints_filter)
+
+    if not urls:
+        log.debug('No urls found for subdomain discovery.')
+
+    task = group(certificate_transparency_scan.si([url]) | nsec_scan.si([url]) for url in urls)
     return task
 
 
@@ -171,7 +196,7 @@ def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
                                         urls_filter: dict = dict(),
                                         endpoints_filter: dict = dict(),) -> Task:
 
-    if not allowed_to_discover("brute_known_subdomains"):
+    if not allowed_to_discover("brute_known_subdomains_compose_task"):
         return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
