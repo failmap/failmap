@@ -660,6 +660,8 @@ CONSTANCE_CONFIG = {
     'MAPBOX_ACCESS_TOKEN': ('pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
                             'Access token for Mapbox', str),
 
+    'WAMBACHERS_OSM_CLIKEY': ('', 'CLI key for Wambachers OSM export feature', str),
+
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
                                                 ' not be translated.', str),
@@ -748,7 +750,7 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
-    ('General', ('COMMENTS', 'MAPBOX_ACCESS_TOKEN')),
+    ('General', ('COMMENTS', 'MAPBOX_ACCESS_TOKEN', 'WAMBACHERS_OSM_CLIKEY')),
 
     ('Project', ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
                  'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),

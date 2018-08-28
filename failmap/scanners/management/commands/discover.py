@@ -11,21 +11,21 @@ class Command(DiscoverTaskCommand):
 
     help = __doc__
 
+    # todo: subdomains, from scanner.dns
+    scanners = {
+        'ftp': ftp,
+        'http': http,
+    }
+
     def add_arguments(self, parser):
-        parser.add_argument('scanner', nargs=1, help='The scanner you want to use.')
+        parser.add_argument('scanner', nargs=1, help='The scanner you want to use.', choices=self.scanners)
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
 
-        # todo: subdomains, from scanner.dns
-        scanners = {
-            'ftp': ftp,
-            'http': http,
-        }
-
-        if options['scanner'][0] not in scanners:
-            print("Scanner does not exist. Please specify a scanner: %s " % scanners.keys())
+        if options['scanner'][0] not in self.scanners:
+            print("Scanner does not exist. Please specify a scanner: %s " % self.scanners.keys())
             return
 
-        self.scanner_module = scanners[options['scanner'][0]]
+        self.scanner_module = self.scanners[options['scanner'][0]]
         return super().handle(self, *args, **options)

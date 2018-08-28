@@ -114,3 +114,6 @@ django-select2  # game, add multiple urls in one go.
 # django-cacheops <-- doesn't do raw queries, so forget it.
 # and when wrapping raw queries it is more heavy than just using djangos caching framework.
 # django-redis  # caching of graph resultsets
+
+
+iso3166  # ISO country code conversion

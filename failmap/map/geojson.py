@@ -4,6 +4,7 @@ import os.path
 import re
 import subprocess
 import time
+import zipfile
 from datetime import datetime
 from subprocess import CalledProcessError
 from typing import Dict, List
@@ -13,7 +14,9 @@ import pytz
 import requests
 import tldextract
 from clint.textui import progress
+from constance import config
 from django.conf import settings
+from iso3166 import countries
 from rdp import rdp
 from wikidata.client import Client
 
@@ -85,7 +88,7 @@ def import_from_scratch(countries: List[str]=None, organization_types: List[str]
                 log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
                 continue
 
-            data = get_osm_data(country, organization_type)
+            data = get_osm_data_wambachers(country, organization_type)
             for feature in data["features"]:
 
                 if "properties" not in feature:
@@ -114,7 +117,7 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
     # you are about to load 50 megabyte of data. Or MORE! :)
-    data = get_osm_data(country, organization_type)
+    data = get_osm_data_wambachers(country, organization_type)
 
     log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
 
@@ -358,13 +361,11 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
         return
 
     # check if we're dealing with the right Feature:
-    if country == "NL" and organization_type == "municipality":
-        if properties.get("boundary", "-") != "administrative":
-            log.info("Feature did not contain properties matching this type of organization.")
-            log.info("Missing boundary:administrative")
-            return
-
-    # todo: dutch stuff can be handled via gemeentecodes.
+    # if country == "NL" and organization_type == "municipality":
+    #     if properties.get("boundary", "-") != "administrative":
+    #         log.info("Feature did not contain properties matching this type of organization.")
+    #         log.info("Missing boundary:administrative")
+    #         return
 
     old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
 
@@ -404,6 +405,78 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
     ).save()
 
     log.info("Stored new coordinates!")
+
+
+def get_osm_data_wambachers(country: str= "NL", organization_type: str= "municipality"):
+    # uses https://wambachers-osm.website/boundaries/ to download map data. Might not be the most updated, but it has
+    # a more complete and better set of queries. For example; it DOES get northern ireland and it clips out the sea,
+    # which makes it very nice to look at.
+    # yes, i've donated, and so should you :)
+    """
+    curl -f -o NL_province.zip 'https://wambachers-osm.website/boundaries/exportBoundaries
+    ?cliVersion=1.0
+    &cliKey=c0e3473f-6ba2-4571-9331-4b3084022021  done: add cliKey to config
+    &exportFormat=json
+    &exportLayout=levels
+    &exportAreas=land
+    &union=false
+    &from_al=4
+    &to_al=4        done: get the right number
+    &selected=NLD'  done: get 3 letter ISO code
+
+    :param country:
+    :param organization_type:
+    :return:
+    """
+
+    # see if we cached a result
+    filename = "%s_%s_%s.zip" % (re.sub(r'\W+', '', country), re.sub(r'\W+', '', organization_type),
+                                 datetime.now(pytz.utc).date())
+    filename = settings.TOOLS['openstreetmap']['output_dir'] + filename
+
+    # if the file has been downloaded recently, don't do that again.
+    four_hours_ago = time.time() - 14400
+    if os.path.isfile(filename) and four_hours_ago < os.path.getmtime(filename):
+        log.debug("Already downloaded a coordinate file in the past four hours. Using that one.")
+        # unzip the file and return it's geojson contents.
+        zip = zipfile.ZipFile(filename)
+        files = zip.namelist()
+        f = zip.open(files[0], 'r')
+        contents = f.read()
+        f.close()
+        data = json.loads(contents)
+        return data
+
+    level = get_region(country, organization_type)
+    country = countries.get(country)
+    country_3_char_isocode = country.alpha3
+    if not level:
+        raise NotImplementedError(
+            "Combination of country and organization_type does not have a matching OSM query implemented.")
+
+    url = "https://wambachers-osm.website/boundaries/exportBoundaries?cliVersion=1.0&cliKey=%s&exportFormat=json" \
+          "&exportLayout=levels&exportAreas=land&union=false&from_al=%s&to_al=%s&selected=%s" % (
+              config.WAMBACHERS_OSM_CLIKEY, level, level, country_3_char_isocode)
+
+    # get's a zip file and extract the content. The contents is the result. todo: Should be enough(?)
+    response = requests.get(url, stream=True, timeout=(1200, 1200))
+    response.raise_for_status()
+
+    # show a nice progress bar when downloading
+    with open(filename, 'wb') as f:
+        for block in progress.bar(response.iter_content(chunk_size=1024), expected_size=(10240000 / 1024) + 1):
+            if block:
+                f.write(block)
+                f.flush()
+
+    # unzip the file and return it's geojson contents.
+    zip = zipfile.ZipFile(filename)
+    files = zip.namelist()
+    f = zip.open(files[0], 'r')
+    contents = f.read()
+    f.close()
+    data = json.loads(contents)
+    return data
 
 
 def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
