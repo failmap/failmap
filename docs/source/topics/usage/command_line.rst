@@ -166,14 +166,52 @@ Which results in:
                             Perform scans on these urls (default is all).
 
 
-Starting a development server
+Reporting
+---------
+Reports can be updated with the following command:
+
+.. code-block:: bash
+
+   failmap report
+
+This command also takes in the organization and url filters. Filtering always updates the entire organization over the entire
+timespan. This means it can take a while before the command has finished.
+
+
+.. code-block:: bash
+
+   failmap report -o Arnhem
+
+See failmap help report for more info.
+
+
+Endpoint discovery and verification
+-----------------------------------
+
+.. code-block:: bash
+
+    failmap discover http -o Texel
+    failmap verify http -u www.texel.nl
+    failmap verify ftp -o Apeldoorn
+
+See failmap help verify
+
+Subdomain discovery
+-------------------
+(doesn't work atm)
+
+.. code-block:: bash
+
+    failmap discover subdomains -o Texel
+
+
+Running a development server
 -----------------------------
 
 To start a development server, that does not tamper with any data, and accepts connections from anywhere (which are then
 filtered by settings.py), run:
 
 .. code-block:: bash
-   
 
    failmap devserver --no-backend --no-data 0.0.0.0:8000
 

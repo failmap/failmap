@@ -1,16 +1,11 @@
 import logging
-from ftplib import FTP, FTP_TLS, error_perm, error_proto, error_reply, error_temp
 
 from celery import Task, group
-from django.utils import timezone
-
-from failmap.celery import ParentFailed, app
-from failmap.organizations.models import Url
-from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
-                                              q_configurations_to_scan, url_filters)
 from constance import config
+
+from failmap.celery import app
+from failmap.scanners.models import Endpoint
+from failmap.scanners.scanner.scanner import endpoint_filters, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +18,8 @@ def compose_task(
 ) -> Task:
     """
     Helps with identifying issues with scanners. It shows the relevant permissions, configurations and lists the
-    organizations, urls and endpoints in a convenient way. This can only run in direct mode and will not result in tasks.
+    organizations, urls and endpoints in a convenient way. This can only run in direct mode and will not result in
+    tasks.
     All messages are returned as log messages.
 
     :param organizations_filter:

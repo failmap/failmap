@@ -98,6 +98,24 @@ def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict
     return task
 
 
+def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
+                          endpoints_filter: dict = dict()) -> Task:
+
+    default_filter = {"protocol": "ftp"}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
+    task = group(
+        # first iterate through ports, so there is more time between different connection attempts. Which reduces load
+        # for the tested server. Also, the first port has the most hits :)
+        discover.si(endpoint.url.url, endpoint.port) | store_when_new_or_kill_if_gone.s(
+            endpoint.url, endpoint.port, 'ftp', 4) for endpoint in endpoints
+    )
+
+    return task
+
+
 @app.task(queue='storage')
 def store(result: dict, endpoint: Endpoint):
     """
@@ -280,7 +298,7 @@ def scan(self, address: str, port: int):
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
 # it will do on all known urls, and try a range of well known FTP ports and alternative ports.
 @app.task(queue='scanners')
-def discover(url, port):
+def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
     connected = False

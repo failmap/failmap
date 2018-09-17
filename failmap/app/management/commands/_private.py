@@ -177,9 +177,12 @@ class ScannerTaskCommand(TaskCommand):
                                                 endpoints_filter=endpoints_filter)
 
 
-# for discovery of services only
 class DiscoverTaskCommand(TaskCommand):
-    """Generic Task Command for scanners."""
+    """Discovery command, launces tasks that can discover services.
+    These tasks can take a lot of time as they might encounter many network timeout for non existing adresses.
+    If you just want to update the current set of information in the database, run a verification task. That will be
+    much faster (but will not discover anything new). The ratio between discovery and verification can be 1:7
+    """
 
     scanner_module = None
 
@@ -201,3 +204,39 @@ class DiscoverTaskCommand(TaskCommand):
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_discover_task(organization_filter)
+
+
+class VerifyTaskCommand(TaskCommand):
+    """Generic Task Command for scanners."""
+
+    scanner_module = None
+
+    def _add_arguments(self, parser):
+        """Add command specific arguments."""
+        self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
+                                       help="Perform scans on these organizations (default is all).")
+
+        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
+                                       help="Perform scans on these urls (default is all).")
+
+    def compose(self, *args, **options):
+        """Compose set of tasks based on provided arguments."""
+
+        # by default no filter means all of each.
+        organizations_filter = dict()
+        urls_filter = dict()
+        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+
+        if options['organization_names']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_names']) + ')$'
+            organizations_filter = {'name__iregex': regex}
+
+        if options['url_addresses']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
+            urls_filter = {'url__iregex': regex}
+
+        # compose set of tasks to be executed
+        return self.scanner_module.compose_verify_task(organizations_filter=organizations_filter,
+                                                       urls_filter=urls_filter, endpoints_filter=endpoints_filter)

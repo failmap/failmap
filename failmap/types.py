@@ -1,7 +1,6 @@
 """Generic Types for type hinting."""
 
 from .celery import Task
-import datetime
 
 
 def compose_task(

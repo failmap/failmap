@@ -42,8 +42,9 @@ from requests.exceptions import ConnectionError
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
-from failmap.scanners.scanner.scanner import allowed_to_discover, q_configurations_to_scan
+from failmap.scanners.scanner.scanner import allowed_to_discover, q_configurations_to_scan, endpoint_filters
 from failmap.scanners.timeout import timeout
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -111,6 +112,33 @@ def compose_discover_task(
                 tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version)
                              | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
 
+    return group(tasks)
+
+
+@app.task(queue="storage")
+def compose_verify_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
+    as much.
+    """
+
+    if not allowed_to_discover("scanner_http"):
+        return group()
+
+    default_filter = {"protocol__in": ["https", "http"]}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
+    tasks = []
+    for endpoint in endpoints:
+        tasks.append(can_connect.si(protocol=endpoint.protocol, url=endpoint.url,
+                                    port=endpoint.port, ip_version=endpoint.ip_version)
+                     | connect_result.s(protocol=endpoint.protocol, url=endpoint.url,
+                                        port=endpoint.port, ip_version=endpoint.ip_version))
     return group(tasks)
 
 

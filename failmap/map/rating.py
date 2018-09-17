@@ -39,6 +39,8 @@ def compose_task(
     if endpoints_filter:
         raise NotImplementedError('This scanner does not work on a endpoint level.')
 
+    log.info(organizations_filter)
+
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
     organizations = Organization.objects.filter(q_configurations_to_display('organization'), **organizations_filter)
