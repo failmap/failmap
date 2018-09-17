@@ -140,22 +140,41 @@ class ScannerTaskCommand(TaskCommand):
 
     def _add_arguments(self, parser):
         """Add command specific arguments."""
+
+        # Endpoint filters should work on port, ip-version and protocol. Those should be anded with organization and
+        # urls. Running into an issue: nargs_pattern = '(-*%s-*)' % '-*'.join('A' * nargs)
+        # TypeError: can't multiply sequence by non-int of type 'str'
+        # Given i only needed urls at this moment, i only added urls as a parameter.
+
+        # select distinct options...
         self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
                                        help="Perform scans on these organizations (default is all).")
+
+        self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
+                                       help="Perform scans on these urls (default is all).")
 
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
-        if not options['organization_names']:
-            # by default no filter means all organizations
-            organization_filter = dict()
-        else:
+        # by default no filter means all of each.
+        organizations_filter = dict()
+        urls_filter = dict()
+        endpoints_filter = dict()  # A choice of ports, ip-version and protocol
+
+        if options['organization_names']:
             # create a case-insensitive filter to match organizations by name
             regex = '^(' + '|'.join(options['organization_names']) + ')$'
-            organization_filter = {'name__iregex': regex}
+            organizations_filter = {'name__iregex': regex}
+
+        if options['url_addresses']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['url_addresses']) + ')$'
+            urls_filter = {'url__iregex': regex}
 
         # compose set of tasks to be executed
-        return self.scanner_module.compose_task(organization_filter)
+        return self.scanner_module.compose_task(organizations_filter=organizations_filter,
+                                                urls_filter=urls_filter,
+                                                endpoints_filter=endpoints_filter)
 
 
 # for discovery of services only
