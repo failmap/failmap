@@ -22,5 +22,3 @@ class Command(BaseCommand):
         # on a worker
         task = check_network.s(code_location="worker")
         task.apply_async()
-
-

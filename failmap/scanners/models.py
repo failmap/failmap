@@ -144,7 +144,6 @@ class Endpoint(models.Model):
     class Meta:
         verbose_name = _('endpoint')
         verbose_name_plural = _('endpoint')
-        app_label = 'scanners'  # added for sphinx autodoc
 
 
 class UrlIp(models.Model):
@@ -203,7 +202,6 @@ class UrlIp(models.Model):
     class Meta:
         verbose_name = _('urlip')
         verbose_name_plural = _('urlip')
-        app_label = 'scanners'  # added for sphinx autodoc
 
 
 class TlsQualysScan(models.Model):
@@ -236,7 +234,6 @@ class TlsQualysScan(models.Model):
     class Meta:
         managed = True
         db_table = 'scanner_tls_qualys'
-        app_label = 'scanners'  # added for sphinx autodoc
 
     def __str__(self):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
@@ -282,7 +279,6 @@ class TlsScan(models.Model):
     class Meta:
         verbose_name = _('tlsscan')
         verbose_name_plural = _('tlsscan')
-        app_label = 'scanners'  # added for sphinx autodoc
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
@@ -338,7 +334,6 @@ class GenericScanMixin(models.Model):
         another abstract base class. You just need to remember to explicitly set abstract=True each time.
         """
         abstract = True
-        app_label = 'scanners'  # added for sphinx autodoc
 
 
 class EndpointGenericScan(GenericScanMixin):
@@ -394,9 +389,6 @@ class EndpointGenericScanScratchpad(models.Model):
         help_text="Whatever data to dump for debugging purposes."
     )
 
-    class Meta:
-        app_label = 'scanners'  # added for sphinx autodoc
-
 
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
@@ -407,9 +399,6 @@ class Screenshot(models.Model):
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
-
-    class Meta:
-        app_label = 'scanners'  # added for sphinx autodoc
 
 
 # A debugging table to help with API interactions.
@@ -424,6 +413,3 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
-
-    class Meta:
-        app_label = 'scanners'  # added for sphinx autodoc

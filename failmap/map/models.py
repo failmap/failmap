@@ -76,7 +76,6 @@ class OrganizationRating(models.Model):
         index_together = [
             ["when", "id"],
         ]
-        app_label = 'map'  # added for sphinx autodoc
         verbose_name = _('Organization Rating')
         verbose_name_plural = _('Organization Ratings')
 
@@ -130,7 +129,6 @@ class UrlRating(models.Model):
 
     class Meta:
         managed = True
-        app_label = 'map'  # added for sphinx autodoc
         verbose_name = _('Url Rating')
         verbose_name_plural = _('Url Ratings')
 
@@ -184,7 +182,6 @@ class AdministrativeRegion(models.Model):
     class Meta:
         verbose_name = _('administrative_region')
         verbose_name_plural = _('administrative_regions')
-        app_label = 'map'  # added for sphinx autodoc
 
     def __str__(self):
         return '%s/%s' % (self.country, self.organization_type,)
@@ -222,4 +219,3 @@ class Configuration(models.Model):
         verbose_name = _('configuration')
         verbose_name_plural = _('configurations')
         ordering = ('display_order', )
-        app_label = 'map'  # added for sphinx autodoc
