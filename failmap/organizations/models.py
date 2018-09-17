@@ -23,6 +23,7 @@ class OrganizationType(models.Model):
         managed = True
         verbose_name = _('organization_type')
         verbose_name_plural = _('organization_types')
+        app_label = 'organizations'  # added for sphinx autodoc
 
     def __str__(self):
         return self.name
@@ -96,6 +97,7 @@ class Organization(models.Model):
         db_table = 'organization'
         verbose_name = _('organization')
         verbose_name_plural = _('organizations')
+        app_label = 'organizations'  # added for sphinx autodoc
 
     # todo: find a smarter way to get the organization type name, instead of a related query... cached enums?
     def __str__(self):
@@ -171,6 +173,7 @@ class Coordinate(models.Model):
         db_table = 'coordinate'
         verbose_name = _('coordinate')
         verbose_name_plural = _('coordinates')
+        app_label = 'organizations'  # added for sphinx autodoc
 
 
 class Url(models.Model):
@@ -289,6 +292,7 @@ class Url(models.Model):
         managed = True
         db_table = 'url'
         unique_together = (('organization_old', 'url'),)
+        app_label = 'organizations'  # added for sphinx autodoc
 
     def __str__(self):
         if self.is_dead:
@@ -414,3 +418,4 @@ class Promise(models.Model):
     class Meta:
         verbose_name = _('promise')
         verbose_name_plural = _('promises')
+        app_label = 'organizations'  # added for sphinx autodoc

@@ -1,6 +1,7 @@
 """Generic Types for type hinting."""
 
 from .celery import Task
+import datetime
 
 
 def compose_task(
@@ -14,8 +15,8 @@ def compose_task(
     :param urls_filter: dict: limit urls to these filters, see below
     :param endpoints_filter: dict: limit endpoints to these filters, see below
 
-    *This is an abstract of the `compose_discover_task` function which is used throughout this codebase, search for
-    `compose_discover_task` to find implementations which can be used as example.*
+    *This is an abstract of the `compose_task` function which is used throughout this codebase, search for
+    `compose_task` to find implementations which can be used as example.*
 
     Composition of a task is building a task from primitives (task, group, chain) and other composed tasks in order
     to create a 'collection' of work that as a whole can be scheduled for execution in the task processing system.
@@ -90,7 +91,7 @@ def compose_task(
 
     For example, to scan all urls/endpoints for one organization named 'example' run:
 
-    >>> task = compose_discover_task(organizations={'name__iexact': 'example'})
+    >>> task = compose_task(organizations={'name__iexact': 'example'})
     >>> result = task.apply_async()
     >>> print(result.get())
 
@@ -98,10 +99,26 @@ def compose_task(
 
     Multiple filters can be applied, to scan only port 80 for organizations added today run:
 
-    >>> task = compose_discover_task(
+    >>> task = compose_task(
     ...     organizations={'date_added__day': datetime.datetime.today().day},
     ...     endpoints={'port': 80}
     ... )
 
+    """
+    raise NotImplementedError()
+
+
+def compose_discover_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+) -> Task:
+    """
+    See Compose Task
+
+    :param organizations_filter:
+    :param urls_filter:
+    :param endpoints_filter:
+    :return:
     """
     raise NotImplementedError()

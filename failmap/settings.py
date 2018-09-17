@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'import_export',
     'failmap.fail',
-    'failmap.organizations.apps.OrganizationsConfig',
+    'failmap.organizations.apps.OrganizationsConfig',  # because some signals need this.
     'failmap.scanners',
     'failmap.map',
     'failmap.game',

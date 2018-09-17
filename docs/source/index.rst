@@ -10,10 +10,12 @@ End User Documentation
    :maxdepth: 2
    :caption: End User Documentation:
 
+   topics/usage/installation
    topics/usage/scanning_policy
    topics/usage/faq_end_users
    topics/usage/user_guide
-   topics/usage/thanks
+   topics/usage/command_line
+   topics/thanks
 
 
 Volunteer documentation
@@ -52,6 +54,16 @@ Advanced Topics
    topics/development/stacking_pattern
    topics/development/docker
    topics/development/task_processing_system
+
+
+Museum
+========================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Museum:
+
+   topics/usage/history
 
 
 Indices and tables

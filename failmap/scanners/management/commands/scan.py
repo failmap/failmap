@@ -2,13 +2,13 @@ import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
 from failmap.scanners.scanner import (dnssec, dummy, ftp, http, onboard, plain_http, screenshot,
-                                      security_headers, tls_osaft, tls_qualys)
+                                      security_headers, tls_osaft, tls_qualys, debug)
 
 log = logging.getLogger(__name__)
 
 
 class Command(ScannerTaskCommand):
-    """Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
+    """ Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
 
     help = __doc__
 
@@ -22,7 +22,8 @@ class Command(ScannerTaskCommand):
         'ftp': ftp,
         'screenshot': screenshot,
         'onboard': onboard,
-        'dummy': dummy
+        'dummy': dummy,
+        'debug': debug
     }
 
     def add_arguments(self, parser):

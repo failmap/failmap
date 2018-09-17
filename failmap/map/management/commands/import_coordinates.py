@@ -5,6 +5,7 @@ from datetime import datetime
 from django.core.management.base import BaseCommand
 
 from failmap.map.geojson import import_from_scratch
+from failmap.map.models import AdministrativeRegion
 
 log = logging.getLogger(__package__)
 
@@ -32,12 +33,29 @@ class Command(BaseCommand):
                             required=False,
                             type=valid_date)
 
+        parser.add_argument("--list",
+                            help="Lists the currently available regions and countries.",
+                            required=False,
+                            action='store_true')
+
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
-        import_from_scratch(
-            countries=[options["country"]],
-            organization_types=[options["region"]],
-            when=options["date"])
+
+        if options['list']:
+            log.info("Currently available administrative regions:")
+            log.info("Hint: add the via the admin interface.")
+            x = AdministrativeRegion.objects.all()
+            if not x:
+                log.info("-- None found. Add them via the admin interface.")
+
+            for z in x:
+                log.info("%-3s %-72s, %-5s" % (z.country, z.organization_type, z.admin_level))
+
+        else:
+            import_from_scratch(
+                countries=[options["country"]],
+                organization_types=[options["region"]],
+                when=options["date"])
 
 
 def valid_date(s):

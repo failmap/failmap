@@ -1,8 +1,10 @@
+# History (Dutch)
+
 These texts are stored for archival purposes. They have been removed from the website in order to save people from
 translating stuff that is already in the manual.
 
 
-# Welke grote veranderingen zijn er geweest?
+## Welke grote veranderingen zijn er geweest?
 
 December 2017
 
@@ -49,7 +51,7 @@ Scores tussen 0 tot en met 1000.
 
 
 
-# Wat is de historie van Faalkaart?
+## Wat is de historie van Faalkaart?
 
 **28 augustus 2017**: Er wordt op een nieuwe manier beoordeeld. Per beveiligingsfout worden punten uitgedeeld. Heeft een organisatie geen punten, dan hebben we geen fouten kunnen vinden: perfect! Er is nu dus ook een top win!
 
