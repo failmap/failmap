@@ -510,6 +510,12 @@ const failmap = {
             }
         }
 
+        // determine if we need to pad the map to the left due to controls being visible.
+        // they are invisible on small viewports (see css)
+        let paddingToLeft = 0;
+        if (document.documentElement.clientWidth > 768)
+            paddingToLeft=320;
+
         // if there is one already, overwrite the attributes...
         if (failmap.polygons.getLayers().length) {
             // add all features that are not part of the current map at all
@@ -521,7 +527,7 @@ const failmap = {
 
             // fit the map automatically, regardless of the initial positions
             if (failmap.polygons.getLayers().length)
-                failmap.map.fitBounds(failmap.polygons.getBounds());
+                failmap.map.fitBounds(failmap.polygons.getBounds(), {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
         } else {
             // add regions
             failmap.polygons = L.geoJson(regions, {
@@ -535,7 +541,7 @@ const failmap = {
 
             // fit the map automatically, regardless of the initial positions
             if (failmap.polygons.getLayers().length)
-                failmap.map.fitBounds(failmap.polygons.getBounds());
+                failmap.map.fitBounds(failmap.polygons.getBounds(), {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
         }
     },
 
