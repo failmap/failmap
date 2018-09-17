@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import VerifyTaskCommand
-from failmap.scanners.scanner import dns, ftp, http
+from failmap.scanners.scanner import ftp, http
 
 log = logging.getLogger(__name__)
 

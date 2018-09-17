@@ -42,9 +42,9 @@ from requests.exceptions import ConnectionError
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, UrlIp
-from failmap.scanners.scanner.scanner import allowed_to_discover, q_configurations_to_scan, endpoint_filters
+from failmap.scanners.scanner.scanner import (allowed_to_discover, endpoint_filters,
+                                              q_configurations_to_scan)
 from failmap.scanners.timeout import timeout
-
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 

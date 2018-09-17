@@ -99,7 +99,7 @@ def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict
 
 
 def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict()) -> Task:
+                        endpoints_filter: dict = dict()) -> Task:
 
     default_filter = {"protocol": "ftp"}
     endpoints_filter = {**endpoints_filter, **default_filter}

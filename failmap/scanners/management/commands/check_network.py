@@ -12,9 +12,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        log.info("Checking the network locally, this might take a while.")
+
+        # locally
+        check_network(code_location="local")
+
+        log.info("Checking the network on a random worker, this might take a while and even hang without a worker.")
+
         # on a worker
         task = check_network.s(code_location="worker")
         task.apply_async()
 
-        # locally
-        check_network(code_location="local")
+
