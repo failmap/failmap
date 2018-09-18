@@ -5,6 +5,8 @@ This file contains (or should) verbose explantion of why points are given.
 
 """
 import logging
+from datetime import datetime
+import pytz
 
 log = logging.getLogger(__package__)
 
@@ -12,7 +14,32 @@ log = logging.getLogger(__package__)
 def get_calculation(scan):
     # Can be probably more efficient by adding some methods to scan.
     scan_type = getattr(scan, "type", "tls_qualys")
-    return calculation_methods[scan_type](scan)
+    calculation = calculation_methods[scan_type](scan)
+
+    # handle comply or explain
+    # only when an explanation is given AND the explanation is still valid when creating the report.
+    calculation['is_explained'] = scan.comply_or_explain_is_explained
+    calculation['comply_or_explain_explanation'] = scan.comply_or_explain_explanation
+    if scan.comply_or_explain_explained_on:
+        calculation['comply_or_explain_explained_on'] = scan.comply_or_explain_explained_on.isoformat()
+    else:
+        calculation['comply_or_explain_explained_on'] = ""
+
+    if scan.comply_or_explain_explanation_valid_until:
+        calculation['comply_or_explain_explanation_valid_until'] = \
+            scan.comply_or_explain_explanation_valid_until.isoformat()
+    else:
+        calculation['comply_or_explain_explanation_valid_until'] = ""
+
+    valid = scan.comply_or_explain_is_explained and (
+            scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc))
+    calculation['comply_or_explain_valid_at_time_of_report'] = valid
+
+    # tracking information for the scan (which also might allow upgrading the scan in the future)
+    calculation['scan'] = scan.pk
+    calculation['scan_type'] = scan_type
+
+    return calculation
 
 
 def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Security'):
@@ -229,6 +256,7 @@ def tls_qualys_rating_based_on_scan(scan):
     if scan.qualys_message == "Certificate not valid for domain name":
         scan.qualys_rating = "I"
 
+    # This shouldn't happen anymore. These scans are not requested in significant moments and probably not saved.
     if scan.qualys_rating == '0':
         log.debug("TLS: This tls scan resulted in no https. Not returning a score.")
         return {}

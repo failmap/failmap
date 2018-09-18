@@ -229,6 +229,15 @@ div#report {
     border-radius: 4px;
 }
 
+.awarded_points_explained {
+    border: 2px solid #8b8987;
+    background-color: #fdfffb;
+    padding: 0px 3px;
+    font-weight: bold;
+    font-size: 11px;
+    border-radius: 4px;
+}
+
 .total_awarded_points_orange {
     border: 2px solid darkorange;
     background-color: orange;

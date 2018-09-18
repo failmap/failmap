@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-08-27 15:33+0000\n"
+"POT-Creation-Date: 2018-09-18 12:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: docs/build/html/_static/doctools.js:191
+#: docs/build/html/_static/doctools.js:193
 msgid "Permalink to this headline"
 msgstr ""
 
-#: docs/build/html/_static/doctools.js:197
+#: docs/build/html/_static/doctools.js:199
 msgid "Permalink to this definition"
 msgstr ""
 
-#: docs/build/html/_static/doctools.js:230
+#: docs/build/html/_static/doctools.js:232
 msgid "Hide Search Matches"
 msgstr ""
 

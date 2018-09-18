@@ -1,5 +1,5 @@
 # coding=UTF-8
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
@@ -204,7 +204,93 @@ class UrlIp(models.Model):
         verbose_name_plural = _('urlip')
 
 
-class TlsQualysScan(models.Model):
+def one_year_in_the_future():
+    return datetime.now(pytz.utc) + timedelta(days=365)
+
+
+class ExplainMixin(models.Model):
+    """
+    An explanation excludes the grading to impact the report. The result is added in the report,
+    strikethrough, with an explanation and the expiry time of this explanation.
+
+    Explains are available for all scans: GenericUrlScan, GenericEndpointScan, TlsScan, TlsQualysscan, this means
+    and extra model for each of these scans types.
+
+    Given there is a 1-1 relation, the info is saved in scans. This reserves about 1kb per scan, which is somewhat
+    acceptable.
+
+    Todo: also create the correct permissions for someone to explain a thing.
+    """
+
+    comply_or_explain_is_explained = models.BooleanField(
+        default=False,
+        help_text="Shorthand to indicate that something is explained. Only when this field is set to True, the "
+                  "explanation is ",
+        verbose_name="is explained",
+    )
+
+    comply_or_explain_explanation_valid_until = models.DateTimeField(
+        help_text="Set to one year in the future. "
+                  "Will expire automatically after a scan finds a change on this service. "
+                  "As long as the rating stays the same, the finding is explained and the issue ignored.",
+        verbose_name="explanation valid until",
+        null=True,
+        blank=True
+    )
+
+    comply_or_explain_explanation = models.TextField(
+        max_length=255,
+        help_text="Text that helps explain why this result is not counted in the report. For example: "
+                  "a broken scanner or another edge-case that is mainly on the side of the scanning party. Having "
+                  "requested the supplier for a fix, or promising a fix should be stored as a promise, not as an "
+                  "explanation.",
+        verbose_name="explanation",
+        default="",
+        null=True,
+        blank=True
+    )
+
+    comply_or_explain_explained_by = models.CharField(
+        max_length=255,
+        help_text="Please also refer to a thread, discussion or another fact that can be verified.",
+        verbose_name="explained by",
+        default="",
+        null=True,
+        blank=True
+    )
+
+    comply_or_explain_explained_on = models.DateTimeField(
+        help_text="From this moment the rating will be muted.",
+        verbose_name="explained on",
+        null=True,
+        blank=True
+    )
+
+    comply_or_explain_case_handled_by = models.CharField(
+        max_length=255,
+        help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in "
+                  "case of follow-ups.",
+        verbose_name="case handled by",
+        default="",
+        null=True,
+        blank=True
+    )
+
+    comply_or_explain_case_additional_notes = models.TextField(
+        max_length=512,
+        help_text="Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info."
+                  "Will not be exported, but are not secret.",
+        verbose_name="additional case notes",
+        default="",
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        abstract = True
+
+
+class TlsQualysScan(ExplainMixin):
     """
     Model for scanner tls qualys
     """
@@ -239,7 +325,7 @@ class TlsQualysScan(models.Model):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
-class TlsScan(models.Model):
+class TlsScan(ExplainMixin):
     """
     Model for our own TLS scans
     """
@@ -263,7 +349,8 @@ class TlsScan(models.Model):
     evidence = models.TextField(
         max_length=9001,
         default=0,
-        help_text="Content that might help understanding the result."
+        help_text="Content that might help understanding the result.",
+        blank=True,
     )
 
     scan_date = models.DateField(auto_now_add=True)  # completed scan
@@ -282,7 +369,7 @@ class TlsScan(models.Model):
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
-class GenericScanMixin(models.Model):
+class GenericScanMixin(ExplainMixin):
     """
     This is a fact, a point in time.
     """
@@ -304,7 +391,8 @@ class GenericScanMixin(models.Model):
     evidence = models.TextField(
         max_length=9001,
         default=0,
-        help_text="Content that might help understanding the result."
+        help_text="Content that might help understanding the result.",
+        blank=True,
     )
     last_scan_moment = models.DateTimeField(
         auto_now_add=True,
@@ -413,3 +501,4 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
+

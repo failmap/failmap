@@ -119,8 +119,19 @@ class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'endpoint__protocol',
                    'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead'
                    )
-    fields = ('endpoint', 'rating', 'rating_no_trust', 'explanation', 'evidence',
-              'rating_determined_on', 'last_scan_moment')
+
+    fieldsets = (
+        (None, {
+            'fields': ('endpoint', 'rating', 'rating_no_trust', 'explanation', 'evidence',
+                       'rating_determined_on', 'last_scan_moment')
+        }),
+        ('comply or explain', {
+            'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
+                       'comply_or_explain_explanation', 'comply_or_explain_explained_by',
+                       'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+                       'comply_or_explain_case_additional_notes'),
+        }),
+    )
 
     @staticmethod
     def compared_to_qualys(instance):
@@ -150,8 +161,18 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # and when there are > 10000 objects of some sort, the system becomes insanely slow.
     # Should make it an autocomplete field... or something else.
     # therefore endpoint is set as a readonly_field.
-    fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-              'rating_determined_on', 'last_scan_moment')
+    fieldsets = (
+        (None, {
+            'fields': ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
+                       'rating_determined_on', 'last_scan_moment')
+        }),
+        ('comply or explain', {
+            'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
+                       'comply_or_explain_explanation', 'comply_or_explain_explained_by',
+                       'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+                       'comply_or_explain_case_additional_notes'),
+        }),
+    )
 
     readonly_fields = ('scan_date', 'scan_time', 'last_scan_moment', 'endpoint')
 
@@ -209,8 +230,18 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'endpoint__url__organization__country', 'endpoint__url__organization__type__name',
                    )
 
-    fields = ('endpoint', 'type', 'rating',
-              'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
+    fieldsets = (
+        (None, {
+            'fields': ('endpoint', 'type', 'rating', 'explanation',
+                       'evidence', 'last_scan_moment', 'rating_determined_on')
+        }),
+        ('comply or explain', {
+            'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
+                       'comply_or_explain_explanation', 'comply_or_explain_explained_by',
+                       'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+                       'comply_or_explain_case_additional_notes'),
+        }),
+    )
 
     readonly_fields = ['last_scan_moment', 'endpoint']
 
@@ -223,8 +254,18 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = ('url__organization__country', 'url__organization__type__name', 'type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on')
-    fields = ('url', 'type', 'rating',
-              'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
+
+    fieldsets = (
+        (None, {
+            'fields': ('url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
+        }),
+        ('comply or explain', {
+            'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
+                       'comply_or_explain_explanation', 'comply_or_explain_explained_by',
+                       'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+                       'comply_or_explain_case_additional_notes'),
+        }),
+    )
 
     readonly_fields = ['last_scan_moment', 'url']
 

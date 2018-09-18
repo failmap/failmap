@@ -331,7 +331,14 @@
                                     <div>
                                         <div v-for="rating in endpoint.ratings">
                                             <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                            <div class="finding_block">
+                                            <div class="finding_block" v-if="rating.comply_or_explain_valid_at_time_of_report">
+                                                <span class="awarded_points_explained">{% endverbatim %}{% trans "Explained" %}{% verbatim %}</span> {{ rating.comply_or_explain_explanation }}<br />
+                                                {% endverbatim %}{% trans "Explained on" %}{% verbatim %}: {{ humanize(rating.comply_or_explain_explained_on) }}, {% endverbatim %}{% trans "explanation expires" %}{% verbatim %}: {{ humanize(rating.comply_or_explain_explanation_valid_until) }}<br>
+                                                <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                                {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}</del>
+                                                <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                            </div>
+                                            <div class="finding_block" v-else>
                                                 <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
                                                 {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
                                                 <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>

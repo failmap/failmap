@@ -175,8 +175,10 @@ def significant_moments(organizations: List[Organization]=None, urls: List[Url]=
     # A nearly 40% performance increase :)
     # the red flag was there was a lot of "__get__" operations going on inside create timeline, while it doesn't do sql
     # after the update no calls to __get__ at all.
+    # qualys_rating=0 means "Unable to connect to the server" and is not returned with a score. This happens in old
+    # datasets.
     if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
-        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).\
+        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).exclude(qualys_rating=0).\
             prefetch_related("endpoint").defer("endpoint__url")
         tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
     else:
@@ -374,6 +376,7 @@ def rate_timeline(timeline, url: Url):
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
         total_high, total_medium, total_low = 0, 0, 0
+        explained_total_high, explained_total_medium, explained_total_low = 0, 0, 0
         given_ratings = {}
 
         if ('url_not_resolvable' in timeline[moment] or 'url_is_dead' in timeline[moment]) \
@@ -384,24 +387,42 @@ def rate_timeline(timeline, url: Url):
             default_calculation = {
                 "url": {
                     "url": url.url,
+                    "ratings": [],
+                    "endpoints": [],
+
+                    "total_issues:": 0,
                     "high": 0,
                     "medium": 0,
                     "low": 0,
-                    "ratings": [],
-                    "endpoints": [],
                     "total_endpoints": 0,
                     "high_endpoints": 0,
                     "medium_endpoints": 0,
                     "low_endpoints": 0,
-                    "total_issues:": 0,
                     "total_url_issues": 0,
-                    "total_endpoint_issues": 0,
                     "url_issues_high": 0,
                     "url_issues_medium": 0,
                     "url_issues_low": 0,
+                    "total_endpoint_issues": 0,
                     "endpoint_issues_high": 0,
                     "endpoint_issues_medium": 0,
                     "endpoint_issues_low": 0,
+
+                    "explained_total_issues:": 0,
+                    "explained_high": 0,
+                    "explained_medium": 0,
+                    "explained_low": 0,
+                    "explained_total_endpoints": 0,
+                    "explained_high_endpoints": 0,
+                    "explained_medium_endpoints": 0,
+                    "explained_low_endpoints": 0,
+                    "explained_total_url_issues": 0,
+                    "explained_url_issues_high": 0,
+                    "explained_url_issues_medium": 0,
+                    "explained_url_issues_low": 0,
+                    "explained_total_endpoint_issues": 0,
+                    "explained_endpoint_issues_high": 0,
+                    "explained_endpoint_issues_medium": 0,
+                    "explained_endpoint_issues_low": 0,
                 }
             }
 
@@ -439,9 +460,11 @@ def rate_timeline(timeline, url: Url):
                                "X-XSS-Protection", "tls_qualys", "plain_https", "ftp"]
 
         total_endpoints, high_endpoints, medium_endpoints, low_endpoints = 0, 0, 0, 0
+        explained_high_endpoints, explained_medium_endpoints, explained_low_endpoints = 0, 0, 0
 
         # Some sums that will be saved as stats:
         endpoint_issues_high, endpoint_issues_medium, endpoint_issues_low = 0, 0, 0
+        explained_endpoint_issues_high, explained_endpoint_issues_medium, explained_endpoint_issues_low = 0, 0, 0
         for endpoint in relevant_endpoints:
             total_endpoints += 1
             url_was_once_rated = True
@@ -488,21 +511,33 @@ def rate_timeline(timeline, url: Url):
                 given_ratings[label] = []
 
             endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
+            explained_endpoint_high, explained_endpoint_medium, explained_endpoint_low = 0, 0, 0
             for endpoint_scan_type in endpoint_scan_types:
                 if endpoint_scan_type in these_endpoint_scans:
                     if endpoint_scan_type not in given_ratings[label]:
                         calculation = get_calculation(these_endpoint_scans[endpoint_scan_type])
                         if calculation:
                             calculations.append(calculation)
-                            endpoint_high += calculation["high"]
-                            endpoint_issues_high += calculation["high"]
-                            endpoint_medium += calculation["medium"]
-                            endpoint_issues_medium += calculation["medium"]
-                            endpoint_low += calculation["low"]
-                            endpoint_issues_low += calculation["low"]
-                            total_high += calculation["high"]
-                            total_medium += calculation["medium"]
-                            total_low += calculation["low"]
+                            if these_endpoint_scans[endpoint_scan_type].comply_or_explain_is_explained:
+                                explained_endpoint_high += calculation["high"]
+                                explained_endpoint_issues_high += calculation["high"]
+                                explained_endpoint_medium += calculation["medium"]
+                                explained_endpoint_issues_medium += calculation["medium"]
+                                explained_endpoint_low += calculation["low"]
+                                explained_endpoint_issues_low += calculation["low"]
+                                explained_total_high += calculation["high"]
+                                explained_total_medium += calculation["medium"]
+                                explained_total_low += calculation["low"]
+                            else:
+                                endpoint_high += calculation["high"]
+                                endpoint_issues_high += calculation["high"]
+                                endpoint_medium += calculation["medium"]
+                                endpoint_issues_medium += calculation["medium"]
+                                endpoint_low += calculation["low"]
+                                endpoint_issues_low += calculation["low"]
+                                total_high += calculation["high"]
+                                total_medium += calculation["medium"]
+                                total_low += calculation["low"]
 
                         given_ratings[label].append(endpoint_scan_type)
                     else:
@@ -524,6 +559,12 @@ def rate_timeline(timeline, url: Url):
                 medium_endpoints += 1
             if endpoint_low:
                 low_endpoints += 1
+            if explained_endpoint_high:
+                explained_high_endpoints += 1
+            if explained_endpoint_medium:
+                explained_medium_endpoints += 1
+            if explained_endpoint_low:
+                explained_low_endpoints += 1
 
             # Readibility is important: it's ordered from the worst to least points.
             calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
@@ -537,6 +578,9 @@ def rate_timeline(timeline, url: Url):
                 "high": endpoint_high,
                 "medium": endpoint_medium,
                 "low": endpoint_low,
+                "explained_high": explained_endpoint_high,
+                "explained_medium":  explained_endpoint_medium,
+                "explained_low":  explained_endpoint_low,
                 "ratings": calculations
             })
 
@@ -581,20 +625,32 @@ def rate_timeline(timeline, url: Url):
         previous_url_ratings[url.id] = these_url_scans
 
         url_issues_high, url_issues_medium, url_issues_low = 0, 0, 0
+        explained_url_issues_high, explained_url_issues_medium, explained_url_issues_low = 0, 0, 0
         for url_scan_type in url_scan_types:
             if url_scan_type in these_url_scans:
                 calculation = get_calculation(these_url_scans[url_scan_type])
                 if calculation:
                     url_calculations.append(calculation)
-                    url_issues_high += calculation["high"]
-                    total_high += calculation["high"]
-                    total_medium += calculation["medium"]
-                    url_issues_medium += calculation["medium"]
-                    total_low += calculation["low"]
-                    url_issues_low += calculation["low"]
+                    if these_url_scans[url_scan_type].comply_or_explain_is_explained:
+                        explained_url_issues_high += calculation["high"]
+                        explained_total_high += calculation["high"]
+                        explained_total_medium += calculation["medium"]
+                        explained_url_issues_medium += calculation["medium"]
+                        explained_total_low += calculation["low"]
+                        explained_url_issues_low += calculation["low"]
+                    else:
+                        url_issues_high += calculation["high"]
+                        total_high += calculation["high"]
+                        total_medium += calculation["medium"]
+                        url_issues_medium += calculation["medium"]
+                        total_low += calculation["low"]
+                        url_issues_low += calculation["low"]
 
         total_url_issues = url_issues_high + url_issues_medium + url_issues_low
+        explained_total_url_issues = explained_url_issues_high + explained_url_issues_medium + explained_url_issues_low
         total_endpoint_issues = endpoint_issues_high + endpoint_issues_medium + endpoint_issues_low
+        explained_total_endpoint_issues = \
+            explained_endpoint_issues_high + explained_endpoint_issues_medium + explained_endpoint_issues_low
 
         sorted_url_reports = sorted(url_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
@@ -602,27 +658,47 @@ def rate_timeline(timeline, url: Url):
             endpoint_reports, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
         total_issues = total_high + total_medium + total_low
+        explained_total_issues = explained_total_high + explained_total_medium + explained_total_low
         calculation = {
             "url": url.url,
+            "ratings": sorted_url_reports,
+            "endpoints": sorted_endpoints_reports,
+
+            "total_issues": total_issues,
             "high": total_high,
             "medium": total_medium,
             "low": total_low,
-            "ratings": sorted_url_reports,
-            "endpoints": sorted_endpoints_reports,
             "total_endpoints": total_endpoints,
             "high_endpoints": high_endpoints,
             "medium_endpoints": medium_endpoints,
             "low_endpoints": low_endpoints,
-            "total_issues:": total_issues,
-
             "total_url_issues": total_url_issues,
-            "total_endpoint_issues": total_endpoint_issues,
             "url_issues_high": url_issues_high,
             "url_issues_medium": url_issues_medium,
             "url_issues_low": url_issues_low,
+            "total_endpoint_issues": total_endpoint_issues,
             "endpoint_issues_high": endpoint_issues_high,
             "endpoint_issues_medium": endpoint_issues_medium,
             "endpoint_issues_low": endpoint_issues_low,
+
+            "explained_total_issues": explained_total_issues,
+            "explained_high": explained_total_high,
+            "explained_medium": explained_total_medium,
+            "explained_low": explained_total_low,
+            # The number of endpoints doesn't change if issues are explained,
+            # just like the number of urls doesn't change.
+            # "explained_total_endpoints": explained_total_endpoints,
+            "explained_high_endpoints": explained_high_endpoints,
+            "explained_medium_endpoints": explained_medium_endpoints,
+            "explained_low_endpoints": explained_low_endpoints,
+            "explained_total_url_issues": explained_total_url_issues,
+            "explained_url_issues_high": explained_url_issues_high,
+            "explained_url_issues_medium": explained_url_issues_medium,
+            "explained_url_issues_low": explained_url_issues_low,
+            "explained_total_endpoint_issues": explained_total_endpoint_issues,
+            "explained_endpoint_issues_high": explained_endpoint_issues_high,
+            "explained_endpoint_issues_medium": explained_endpoint_issues_medium,
+            "explained_endpoint_issues_low": explained_endpoint_issues_low,
         }
 
         log.debug("On %s %s has %s endpoints and %s high, %s medium and %s low vulnerabilities" %
@@ -634,7 +710,21 @@ def rate_timeline(timeline, url: Url):
                         total_url_issues=total_url_issues, total_endpoint_issues=total_endpoint_issues,
                         url_issues_high=url_issues_high, url_issues_medium=url_issues_medium,
                         url_issues_low=url_issues_low, endpoint_issues_high=endpoint_issues_high,
-                        endpoint_issues_medium=endpoint_issues_medium, endpoint_issues_low=endpoint_issues_low
+                        endpoint_issues_medium=endpoint_issues_medium, endpoint_issues_low=endpoint_issues_low,
+                        explained_high=explained_total_high, explained_medium=explained_total_medium,
+                        explained_low=explained_total_low,
+                        explained_total_issues=explained_total_issues,
+                        explained_high_endpoints=explained_high_endpoints,
+                        explained_medium_endpoints=explained_medium_endpoints,
+                        explained_low_endpoints=explained_low_endpoints,
+                        explained_total_url_issues=explained_total_url_issues,
+                        explained_total_endpoint_issues=explained_total_endpoint_issues,
+                        explained_url_issues_high=explained_url_issues_high,
+                        explained_url_issues_medium=explained_url_issues_medium,
+                        explained_url_issues_low=explained_url_issues_low,
+                        explained_endpoint_issues_high=explained_endpoint_issues_high,
+                        explained_endpoint_issues_medium=explained_endpoint_issues_medium,
+                        explained_endpoint_issues_low=explained_endpoint_issues_low
                         )
 
 
@@ -643,7 +733,16 @@ def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, 
                     high_endpoints: int=0, medium_endpoints: int=0, low_endpoints: int=0,
                     total_url_issues: int=0, total_endpoint_issues: int=0,
                     url_issues_high: int=0, url_issues_medium: int=0, url_issues_low: int=0,
-                    endpoint_issues_high: int=0, endpoint_issues_medium: int=0, endpoint_issues_low: int=0):
+                    endpoint_issues_high: int=0, endpoint_issues_medium: int=0, endpoint_issues_low: int=0,
+
+                    explained_high: int=0, explained_medium: int=0, explained_low: int=0,
+                    explained_total_issues: int = 0, explained_high_endpoints: int = 0,
+                    explained_medium_endpoints: int = 0, explained_low_endpoints: int = 0,
+                    explained_total_url_issues: int = 0, explained_total_endpoint_issues: int = 0,
+                    explained_url_issues_high: int = 0, explained_url_issues_medium: int = 0,
+                    explained_url_issues_low: int = 0, explained_endpoint_issues_high: int = 0,
+                    explained_endpoint_issues_medium: int = 0, explained_endpoint_issues_low: int = 0
+                    ):
     u = UrlRating()
     u.url = url
 
@@ -657,16 +756,16 @@ def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, 
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
     u.rating = 0
+    u.calculation = calculation
+    u.total_endpoints = total_endpoints
+
     u.high = high
     u.medium = medium
     u.low = low
-    u.calculation = calculation
-    u.total_endpoints = total_endpoints
     u.total_issues = total_issues
     u.high_endpoints = high_endpoints
     u.medium_endpoints = medium_endpoints
     u.low_endpoints = low_endpoints
-
     u.total_url_issues = total_url_issues
     u.total_endpoint_issues = total_endpoint_issues
     u.url_issues_high = url_issues_high
@@ -675,6 +774,22 @@ def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, 
     u.endpoint_issues_high = endpoint_issues_high
     u.endpoint_issues_medium = endpoint_issues_medium
     u.endpoint_issues_low = endpoint_issues_low
+
+    u.explained_high = explained_high
+    u.explained_medium = explained_medium
+    u.explained_low = explained_low
+    u.explained_total_issues = explained_total_issues
+    u.explained_high_endpoints = explained_high_endpoints
+    u.explained_medium_endpoints = explained_medium_endpoints
+    u.explained_low_endpoints = explained_low_endpoints
+    u.explained_total_url_issues = explained_total_url_issues
+    u.explained_total_endpoint_issues = explained_total_endpoint_issues
+    u.explained_url_issues_high = explained_url_issues_high
+    u.explained_url_issues_medium = explained_url_issues_medium
+    u.explained_url_issues_low = explained_url_issues_low
+    u.explained_endpoint_issues_high = explained_endpoint_issues_high
+    u.explained_endpoint_issues_medium = explained_endpoint_issues_medium
+    u.explained_endpoint_issues_low = explained_endpoint_issues_low
 
     u.save()
 
