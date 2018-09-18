@@ -501,4 +501,3 @@ class TlsQualysScratchpad(models.Model):
     domain = models.CharField(max_length=255)
     when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()
-

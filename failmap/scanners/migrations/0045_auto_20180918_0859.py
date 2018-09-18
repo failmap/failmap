@@ -13,17 +13,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, null=True, verbose_name='additional case notes'),
+            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, null=True, verbose_name='additional case notes'),
         ),
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, null=True, verbose_name='case handled by'),
+            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, null=True, verbose_name='case handled by'),
         ),
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, null=True, verbose_name='explained by'),
+            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, null=True, verbose_name='explained by'),
         ),
         migrations.AlterField(
             model_name='endpointgenericscan',
@@ -33,17 +36,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tlsqualysscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, null=True, verbose_name='additional case notes'),
+            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, null=True, verbose_name='additional case notes'),
         ),
         migrations.AlterField(
             model_name='tlsqualysscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, null=True, verbose_name='case handled by'),
+            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, null=True, verbose_name='case handled by'),
         ),
         migrations.AlterField(
             model_name='tlsqualysscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, null=True, verbose_name='explained by'),
+            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, null=True, verbose_name='explained by'),
         ),
         migrations.AlterField(
             model_name='tlsqualysscan',
@@ -53,17 +59,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tlsscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, null=True, verbose_name='additional case notes'),
+            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, null=True, verbose_name='additional case notes'),
         ),
         migrations.AlterField(
             model_name='tlsscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, null=True, verbose_name='case handled by'),
+            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, null=True, verbose_name='case handled by'),
         ),
         migrations.AlterField(
             model_name='tlsscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, null=True, verbose_name='explained by'),
+            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, null=True, verbose_name='explained by'),
         ),
         migrations.AlterField(
             model_name='tlsscan',
@@ -73,17 +82,20 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='urlgenericscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, null=True, verbose_name='additional case notes'),
+            field=models.TextField(blank=True, default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, null=True, verbose_name='additional case notes'),
         ),
         migrations.AlterField(
             model_name='urlgenericscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, null=True, verbose_name='case handled by'),
+            field=models.CharField(blank=True, default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, null=True, verbose_name='case handled by'),
         ),
         migrations.AlterField(
             model_name='urlgenericscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, null=True, verbose_name='explained by'),
+            field=models.CharField(blank=True, default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, null=True, verbose_name='explained by'),
         ),
         migrations.AlterField(
             model_name='urlgenericscan',

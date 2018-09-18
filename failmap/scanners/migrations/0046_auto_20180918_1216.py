@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tlsscan',
             name='evidence',
-            field=models.TextField(blank=True, default=0, help_text='Content that might help understanding the result.', max_length=9001),
+            field=models.TextField(blank=True, default=0,
+                                   help_text='Content that might help understanding the result.', max_length=9001),
         ),
     ]

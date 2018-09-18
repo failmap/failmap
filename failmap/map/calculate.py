@@ -6,6 +6,7 @@ This file contains (or should) verbose explantion of why points are given.
 """
 import logging
 from datetime import datetime
+
 import pytz
 
 log = logging.getLogger(__package__)
@@ -32,7 +33,7 @@ def get_calculation(scan):
         calculation['comply_or_explain_explanation_valid_until'] = ""
 
     valid = scan.comply_or_explain_is_explained and (
-            scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc))
+        scan.comply_or_explain_explanation_valid_until > datetime.now(pytz.utc))
     calculation['comply_or_explain_valid_at_time_of_report'] = valid
 
     # tracking information for the scan (which also might allow upgrading the scan in the future)

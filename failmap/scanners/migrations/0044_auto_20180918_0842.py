@@ -13,22 +13,26 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, verbose_name='additional case notes'),
+            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, verbose_name='additional case notes'),
         ),
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, verbose_name='case handled by'),
+            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, verbose_name='case handled by'),
         ),
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, verbose_name='explained by'),
+            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, verbose_name='explained by'),
         ),
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_explained_on',
-            field=models.DateTimeField(blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
+            field=models.DateTimeField(
+                blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
         ),
         migrations.AddField(
             model_name='endpointgenericscan',
@@ -38,32 +42,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_explanation_valid_until',
-            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.', null=True, verbose_name='explanation valid until'),
+            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.',
+                                       null=True, verbose_name='explanation valid until'),
         ),
         migrations.AddField(
             model_name='endpointgenericscan',
             name='comply_or_explain_is_explained',
-            field=models.BooleanField(default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
+            field=models.BooleanField(
+                default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, verbose_name='additional case notes'),
+            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, verbose_name='additional case notes'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, verbose_name='case handled by'),
+            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, verbose_name='case handled by'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, verbose_name='explained by'),
+            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, verbose_name='explained by'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_explained_on',
-            field=models.DateTimeField(blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
+            field=models.DateTimeField(
+                blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
@@ -73,32 +83,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_explanation_valid_until',
-            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.', null=True, verbose_name='explanation valid until'),
+            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.',
+                                       null=True, verbose_name='explanation valid until'),
         ),
         migrations.AddField(
             model_name='tlsqualysscan',
             name='comply_or_explain_is_explained',
-            field=models.BooleanField(default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
+            field=models.BooleanField(
+                default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
         ),
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, verbose_name='additional case notes'),
+            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, verbose_name='additional case notes'),
         ),
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, verbose_name='case handled by'),
+            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, verbose_name='case handled by'),
         ),
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, verbose_name='explained by'),
+            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, verbose_name='explained by'),
         ),
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_explained_on',
-            field=models.DateTimeField(blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
+            field=models.DateTimeField(
+                blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
         ),
         migrations.AddField(
             model_name='tlsscan',
@@ -108,32 +124,38 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_explanation_valid_until',
-            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.', null=True, verbose_name='explanation valid until'),
+            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.',
+                                       null=True, verbose_name='explanation valid until'),
         ),
         migrations.AddField(
             model_name='tlsscan',
             name='comply_or_explain_is_explained',
-            field=models.BooleanField(default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
+            field=models.BooleanField(
+                default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_case_additional_notes',
-            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.', max_length=512, verbose_name='additional case notes'),
+            field=models.CharField(default='', help_text='Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info.Will not be exported, but are not secret.',
+                                   max_length=512, verbose_name='additional case notes'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_case_handled_by',
-            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.", max_length=255, verbose_name='case handled by'),
+            field=models.CharField(default='', help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in case of follow-ups.",
+                                   max_length=255, verbose_name='case handled by'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_explained_by',
-            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.', max_length=255, verbose_name='explained by'),
+            field=models.CharField(default='', help_text='Please also refer to a thread, discussion or another fact that can be verified.',
+                                   max_length=255, verbose_name='explained by'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_explained_on',
-            field=models.DateTimeField(blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
+            field=models.DateTimeField(
+                blank=True, help_text='From this moment the rating will be muted.', null=True, verbose_name='explained on'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
@@ -143,11 +165,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_explanation_valid_until',
-            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.', null=True, verbose_name='explanation valid until'),
+            field=models.DateTimeField(blank=True, help_text='Set to one year in the future. Will expire automatically after a scan finds a change on this service. As long as the rating stays the same, the finding is explained and the issue ignored.',
+                                       null=True, verbose_name='explanation valid until'),
         ),
         migrations.AddField(
             model_name='urlgenericscan',
             name='comply_or_explain_is_explained',
-            field=models.BooleanField(default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
+            field=models.BooleanField(
+                default=False, help_text='Shorthand to indicate that something is explained. Only when this field is set to True, the explanation is ', verbose_name='is explained'),
         ),
     ]

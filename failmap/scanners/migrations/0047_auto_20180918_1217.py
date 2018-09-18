@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='evidence',
-            field=models.TextField(blank=True, default=0, help_text='Content that might help understanding the result.', max_length=9001),
+            field=models.TextField(blank=True, default=0,
+                                   help_text='Content that might help understanding the result.', max_length=9001),
         ),
         migrations.AlterField(
             model_name='urlgenericscan',
             name='evidence',
-            field=models.TextField(blank=True, default=0, help_text='Content that might help understanding the result.', max_length=9001),
+            field=models.TextField(blank=True, default=0,
+                                   help_text='Content that might help understanding the result.', max_length=9001),
         ),
     ]
