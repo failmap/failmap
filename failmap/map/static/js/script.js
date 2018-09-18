@@ -345,4 +345,28 @@ let document_ready = function() {
         location.href = '#report';
         vueReport.selected = organization_name;
     }
+
+    // switch themes
+    // http://jsfiddle.net/82AsF/
+    let themes = {
+        "default": "/static/css/vendor/bootstrap.min.css",
+        "darkly" : "/static/css/vendor/bootstrap-darkly.min.css",
+    };
+
+    $(function(){
+       let themesheet = $('<link href="'+themes['default']+'" rel="stylesheet" />');
+        themesheet.appendTo('head');
+        $('.theme-link').click(function(){
+            let selected_theme = $(this).attr('data-theme');
+           let themeurl = themes[selected_theme];
+           let thing = 'link[href="'+$('link#active_theme').attr('href') + '"]';
+           $(thing).attr('href', themeurl);
+
+           if (selected_theme === 'darkly')
+               failmap.set_theme('dark');
+
+           if (selected_theme === 'default')
+                failmap.set_theme('light');
+        });
+    });
 };

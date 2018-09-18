@@ -107,9 +107,9 @@ const report_mixin = {
             return "green";
         },
         colorizebg: function (high, medium, low) {
-            if (high > 0) return "#fbeaea";
-            if (medium > 0) return "#ffefd3";
-            return "#dff9d7";
+            if (high > 0) return "rgba(251, 173, 173, 0.3)";
+            if (medium > 0) return "rgba(249, 209, 139, 0.3)";
+            return "rgba(191, 255, 171, 0.3)";
         },
         idize: function (url) {
             url = url.toLowerCase();

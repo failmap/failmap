@@ -89,27 +89,52 @@ const failmap = {
             "</div>";
         this.add_div(html, "info_nobackground", false);
 
-        this.add_div('<div id="historycontrol"></div>', "info", true);
+        this.add_div('<div id="historycontrol"></div>', "info table-light", true);
 
-        this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info", true);
-        this.add_div("<div><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info", true);
+        this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
+        this.add_div("<div><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
         let labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
         labels.push('<i style="background:' + failmap.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
         labels.push('<i style="background:' + failmap.getColorCode('red') + '"></i> '+ gettext('Bad'));
         labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
-        this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend", false, {position: 'bottomright'});
+        this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
 
-        if (debug)
+        this.light_map = new L.tileLayer(this.tile_uri(), {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
+            'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            id: 'mapbox.light',
+            accessToken: this.mapbox_token,
+            style: 'light-v9',
+            tileSize: 512,
+            zoomOffset: -1
+        });
+
+        this.dark_map = new L.tileLayer(this.tile_uri(), {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+                '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
+                'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+                id: 'mapbox.light',
+                accessToken: this.mapbox_token,
+                style: 'dark-v9',
+                tileSize: 512,
+                zoomOffset: -1
+        });
+
+        if (!debug)
             this.emptyTiles();
         else
             this.loadTiles();
     },
 
-    loadTiles: function(){
-        // let tile_uri_base = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png';
+    tile_uri: function() {
         let tile_uri_base = 'https://api.mapbox.com/styles/v1/mapbox/{style}/tiles/{z}/{x}/{y}/';
         let tile_uri_params = 'access_token={accessToken}';
         let tile_uri = tile_uri_base + '?' + tile_uri_params;
@@ -120,20 +145,30 @@ const failmap = {
             tile_uri = '/proxy/' + tile_uri_base;
         }
 
+        return tile_uri;
+    },
+
+    set_theme: function(theme_name) {
+        this.map.removeLayer(this.active_layer);
+
+        if (theme_name === "light")
+            this.active_layer = this.light_map;
+
+        if (theme_name === "dark")
+            this.active_layer = this.dark_map;
+
+        this.map.addLayer(this.active_layer);
+    },
+
+    light_map: null,
+    dark_map: null,
+    active_layer: null,
+
+    loadTiles: function(){
         // given tiles are proxies, the amount of connections might be maxed. Loading this last creates a bit more
         // faster design.
-        L.tileLayer(tile_uri, {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
-            'Ratings &copy; <a href="http://faalkaart.nl/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
-            id: 'mapbox.light',
-            accessToken: this.mapbox_token,
-            style: 'light-v9', // 'dark-v9' for dark mode,
-            tileSize: 512,
-            zoomOffset: -1
-        }).addTo(this.map);
+        this.active_layer = this.light_map;
+        this.active_layer.addTo(this.map);
     },
 
     // this is an empty tiles layer to make sure markers load. This can be useful for testing so things load faster.
