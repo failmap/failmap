@@ -36,8 +36,8 @@ requests
 dnspython  # dnsrecon
 netaddr  # dnsrecon
 untangle  # dns scans https://github.com/stchris/untangle
-python-resize-image  # screenshots
 Pillow  # screenshots
+python-resize-image  # screenshots
 tldextract
 
 # logging
