@@ -128,7 +128,7 @@ const failmap = {
                 zoomOffset: -1
         });
 
-        if (!debug)
+        if (debug)
             this.emptyTiles();
         else
             this.loadTiles();
