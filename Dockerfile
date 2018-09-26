@@ -107,7 +107,7 @@ COPY ./failmap/ /source/failmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
 # Add hypersh CLI tool
-ADD https://hyper-install.s3.amazonaws.com/hyper-mac.bin.zip /usr/local/bin/
+COPY /vendor/hyper/hyper /usr/local/bin/hyper
 
 # add wildcard to version file as it may not exists (eg: local development)
 COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/

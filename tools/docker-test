@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+
+tools/docker-build
+tests/docker.sh

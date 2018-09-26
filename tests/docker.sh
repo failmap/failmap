@@ -49,7 +49,7 @@ curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=
 docker exec failmap-$$ /O-Saft/o-saft
 
 # Test if hypersh CLI is available
-docker exec failmap-$$ /usr/local/bin/hypersh
+docker exec failmap-$$ /usr/local/bin/hyper
 
 # cleanup
 rm -f cookie-$$
