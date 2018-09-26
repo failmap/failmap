@@ -48,6 +48,9 @@ curl -siv --cookie-jar cookie-$$ --cookie cookie-$$ --data "csrfmiddlewaretoken=
 # Test if o-saft runs
 docker exec failmap-$$ /O-Saft/o-saft
 
+# Test if hypersh CLI is available
+docker exec failmap-$$ /usr/local/bin/hypersh
+
 # cleanup
 rm -f cookie-$$
 
