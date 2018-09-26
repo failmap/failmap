@@ -35,3 +35,4 @@ db.sqlite3-journal
 /helpdesk/*
 .pip-cache/*
 *.p12
+config.json
