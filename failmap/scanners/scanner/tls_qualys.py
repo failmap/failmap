@@ -23,6 +23,7 @@ import ipaddress
 import json
 import logging
 from datetime import datetime, timedelta
+from time import sleep
 
 import pytz
 import requests
@@ -130,7 +131,7 @@ def compose_task(
     # 7 march 2018, qualys has new rate limits due to service outage.
     # We used to do 1/m which was fine, but we're now doing 1 every 2 minutes.
     # perhaps 0.5/m doesn't work... should maybe be.
-    rate_limit='30/h',
+    rate_limit='60/h',
 )
 def qualys_scan(self, url):
     """Acquire JSON scan result data for given URL from Qualys.
@@ -200,6 +201,19 @@ def qualys_scan(self, url):
     """
     log.info('Still waiting for Qualys result on %s. Retrying task in 180 seconds. Status: %s' %
              (url.url, data.get('status', "unknown")))
+
+    # If this scan is performed directly, the countdown setting / exception doesn't work. So sleep manually.
+    if self.request.is_eager:
+        raise NotImplementedError("Sorry, couldn't figure out how to run this function with the right parameters. "
+                                  "Try -m async to run this on a worker. Or kill this command and retry again to "
+                                  "progress the scan (probably a few times).")
+        sleep(50)
+
+        # retried tasks return non if an exception happens. So instead of throwing an exception,
+        # we're calling ourselves again in the hopes we get the correct value
+        # todo: cannot get the parameter url accross, tried dict, kwargs, args, etc etc etc
+        # return self.apply(url=url).get(propagate=False)
+
     # not tested yet: report_to_console(url.url, data)
     # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
     # The 'retry' converts this task instance from a rate_limited into a
@@ -211,12 +225,21 @@ def qualys_scan(self, url):
     # the more often you try to get the status, on the more workers it will run (increasing concurrency)
     # so if we check after two minutes, there will be a lot less workers with increasing concurrency as the
     # scan will probably be finished by then.
-    raise self.retry(countdown=180, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
+    """
+    With 180 secs: This might cause too many high prio tasks, so much that you cannot really handle them high prio.
+    It might be run on another machine... and then it will also eat from the credits of that machine.
+
+    The countdown is just the amount of time before it's added to the queue.
+    """
+    raise self.retry(countdown=45, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
 
 
 @app.task(queue='storage')
 def process_qualys_result(data, url):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
+
+    log.info(data)
+    log.info(dir(data))
 
     # a normal completed scan.
     if data['status'] == "READY" and 'endpoints' in data.keys():
