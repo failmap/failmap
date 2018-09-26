@@ -36,7 +36,7 @@ class Command(BaseCommand):
             http_scanner_undo_endpoint_deaths(in_the_last_n_days=4, ip_version=6)
 
 
-def http_scanner_undo_endpoint_deaths(in_the_last_n_days: int=1, ip_version: int=6):
+def http_scanner_undo_endpoint_deaths(in_the_last_n_days: int = 1, ip_version: int = 6):
     """
     Sets all ipv6 or 4 endpoints to alive that where killed in the past N days.
 

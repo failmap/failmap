@@ -127,7 +127,7 @@ def get_default_category(request, ):
     return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
 
 
-def get_default_category_for_country(request, country: str="NL"):
+def get_default_category_for_country(request, country: str = "NL"):
 
     organization_type = Configuration.objects.all().filter(
         is_displayed=True,
@@ -156,7 +156,7 @@ def get_countries(request,):
     return JsonResponse(list, safe=False, encoder=JSEncoder)
 
 
-def get_categories(request, country: str="NL"):
+def get_categories(request, country: str = "NL"):
 
     categories = Configuration.objects.all().filter(
         country=get_country(country),
@@ -166,7 +166,7 @@ def get_categories(request, country: str="NL"):
     return JsonResponse(list(categories), safe=False, encoder=JSEncoder)
 
 
-def generic_export(query, set, country: str="NL", organization_type="municipality"):
+def generic_export(query, set, country: str = "NL", organization_type="municipality"):
     """
     This dataset can be imported in another instance blindly using the admin interface.
 
@@ -195,7 +195,7 @@ def generic_export(query, set, country: str="NL", organization_type="municipalit
 
 
 @cache_page(one_day)
-def export_urls_only(request, country: str="NL", organization_type="municipality",):
+def export_urls_only(request, country: str = "NL", organization_type="municipality",):
     query = Url.objects.all().filter(
         is_dead=False,
         not_resolvable=False,
@@ -208,7 +208,7 @@ def export_urls_only(request, country: str="NL", organization_type="municipality
 
 
 @cache_page(one_day)
-def export_organizations(request, country: str="NL", organization_type="municipality",):
+def export_organizations(request, country: str = "NL", organization_type="municipality",):
     query = Organization.objects.all().filter(
         country=get_country(country),
         type=get_organization_type(organization_type),
@@ -219,13 +219,13 @@ def export_organizations(request, country: str="NL", organization_type="municipa
 
 
 @cache_page(one_day)
-def export_organization_types(request, country: str="NL", organization_type="municipality"):
+def export_organization_types(request, country: str = "NL", organization_type="municipality"):
     query = OrganizationType.objects.all().values('name')
     return generic_export(query, 'organization_types', country, organization_type)
 
 
 @cache_page(one_day)
-def export_coordinates(request, country: str="NL", organization_type="municipality",):
+def export_coordinates(request, country: str = "NL", organization_type="municipality",):
     organizations = Organization.objects.all().filter(
         country=get_country(country),
         type=get_organization_type(organization_type))
@@ -238,7 +238,7 @@ def export_coordinates(request, country: str="NL", organization_type="municipali
 
 
 @cache_page(one_day)
-def export_urls(request, country: str="NL", organization_type="municipality"):
+def export_urls(request, country: str = "NL", organization_type="municipality"):
     query = Url.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
@@ -348,7 +348,7 @@ def organizationtype_exists(request, organization_type_name):
 
 
 @cache_page(ten_minutes)
-def organization_report(request, country: str="NL", organization_type="municipality",
+def organization_report(request, country: str = "NL", organization_type="municipality",
                         organization_id=None, organization_name=None, weeks_back=0):
     # urls with /data/report// (two slashes)
     if not organization_id and not organization_name:
@@ -414,7 +414,7 @@ def string_to_delta(string_delta):
 
 
 @cache_page(one_day)
-def terrible_urls(request, country: str="NL", organization_type="municipality", weeks_back=0):
+def terrible_urls(request, country: str = "NL", organization_type="municipality", weeks_back=0):
     # this would only work if the latest endpoint is actually correct.
     # currently this goes wrong when the endpoints are dead but the url still resolves.
     # then there should be an url rating of 0 (as no endpoints). But we don't save that yet.
@@ -502,7 +502,7 @@ def terrible_urls(request, country: str="NL", organization_type="municipality", 
 
 
 @cache_page(one_hour)
-def top_fail(request, country: str="NL", organization_type="municipality", weeks_back=0):
+def top_fail(request, country: str = "NL", organization_type="municipality", weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -585,7 +585,7 @@ def top_fail(request, country: str="NL", organization_type="municipality", weeks
 
 
 # @cache_page(cache_time)
-def top_win(request, country: str="NL", organization_type="municipality", weeks_back=0):
+def top_win(request, country: str = "NL", organization_type="municipality", weeks_back=0):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -685,7 +685,7 @@ def stats_determine_when(stat, weeks_back=0):
 
 
 @cache_page(one_hour)
-def stats(request, country: str="NL", organization_type="municipality", weeks_back=0):
+def stats(request, country: str = "NL", organization_type="municipality", weeks_back=0):
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
                   '1 months ago': 0, '2 months ago': 0, '3 months ago': 0}
 
@@ -856,7 +856,7 @@ def stats(request, country: str="NL", organization_type="municipality", weeks_ba
 
 
 @cache_page(one_hour)
-def vulnerability_graphs(request, country: str="NL", organization_type="municipality", weeks_back=0):
+def vulnerability_graphs(request, country: str = "NL", organization_type="municipality", weeks_back=0):
     # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
     # they might.
     # also: it's "1 days ago", not "1 day ago".
@@ -1036,8 +1036,8 @@ def wanted_urls(request):
 
 
 @cache_page(ten_minutes)
-def improvements(request, country: str="NL", organization_type: str="municipality",
-                 weeks_back: int=0, weeks_duration: int=0):
+def improvements(request, country: str = "NL", organization_type: str = "municipality",
+                 weeks_back: int = 0, weeks_duration: int = 0):
     # todo: adjustable timespan
     # todo: adjustable weeks_back
 
@@ -1193,8 +1193,8 @@ def improvements(request, country: str="NL", organization_type: str="municipalit
 
 
 @cache_page(one_hour)
-def ticker(request, country: str="NL", organization_type: str="municipality",
-           weeks_back: int=0, weeks_duration: int=0):
+def ticker(request, country: str = "NL", organization_type: str = "municipality",
+           weeks_back: int = 0, weeks_duration: int = 0):
 
     weeks_back = int(weeks_back)
     weeks_duration = int(weeks_duration)
@@ -1276,7 +1276,7 @@ def ticker(request, country: str="NL", organization_type: str="municipality",
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
-def map_default(request, weeks_back: int=0, url_scan_types: dict=None, endpoint_scan_types: dict=None, ):
+def map_default(request, weeks_back: int = 0, url_scan_types: dict = None, endpoint_scan_types: dict = None, ):
     defaults = Configuration.objects.all().filter(
         is_displayed=True,
         is_the_default_option=True
@@ -1287,8 +1287,8 @@ def map_default(request, weeks_back: int=0, url_scan_types: dict=None, endpoint_
 
 
 # @cache_page(four_hours)
-def map_data(request, country: str="NL", organization_type: str="municipality", weeks_back: int=0,
-             url_scan_types: dict=None, endpoint_scan_types: dict=None, ):
+def map_data(request, country: str = "NL", organization_type: str = "municipality", weeks_back: int = 0,
+             url_scan_types: dict = None, endpoint_scan_types: dict = None, ):
 
     if not weeks_back:
         when = datetime.now(pytz.utc)
@@ -1518,7 +1518,7 @@ def empty_response():
 
 
 @cache_page(ten_minutes)
-def latest_scans(request, scan_type, country: str="NL", organization_type="municipality"):
+def latest_scans(request, scan_type, country: str = "NL", organization_type="municipality"):
     scans = []
 
     dataset = {
@@ -1742,7 +1742,7 @@ class LatestScanFeed(Feed):
         return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)
 
 
-def organization_autcomplete(request, country: str="NL", organization_type="municipality", parameter: str=""):
+def organization_autcomplete(request, country: str = "NL", organization_type="municipality", parameter: str = ""):
     # If you would try SQL injection, this would be the place. The ORM would shield it... or does it :)
 
     qs = Organization.objects.all()

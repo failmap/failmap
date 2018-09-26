@@ -182,8 +182,8 @@ def url_lives(ips, url):
             url.save()
 
 
-def dev_verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
-                         organizations: List[Organization]=None):
+def dev_verify_endpoints(urls: List[Url] = None, port: int = None, protocol: str = None,
+                         organizations: List[Organization] = None):
     """
     Checks all http(s) endpoints if they still exist. This is to monitor changes in the existing
     dataset, without contacting an organization too often. It can be checked every few days,
@@ -222,8 +222,8 @@ def dev_verify_endpoints(urls: List[Url]=None, port: int=None, protocol: str=Non
     random.shuffle(endpoints)
 
 
-def dev_discover_endpoints(urls: List[Url]=None, port: int=None, protocol: str=None,
-                           organizations: List[Organization]=None):
+def dev_discover_endpoints(urls: List[Url] = None, port: int = None, protocol: str = None,
+                           organizations: List[Organization] = None):
     """
     Contact each URL (or each url of organizations) to determine if there are endpoints.
     Do so both over HTTP, HTTPS on various ports and with both IPv4 and IPv6.
@@ -461,7 +461,7 @@ def resolves_on_v6(url: str):
     return False
 
 
-def has_internet_connection(host: str="8.8.8.8", port: int=53, connection_timeout: int=10):
+def has_internet_connection(host: str = "8.8.8.8", port: int = 53, connection_timeout: int = 10):
     """
     https://stackoverflow.com/questions/3764291/checking-network-connection#3764660
     Host: 8.8.8.8 (google-public-dns-a.google.com)

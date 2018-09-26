@@ -16,7 +16,7 @@ class TlsScanManager:
     :return:
     """
     @staticmethod
-    def add_scan(endpoint: Endpoint, rating: str, rating_no_trust: str, message: str, evidence: str=""):
+    def add_scan(endpoint: Endpoint, rating: str, rating_no_trust: str, message: str, evidence: str = ""):
 
         # Check if the latest scan has the same rating or not:
         try:

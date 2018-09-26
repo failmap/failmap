@@ -116,7 +116,7 @@ class Command(DumpDataCommand):
 # implies that name + country + organization_type is unique.
 @transaction.atomic
 def merge(source_organizations_names: List[str], target_organization_name: str, when: datetime,
-          organization_type: str="municipality", country: str="NL"):
+          organization_type: str = "municipality", country: str = "NL"):
     """
     Keeping historical data correct is important.
     - The old organization should be visible, exactly as it was at that moment (geography), with the same ratings and
@@ -292,7 +292,7 @@ def merge(source_organizations_names: List[str], target_organization_name: str, 
 
 @transaction.atomic
 def dissolve(dissolved_organization_name: str, target_organization_names: List[str], when: datetime,
-             organization_type: str="municipality", country: str="NL"):
+             organization_type: str = "municipality", country: str = "NL"):
     """
     Dissolving organizations leave behind a set of urls. Those urls should be taken care off by other existing
     organizations. This is not always the case unfortunately (but who will solve these issues otherwise?)

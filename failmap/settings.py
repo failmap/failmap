@@ -881,6 +881,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'urlgenericscan'},
         {'name': 'screenshot'},
         {'name': 'urlip'},
+        {'name': 'tlsqualysscratchpad'},
         {'name': 'endpointgenericscanscratchpad'},
     ]},
 
@@ -970,3 +971,13 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 # }
 # End cacheops
 ########
+
+# Hyper Cloud Scanning
+# This is where certificates are stored from the credentials table when they are uploaded to Hyper.
+# the name of the certificate name is the number of the credentials record + .p12
+# Thus: HYPER_CERTIFICATE_DIR + '/hyper_certificate_1.p12' for the first configuration.
+# Make sure it has NO trailing slash.
+HYPER_CERTIFICATE_DIR = os.environ.get('HYPER_CERTIFICATE_DIR', BASE_DIR + '/..')
+
+# Hyper credential files will be written here in a separate dir per config. So config /1/, /2/ etc...
+HYPER_CREDENTIALS_DIR = os.environ.get('HYPER_CREDENTIALS_DIR', BASE_DIR + '/..')

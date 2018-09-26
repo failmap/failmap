@@ -175,12 +175,13 @@ texinfo_documents = [
 
 celery_task_prefix = '(task)'  # < default
 
-import sys, os
-
-sys.path.insert(0, os.path.join(os.path.abspath('.'), '../../../failmap'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'failmap.settings'
-# from django.conf import settings
-# settings.configure()  # missing things... such as TOOLS. This is a default config file which is useless.
-
-import django
-django.setup()
+# Doesn't work on readthedocs yet...
+# import sys, os
+#
+# sys.path.insert(0, os.path.join(os.path.abspath('.'), '../../../failmap'))
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'failmap.settings'
+# # from django.conf import settings
+# # settings.configure()  # missing things... such as TOOLS. This is a default config file which is useless.
+#
+# import django
+# django.setup()

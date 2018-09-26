@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 # simply matching config variables to modules.
 # Note that .__module__  is always celery.local :)
-def allowed_to_scan(scanner_name: str=""):
+def allowed_to_scan(scanner_name: str = ""):
 
     log.info(scanner_name)
 
@@ -55,7 +55,7 @@ def allowed_to_scan(scanner_name: str=""):
     return False
 
 
-def allowed_to_discover(scanner_name: str=""):
+def allowed_to_discover(scanner_name: str = ""):
 
     # discover endpoints does not listen to NEW_DOMAINS, since it aren't new domains.
     if scanner_name == 'scanner_http':
@@ -73,7 +73,7 @@ def allowed_to_discover(scanner_name: str=""):
     return False
 
 
-def q_configurations_to_scan(level: str='url'):
+def q_configurations_to_scan(level: str = 'url'):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
     for the organization tables, or with a join from url to organization.
@@ -103,7 +103,7 @@ def q_configurations_to_scan(level: str='url'):
     return qs
 
 
-def q_configurations_to_display(level: str='url'):
+def q_configurations_to_display(level: str = 'url'):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
     for the organization tables, or with a join from url to organization.

@@ -1,5 +1,10 @@
 import logging
+import random
+import re
+import subprocess
 import time
+import traceback
+from base64 import b64decode
 
 from django.conf import settings
 from django.db import models
@@ -30,10 +35,26 @@ class Credential(models.Model):
 
     name = models.CharField(max_length=30)
 
-    region = models.CharField(max_length=64)
+    region = models.CharField(
+        max_length=64,
+        help_text="Currently choose between: eu-central-1 and us-west-1. "
+                  "See https://docs.hyper.sh/hyper/Introduction/region.html"
+    )
 
     access_key = models.CharField(max_length=64)
     secret_key = models.CharField(max_length=64)
+
+    communication_certificate = models.TextField(
+        max_length=8000,
+        null=True,
+        blank=True,
+        help_text="A Base64 representation of a valid failmap .p12 certificate. You can create these yourself and "
+                  "use these certificates to enter the admin interface. This certificate encrypts traffic between "
+                  "failmap and it's workers. Do not share this certificate with anyone else, as they might get "
+                  "access to the admin interface. (this feature will be better / more easily implemented someday "
+                  "hopefully). You can create this value by running base64 filename. Do not use an online base64"
+                  " service as that will leak your certificate :)."
+    )
 
     enabled = models.BooleanField(default=True, help_text="Allow these credentials to be used.")
 
@@ -102,6 +123,109 @@ class Credential(models.Model):
 
         return self.valid
 
+    def nuke(self):
+        self.task_nuke.apply_async(args=(self,))
+
+    @app.task
+    def task_nuke(self):
+        """Removes all containers, volumes and images. You'll start with a clean slate."""
+
+        # This part of the API also doesn't work anymore and has been replaced with command line functions. Too bad!
+        # TypeError: 'ContainerCollection' object is not callable. You might be trying to use the old (pre-2.0) API -
+        # use docker.APIClient if so.
+
+        containers = self.hyper_cmd_run("List all containers", ["ps", "-a", "-q"])
+        if containers:
+            self.hyper_cmd_run("Kill all containers", ["rm", "-v", "-f"] + list(filter(None, containers.split('\n'))))
+
+        volumes = self.hyper_cmd_run("List all volumes", ["volume", "ls", "-q"])
+        if volumes:
+            self.hyper_cmd_run("Removing any remaining volumes", ["volume", "rm"] +
+                               list(filter(None, volumes.split('\n'))))
+
+        images = self.hyper_cmd_run("List all containers", ["images", "-q"])
+        if images:
+            self.hyper_cmd_run("Removing any images", ["rmi", ] + list(filter(None, images.split('\n'))))
+
+        log.info("All Clear!")
+
+    def hyper_status(self):
+        """Returns extensive status information"""
+        status = ""
+        status += "\n\nVersion:\n"
+        status += self.hyper_cmd_run("Hyper Version", ["version"])
+        status += "\n\nQuota (upper limits not available here):\n"
+        status += str(self.quota_check("images", 0)) + '\n'
+        status += str(self.quota_check("volumes", 0)) + '\n'
+        status += str(self.quota_check("fips", 0)) + '\n'
+        status += str(self.quota_check("containers", 0)) + '\n'
+        status += "\n\nImages:\n"
+        status += self.hyper_cmd_run("Current Images", ["images"])
+        status += "\n\nContainers:\n"
+        status += self.hyper_cmd_run("Current containers", ["ps", "-a"])
+        status += "\n\nVolumes:\n"
+        status += self.hyper_cmd_run("Current Volumes", ["volume", "ls"])
+        status += "\n\nFIPS:\n"
+        status += self.hyper_cmd_run("Current Floating IP's", ["fip", "ls"])
+        return status
+
+    def quota_check(self, what, max):
+        c = {'images': ["images"], 'volumes': ["volume", "ls", "-q"], 'fips': ['fip', 'ls'], 'containers': ['ps', '-a']}
+        running = self.hyper_cmd_run('Quota check for %s' % what, c[what])
+
+        # something is off with the volumes output (at least at 0 volumes)
+        if what in ['volumes']:
+            running = running.count('\n')
+        else:
+            running = running.count('\n') - 1
+
+        available = max - running
+        log.debug("Fips: Running: %s, Max: %s, Free: %s" % (running, max, available))
+        return {'what': what, 'running': running, 'max': max, 'available': available}
+
+    def hyper_cmd_run(self, label, cmd):
+        self.update_hyper_config_file()
+        log.info(label)
+
+        # add the standard hyper command:
+        stdcmd = ["hyper", "--config="+self.config_dirname()]
+
+        cmd = stdcmd + cmd
+
+        log.debug(cmd)
+        out = subprocess.check_output(cmd)
+        pretty = out.decode('utf-8').replace('\\n', '\n')
+        log.info(pretty)
+        return pretty
+
+    def update_hyper_config_file(self):
+        """Writes credentials file for this Credential"""
+
+        full_config = """
+        {
+            "auths": {},
+            "clouds": {
+                "tcp://*.hyper.sh:443": {
+                    "accesskey": "%(accesskey)s",
+                    "secretkey": "%(secretkey)s",
+                    "region": "%(region)s"
+                }
+            }
+        }
+        """ % {'accesskey': self.access_key, 'secretkey': self.secret_key, 'region': self.region}
+
+        with open(self.config_dirname() + '/config.json', 'w') as file:
+            file.write(full_config)
+
+    def config_dirname(self):
+        import os
+        directory = "%s/%s" % (settings.HYPER_CREDENTIALS_DIR, self.pk)
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        return directory
+
     @app.task
     def task_validate(self):
         return self.validate()
@@ -112,6 +236,18 @@ class Credential(models.Model):
         is_validation_save = 'last_validated' in kwargs.get('update_fields', [])
         if not is_validation_save:
             self.task_validate.apply_async(args=(self,))
+
+        self.update_certificate()
+
+    # Certificate is needed to communicate between failmap and it's workers. This cert is stored as base64 in the
+    # configuration and stored as a file on save. Configure HYPER_CERTIFICATE_DIR on the server to give these files
+    # a special location.
+    def update_certificate(self):
+        with open(self.certificate_path(), 'wb') as file:
+            file.write(b64decode(self.communication_certificate))
+
+    def certificate_path(self):
+        return settings.HYPER_CERTIFICATE_DIR + "/hyper_certificate_%s.p12" % self.pk
 
 
 class ContainerEnvironment(models.Model):
@@ -134,7 +270,16 @@ class ContainerConfiguration(models.Model):
     command = models.CharField(max_length=200, default=DEFAULT_COMMAND)
     environment = models.ManyToManyField(ContainerEnvironment)
     volumes = models.CharField(max_length=200, help_text="Comma separated list of volumes.")
-    instance_type = models.CharField(max_length=2, default='S1')
+    instance_type = models.CharField(
+        max_length=2,
+        default='S1',
+        help_text="Container sizes are described here: https://hyper.sh/hyper/pricing.html - In most cases S3 will "
+                  "suffice. The smaller, the cheaper."
+    )
+    requires_unique_ip = models.BooleanField(
+        default=False,
+        help_text="When set to true, a FIP is connected to this container. Make sure those are available."
+    )
 
     def __str__(self):
         return self.name
@@ -142,6 +287,8 @@ class ContainerConfiguration(models.Model):
     @property
     def as_dict(self):
         """Return configuration as directory of arguments that can be passed to hypersh API."""
+
+        # update hyper certificate, rendered from settings to a certain path.
 
         return {
             'image': self.image,
@@ -270,7 +417,8 @@ class ContainerGroup(models.Model):
     def update(self):
         """Update current object state based on real-world state."""
         try:
-            containers = self.client.containers.list(filters={'label': 'group=' + slugify(self.name)})
+            # all = Also get terminated containers.
+            containers = self.client.containers.list(all=True, filters={'label': 'group=' + slugify(self.name)})
         except BaseException as e:
             log.exception('failed to start container')
             sentry_id = client.captureException()
@@ -294,7 +442,7 @@ class ContainerGroup(models.Model):
             self.client.images.pull(self.configuration.as_dict['image'],
                                     auth_config="hack")  # prevent docker api from having auth issues
         except BaseException as e:
-            log.exception('failed to start container')
+            log.exception('failed to pull image')
             sentry_id = client.captureException()
             if sentry_id:
                 self.last_error = '{e}\nSentry: {project_url}/?query={sentry_id}'.format(
@@ -311,15 +459,72 @@ class ContainerGroup(models.Model):
     def create_container(self):
         try:
             log.debug("running container")
-            self.client.containers.run(
-                detach=True,
-                labels={
-                    'sh_hyper_instancetype': self.configuration.instance_type,
-                    'group': slugify(self.name),
-                },
-                environment=[str(x) for x in self.environment.all()],
-                tty=True,
-                **self.configuration.as_dict)
+
+            conf = self.configuration.as_dict
+
+            # Give $certificate the correct name and id:
+            conf['volumes'] = [volume.replace("$certificate",
+                                              self.credential.certificate_path()) for volume in conf['volumes']]
+
+            """
+            You'll see that we use commands to perform certain hyper operations. This is due to the mismatch with the
+            wrapped docker API and the hyper API. Hyper API looks more like the docker 1.0 API which has been
+            deprecated a while. This means that you'll have to find another way to send commands to hyper.
+
+            Simply sending POST commands doesn't work, given the amazon integrity code which is not really simple
+            and easy to understand (perhaps there is someone who added that to the requests library, but didn't check).
+
+            With code inspection you will see all kinds of nice functions that you can't use. The API of hyper is
+            leading and you'll have to figure out what's available in their documentation.
+
+            Things such as HostConfig are not available in the new API and will result in an error.
+            """
+
+            env = ["-e " + str(x) for x in self.environment.all()]
+            env = " ".join(env)
+
+            volumes = " ".join(conf['volumes'])
+            if volumes:
+                volumes = "-v " + volumes
+
+            container_id = random.randint(0, 10000000)
+
+            # get you command injection ready! Because here we go down a terrible road...
+            container_name = "fail-%(name)s-%(id)s" % {'name': slugify(self.name), 'id': container_id}
+
+            # Check if we need a FIP BEFORE we create the container, if there is no free FIP, then don't create
+            # the container! - This is not a transaction, it will fail sometimes.
+            if self.configuration.requires_unique_ip:
+                fip_name = self.get_fip()
+                if not fip_name:
+                    raise BaseException("No FIP available, while container needs one. Get more FIPS!")
+
+            cmd = \
+                "run --size=%(size)s -d --label %(lbl)s --name %(name)s %(env)s %(vol)s %(image)s %(cmd)s" \
+                % ({'id': container_id, 'env': env, 'vol': volumes, 'image': conf['image'],
+                    'cmd': conf['command'], 'size': self.configuration.instance_type, 'name': container_name,
+                    'lbl': 'group=%s' % slugify(self.name)})
+
+            cmd = list(filter(lambda x: not re.match(r'^\s*$', x), cmd.split(' ')))
+            log.info(cmd)
+            output = self.credential.hyper_cmd_run("Creating container", cmd)
+
+            # if pretty ends on something like: e7239e4f30ec38319095a47eed13c122e804ac316c7e7e553588f6a17246e86a
+            # then the container was succesfully created.
+            if re.findall(r'[a-f0-9]{64}', output):
+                log.info("Container succesfully started.")
+            else:
+                raise BaseException("Could not create container. Output: " + output)
+
+            # some containers need a FIP, this has to be configured, and that isn't happening yet.
+            if self.configuration.requires_unique_ip:
+                # assign a FIP.
+                fip_name = self.get_fip()
+                if not fip_name:
+                    raise BaseException("No FIP available, while container needs one. Get more FIPS!")
+                cmd = ["fip", "attach", fip_name, container_name]
+                self.credential.hyper_cmd_run("Attaching FIP", cmd)
+
         except BaseException as e:
             log.exception('failed to start container')
             sentry_id = client.captureException()
@@ -330,7 +535,7 @@ class ContainerGroup(models.Model):
                     sentry_id=sentry_id,
                 )
             else:
-                self.last_error = e
+                self.last_error = str(e) + str(traceback.print_exc())
             self.error_count += 1
             self.save(update_fields=['last_error', 'error_count'])
         else:
@@ -338,10 +543,23 @@ class ContainerGroup(models.Model):
             self.error_count = 0
             self.save(update_fields=['last_error', 'error_count'])
 
+    def get_fip(self):
+        """Returns the name of the first available FIP."""
+        name = ""
+        output = self.credential.hyper_cmd_run("Listing FIPS", ['fip', 'ls'])
+        for line in output.split('\n'):
+            if line:
+                elements = line.split()
+                if len(elements) == 2:  # ip and name
+                    return elements[1]
+        return name
+
     def destroy_container(self):
         """Remove one container."""
         log.debug("removing container")
-        self.client.containers.list(filters={'label': 'group=' + slugify(self.name)})[0].remove(force=True)
+        # -v = also remove associated volume
+        self.client.containers.list(all=True, filters={'label': 'group=' + slugify(self.name)})[0].remove(
+            force=True, v=True)
 
 
 @app.task

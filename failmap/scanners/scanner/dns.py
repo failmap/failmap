@@ -69,12 +69,12 @@ It's very convenient to add non-existing top-level domains, as that is a startin
 """
 
 
-def search_engines(organizations: List[Organization]=None, urls: List[Url]=None):
+def search_engines(organizations: List[Organization] = None, urls: List[Url] = None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in search_engines_scan(urls)]
 
 
-def nsec(organizations: List[Organization]=None, urls: List[Url]=None):
+def nsec(organizations: List[Organization] = None, urls: List[Url] = None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in nsec_scan(urls)]
 
@@ -121,7 +121,7 @@ def nsec_compose_task(organizations_filter: dict = dict(),
     return task
 
 
-def certificate_transparency(organizations: List[Organization]=None, urls: List[Url]=None):
+def certificate_transparency(organizations: List[Organization] = None, urls: List[Url] = None):
     urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
     return [new_url for new_url in certificate_transparency_scan(urls)]
 
@@ -167,17 +167,17 @@ def compose_discover_task(organizations_filter: dict = dict(),
     return task
 
 
-def brute_dutch(organizations: List[Organization]=None, urls: List[Url]=None):
+def brute_dutch(organizations: List[Organization] = None, urls: List[Url] = None):
     urls = toplevel_urls_without_wildcards(organizations) if organizations else [] + urls if urls else []
     return bruteforce_scan(urls, str(wordlists["dutch_basic"]["path"]))
 
 
-def brute_three_letters(organizations: List[Organization]=None, urls: List[Url]=None):
+def brute_three_letters(organizations: List[Organization] = None, urls: List[Url] = None):
     urls = toplevel_urls_without_wildcards(organizations) if organizations else [] + urls if urls else []
     return bruteforce_scan(urls, str(wordlists["three_letters"]["path"]))
 
 
-def brute_known_subdomains(organizations: List[Organization]=None, urls: List[Url]=None):
+def brute_known_subdomains(organizations: List[Organization] = None, urls: List[Url] = None):
     if organizations:
         for organization in organizations:
             update_subdomain_wordlist()
@@ -210,7 +210,7 @@ def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
     return task
 
 
-def standard(organizations: List[Organization]=None, urls: List[Url]=None):
+def standard(organizations: List[Organization] = None, urls: List[Url] = None):
     """
     Runs scans that are not heavy and potentially return a lot of results:
 

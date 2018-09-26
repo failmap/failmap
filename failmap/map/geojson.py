@@ -36,7 +36,7 @@ https://stackoverflow.com/questions/41723087/get-administrative-borders-with-ove
 """
 
 
-def get_resampling_resolution(country: str="NL", organization_type: str="municipality"):
+def get_resampling_resolution(country: str = "NL", organization_type: str = "municipality"):
     resolution = AdministrativeRegion.objects.all().filter(
         country=country,
         organization_type__name=organization_type).values_list('resampling_resolution', flat=True).first()
@@ -47,7 +47,7 @@ def get_resampling_resolution(country: str="NL", organization_type: str="municip
     return resolution
 
 
-def get_region(country: str="NL", organization_type: str="municipality"):
+def get_region(country: str = "NL", organization_type: str = "municipality"):
     return AdministrativeRegion.objects.all().filter(
         country=country,
         organization_type__name=organization_type).values_list('admin_level', flat=True).first()
@@ -59,7 +59,7 @@ def get_region(country: str="NL", organization_type: str="municipality"):
 # better to validate that the region doesn't exist and then add it...
 # @transaction.atomic
 @app.task(queue="scanners")
-def import_from_scratch(countries: List[str]=None, organization_types: List[str]=None, when=None):
+def import_from_scratch(countries: List[str] = None, organization_types: List[str] = None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
     certain region.
@@ -108,7 +108,7 @@ def import_from_scratch(countries: List[str]=None, organization_types: List[str]
 
 # @transaction.atomic
 @app.task(queue="scanners")
-def update_coordinates(country: str = "NL", organization_type: str="municipality", when=None):
+def update_coordinates(country: str = "NL", organization_type: str = "municipality", when=None):
 
     if not osmtogeojson_available():
         raise FileNotFoundError("osmtogeojson was not found. Please install it and make sure python can access it. "
@@ -139,7 +139,7 @@ def update_coordinates(country: str = "NL", organization_type: str="municipality
     log.info("Resampling and update tasks have been created.")
 
 
-def resample(feature: Dict, resampling_resolution: float=0.001):
+def resample(feature: Dict, resampling_resolution: float = 0.001):
     # downsample the coordinates using the rdp algorithm, mainly to reduce 50 megabyte to a about 150 kilobytes.
     # The code is a little bit dirty, using these counters. If you can refactor, please do :)
 
@@ -166,7 +166,7 @@ def resample(feature: Dict, resampling_resolution: float=0.001):
     return feature
 
 
-def store_new(feature: Dict, country: str="NL", organization_type: str="municipality", when=None):
+def store_new(feature: Dict, country: str = "NL", organization_type: str = "municipality", when=None):
     properties = feature["properties"]
     coordinates = feature["geometry"]
 
@@ -297,7 +297,7 @@ def store_new(feature: Dict, country: str="NL", organization_type: str="municipa
         log.info("Also found a top level website for this organization: %s" % website)
 
 
-def store_updates(feature: Dict, country: str="NL", organization_type: str="municipality", when=None):
+def store_updates(feature: Dict, country: str = "NL", organization_type: str = "municipality", when=None):
     properties = feature["properties"]
     coordinates = feature["geometry"]
 
@@ -407,7 +407,7 @@ def store_updates(feature: Dict, country: str="NL", organization_type: str="muni
     log.info("Stored new coordinates!")
 
 
-def get_osm_data_wambachers(country: str= "NL", organization_type: str= "municipality"):
+def get_osm_data_wambachers(country: str = "NL", organization_type: str = "municipality"):
     # uses https://wambachers-osm.website/boundaries/ to download map data. Might not be the most updated, but it has
     # a more complete and better set of queries. For example; it DOES get northern ireland and it clips out the sea,
     # which makes it very nice to look at.
@@ -479,7 +479,7 @@ def get_osm_data_wambachers(country: str= "NL", organization_type: str= "municip
     return data
 
 
-def get_osm_data(country: str= "NL", organization_type: str= "municipality"):
+def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
     """
     Runs an overpass query that results in a set with administrative borders and points with metadata.
 

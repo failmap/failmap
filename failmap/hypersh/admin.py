@@ -3,6 +3,7 @@ import logging
 from django.contrib import admin
 from django.utils.html import format_html
 from django_fsm_log.admin import StateLogInline
+from import_export.admin import ImportExportModelAdmin
 
 from .models import ContainerConfiguration, ContainerEnvironment, ContainerGroup, Credential
 
@@ -14,11 +15,11 @@ def environment_strings(obj):
 
 
 @admin.register(Credential)
-class CredentialAdmin(admin.ModelAdmin):
+class CredentialAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'enabled', 'valid', 'last_validated', 'used_by_group')
     readonly_fields = ('valid',)
 
-    actions = ('validate',)
+    actions = ('validate', 'nuke', 'status')
 
     def used_by_group(self, obj):
         return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containergroup_set.all())
@@ -29,9 +30,31 @@ class CredentialAdmin(admin.ModelAdmin):
             m.validate()
     validate.short_description = "Validate against Hyper.sh API."
 
+    def nuke(self, request, queryset):
+        """Remove all containers, images and volumes using these credentials."""
+        for m in queryset:
+            m.nuke()
+    nuke.short_description = "💥 Remove all containers, volumes and images."
+
+    def status(self, request, queryset):
+        """Get a status report on all containers etc"""
+
+        from django.http import HttpResponse
+
+        content = "<pre>"
+        for m in queryset:
+            content += "Status for credentials set %s:" % m.pk
+            content += m.hyper_status()
+
+        content += "</pre>"
+
+        return HttpResponse(content)
+
+    status.short_description = "Get status report"
+
 
 @admin.register(ContainerEnvironment)
-class ContainerEnvironmentAdmin(admin.ModelAdmin):
+class ContainerEnvironmentAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name', 'value', 'used_by_group', 'used_by_configuration')
     readonly_fields = ('configuration', 'group')
 
@@ -43,7 +66,7 @@ class ContainerEnvironmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(ContainerGroup)
-class ContainerGroupAdmin(admin.ModelAdmin):
+class ContainerGroupAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         'name',
         'credential',
@@ -109,8 +132,8 @@ class ContainerGroupAdmin(admin.ModelAdmin):
 
 
 @admin.register(ContainerConfiguration)
-class ContainerConfigurationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'image', 'command', environment_strings, 'used_by_group')
+class ContainerConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('name', 'image', 'command', environment_strings, 'used_by_group', 'requires_unique_ip')
 
     def used_by_group(self, obj):
         return ",".join("{0.__class__.__name__}({0.name})".format(x) for x in obj.containergroup_set.all())

@@ -94,7 +94,7 @@ def rerate_organizations(organizations: List):
 
 
 @app.task(queue='storage')
-def add_organization_rating(organizations: List[Organization], build_history: bool=False, when: datetime=None):
+def add_organization_rating(organizations: List[Organization], build_history: bool = False, when: datetime = None):
     """
     :param organizations: List of organization
     :param build_history: Optional. Find all relevant moments of this organization and create a rating
@@ -116,7 +116,7 @@ def add_organization_rating(organizations: List[Organization], build_history: bo
             rate_organization_on_moment(organization, when)
 
 
-def add_url_rating(urls: List[Url], build_history: bool=False, when: datetime=None):
+def add_url_rating(urls: List[Url], build_history: bool = False, when: datetime = None):
 
     if when:
         isinstance(when, datetime)
@@ -136,7 +136,7 @@ def delete_organization_ratings(organization: Organization):
     OrganizationRating.objects.all().filter(organization=organization).delete()
 
 
-def significant_moments(organizations: List[Organization]=None, urls: List[Url]=None):
+def significant_moments(organizations: List[Organization] = None, urls: List[Url] = None):
     """
     Searches for all significant point in times that something changed. The goal is to save
     unneeded queries when rebuilding ratings. When you know when things changed, you know
@@ -729,13 +729,13 @@ def rate_timeline(timeline, url: Url):
 
 
 def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, calculation,
-                    total_issues: int=0, total_endpoints: int=0,
-                    high_endpoints: int=0, medium_endpoints: int=0, low_endpoints: int=0,
-                    total_url_issues: int=0, total_endpoint_issues: int=0,
-                    url_issues_high: int=0, url_issues_medium: int=0, url_issues_low: int=0,
-                    endpoint_issues_high: int=0, endpoint_issues_medium: int=0, endpoint_issues_low: int=0,
+                    total_issues: int = 0, total_endpoints: int = 0,
+                    high_endpoints: int = 0, medium_endpoints: int = 0, low_endpoints: int = 0,
+                    total_url_issues: int = 0, total_endpoint_issues: int = 0,
+                    url_issues_high: int = 0, url_issues_medium: int = 0, url_issues_low: int = 0,
+                    endpoint_issues_high: int = 0, endpoint_issues_medium: int = 0, endpoint_issues_low: int = 0,
 
-                    explained_high: int=0, explained_medium: int=0, explained_low: int=0,
+                    explained_high: int = 0, explained_medium: int = 0, explained_low: int = 0,
                     explained_total_issues: int = 0, explained_high_endpoints: int = 0,
                     explained_medium_endpoints: int = 0, explained_low_endpoints: int = 0,
                     explained_total_url_issues: int = 0, explained_total_endpoint_issues: int = 0,
@@ -861,7 +861,7 @@ def show_timeline_console(timeline, url: Url):
 # also callable as admin action
 # this is 100% based on url ratings, just an aggregate of the last status.
 # make sure the URL ratings are up to date, they will check endpoints and such.
-def rate_organization_on_moment(organization: Organization, when: datetime=None):
+def rate_organization_on_moment(organization: Organization, when: datetime = None):
     # If there is no time slicing, then it's today.
     if not when:
         when = datetime.now(pytz.utc)
@@ -1068,7 +1068,7 @@ def get_latest_urlratings_fast(urls: List[Url], when):
 
 
 # but this will give the correct score, possibly on the wrong endpoints (why?)
-def rate_url(url: Url, when: datetime=None):
+def rate_url(url: Url, when: datetime = None):
     if not when:
         when = datetime.now(pytz.utc)
 
@@ -1100,7 +1100,7 @@ def rate_url(url: Url, when: datetime=None):
         log.warning("The calculation is still the same, not creating a new UrlRating")
 
 
-def get_url_score_modular(url: Url, when: datetime=None):
+def get_url_score_modular(url: Url, when: datetime = None):
     if not when:
         when = datetime.now(pytz.utc)
 

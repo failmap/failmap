@@ -16,7 +16,7 @@ class EndpointScanManager:
     :return:
     """
     @staticmethod
-    def add_scan(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str=""):
+    def add_scan(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str = ""):
 
         # Check if the latest scan has the same rating or not:
         try:
