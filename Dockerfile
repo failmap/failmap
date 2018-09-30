@@ -20,8 +20,11 @@ RUN apk --no-cache add \
   nodejs-npm \
   libxml2-dev \
   libxslt-dev \
-  python3-dev \ 
-  git
+  python3-dev \
+  git \
+  # hypercli build dependencies
+  go \
+  bash
 
 # install app and dependencies in a artifact-able directory
 RUN /usr/bin/pip3 install virtualenv
@@ -42,6 +45,10 @@ RUN tools/docker-install-dnscheck.sh
 
 # install osmtogeojson
 RUN npm install osmtogeojson
+
+# build hypersh hypercli
+COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
+RUN cd /gopath/src/github.com/hyperhq/hypercli; GOPATH=/gopath HYPER_GITCOMMIT=0 ./build.sh
 
 # restart with a clean image
 FROM failmap/o-saft:latest
@@ -102,12 +109,12 @@ COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
 COPY --from=build /node_modules /node_modules
 RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
 
+# copy hypercli binary
+COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local/bin/hyper
+
 # copy all relevant files for python installation
 COPY ./failmap/ /source/failmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
-
-# Add hypersh CLI tool
-COPY /vendor/hyper/hyper /usr/local/bin/hyper
 
 # add wildcard to version file as it may not exists (eg: local development)
 COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
