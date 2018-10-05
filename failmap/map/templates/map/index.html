@@ -188,6 +188,18 @@
     </nav>
 </div>
 
+{% if config.SHOW_ANNOUNCEMENT and config.ANNOUNCEMENT %}
+<section class="announcement">
+   <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <i class="fas fa-bell"></i> {{ config.ANNOUNCEMENT|safe }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <section>
     <div id='map'></div>
 </section>

@@ -642,6 +642,10 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 CONSTANCE_CONFIG = {
     'COMMENTS': ('', 'Some comments by you that say a little bit about why below settings are the way they are.', str),
 
+    'SHOW_ANNOUNCEMENT': (False, 'Shows the announcement bar. Announcements do not show when empty anyway.', bool),
+    'ANNOUNCEMENT': ('', 'Text / HTML message that should appear on the top of the site / app. For example with '
+                         'important news / features or current issues. You can enter any HTML, JS, CSS.', str),
+
     'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
     'PROJECT_COUNTRY': ('NL', 'Two letter ISO code of the country that should be shown.', str),
     'PROJECT_TAGLINE': ('', 'Tagline for this project.', str),
@@ -659,11 +663,6 @@ CONSTANCE_CONFIG = {
 
     'MAPBOX_ACCESS_TOKEN': ('pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
                             'Access token for Mapbox', str),
-
-    'SITE_BASE_ADDRESS': ('sitename.tld', 'Base address of this site, such as faalkaart.nl, failmap.co.uk, example.com.'
-                                          ' Without the protocol (so no http or https). This is used for remote '
-                                          'scanners to contact this website. They will use: '
-                                          'redis://SITE_BASE_ADDRESS:1337/0', str),
 
     'WAMBACHERS_OSM_CLIKEY': ('', 'CLI key for Wambachers OSM export feature', str),
 
@@ -755,7 +754,7 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
-    ('General', ('COMMENTS', 'SITE_BASE_ADDRESS', 'MAPBOX_ACCESS_TOKEN', 'WAMBACHERS_OSM_CLIKEY')),
+    ('General', ('COMMENTS', 'SHOW_ANNOUNCEMENT', 'ANNOUNCEMENT', 'MAPBOX_ACCESS_TOKEN', 'WAMBACHERS_OSM_CLIKEY')),
 
     ('Project', ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
                  'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
