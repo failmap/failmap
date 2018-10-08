@@ -29,6 +29,7 @@ import pytz
 import requests
 from celery import Task, group, states
 from django.conf import settings
+from multiprocessing.pool import ThreadPool
 
 from failmap.celery import PRIO_HIGH, PRIO_NORMAL, app
 from failmap.organizations.models import Organization, Url
@@ -43,12 +44,30 @@ API_SERVER_TIMEOUT = 30
 log = logging.getLogger(__name__)
 
 
+"""
+New architecture:
+- A worker gets a set of 25 objects to scan. Will do so multithreaded, 
+ - - starting one every minute (or backing off if needed)
+- A finished scan results in a new task (just like a scrathpad). Whenever the worker is ready all 25 scans are 
+  completed and the worker is ready to receive more. This is the _FASTEST_ you can ever accomplish without messy 
+  queue management.
+"""
+
 @app.task(queue="storage")
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
 ) -> Task:
+
+    # for some reason declaring the chunks function outside of this function does not resolve. I mean... why?
+    # https://chrisalbon.com/python/data_wrangling/break_list_into_chunks_of_equal_size/
+    # Create a function called "chunks" with two arguments, l and n:
+    def chunks(l, n):
+        # For item i in a range that is a length of l,
+        for i in range(0, len(l), n):
+            # Create an index range for l of n items:
+            yield l[i:i + n]
 
     if not allowed_to_scan("scanner_tls_qualys"):
         return group()
@@ -99,139 +118,102 @@ def compose_task(
         log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
         return group()
 
-    log.info('Creating qualys scan task for %s urls for %s organizations.',
-             len(urls), len(organizations))
+    log.info('Creating qualys scan task for %s urls for %s organizations.', len(urls), len(organizations))
 
-    # create tasks for scanning all selected urls as a single managable group
-    task = group(qualys_scan.si(url) | process_qualys_result.s(url) for url in urls)
-
+    # Split the urls up in chunks:
+    chunks = list(chunks(urls, 25))
+    task = group(qualys_scan_bulk.s(chunk) for chunk in chunks)
     return task
 
 
-@app.task(
-    # http://docs.celeryproject.org/en/latest/userguide/tasks.html#Task.rate_limit
-    # start at most 1 qualys task per minute to not get our IP blocked
+@app.task(queue='scanners.qualys')
+def qualys_scan_bulk(urls):
+    # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
+    # capacity severely.
+    # Using this solution still uses parallel scans, while not having to rely on the black-box of redis and celery
+    # that have caused priority shifts. This is much faster and easier to understand.
 
-    # After starting a scan you can read it out as much as you want. The problem lies with rate limiting
-    # of starting the task.
+    # start one every 60 seconds, a thread can manage itself if too many are running.
+    pool = ThreadPool(25)
 
-    # Celery will at most start 1 new qualys_scan per minute, the 'retry' at
-    # the end of this task will turn it from a rate_limited into a scheduled
-    # tasks which makes this work nicely with Qualys API restrictions.
+    for url in urls:
+        api_results = service_provider_status()
+        while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+            log.debug("Running out of capacity, waiting to start new scan.")
+            sleep(70)
+            api_results = service_provider_status()
 
-    # after starting a scan (1/m) you can read out every 20 seconds.
-    # You can do so in the 10 minutes. If you don't, it will start a new scan which affects your rate limit.
+        pool.apply_async(qualys_scan_thread, [url])
+        sleep(70)
 
-    bind=True,
-    # this task should run on an internet connected, distributed worker
-    # also because of rate limiting put in its own queue to prevent blocking other tasks
-    queue='scanners.qualys',
-    # start at most 1 new task per minute (per worker)
+    pool.close()
+    pool.join()
 
-    # 7 march 2018, qualys has new rate limits due to service outage.
-    # We used to do 1/m which was fine, but we're now doing 1 every 2 minutes.
-    # perhaps 0.5/m doesn't work... should maybe be.
-    rate_limit='60/h',
-)
-def qualys_scan(self, url):
-    """Acquire JSON scan result data for given URL from Qualys.
+    return
 
-    A scan usually takes about two minutes. It _can_ take much longer depending on the amount
-    of ip's qualys is able to find. Having eight different IP's is not special for some cloud
-    hosters.
 
-    :param url: object representing an url
-    :return:
-    """
+# keeps scanning in a loop until it has the data to fire a
+def qualys_scan_thread(url):
 
-    state = self.AsyncResult(self.request.id).state
-    if state in [states.PENDING, states.STARTED]:
-        log.info("Started attempt to scan %s. State: %s " % (url, state))
-    if state == states.RETRY:
-        log.info("Scan on %s continued..." % url)
+    scan_completed = False
+    data = {}
+    waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
+    max_waiting_time = 180
 
-    # Query Qualys API for information about this URL.
-    try:
-        data = service_provider_scan_via_api(url.url)
-    except requests.RequestException:
-        # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
-        # ex: EOF occurred in violation of protocol (_ssl.c:749)
-        log.exception("(Network or Server) Error when contacting Qualys for scan on %s", url.url)
-        # Initial scan (with rate limiting) has not been received yet, so add to the qualys queue again.
-        raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=100, queue='scanners.qualys')
+    while not scan_completed:
+        try:
+            api_result = service_provider_scan_via_api_with_limits(url.url)
+            data = api_result['data']
+        except requests.RequestException:
+            # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+            # ex: EOF occurred in violation of protocol (_ssl.c:749)
+            log.exception("(Network or Server) Error when contacting Qualys for scan on %s", url.url)
 
-    # Create task for storage worker to store debug data in database (this
-    # task has no direct DB access due to scanners queue).
-    scratch.apply_async([url, data])
+        # Store debug data in database (this task has no direct DB access due to scanners queue).
+        scratch.apply_async([url, data])
 
-    if settings.DEBUG:
-        report_to_console(url.url, data)  # for more debugging
+        if settings.DEBUG:
+            report_to_console(url.url, data)
 
-    # Qualys is running a scan...
-    if 'status' in data:
-        # Qualys has completed the scan of the url and has a result for us. Continue the chain.
-        # Qualys has found an error while scanning. Continue the chain.
-        if data['status'] in ["READY", "ERROR"]:
-            return data
+        # Qualys is already running a scan on this url
+        if 'status' in data:
+            # Qualys has completed the scan of the url and has a result.
+            if data['status'] in ["READY", "ERROR"]:
+                scan_completed = True
 
-    # The API is in error state, let's see if we can recover...
-    # This is on API level, and not the content of the API
-    if "errors" in data:
-        # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
-        if data['errors'][0]['message'] == "Running at full capacity. Please try again later.":
-            log.info("Re-queued scan, qualys is at full capacity.")
-            raise self.retry(countdown=60, priorty=PRIO_NORMAL, max_retries=100, queue='scanners.qualys')
-        # We have no clue, but we certainly don't want this running on the normal queue.
-        # The amount of retries has been lowered, as this is a situation we don't know yet, we don't have to
-        # keep on making the same mistakes at the API.
-        if data['errors'][0]['message'].startswith("Concurrent assessment limit reached "):
-            log.info("Too many concurrent assessments: Are you running multiple scans from the same IP? "
-                     "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. Slow down. "
-                     "%s" % data['errors'][0]['message'])
-            raise self.retry(countdown=120, priorty=PRIO_NORMAL, max_retries=100, queue='scanners.qualys')
-        else:
-            log.exception("Unexpected error from API on %s: %s", url.url, str(data))
-            # We don't have to keep on failing... lowering the amount of retries.
-            raise self.retry(countdown=120, priorty=PRIO_NORMAL, max_retries=5, queue='scanners.qualys')
+        # The API is in error state, let's see if we can be nice and recover.
+        if "errors" in data:
+            # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
+            # Don't increase the amount of waiting time yet... try again in a minute.
+            if data['errors'][0]['message'] == "Running at full capacity. Please try again later.":
+                log.error("Qualys is at full capacity, trying later.")
 
-    """
-    While the documentation says to check every 10 seconds, we'll do that between every
-    20 to 25, simply because it matters very little when scans are ran parralel.
-    https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-    """
-    log.info('Still waiting for Qualys result on %s. Retrying task in 180 seconds. Status: %s' %
-             (url.url, data.get('status', "unknown")))
+            # We're going too fast with new assessments. Back off.
+            if data['errors'][0]['message'].startswith("Concurrent assessment limit reached "):
+                log.error("Too many concurrent assessments: Are you running multiple scans from the same IP? "
+                          "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
+                          "Slow down. ""%s" % data['errors'][0]['message'])
+                if waiting_time < max_waiting_time:
+                    waiting_time += 30
+            if data['errors'][0]['message'] == "Too many new assessments too fast. Please slow down.":
+                if waiting_time < max_waiting_time:
+                    waiting_time += 30
+            else:
+                log.error("Unexpected error from API on %s: %s", url.url, str(data))
 
-    # If this scan is performed directly, the countdown setting / exception doesn't work. So sleep manually.
-    if self.request.is_eager:
-        raise NotImplementedError("Sorry, couldn't figure out how to run this function with the right parameters. "
-                                  "Try -m async to run this on a worker. Or kill this command and retry again to "
-                                  "progress the scan (probably a few times).")
-        sleep(50)
+        elif data:
+            # scan started without errors. It's probably pending. Reset the waiting time to 60 seconds again as we
+            # we want to get the result asap.
+            waiting_time = 60
 
-        # retried tasks return non if an exception happens. So instead of throwing an exception,
-        # we're calling ourselves again in the hopes we get the correct value
-        # todo: cannot get the parameter url accross, tried dict, kwargs, args, etc etc etc
-        # return self.apply(url=url).get(propagate=False)
+        log.debug("Waiting %s seconds before next update." % waiting_time)
+        if not scan_completed:
+            sleep(waiting_time)
 
-    # not tested yet: report_to_console(url.url, data)
-    # 10 minutes of retries... (20s seconds * 30 = 10 minutes)
-    # The 'retry' converts this task instance from a rate_limited into a
-    # scheduled task, so retrying tasks won't interfere with new tasks to be
-    # started
-    # We use a different queue here as only initial requests count toward the rate limit set by Qualys.
-    # Do note: this really needs to be picked up within the first five minutes of starting the scan. If you don't
-    # a new scan is started on this url and you'll run into rate limiting problems.
-    # the more often you try to get the status, on the more workers it will run (increasing concurrency)
-    # so if we check after two minutes, there will be a lot less workers with increasing concurrency as the
-    # scan will probably be finished by then.
-    """
-    With 180 secs: This might cause too many high prio tasks, so much that you cannot really handle them high prio.
-    It might be run on another machine... and then it will also eat from the credits of that machine.
-
-    The countdown is just the amount of time before it's added to the queue.
-    """
-    raise self.retry(countdown=45, priorty=PRIO_HIGH, max_retries=100, queue='scanners')
+    # scan completed
+    # store the result on the storage queue.
+    process_qualys_result.apply_async([data, url])
+    return True
 
 
 @app.task(queue='storage')
@@ -321,6 +303,101 @@ def service_provider_scan_via_api(domain):
              )
 
     return response.json()
+
+
+def service_provider_scan_via_api_with_limits(domain):
+    # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+    payload = {
+        'host': domain,  # host that will be scanned for tls
+        'publish': "off",  # will not be published on the front page of the ssllabs site
+        'startNew': "off",  # that's done automatically when needed by service provider
+        'fromCache': "on",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
+        # qualys is not long lived. We prefer it because it might give back a result faster.
+        'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
+        'all': "done"  # ?
+    }
+
+    response = requests.get(
+        "https://api.ssllabs.com/api/v2/analyze",
+        params=payload,
+        timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
+        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
+    )
+
+    # log.debug(vars(response))  # extreme debugging
+    log.info("Assessments: max: %s, current: %s, this client: %s, this: %s",
+             response.headers['X-Max-Assessments'],
+             response.headers['X-Current-Assessments'],
+             response.headers['X-ClientMaxAssessments'],
+             domain
+             )
+
+    return {'max': int(response.headers['X-Max-Assessments']),
+            'current': int(response.headers['X-Current-Assessments']),
+            'this-client-max': int(response.headers['X-ClientMaxAssessments']),
+            'data': response.json()}
+
+
+def service_provider_status():
+    # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+    response = requests.get(
+        "https://api.ssllabs.com/api/v2/getStatusCodes",
+        params={},
+        timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
+        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
+    )
+
+    """
+    Always the same response. This is just used to get a correct response and the available capacity.
+    
+     {'statusDetails': {'TESTING_PROTOCOL_INTOLERANCE_399': 'Testing Protocol Intolerance (TLS 1.152)', 
+     'PREPARING_REPORT': 'Preparing the report', 'TESTING_SESSION_RESUMPTION': 'Testing session resumption', 
+     'RETRIEVING_CERT_V3__NO_SNI': 'Retrieving certificate', 'TESTING_NPN': 'Testing NPN', 
+     'RETRIEVING_CERT_V3__SNI_APEX': 'Retrieving certificate', 'TESTING_CVE_2014_0224': 'Testing CVE-2014-0224', 
+     'TESTING_CAPABILITIES': 'Determining server capabilities', 'TESTING_CVE_2016_2107': 'Testing CVE-2016-2107', 
+     'TESTING_HEARTBLEED': 'Testing Heartbleed', 'TESTING_PROTO_3_3_V2H': 'Testing TLS 1.1 (v2 handshake)', 
+     'TESTING_SESSION_TICKETS': 'Testing Session Ticket support', 'VALIDATING_TRUST_PATHS': 'Validating trust paths', 
+     'TESTING_RENEGOTIATION': 'Testing renegotiation', 'TESTING_HTTPS': 'Sending one complete HTTPS request', 
+     'TESTING_ALPN': 'Determining supported ALPN protocols', 'TESTING_V2H_HANDSHAKE': 'Testing v2 handshake', 
+     'TESTING_STRICT_RI': 'Testing Strict Renegotiation', 'TESTING_HANDSHAKE_SIMULATION': 'Simulating handshakes', 
+     'TESTING_SUITES_DEPRECATED': 'Testing deprecated cipher suites', 'TESTING_STRICT_SNI': 'Testing Strict SNI', 
+     'TESTING_PROTOCOL_INTOLERANCE_499': 'Testing Protocol Intolerance (TLS 2.152)', 'TESTING_PROTO_3_1_V2H': 
+     'Testing TLS 1.0 (v2 handshake)', 'TESTING_TLS_VERSION_INTOLERANCE': 'Testing TLS version intolerance', 
+     'TESTING_BLEICHENBACHER': 'Testing Bleichenbacher', 'TESTING_PROTOCOL_INTOLERANCE_304': 
+     'Testing Protocol Intolerance (TLS 1.3)', 'TESTING_SUITES_BULK': 'Bulk-testing less common cipher suites', 
+     'TESTING_BEAST': 'Testing for BEAST', 'TESTING_PROTO_2_0': 'Testing SSL 2.0', 'TESTING_TICKETBLEED': 
+     'Testing Ticketbleed', 'BUILDING_TRUST_PATHS': 'Building trust paths', 'TESTING_PROTO_3_1': 'Testing TLS 1.0', 
+     'TESTING_PROTO_3_0_V2H': 'Testing SSL 3.0 (v2 handshake)', 'TESTING_PROTO_3_0': 'Testing SSL 3.0', 
+     'TESTING_PROTOCOL_INTOLERANCE_300': 'Testing Protocol Intolerance (SSL 3.0)', 'TESTING_PROTOCOL_INTOLERANCE_301': 
+     'Testing Protocol Intolerance (TLS 1.0)', 'TESTING_PROTOCOL_INTOLERANCE_302': 
+     'Testing Protocol Intolerance (TLS 1.1)', 'TESTING_SUITES_NO_SNI': 'Observed extra suites during simulation, 
+     Testing cipher suites without SNI support', 'TESTING_EC_NAMED_CURVES': 'Determining supported named groups', 
+     'TESTING_PROTOCOL_INTOLERANCE_303': 'Testing Protocol Intolerance (TLS 1.2)', 'TESTING_OCSP_STAPLING_PRIME': 
+     'Trying to prime OCSP stapling', 'TESTING_DROWN': 'Testing for DROWN', 'TESTING_EXTENSION_INTOLERANCE': 
+     'Testing Extension Intolerance (might take a while)', 'TESTING_OCSP_STAPLING': 'Testing OCSP stapling', 
+     'TESTING_SSL2_SUITES': 'Checking if SSL 2.0 has any ciphers enabled', 'TESTING_SUITES': 
+     'Determining available cipher suites', 'TESTING_ECDHE_PARAMETER_REUSE': 'Testing ECDHE parameter reuse', 
+     'TESTING_PROTO_3_2_V2H': 'Testing TLS 1.1 (v2 handshake)', 'TESTING_POODLE_TLS': 'Testing POODLE against TLS', 
+     'RETRIEVING_CERT_TLS13': 'Retrieving certificate', 'RETRIEVING_CERT_V3__SNI_WWW': 'Retrieving certificate', 
+     'TESTING_PROTO_3_4': 'Testing TLS 1.3', 'TESTING_COMPRESSION': 'Testing compression', 'CHECKING_REVOCATION': 
+     'Checking for revoked certificates', 'TESTING_SUITE_PREFERENCE': 'Determining cipher suite preference', 
+     'TESTING_PROTO_3_2': 'Testing TLS 1.1', 'TESTING_PROTO_3_3': 'Testing TLS 1.2', 'TESTING_LONG_HANDSHAKE': 
+     'Testing Long Handshake (might take a while)'}}
+    """
+    # log.debug(response)
+
+    # log.debug(vars(response))  # extreme debugging
+    log.info("Status: max: %s, current: %s, this client: %s",
+             response.headers['X-Max-Assessments'],
+             response.headers['X-Current-Assessments'],
+             response.headers['X-ClientMaxAssessments'])
+
+    return {'max': int(response.headers['X-Max-Assessments']),
+            'current': int(response.headers['X-Current-Assessments']),
+            'this-client-max': int(response.headers['X-ClientMaxAssessments']),
+            'data': response.json()}
 
 
 def save_scan(url, data):
