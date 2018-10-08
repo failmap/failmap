@@ -1,6 +1,7 @@
 import logging
 
 from django.core.management.base import BaseCommand
+
 from failmap.hypersh.models import Credential
 
 log = logging.getLogger(__package__)
