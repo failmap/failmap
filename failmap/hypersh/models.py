@@ -2,6 +2,7 @@ import logging
 import random
 import re
 import subprocess
+import tempfile
 import time
 import traceback
 from base64 import b64decode
@@ -184,11 +185,11 @@ class Credential(models.Model):
         return {'what': what, 'running': running, 'max': max, 'available': available}
 
     def hyper_cmd_run(self, label, cmd):
-        self.update_hyper_config_file()
+        hyper_config_dir = self.create_tmp_hyper_config()
         log.info(label)
 
         # add the standard hyper command:
-        stdcmd = ["hyper", "--config="+self.config_dirname()]
+        stdcmd = ["hyper", "--config="+hyper_config_dir]
 
         cmd = stdcmd + cmd
 
@@ -198,7 +199,12 @@ class Credential(models.Model):
         log.info(pretty)
         return pretty
 
-    def update_hyper_config_file(self):
+    def create_tmp_hyper_config(self):
+
+        # you need a serparate dir per config file...
+        # you need to manually delete this... which we currently wont.
+        tmp_dir = tempfile.mkdtemp()
+
         """Writes credentials file for this Credential"""
 
         full_config = """
@@ -214,17 +220,10 @@ class Credential(models.Model):
         }
         """ % {'accesskey': self.access_key, 'secretkey': self.secret_key, 'region': self.region}
 
-        with open(self.config_dirname() + '/config.json', 'w') as file:
+        with open(tmp_dir + '/config.json', 'w') as file:
             file.write(full_config)
 
-    def config_dirname(self):
-        import os
-        directory = "%s/%s" % (settings.HYPER_CREDENTIALS_DIR, self.pk)
-
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        return directory
+        return tmp_dir
 
     @app.task
     def task_validate(self):
@@ -236,18 +235,6 @@ class Credential(models.Model):
         is_validation_save = 'last_validated' in kwargs.get('update_fields', [])
         if not is_validation_save:
             self.task_validate.apply_async(args=(self,))
-
-        self.update_certificate()
-
-    # Certificate is needed to communicate between failmap and it's workers. This cert is stored as base64 in the
-    # configuration and stored as a file on save. Configure HYPER_CERTIFICATE_DIR on the server to give these files
-    # a special location.
-    def update_certificate(self):
-        with open(self.certificate_path(), 'wb') as file:
-            file.write(b64decode(self.communication_certificate))
-
-    def certificate_path(self):
-        return settings.HYPER_CERTIFICATE_DIR + "/hyper_certificate_%s.p12" % self.pk
 
 
 class ContainerEnvironment(models.Model):
@@ -462,9 +449,16 @@ class ContainerGroup(models.Model):
 
             conf = self.configuration.as_dict
 
+            # create a temporary file with certificate information. Will be deleted asap.
+            # will leak the certificate if temporaryfile can be accessed by others etc.
+            # you really need to save it... can't unlink it manually as exceptions below will make sure it remains.
+            # starting containers can be really slow.
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_certfile:
+                tmp_certfile.write(b64decode(self.credential.communication_certificate))
+                tmp_certfile.flush()  # make sure it's actually written.
+
             # Give $certificate the correct name and id:
-            conf['volumes'] = [volume.replace("$certificate",
-                                              self.credential.certificate_path()) for volume in conf['volumes']]
+            conf['volumes'] = [volume.replace("$certificate", tmp_certfile.name) for volume in conf['volumes']]
 
             """
             You'll see that we use commands to perform certain hyper operations. This is due to the mismatch with the
