@@ -188,30 +188,8 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
                        'rating_determined_on', 'last_scan_moment')
 
-    actions = ['rate_url', 'scan_url']
-
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
-
-    def rate_url(self, request, queryset):
-
-        for tlsqualysscan in queryset:
-            rate_url(url=tlsqualysscan.endpoint.url)
-
-        self.message_user(request, "URL(s) have been rated")
-
-    # def scan_url(self, request, queryset):
-    #
-    #     urls_to_scan = []
-    #     for tlsqualysscan in queryset:
-    #         urls_to_scan.append(tlsqualysscan.endpoint.url.url)
-    #
-    #     scan(urls_to_scan)
-    #
-    #     self.message_user(request, "URL(s) have been scanned")
-
-    rate_url.short_description = "Rate (url)"
-    # scan_url.short_description = "Scan (url)"
 
 
 @admin.register(TlsQualysScratchpad)
