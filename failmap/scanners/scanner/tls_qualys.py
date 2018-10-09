@@ -196,7 +196,10 @@ def qualys_scan_thread(url):
                           "Slow down. ""%s" % data['errors'][0]['message'])
                 if waiting_time < max_waiting_time:
                     waiting_time += 30
-            if data['errors'][0]['message'] == "Too many new assessments too fast. Please slow down.":
+            if data['errors'][0]['message'].startswith("Too many concurrent assessments"):
+                if waiting_time < max_waiting_time:
+                    waiting_time += 30
+            if data['errors'][0]['message'].startswith("Concurrent assessment limit reached"):
                 if waiting_time < max_waiting_time:
                     waiting_time += 30
             else:

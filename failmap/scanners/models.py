@@ -239,7 +239,7 @@ class ExplainMixin(models.Model):
     )
 
     comply_or_explain_explanation = models.TextField(
-        max_length=255,
+        max_length=2048,
         help_text="Text that helps explain why this result is not counted in the report. For example: "
                   "a broken scanner or another edge-case that is mainly on the side of the scanning party. Having "
                   "requested the supplier for a fix, or promising a fix should be stored as a promise, not as an "
@@ -251,7 +251,7 @@ class ExplainMixin(models.Model):
     )
 
     comply_or_explain_explained_by = models.CharField(
-        max_length=255,
+        max_length=512,
         help_text="Please also refer to a thread, discussion or another fact that can be verified.",
         verbose_name="explained by",
         default="",
@@ -267,7 +267,7 @@ class ExplainMixin(models.Model):
     )
 
     comply_or_explain_case_handled_by = models.CharField(
-        max_length=255,
+        max_length=512,
         help_text="Who entered the comply-or-explain information, so it's easy to find the right person to talk to in "
                   "case of follow-ups.",
         verbose_name="case handled by",
@@ -277,7 +277,7 @@ class ExplainMixin(models.Model):
     )
 
     comply_or_explain_case_additional_notes = models.TextField(
-        max_length=512,
+        max_length=9000,
         help_text="Notes about the scenario for follow up. Things such as phone numbers, mail addresses, contact info."
                   "Will not be exported, but are not secret.",
         verbose_name="additional case notes",
@@ -320,6 +320,7 @@ class TlsQualysScan(ExplainMixin):
     class Meta:
         managed = True
         db_table = 'scanner_tls_qualys'
+        ordering = ['-rating_determined_on', ]
 
     def __str__(self):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
@@ -366,6 +367,7 @@ class TlsScan(ExplainMixin):
     class Meta:
         verbose_name = _('tlsscan')
         verbose_name_plural = _('tlsscan')
+        ordering = ['-rating_determined_on', ]
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
@@ -422,6 +424,7 @@ class GenericScanMixin(ExplainMixin):
         another abstract base class. You just need to remember to explicitly set abstract=True each time.
         """
         abstract = True
+        ordering = ['-rating_determined_on', ]
 
 
 class EndpointGenericScan(GenericScanMixin):
