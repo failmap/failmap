@@ -4,8 +4,6 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
-from failmap.map.rating import rate_url
-
 from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
                      TlsQualysScan, TlsQualysScratchpad, TlsScan, UrlGenericScan, UrlIp)
 
@@ -83,29 +81,6 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     inlines = [TlsQualysScanAdminInline, EndpointGenericScanInline]
     save_as = True  # Save as new is nice for duplicating endpoints.
-
-    actions = ['rate_url', 'scan_url']
-
-    def rate_url(self, request, queryset):
-
-        for endpoint in queryset:
-            rate_url(url=endpoint.url)
-
-        self.message_user(request, "URL(s) have been rated")
-
-    def scan_url(self, request, queryset):
-
-        urls_to_scan = []
-        for endpoint in queryset:
-            urls_to_scan.append(endpoint.url.url)
-
-        # scan(urls_to_scan)
-        raise NotImplementedError('WIP deprecated TODO')
-
-        self.message_user(request, "URL(s) have been scanned")
-
-    rate_url.short_description = "Rate (url)"
-    scan_url.short_description = "Scan (url)"
 
 
 @admin.register(TlsScan)
