@@ -23,9 +23,13 @@ class Command(VerifyTaskCommand):
 
     def handle(self, *args, **options):
 
-        if options['scanner'][0] not in self.scanners:
-            print("Scanner does not exist. Please specify a scanner: %s " % self.scanners.keys())
-            return
+        try:
+            if options['scanner'][0] not in self.scanners:
+                print("Scanner does not exist. Please specify a scanner: %s " % self.scanners.keys())
+                return
 
-        self.scanner_module = self.scanners[options['scanner'][0]]
-        return super().handle(self, *args, **options)
+            self.scanner_module = self.scanners[options['scanner'][0]]
+            return super().handle(self, *args, **options)
+
+        except KeyboardInterrupt:
+            log.info("Received keyboard interrupt. Stopped.")
