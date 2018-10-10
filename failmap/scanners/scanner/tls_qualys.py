@@ -30,6 +30,7 @@ import pytz
 import requests
 from celery import Task, group
 from django.conf import settings
+from tenacity import before_log, retry, wait_fixed
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
@@ -137,6 +138,8 @@ def qualys_scan_bulk(urls):
     # start one every 60 seconds, a thread can manage itself if too many are running.
     pool = ThreadPool(25)
 
+    # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
+    # every 30 seconds. So they may be even down for a day and it will continue.
     for url in urls:
         api_results = service_provider_status()
         while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
@@ -278,37 +281,9 @@ def report_to_console(domain, data):
         log.error("Unexpected data received for domain: %s, %s" % (domain, data))
 
 
-def service_provider_scan_via_api(domain):
-    # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
-    payload = {
-        'host': domain,  # host that will be scanned for tls
-        'publish': "off",  # will not be published on the front page of the ssllabs site
-        'startNew': "off",  # that's done automatically when needed by service provider
-        'fromCache': "on",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
-        # qualys is not long lived. We prefer it because it might give back a result faster.
-        'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
-        'all': "done"  # ?
-    }
-
-    response = requests.get(
-        "https://api.ssllabs.com/api/v2/analyze",
-        params=payload,
-        timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
-        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
-    )
-
-    # log.debug(vars(response))  # extreme debugging
-    log.info("Assessments: max: %s, current: %s, this client: %s, this: %s",
-             response.headers['X-Max-Assessments'],
-             response.headers['X-Current-Assessments'],
-             response.headers['X-ClientMaxAssessments'],
-             domain
-             )
-
-    return response.json()
-
-
+# Qualys is a service that is constantly attacked / ddossed and very unreliable. So try a couple of times before
+# giving up. It can even be down for half a day. Waiting a little between retries.
+@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
 def service_provider_scan_via_api_with_limits(domain):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     payload = {
@@ -343,6 +318,7 @@ def service_provider_scan_via_api_with_limits(domain):
             'data': response.json()}
 
 
+@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
 def service_provider_status():
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     response = requests.get(

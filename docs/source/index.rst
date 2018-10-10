@@ -25,6 +25,7 @@ Volunteer documentation
    :maxdepth: 2
    :caption: Volunteer Documentation:
 
+   topics/usage/comply_or_explain
    topics/usage/running_a_remote_worker
    topics/development/translation
 

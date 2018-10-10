@@ -118,3 +118,4 @@ django-select2  # game, add multiple urls in one go.
 
 iso3166  # ISO country code conversion
 docker  # hyper scaling
+tenacity  # generic retry library
