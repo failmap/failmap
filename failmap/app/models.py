@@ -87,3 +87,29 @@ def create_job(task_module: str):
     task = module.compose_task()
 
     return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_discover_job(task_module: str):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
+    """
+
+    module = importlib.import_module(task_module)
+    task = module.compose_discover_task()
+
+    return Job.create(task, task_module, None)
+
+
+@app.task(queue='storage')
+def create_verify_job(task_module: str):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    task_module: module from which to call `compose_discover_task` which results in the task to be executed
+    """
+
+    module = importlib.import_module(task_module)
+    task = module.compose_verify_task()
+
+    return Job.create(task, task_module, None)

@@ -389,7 +389,8 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
     form = MyUrlAdminForm
 
-    list_display = ('url', 'visit', 'current_rating', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
+    list_display = ('url', 'sub', 'domain', 'tld',
+                    'visit', 'current_rating', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
 
     search_fields = ('url', )
@@ -422,6 +423,18 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
         })
     )
     readonly_fields = ['created_on', 'onboarded']
+
+    @staticmethod
+    def domain(obj):
+        return obj.computed_domain
+
+    @staticmethod
+    def tld(obj):
+        return obj.computed_suffix
+
+    @staticmethod
+    def sub(obj):
+        return obj.computed_subdomain
 
     def visit(self, obj: Url):
         if not obj.endpoint_set.count():

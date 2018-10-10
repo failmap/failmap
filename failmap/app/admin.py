@@ -17,7 +17,9 @@ admin.site.register(Job, JobAdmin)
 
 
 class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
-    list_display = ('name', 'enabled', 'interval', )
+    list_display = ('name', 'enabled', 'interval', 'queue', 'task', 'args')
+
+    save_as = True
 
     class Meta:
         ordering = ["-name"]
