@@ -17,7 +17,10 @@ admin.site.register(Job, JobAdmin)
 
 
 class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
-    list_display = ('__str__', 'enabled', 'interval', )
+    list_display = ('name', 'enabled', 'interval', )
+
+    class Meta:
+        ordering = ["-name"]
 
 
 class IESolarSchedule(ImportExportModelAdmin):
