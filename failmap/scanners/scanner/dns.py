@@ -26,6 +26,7 @@ import pytz
 import untangle
 from celery import Task, group
 from django.conf import settings
+from tenacity import before_log, retry, wait_fixed
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
@@ -88,7 +89,6 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     if endpoints_filter:
         raise NotImplementedError("Endpoints are not yet supported for DNS scans.")
 
-    urls = []
     # todo: check voor toplevel
     # todo: functional decomposition
 
@@ -99,14 +99,17 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
     urls_filter = {**toplevel_filter, **urls_filter}
 
+    # urls = Url.objects.all()
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+
     if organizations_filter:
         organizations = Organization.objects.filter(**organizations_filter)
         # when empty no results.
-        urls += Url.objects.filter(organization__in=organizations, **urls_filter)
+        urls = urls.filter(organization__in=organizations, **urls_filter)
     else:
-        urls += Url.objects.filter(**urls_filter)
+        urls = urls.filter(**urls_filter)
 
-    return urls
+    return list(urls)
 
 
 @app.task(ignore_result=True, queue="scanners")
@@ -550,7 +553,8 @@ def bruteforce_scan(urls: List[Url], wordlist: str):
 
 
 # don't overload the crt.sh service, rate limit
-@app.task(ignore_result=True, queue="scanners", rate_limit='10/m')
+@app.task(ignore_result=True, queue="scanners", rate_limit='2/m')
+@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
 def certificate_transparency_scan(urls: List[Url]):
     """
     Checks the certificate transparency database for subdomains. Using a regex the subdomains
