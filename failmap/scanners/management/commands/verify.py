@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import VerifyTaskCommand
-from failmap.scanners.scanner import ftp, http
+from failmap.scanners.scanner import dns, ftp, http
 
 log = logging.getLogger(__name__)
 
@@ -11,10 +11,10 @@ class Command(VerifyTaskCommand):
 
     help = __doc__
 
-    # todo: subdomains, from scanner.dns
     scanners = {
         'ftp': ftp,
         'http': http,
+        'subdomains': dns
     }
 
     def add_arguments(self, parser):
