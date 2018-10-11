@@ -14,18 +14,18 @@ __all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, tls_osaft, sc
 TLD_DEFAULT_EXPLORERS = []
 DEFAULT_EXPLORERS = [http.compose_discover_task, ftp.compose_discover_task]
 
+# Beta: dns.brute_known_subdomains_compose_task, - old code still
 TLD_DEFAULT_CRAWLERS = [
-    dns.brute_known_subdomains_compose_task,
     dns.certificate_transparency_compose_task,
     dns.nsec_compose_task]
 DEFAULT_CRAWLERS = []
 
+# Beta: tls_osaft.compose_task, - is this using the outdated ssl library?
+# Beta: screenshot.compose_task, - Browser is not available in docker container
 DEFAULT_SCANNERS = [
     security_headers.compose_task,
-    tls_osaft.compose_task,
     tls_qualys.compose_task,
     ftp.compose_task,
-    screenshot.compose_task,
     plain_http.compose_task,
 ]
 TLD_DEFAULT_SCANNERS = [dnssec.compose_task]

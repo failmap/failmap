@@ -52,6 +52,11 @@ def compose_task(
 
     log.info("Found %s urls to create tasks for." % len(urls))
 
+    # it's impossible to set the first stage "endpoint_discovery" in a task, as the task might take an hour
+    # to complete (depending of how much work is in the queue. Could be days. So therefore to trigger the first
+    # stage and not to re-submit the url for onboarding (again and again and again) the first stage is set in
+    # this routine for each of the steps.
+
     tasks = []
     for url in urls:
         log.info("Url %s is at onboarding_stage: %s", url, url.onboarding_stage)
@@ -60,20 +65,20 @@ def compose_task(
         if not url.onboarding_stage:  # While developing: or url.onboarding_stage == "endpoint_discovery":
             log.info("Exploring on: %s", url)
             # Of course this will still fail as the bug aforementioned was not fixed. have to rewrite that.
-            tasks.append(update_stage.si(url, "endpoint_discovery")
-                         | explore_tasks(url)
+            update_stage(url, "endpoint_discovery")
+            tasks.append(explore_tasks(url)
                          | update_stage.si(url, "endpoint_finished"))
 
         elif url.onboarding_stage in ["endpoint_finished"]:  # dev: , "scans_running"
             log.info("Scanning on: %s", url)
-            tasks.append(update_stage.si(url, "scans_running")
-                         | scan_tasks(url)
+            update_stage(url, "scans_running")
+            tasks.append(scan_tasks(url)
                          | update_stage.si(url, "scans_finished"))
 
         elif url.onboarding_stage == "scans_finished":
             log.info("Crawling on: %s", url)
-            tasks.append(update_stage.si(url, "endpoint_finished")
-                         | crawl_tasks(url)
+            update_stage(url, "crawling")
+            tasks.append(crawl_tasks(url)
                          | finish_onboarding.si(url))
         else:
             # Do nothing when wheels are set in motion or an unknown state is encountered.
