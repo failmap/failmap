@@ -409,34 +409,41 @@ def import_dnsrecon_report(url: Url, path: str):
     import json
     with open(path) as data_file:
         data = json.load(data_file)
-        addedlist = []
-        for record in data:
-            # brutally ignore all kinds of info from other structures.
-            log.debug("Record: %s" % record)
-            # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
-            # strings: dkim etc
-            # target: cname
-            # arguments: dnsrecon
-            # ns_server: nameserver used
-            bad = ["arguments", "ns_server", "mname", "Version", "exchange", "strings", "target"]
-            my_list = list(record.keys())
-            if [e for e in bad if e in '\n'.join(my_list)]:
-                continue
+        addedlist = dnsrecon_parse_report_contents(url, data)
+    return addedlist
 
-            # "address": "no_ip",
-            if record["address"] == "no_ip":
-                continue
 
-            if record["name"].endswith(url.url) and record["name"].lower() != url.url.lower():
-                subdomain = record["name"][0:-len(url.url) - 1]
-                # remove wildcards: "name": "*.woonsubsidie.amsterdam.nl",
-                if subdomain[0:2] == "*.":
-                    subdomain = subdomain[2:len(subdomain)]
+@app.task(queue="storage")
+def dnsrecon_parse_report_contents(url: Url, contents):
+    addedlist = []
+    for record in contents:
+        # brutally ignore all kinds of info from other structures.
+        log.debug("Record: %s" % record)
+        # https://stackoverflow.com/questions/11328940/check-if-list-item-contains-items-fro
+        # strings: dkim etc
+        # target: cname
+        # arguments: dnsrecon
+        # ns_server: nameserver used
+        bad = ["arguments", "ns_server", "mname", "Version", "exchange", "strings", "target"]
+        my_list = list(record.keys())
+        if [e for e in bad if e in '\n'.join(my_list)]:
+            continue
 
-                # will check for resolve and if this is a wildcard.
-                added = url.add_subdomain(subdomain.lower())
-                if added:
-                    addedlist.append(added)
+        # "address": "no_ip",
+        if record["address"] == "no_ip":
+            continue
+
+        if record["name"].endswith(url.url) and record["name"].lower() != url.url.lower():
+            subdomain = record["name"][0:-len(url.url) - 1]
+            # remove wildcards: "name": "*.woonsubsidie.amsterdam.nl",
+            if subdomain[0:2] == "*.":
+                subdomain = subdomain[2:len(subdomain)]
+
+            # will check for resolve and if this is a wildcard.
+            added = url.add_subdomain(subdomain.lower())
+            if added:
+                addedlist.append(added)
+
     return addedlist
 
 
@@ -613,31 +620,20 @@ def nsec_scan(urls: List[Url]):
     :param urls:
     :return:
     """
-    added = []
+
+    import sys
+    from django.conf import settings
+    sys.path.append('/Applications/XAMPP/xamppfiles/htdocs/failmap/admin/vendor/dnsrecon/')
+
+    from lib.dnshelper import DnsHelper
+    from dnsrecon import ds_zone_walk
+
     for url in urls:
-        file = settings.TOOLS['dnsrecon']['output_dir'] + "%s_nsec.json" % url.url
-        command = ['python', dnsrecon, '-t', 'zonewalk', '-d', url.url, '-z', '-j', file]
-        try:
-            subprocess.check_output(command)
-            added += import_dnsrecon_report(url, file)
-        except subprocess.CalledProcessError as message:
-            """
-                If the first nameserver is borken:
-
-                dns.resolver.NoNameservers: All nameservers failed to answer the query .
-                IN A: Server 8.8.8.8 UDP port 53 answered SERVFAIL
-
-                ns2 might still work.
-
-            or
-
-              File "dnshelper.py", line 197, in get_soa
-                for rdata in answers:
-                    UnboundLocalError: local variable 'answers' referenced before assignment
-            """
-            log.error('DNSRecon process error: %s' % str(message))
-
-    return added
+        resolver = DnsHelper(url.url, '8.8.8.8', 30)
+        records = ds_zone_walk(resolver, url.url)
+        log.info(records)
+        dnsrecon_parse_report_contents.apply_async(url, records)
+        return
 
 
 def update_subdomain_wordlist():

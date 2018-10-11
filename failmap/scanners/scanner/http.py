@@ -109,8 +109,8 @@ def compose_discover_task(
 
         for port in STANDARD_HTTPS_PORTS:
             for url in urls:
-                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version)
-                             | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
+                tasks.append(can_connect.si(protocol="https", url=url, port=port, ip_version=ip_version)
+                             | connect_result.s(protocol="https", url=url, port=port, ip_version=ip_version))
 
     return group(tasks)
 
