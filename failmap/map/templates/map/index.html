@@ -840,7 +840,10 @@
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
                             {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{% verbatim %}{{ security_headers_x_frame_options.medium }}{% endverbatim %}</td>{% endif %}
-
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_FTP %}<td>{% trans "FTP connection issue (security unknown)" %}</td>{% endif %}
+                            {% if config.SHOW_FTP %}<td :class="'number-sm ' + goodbad(ftp.medium)">{% verbatim %}{{ ftp.medium }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
                 </div>
