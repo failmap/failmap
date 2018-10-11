@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from failmap.celery import Task, app
 from failmap.organizations.models import Url
-from failmap.scanners.scanner.scanner import url_filters
+from failmap.scanners.scanner.scanner import q_configurations_to_scan, url_filters
 from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 
 log = logging.getLogger(__package__)
@@ -45,10 +45,11 @@ def compose_task(
     # to reset onboarding of tasks. Normally onboarding should be one within 5 minutes. We'll reset after 7 days.
     reset_expired_onboards()
 
-    urls = Url.objects.all().filter(onboarded=False)
-    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    default_filter = {"onboarded": "False"}
+    urls_filter = {**urls_filter, **default_filter}
 
-    # todo: filter out the scans that failed / took too long and try again.
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
     log.info("Found %s urls to create tasks for." % len(urls))
 
