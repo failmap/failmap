@@ -414,7 +414,7 @@ def import_dnsrecon_report(url: Url, path: str):
 
 
 @app.task(queue="storage")
-def dnsrecon_parse_report_contents(url: Url, contents):
+def dnsrecon_parse_report_contents(url: Url, contents: List):
     addedlist = []
     for record in contents:
         # brutally ignore all kinds of info from other structures.
@@ -621,9 +621,10 @@ def nsec_scan(urls: List[Url]):
     :return:
     """
 
+    # do some horrible path hacking as there is no package for this software yet...
     import sys
     from django.conf import settings
-    sys.path.append('/Applications/XAMPP/xamppfiles/htdocs/failmap/admin/vendor/dnsrecon/')
+    sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
 
     from lib.dnshelper import DnsHelper
     from dnsrecon import ds_zone_walk
@@ -632,7 +633,7 @@ def nsec_scan(urls: List[Url]):
         resolver = DnsHelper(url.url, '8.8.8.8', 30)
         records = ds_zone_walk(resolver, url.url)
         log.info(records)
-        dnsrecon_parse_report_contents.apply_async(url, records)
+        dnsrecon_parse_report_contents.apply_async([url, records])
         return
 
 

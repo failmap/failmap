@@ -116,6 +116,9 @@ COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local
 COPY ./failmap/ /source/failmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
+# copy dependencies that are not in pypi or otherwise not available with ease
+COPY ./vendor/ /source/vendor/
+
 # add wildcard to version file as it may not exists (eg: local development)
 COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
 
@@ -134,6 +137,7 @@ ENV UWSGI_STATIC_MAP /static=/srv/failmap/static
 # set proxy and browser caching for static files to 1 month
 ENV UWSGI_STATIC_EXPIRES /* 2678400
 ENV TOOLS_DIR /usr/local/bin/
+ENV VENDOR_DIR /source/vendor/
 
 # collect all static files form all django applications into static files directory
 RUN /pyenv/bin/failmap collectstatic
