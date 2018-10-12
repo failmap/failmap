@@ -110,7 +110,8 @@ class SomeError(Exception):
     """Just some expectable error."""
 
 
-@app.task(queue='scanners',
+# The isolated queue means no network connection.
+@app.task(queue='storage',
           bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},

@@ -69,12 +69,12 @@ class ParentFailed(Exception):
         super(ParentFailed, self).__init__(message, *args)
 
 
-@app.task(queue='default', bind=True)
+@app.task(queue='isolated', bind=True)
 def debug_task(self):
     print('Request: {0!r}'.format(self.request))
 
 
-@app.task(queue='default')
+@app.task(queue='isolated')
 def waitsome(sleep):
     """Wait some time and return epoch at completion."""
 
@@ -82,7 +82,7 @@ def waitsome(sleep):
     return time.time()
 
 
-@app.task(queue='default', rate_limit='1/s')
+@app.task(queue='isolated', rate_limit='1/s')
 def rate_limited(sleep):
     """Wait some time but limit to maximum tasks of 1 per second."""
 

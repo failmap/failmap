@@ -70,9 +70,9 @@ QUEUES_MATCHING_ROLES = {
         Queue('storage'),
         # default queue for task with no explicit queue assigned
         # these tasks should not expect network connectivity or database access!
-        Queue('default'),
+        # Queue('default'), # deprecated
         # legacy default queue, can be removed after transition period to multiworkers
-        Queue('celery'),
+        # Queue('celery'),  # deprecated
         # endpoint discovery
         # just processing and calculations that require no database storage or network connectivity
         Queue('isolated'),  # tasks that require no network, no database.
@@ -99,8 +99,7 @@ QUEUES_MATCHING_ROLES = {
     # worker with access to storage allowed to connect to databases
     'storage': [
         Queue('storage'),
-        Queue('default'),
-        Queue('celery'),
+        Queue('isolated'),  # to test the dummy scanner, you don't have any access to the network.
     ],
     # universal scanner worker that has internet access for both IPv4 and IPv6
     'scanner': [
