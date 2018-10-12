@@ -245,7 +245,8 @@ def scan(self, address: str, port: int):
         # An error was received, such as a not-implemented.
         # ftplib.error_perm: 502 Command not implemented.
         results['status'] = str(error_reply)
-        log.error(results)
+        # Server might not understand FEAT command.
+        # log.error(results)
 
         # We can try AUTH TLS and AUTH SSL to see if something is supported, even if we don't have a list of FEAT
         try:
