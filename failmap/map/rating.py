@@ -549,7 +549,14 @@ def rate_timeline(timeline, url: Url):
                             "medium": 0,
                             "low": 0,
                             "since": these_endpoint_scans[endpoint_scan_type].rating_determined_on.isoformat(),
-                            "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat()
+                            "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat(),
+
+                            # With this empty calculation, make sure all standard fields are available.
+                            'is_explained': False,
+                            'comply_or_explain_explanation': '',
+                            'comply_or_explain_explained_on': '',
+                            'comply_or_explain_explanation_valid_until': '',
+                            'comply_or_explain_valid_at_time_of_report': False
                         })
 
             # give an idea how many endpoint issues there are compared to the total # of endpoints
