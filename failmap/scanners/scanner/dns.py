@@ -194,7 +194,7 @@ def compose_verify_task(organizations_filter: dict = dict(),
 
 
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities
-@app.task(queue="scanners.4and6")
+@app.task(queue="all_internet")
 def url_resolves(url):
 
     v4, v6 = get_ips(url.url)
@@ -504,7 +504,7 @@ def search_engines_scan(urls: List[Url]):
 
 
 # this can be highly invasive and slow, so try to behave: rate limit: 1 to 2 per minute.
-@app.task(ignore_result=True, queue="scanners", rate_limit='40/h')
+@app.task(ignore_result=True, queue="internet", rate_limit='40/h')
 def bruteforce_scan(urls: List[Url], wordlist: str):
     """
 
@@ -548,7 +548,7 @@ def bruteforce_scan(urls: List[Url], wordlist: str):
 
 
 # don't overload the crt.sh service, rate limit
-@app.task(ignore_result=True, queue="scanners", rate_limit='2/m')
+@app.task(ignore_result=True, queue="internet", rate_limit='2/m')
 @retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
 def certificate_transparency_scan(urls: List[Url]):
     """
@@ -604,7 +604,7 @@ def certificate_transparency_scan(urls: List[Url]):
 
 
 # this is a fairly safe scanner, and can be run pretty quiclkly (no clue if parralelisation works)
-@app.task(ignore_result=True, queue="scanners", rate_limit='4/m')
+@app.task(ignore_result=True, queue="internet", rate_limit='4/m')
 def nsec_scan(urls: List[Url]):
     """
     Tries to use nsec (dnssec) walking. Does not use nsec3 (hashes).

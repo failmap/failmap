@@ -190,7 +190,7 @@ def error_response_400_500(endpoint):
 
 
 # Has been made explicity due to errors with the latest version of celery not allowing signature kwargs.
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'scanners.ipv4'})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'ipv4'})
 def get_headers_v4(self, uri_uri):
     try:
         return get_headers(uri_uri)
@@ -224,7 +224,7 @@ def get_headers_v4(self, uri_uri):
             return e
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'scanners.ipv6'})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'ipv6'})
 def get_headers_v6(self, uri_uri):
     try:
         return get_headers(uri_uri)

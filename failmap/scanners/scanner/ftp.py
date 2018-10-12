@@ -155,7 +155,7 @@ def store(result: dict, endpoint: Endpoint):
 
 
 # todo: also support FPT only over ipv6.
-@app.task(queue='scanners.ipv4',
+@app.task(queue='ipv4',
           bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
@@ -296,7 +296,7 @@ def scan(self, address: str, port: int):
 
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
 # it will do on all known urls, and try a range of well known FTP ports and alternative ports.
-@app.task(queue='scanners.ipv4')
+@app.task(queue='ipv4')
 def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 

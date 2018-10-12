@@ -121,12 +121,12 @@ def well_done(endpoint):
         EndpointScanManager.add_scan("plain_https", endpoint, "0", cleaned_up)
 
 
-@app.task(queue='scanners.ipv4')
+@app.task(queue='ipv4')
 def scan_v4(endpoint):
     return scan(endpoint)
 
 
-@app.task(queue='scanners.ipv6')
+@app.task(queue='ipv6')
 def scan_v6(endpoint):
     return scan(endpoint)
 

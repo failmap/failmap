@@ -249,7 +249,7 @@ def dev_discover_endpoints(urls: List[Url] = None, port: int = None, protocol: s
         urls = urls.filter(organization__in=organizations)
 
 
-@app.task(queue="scanners")
+@app.task(queue="4and6")
 def get_ips(url: str):
     ipv4 = ""
     ipv6 = ""
@@ -285,28 +285,28 @@ def get_ips(url: str):
     return ipv4, ipv6
 
 
-@app.task(
-    # When doing a lot of connections, try to do them in semi-random order also not to overload networks/firewalls
+"""
+    When doing a lot of connections, try to do them in semi-random order also not to overload networks/firewalls
 
-    # Don't try and overload the network with too many connections.
-    # The (virtual) network (card) might have a problem keeping up.
-    # Firewalls might see it as hostile.
-    # Our database might be overloaded with work,
+    Don't try and overload the network with too many connections.
+    The (virtual) network (card) might have a problem keeping up.
+    Firewalls might see it as hostile.
+    Our database might be overloaded with work,
 
-    # To consider the rate limit:
-    # There are about 11000 endpoints at this moment.
-    # 3/s = 180/m = 1800/10m = 10800/h
-    # 4/s = 240/m = 2400/10m = 14400/h
-    # 5/s = 300/m = 3000/10m = 18000/h
-    # 10/s = 600/m = 6000/10m = 36000/h
+    To consider the rate limit:
+    There are about 11000 endpoints at this moment.
+    3/s = 180/m = 1800/10m = 10800/h
+    4/s = 240/m = 2400/10m = 14400/h
+    5/s = 300/m = 3000/10m = 18000/h
+    10/s = 600/m = 6000/10m = 36000/h
 
-    # given many won't exist and time out, it's fine to set it to 20...
+    given many won't exist and time out, it's fine to set it to 20...
 
-    # on the development machine it scans all within 10 minutes. About 20/s.
+    on the development machine it scans all within 10 minutes. About 20/s.
+"""
 
-    rate_limit='120/s',
-    # queue needs to be set based on ip, either scanners.endpoint_discovery.ipv4 or scanners.endpoint_discovery.ipv4
-)
+
+@app.task(queue="4and6", rate_limit='120/s')
 def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
@@ -604,7 +604,7 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         ep.save()
 
 
-@app.task(queue='scanners.4and6')
+@app.task(queue='4and6')
 def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,

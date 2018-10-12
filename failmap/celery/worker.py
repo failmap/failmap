@@ -30,27 +30,29 @@ TLS_CLIENT_FILE = '/client.p12'
 
 # list of all roles that require internet connectivity
 ROLES_REQUIRING_ANY_NETWORK = [
-    'scanner',  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
+    'internet',  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
 ]
 
 ROLES_REQUIRING_IPV4_AND_IPV6 = [
     'default',
+    'all_internet'
 ]
 
 # list of all roles that require IPv6 networking
 ROLES_REQUIRING_IPV6 = [
-    'scanner_v6',
-    'scanner_ipv6_only',
+    'v6_internet',
+    'default_ipv6',
 ]
 
 ROLES_REQUIRING_IPV4 = [
-    'scanner_v4',
-    'scanner_ipv4_only',
-    'scanner_qualys',  # only supports ipv4(!)
+    'v4_internet',
+    'default_ipv4',
+    'qualys',  # only supports ipv4(!)
 ]
 
 ROLES_REQUIRING_NO_NETWORK = [
     'storage',
+    'calculator'
 ]
 
 # define roles for workers
@@ -58,68 +60,69 @@ QUEUES_MATCHING_ROLES = {
     # Select between roles.
 
     # universal worker that has access to database and internet on both v4 and v6
+    # will work in one-worker configuration
     'default': [
-        # for tasks that require network connectivity to perform a scanning task, meaning any network connectivity
-        # using both ipv4 and ipv6
-        Queue('scanners'),
-        # allow to differentiate on scan tasks that have specific ip network family requirements
-        Queue('scanners.ipv4'),
-        Queue('scanners.ipv6'),
-        Queue('scanners.4and6'),  # both need to be present(!)
+        # doesn't care about network family, any network is fine
+        Queue('internet'),
+        # only ipv4 tasks
+        Queue('ipv4'),
+        # only ipv4 tasks
+        Queue('ipv6'),
+        # needs both network families to be present
+        Queue('4and6'),
         # for tasks that require a database connection
         Queue('storage'),
-        # default queue for task with no explicit queue assigned
-        # these tasks should not expect network connectivity or database access!
-        # Queue('default'), # deprecated
-        # legacy default queue, can be removed after transition period to multiworkers
-        # Queue('celery'),  # deprecated
-        # endpoint discovery
-        # just processing and calculations that require no database storage or network connectivity
-        Queue('isolated'),  # tasks that require no network, no database.
-    ],
-    # universal worker without ipv6 specific queues
-    'default_ipv4': [
-        Queue('scanners'),  # tasks that requires ANY network
-        Queue('scanners.ipv4'),  # or specific ipv4
-        Queue('storage'),  # database access... why?
-        Queue('isolated'),  # tasks that require no network, no database.
-        # Queue('default'),  # no explicit queue means uncertainty about network requirements.
-        # Queue('celery'),  # see default
-    ],
-    'scanner_v4': [
-        Queue('scanners'),  # tasks that requires ANY network
-        Queue('scanners.ipv4'),  # specifically ipv4
-        Queue('isolated'),  # tasks that require no network, no database.
-    ],
-    'scanner_v6': [
-        Queue('scanners'),  # requires ANY network
-        Queue('scanners.ipv6'),
+        # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
         Queue('isolated'),
     ],
-    # worker with access to storage allowed to connect to databases
+    'default_ipv4': [
+        Queue('internet'),
+        Queue('ipv4'),
+        Queue('storage'),
+        Queue('isolated'),
+    ],
+    'default_ipv6': [
+        Queue('internet'),
+        Queue('ipv6'),
+        Queue('storage'),
+        Queue('isolated'),
+    ],
+    'v4_internet': [
+        Queue('internet'),
+        Queue('ipv4'),
+        Queue('isolated'),
+    ],
+    'v6_internet': [
+        Queue('internet'),
+        Queue('ipv6'),
+        Queue('isolated'),
+    ],
     'storage': [
         Queue('storage'),
-        Queue('isolated'),  # to test the dummy scanner, you don't have any access to the network.
+        # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
+        # Given there is only one storage worker, blocking it doesn't help it's work.
     ],
-    # universal scanner worker that has internet access for both IPv4 and IPv6
-    'scanner': [
-        Queue('scanners'),  # tasks that requires ANY network
+    'calculator': [
+        Queue('isolated')
+    ],
+    # universal scanner worker that has internet access for either IPv4 and IPv6 or both (you don't know)
+    'any_internet': [
+        Queue('internet'),  # tasks that requires ANY network
         Queue('isolated'),  # no network, no database
+    ],
+    # all internet access, with ipv4 and 6 configured
+    'all_internet': [
+        Queue('internet'),
+        Queue('ipv4'),
+        Queue('ipv6'),
+        Queue('4and6'),
+        Queue('isolated'),
     ],
     # special scanner worker for qualys rate limited tasks to not block queue for other tasks
     # and it needs a dedicated IP address, which is coded in hyper workers.
-    'scanner_qualys': [
-        Queue('scanners.qualys'),
-    ],
-    # scanner with no IPv6 connectivity
-    # this is an initial concept and can later be replaced with universal
-    # scanner that automatically detects connectivity
-    'scanner_ipv4_only': [
-        Queue('scanners.ipv4'),
-    ],
-    'scanner_ipv6_only': [
-        Queue('scanners.ipv6'),
-    ],
+    'qualys': [
+        Queue('qualys'),
+    ]
 }
 
 

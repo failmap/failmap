@@ -293,7 +293,7 @@ So wait until it's finished, and don't start too many tasks. Otherwise your syst
 
 
 # todo: **WARNING: 201: Can\'t get IP for host \'raad.zutphen.nl:443\'; host ignored :)
-@app.task(queue="scanners.4and6")
+@app.task(queue="4and6")
 def run_osaft_scan_shared_container(address, port):
     start_osaft_container()
 
@@ -335,7 +335,7 @@ def run_osaft_scan_shared_container(address, port):
 # hangs completely... control+c doesn't work... queue locked...
 # Note that the timeout can work against itself. Even while the task is killed, the process is still running in the
 # docker container waiting to be finished. It's better to hang then to process failed tasks.
-@app.task(queue="scanners.4and6", max_retries=1, priority=PRIO_LOW)
+@app.task(queue="4and6", max_retries=1, priority=PRIO_LOW)
 def run_osaft_scan(address, port):
     return run_osaft_scan_shared_container(address, port)
 
@@ -416,7 +416,7 @@ def gawk(string):
     return output.decode('utf-8')
 
 
-@app.task(queue="scanners.4and6", priority=PRIO_NORMAL)
+@app.task(queue="4and6", priority=PRIO_NORMAL)
 def ammend_unsuported_issues(osaft_report, address, port=443):
     """
     A scan takes about a minute to complete and can be run against any TLS website and many other services.
