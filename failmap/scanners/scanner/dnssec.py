@@ -134,11 +134,15 @@ def store_dnssec(result: List[str], url: Url):
     return {'status': 'success', 'result': level}
 
 
+# amsterdam.nl hangs on october 12 2018
+# in some cases this hangs, therefore have a time limit on the task.
+# "The worker processing the task will be killed and replaced with a new one when this is exceeded."
 @app.task(queue='scanners',
           bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
-          expires=EXPIRES)
+          expires=EXPIRES,
+          task_time_limit=120)
 def scan_dnssec(self, url: str):
     """
     Uses the dnssec scanner of dotse, which works pretty well.
