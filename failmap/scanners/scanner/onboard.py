@@ -11,7 +11,6 @@ from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 log = logging.getLogger(__package__)
 
 
-@app.task(queue='storage')
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

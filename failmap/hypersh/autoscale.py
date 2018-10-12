@@ -3,13 +3,13 @@ import logging
 import flower.utils.broker
 
 from failmap.celery import app
-from failmap.celery.worker import WORKER_QUEUE_CONFIGURATION
+from failmap.celery.worker import QUEUES_MATCHING_ROLES
 from failmap.hypersh.models import ContainerGroup
 
 log = logging.getLogger(__name__)
 
 
-@app.task
+@app.task(queue="storage")
 def autoscale():
     """Calculates the number of needed scanners based on the number of tasks in the queue.
 
@@ -22,7 +22,7 @@ def autoscale():
     cg = ContainerGroup.objects.all().get(name="Qualys scanners")
 
     if 'redis://' in app.conf.broker_url:
-        queue_names = [q.name for q in WORKER_QUEUE_CONFIGURATION['default']]
+        queue_names = [q.name for q in QUEUES_MATCHING_ROLES['default']]
 
         # use flower to not reinvent the wheel on querying queue statistics
         broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)

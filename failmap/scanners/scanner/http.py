@@ -59,7 +59,6 @@ STANDARD_HTTPS_PORTS = [443, 8443]
 # todo: in wildcard scenarios you can add urls that have a deviating IP from the (loadbalanced) wildcard address.
 
 
-@app.task(queue="storage")
 def compose_discover_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -115,7 +114,6 @@ def compose_discover_task(
     return group(tasks)
 
 
-@app.task(queue="storage")
 def compose_verify_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -606,7 +604,7 @@ def kill_endpoint(protocol: str, url: Url, port: int, ip_version: int):
         ep.save()
 
 
-@app.task(queue='scanners')
+@app.task(queue='scanners.4and6')
 def check_network(code_location=""):
     """
     Used to see if a worker can do IPv6. Will trigger an exception when no ipv4 or ipv6 is available,

@@ -1,3 +1,9 @@
+"""
+This was an attempt to write a TLS scanner, but it failed due to complexities. You'll get 75% right and then the
+hard parts start. Therefore there are various other scanners that deliver better results, better consistency and
+have more contributers. This library therefore is obsolete and will be removed.
+"""
+
 import logging
 import platform
 import re
@@ -8,7 +14,6 @@ import pytz
 import untangle
 from django.conf import settings
 
-from failmap.celery import app
 from failmap.scanners.models import Endpoint
 from failmap.scanners.timeout import timeout
 
@@ -180,10 +185,7 @@ def scan_real_url(url, port=443):
 
     return out
 
-# TODO: make queue explicit, split functionality in storage and scanner
 
-
-@app.task
 def scan_endpoint(endpoint, IPv6=False):
     return scan_real_url(endpoint.url.url, endpoint.port)
 
@@ -225,8 +227,6 @@ def test_real(url='faalkaart.nl', port=443):
     debug_grade(rating, trust_rating)
 
 
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task
 def determine_grade(report, url):
     """
     Compared to other services, it's not needed to give a comprehensive report of all things that
@@ -482,8 +482,6 @@ def debug_grade(ratings, trust_ratings):
     log.debug('')
 
 
-# TODO: make queue explicit, split functionality in storage and scanner
-@app.task
 def store_grade(ratings, trust_ratings, endpoint):
     lowest_rating = 'A'
     trust = True

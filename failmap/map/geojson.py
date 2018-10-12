@@ -58,7 +58,7 @@ def get_region(country: str = "NL", organization_type: str = "municipality"):
 # You also cannot see progress...
 # better to validate that the region doesn't exist and then add it...
 # @transaction.atomic
-@app.task(queue="scanners")
+@app.task(queue="storage")
 def import_from_scratch(countries: List[str] = None, organization_types: List[str] = None, when=None):
     """
     Run this when you have nothing on the organization type in that country. It will help bootstrapping a
@@ -107,7 +107,7 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
 
 
 # @transaction.atomic
-@app.task(queue="scanners")
+@app.task(queue="storage")
 def update_coordinates(country: str = "NL", organization_type: str = "municipality", when=None):
 
     if not osmtogeojson_available():

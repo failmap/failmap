@@ -127,7 +127,7 @@ class Credential(models.Model):
     def nuke(self):
         self.task_nuke.apply_async(args=(self,))
 
-    @app.task
+    @app.task(queue='storage')
     def task_nuke(self):
         """Removes all containers, volumes and images. You'll start with a clean slate."""
 
@@ -225,7 +225,7 @@ class Credential(models.Model):
 
         return tmp_dir
 
-    @app.task
+    @app.task(queue='storage')
     def task_validate(self):
         return self.validate()
 
@@ -348,7 +348,7 @@ class ContainerGroup(models.Model):
         self.state = 'idle'
         self.save(update_fields=['state'])
 
-    @app.task
+    @app.task(queue='storage')
     def scale_action(self):
         """Evaluate current state to desired and perform actions to reach desired state.
 
@@ -556,7 +556,7 @@ class ContainerGroup(models.Model):
             force=True, v=True)
 
 
-@app.task
+@app.task(queue='storage')
 def check_scaling():
     """Create tasks for each container group to check if scaling actions are required."""
     for group in ContainerGroup.objects.filter(enabled=True, state__in=['idle', 'new', 'error']):

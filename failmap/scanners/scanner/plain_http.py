@@ -10,7 +10,7 @@ import logging
 
 from celery import Task, group
 
-from failmap.celery import IP_VERSION_QUEUE, app
+from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
@@ -121,16 +121,17 @@ def well_done(endpoint):
         EndpointScanManager.add_scan("plain_https", endpoint, "0", cleaned_up)
 
 
-@app.task(queue='scanners', kwargs={'queue': IP_VERSION_QUEUE[4]})
+@app.task(queue='scanners.ipv4')
 def scan_v4(endpoint):
     return scan(endpoint)
 
 
-@app.task(queue='scanners', kwargs={'queue': IP_VERSION_QUEUE[6]})
+@app.task(queue='scanners.ipv6')
 def scan_v6(endpoint):
     return scan(endpoint)
 
 
+# Task is written to work both on v4 and v6, but the network conf of the machine differs.
 def scan(endpoint):
     """
     Using an incomplete endpoint

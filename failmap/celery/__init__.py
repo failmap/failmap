@@ -10,7 +10,7 @@ import flower.utils.broker
 from celery import Celery, Task
 from django.conf import settings
 
-from .worker import WORKER_QUEUE_CONFIGURATION
+from .worker import QUEUES_MATCHING_ROLES
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
 
@@ -110,7 +110,7 @@ def status():
     } for worker_name, worker_stats in stats.items()]
 
     if 'redis://' in app.conf.broker_url:
-        queue_names = [q.name for q in WORKER_QUEUE_CONFIGURATION['default']]
+        queue_names = [q.name for q in QUEUES_MATCHING_ROLES['default']]
 
         # use flower to not reinvent the wheel on querying queue statistics
         broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)

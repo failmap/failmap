@@ -12,7 +12,7 @@ from celery import Task, group
 from constance import config
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
-from failmap.celery import IP_VERSION_QUEUE, ParentFailed, app
+from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
 from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
@@ -21,7 +21,6 @@ from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_t
 log = logging.getLogger(__name__)
 
 
-@app.task(queue="storage")
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -191,7 +190,7 @@ def error_response_400_500(endpoint):
 
 
 # Has been made explicity due to errors with the latest version of celery not allowing signature kwargs.
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': IP_VERSION_QUEUE[4]})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'scanners.ipv4'})
 def get_headers_v4(self, uri_uri):
     try:
         return get_headers(uri_uri)
@@ -225,7 +224,7 @@ def get_headers_v4(self, uri_uri):
             return e
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': IP_VERSION_QUEUE[6]})
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'scanners.ipv6'})
 def get_headers_v6(self, uri_uri):
     try:
         return get_headers(uri_uri)

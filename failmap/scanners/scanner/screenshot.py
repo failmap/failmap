@@ -94,7 +94,7 @@ def compose_task(
 # This will enforce a minimum delay of 20 seconds between starting two tasks on the same worker instance.
 # A worker instance is a host that contains multiple workers. So setting it for 20 seconds, you will only have
 # a limited set of tasks running, thus no concurrency on the same worker instance.
-@app.task(queue='storage', rate_limit="5/m")
+@app.task(queue='storage', rate_limit="3/m")
 def screenshot_endpoint(endpoint):
     try:
         return screenshot_with_firefox(endpoint)

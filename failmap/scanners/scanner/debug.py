@@ -3,14 +3,12 @@ import logging
 from celery import Task, group
 from constance import config
 
-from failmap.celery import app
 from failmap.scanners.models import Endpoint
 from failmap.scanners.scanner.scanner import endpoint_filters, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
 
-@app.task(queue='storage')
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

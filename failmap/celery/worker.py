@@ -1,3 +1,15 @@
+"""
+A worker gets a role from it's configuration. This role determines which queue's are processed by the worker.
+The role also specifies what network connectivity is required (ipv4, ipv6 or both).
+
+Note that hyper.sh workers only offer IPv4. (No sign of changing)
+A normal Failmap server should have both IPv4 and IPv6 access.
+
+On tricky issue:
+The ROLE scanner requires both access to IPv4 and IPv6 networks.
+The QUEUE scanner contains tasks that do not care about network family and can be either 4 or 6.
+"""
+
 import getpass
 import logging
 import os
@@ -16,39 +28,44 @@ log = logging.getLogger(__name__)
 
 TLS_CLIENT_FILE = '/client.p12'
 
-# list of all roles that require IPv6 networking
-IPV6_ROLES = [
-    'default',
-    'scanner_endpoint_discovery',
-    'scanner_v6',
-    'scanner',
+# list of all roles that require internet connectivity
+ROLES_REQUIRING_ANY_NETWORK = [
+    'scanner',  # the queue scanner accepts 4and6, 4 or 6 - so ANY network scan :)
 ]
 
-# list of all roles that require internet connectivity
-CONNECTIVITY_ROLES = [
+ROLES_REQUIRING_IPV4_AND_IPV6 = [
     'default',
-    'default_ipv4',
-    'scanner_endpoint_discovery',
-    'scanner_v4',
+]
+
+# list of all roles that require IPv6 networking
+ROLES_REQUIRING_IPV6 = [
     'scanner_v6',
-    'scanner',
-    'scanner_qualys',
-    'scanner_dns',
+    'scanner_ipv6_only',
+]
+
+ROLES_REQUIRING_IPV4 = [
+    'scanner_v4',
     'scanner_ipv4_only',
+    'scanner_qualys',  # only supports ipv4(!)
+]
+
+ROLES_REQUIRING_NO_NETWORK = [
+    'storage',
 ]
 
 # define roles for workers
-WORKER_QUEUE_CONFIGURATION = {
-    # universal worker that has access to database and internet
+QUEUES_MATCHING_ROLES = {
+    # Select between roles.
+
+    # universal worker that has access to database and internet on both v4 and v6
     'default': [
-        # for tasks that require network connectivity to perform a scanning task
+        # for tasks that require network connectivity to perform a scanning task, meaning any network connectivity
+        # using both ipv4 and ipv6
         Queue('scanners'),
         # allow to differentiate on scan tasks that have specific ip network family requirements
         Queue('scanners.ipv4'),
         Queue('scanners.ipv6'),
-        # a special queue for Qualys as it requires rate limiting and that causes other tasks in
-        # the same queue to stall.
-        Queue('scanners.qualys'),
+        Queue('scanners.4and6'),  # both need to be present(!)
         # for tasks that require a database connection
         Queue('storage'),
         # default queue for task with no explicit queue assigned
@@ -57,34 +74,27 @@ WORKER_QUEUE_CONFIGURATION = {
         # legacy default queue, can be removed after transition period to multiworkers
         Queue('celery'),
         # endpoint discovery
-        Queue('scanners.endpoint_discovery.ipv4'),
-        Queue('scanners.endpoint_discovery.ipv6'),
-        Queue('scanners.dns'),
+        # just processing and calculations that require no database storage or network connectivity
+        Queue('isolated'),  # tasks that require no network, no database.
     ],
     # universal worker without ipv6 specific queues
     'default_ipv4': [
-        Queue('scanners'),
-        Queue('scanners.ipv4'),
-        Queue('scanners.qualys'),
-        Queue('storage'),
-        Queue('default'),
-        Queue('celery'),
-        Queue('scanners.endpoint_discovery.ipv4'),
-        Queue('scanners.dns'),
-    ],
-    # special queue for handling tons of tasks that are rate limited (we don't want to broadcast
-    # hundreds of thousands of tasks at the same time since that looks like hostile internet traffic)
-    'scanner_endpoint_discovery': [
-        Queue('scanners.endpoint_discovery.ipv4'),
-        Queue('scanners.endpoint_discovery.ipv6'),
+        Queue('scanners'),  # tasks that requires ANY network
+        Queue('scanners.ipv4'),  # or specific ipv4
+        Queue('storage'),  # database access... why?
+        Queue('isolated'),  # tasks that require no network, no database.
+        # Queue('default'),  # no explicit queue means uncertainty about network requirements.
+        # Queue('celery'),  # see default
     ],
     'scanner_v4': [
-        Queue('scanners.ipv4'),
-        Queue('scanners.endpoint_discovery.ipv4'),
+        Queue('scanners'),  # tasks that requires ANY network
+        Queue('scanners.ipv4'),  # specifically ipv4
+        Queue('isolated'),  # tasks that require no network, no database.
     ],
     'scanner_v6': [
+        Queue('scanners'),  # requires ANY network
         Queue('scanners.ipv6'),
-        Queue('scanners.endpoint_discovery.ipv6'),
+        Queue('isolated'),
     ],
     # worker with access to storage allowed to connect to databases
     'storage': [
@@ -94,25 +104,22 @@ WORKER_QUEUE_CONFIGURATION = {
     ],
     # universal scanner worker that has internet access for both IPv4 and IPv6
     'scanner': [
-        Queue('scanners'),
-        Queue('scanners.ipv4'),
-        Queue('scanners.ipv6'),
+        Queue('scanners'),  # tasks that requires ANY network
+        Queue('isolated'),  # no network, no database
     ],
     # special scanner worker for qualys rate limited tasks to not block queue for other tasks
+    # and it needs a dedicated IP address, which is coded in hyper workers.
     'scanner_qualys': [
         Queue('scanners.qualys'),
-    ],
-    # special scanner worker to handle tons of dns queries
-    'scanner_dns': [
-        Queue('scanners'),
-        Queue('scanners.dns'),
     ],
     # scanner with no IPv6 connectivity
     # this is an initial concept and can later be replaced with universal
     # scanner that automatically detects connectivity
     'scanner_ipv4_only': [
-        Queue('scanners'),
         Queue('scanners.ipv4'),
+    ],
+    'scanner_ipv6_only': [
+        Queue('scanners.ipv6'),
     ],
 }
 
@@ -125,7 +132,7 @@ def worker_configuration():
     log.info('Configuring worker for role: %s', role)
 
     # configure which queues should be consumed depending on assigned role for this worker
-    return {'task_queues': WORKER_QUEUE_CONFIGURATION[role]}
+    return {'task_queues': QUEUES_MATCHING_ROLES[role]}
 
 
 @retry(tries=3, delay=5)
@@ -134,7 +141,10 @@ def worker_verify_role_capabilities(role):
 
     failed = False
 
-    if role in IPV6_ROLES:
+    if role in ROLES_REQUIRING_NO_NETWORK:
+        return not failed
+
+    if role in ROLES_REQUIRING_IPV6 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # verify if a https connection to a IPv6 website can be made
         s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
         try:
@@ -146,7 +156,7 @@ def worker_verify_role_capabilities(role):
             log.warning('Failed to connect to ipv6 test domain %s via IPv6', config.IPV6_TEST_DOMAIN, exc_info=True)
             failed = True
 
-    if role in CONNECTIVITY_ROLES:
+    if role in ROLES_REQUIRING_IPV4 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # verify if a https connection to a website can be made
         # we assume non-ipv4 internet doesn't exist
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
@@ -158,6 +168,28 @@ def worker_verify_role_capabilities(role):
         except BaseException:
             log.warning('Failed to connect to test domain %s via IPv4', config.CONNECTIVITY_TEST_DOMAIN, exc_info=True)
             failed = True
+
+    if role in ROLES_REQUIRING_ANY_NETWORK:
+        # one may fail.
+
+        # try v4 first
+        s4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        try:
+            s4.connect((config.IPV6_TEST_DOMAIN, 443))
+        except socket.gaierror:
+            # docker container DNS might not be ready, retry
+            raise
+        except BaseException:
+            s6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            try:
+                s6.connect((config.IPV6_TEST_DOMAIN, 443))
+            except socket.gaierror:
+                # docker container DNS might not be ready, retry
+                raise
+            except BaseException:
+                log.warning('Failed to connect to test domain %s via both v6 and v6', config.CONNECTIVITY_TEST_DOMAIN,
+                            exc_info=True)
+                failed = True
 
     return not failed
 

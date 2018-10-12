@@ -55,7 +55,6 @@ New architecture:
 """
 
 
-@app.task(queue="storage")
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),

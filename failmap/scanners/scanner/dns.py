@@ -112,7 +112,6 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
     return list(urls)
 
 
-@app.task(ignore_result=True, queue="scanners")
 def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
                       endpoints_filter: dict = dict(),) -> Task:
@@ -133,7 +132,6 @@ def certificate_transparency(organizations: List[Organization] = None, urls: Lis
     return [new_url for new_url in certificate_transparency_scan(urls)]
 
 
-@app.task(ignore_result=True, queue="scanners")
 def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
                                           endpoints_filter: dict = dict(),) -> Task:
@@ -149,7 +147,6 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
     return task
 
 
-@app.task(ignore_result=True, queue="scanners")
 def compose_discover_task(organizations_filter: dict = dict(),
                           urls_filter: dict = dict(),
                           endpoints_filter: dict = dict(),) -> Task:
@@ -174,7 +171,6 @@ def compose_discover_task(organizations_filter: dict = dict(),
     return task
 
 
-# todo: compose verify task, simply checks if the url DNS still resolves. If not, kill url.
 # it will not revive anything(!) Should that be a revive task?
 def compose_verify_task(organizations_filter: dict = dict(),
                         urls_filter: dict = dict(),
@@ -198,7 +194,7 @@ def compose_verify_task(organizations_filter: dict = dict(),
 
 
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities
-@app.task(queue="scanners")
+@app.task(queue="scanners.4and6")
 def url_resolves(url):
 
     v4, v6 = get_ips(url.url)
@@ -251,7 +247,6 @@ def brute_known_subdomains(organizations: List[Organization] = None, urls: List[
             return bruteforce_scan([url], str(wordlists["known_subdomains"]["path"]))
 
 
-@app.task(ignore_result=True, queue="scanners")
 def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
                                         urls_filter: dict = dict(),
                                         endpoints_filter: dict = dict(),) -> Task:

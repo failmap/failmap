@@ -30,10 +30,7 @@ RETRY_DELAY = 10
 # can also be a datetime.
 EXPIRES = 3600  # one hour is more then enough
 
-# also does discovery(!)
 
-
-@app.task(queue='storage')
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -157,7 +154,8 @@ def store(result: dict, endpoint: Endpoint):
     return {'status': 'success', 'result': level}
 
 
-@app.task(queue='scanners',
+# todo: also support FPT only over ipv6.
+@app.task(queue='scanners.ipv4',
           bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
@@ -298,7 +296,7 @@ def scan(self, address: str, port: int):
 
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
 # it will do on all known urls, and try a range of well known FTP ports and alternative ports.
-@app.task(queue='scanners')
+@app.task(queue='scanners.ipv4')
 def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
