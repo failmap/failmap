@@ -340,7 +340,7 @@ JET_APP_INDEX_DASHBOARD = 'failmap.app.dashboard.CustomAppIndexDashboard'
 JET_INDEX_DASHBOARD = 'failmap.app.dashboard.CustomIndexDashboard'
 
 # expand menu items by default for quick access
-JET_SIDE_MENU_COMPACT = True
+JET_SIDE_MENU_COMPACT = False
 
 LOGGING = {
     'version': 1,
