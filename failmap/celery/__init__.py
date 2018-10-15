@@ -110,7 +110,7 @@ def status():
     } for worker_name, worker_stats in stats.items()]
 
     if 'redis://' in app.conf.broker_url:
-        queue_names = [q.name for q in QUEUES_MATCHING_ROLES['default']]
+        queue_names = [q.name for q in QUEUES_MATCHING_ROLES['queuemonitor']]
 
         # use flower to not reinvent the wheel on querying queue statistics
         broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)

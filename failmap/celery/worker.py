@@ -60,7 +60,7 @@ QUEUES_MATCHING_ROLES = {
     # Select between roles.
 
     # universal worker that has access to database and internet on both v4 and v6
-    # will work in one-worker configuration
+    # will work in one-worker configuration - and slowly -  it's untested and it likely will not be a great experience
     'default': [
         # doesn't care about network family, any network is fine
         Queue('internet'),
@@ -74,7 +74,25 @@ QUEUES_MATCHING_ROLES = {
         Queue('storage'),
         # tasks that require no network, no database. Such as calculations, parsing of datasets etc.
         Queue('isolated'),
+        # run qualys scans
+        Queue('qualys'),
+        # scaling things
+        Queue('hyper'),
     ],
+
+    # queuemonitor shows the currently running queues on the dashboard. It will not do anything else. It subscribes
+    # to all queues. This does not have a worker (and doesn't need one).
+    'queuemonitor': [
+        Queue('storage'),
+        Queue('hyper'),
+        Queue('4and6'),
+        Queue('ipv4'),
+        Queue('ipv6'),
+        Queue('internet'),
+        Queue('qualys'),
+        Queue('isolated'),
+    ],
+
     'default_ipv4': [
         Queue('internet'),
         Queue('ipv4'),
