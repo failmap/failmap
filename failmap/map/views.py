@@ -1457,7 +1457,7 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
         for url in calculation['organization']['urls']:
             for url_rating in url['ratings']:
                 if url_rating['type'] in desired_url_scans and \
-                        url_rating['comply_or_explain_valid_at_time_of_report'] is False:
+                        url_rating.get('comply_or_explain_valid_at_time_of_report', False) is False:
                     high += url_rating['high']
                     medium += url_rating['medium']
                     low += url_rating['low']
@@ -1466,7 +1466,7 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
             for endpoint in url['endpoints']:
                 for endpoint_rating in endpoint['ratings']:
                     if endpoint_rating['type'] in desired_endpoint_scans and \
-                            endpoint_rating['comply_or_explain_valid_at_time_of_report'] is False:
+                            endpoint_rating.get('comply_or_explain_valid_at_time_of_report', False) is False:
                         high += endpoint_rating['high']
                         medium += endpoint_rating['medium']
                         low += endpoint_rating['low']
