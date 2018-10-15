@@ -28,7 +28,6 @@ import logging
 import random
 import socket
 from datetime import datetime
-from typing import List
 
 import pytz
 import requests
@@ -102,13 +101,18 @@ def compose_discover_task(
 
     # DONE: create separate tasks on different queues determined by IP version. Distribute load per capability.
     # todo: don't use the canvas model, just fire off the next task from the connection.
+    # The canvas model uses an enormous amount of CPU, which is needed for other things.
+
+    # why do we want to store these at all? They change all the time and well... we don't do anything with this info
+    # so no hoarding and disable this for when we need it.
+    # for url in urls:
+    #     tasks.append(get_ips.si(url.url) | url_lives.s(url))  # See if thing is alive, once.
 
     for ip_version in ip_versions:
         queue = "ipv4" if ip_version == 4 else "ipv6"
 
         for port in STANDARD_HTTP_PORTS:
             for url in urls:
-                tasks.append(get_ips.si(url.url) | url_lives.s(url))  # See if thing is alive, once.
                 tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version).set(queue=queue)
                              | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
 
@@ -140,8 +144,9 @@ def compose_verify_task(
 
     tasks = []
     for endpoint in endpoints:
+        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
         tasks.append(can_connect.si(protocol=endpoint.protocol, url=endpoint.url,
-                                    port=endpoint.port, ip_version=endpoint.ip_version)
+                                    port=endpoint.port, ip_version=endpoint.ip_version).set(queue=queue)
                      | connect_result.s(protocol=endpoint.protocol, url=endpoint.url,
                                         port=endpoint.port, ip_version=endpoint.ip_version))
     return group(tasks)
@@ -185,75 +190,6 @@ def url_lives(ips, url):
             url.not_resolvable_since = datetime.now(pytz.utc)
             url.not_resolvable_reason = "Made resolvable again since ip address was found."
             url.save()
-
-
-def dev_verify_endpoints(urls: List[Url] = None, port: int = None, protocol: str = None,
-                         organizations: List[Organization] = None):
-    """
-    Checks all http(s) endpoints if they still exist. This is to monitor changes in the existing
-    dataset, without contacting an organization too often. It can be checked every few days,
-    as trying to find new endpoints is more involved and should not be run more than once every
-    two to four weeks.
-
-    The only result this scanner has is the same or less endpoints than we currently have.
-
-    Existing endpoints might be marked as unresolvable.
-
-    :return: None
-    """
-    if not urls:
-        endpoints = Endpoint.objects.all().filter(is_dead=False,
-                                                  url__not_resolvable=False,
-                                                  url__is_dead=False)
-    else:
-        endpoints = Endpoint.objects.all().filter(is_dead=False,
-                                                  url__not_resolvable=False,
-                                                  url__is_dead=False,
-                                                  url__in=urls)
-
-    if port:
-        endpoints = endpoints.filter(port=port)
-
-    if protocol:
-        endpoints = endpoints.filter(protocol=protocol)
-    else:
-        endpoints = endpoints.filter(protocol__in=["http", "https"])
-
-    if organizations:
-        endpoints = endpoints.filter(url__organization__in=organizations)
-
-    # randomize the endpoints to better spread load.
-    endpoints = list(endpoints)
-    random.shuffle(endpoints)
-
-
-def dev_discover_endpoints(urls: List[Url] = None, port: int = None, protocol: str = None,
-                           organizations: List[Organization] = None):
-    """
-    Contact each URL (or each url of organizations) to determine if there are endpoints.
-    Do so both over HTTP, HTTPS on various ports and with both IPv4 and IPv6.
-
-    A healthy set of endpoints in 2018 is:
-
-
-    IPv4 80  Redirects to 443
-    IPv4 443 Content
-    IPv6 80  Redirects to 443
-    IPv6 443 Content
-
-    Port 80 websites will be deprecated in the coming years by all popular browsers. They will begin to
-    disappear, which will be in full force in mid 2019.
-
-    Existing endpoints might be marked as unresolvable.
-    Existing URLS might also be marked as unresolvable: the is_dead will not be set, this is a OSI layer 8 option.
-
-    :return: None
-    """
-    if not urls:
-        urls = Url.objects.all().filter(is_dead=False, not_resolvable=False)
-
-    if organizations:
-        urls = urls.filter(organization__in=organizations)
 
 
 @app.task(queue="4and6")
