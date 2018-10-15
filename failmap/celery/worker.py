@@ -102,6 +102,10 @@ QUEUES_MATCHING_ROLES = {
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
     ],
+    'hyper': [
+        # where hyper scaling tasks take place. Is not waiting or dealing with load elsewhere.
+        Queue('hyper'),
+    ],
     'calculator': [
         Queue('isolated')
     ],
