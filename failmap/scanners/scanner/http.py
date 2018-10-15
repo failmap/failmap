@@ -99,16 +99,23 @@ def compose_discover_task(
 
     # We found we're getting useless endpoints that contain little to no data when
     # opening non-tls port 443 and tls port 80. We're not doing that anymore.
+
+    # DONE: create separate tasks on different queues determined by IP version. Distribute load per capability.
+    # todo: don't use the canvas model, just fire off the next task from the connection.
+
     for ip_version in ip_versions:
+        queue = "ipv4" if ip_version == 4 else "ipv6"
+
         for port in STANDARD_HTTP_PORTS:
             for url in urls:
                 tasks.append(get_ips.si(url.url) | url_lives.s(url))  # See if thing is alive, once.
-                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version)
+                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version).set(queue=queue)
                              | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
 
         for port in STANDARD_HTTPS_PORTS:
             for url in urls:
-                tasks.append(can_connect.si(protocol="https", url=url, port=port, ip_version=ip_version)
+                tasks.append(can_connect.si(protocol="https", url=url, port=port, ip_version=ip_version
+                                            ).set(queue=queue)
                              | connect_result.s(protocol="https", url=url, port=port, ip_version=ip_version))
 
     return group(tasks)
@@ -255,34 +262,52 @@ def get_ips(url: str):
     ipv6 = ""
 
     if settings.NETWORK_SUPPORTS_IPV4:
-        try:
-            ipv4 = socket.gethostbyname(url)
-            log.debug("%s has IPv4 address: %s" % (url, ipv4))
-        except Exception as ex:
-            # when not known: [Errno 8] nodename nor servname provided, or not known
-            log.debug("Get IPv4 error: %s" % ex)
+        ipv4 = get_ipv4(url)
 
     if settings.NETWORK_SUPPORTS_IPV6:
-        try:
-            # dig AAAA faalkaart.nl +short (might be used for debugging)
-            x = socket.getaddrinfo(url, None, socket.AF_INET6)
-            ipv6 = x[0][4][0]
-
-            # six to four addresses make no sense
-            if str(ipv6).startswith("::ffff:"):
-                log.error("Six-to-Four address %s discovered on %s, "
-                          "did you configure IPv6 connectivity correctly? "
-                          "Removing this IPv6 address from result to prevent "
-                          "database pollution." %
-                          (ipv6, url))
-                ipv6 = ""
-            else:
-                log.debug("%s has IPv6 address: %s" % (url, ipv6))
-        except Exception as ex:
-            # when not known: [Errno 8nodename nor servname provided, or not known
-            log.debug("Get IPv6 error: %s" % ex)
+        ipv6 = get_ipv6(url)
 
     return ipv4, ipv6
+
+
+# It's possible you don't get an address back, it could not be configured on our or their side.
+def get_ipv4(url: str):
+    ipv4 = ""
+
+    try:
+        ipv4 = socket.gethostbyname(url)
+        log.debug("%s has IPv4 address: %s" % (url, ipv4))
+    except Exception as ex:
+        # when not known: [Errno 8] nodename nor servname provided, or not known
+        log.debug("Get IPv4 error: %s" % ex)
+
+    return ipv4
+
+
+# It's possible you don't get an address back, it could not be configured on our or their side.
+def get_ipv6(url: str):
+    ipv6 = ""
+
+    try:
+        # dig AAAA faalkaart.nl +short (might be used for debugging)
+        x = socket.getaddrinfo(url, None, socket.AF_INET6)
+        ipv6 = x[0][4][0]
+
+        # six to four addresses make no sense
+        if str(ipv6).startswith("::ffff:"):
+            log.error("Six-to-Four address %s discovered on %s, "
+                      "did you configure IPv6 connectivity correctly? "
+                      "Removing this IPv6 address from result to prevent "
+                      "database pollution." %
+                      (ipv6, url))
+            ipv6 = ""
+        else:
+            log.debug("%s has IPv6 address: %s" % (url, ipv6))
+    except Exception as ex:
+        # when not known: [Errno 8nodename nor servname provided, or not known
+        log.debug("Get IPv6 error: %s" % ex)
+
+    return ipv6
 
 
 """
@@ -306,8 +331,8 @@ def get_ips(url: str):
 """
 
 
-@app.task(queue="4and6", rate_limit='120/s')
-def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
+@app.task(queue="4and6", rate_limit='120/s', bind=True)
+def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bool:
     """
     Searches for both IPv4 and IPv6 IP addresses / types.
 
@@ -336,24 +361,19 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     Todo: futher look if DIG can be of value to us. Until now it seems not so.
     """
 
-    ipv4, ipv6 = get_ips(url.url)
+    # You can see what queue / routing info is used. So options(queue works and overrides the default 4and6 queue)
+    # log.info(self.request['delivery_info']['routing_key'])
+
     uri = ""
     ip = ""
-    if ip_version == 6:
-        if not ipv6:
-            return False
-        else:
-            uri = "%s://[%s]:%s" % (protocol, ipv6, port)
-            ip = ipv6
+    if ip_version == "ipv4":
+        ip = get_ipv4(url.url)
+        uri = "%s://%s:%s" % (protocol, ip, port)
+    else:
+        ip = get_ipv6(url.url)
+        uri = "%s://[%s]:%s" % (protocol, ip, port)
 
-    if ip_version == 4:
-        if not ipv4:
-            return False
-        else:
-            uri = "%s://[%s]:%s" % (protocol, ipv4, port)
-            ip = ipv4
-
-    if not uri or not ip:
+    if not ip:
         return False
 
     log.debug("Attempting connect on: %s: host: %s IP: %s" % (uri, url.url, ip))
