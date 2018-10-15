@@ -59,7 +59,7 @@
           method: 'GET',
           success (data){
             self.loading = false;
-            self.workers = data.workers;
+            self.workers = data.workers.sort(this.sortAlphaNum);
             self.alerts = data.alerts;
             self.queues = data.queues;
           },
@@ -69,6 +69,19 @@
             self.error = true;
           },
         })
+      },
+      sortAlphaNum: function (a,b) {
+    	let reA = /[^a-zA-Z]/g;
+        let reN = /[^0-9]/g;
+        let aA = a.name.replace(reA, "");
+        let bA = b.name.replace(reA, "");
+        if(aA === bA) {
+          let aN = parseInt(a.name.replace(reN, ""), 10);
+          let bN = parseInt(b.name.replace(reN, ""), 10);
+          return aN === bN ? 0 : aN > bN ? 1 : -1;
+        } else {
+          return aA > bA ? 1 : -1;
+        }
       }
     }
   });
