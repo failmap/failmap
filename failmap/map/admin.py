@@ -8,7 +8,8 @@ from import_export.admin import ImportExportModelAdmin
 from ..app.models import Job
 from ..celery import PRIO_HIGH, app
 from .geojson import import_from_scratch, update_coordinates
-from .models import AdministrativeRegion, Configuration, OrganizationRating, UrlRating
+from .models import (AdministrativeRegion, Configuration, OrganizationRating, UrlRating,
+                     VulnerabilityStatistic)
 
 
 @admin.register(OrganizationRating)
@@ -236,3 +237,8 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
     remove_default.short_description = '😭  Remove default'
     actions.append(remove_default)
+
+
+@admin.register(VulnerabilityStatistic)
+class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low')

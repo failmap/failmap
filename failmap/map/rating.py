@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import pytz
@@ -9,13 +9,13 @@ from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from failmap.organizations.models import Organization, Url
+from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner.scanner import q_configurations_to_display
 
 from ..celery import Task, app
 from .calculate import get_calculation
-from .models import OrganizationRating, UrlRating
+from .models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
 
 log = logging.getLogger(__package__)
 
@@ -53,6 +53,7 @@ def compose_task(
     # be rebuild.
 
     tasks = []
+
     for organization in organizations:
         urls = Url.objects.filter(q_configurations_to_display(), organization=organization, **urls_filter)
         if not urls:
@@ -69,6 +70,10 @@ def compose_task(
         log.debug("urls to display: %s" % q_configurations_to_display())
         log.debug("organizatins to display: %s" % q_configurations_to_display('organization'))
         raise Exception('Applied filters resulted in no tasks!')
+
+    # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
+    # mainly as we're trying to get away from canvas and it's buggyness.
+    tasks.append(calculate_vulnerability_graphs.si())
 
     task = group(tasks)
 
@@ -875,6 +880,13 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
 
     log.info("Creating report for %s on %s" % (organization, when, ))
 
+    # if there already is an organization rating on this moment, skip it. You should have deleted it first.
+    # this is probably a lot quicker than calculating the score and then deepdiffing it.
+    # using this check we can also ditch deepdiff, because ratings on the same day are always the same.
+    # todo: we should be able to continue on a certain day.
+    if OrganizationRating.objects.all().filter(organization=organization, when=when).exists():
+        log.info("Rating already exists for %s on %s. Not overwriting." % (organization, when))
+
     total_rating = 0
     total_high, total_medium, total_low = 0, 0, 0
 
@@ -931,12 +943,13 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
 
     total_issues = total_high + total_medium + total_low
 
-    try:
-        last = OrganizationRating.objects.filter(
-            organization=organization, when__lte=when).latest('when')
-    except OrganizationRating.DoesNotExist:
-        log.debug("Could not find the last organization rating, creating a dummy one.")
-        last = OrganizationRating()  # create an empty one
+    # don't need this anymore
+    # try:
+    #     last = OrganizationRating.objects.filter(
+    #         organization=organization, when__lte=when).latest('when')
+    # except OrganizationRating.DoesNotExist:
+    #     log.debug("Could not find the last organization rating, creating a dummy one.")
+    #     last = OrganizationRating()  # create an empty one
 
     calculation = {
         "organization": {
@@ -967,43 +980,45 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     }
 
     # this is 10% faster without deepdiff, the major pain is elsewhere.
-    if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
-        # if True:
-        log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
-        organizationrating = OrganizationRating()
-        organizationrating.organization = organization
-        organizationrating.rating = total_rating
-        organizationrating.high = total_high
-        organizationrating.medium = total_medium
-        organizationrating.low = total_low
-        organizationrating.when = when
-        organizationrating.calculation = calculation
+    # if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
+    # if True:
+    log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
+    organizationrating = OrganizationRating()
+    organizationrating.organization = organization
+    organizationrating.rating = total_rating
+    organizationrating.high = total_high
+    organizationrating.medium = total_medium
+    organizationrating.low = total_low
+    organizationrating.when = when
+    organizationrating.calculation = calculation
 
-        organizationrating.total_issues = total_issues
-        organizationrating.total_urls = total_urls
-        organizationrating.high_urls = high_urls
-        organizationrating.medium_urls = medium_urls
-        organizationrating.low_urls = low_urls
+    organizationrating.total_issues = total_issues
+    organizationrating.total_urls = total_urls
+    organizationrating.high_urls = high_urls
+    organizationrating.medium_urls = medium_urls
+    organizationrating.low_urls = low_urls
 
-        organizationrating.total_endpoints = total_endpoints
-        organizationrating.high_endpoints = high_endpoints
-        organizationrating.medium_endpoints = medium_endpoints
-        organizationrating.low_endpoints = low_endpoints
+    organizationrating.total_endpoints = total_endpoints
+    organizationrating.high_endpoints = high_endpoints
+    organizationrating.medium_endpoints = medium_endpoints
+    organizationrating.low_endpoints = low_endpoints
 
-        organizationrating.total_url_issues = total_url_issues
-        organizationrating.total_endpoint_issues = total_endpoint_issues
-        organizationrating.url_issues_high = url_issues_high
-        organizationrating.url_issues_medium = url_issues_medium
-        organizationrating.url_issues_low = url_issues_low
-        organizationrating.endpoint_issues_high = endpoint_issues_high
-        organizationrating.endpoint_issues_medium = endpoint_issues_medium
-        organizationrating.endpoint_issues_low = endpoint_issues_low
+    organizationrating.total_url_issues = total_url_issues
+    organizationrating.total_endpoint_issues = total_endpoint_issues
+    organizationrating.url_issues_high = url_issues_high
+    organizationrating.url_issues_medium = url_issues_medium
+    organizationrating.url_issues_low = url_issues_low
+    organizationrating.endpoint_issues_high = endpoint_issues_high
+    organizationrating.endpoint_issues_medium = endpoint_issues_medium
+    organizationrating.endpoint_issues_low = endpoint_issues_low
 
-        organizationrating.save()
-    else:
-        # This happens because some urls are dead etc: our filtering already removes this from the relevant information
-        # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-        log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
+    organizationrating.save()
+
+    # doing a check beforehand is faster
+    # else:
+    # This happens because some urls are dead etc: our filtering already removes this from the relevant information
+    # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
+    #    log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
 
 
 def get_latest_urlratings(urls: List[Url], when):
@@ -1452,3 +1467,121 @@ def default_organization_rating(organizations: List[Organization]):
             }
         }
         r.save()
+
+
+@app.task(queue='storage')
+def calculate_vulnerability_graphs():
+    log.info("Calculation vulnerability graphs")
+
+    # for everything that is displayed on the site:
+    map_configurations = Configuration.objects.all().filter(
+        is_displayed=True).order_by('display_order').values('country', 'organization_type')
+
+    for map_configuration in map_configurations:
+        scan_types = set()  # set instead of list to prevent checking if something is in there already.
+        scan_types.add('total')  # the total would be separated per char if directly passed into set()
+        organization_type_id = map_configuration['organization_type']
+        country = map_configuration['country']
+
+        # for the entire year, starting with oldest (in case the other tasks are not ready)
+        for days_back in list(reversed(range(0, 366))):
+            measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
+            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+            log.info("Days back:%s Date: %s" % (days_back, when))
+
+            # delete this specific moment as it's going to be replaced, so it's not really noticable an update is
+            # taking place.
+            VulnerabilityStatistic.objects.all().filter(
+                when=when, country=country, organization_type=OrganizationType(pk=organization_type_id)).delete()
+
+            # about 1 second per query, while it seems to use indexes.
+            # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
+            # see map_data for more info.
+
+            # this query removes the double urls (see below) and makes the joins straightforward. But it's way slower.
+            # In the end this would be the query we should use... but can't right now
+            # sql = """SELECT MAX(map_urlrating.id) as id, map_urlrating2.calculation FROM map_urlrating
+            #        INNER JOIN url ON map_urlrating.url_id = url.id
+            #        INNER JOIN url_organization on url.id = url_organization.url_id
+            #        INNER JOIN organization ON url_organization.organization_id = organization.id
+            #        INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
+            #         WHERE organization.type_id = '%(OrganizationTypeId)s'
+            #         AND organization.country = '%(country)s'
+            #         AND map_urlrating.`when` <= '%(when)s'
+            #         GROUP BY map_urlrating.url_id
+            #     """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
+            #            "country": get_country(country)}
+
+            # parse the query here instead of outside the function to save a second or so.
+            # The ID is included for convenience of the rawquery.
+            # This query will deliver double ratings for urls that are doubly listed, which is dubious.
+            # this happens because multiple organizations can have the same URL.
+            # It's fair that there are more issues if more organizations share the same url?
+            sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation as calculation FROM
+                       map_urlrating
+                   INNER JOIN
+                   (SELECT MAX(id) as id2 FROM map_urlrating or2
+                   WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+                   ON x.id2 = map_urlrating.id
+                   INNER JOIN url ON map_urlrating.url_id = url.id
+                   INNER JOIN url_organization on url.id = url_organization.url_id
+                   INNER JOIN organization ON url_organization.organization_id = organization.id
+                   INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
+                    WHERE organization.type_id = '%(OrganizationTypeId)s'
+                    AND organization.country = '%(country)s'
+                """ % {"when": when, "OrganizationTypeId": organization_type_id, "country": country}
+
+            urlratings = UrlRating.objects.raw(sql)
+
+            # group by vulnerability type
+            for urlrating in urlratings:
+
+                # rare occasions there are no endpoints.
+                if "endpoints" not in urlrating.calculation:
+                    continue
+
+                # url reports
+                for rating in urlrating.calculation['ratings']:
+                    if rating['type'] not in measurement:
+                        measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                    # if rating['type'] not in scan_types:
+                    scan_types.add(rating['type'])
+
+                    measurement[rating['type']]['high'] += rating['high']
+                    measurement[rating['type']]['medium'] += rating['medium']
+                    measurement[rating['type']]['low'] += rating['low']
+
+                    measurement['total']['high'] += rating['high']
+                    measurement['total']['medium'] += rating['medium']
+                    measurement['total']['low'] += rating['low']
+
+                # endpoint reports
+                for endpoint in urlrating.calculation['endpoints']:
+                    for rating in endpoint['ratings']:
+                        if rating['type'] not in measurement:
+                            measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                        # if rating['type'] not in scan_types:
+                        scan_types.add(rating['type'])
+
+                        measurement[rating['type']]['high'] += rating['high']
+                        measurement[rating['type']]['medium'] += rating['medium']
+                        measurement[rating['type']]['low'] += rating['low']
+
+                        measurement['total']['high'] += rating['high']
+                        measurement['total']['medium'] += rating['medium']
+                        measurement['total']['low'] += rating['low']
+
+            # store these results per scan type, and only retrieve this per scan type...
+            for scan_type in scan_types:
+                if scan_type in measurement:
+                    vs = VulnerabilityStatistic()
+                    vs.when = when
+                    vs.organization_type = OrganizationType(pk=organization_type_id)
+                    vs.country = country
+                    vs.scan_type = scan_type
+                    vs.high = measurement[scan_type]['high']
+                    vs.medium = measurement[scan_type]['medium']
+                    vs.low = measurement[scan_type]['low']
+                    vs.save()

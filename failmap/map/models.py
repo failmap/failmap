@@ -284,3 +284,29 @@ class Configuration(models.Model):
         verbose_name = _('configuration')
         verbose_name_plural = _('configurations')
         ordering = ('display_order', )
+
+
+# It took too long to calculate these stats, resulting in non showing graphs. Therefore we're now storing
+# them in this model.
+class VulnerabilityStatistic(models.Model):
+
+    country = CountryField(db_index=True,
+                           help_text="Part of the combination shown on the map.")
+
+    organization_type = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        help_text="Part of the combination shown on the map.")
+
+    when = models.DateField()
+
+    scan_type = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        db_index=True
+    )
+
+    high = models.PositiveIntegerField(default=0, blank=False, null=False)
+    medium = models.PositiveIntegerField(default=0, blank=False, null=False)
+    low = models.PositiveIntegerField(default=0, blank=False, null=False)

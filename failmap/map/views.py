@@ -22,7 +22,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 from simplejson.errors import JSONDecodeError
 
-from failmap.map.models import Configuration, OrganizationRating, UrlRating
+from failmap.map.models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
 
@@ -857,132 +857,39 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
 
 @cache_page(one_hour)
 def vulnerability_graphs(request, country: str = "NL", organization_type="municipality", weeks_back=0):
-    # be careful these values don't overlap. While "3 weeks ago" and "1 month ago" don't seem to be overlapping,
-    # they might.
-    # also: it's "1 days ago", not "1 day ago".
-    timeframes = [
-        'now', '1 days ago', '2 days ago', '4 days ago', '6 days ago',
-        '8 days ago', '10 days ago', '14 days ago', '21 days ago', '28 days ago',
-        '35 days ago', '42 days ago', '49 days ago', '56 days ago',
-        '63 days ago', '70 days ago', '77 days ago', '84 days ago', '91 days ago']
 
-    timeframes = reversed(timeframes)
+    organization_type_id = get_organization_type(organization_type)
+    country = get_country(country)
+    when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
-    # if you print this, the result will be empty. WHY :)
-    # print([timeframe for timeframe in timeframes])
+    data = VulnerabilityStatistic.objects.all().filter(
+        organization_type=organization_type_id, country=country, when__lte=when
+    ).order_by('scan_type')
 
+    """
+    Desired output:
+      "security_headers_x_frame_options": [
+        {
+          "date": "2018-07-17",
+          "high": 0,
+          "medium": 3950,
+          "low": 0
+        },
+        {
+          "date": "2018-07-24",
+          "high": 0,
+          "medium": 2940,
+          "low": 0
+        },
+    """
     stats = {}
-    scan_types = set('total')  # set instead of list to prevent checking if something is in there already.
-    alphanum_only = re.compile('[\W_]+')
 
-    for stat in timeframes:
-        measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
-        when = stats_determine_when(stat, weeks_back)
-        log.debug("%s: %s" % (stat, when))
+    for statistic in data:
+        if statistic.scan_type not in stats:
+            stats[statistic.scan_type] = []
 
-        # about 1 second per query, while it seems to use indexes.
-        # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
-        # see map_data for more info.
-
-        # this query removes the double urls (see below) and makes the joins straightforward. But it's way slower.
-        # In the end this would be the query we should use... but can't right now
-        # sql = """SELECT MAX(map_urlrating.id) as id, map_urlrating2.calculation FROM map_urlrating
-        #        INNER JOIN url ON map_urlrating.url_id = url.id
-        #        INNER JOIN url_organization on url.id = url_organization.url_id
-        #        INNER JOIN organization ON url_organization.organization_id = organization.id
-        #        INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
-        #         WHERE organization.type_id = '%(OrganizationTypeId)s'
-        #         AND organization.country = '%(country)s'
-        #         AND map_urlrating.`when` <= '%(when)s'
-        #         GROUP BY map_urlrating.url_id
-        #     """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-        #            "country": get_country(country)}
-
-        # caching for about 30 minutes.
-        # which works pretty OK, but then the calculation takes too long for a function result to get stored.
-        # The cache eats 8.5 seconds.
-        # mainly {built-in method _pickle.loads}... That's because the reports are so large.
-        cache_key = str(alphanum_only.sub('', "grs %s %s %s %s" % (country, organization_type, stat, weeks_back)))
-        log.debug('retrieving %s' % cache_key)
-        urlratings = cache.get(cache_key)
-        if not urlratings:
-            # parse the query here instead of outside the function to save a second or so.
-            # The ID is included for convenience of the rawquery.
-            # This query will deliver double ratings for urls that are doubly listed, which is dubious.
-            # this happens because multiple organizations can have the same URL.
-            # It's fair that there are more issues if more organizations share the same url?
-            sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation as calculation FROM
-                       map_urlrating
-                   INNER JOIN
-                   (SELECT MAX(id) as id2 FROM map_urlrating or2
-                   WHERE `when` <= '%(when)s' GROUP BY url_id) as x
-                   ON x.id2 = map_urlrating.id
-                   INNER JOIN url ON map_urlrating.url_id = url.id
-                   INNER JOIN url_organization on url.id = url_organization.url_id
-                   INNER JOIN organization ON url_organization.organization_id = organization.id
-                   INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
-                    WHERE organization.type_id = '%(OrganizationTypeId)s'
-                    AND organization.country = '%(country)s'
-                """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                       "country": get_country(country)}
-
-            # log.debug(sql)
-
-            urlratings = UrlRating.objects.raw(sql)
-            log.debug('Set %s as %s' % (cache_key, urlratings))
-            cache.set(cache_key, list(urlratings), 1800)
-
-        # group by vulnerability type
-        for urlrating in urlratings:
-
-            # rare occasions there are no endpoints.
-            if "endpoints" not in urlrating.calculation:
-                continue
-
-            # url reports
-            for rating in urlrating.calculation['ratings']:
-                if rating['type'] not in measurement:
-                    measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
-
-                # if rating['type'] not in scan_types:
-                scan_types.add(rating['type'])
-
-                measurement[rating['type']]['high'] += rating['high']
-                measurement[rating['type']]['medium'] += rating['medium']
-                measurement[rating['type']]['low'] += rating['low']
-
-                measurement['total']['high'] += rating['high']
-                measurement['total']['medium'] += rating['medium']
-                measurement['total']['low'] += rating['low']
-
-            # endpoint reports
-            for endpoint in urlrating.calculation['endpoints']:
-                for rating in endpoint['ratings']:
-                    if rating['type'] not in measurement:
-                        measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
-
-                    # if rating['type'] not in scan_types:
-                    scan_types.add(rating['type'])
-
-                    measurement[rating['type']]['high'] += rating['high']
-                    measurement[rating['type']]['medium'] += rating['medium']
-                    measurement[rating['type']]['low'] += rating['low']
-
-                    measurement['total']['high'] += rating['high']
-                    measurement['total']['medium'] += rating['medium']
-                    measurement['total']['low'] += rating['low']
-
-        for scan_type in scan_types:
-            if scan_type not in stats:
-                stats[scan_type] = []
-
-        for scan_type in scan_types:
-            if scan_type in measurement:
-                stats[scan_type].append({'date': when.date(),
-                                         'high': measurement[scan_type]['high'],
-                                         'medium': measurement[scan_type]['medium'],
-                                         'low': measurement[scan_type]['low'],
-                                         })
+        stats[statistic.scan_type].append({'high': statistic.high, 'medium': statistic.medium,
+                                           'low': statistic.low, 'date': statistic.when})
 
     return JsonResponse(stats, encoder=JSEncoder)
 
