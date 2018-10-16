@@ -528,11 +528,15 @@ function views() {
                         this.vulnerability_graph('timeline_xcto_vulnerabilities', data.security_headers_x_content_type_options);
                         this.vulnerability_graph('timeline_xxss_vulnerabilities', data.security_headers_x_xss_protection);
                         this.vulnerability_graph('timeline_dnssec_vulnerabilities', data.DNSSEC);
-                        // todo: this.makegraph('timeline_unencrypted_ftp_vulnerabilities', data.plain_https);
+                        this.vulnerability_graph('timeline_unencrypted_ftp_vulnerabilities', data.ftp);
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
 
             },
             vulnerability_graph: function(element, data){
+
+                if (data === undefined)
+                    return;
+
                 let labels = Array();
                 let high = Array();
                 let medium = Array();
