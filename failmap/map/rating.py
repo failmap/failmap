@@ -1480,6 +1480,7 @@ def calculate_vulnerability_graphs():
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
         scan_types.add('total')  # the total would be separated per char if directly passed into set()
+        scan_types.add('ftp')
         organization_type_id = map_configuration['organization_type']
         country = map_configuration['country']
 

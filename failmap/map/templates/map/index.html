@@ -64,8 +64,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/d3.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -81,8 +81,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/d3.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/graphs.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
@@ -282,6 +282,12 @@
                         <div class="score low">
                             <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
                             <span class="score_label">{% trans "Low" %}</span>
+                        </div>
+
+                        <br style="clear: both">
+
+                        <div class="chart-container" style="position: relative; height:555px; width:100%">
+                            <canvas id="organization_vulnerability_timeline"></canvas>
                         </div>
 
                         <br style="clear: both">
@@ -883,7 +889,9 @@
             <div class="row">
                 <div class="col-md-12">
                     <h4>{% trans "Overall" %}</h4>
-                    <svg id="graph_total" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_all_vulnerabilities"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -892,13 +900,17 @@
                 {% if config.SHOW_HTTP_TLS_QUALYS %}
                 <div class="col-md-6">
                     <h4>{% trans "Encryption failure" %}</h4>
-                    <svg id="graph_tls_qualys" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_tls_qualys_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_MISSING_TLS %}
                 <div class="col-md-6">
                     <h4>{% trans "Lack of encryption failure" %}</h4>
-                    <svg id="graph_plain_https" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_missing_https_encryption_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -909,13 +921,17 @@
                 {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
                 <div class="col-md-6">
                     <h4>{% trans "Forcing of encryption failure" %}</h4>
-                    <svg id="graph_security_headers_strict_transport_security" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_hsts_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Frame Options failure" %}</h4>
-                    <svg id="graph_security_headers_x_frame_options" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xfo_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -926,13 +942,17 @@
                 {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Content-Type-Options failure" %}</h4>
-                    <svg id="graph_security_headers_x_content_type_options" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xcto_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
                 {% if config.SHOW_HTTP_HEADERS_X_XSS%}
                 <div class="col-md-6">
                     <h4>{% trans "X-XSS-Protection failure" %}</h4>
-                    <svg id="graph_security_headers_x_xss_protection" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xxss_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -943,11 +963,16 @@
                 {% if config.SHOW_FTP %}
                 <div class="col-md-6">
                     <h4>{% trans "FTP failure" %}</h4>
-                    <svg id="graph_ftp" width="555" height="300"></svg>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_unencrypted_ftp_vulnerabilities"></canvas>
+                    </div>
                 </div>
                 {% endif %}
                 <div class="col-md-6">
-                    <h4>&nbsp;</h4>
+                    <h4>{% trans "DNSSEC failure" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_dnssec_vulnerabilities"></canvas>
+                    </div>
                 </div>
             </div>
             {% endif %}

@@ -856,6 +856,24 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
 
 
 @cache_page(one_hour)
+def organization_vulnerability_timeline(request, organization_id: int):
+
+    ratings = OrganizationRating.objects.all().filter(organization=organization_id).order_by('when')
+
+    stats = []
+
+    for rating in ratings:
+        stats.append({'date': rating.when.date().isoformat(),
+                      'endpoints': rating.total_endpoints,
+                      'urls': rating.total_urls,
+                      'high': rating.url_issues_high + rating.endpoint_issues_high,
+                      'medium': rating.url_issues_medium + rating.endpoint_issues_medium,
+                      'low': rating.url_issues_low + rating.endpoint_issues_low})
+
+    return JsonResponse(stats, encoder=JSEncoder, safe=False)
+
+
+@cache_page(one_hour)
 def vulnerability_graphs(request, country: str = "NL", organization_type="municipality", weeks_back=0):
 
     organization_type_id = get_organization_type(organization_type)
@@ -864,7 +882,7 @@ def vulnerability_graphs(request, country: str = "NL", organization_type="munici
 
     data = VulnerabilityStatistic.objects.all().filter(
         organization_type=organization_type_id, country=country, when__lte=when
-    ).order_by('scan_type')
+    ).order_by('scan_type', 'when')
 
     """
     Desired output:
@@ -889,7 +907,7 @@ def vulnerability_graphs(request, country: str = "NL", organization_type="munici
             stats[statistic.scan_type] = []
 
         stats[statistic.scan_type].append({'high': statistic.high, 'medium': statistic.medium,
-                                           'low': statistic.low, 'date': statistic.when})
+                                           'low': statistic.low, 'date': statistic.when.isoformat()})
 
     return JsonResponse(stats, encoder=JSEncoder)
 
