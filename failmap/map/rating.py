@@ -873,7 +873,7 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     if not when:
         when = datetime.now(pytz.utc)
 
-    log.debug("rating on: %s, Organization %s" % (when, organization))
+    log.info("Creating report for %s on %s" % (organization, when, ))
 
     total_rating = 0
     total_high, total_medium, total_low = 0, 0, 0
@@ -966,7 +966,9 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
         }
     }
 
+    # this is 10% faster without deepdiff, the major pain is elsewhere.
     if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
+        # if True:
         log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
         organizationrating = OrganizationRating()
         organizationrating.organization = organization
@@ -1096,6 +1098,15 @@ def rate_url(url: Url, when: datetime = None):
     # therefore the order in which URLs are grabbed (if there are new ones) is important.
     # it cannot be random, otherwise the explanation will be different every time.
     # deepdiff is also extremely slow, logically, since the json objects are pretty large.
+
+    # Comparing to json, nothing or deepdiff makes very little difference in performance.
+    # import json
+    # a = json.dumps(last_url_rating.calculation, sort_keys=True)
+    # b = json.dumps(explanation, sort_keys=True)
+
+    # DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True)
+    # if explanation:
+    # if explanation and a == b:
     if explanation and DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True):
         u = UrlRating()
         u.url = url
