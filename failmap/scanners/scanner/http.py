@@ -137,7 +137,10 @@ def compose_verify_task(
     if not allowed_to_discover("scanner_http"):
         return group()
 
-    default_filter = {"protocol__in": ["https", "http"]}
+    # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?
+    # otherwise we'll be verifying things that existed ages ago and probably will never return. Which makes this
+    # scan also extremely slow. - The description says we should.
+    default_filter = {"protocol__in": ["https", "http"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
@@ -302,7 +305,7 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
 
     uri = ""
     ip = ""
-    if ip_version == "ipv4":
+    if ip_version == 4:
         ip = get_ipv4(url.url)
         uri = "%s://%s:%s" % (protocol, ip, port)
     else:

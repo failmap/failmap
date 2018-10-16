@@ -98,7 +98,7 @@ def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict
 def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
                         endpoints_filter: dict = dict()) -> Task:
 
-    default_filter = {"protocol": "ftp"}
+    default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
