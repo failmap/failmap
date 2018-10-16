@@ -784,3 +784,8 @@ th.active .arrow {
     padding-top: 20px;
     padding-bottom: 20px;
 }
+
+.photobar {
+    height: 243px;
+    width: 320px;
+}
