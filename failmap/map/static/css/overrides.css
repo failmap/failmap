@@ -789,3 +789,8 @@ th.active .arrow {
     height: 243px;
     width: 320px;
 }
+
+
+#graphs .row {
+    padding-bottom: 30px;
+}

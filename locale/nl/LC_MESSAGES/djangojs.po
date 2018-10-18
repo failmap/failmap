@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 12:11+0000\n"
+"POT-Creation-Date: 2018-10-18 09:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -179,8 +179,8 @@ msgstr ""
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js:61 static/js/views.js:690 static/js/views.js:695
-#: static/js/views.js:698
+#: static/js/failmap.js:61 static/js/views.js:738 static/js/views.js:743
+#: static/js/views.js:746
 msgid "View Full Screen"
 msgstr ""
 
@@ -488,987 +488,1003 @@ msgstr ""
 msgid "category_menu_hacking"
 msgstr ""
 
+#: static/js/script.js:74
+msgid "category_menu_country"
+msgstr ""
+
 #: static/js/script.js:75
-msgid "category_menu_bundesland"
+msgid "category_menu_region"
 msgstr ""
 
 #: static/js/script.js:76
-msgid "category_menu_regierungsbezirk"
+msgid "category_menu_county"
 msgstr ""
 
 #: static/js/script.js:77
-msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
-msgstr ""
-
-#: static/js/script.js:78
-msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
-msgstr ""
-
-#: static/js/script.js:79
-msgid "category_menu_stadt_gemeinde"
+msgid "category_menu_district"
 msgstr ""
 
 #: static/js/script.js:80
-msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
+msgid "category_menu_bundesland"
 msgstr ""
 
 #: static/js/script.js:81
-msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
+msgid "category_menu_regierungsbezirk"
+msgstr ""
+
+#: static/js/script.js:82
+msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
+msgstr ""
+
+#: static/js/script.js:83
+msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
 #: static/js/script.js:84
-msgid "country_AD"
+msgid "category_menu_stadt_gemeinde"
 msgstr ""
 
 #: static/js/script.js:85
-msgid "country_AE"
+msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr ""
 
 #: static/js/script.js:86
-msgid "country_AF"
-msgstr ""
-
-#: static/js/script.js:87
-msgid "country_AG"
-msgstr ""
-
-#: static/js/script.js:88
-msgid "country_AI"
+msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr ""
 
 #: static/js/script.js:89
-msgid "country_AL"
+msgid "country_AD"
 msgstr ""
 
 #: static/js/script.js:90
-msgid "country_AM"
+msgid "country_AE"
 msgstr ""
 
 #: static/js/script.js:91
-msgid "country_AO"
+msgid "country_AF"
 msgstr ""
 
 #: static/js/script.js:92
-msgid "country_AQ"
+msgid "country_AG"
 msgstr ""
 
 #: static/js/script.js:93
-msgid "country_AR"
+msgid "country_AI"
 msgstr ""
 
 #: static/js/script.js:94
-msgid "country_AS"
+msgid "country_AL"
 msgstr ""
 
 #: static/js/script.js:95
-msgid "country_AT"
+msgid "country_AM"
 msgstr ""
 
 #: static/js/script.js:96
-msgid "country_AU"
+msgid "country_AO"
 msgstr ""
 
 #: static/js/script.js:97
-msgid "country_AW"
+msgid "country_AQ"
 msgstr ""
 
 #: static/js/script.js:98
-msgid "country_AX"
+msgid "country_AR"
 msgstr ""
 
 #: static/js/script.js:99
-msgid "country_AZ"
+msgid "country_AS"
 msgstr ""
 
 #: static/js/script.js:100
-msgid "country_BA"
+msgid "country_AT"
 msgstr ""
 
 #: static/js/script.js:101
-msgid "country_BB"
+msgid "country_AU"
 msgstr ""
 
 #: static/js/script.js:102
-msgid "country_BD"
+msgid "country_AW"
 msgstr ""
 
 #: static/js/script.js:103
-msgid "country_BE"
+msgid "country_AX"
 msgstr ""
 
 #: static/js/script.js:104
-msgid "country_BF"
+msgid "country_AZ"
 msgstr ""
 
 #: static/js/script.js:105
-msgid "country_BG"
+msgid "country_BA"
 msgstr ""
 
 #: static/js/script.js:106
-msgid "country_BH"
+msgid "country_BB"
 msgstr ""
 
 #: static/js/script.js:107
-msgid "country_BI"
+msgid "country_BD"
 msgstr ""
 
 #: static/js/script.js:108
-msgid "country_BJ"
+msgid "country_BE"
 msgstr ""
 
 #: static/js/script.js:109
-msgid "country_BL"
+msgid "country_BF"
 msgstr ""
 
 #: static/js/script.js:110
-msgid "country_BM"
+msgid "country_BG"
 msgstr ""
 
 #: static/js/script.js:111
-msgid "country_BN"
+msgid "country_BH"
 msgstr ""
 
 #: static/js/script.js:112
-msgid "country_BO"
+msgid "country_BI"
 msgstr ""
 
 #: static/js/script.js:113
-msgid "country_BR"
+msgid "country_BJ"
 msgstr ""
 
 #: static/js/script.js:114
-msgid "country_BS"
+msgid "country_BL"
 msgstr ""
 
 #: static/js/script.js:115
-msgid "country_BT"
+msgid "country_BM"
 msgstr ""
 
 #: static/js/script.js:116
-msgid "country_BW"
+msgid "country_BN"
 msgstr ""
 
 #: static/js/script.js:117
-msgid "country_BY"
+msgid "country_BO"
 msgstr ""
 
 #: static/js/script.js:118
-msgid "country_BZ"
+msgid "country_BR"
 msgstr ""
 
 #: static/js/script.js:119
-msgid "country_CA"
+msgid "country_BS"
 msgstr ""
 
 #: static/js/script.js:120
-msgid "country_CD"
+msgid "country_BT"
 msgstr ""
 
 #: static/js/script.js:121
-msgid "country_CF"
+msgid "country_BW"
 msgstr ""
 
 #: static/js/script.js:122
-msgid "country_CG"
+msgid "country_BY"
 msgstr ""
 
 #: static/js/script.js:123
-msgid "country_CH"
+msgid "country_BZ"
 msgstr ""
 
 #: static/js/script.js:124
-msgid "country_CI"
+msgid "country_CA"
 msgstr ""
 
 #: static/js/script.js:125
-msgid "country_CK"
+msgid "country_CD"
 msgstr ""
 
 #: static/js/script.js:126
-msgid "country_CL"
+msgid "country_CF"
 msgstr ""
 
 #: static/js/script.js:127
-msgid "country_CM"
+msgid "country_CG"
 msgstr ""
 
 #: static/js/script.js:128
-msgid "country_CN"
+msgid "country_CH"
 msgstr ""
 
 #: static/js/script.js:129
-msgid "country_CO"
+msgid "country_CI"
 msgstr ""
 
 #: static/js/script.js:130
-msgid "country_CR"
+msgid "country_CK"
 msgstr ""
 
 #: static/js/script.js:131
-msgid "country_CU"
+msgid "country_CL"
 msgstr ""
 
 #: static/js/script.js:132
-msgid "country_CV"
+msgid "country_CM"
 msgstr ""
 
 #: static/js/script.js:133
-msgid "country_CW"
+msgid "country_CN"
 msgstr ""
 
 #: static/js/script.js:134
-msgid "country_CY"
+msgid "country_CO"
 msgstr ""
 
 #: static/js/script.js:135
-msgid "country_CZ"
+msgid "country_CR"
 msgstr ""
 
 #: static/js/script.js:136
-msgid "country_DE"
+msgid "country_CU"
 msgstr ""
 
 #: static/js/script.js:137
-msgid "country_DJ"
+msgid "country_CV"
 msgstr ""
 
 #: static/js/script.js:138
-msgid "country_DK"
+msgid "country_CW"
 msgstr ""
 
 #: static/js/script.js:139
-msgid "country_DM"
+msgid "country_CY"
 msgstr ""
 
 #: static/js/script.js:140
-msgid "country_DO"
+msgid "country_CZ"
 msgstr ""
 
 #: static/js/script.js:141
-msgid "country_DZ"
+msgid "country_DE"
 msgstr ""
 
 #: static/js/script.js:142
-msgid "country_EC"
+msgid "country_DJ"
 msgstr ""
 
 #: static/js/script.js:143
-msgid "country_EE"
+msgid "country_DK"
 msgstr ""
 
 #: static/js/script.js:144
-msgid "country_EG"
+msgid "country_DM"
 msgstr ""
 
 #: static/js/script.js:145
-msgid "country_EH"
+msgid "country_DO"
 msgstr ""
 
 #: static/js/script.js:146
-msgid "country_ER"
+msgid "country_DZ"
 msgstr ""
 
 #: static/js/script.js:147
-msgid "country_ES"
+msgid "country_EC"
 msgstr ""
 
 #: static/js/script.js:148
-msgid "country_ET"
+msgid "country_EE"
 msgstr ""
 
 #: static/js/script.js:149
-msgid "country_FI"
+msgid "country_EG"
 msgstr ""
 
 #: static/js/script.js:150
-msgid "country_FJ"
+msgid "country_EH"
 msgstr ""
 
 #: static/js/script.js:151
-msgid "country_FK"
+msgid "country_ER"
 msgstr ""
 
 #: static/js/script.js:152
-msgid "country_FM"
+msgid "country_ES"
 msgstr ""
 
 #: static/js/script.js:153
-msgid "country_FO"
+msgid "country_ET"
 msgstr ""
 
 #: static/js/script.js:154
-msgid "country_FR"
+msgid "country_FI"
 msgstr ""
 
 #: static/js/script.js:155
-msgid "country_GA"
+msgid "country_FJ"
 msgstr ""
 
 #: static/js/script.js:156
-msgid "country_GB"
+msgid "country_FK"
 msgstr ""
 
 #: static/js/script.js:157
-msgid "country_GD"
+msgid "country_FM"
 msgstr ""
 
 #: static/js/script.js:158
-msgid "country_GE"
+msgid "country_FO"
 msgstr ""
 
 #: static/js/script.js:159
-msgid "country_GG"
+msgid "country_FR"
 msgstr ""
 
 #: static/js/script.js:160
-msgid "country_GH"
+msgid "country_GA"
 msgstr ""
 
 #: static/js/script.js:161
-msgid "country_GL"
+msgid "country_GB"
 msgstr ""
 
 #: static/js/script.js:162
-msgid "country_GM"
+msgid "country_GD"
 msgstr ""
 
 #: static/js/script.js:163
-msgid "country_GN"
+msgid "country_GE"
 msgstr ""
 
 #: static/js/script.js:164
-msgid "country_GQ"
+msgid "country_GG"
 msgstr ""
 
 #: static/js/script.js:165
-msgid "country_GR"
+msgid "country_GH"
 msgstr ""
 
 #: static/js/script.js:166
-msgid "country_GS"
+msgid "country_GL"
 msgstr ""
 
 #: static/js/script.js:167
-msgid "country_GT"
+msgid "country_GM"
 msgstr ""
 
 #: static/js/script.js:168
-msgid "country_GU"
+msgid "country_GN"
 msgstr ""
 
 #: static/js/script.js:169
-msgid "country_GW"
+msgid "country_GQ"
 msgstr ""
 
 #: static/js/script.js:170
-msgid "country_GY"
+msgid "country_GR"
 msgstr ""
 
 #: static/js/script.js:171
-msgid "country_HK"
+msgid "country_GS"
 msgstr ""
 
 #: static/js/script.js:172
-msgid "country_HM"
+msgid "country_GT"
 msgstr ""
 
 #: static/js/script.js:173
-msgid "country_HN"
+msgid "country_GU"
 msgstr ""
 
 #: static/js/script.js:174
-msgid "country_HR"
+msgid "country_GW"
 msgstr ""
 
 #: static/js/script.js:175
-msgid "country_HT"
+msgid "country_GY"
 msgstr ""
 
 #: static/js/script.js:176
-msgid "country_HU"
+msgid "country_HK"
 msgstr ""
 
 #: static/js/script.js:177
-msgid "country_ID"
+msgid "country_HM"
 msgstr ""
 
 #: static/js/script.js:178
-msgid "country_IE"
+msgid "country_HN"
 msgstr ""
 
 #: static/js/script.js:179
-msgid "country_IL"
+msgid "country_HR"
 msgstr ""
 
 #: static/js/script.js:180
-msgid "country_IM"
+msgid "country_HT"
 msgstr ""
 
 #: static/js/script.js:181
-msgid "country_IN"
+msgid "country_HU"
 msgstr ""
 
 #: static/js/script.js:182
-msgid "country_IO"
+msgid "country_ID"
 msgstr ""
 
 #: static/js/script.js:183
-msgid "country_IQ"
+msgid "country_IE"
 msgstr ""
 
 #: static/js/script.js:184
-msgid "country_IR"
+msgid "country_IL"
 msgstr ""
 
 #: static/js/script.js:185
-msgid "country_IS"
+msgid "country_IM"
 msgstr ""
 
 #: static/js/script.js:186
-msgid "country_IT"
+msgid "country_IN"
 msgstr ""
 
 #: static/js/script.js:187
-msgid "country_JE"
+msgid "country_IO"
 msgstr ""
 
 #: static/js/script.js:188
-msgid "country_JM"
+msgid "country_IQ"
 msgstr ""
 
 #: static/js/script.js:189
-msgid "country_JO"
+msgid "country_IR"
 msgstr ""
 
 #: static/js/script.js:190
-msgid "country_JP"
+msgid "country_IS"
 msgstr ""
 
 #: static/js/script.js:191
-msgid "country_KE"
+msgid "country_IT"
 msgstr ""
 
 #: static/js/script.js:192
-msgid "country_KG"
+msgid "country_JE"
 msgstr ""
 
 #: static/js/script.js:193
-msgid "country_KH"
+msgid "country_JM"
 msgstr ""
 
 #: static/js/script.js:194
-msgid "country_KI"
+msgid "country_JO"
 msgstr ""
 
 #: static/js/script.js:195
-msgid "country_KM"
+msgid "country_JP"
 msgstr ""
 
 #: static/js/script.js:196
-msgid "country_KN"
+msgid "country_KE"
 msgstr ""
 
 #: static/js/script.js:197
-msgid "country_KP"
+msgid "country_KG"
 msgstr ""
 
 #: static/js/script.js:198
-msgid "country_KR"
+msgid "country_KH"
 msgstr ""
 
 #: static/js/script.js:199
-msgid "country_KW"
+msgid "country_KI"
 msgstr ""
 
 #: static/js/script.js:200
-msgid "country_KY"
+msgid "country_KM"
 msgstr ""
 
 #: static/js/script.js:201
-msgid "country_KZ"
+msgid "country_KN"
 msgstr ""
 
 #: static/js/script.js:202
-msgid "country_LA"
+msgid "country_KP"
 msgstr ""
 
 #: static/js/script.js:203
-msgid "country_LB"
+msgid "country_KR"
 msgstr ""
 
 #: static/js/script.js:204
-msgid "country_LC"
+msgid "country_KW"
 msgstr ""
 
 #: static/js/script.js:205
-msgid "country_LI"
+msgid "country_KY"
 msgstr ""
 
 #: static/js/script.js:206
-msgid "country_LK"
+msgid "country_KZ"
 msgstr ""
 
 #: static/js/script.js:207
-msgid "country_LR"
+msgid "country_LA"
 msgstr ""
 
 #: static/js/script.js:208
-msgid "country_LS"
+msgid "country_LB"
 msgstr ""
 
 #: static/js/script.js:209
-msgid "country_LT"
+msgid "country_LC"
 msgstr ""
 
 #: static/js/script.js:210
-msgid "country_LU"
+msgid "country_LI"
 msgstr ""
 
 #: static/js/script.js:211
-msgid "country_LV"
+msgid "country_LK"
 msgstr ""
 
 #: static/js/script.js:212
-msgid "country_LY"
+msgid "country_LR"
 msgstr ""
 
 #: static/js/script.js:213
-msgid "country_MA"
+msgid "country_LS"
 msgstr ""
 
 #: static/js/script.js:214
-msgid "country_MC"
+msgid "country_LT"
 msgstr ""
 
 #: static/js/script.js:215
-msgid "country_MD"
+msgid "country_LU"
 msgstr ""
 
 #: static/js/script.js:216
-msgid "country_ME"
+msgid "country_LV"
 msgstr ""
 
 #: static/js/script.js:217
-msgid "country_MF"
+msgid "country_LY"
 msgstr ""
 
 #: static/js/script.js:218
-msgid "country_MG"
+msgid "country_MA"
 msgstr ""
 
 #: static/js/script.js:219
-msgid "country_MH"
+msgid "country_MC"
 msgstr ""
 
 #: static/js/script.js:220
-msgid "country_MK"
+msgid "country_MD"
 msgstr ""
 
 #: static/js/script.js:221
-msgid "country_ML"
+msgid "country_ME"
 msgstr ""
 
 #: static/js/script.js:222
-msgid "country_MM"
+msgid "country_MF"
 msgstr ""
 
 #: static/js/script.js:223
-msgid "country_MN"
+msgid "country_MG"
 msgstr ""
 
 #: static/js/script.js:224
-msgid "country_MO"
+msgid "country_MH"
 msgstr ""
 
 #: static/js/script.js:225
-msgid "country_MP"
+msgid "country_MK"
 msgstr ""
 
 #: static/js/script.js:226
-msgid "country_MR"
+msgid "country_ML"
 msgstr ""
 
 #: static/js/script.js:227
-msgid "country_MS"
+msgid "country_MM"
 msgstr ""
 
 #: static/js/script.js:228
-msgid "country_MT"
+msgid "country_MN"
 msgstr ""
 
 #: static/js/script.js:229
-msgid "country_MU"
+msgid "country_MO"
 msgstr ""
 
 #: static/js/script.js:230
-msgid "country_MV"
+msgid "country_MP"
 msgstr ""
 
 #: static/js/script.js:231
-msgid "country_MW"
+msgid "country_MR"
 msgstr ""
 
 #: static/js/script.js:232
-msgid "country_MX"
+msgid "country_MS"
 msgstr ""
 
 #: static/js/script.js:233
-msgid "country_MY"
+msgid "country_MT"
 msgstr ""
 
 #: static/js/script.js:234
-msgid "country_MZ"
+msgid "country_MU"
 msgstr ""
 
 #: static/js/script.js:235
-msgid "country_NA"
+msgid "country_MV"
 msgstr ""
 
 #: static/js/script.js:236
-msgid "country_NC"
+msgid "country_MW"
 msgstr ""
 
 #: static/js/script.js:237
-msgid "country_NE"
+msgid "country_MX"
 msgstr ""
 
 #: static/js/script.js:238
-msgid "country_NF"
+msgid "country_MY"
 msgstr ""
 
 #: static/js/script.js:239
-msgid "country_NG"
+msgid "country_MZ"
 msgstr ""
 
 #: static/js/script.js:240
-msgid "country_NI"
+msgid "country_NA"
 msgstr ""
 
 #: static/js/script.js:241
-msgid "country_NL"
+msgid "country_NC"
 msgstr ""
 
 #: static/js/script.js:242
-msgid "country_NO"
+msgid "country_NE"
 msgstr ""
 
 #: static/js/script.js:243
-msgid "country_NP"
+msgid "country_NF"
 msgstr ""
 
 #: static/js/script.js:244
-msgid "country_NR"
+msgid "country_NG"
 msgstr ""
 
 #: static/js/script.js:245
-msgid "country_NU"
+msgid "country_NI"
 msgstr ""
 
 #: static/js/script.js:246
-msgid "country_NZ"
+msgid "country_NL"
 msgstr ""
 
 #: static/js/script.js:247
-msgid "country_OM"
+msgid "country_NO"
 msgstr ""
 
 #: static/js/script.js:248
-msgid "country_PA"
+msgid "country_NP"
 msgstr ""
 
 #: static/js/script.js:249
-msgid "country_PE"
+msgid "country_NR"
 msgstr ""
 
 #: static/js/script.js:250
-msgid "country_PF"
+msgid "country_NU"
 msgstr ""
 
 #: static/js/script.js:251
-msgid "country_PG"
+msgid "country_NZ"
 msgstr ""
 
 #: static/js/script.js:252
-msgid "country_PH"
+msgid "country_OM"
 msgstr ""
 
 #: static/js/script.js:253
-msgid "country_PK"
+msgid "country_PA"
 msgstr ""
 
 #: static/js/script.js:254
-msgid "country_PL"
+msgid "country_PE"
 msgstr ""
 
 #: static/js/script.js:255
-msgid "country_PM"
+msgid "country_PF"
 msgstr ""
 
 #: static/js/script.js:256
-msgid "country_PN"
+msgid "country_PG"
 msgstr ""
 
 #: static/js/script.js:257
-msgid "country_PR"
+msgid "country_PH"
 msgstr ""
 
 #: static/js/script.js:258
-msgid "country_PS"
+msgid "country_PK"
 msgstr ""
 
 #: static/js/script.js:259
-msgid "country_PT"
+msgid "country_PL"
 msgstr ""
 
 #: static/js/script.js:260
-msgid "country_PW"
+msgid "country_PM"
 msgstr ""
 
 #: static/js/script.js:261
-msgid "country_PY"
+msgid "country_PN"
 msgstr ""
 
 #: static/js/script.js:262
-msgid "country_QA"
+msgid "country_PR"
 msgstr ""
 
 #: static/js/script.js:263
-msgid "country_RO"
+msgid "country_PS"
 msgstr ""
 
 #: static/js/script.js:264
-msgid "country_RS"
+msgid "country_PT"
 msgstr ""
 
 #: static/js/script.js:265
-msgid "country_RU"
+msgid "country_PW"
 msgstr ""
 
 #: static/js/script.js:266
-msgid "country_RW"
+msgid "country_PY"
 msgstr ""
 
 #: static/js/script.js:267
-msgid "country_SA"
+msgid "country_QA"
 msgstr ""
 
 #: static/js/script.js:268
-msgid "country_SB"
+msgid "country_RO"
 msgstr ""
 
 #: static/js/script.js:269
-msgid "country_SC"
+msgid "country_RS"
 msgstr ""
 
 #: static/js/script.js:270
-msgid "country_SD"
+msgid "country_RU"
 msgstr ""
 
 #: static/js/script.js:271
-msgid "country_SE"
+msgid "country_RW"
 msgstr ""
 
 #: static/js/script.js:272
-msgid "country_SG"
+msgid "country_SA"
 msgstr ""
 
 #: static/js/script.js:273
-msgid "country_SH"
+msgid "country_SB"
 msgstr ""
 
 #: static/js/script.js:274
-msgid "country_SI"
+msgid "country_SC"
 msgstr ""
 
 #: static/js/script.js:275
-msgid "country_SK"
+msgid "country_SD"
 msgstr ""
 
 #: static/js/script.js:276
-msgid "country_SL"
+msgid "country_SE"
 msgstr ""
 
 #: static/js/script.js:277
-msgid "country_SM"
+msgid "country_SG"
 msgstr ""
 
 #: static/js/script.js:278
-msgid "country_SN"
+msgid "country_SH"
 msgstr ""
 
 #: static/js/script.js:279
-msgid "country_SO"
+msgid "country_SI"
 msgstr ""
 
 #: static/js/script.js:280
-msgid "country_SR"
+msgid "country_SK"
 msgstr ""
 
 #: static/js/script.js:281
-msgid "country_SS"
+msgid "country_SL"
 msgstr ""
 
 #: static/js/script.js:282
-msgid "country_ST"
+msgid "country_SM"
 msgstr ""
 
 #: static/js/script.js:283
-msgid "country_SV"
+msgid "country_SN"
 msgstr ""
 
 #: static/js/script.js:284
-msgid "country_SX"
+msgid "country_SO"
 msgstr ""
 
 #: static/js/script.js:285
-msgid "country_SY"
+msgid "country_SR"
 msgstr ""
 
 #: static/js/script.js:286
-msgid "country_SZ"
+msgid "country_SS"
 msgstr ""
 
 #: static/js/script.js:287
-msgid "country_TC"
+msgid "country_ST"
 msgstr ""
 
 #: static/js/script.js:288
-msgid "country_TD"
+msgid "country_SV"
 msgstr ""
 
 #: static/js/script.js:289
-msgid "country_TF"
+msgid "country_SX"
 msgstr ""
 
 #: static/js/script.js:290
-msgid "country_TG"
+msgid "country_SY"
 msgstr ""
 
 #: static/js/script.js:291
-msgid "country_TH"
+msgid "country_SZ"
 msgstr ""
 
 #: static/js/script.js:292
-msgid "country_TJ"
+msgid "country_TC"
 msgstr ""
 
 #: static/js/script.js:293
-msgid "country_TL"
+msgid "country_TD"
 msgstr ""
 
 #: static/js/script.js:294
-msgid "country_TM"
+msgid "country_TF"
 msgstr ""
 
 #: static/js/script.js:295
-msgid "country_TN"
+msgid "country_TG"
 msgstr ""
 
 #: static/js/script.js:296
-msgid "country_TO"
+msgid "country_TH"
 msgstr ""
 
 #: static/js/script.js:297
-msgid "country_TR"
+msgid "country_TJ"
 msgstr ""
 
 #: static/js/script.js:298
-msgid "country_TT"
+msgid "country_TL"
 msgstr ""
 
 #: static/js/script.js:299
-msgid "country_TW"
+msgid "country_TM"
 msgstr ""
 
 #: static/js/script.js:300
-msgid "country_TZ"
+msgid "country_TN"
 msgstr ""
 
 #: static/js/script.js:301
-msgid "country_UA"
+msgid "country_TO"
 msgstr ""
 
 #: static/js/script.js:302
-msgid "country_UG"
+msgid "country_TR"
 msgstr ""
 
 #: static/js/script.js:303
-msgid "country_US"
+msgid "country_TT"
 msgstr ""
 
 #: static/js/script.js:304
-msgid "country_UY"
+msgid "country_TW"
 msgstr ""
 
 #: static/js/script.js:305
-msgid "country_UZ"
+msgid "country_TZ"
 msgstr ""
 
 #: static/js/script.js:306
-msgid "country_VA"
+msgid "country_UA"
 msgstr ""
 
 #: static/js/script.js:307
-msgid "country_VC"
+msgid "country_UG"
 msgstr ""
 
 #: static/js/script.js:308
-msgid "country_VE"
+msgid "country_US"
 msgstr ""
 
 #: static/js/script.js:309
-msgid "country_VG"
+msgid "country_UY"
 msgstr ""
 
 #: static/js/script.js:310
-msgid "country_VI"
+msgid "country_UZ"
 msgstr ""
 
 #: static/js/script.js:311
-msgid "country_VN"
+msgid "country_VA"
 msgstr ""
 
 #: static/js/script.js:312
-msgid "country_VU"
+msgid "country_VC"
 msgstr ""
 
 #: static/js/script.js:313
-msgid "country_WF"
+msgid "country_VE"
 msgstr ""
 
 #: static/js/script.js:314
-msgid "country_WS"
+msgid "country_VG"
 msgstr ""
 
 #: static/js/script.js:315
-msgid "country_YE"
+msgid "country_VI"
 msgstr ""
 
 #: static/js/script.js:316
-msgid "country_ZA"
+msgid "country_VN"
 msgstr ""
 
 #: static/js/script.js:317
-msgid "country_ZM"
+msgid "country_VU"
 msgstr ""
 
 #: static/js/script.js:318
-msgid "country_ZW"
+msgid "country_WF"
+msgstr ""
+
+#: static/js/script.js:319
+msgid "country_WS"
+msgstr ""
+
+#: static/js/script.js:320
+msgid "country_YE"
+msgstr ""
+
+#: static/js/script.js:321
+msgid "country_ZA"
 msgstr ""
 
 #: static/js/script.js:322
-msgid "One week earlier"
+msgid "country_ZM"
 msgstr ""
 
 #: static/js/script.js:323
+msgid "country_ZW"
+msgstr ""
+
+#: static/js/script.js:327
+msgid "One week earlier"
+msgstr ""
+
+#: static/js/script.js:328
 msgid "One week later"
 msgstr ""
 
-#: static/js/script.js:324
+#: static/js/script.js:329
 msgid "Moment"
 msgstr ""
 
-#: static/js/script.js:325
+#: static/js/script.js:330
 msgid "Risks"
 msgstr ""
 
@@ -1476,33 +1492,33 @@ msgstr ""
 msgid "week"
 msgstr ""
 
-#: static/js/views.js:135 static/js/views.js:138 static/js/views.js:147
-#: static/js/views.js:150
+#: static/js/views.js:183 static/js/views.js:186 static/js/views.js:195
+#: static/js/views.js:198
 msgid "Second opinion"
 msgstr ""
 
-#: static/js/views.js:136 static/js/views.js:139 static/js/views.js:141
-#: static/js/views.js:143 static/js/views.js:145 static/js/views.js:148
-#: static/js/views.js:151
+#: static/js/views.js:184 static/js/views.js:187 static/js/views.js:189
+#: static/js/views.js:191 static/js/views.js:193 static/js/views.js:196
+#: static/js/views.js:199
 msgid "Documentation"
 msgstr ""
 
-#: static/js/views.js:167
+#: static/js/views.js:215
 msgid "score perfect"
 msgstr ""
 
-#: static/js/views.js:169
+#: static/js/views.js:217
 msgid "score high"
 msgstr ""
 
-#: static/js/views.js:171
+#: static/js/views.js:219
 msgid "score medium"
 msgstr ""
 
-#: static/js/views.js:173
+#: static/js/views.js:221
 msgid "score low"
 msgstr ""
 
-#: static/js/views.js:696
+#: static/js/views.js:744
 msgid "Exit Full Screen"
 msgstr ""

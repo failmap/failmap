@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-09-18 12:11+0000\n"
+"POT-Creation-Date: 2018-10-18 09:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:690
-#: failmap/map/static/js/views.js:695 failmap/map/static/js/views.js:698
+#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:947
+#: failmap/map/static/js/views.js:952 failmap/map/static/js/views.js:955
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -50,110 +50,6 @@ msgstr "Onbekend"
 #: failmap/map/static/js/failmap.js:102
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
-
-#: failmap/map/static/js/graphs.js:29
-msgid "January"
-msgstr "Januari"
-
-#: failmap/map/static/js/graphs.js:29
-msgid "February"
-msgstr "Februari"
-
-#: failmap/map/static/js/graphs.js:29
-msgid "March"
-msgstr "Maart"
-
-#: failmap/map/static/js/graphs.js:30
-msgid "April"
-msgstr "April"
-
-#: failmap/map/static/js/graphs.js:30 failmap/map/static/js/graphs.js:34
-msgid "May"
-msgstr "Mei"
-
-#: failmap/map/static/js/graphs.js:30
-msgid "June"
-msgstr "Juni"
-
-#: failmap/map/static/js/graphs.js:31
-msgid "July"
-msgstr "Juli"
-
-#: failmap/map/static/js/graphs.js:31
-msgid "August"
-msgstr "Augustus"
-
-#: failmap/map/static/js/graphs.js:31
-msgid "September"
-msgstr "September"
-
-#: failmap/map/static/js/graphs.js:32
-msgid "October"
-msgstr "October"
-
-#: failmap/map/static/js/graphs.js:32
-msgid "November"
-msgstr "November"
-
-#: failmap/map/static/js/graphs.js:32
-msgid "December"
-msgstr "December"
-
-#: failmap/map/static/js/graphs.js:33
-msgid "Jan"
-msgstr "Jan"
-
-#: failmap/map/static/js/graphs.js:33
-msgid "Feb"
-msgstr "Feb"
-
-#: failmap/map/static/js/graphs.js:33
-msgid "Mar"
-msgstr "Mar"
-
-#: failmap/map/static/js/graphs.js:34
-msgid "Apr"
-msgstr "Apr"
-
-#: failmap/map/static/js/graphs.js:34
-msgid "Jun"
-msgstr "Jun"
-
-#: failmap/map/static/js/graphs.js:35
-msgid "Jul"
-msgstr "Jul"
-
-#: failmap/map/static/js/graphs.js:35
-msgid "Aug"
-msgstr "Aug"
-
-#: failmap/map/static/js/graphs.js:35
-msgid "Sept"
-msgstr "Sept"
-
-#: failmap/map/static/js/graphs.js:36
-msgid "Oct"
-msgstr "Oct"
-
-#: failmap/map/static/js/graphs.js:36
-msgid "Nov"
-msgstr "Nov"
-
-#: failmap/map/static/js/graphs.js:36
-msgid "Dec"
-msgstr "Dec"
-
-#: failmap/map/static/js/graphs.js:145
-msgid "low"
-msgstr "laag"
-
-#: failmap/map/static/js/graphs.js:147
-msgid "medium"
-msgstr "midden"
-
-#: failmap/map/static/js/graphs.js:149
-msgid "high"
-msgstr "hoog"
 
 #: failmap/map/static/js/script.js:15
 msgid "2 weeks ago"
@@ -1856,37 +1752,115 @@ msgstr ""
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js:135 failmap/map/static/js/views.js:138
-#: failmap/map/static/js/views.js:147 failmap/map/static/js/views.js:150
+#: failmap/map/static/js/views.js:293 failmap/map/static/js/views.js:296
+#: failmap/map/static/js/views.js:305 failmap/map/static/js/views.js:308
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap/map/static/js/views.js:136 failmap/map/static/js/views.js:139
-#: failmap/map/static/js/views.js:141 failmap/map/static/js/views.js:143
-#: failmap/map/static/js/views.js:145 failmap/map/static/js/views.js:148
-#: failmap/map/static/js/views.js:151
+#: failmap/map/static/js/views.js:294 failmap/map/static/js/views.js:297
+#: failmap/map/static/js/views.js:299 failmap/map/static/js/views.js:301
+#: failmap/map/static/js/views.js:303 failmap/map/static/js/views.js:306
+#: failmap/map/static/js/views.js:309
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js:167
+#: failmap/map/static/js/views.js:325
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap/map/static/js/views.js:169
+#: failmap/map/static/js/views.js:327
 msgid "score high"
 msgstr "hoog"
 
-#: failmap/map/static/js/views.js:171
+#: failmap/map/static/js/views.js:329
 msgid "score medium"
 msgstr "midden"
 
-#: failmap/map/static/js/views.js:173
+#: failmap/map/static/js/views.js:331
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:696
+#: failmap/map/static/js/views.js:953
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
+
+#~ msgid "January"
+#~ msgstr "Januari"
+
+#~ msgid "February"
+#~ msgstr "Februari"
+
+#~ msgid "March"
+#~ msgstr "Maart"
+
+#~ msgid "April"
+#~ msgstr "April"
+
+#~ msgid "May"
+#~ msgstr "Mei"
+
+#~ msgid "June"
+#~ msgstr "Juni"
+
+#~ msgid "July"
+#~ msgstr "Juli"
+
+#~ msgid "August"
+#~ msgstr "Augustus"
+
+#~ msgid "September"
+#~ msgstr "September"
+
+#~ msgid "October"
+#~ msgstr "October"
+
+#~ msgid "November"
+#~ msgstr "November"
+
+#~ msgid "December"
+#~ msgstr "December"
+
+#~ msgid "Jan"
+#~ msgstr "Jan"
+
+#~ msgid "Feb"
+#~ msgstr "Feb"
+
+#~ msgid "Mar"
+#~ msgstr "Mar"
+
+#~ msgid "Apr"
+#~ msgstr "Apr"
+
+#~ msgid "Jun"
+#~ msgstr "Jun"
+
+#~ msgid "Jul"
+#~ msgstr "Jul"
+
+#~ msgid "Aug"
+#~ msgstr "Aug"
+
+#~ msgid "Sept"
+#~ msgstr "Sept"
+
+#~ msgid "Oct"
+#~ msgstr "Oct"
+
+#~ msgid "Nov"
+#~ msgstr "Nov"
+
+#~ msgid "Dec"
+#~ msgstr "Dec"
+
+#~ msgid "low"
+#~ msgstr "laag"
+
+#~ msgid "medium"
+#~ msgstr "midden"
+
+#~ msgid "high"
+#~ msgstr "hoog"
 
 #~ msgid "High"
 #~ msgstr "Hoog risico"

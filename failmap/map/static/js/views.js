@@ -111,14 +111,17 @@ const report_mixin = {
                 let high = Array();
                 let medium = Array();
                 let low = Array();
+
                 let urls = Array();
+                let endpoints = Array();
 
                 for(let i=0; i<data.length; i++){
                     labels.push(data[i].date);
                     high.push(data[i].high);
                     medium.push(data[i].medium);
                     low.push(data[i].low);
-                    urls.push(data[i].urls)
+                    urls.push(data[i].urls);
+                    endpoints.push(data[i].endpoints);
                 }
 
                 let ctx = document.getElementById("organization_vulnerability_timeline").getContext('2d');
@@ -130,40 +133,29 @@ const report_mixin = {
                         datasets: [{
                             label: '# High risk',
                             data: high,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255,99,132,1)',
                             borderWidth: 1
                         },
                         {
                             label: '# Medium risk',
                             data: medium,
-                            backgroundColor: [
-                                'rgba(255, 102, 0, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,102,0,1)',
-                            ],
+                            backgroundColor: 'rgba(255, 102, 0, 0.2)',
+                            borderColor: 'rgba(255,102,0,1)',
                             borderWidth: 1
                         },
                         {
                             label: '# Low risk',
                             data: low,
-                            backgroundColor: [
-                                'rgba(255, 255, 0, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,255,0,1)',
-                            ],
+                            backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                            borderColor: 'rgba(255,255,0,1)',
                             borderWidth: 1
                         },
                         ]
                     },
                     options: {
-                       responsive: true,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         title: {
                             display: true,
                             text: 'Vulnerabilities over time for this organization'
@@ -179,8 +171,13 @@ const report_mixin = {
                         scales: {
                             xAxes: [{
                                 display: true,
+                                type: 'time',
+                                distribution: 'linear',
+                                time: {
+                                    unit: 'month'
+                                },
                                 scaleLabel: {
-                                    display: true,
+                                    display: false,
                                     labelString: 'Month'
                                 }
                             }],
@@ -188,7 +185,7 @@ const report_mixin = {
                                 display: true,
                                 stacked: true,
                                 scaleLabel: {
-                                    display: true,
+                                    display: false,
                                     labelString: 'Value'
                                 }
                             }]
@@ -196,6 +193,68 @@ const report_mixin = {
                     }
                 });
 
+
+                let context = document.getElementById("organization_connectivity_timeline").getContext('2d');
+                let myChart2 = new Chart(context, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+
+                        datasets: [{
+                            label: '# Internet Adresses',
+                            data: urls,
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            borderColor: 'rgba(0,0,0,1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '# Services',
+                            data: endpoints,
+                            backgroundColor: 'rgba(0, 40, 255, 0.2)',
+                            borderColor: 'rgba(0,40,255,1)',
+                            borderWidth: 1
+                        },
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        title: {
+                            display: true,
+                            text: 'Internet connectivity of this organization'
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                        scales: {
+                            xAxes: [{
+                                display: true,
+                                type: 'time',
+                                distribution: 'linear',
+                                time: {
+                                    unit: 'month'
+                                },
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: 'Month'
+                                }
+                            }],
+                            yAxes: [{
+                                display: true,
+                                stacked: true,
+                                scaleLabel: {
+                                    display: false,
+                                    labelString: 'Value'
+                                }
+                            }]
+                        }
+                    }
+                });
 
             }).catch((fail) => {console.log('An error occurred: ' + fail)});
         },
@@ -520,19 +579,19 @@ function views() {
                 fetch('/data/vulnstats/' + this.country + '/' + this.category + '/0')
                     .then(response => response.json()).then(data => {
 
-                        this.vulnerability_graph('timeline_all_vulnerabilities', data.total);
-                        this.vulnerability_graph('timeline_tls_qualys_vulnerabilities', data.tls_qualys);
-                        this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https);
-                        this.vulnerability_graph('timeline_hsts_vulnerabilities', data.security_headers_strict_transport_security);
-                        this.vulnerability_graph('timeline_xfo_vulnerabilities', data.security_headers_x_frame_options);
-                        this.vulnerability_graph('timeline_xcto_vulnerabilities', data.security_headers_x_content_type_options);
-                        this.vulnerability_graph('timeline_xxss_vulnerabilities', data.security_headers_x_xss_protection);
-                        this.vulnerability_graph('timeline_dnssec_vulnerabilities', data.DNSSEC);
-                        this.vulnerability_graph('timeline_unencrypted_ftp_vulnerabilities', data.ftp);
+                        this.vulnerability_graph('timeline_all_vulnerabilities', data.total, 'hml');
+                        this.vulnerability_graph('timeline_tls_qualys_vulnerabilities', data.tls_qualys, 'hl');
+                        this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https, 'hm');
+                        this.vulnerability_graph('timeline_hsts_vulnerabilities', data.security_headers_strict_transport_security, 'm');
+                        this.vulnerability_graph('timeline_xfo_vulnerabilities', data.security_headers_x_frame_options, 'm');
+                        this.vulnerability_graph('timeline_xcto_vulnerabilities', data.security_headers_x_content_type_options, 'l');
+                        this.vulnerability_graph('timeline_xxss_vulnerabilities', data.security_headers_x_xss_protection, 'l');
+                        this.vulnerability_graph('timeline_dnssec_vulnerabilities', data.DNSSEC, 'h');
+                        this.vulnerability_graph('timeline_unencrypted_ftp_vulnerabilities', data.ftp, 'hm');
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
 
             },
-            vulnerability_graph: function(element, data){
+            vulnerability_graph: function(element, data, axis){
 
                 if (data === undefined)
                     return;
@@ -541,63 +600,57 @@ function views() {
                 let high = Array();
                 let medium = Array();
                 let low = Array();
-                let urls = Array();
 
                 for(let i=0; i<data.length; i++){
-                    labels.push(data[i].date);
+                    labels.push(new Date(data[i].date));
                     high.push(data[i].high);
                     medium.push(data[i].medium);
                     low.push(data[i].low);
-                    urls.push(data[i].urls)
                 }
+
+                let datasets = Array();
+
+                if (axis.indexOf('h') !== -1)
+                    datasets.push({
+                            label: '# High risk',
+                            data: high,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255,99,132,1)',
+                            borderWidth: 1
+                        });
+
+                if (axis.indexOf('m') !== -1)
+                    datasets.push({
+                            label: '# Medium risk',
+                            data: medium,
+                            backgroundColor: 'rgba(255, 102, 0, 0.2)',
+                            borderColor: 'rgba(255,102,0,1)',
+                            borderWidth: 1
+                        });
+
+
+                if (axis.indexOf('l') !== -1)
+                    datasets.push({
+                            label: '# Low risk',
+                            data: low,
+                            backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                            borderColor: 'rgba(255,255,0,1)',
+                            borderWidth: 1
+                        });
 
                 let ctx = document.getElementById(element).getContext('2d');
                 let myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
-
-                        datasets: [{
-                            label: '# High risk',
-                            data: high,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,99,132,1)',
-                            ],
-                            borderWidth: 1
-                        },
-                        {
-                            label: '# Medium risk',
-                            data: medium,
-                            backgroundColor: [
-                                'rgba(255, 102, 0, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,102,0,1)',
-                            ],
-                            borderWidth: 1
-                        },
-                        {
-                            label: '# Low risk',
-                            data: low,
-                            backgroundColor: [
-                                'rgba(255, 255, 0, 0.2)',
-                            ],
-                            borderColor: [
-                                'rgba(255,255,0,1)',
-                            ],
-                            borderWidth: 1
-                        },
-                        ]
+                        datasets: datasets,
                     },
                     options: {
-                       responsive: true,
+                        responsive: true,
                         maintainAspectRatio: false,
                         title: {
-                            display: true,
-                            text: 'Vulnerabilities over time for this organization'
+                            display: false,
+                            text: ''
                         },
                         tooltips: {
                             mode: 'index',
@@ -610,8 +663,13 @@ function views() {
                         scales: {
                             xAxes: [{
                                 display: true,
+                                type: 'time',
+                                distribution: 'linear',
+                                time: {
+                                    unit: 'month'
+                                },
                                 scaleLabel: {
-                                    display: true,
+                                    display: false,
                                     labelString: 'Month'
                                 }
                             }],
@@ -619,7 +677,7 @@ function views() {
                                 display: true,
                                 stacked: true,
                                 scaleLabel: {
-                                    display: true,
+                                    display: false,
                                     labelString: 'Value'
                                 }
                             }]
