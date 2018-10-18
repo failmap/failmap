@@ -24,7 +24,7 @@ from simplejson.errors import JSONDecodeError
 
 from failmap.map.models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
-from failmap.scanners.models import EndpointGenericScan, TlsQualysScan
+from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
 
 from .. import __version__
 from ..app.common import JSEncoder
@@ -1550,6 +1550,75 @@ def latest_updates(organization_id):
         })
 
     return dataset
+
+
+@cache_page(ten_minutes)
+def explain_list(request, country, organization_type):
+    """
+    Because explains are possible on every scan type, try to get 10 of each, merge them and orders them chronologically
+
+    :return:
+    """
+    country = get_country(country)
+    organization_type = get_organization_type(organization_type)
+
+    ugss = UrlGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                               url__organization__country=country,
+                                               url__organization__type_id=organization_type
+                                               ).order_by('comply_or_explain_explained_on')[0:10]
+    egss = EndpointGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                                    endpoint__url__organization__country=country,
+                                                    endpoint__url__organization__type_id=organization_type
+                                                    ).order_by('comply_or_explain_explained_on')[0:10]
+    tqss = TlsQualysScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                              endpoint__url__organization__country=country,
+                                              endpoint__url__organization__type_id=organization_type
+                                              ).order_by('comply_or_explain_explained_on')[0:10]
+    tss = TlsScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                       endpoint__url__organization__country=country,
+                                       endpoint__url__organization__type_id=organization_type
+                                       ).order_by('comply_or_explain_explained_on')[0:10]
+
+    explains = []
+
+    for scan in ugss:
+        explains.append(get_explanation('url', scan))
+
+    for scan in egss:
+        explains.append(get_explanation('endpoint', scan))
+
+    for scan in tqss:
+        explains.append(get_explanation('endpoint', scan))
+
+    for scan in tss:
+        explains.append(get_explanation('endpoint', scan))
+
+    # sorting
+    explains = sorted(explains, key=lambda k: (k['explained_on']), reverse=True)
+
+    return JsonResponse(explains, encoder=JSEncoder, safe=False)
+
+
+def get_explanation(type, scan):
+    calculation = get_calculation(scan)
+
+    explain = {
+        'organizations': scan.url.organization.name if type == "url" else list(
+            scan.endpoint.url.organization.all().values('id', 'name')),
+        'scan_type': getattr(scan, "type", "tls_qualys"),
+        'explanation': scan.comply_or_explain_explanation,
+        'explained_by': scan.comply_or_explain_explained_by,
+        'explained_on': scan.comply_or_explain_explained_on.isoformat(
+        ) if scan.comply_or_explain_explained_on else datetime.now(pytz.utc).isoformat(),
+        'valid_until': scan.comply_or_explain_explanation_valid_until.isoformat(),
+        'original_severity': "high" if calculation['high'] else "medium" if calculation['medium'] else "low",
+        'original_explanation': calculation['explanation'],
+        'subject': str("%s %s/%s on IPv%s") % (
+            scan.endpoint.url, scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version
+        ) if type == "endpoint" else str(scan.url.url)
+    }
+
+    return explain
 
 
 @cache_page(ten_minutes)

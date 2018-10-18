@@ -198,7 +198,7 @@ div#report {
     font-size: 17px;
 }
 
-.awarded_points_orange {
+.awarded_points_orange, .awarded_points_medium {
     border: 1px solid darkorange;
     background-color: orange;
     padding: 0px 3px;
@@ -207,7 +207,7 @@ div#report {
     border-radius: 4px;
 }
 
-.awarded_points_red {
+.awarded_points_red, .awarded_points_high {
     border: 1px solid darkred;
     background-color: red;
     padding: 0px 3px;
@@ -216,7 +216,7 @@ div#report {
     border-radius: 4px;
 }
 
-.awarded_points_green {
+.awarded_points_green, .awarded_points_low, .awarded_points_perfect {
     border: 1px solid green;
     background-color: lightgreen;
     padding: 0px 3px;

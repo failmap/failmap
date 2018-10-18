@@ -692,6 +692,7 @@ CONSTANCE_CONFIG = {
                                  'Extended statistics needs to be enabled for this to have effect.', bool),
     'SHOW_DATASETS': (True, 'Shows dataset downloads. Note: dataset downloads are always available, even if they '
                             'are not shown on the website.', bool),
+    'SHOW_COMPLY_OR_EXPLAIN': (False, 'Shows comply or explain sections and the explain link in findings.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
@@ -766,7 +767,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                      'RESPONSIBLE_ORGANIZATION_PHONE')),
 
     ('Website', ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
-                 'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES', 'SHOW_TICKER',
+                 'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
+                 'SHOW_COMPLY_OR_EXPLAIN', 'SHOW_TICKER',
                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
                  'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP'

@@ -1266,6 +1266,7 @@ function views() {
                 vueExport.set_state(this.country, this.category);
                 vueDomainlist.set_state(this.country, this.category);
                 vueTicker.set_state(this.country, this.category);
+                vueExplains.set_state(this.country, this.category);
 
                 // this needs state as the organizaton name in itself is not unique.
                 vueReport.set_state(this.country, this.category);
@@ -1451,6 +1452,57 @@ function views() {
             }
         }
 
+    });
+
+    window.vueExplains = new Vue({
+        name: "comply_or_explain",
+        el: '#comply_or_explain',
+        mixins: [state_mixin, translation_mixin],
+        data: {
+            explains: Array(),
+            more_explains: Array(),
+            more_available: true,
+        },
+
+        methods: {
+            humanize: function (date) {
+                // It's better to show how much time was between the last scan and now. This is easier to understand.
+                return moment(date).fromNow();
+            },
+            load: function() {
+
+             if (!this.country || !this.category)
+                return;
+
+
+                fetch('/data/explained/' + this.country + '/' + this.category + '/').then(response => response.json()).then(explains => {
+                    this.more_explains = explains.slice(3);
+                    this.explains = explains.slice(0, 3);
+
+                    if (this.more_explains.length === 0)
+                        this.more_available = false;
+
+                }).catch((fail) => {
+                    console.log('An error occurred: ' + fail)
+                });
+            },
+            showreport(organization_id){
+                location.href = '#report';
+                vueReport.selected = organization_id;
+            },
+            showmore(){
+                if (this.more_explains.length > 3) {
+                    this.explains.push(this.more_explains.shift());
+                    this.explains.push(this.more_explains.shift());
+                    this.explains.push(this.more_explains.shift());
+                } else if (this.more_explains.length > 1) {
+                    for (i=0; i<this.more_explains.length; i++){
+                        this.explains.push(this.more_explains.shift());
+                    }
+                    this.more_available = false;
+                }
+            }
+        },
     });
 
     window.vueInfo = new Vue({

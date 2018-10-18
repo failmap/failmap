@@ -1074,6 +1074,79 @@
 </section>
 {% endif %}
 
+{% if config.SHOW_COMPLY_OR_EXPLAIN %}
+<section name="comply_or_explain_info">
+    <div class="container">
+        <div id="comply_or_explain">
+            <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                <a name="datasets" class="jumptonav"></a>
+                <h2>{% trans "Comply or explain" %}</h2>
+                <p>
+                {% trans "Comply or explain introduction" %}
+                </p>
+                {% comment %}
+                If show datasets:
+                You can download the entire dataset for further analysis in the datasets section. Link.
+
+                if show discuss:
+                You can discuss comply or explain here: Link.
+                {% endcomment %}
+
+            </div>
+
+
+            <template v-for="explain in explains">
+                <div class="row">
+
+                    <div class="col-md-10">
+                        <div style="background-color: rgba(254, 114, 114, 0.1); border-radius: 20px; padding: 10px 15px; margin-right: 10%; margin-bottom: -14px;">
+                            <del>
+                            <span :class="'awarded_points_' + explain.original_severity">
+                                {% verbatim %}{{ translate(explain.original_severity) }}{% endverbatim %}
+                            </span>&nbsp;&nbsp;
+                            {% verbatim %}{{ translate(explain.scan_type) }}{% endverbatim %}:
+                            {% verbatim %}{{ translate(explain.original_explanation) }}{% endverbatim %}
+                            </del>
+                        </div>
+                        <br>
+                        <blockquote class="blockquote text-right" style="border-radius: 20px; padding: 10px 15px; background-color: #95f09533; margin-left: 10%; margin-bottom:40px;">
+                            <p class="mb-0">
+                                {% verbatim %}{{ explain.explanation }}{% endverbatim %}
+                            </p>
+                            <footer class="blockquote-footer">
+                                {% verbatim %}{{ explain.explained_by }} <cite title="Source Title">{{ humanize(explain.explained_on) }}{% endverbatim %} </cite>
+                            </footer>
+                        </blockquote>
+
+                    </div>
+
+                    <div class="col-md-2 text-center">
+                        <small>{% trans "View report" %}</small>
+                        <ul style="padding-left: 0px">
+                            <li v-for="organization in explain.organizations" style="border: 1px solid #c5c5c5;list-style: none;padding: 10px;margin: 10px;width: 100%;background-color: #e3d1cb33;border-radius: 3px;">
+                                <a @click="showreport(organization.id)" :title="'View report for ' + organization.name">
+                                <i class="far fa-file-alt"></i> {% verbatim %}{{ organization.name }}{% endverbatim %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </template>
+
+
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{% trans "Show more" %}</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% if config.SHOW_DATASETS %}
 <section name="datasets">
     <div class="container">

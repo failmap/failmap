@@ -45,6 +45,7 @@ urlpatterns = [
          views.improvements),
     path('data/ticker/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>', views.ticker),
     path('data/wanted/', views.wanted_urls),
+    path('data/explained/<c:country>/<slug:organization_type>/', views.explain_list),
     path('data/report/<c:country>/<slug:organization_type>/<oid:organization_id>/<w:weeks_back>',
          views.organization_report),
     path('data/organization_vulnerability_timeline/<oid:organization_id>', views.organization_vulnerability_timeline),

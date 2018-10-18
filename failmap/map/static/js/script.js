@@ -76,6 +76,16 @@ var dynamic_translations = function(){
     gettext('category_menu_county');
     gettext('category_menu_district');
 
+    // scan types
+    gettext('Strict-Transport-Security');
+    gettext('X-Content-Type-Options');
+    gettext('X-Frame-Options');
+    gettext('X-XSS-Protection');
+    gettext('plain_https');
+    gettext('tls_qualys');
+    gettext('DNSSEC');
+    gettext('ftp');
+
     // and germany
     gettext('category_menu_bundesland');
     gettext('category_menu_regierungsbezirk');
