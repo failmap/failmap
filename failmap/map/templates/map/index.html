@@ -124,6 +124,10 @@
             <li class="nav-item"><a class="nav-link" href="#extensive_statistics">{% trans "Statistics" %}</a></li>
             {% endif %}
 
+            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info">{% trans "Comply or explain" %}</a></li>
+            {% endif %}
+
             {% if config.SHOW_DATASETS %}
             <li class="nav-item"><a class="nav-link" href="#datasets">{% trans "Datasets" %}</a></li>
             {% endif %}
@@ -1080,19 +1084,23 @@
         <div id="comply_or_explain">
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="datasets" class="jumptonav"></a>
+                <a name="comply_or_explain_info" class="jumptonav"></a>
                 <h2>{% trans "Comply or explain" %}</h2>
                 <p>
                 {% trans "Comply or explain introduction" %}
+                    {% if config.SHOW_DATASETS %}
+                        {% blocktrans %}You can download the entire dataset for further analysis in the <a href="#datasets">datasets</a> section.{% endblocktrans %}
+                    {% endif %}
                 </p>
-                {% comment %}
-                If show datasets:
-                You can download the entire dataset for further analysis in the datasets section. Link.
 
-                if show discuss:
-                You can discuss comply or explain here: Link.
-                {% endcomment %}
+                {%  if config.SHOW_COMPLY_OR_EXPLAIN_DISCUSS %}
+                    <p>{% blocktrans with COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK=config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK %}
+                        The comply or explain argumentation can be discussed here:
+                        <a href="{{ COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}" target="_blank" title="Comply or explain forum.">comply or explain forum</a>.
+                    {% endblocktrans %}
+                    </p>
 
+                {% endif %}
             </div>
 
 

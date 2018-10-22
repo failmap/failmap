@@ -693,6 +693,8 @@ CONSTANCE_CONFIG = {
     'SHOW_DATASETS': (True, 'Shows dataset downloads. Note: dataset downloads are always available, even if they '
                             'are not shown on the website.', bool),
     'SHOW_COMPLY_OR_EXPLAIN': (False, 'Shows comply or explain sections and the explain link in findings.', bool),
+    'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (False, 'Shows a link to the comply or explain discussion forum. The url of this'
+                                              'forum can be edited below.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
@@ -704,6 +706,9 @@ CONSTANCE_CONFIG = {
     'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_FTP': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+
+    'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK': ('', 'Link to the comply or explain discussion forum.', str),
+    'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS': ('', 'E-mail where to receive explanations.', str),
 
     # todo: schedule this once per week by default.
     'DISCOVER_URLS_USING_NSEC': (True, 'Discover new domains using DNSSEC NSEC1 hashes? (See docs)', bool),
@@ -768,11 +773,15 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
 
     ('Website', ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
                  'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
-                 'SHOW_COMPLY_OR_EXPLAIN', 'SHOW_TICKER',
+                 'SHOW_TICKER',
                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
                  'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP'
                  )),
+
+    ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
+                           'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK', 'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS'
+                           )),
 
     ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
                    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')),
