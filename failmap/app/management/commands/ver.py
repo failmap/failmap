@@ -1,9 +1,10 @@
 import logging
+import platform
+
+import django
+from django.core.management.base import BaseCommand
 
 from .... import __version__
-from django.core.management.base import BaseCommand
-import django
-import platform
 
 log = logging.getLogger(__package__)
 
@@ -18,4 +19,3 @@ class Command(BaseCommand):
         print("Failmap version: %s" % __version__)
         print("")
         print("Check for the latest version at: https://gitlab.com/failmap/failmap/")
-
