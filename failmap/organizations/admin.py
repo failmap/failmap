@@ -65,10 +65,14 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):
 
     can_delete = False
 
-    exclude = ['domain', 'evidence']
+    exclude = ['domain', 'evidence', 'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+               'comply_or_explain_explanation_valid_until', 'comply_or_explain_case_additional_notes',
+               'comply_or_explain_explanation', 'comply_or_explain_explained_by'
+               ]
 
     # this is purely informational, to save clicks when debugging.
-    readonly_fields = ('endpoint', 'type', 'rating', 'explanation', 'rating_determined_on', 'last_scan_moment')
+    readonly_fields = ('comply_or_explain_is_explained',
+                       'endpoint', 'type', 'rating', 'explanation', 'rating_determined_on', 'last_scan_moment')
 
     ordering = ['-rating_determined_on']
 
@@ -93,10 +97,13 @@ class TlsQualysScanInline(nested_admin.NestedTabularInline):
 
     can_delete = False
 
-    exclude = ['scan_date', 'scan_time']
+    exclude = ['scan_date', 'scan_time', 'comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+               'comply_or_explain_explanation_valid_until', 'comply_or_explain_case_additional_notes',
+               'comply_or_explain_explanation', 'comply_or_explain_explained_by']
 
     # this is purely informational, to save clicks when debugging.
-    readonly_fields = ('qualys_rating', 'qualys_rating_no_trust', 'qualys_message', 'rating_determined_on',
+    readonly_fields = ('comply_or_explain_is_explained',
+                       'qualys_rating', 'qualys_rating_no_trust', 'qualys_message', 'rating_determined_on',
                        'last_scan_moment')
 
     ordering = ['-rating_determined_on']
@@ -121,6 +128,15 @@ class UrlGenericScanAdminInline(CompactInline):
     extra = 0
     show_change_link = True
     ordering = ["-rating_determined_on"]
+
+    exclude = ['comply_or_explain_explained_on', 'comply_or_explain_case_handled_by',
+               'comply_or_explain_explanation_valid_until', 'comply_or_explain_case_additional_notes',
+               'comply_or_explain_explanation', 'comply_or_explain_explained_by', 'domain'
+               ]
+
+    readonly_fields = ('comply_or_explain_is_explained',
+                       'type', 'rating', 'explanation', 'evidence', 'rating_determined_on',
+                       'last_scan_moment',)
 
 
 class CoordinateAdminInline(CompactInline):
