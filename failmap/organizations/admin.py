@@ -409,7 +409,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
                     'visit', 'current_rating', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
 
-    search_fields = ('url', )
+    search_fields = ('url', 'computed_subdomain', 'computed_domain', 'computed_suffix')
     list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
                    'uses_dns_wildcard', 'organization', 'onboarded', 'organization__type__name',
