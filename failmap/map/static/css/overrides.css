@@ -794,3 +794,29 @@ th.active .arrow {
 #graphs .row {
     padding-bottom: 30px;
 }
+
+.chat_quote_left {
+    background-color: rgba(254, 114, 114, 0.1);
+    border-radius: 20px;
+    padding: 10px 15px;
+    margin-right: 10%;
+    margin-bottom: -14px;
+}
+
+.chat_quote_right {
+    border-radius: 20px;
+    padding: 10px 15px;
+    background-color: #95f09533;
+    margin-left: 10%;
+    margin-bottom:40px;
+}
+
+.explain_reports {
+    border: 1px solid #c5c5c5;
+    list-style: none;
+    padding: 10px;
+    margin: 10px;
+    width: 100%;
+    background-color: #e3d1cb33;
+    border-radius: 3px;
+}

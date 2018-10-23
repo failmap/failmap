@@ -1122,7 +1122,7 @@
                 <div class="row">
 
                     <div class="col-md-10">
-                        <div style="background-color: rgba(254, 114, 114, 0.1); border-radius: 20px; padding: 10px 15px; margin-right: 10%; margin-bottom: -14px;">
+                        <div class="chat_quote_left">
                             <del>
                             <span :class="'awarded_points_' + explain.original_severity">
                                 {% verbatim %}{{ translate(explain.original_severity) }}{% endverbatim %}
@@ -1132,7 +1132,7 @@
                             </del>
                         </div>
                         <br>
-                        <blockquote class="blockquote text-right" style="border-radius: 20px; padding: 10px 15px; background-color: #95f09533; margin-left: 10%; margin-bottom:40px;">
+                        <blockquote class="blockquote text-right chat_quote_right">
                             <p class="mb-0">
                                 {% verbatim %}{{ explain.explanation }}{% endverbatim %}
                             </p>
@@ -1146,7 +1146,7 @@
                     <div class="col-md-2 text-center">
                         <small>{% trans "View report" %}</small>
                         <ul style="padding-left: 0px">
-                            <li v-for="organization in explain.organizations" style="border: 1px solid #c5c5c5;list-style: none;padding: 10px;margin: 10px;width: 100%;background-color: #e3d1cb33;border-radius: 3px;">
+                            <li v-for="organization in explain.organizations" class="explain_reports">
                                 <a @click="showreport(organization.id)" :title="'View report for ' + organization.name">
                                 <i class="far fa-file-alt"></i> {% verbatim %}{{ organization.name }}{% endverbatim %}
                                 </a>
