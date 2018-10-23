@@ -1628,6 +1628,62 @@ def explain_list(request, country, organization_type):
     return JsonResponse(explains, encoder=JSEncoder, safe=False)
 
 
+def export_explains(request, country, organization_type):
+
+    country = get_country(country)
+    organization_type = get_organization_type(organization_type)
+
+    ugss = UrlGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                               url__organization__country=country,
+                                               url__organization__type_id=organization_type
+                                               ).order_by('comply_or_explain_explained_on')
+    egss = EndpointGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                                    endpoint__url__organization__country=country,
+                                                    endpoint__url__organization__type_id=organization_type
+                                                    ).order_by('comply_or_explain_explained_on')
+    tqss = TlsQualysScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                              endpoint__url__organization__country=country,
+                                              endpoint__url__organization__type_id=organization_type
+                                              ).order_by('comply_or_explain_explained_on')
+    tss = TlsScan.objects.all().filter(comply_or_explain_is_explained=True,
+                                       endpoint__url__organization__country=country,
+                                       endpoint__url__organization__type_id=organization_type
+                                       ).order_by('comply_or_explain_explained_on')
+
+    explains = []
+
+    for scan in ugss:
+        explains.append(get_explanation('url', scan))
+
+    for scan in egss:
+        explains.append(get_explanation('endpoint', scan))
+
+    for scan in tqss:
+        explains.append(get_explanation('endpoint', scan))
+
+    for scan in tss:
+        explains.append(get_explanation('endpoint', scan))
+
+    # sorting
+    explains = sorted(explains, key=lambda k: (k['explained_on']), reverse=True)
+
+    # get the organization type name
+    organization_type_name = OrganizationType.objects.filter(name=organization_type).values('name').first()
+
+    if not organization_type_name:
+        organization_type_name = 'municipality'
+    else:
+        organization_type_name = organization_type_name.get('name')
+
+    response = JsonResponse(explains, safe=False, encoder=JSEncoder, )
+    response['Content-Disposition'] = 'attachment; filename="%s_%s_%s_%s.json"' % (
+        country, organization_type_name, set, timezone.datetime.now().date())
+
+    return response
+
+
+
+
 def get_explanation(type, scan):
     calculation = get_calculation(scan)
 
