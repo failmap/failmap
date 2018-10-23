@@ -1157,6 +1157,11 @@
                 </div>
             </template>
 
+            <div class="row" v-if="!explains.length">
+                <div class="col-md-12">
+                    {% trans "No explanations yet." %}
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 text-center">
