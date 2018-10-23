@@ -1318,114 +1318,153 @@
 
 </body>
 
+<!-- todo: Only the close buttons differ from the original report. Use one template for both if possible. -->
 <script type="x-template" id="fullscreenreport">
+
     {% verbatim %}
     <div class="page-header" id="fullscreenreport" v-if="visible">
         <div v-if="name" class="fullscreenlayout">
             <p class="closebutton" onclick="vueFullScreenReport.hide()">
-                X
+                <i class="fas fa-window-close"></i>
             </p>
+        {% endverbatim %}
 
-            <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
-            <br />
-            <a @click="vueFullScreenReport.hide()" class="btn btn-primary"><i class="fas fa-times"></i> {% trans "close report" %}</a>
-            <a @click="printreport('reportcontent')" class="btn btn-success"><i class="fas fa-print"></i> {% trans "print report" %}</a>
-            <br />
-
-            <div class="score high">
-                <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
-                <span class="score_label">{% trans "High" %}</span>
-            </div>
-
-            <div class="score medium">
-                <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
-                <span class="score_label">{% trans "Medium" %}</span>
-            </div>
-
-            <div class="score low">
-                <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
-                <span class="score_label">{% trans "Low" %}</span>
-            </div>
-
-            <br style="clear: both">
-            <br />
-            <i>{% trans "Report from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
-            <br />
-            <i>{% trans "Scans are performed on a daily to weekly basis." %}</i><br/>
-            <br/>
-            <ul>
-            <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
-            </li>
-            <li>{% trans "RSS change feed teaser" %}
-            <a :href="'/data/updates_on_organization_feed/' + selected"
-            target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
-            <li>
-            {% trans "Report ask domains leader" %} <a
-                :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-            </li>
-            </ul>
-
-            <div>
-               <!-- copy of report -->
-                <br/>
-                {% verbatim %}
-                <div v-for="url in urls" class="perurl"
-                     :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255, 0.0));'">
-
-                    <div class="col-md-4">
-                        &nbsp;
-                    </div>
-                    <div class="col-md-8">
-                        <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                        <span class="faildomain" :class="colorize(url.high, url.medium, url.low)"
-                              :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                        <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'"
-                           class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
-                            {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}</a>
+                    <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
+                    <br />
+                    <a onclick="vueFullScreenReport.hide()" class="btn btn-primary" style="color:white;"><i class="fas fa-times"></i> {% trans "close report" %}</a>
+                    <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+                    <br /><br />
+                    <div class="score high">
+                        <span class="score_value high_text">{% verbatim %}{{ high }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "High" %}</span>
                     </div>
 
-                    <div v-for="endpoint in url.endpoints">
-                        <div class="col-md-4 giveroom">
-                            <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
-                               target="_blank"
-                               :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
-                                <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                     class="lazyload clippedimage" :data-src="'/static/images/screenshots/'+ endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
-                                    :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
-                                />
-                            </a>
+                    <div class="score medium">
+                        <span class="score_value medium_text">{% verbatim %}{{ medium }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "Medium" %}</span>
+                    </div>
+
+                    <div class="score low">
+                        <span class="score_value low_text">{% verbatim %}{{ low }}{% endverbatim %}</span><br/>
+                        <span class="score_label">{% trans "Low" %}</span>
+                    </div>
+
+                    <br style="clear: both">
+                    <br>
+
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="organization_vulnerability_timeline"></canvas>
+                    </div>
+
+                    <br style="clear: both">
+                    <br>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="organization_connectivity_timeline"></canvas>
+                    </div>
+
+                    <br style="clear: both">
+                    <br />
+                    <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
+                    <br/>
+                    <ul>
+                    <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
+                    </li>
+                    <li>{% trans "RSS change feed teaser" %}
+                    <a :href="'/data/updates_on_organization_feed/' + selected"
+                    target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
+                    <li>
+                    {% trans "Report ask domains leader" %} <a
+                        :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+                    </li>
+                    </ul>
+                    <br/>
+                    {% verbatim %}
+                    <div v-for="url in urls" class="perurl"
+                         :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255, 0.0));'">
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                &nbsp;
+                            </div>
+                            <div class="col-md-8">
+                                <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
+                                <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                                <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
+                                    {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
+                            </div>
                         </div>
-                        <div class="col-md-8 giveroom">
-                            <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
 
-                            <div>
-                                <div v-for="rating in endpoint.ratings">
+                        <!-- url reports -->
+                        <div v-if="url.ratings.length > 0" class="row">
+                            <div class="col-md-4">
+                                &nbsp;
+                            </div>
+                            <div class="col-md-8 giveroom_url">
+                                <h4>{% trans "Url level findings" %}</h4>
+                                {% verbatim %}
+                                <div v-for="rating in url.ratings">
                                     <h5>&nbsp; {{ create_header(rating) }}</h5>
-                                    &nbsp; &nbsp; <span
-                                        v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{
-                                    translate(rating.explanation) }}<br/>
-                                    &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
-                                    humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
-                                    {{ humanize(rating.last_scan) }} <br/>
-                                    &nbsp; &nbsp;
-                                    {% endverbatim %}
-
-                                    {% verbatim %}
+                                    <div class="finding_block">
+                                        <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                        {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
                                         <div class="finding_references">
-                                            <span v-html="second_opinion_links(rating, url)"> </span>
-                                            {% endverbatim %}
-                                            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                                                <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
-                                            {% endif %}
+                                                <span v-html="second_opinion_links(rating, url)"> </span>
+                                                {% endverbatim %}
+                                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                                    <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                                                {% endif %}{% verbatim %}
                                         </div>
-                                    <br/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- endpoint reports -->
+                        <div v-for="endpoint in url.endpoints" class="row">
+                            <div class="col-md-4 giveroom photobar">
+                                <a :href="endpoint.protocol + '://' + url.url + ':' + endpoint.port"
+                                   target="_blank"
+                                   :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
+                                    <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
+                                         class="lazyload clippedimage" :data-src="'/static/images/screenshots/' + endpoint.ip_version + '_' + endpoint.protocol + idize(url.url) + endpoint.port + '_latest.png'"
+                                        :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
+                                    />
+                                </a>
+                            </div>
+                            <div class="col-md-8 giveroom">
+                                <h4>{% endverbatim %}{% trans "Service" %}: {% verbatim %}{{endpoint_type(endpoint) }}</h4>
+
+                                <div>
+                                    <div v-for="rating in endpoint.ratings">
+                                        <h5>&nbsp; {{ create_header(rating) }}</h5>
+                                        <div class="finding_block" v-if="rating.comply_or_explain_valid_at_time_of_report">
+                                            <span class="awarded_points_explained">{% endverbatim %}{% trans "Explained" %}{% verbatim %}</span> {{ rating.comply_or_explain_explanation }}<br />
+                                            {% endverbatim %}{% trans "Explained on" %}{% verbatim %}: {{ humanize(rating.comply_or_explain_explained_on) }}, {% endverbatim %}{% trans "explanation expires" %}{% verbatim %}: {{ humanize(rating.comply_or_explain_explanation_valid_until) }}<br>
+                                            <del style="font-size: 0.8em"><span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                            {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}</del>
+                                            <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                        </div>
+                                        <div class="finding_block" v-else>
+                                            <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
+                                            {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
+
+                                            <div class="finding_references">
+                                                <span v-html="second_opinion_links(rating, url)"> </span>
+                                                {% endverbatim %}
+                                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                                    <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                                                {% endif %}
+                                            </div>
+                                            {% verbatim %}
+                                        </div>
+                                    </div>
+                                </div>
+
                     </div>
                 </div>
-                <!-- end copy of report -->
+                {% endverbatim %}
             </div>
+
         </div>
     </div>
 </script>
