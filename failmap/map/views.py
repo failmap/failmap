@@ -856,7 +856,10 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
 
 
 @cache_page(one_hour)
-def organization_vulnerability_timeline(request, organization_id: int):
+def organization_vulnerability_timeline(request, organization_id: int, organization_type: str = "", country: str = ""):
+
+    # We don't do anything with organization_type: str="", country: str="", it's just so the requests are compatible
+    # and easier to code.
 
     ratings = OrganizationRating.objects.all().filter(organization=organization_id).order_by('when')
 
@@ -871,6 +874,32 @@ def organization_vulnerability_timeline(request, organization_id: int):
                       'low': rating.url_issues_low + rating.endpoint_issues_low})
 
     return JsonResponse(stats, encoder=JSEncoder, safe=False)
+
+
+def organization_vulnerability_timeline_via_name(request, organization_name: str,
+                                                 organization_type: str = "", country: str = ""):
+
+    if not organization_type or country:
+        # getting defaults
+        data = Configuration.objects.all().filter(
+            is_displayed=True,
+            is_the_default_option=True
+        ).order_by('display_order').values('country', 'organization_type__name').first()
+
+        country = data['country']
+        category = data['organization_type__name']
+    else:
+        country = get_country(country)
+        category = get_organization_type(organization_type)
+
+    organization = Organization.objects.all().filter(country=country, type__name=category,
+                                                     name=organization_name,
+                                                     is_dead=False).first()
+
+    if organization:
+        return organization_vulnerability_timeline(request, organization.id)
+    else:
+        return JsonResponse({}, encoder=JSEncoder, safe=True)
 
 
 @cache_page(one_hour)

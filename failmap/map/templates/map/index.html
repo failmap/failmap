@@ -344,7 +344,13 @@
                                         <div class="finding_block">
                                             <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
                                             {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
-                                            <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                            <div class="finding_references">
+                                                    <span v-html="second_opinion_links(rating, url)"> </span>
+                                                    {% endverbatim %}
+                                                    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                                        <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                                                    {% endif %}{% verbatim %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -378,7 +384,15 @@
                                             <div class="finding_block" v-else>
                                                 <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
                                                 {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
-                                                <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+
+                                                <div class="finding_references">
+                                                    <span v-html="second_opinion_links(rating, url)"> </span>
+                                                    {% endverbatim %}
+                                                    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                                        <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                                                    {% endif %}
+                                                </div>
+                                                {% verbatim %}
                                             </div>
                                         </div>
                                     </div>
@@ -1393,7 +1407,17 @@
                                     &nbsp; &nbsp; {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{
                                     humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}:
                                     {{ humanize(rating.last_scan) }} <br/>
-                                    &nbsp; &nbsp; <div class="finding_references" v-html="second_opinion_links(rating, url)"> </div>
+                                    &nbsp; &nbsp;
+                                    {% endverbatim %}
+
+                                    {% verbatim %}
+                                        <div class="finding_references">
+                                            <span v-html="second_opinion_links(rating, url)"> </span>
+                                            {% endverbatim %}
+                                            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                                <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                                            {% endif %}
+                                        </div>
                                     <br/>
                                 </div>
                             </div>
@@ -1404,7 +1428,6 @@
             </div>
         </div>
     </div>
-    {% endverbatim %}
 </script>
 <script type="x-template" id="latest_table">
     <table class="table table-striped changes" :id="element_id">

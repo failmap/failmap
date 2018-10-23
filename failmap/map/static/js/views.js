@@ -308,6 +308,46 @@ const report_mixin = {
                 return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
         },
+        explain_link: function(address, rating, url) {
+            subject = this.translate("Explanation of finding");
+            body = this.translate("Hi!,\n" +
+                "\n" +
+                "I would like to explain the below finding.\n" +
+                "\n" +
+                "Address: {{ url }}\n" +
+                "Scan Type: {{ scan_type }}\n" +
+                "Scan ID: {{ scan_id }}\n" +
+                "Impact: High: {{ high }}, Medium {{ medium }}, Low: {{ low }}.\n" +
+                "\n" +
+                "I believe the finding to be incorrect. This is why:\n" +
+                "[... please enter your explanation for review here ...]\n" +
+                "\n" +
+                "I acknowledge that this finding will be published together with my organizations name.\n" +
+                "\n" +
+                "tip: please refer to documentation or standards where possible. Be aware that an explanation is valid " +
+                "for one year by default.\n" +
+                "\n" +
+                "Kind regards,\n" +
+                "");
+
+            explain = this.translate("Explain");
+
+            // use a sort-of-templating language
+            body = body.replace("{{ url }}", url.url);
+            body = body.replace("{{ scan_type }}", rating.type);
+            body = body.replace("{{ scan_id }}", rating.scan);
+            body = body.replace("{{ high }}", rating.high);
+            body = body.replace("{{ medium }}", rating.medium);
+            body = body.replace("{{ low }}", rating.low);
+
+            // make it so it can be sent in the mail:
+            subject = encodeURIComponent(subject);
+            body = encodeURIComponent(body);
+
+            link = "<a href='mailto:" + address + "?subject=" + subject + "&body=" + body + "' class='btn-sm'><i class='fas fa-comments'></i> " + explain + "</a>";
+
+            return link;
+        },
         total_awarded_points: function (high, medium, low) {
             let marker = vueReport.make_marker(high, medium, low);
             return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'

@@ -48,7 +48,15 @@ urlpatterns = [
     path('data/explained/<c:country>/<slug:organization_type>/', views.explain_list),
     path('data/report/<c:country>/<slug:organization_type>/<oid:organization_id>/<w:weeks_back>',
          views.organization_report),
+    # be compattible with optional parameters and types.
     path('data/organization_vulnerability_timeline/<oid:organization_id>', views.organization_vulnerability_timeline),
+    path('data/organization_vulnerability_timeline/<oid:organization_id>/<slug:organization_type>/<c:country>',
+         views.organization_vulnerability_timeline),
+    path('data/organization_vulnerability_timeline/<slug:organization_name>/<slug:organization_type>/<c:country>',
+         views.organization_vulnerability_timeline_via_name),
+    path(
+        'data/organization_vulnerability_timeline/<slug:organization_name>/',
+        views.organization_vulnerability_timeline_via_name),
     path('data/report/<c:country>/<slug:organization_type>/<str:organization_name>/<w:weeks_back>',
          views.organization_report),
     path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
