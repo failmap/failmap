@@ -62,11 +62,15 @@ urlpatterns = [
     path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
     path('data/updates_on_organization_feed/<oid:organization_id>', views.UpdatesOnOrganizationFeed()),
 
-    path('data/export/urls_only/<c:country>/<slug:organization_type>/', views.export_urls_only),
-    path('data/export/organization_types/<c:country>/<slug:organization_type>/', views.export_organization_types),
-    path('data/export/organizations/<c:country>/<slug:organization_type>/', views.export_organizations),
-    path('data/export/coordinates/<c:country>/<slug:organization_type>/', views.export_coordinates),
-    path('data/export/urls/<c:country>/<slug:organization_type>/', views.export_urls),
+    path('data/export/urls_only/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_urls_only),
+    path('data/export/organization_types/<c:country>/<slug:organization_type>/<slug:file_format>/',
+         views.export_organization_types),
+    path('data/export/organizations/<c:country>/<slug:organization_type>/<slug:file_format>/',
+         views.export_organizations),
+    path('data/export/coordinates/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_coordinates),
+    path('data/export/urls/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_urls),
+
+    # this is not a single dataset, so building all kinds of exports was a bit harder, when needed we can build it.
     path('data/export/explains/<c:country>/<slug:organization_type>/', views.export_explains),
 
     # Proxy maptile requests,

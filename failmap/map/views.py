@@ -20,6 +20,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
+from import_export.resources import modelresource_factory
 from simplejson.errors import JSONDecodeError
 
 from failmap.map.models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
@@ -166,7 +167,7 @@ def get_categories(request, country: str = "NL"):
     return JsonResponse(list(categories), safe=False, encoder=JSEncoder)
 
 
-def generic_export(query, set, country: str = "NL", organization_type="municipality"):
+def generic_export(query, set, country: str = "NL", organization_type="municipality", file_format: str = "json"):
     """
     This dataset can be imported in another instance blindly using the admin interface.
 
@@ -188,14 +189,43 @@ def generic_export(query, set, country: str = "NL", organization_type="municipal
     else:
         organization_type_name = organization_type_name.get('name')
 
-    response = JsonResponse(list(query), safe=False, encoder=JSEncoder, )
-    response['Content-Disposition'] = 'attachment; filename="%s_%s_%s_%s.json"' % (
-        country, organization_type_name, set, timezone.datetime.now().date())
+    if file_format not in ['csv', 'xlsx', 'xls', 'ods', 'html', 'tsv', 'yaml', 'json']:
+        file_format = 'json'
+
+    # you can't call query.format, as it will result in parsing to that format which is expensive.
+    data = {}
+    if file_format == "json":
+        data = query.json
+    if file_format == "csv":
+        # works only on complete dataset, cannot omit fields.
+        data = query.json
+    if file_format == "xls":
+        # xls only results in empty files... so no xls support
+        data = query.json
+    if file_format == "xlsx":
+        # cell() missing 1 required positional argument: 'column'
+        # So no xslx support for now.
+        data = query.json
+    if file_format == "yaml":
+        data = query.yaml
+    if file_format == "tsv":
+        # works only on complete dataset, cannot omit fields.
+        data = query.json
+    if file_format == "html":
+        # works only on complete dataset
+        data = query.json
+    if file_format == "ods":
+        # ods only results in empty files... so no ods support, works only on complete dataset.
+        data = query.json
+
+    response = HttpResponse(data, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename="%s_%s_%s_%s.%s"' % (
+        country, organization_type_name, set, timezone.datetime.now().date(), file_format)
     return response
 
 
 @cache_page(one_day)
-def export_urls_only(request, country: str = "NL", organization_type="municipality",):
+def export_urls_only(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
     query = Url.objects.all().filter(
         is_dead=False,
         not_resolvable=False,
@@ -204,28 +234,37 @@ def export_urls_only(request, country: str = "NL", organization_type="municipali
         organization__type=get_organization_type(organization_type)
     ).values_list('url', flat=True)
 
-    return generic_export(query, 'urls_only', country, organization_type)
+    exporter = modelresource_factory(query.model)
+    dataset = exporter().export(query)
+
+    return generic_export(dataset, 'urls_only', country, organization_type, file_format)
 
 
 @cache_page(one_day)
-def export_organizations(request, country: str = "NL", organization_type="municipality",):
+def export_organizations(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
     query = Organization.objects.all().filter(
         country=get_country(country),
         type=get_organization_type(organization_type),
         is_dead=False
     ).values('id', 'name', 'type', 'wikidata', 'wikipedia', 'twitter_handle')
 
-    return generic_export(query, 'organizations', country, organization_type)
+    exporter = modelresource_factory(query.model)
+    dataset = exporter().export(query)
+
+    return generic_export(dataset, 'organizations', country, organization_type, file_format)
 
 
 @cache_page(one_day)
-def export_organization_types(request, country: str = "NL", organization_type="municipality"):
+def export_organization_types(request, country: str = "NL", organization_type="municipality",
+                              file_format: str = "json"):
     query = OrganizationType.objects.all().values('name')
-    return generic_export(query, 'organization_types', country, organization_type)
+    exporter = modelresource_factory(query.model)
+    dataset = exporter().export(query)
+    return generic_export(dataset, 'organization_types', country, organization_type, file_format)
 
 
 @cache_page(one_day)
-def export_coordinates(request, country: str = "NL", organization_type="municipality",):
+def export_coordinates(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
     organizations = Organization.objects.all().filter(
         country=get_country(country),
         type=get_organization_type(organization_type))
@@ -234,11 +273,15 @@ def export_coordinates(request, country: str = "NL", organization_type="municipa
         organization__in=list(organizations),
         is_dead=False
     ).values('id', 'organization', 'geojsontype', 'area')
-    return generic_export(query, 'coordinates', country, organization_type)
+
+    exporter = modelresource_factory(query.model)
+    dataset = exporter().export(query)
+
+    return generic_export(dataset, 'coordinates', country, organization_type, file_format)
 
 
 @cache_page(one_day)
-def export_urls(request, country: str = "NL", organization_type="municipality"):
+def export_urls(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
     query = Url.objects.all().filter(
         organization__in=Organization.objects.all().filter(
             country=get_country(country),
@@ -246,7 +289,11 @@ def export_urls(request, country: str = "NL", organization_type="municipality"):
         is_dead=False,
         not_resolvable=False
     ).values('id', 'url', 'organization')
-    return generic_export(query, 'urls', country, organization_type)
+
+    exporter = modelresource_factory(query.model)
+    dataset = exporter().export(query)
+
+    return generic_export(dataset, 'urls', country, organization_type, file_format)
 
 
 @cache_page(one_hour)

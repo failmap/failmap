@@ -969,7 +969,7 @@ function views() {
         },
         methods: {
             create_link: function(category, linktype){
-                return '/data/export/' + linktype + '/' + this.country + '/' + category + '/';
+                return '/data/export/' + linktype + '/' + this.country + '/' + category + '/json/';
             },
             load: function(){
                 // doesn't have a load method, but is auto called via the state_mixin.
