@@ -1239,6 +1239,10 @@
                 <ul>
                     <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
                     <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                        <li>{% trans "Comply or explain" %}: <a href="mailto:{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    {%  endif %}
+
                     <li>
                         {% if config.PROJECT_TWITTER or config.PROJECT_FACEBOOK %}
                             {% trans "Also on social media" %}:
