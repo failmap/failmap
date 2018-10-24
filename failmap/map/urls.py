@@ -67,6 +67,7 @@ urlpatterns = [
     path('data/export/organizations/<c:country>/<slug:organization_type>/', views.export_organizations),
     path('data/export/coordinates/<c:country>/<slug:organization_type>/', views.export_coordinates),
     path('data/export/urls/<c:country>/<slug:organization_type>/', views.export_urls),
+    path('data/export/explains/<c:country>/<slug:organization_type>/', views.export_explains),
 
     # Proxy maptile requests,
     # In production this can be done by caching proxy, this makes sure it works for dev. as well.

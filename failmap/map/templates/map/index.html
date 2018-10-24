@@ -1187,25 +1187,29 @@
             </div>
             <div class="row">
                 <div class="col-md-12">
-                    <table style="width:100%">
+                    <table style="width:100%" class="table table-striped">
                         <thead>
                             <tr>
-                                <th>{% trans "Category" %}</th>
-                                <th>{% trans "List of only urls" %}</th>
-                                <th>{% trans "Copy of organization_types" %}*</th>
-                                <th>{% trans "Copy of organizations" %}*</th>
-                                <th>{% trans "Copy of coordinates" %}*</th>
-                                <th>{% trans "Copy of urls" %}*</th>
+                                <th><i class="fas fa-chart-pie"></i> {% trans "Category" %}</th>
+                                <th><i class="fas fa-list-ul"></i> {% trans "Only urls" %}</th>
+                                <th><i class="fas fa-city"></i> {% trans "Organization types" %}*</th>
+                                <th><i class="fas fa-building"></i> {% trans "Organizations" %}*</th>
+                                <th><i class="fas fa-map-marker-alt"></i> {% trans "Map Data" %}*</th>
+                                <th><i class="far fa-compass"></i> {% trans "Urls" %}*</th>
+                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}<th><i class="fas fa-comments"></i>  {% trans "Explanations" %}</th> {%  endif %}
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="category in categories">
                                 <td>{% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</td>
-                                <td><a :href="create_link(category, 'urls_only')">{% trans "Download" %} ⬇️</a></td>
-                                <td><a :href="create_link(category, 'organization_types')">{% trans "Download" %} ⬇️</a></td>
-                                <td><a :href="create_link(category, 'organizations')">{% trans "Download" %} ⬇️</a></td>
-                                <td><a :href="create_link(category, 'coordinates')">{% trans "Download" %} ⬇️</a></td>
-                                <td><a :href="create_link(category, 'urls')">{% trans "Download" %} ⬇️</a></td>
+                                <td>⬇️ <a :href="create_link(category, 'urls_only')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(category, 'organization_types')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(category, 'organizations')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(category, 'coordinates')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(category, 'urls')">{% trans "Download" %}</a></td>
+                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                    <td>⬇️ <a :href="create_link(category, 'explains')">{% trans "Download" %}️</a></td>
+                                {% endif %}
                             </tr>
                         </tbody>
                     </table>

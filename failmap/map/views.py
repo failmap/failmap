@@ -1682,8 +1682,6 @@ def export_explains(request, country, organization_type):
     return response
 
 
-
-
 def get_explanation(type, scan):
     calculation = get_calculation(scan)
 
