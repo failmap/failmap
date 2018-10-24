@@ -309,8 +309,8 @@ const report_mixin = {
                         '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
         },
         explain_link: function(address, rating, url) {
-            subject = this.translate("Explanation of finding");
-            body = this.translate("Hi!,\n" +
+            subject = gettext("Explanation of finding");
+            body = gettext("Hi!,\n" +
                 "\n" +
                 "I would like to explain the below finding.\n" +
                 "\n" +
