@@ -8,7 +8,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Job
+from .models import Job, Volunteer
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -59,6 +59,12 @@ admin.site.register(CrontabSchedule, IESolarSchedule)
 admin.site.register(IntervalSchedule, IEIntervalSchedule)
 
 
+class VolunteerInline(admin.StackedInline):
+    model = Volunteer
+    can_delete = False
+    verbose_name_plural = 'Volunteer information'
+
+
 # Thank you:
 # https://stackoverflow.com/questions/47941038/how-should-i-add-django-import-export-on-the-user-model?rq=1
 class UserResource(resources.ModelResource):
@@ -74,6 +80,13 @@ class GroupResource(resources.ModelResource):
 
 class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
+    inlines = (VolunteerInline, )
+
+    list_display = ('username', 'organization', 'first_name', 'last_name', 'email', 'is_staff')
+
+    @staticmethod
+    def organization(obj):
+        return obj.volunteer.organization
 
 
 # I don't know if the permissions between two systems have the same numbers... Only one way to find out :)
