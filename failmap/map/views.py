@@ -21,9 +21,9 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 from import_export.resources import modelresource_factory
-from simplejson.errors import JSONDecodeError
 
-from failmap.map.models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
+from failmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
+                                VulnerabilityStatistic)
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
 
@@ -1277,24 +1277,23 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
     return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
-def map_default(request, weeks_back: int = 0, url_scan_types: dict = None, endpoint_scan_types: dict = None, ):
+def map_default(request, days_back: int = 0, displayed_issue: str = None):
     defaults = Configuration.objects.all().filter(
         is_displayed=True,
         is_the_default_option=True
     ).order_by('display_order').values('country', 'organization_type__name').first()
 
-    return map_data(request, defaults['country'], defaults['organization_type__name'], weeks_back,
-                    url_scan_types, endpoint_scan_types)
+    return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
 
 
-# @cache_page(four_hours)
-def map_data(request, country: str = "NL", organization_type: str = "municipality", weeks_back: int = 0,
-             url_scan_types: dict = None, endpoint_scan_types: dict = None, ):
+@cache_page(four_hours)
+def map_data(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
+             displayed_issue: str = None):
 
-    if not weeks_back:
+    if not days_back:
         when = datetime.now(pytz.utc)
     else:
-        when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+        when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
 
     desired_url_scans = []
     desired_endpoint_scans = []
@@ -1308,33 +1307,24 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
                                "plain_https",
                                "ftp"]
 
-    # todo: add try except for standard json errors.
-    # this is a vulnerability, so we try to contain it
-    try:
-        if len(url_scan_types) < 1024 and len(endpoint_scan_types) < 1024:
-            # risky, custom user input.
-            url_scan_types = json.loads(url_scan_types)
-            endpoint_scan_types = json.loads(endpoint_scan_types)
+    if displayed_issue in possible_url_scans:
+        desired_url_scans += [displayed_issue]
 
-            for possible_scan_type in possible_url_scans:
-                if url_scan_types.get(possible_scan_type, False) == "true":
-                    desired_url_scans += [possible_scan_type]
-
-            for possible_scan_type in possible_endpoint_scans:
-                if endpoint_scan_types.get(possible_scan_type, False) == "true":
-                    desired_endpoint_scans += [possible_scan_type]
-    except (JSONDecodeError, ):
-        # falling back to default value
-        # log.debug("JsonDecodeError")
-        pass
-
-    # log.debug(desired_url_scans)
-    # log.debug(desired_endpoint_scans)
+    if displayed_issue in possible_endpoint_scans:
+        desired_endpoint_scans += [displayed_issue]
 
     # fallback if no data, which is the default.
     if not desired_url_scans and not desired_endpoint_scans:
         desired_url_scans = possible_url_scans
         desired_endpoint_scans = possible_endpoint_scans
+
+    # look if we have data in the cache, which will save some calculations and a slower query
+    cached = MapDataCache.objects.all().filter(country=country,
+                                               organization_type=get_organization_type(organization_type), when=when,
+                                               filters=desired_url_scans + desired_endpoint_scans).first()
+
+    if cached:
+        return JsonResponse(cached.dataset, encoder=JSEncoder)
 
     """
     Returns a json structure containing all current map data.
@@ -1512,6 +1502,15 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
         }
 
         data["features"].append(dataset)
+
+    # cache this result for future queries, this cache is rebuilt when creating reports (todo)
+    cached = MapDataCache()
+    cached.organization_type = OrganizationType(pk=get_organization_type(organization_type))
+    cached.country = country
+    cached.filters = desired_url_scans + desired_endpoint_scans
+    cached.when = when
+    cached.dataset = data
+    cached.save()
 
     return JsonResponse(data, encoder=JSEncoder)
 

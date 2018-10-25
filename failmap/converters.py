@@ -59,6 +59,16 @@ class WeeksConverter:
         return '%d' % value
 
 
+class DaysConverter:
+    regex = '[0-9]{0,3}'
+
+    def to_python(self, value):
+        return int(value)
+
+    def to_url(self, value):
+        return '%d' % value
+
+
 class CountryConverter:
     regex = '[A-Z]{2}'
 

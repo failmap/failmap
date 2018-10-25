@@ -11,6 +11,7 @@ from .. import converters
 # todo: organization type converter doesn't work yet... using slug as an alternative.
 register_converter(converters.OrganizationTypeConverter, 'ot')
 register_converter(converters.WeeksConverter, 'w')
+register_converter(converters.DaysConverter, 'd')
 register_converter(converters.CountryConverter, 'c')
 register_converter(converters.OrganizationIdConverter, 'oid')
 register_converter(converters.JsonConverter, 'json')
@@ -25,9 +26,10 @@ urlpatterns = [
          views.organization_autcomplete),
 
     path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
-    path('data/map/<c:country>/<slug:organization_type>/<w:weeks_back>/<json:url_scan_types>/'
-         '<json:endpoint_scan_types>/', views.map_data),
-    path('data/map_default/<w:weeks_back>/<json:url_scan_types>/<json:endpoint_scan_types>/', views.map_default),
+    path('data/map/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/', views.map_data),
+    path('data/map/<c:country>/<slug:organization_type>/<d:days_back>//', views.map_data),
+    path('data/map_default/<d:days_back>/<slug:displayed_issue>/', views.map_default),
+    path('data/map_default/<d:days_back>//', views.map_default),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
     path('data/countries/', views.get_countries),
     path('data/default_country/', views.get_default_country),

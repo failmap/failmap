@@ -310,3 +310,31 @@ class VulnerabilityStatistic(models.Model):
     high = models.PositiveIntegerField(default=0, blank=False, null=False)
     medium = models.PositiveIntegerField(default=0, blank=False, null=False)
     low = models.PositiveIntegerField(default=0, blank=False, null=False)
+
+
+class MapDataCache(models.Model):
+
+    country = CountryField(db_index=True,
+                           help_text="Part of the combination shown on the map.")
+
+    organization_type = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        help_text="Part of the combination shown on the map.")
+
+    when = models.DateField()
+
+    filters = models.CharField(
+        max_length=1024,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="Any set of desired scan_types"
+    )
+
+    dataset = JSONField()
+
+    cached_on = models.DateField(auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return 'Map Cache %s %s %s' % (self.country, self.organization_type, self.when)

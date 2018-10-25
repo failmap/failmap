@@ -8,8 +8,8 @@ from import_export.admin import ImportExportModelAdmin
 from ..app.models import Job
 from ..celery import PRIO_HIGH, app
 from .geojson import import_from_scratch, update_coordinates
-from .models import (AdministrativeRegion, Configuration, OrganizationRating, UrlRating,
-                     VulnerabilityStatistic)
+from .models import (AdministrativeRegion, Configuration, MapDataCache, OrganizationRating,
+                     UrlRating, VulnerabilityStatistic)
 
 
 @admin.register(OrganizationRating)
@@ -244,3 +244,16 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low')
     list_filter = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low')
     search_fields = (['country', 'organization_type', 'scan_type'])
+
+
+@admin.register(MapDataCache)
+class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('pk', 'country', 'organization_type', 'filters', 'when', 'length')
+    list_filter = ('country', 'organization_type', 'filters', 'when')
+    search_fields = (['country', 'organization_type', 'filters'])
+
+    readonly_fields = ['cached_on']
+
+    @staticmethod
+    def length(obj):
+        return len(str(obj.dataset))

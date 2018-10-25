@@ -9,13 +9,15 @@ from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
+from failmap.map.views import map_data
 from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner.scanner import q_configurations_to_display
 
 from ..celery import Task, app
 from .calculate import get_calculation
-from .models import Configuration, OrganizationRating, UrlRating, VulnerabilityStatistic
+from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
+                     VulnerabilityStatistic)
 
 log = logging.getLogger(__package__)
 
@@ -71,9 +73,20 @@ def compose_task(
         log.debug("organizatins to display: %s" % q_configurations_to_display('organization'))
         raise Exception('Applied filters resulted in no tasks!')
 
+    # when trying to report on a specific url or organization (so not everything) also don't rebuild all caches
+    # from the past. This saves a lot of rebuild time, making results visible in a "fixing state" and the entire rebuild
+    # will happen at a scheduled interval to make sure the rest is up to date.
+    if organizations_filter or urls_filter:
+        days = 2
+    else:
+        days = 366
+
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
-    tasks.append(calculate_vulnerability_graphs.si())
+    tasks.append(calculate_vulnerability_graphs.si(days))
+
+    # also try to speed up the map view
+    tasks.append(calculate_map_data.si(days))
 
     task = group(tasks)
 
@@ -1470,7 +1483,7 @@ def default_organization_rating(organizations: List[Organization]):
 
 
 @app.task(queue='storage')
-def calculate_vulnerability_graphs():
+def calculate_vulnerability_graphs(days: int = 366):
     log.info("Calculation vulnerability graphs")
 
     # for everything that is displayed on the site:
@@ -1485,7 +1498,7 @@ def calculate_vulnerability_graphs():
         country = map_configuration['country']
 
         # for the entire year, starting with oldest (in case the other tasks are not ready)
-        for days_back in list(reversed(range(0, 366))):
+        for days_back in list(reversed(range(0, days))):
             measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
             log.info("Days back:%s Date: %s" % (days_back, when))
@@ -1586,3 +1599,41 @@ def calculate_vulnerability_graphs():
                     vs.medium = measurement[scan_type]['medium']
                     vs.low = measurement[scan_type]['low']
                     vs.save()
+
+
+@app.task(queue='storage')
+def calculate_map_data(days: int = 366):
+    log.info("calculate_map_data")
+
+    # fake request
+    from django.test.client import RequestFactory
+    rf = RequestFactory()
+    get_request = rf.get('/hello/', HTTP_HOST='localhost')
+
+    # all vulnerabilities * 14 days
+    filters = ["security_headers_strict_transport_security", "security_headers_x_content_type_options", "ftp", "DNSSEC",
+               "security_headers_x_frame_options", "security_headers_x_xss_protection", "tls_qualys", "plain_https",  ""
+               ]
+
+    map_configurations = Configuration.objects.all().filter(
+        is_displayed=True).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
+
+    for map_configuration in map_configurations:
+        for days_back in list(reversed(range(0, days))):
+            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+            for filter in filters:
+
+                # You can expect something to change each day. Therefore just store the map data each day.
+                MapDataCache.objects.all().filter(
+                    when=when, country=map_configuration['country'],
+                    organization_type=OrganizationType(pk=map_configuration['organization_type']),
+                    filters=[filter]
+                ).delete()
+
+                log.debug("Country: %s, Organization_type: %s, day: %s, filter: %s" % (
+                    map_configuration['country'], map_configuration['organization_type__name'],
+                    days_back, filter
+                ))
+                map_data(get_request,
+                         map_configuration['country'], map_configuration['organization_type__name'],
+                         days_back, filter)

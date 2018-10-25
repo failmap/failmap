@@ -1514,29 +1514,30 @@
     {% if config.SHOW_DNS_DNSSEC or config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS or config.SHOW_FTP or config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO or config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
         <h4>{% trans "Risk filter" %}</h4>
         {% if config.SHOW_DNS_DNSSEC %}
-        <input type='checkbox' v-model="DNSSEC" name="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_TLS_QUALYS %}
-        <input type='checkbox' v-model="tls_qualys" name="TLS_QUALYS" id="TLS_QUALYS"> <label for="TLS_QUALYS">{% trans "report_header_tls_qualys" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="tls_qualys" id="TLS_QUALYS"> <label for="TLS_QUALYS">{% trans "report_header_tls_qualys" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_MISSING_TLS %}
-        <input type='checkbox' v-model="plain_https" name="plain_https" id="plain_https"> <label for="plain_https">{% trans "report_header_plain_https" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="plain_https" id="plain_https"> <label for="plain_https">{% trans "report_header_plain_https" %}</label><br />
         {% endif %}
         {% if config.SHOW_FTP %}
-        <input type='checkbox' v-model="ftp" name="ftp" id="ftp"> <label for="ftp">{% trans "report_header_ftp" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="ftp" id="ftp"> <label for="ftp">{% trans "report_header_ftp" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_HSTS %}
-        <input type='checkbox' v-model="security_headers_strict_transport_security" name="HSTS" id="HSTS"> <label for="HSTS">{% trans "report_header_security_headers_strict_transport_security" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_strict_transport_security" id="HSTS"> <label for="HSTS">{% trans "report_header_security_headers_strict_transport_security" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_XFO %}
-        <input type='checkbox' v-model="security_headers_x_frame_options" name="XFO" id="XFO"> <label for="XFO">{% trans "report_header_security_headers_x_frame_options" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_frame_options" id="XFO"> <label for="XFO">{% trans "report_header_security_headers_x_frame_options" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_X_XSS %}
-        <input type='checkbox' v-model="security_headers_x_xss_protection" name="X_XSS" id="X_XSS"> <label for="X_XSS">{% trans "report_header_security_headers_x_xss_protection" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_xss_protection" id="X_XSS"> <label for="X_XSS">{% trans "report_header_security_headers_x_xss_protection" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
-        <input type='checkbox' v-model="security_headers_x_content_type_options" name="X_CONTENT" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_content_type_options" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
         {% endif %}
+        <button type="button" class="btn btn-success btn-sm" @click="clear_filter()" v-show="displayed_issue">{% trans "Clear Filter" %}</button><br />
     {% endif %}
     </div>
 </script>
