@@ -58,31 +58,12 @@ def compose_task(
     log.info('Creating security headers scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
-    # create tasks for scanning all selected endpoints as a single managable group
-    """
-    It's incredibly annoying to work with options...
-
-    TypeError: get_headers() takes 2 positional arguments but 24 were given
-    signature('failmap.scanners.scanner.security_headers.get_headers', args=(endpoint.uri_url()),
-                  options={'queue': IP_VERSION_QUEUE[endpoint.ip_version],
-                           'immutable': True})
-
-    TypeError: get_headers() takes 1 positional argument but 2 were given
-    get_headers.signature(
-            (endpoint.uri_url(),),
-            options={'queue': IP_VERSION_QUEUE[endpoint.ip_version], 'immutable': True}
-        ) | analyze_headers.s(endpoint) for endpoint in endpoints
-
-
-    I'm done with this nonsense, and writing two explicit functions...
-    """
-
     tasks = []
     for endpoint in endpoints:
-        if endpoint.ip_version == 4:
-            tasks.append(get_headers_v4.si(endpoint.uri_url()) | analyze_headers.s(endpoint))
-        if endpoint.ip_version == 6:
-            tasks.append(get_headers_v6.si(endpoint.uri_url()) | analyze_headers.s(endpoint))
+        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
+        tasks.append(get_headers.si(endpoint.uri_url()).set(queue=queue) | analyze_headers.s(endpoint))
+
+    log.info("Created %s tasks" % len(tasks))
 
     return group(tasks)
 
@@ -93,7 +74,7 @@ def analyze_headers(result: requests.Response, endpoint):
 
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return ParentFailed('skipping result parsing because scan failed.', cause=result)
+        return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
 
     response = result
 
@@ -189,11 +170,10 @@ def error_response_400_500(endpoint):
         EndpointScanManager.add_scan('Strict-Transport-Security', endpoint, '400_500', "")
 
 
-# Has been made explicity due to errors with the latest version of celery not allowing signature kwargs.
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'ipv4'})
-def get_headers_v4(self, uri_uri):
+@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})
+def get_headers(self, uri_uri):
     try:
-        return get_headers(uri_uri)
+        return get_headers_request(uri_uri)
 
     # The amount of possible return states is overwhelming :)
 
@@ -224,41 +204,7 @@ def get_headers_v4(self, uri_uri):
             return e
 
 
-@app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3}, kwargs={'queue': 'ipv6'})
-def get_headers_v6(self, uri_uri):
-    try:
-        return get_headers(uri_uri)
-
-    # The amount of possible return states is overwhelming :)
-
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895712/
-    #         https://sentry.io/internet-cleanup-foundation/faalkaart/issues/460895699/
-    # ValueError, really don't know how to further handle it.
-    #
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425503689/
-    # requests.TooManyRedirects
-    #
-    # Solving https://sentry.io/internet-cleanup-foundation/faalkaart/issues/425507209/
-    # LocationValueError - No host specified.
-    # it redirects to something like https:/// (with three slashes) and then somewhere it crashes
-    # possibly an error in requests.
-    #
-    # Possibly tooManyRedirects could be plotted on the map, given this is a configuration error
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, ValueError,
-            requests.TooManyRedirects, urllib3.exceptions.LocationValueError) as e:
-        # If an expected error is encountered put this task back on the queue to be retried.
-        # This will keep the chained logic in place (saving result after successful scan).
-        # Retry delay and total number of attempts is configured in the task decorator.
-        try:
-            # Since this action raises an exception itself, any code after this won't be executed.
-            raise self.retry(exc=e)
-        except BaseException:
-            # If this task still fails after maximum retries the last
-            # error will be passed as result to the next task.
-            return e
-
-
-def get_headers(uri_url):
+def get_headers_request(uri_url):
     """
     Issue #94:
     TL;DR: The fix is to follow all redirects.
