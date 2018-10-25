@@ -1,7 +1,11 @@
 from django.contrib import admin
+from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import Group, User
 # overwrites for period tasks, allowing import and export buttons to work.
 from django_celery_beat.admin import PeriodicTaskAdmin
 from django_celery_beat.models import CrontabSchedule, IntervalSchedule, PeriodicTask, SolarSchedule
+from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from .models import Job
@@ -25,6 +29,14 @@ class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
         ordering = ["-name"]
 
 
+class IEUser(ImportExportModelAdmin):
+    pass
+
+
+class IEGroup(ImportExportModelAdmin):
+    pass
+
+
 class IESolarSchedule(ImportExportModelAdmin):
     pass
 
@@ -45,3 +57,31 @@ admin.site.register(PeriodicTask, IEPeriodicTaskAdmin)
 admin.site.register(SolarSchedule, IESolarSchedule)
 admin.site.register(CrontabSchedule, IESolarSchedule)
 admin.site.register(IntervalSchedule, IEIntervalSchedule)
+
+
+# Thank you:
+# https://stackoverflow.com/questions/47941038/how-should-i-add-django-import-export-on-the-user-model?rq=1
+class UserResource(resources.ModelResource):
+    class Meta:
+        model = User
+        # fields = ('first_name', 'last_name', 'email')
+
+
+class GroupResource(resources.ModelResource):
+    class Meta:
+        model = Group
+
+
+class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
+    resource_class = UserResource
+
+
+# I don't know if the permissions between two systems have the same numbers... Only one way to find out :)
+class GroupAdmin(BaseGroupAdmin, ImportExportModelAdmin):
+    resource_class = GroupResource
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
+admin.site.unregister(Group)
+admin.site.register(Group, GroupAdmin)
