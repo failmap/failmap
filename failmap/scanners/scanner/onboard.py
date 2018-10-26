@@ -115,7 +115,28 @@ def reset_onboarding_status(url):
         url.onboarding_stage = "endpoint_finished"
 
     # retry crawling after scans are finished
-    if url.onboarding_stage == "crawl_started":
+    if url.onboarding_stage == "crawling":
+        url.onboarding_stage = "scans_finished"
+
+    url.save()
+
+
+def forward_onboarding_status(url):
+    # set the task a step back.
+    # retry endpoint discovery if that didn't finish.
+    if url.onboarding_stage == "endpoint_discovery":
+        url.onboarding_stage = "endpoint_finished"
+
+    # retry scanning after discovery of endpoints
+    if url.onboarding_stage == "scans_running":
+        url.onboarding_stage = "scans_finished"
+
+    # retry crawling after scans are finished
+    if url.onboarding_stage == "crawling":
+        url.onboarded = True
+        url.onboarded_on = timezone.now()
+        url.onboarding_stage = "onboarded"
+
         url.onboarding_stage = "scans_finished"
 
     url.save()
