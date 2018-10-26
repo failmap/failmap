@@ -1069,6 +1069,12 @@ function views() {
         data: {scan: "X-XSS-Protection", element_id: "latest_security_headers_x_xss_protection"}
     });
 
+    window.vueLatestDNSSEC = new Vue({
+        name: "latest_DNSSEC",
+        mixins: [latest_mixin, state_mixin],
+        el: '#latest_DNSSEC',
+        data: {scan: "DNSSEC", element_id: "latest_DNSSEC"}
+    });
 
     /*
     * {
@@ -1256,6 +1262,7 @@ function views() {
                 vueLatestHSTS.set_state(this.country, this.category);
                 vueLatestXFrameOptions.set_state(this.country, this.category);
                 vueLatestXXSSProtection.set_state(this.country, this.category);
+                vueLatestDNSSEC.set_state(this.country, this.category);
                 vueGraphs.set_state(this.country, this.category);
                 vueImprovements.set_state(this.country, this.category);
                 vueExport.set_state(this.country, this.category);

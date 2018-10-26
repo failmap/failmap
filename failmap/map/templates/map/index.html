@@ -1079,11 +1079,14 @@
                     <span id="latest_ftp"></span>
                 </div>
                 {% endif %}
+                {% if config.SHOW_DNS_DNSSEC %}
                 <div class="col-md-6">
-                    <h4>&nbsp;</h4>
-                    <p>&nbsp;</p>
-                    <span></span>
+                    <h4>{% trans "DNSSEC updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/DNSSEC"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_DNSSEC"></span>
                 </div>
+                {%  endif %}
             </div>
             {% endif %}
         </div>

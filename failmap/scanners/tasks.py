@@ -16,8 +16,7 @@ DEFAULT_EXPLORERS = [http.compose_discover_task, ftp.compose_discover_task]
 
 # Beta: dns.brute_known_subdomains_compose_task, - old code still
 TLD_DEFAULT_CRAWLERS = [
-    dns.certificate_transparency_compose_task,
-    dns.nsec_compose_task]
+    dns.compose_discover_task]
 DEFAULT_CRAWLERS = []
 
 # Beta: tls_osaft.compose_task, - is this using the outdated ssl library?

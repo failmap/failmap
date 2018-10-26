@@ -1531,7 +1531,7 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
 
     if scan_type not in ["tls_qualys",
                          "Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https", "ftp"]:
+                         "plain_https", "ftp", 'DNSSEC']:
         return empty_response()
 
     if scan_type == "tls_qualys":
@@ -1548,21 +1548,46 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
             endpoint__url__organization__country=get_country(country)
         ).order_by('-rating_determined_on')[0:6])
 
+    if scan_type in ['DNSSEC']:
+        scans = list(UrlGenericScan.objects.filter(
+            type=scan_type,
+            url__organization__type=get_organization_type(organization_type),
+            url__organization__country=get_country(country)
+        ).order_by('-rating_determined_on')[0:6])
+
     for scan in scans:
         calculation = get_calculation(scan)
-        dataset["scans"].append({
-            "url": scan.endpoint.url.url,
-            "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
-            "protocol": scan.endpoint.protocol,
-            "port": scan.endpoint.port,
-            "ip_version": scan.endpoint.ip_version,
-            "explanation": calculation.get("explanation", ""),
-            "high": calculation.get("high", 0),
-            "medium": calculation.get("medium", 0),
-            "low": calculation.get("low", 0),
-            "last_scan_humanized": naturaltime(scan.last_scan_moment),
-            "last_scan_moment": scan.last_scan_moment.isoformat()
-        })
+
+        if scan_type in ['DNSSEC']:
+            # url scans
+            dataset["scans"].append({
+                "url": scan.url.url,
+                "service": "%s" % scan.url.url,
+                "protocol": "DNSSEC",
+                "port": "-",
+                "ip_version": "-",
+                "explanation": calculation.get("explanation", ""),
+                "high": calculation.get("high", 0),
+                "medium": calculation.get("medium", 0),
+                "low": calculation.get("low", 0),
+                "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                "last_scan_moment": scan.last_scan_moment.isoformat()
+            })
+        else:
+            # endpoint scans
+            dataset["scans"].append({
+                "url": scan.endpoint.url.url,
+                "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                "protocol": scan.endpoint.protocol,
+                "port": scan.endpoint.port,
+                "ip_version": scan.endpoint.ip_version,
+                "explanation": calculation.get("explanation", ""),
+                "high": calculation.get("high", 0),
+                "medium": calculation.get("medium", 0),
+                "low": calculation.get("low", 0),
+                "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                "last_scan_moment": scan.last_scan_moment.isoformat()
+            })
 
     return JsonResponse(dataset, encoder=JSEncoder)
 
@@ -1597,8 +1622,10 @@ def latest_updates(organization_id):
         endpoint__url__organization=organization).order_by('-rating_determined_on')[0:10])
     generic_endpoint_scans = list(EndpointGenericScan.objects.filter(
         endpoint__url__organization=organization).order_by('-rating_determined_on')[0:60])
+    url_endpoint_scans = list(UrlGenericScan.objects.filter(
+        url__organization=organization).order_by('-rating_determined_on')[0:60])
 
-    scans = tls_scans + generic_endpoint_scans
+    scans = tls_scans + generic_endpoint_scans + url_endpoint_scans
     # todo: sort them, currently assumes the rss reader will do the sorting
     # scans = sorted(scans, key=lambda k: k.last_scan_moment, reverse=False)
 

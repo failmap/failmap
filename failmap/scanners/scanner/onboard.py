@@ -1,5 +1,7 @@
 import logging
+from datetime import datetime, timedelta
 
+import pytz
 from celery import group
 from django.utils import timezone
 
@@ -94,26 +96,29 @@ def compose_task(
 
 
 def reset_expired_onboards():
-    from datetime import datetime, timedelta
-    import pytz
-
+    # If the queues don't finish in 7 days, you have a problem somewhere. This will add to that problem by adding
+    # EVEN MORE tasks to the queue. So an unmanaged system will run out of space somewhere sometime :)
     expired = Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(pytz.utc) - timedelta(days=7))
 
     for url in expired:
-        # set the task a step back.
-        # retry endpoint discovery if that didn't finish.
-        if url.onboarding_stage == "endpoint_discovery":
-            url.onboarding_stage = ""
+        reset_onboarding_status(url)
 
-        # retry scanning after discovery of endpoints
-        if url.onboarding_stage == "scans_running":
-            url.onboarding_stage = "endpoint_finished"
 
-        # retry crawling after scans are finished
-        if url.onboarding_stage == "crawl_started":
-            url.onboarding_stage = "scans_finished"
+def reset_onboarding_status(url):
+    # set the task a step back.
+    # retry endpoint discovery if that didn't finish.
+    if url.onboarding_stage == "endpoint_discovery":
+        url.onboarding_stage = ""
 
-        url.save()
+    # retry scanning after discovery of endpoints
+    if url.onboarding_stage == "scans_running":
+        url.onboarding_stage = "endpoint_finished"
+
+    # retry crawling after scans are finished
+    if url.onboarding_stage == "crawl_started":
+        url.onboarding_stage = "scans_finished"
+
+    url.save()
 
 
 @app.task(queue='storage')
