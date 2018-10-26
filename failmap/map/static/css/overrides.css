@@ -142,11 +142,9 @@ div#report {
     border: 1px solid black;
     display: inline-block;
     float: left;
-    background-color: gainsboro;
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px)
+    background: gainsboro repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px);
 }
 
-/* todo: consider making screenshots in aspect ratio? */
 .clippedimage {
     margin-top: 14px;
     margin-left: 17px;
@@ -156,8 +154,11 @@ div#report {
     clip: rect(0, 320px, 200px, 0);
 
     /* If we can't find the image, would this then show? */
-    background-color: gainsboro;
-    background-image: repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px)
+    background: gainsboro repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px);
+
+    /* Not setting the image width and height explicitly will make the image 100% width on ios / safari. nov 2018 */
+    width: 320px;
+    height: 200px;
 }
 
 .servicelink {
@@ -201,7 +202,7 @@ div#report {
 .awarded_points_orange, .awarded_points_medium {
     border: 1px solid darkorange;
     background-color: orange;
-    padding: 0px 3px;
+    padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
     border-radius: 4px;
@@ -210,7 +211,7 @@ div#report {
 .awarded_points_red, .awarded_points_high {
     border: 1px solid darkred;
     background-color: red;
-    padding: 0px 3px;
+    padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
     border-radius: 4px;
@@ -219,7 +220,7 @@ div#report {
 .awarded_points_green, .awarded_points_low, .awarded_points_perfect {
     border: 1px solid green;
     background-color: lightgreen;
-    padding: 0px 3px;
+    padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
     border-radius: 4px;
@@ -228,7 +229,7 @@ div#report {
 .awarded_points_explained {
     border: 2px solid #8b8987;
     background-color: #fdfffb;
-    padding: 0px 3px;
+    padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
     border-radius: 4px;
@@ -305,7 +306,7 @@ div#report {
     right: 329px;
     font-size: 30px;
     color: silver;
-    font-family: consolas;
+    font-family: sans-serif, consolas;
 }
 
 .navbar-custom {
@@ -353,12 +354,6 @@ path {
     font-size: 20px;
 }
 
-@keyframes dash {
-    to {
-        stroke-dashoffset: 1000;
-    }
-}
-
 .backtomap {
     float: right;
     position: relative;
@@ -369,36 +364,6 @@ path {
     font-size: inherit !important;
     margin: 0 5px 0 0 !important;
 }
-
-/* Begin D3 JS*/
-.axis path {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-
-.axis text {
-    font-family: Verdana;
-    font-size: 13px;
-}
-
-.area {
-    opacity: 0.5;
-    shape-rendering: geometricPrecision;
-}
-
-.d3_tooltip {
-    border: 1px solid gray;
-    padding: 5px;
-    border-radius: 3px;
-    font-family: verdana;
-    font-size: 10px;
-    background: rgba(255, 255, 255, 0.5);
-    text-align: center;
-    position: absolute;
-    z-index: 2000;
-}
-/* End D3 JS */
 
 .changes .date {
     width: 173px;
@@ -575,25 +540,11 @@ path {
     width: 100%;
     height: 200px;
     position: fixed;
-    bottom: 0px;
-    left: 0px;
+    bottom: 0;
+    left: 0;
     background-color: white;
     border-top: 2px solid black;
 }
-
-
-/* next april fools
-path {
-	animation: rotation 1s infinite linear;
-    transform-origin: 0 0;
-}
-
-@keyframes rotation {
-    from {transform: rotate(0deg);}
-    to   {transform: rotate(359deg);}
-}
-
-*/
 
 section {
     margin-bottom: 87px;
