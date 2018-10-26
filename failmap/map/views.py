@@ -397,6 +397,7 @@ def organizationtype_exists(request, organization_type_name):
 @cache_page(ten_minutes)
 def organization_report(request, country: str = "NL", organization_type="municipality",
                         organization_id=None, organization_name=None, weeks_back=0):
+    # todo: check if the organization / layer is displayed on the map.
     # urls with /data/report// (two slashes)
     if not organization_id and not organization_name:
         return JsonResponse({}, safe=False, encoder=JSEncoder)
@@ -1605,8 +1606,7 @@ def latest_updates(organization_id):
     """
 
     try:
-        # todo: is dead etc.
-        # todo: does this only do an exact match?
+        # todo: check that the organization is displayed on the map
         organization = Organization.objects.all().filter(pk=organization_id).get()
     except ObjectDoesNotExist:
         return empty_response()
@@ -1626,30 +1626,53 @@ def latest_updates(organization_id):
         url__organization=organization).order_by('-rating_determined_on')[0:60])
 
     scans = tls_scans + generic_endpoint_scans + url_endpoint_scans
-    # todo: sort them, currently assumes the rss reader will do the sorting
-    # scans = sorted(scans, key=lambda k: k.last_scan_moment, reverse=False)
+
+    scans = sorted(scans, key=lambda k: getattr(k, 'rating_determined_on', datetime.now(pytz.utc)), reverse=True)
 
     for scan in scans:
-        scan_type = getattr(scan, "type", "tls_qualys")  # todo: should always be a property of scan
+        scan_type = getattr(scan, "type", "tls_qualys")
         calculation = get_calculation(scan)
-        dataset["scans"].append({
-            "organization": organization.name,
-            "organization_id": organization.pk,
-            "url": scan.endpoint.url.url,
-            "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
-            "protocol": scan.endpoint.protocol,
-            "port": scan.endpoint.port,
-            "ip_version": scan.endpoint.ip_version,
-            "scan_type": scan_type,
-            "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
-            "high": calculation.get("high", 0),
-            "medium": calculation.get("medium", 0),
-            "low": calculation.get("low", 0),
-            "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
-            "rating_determined_on": scan.rating_determined_on,
-            "last_scan_humanized": naturaltime(scan.last_scan_moment),
-            "last_scan_moment": scan.last_scan_moment.isoformat()
-        })
+        if scan_type in ['DNSSEC']:
+            # url scans
+            dataset["scans"].append({
+                "organization": organization.name,
+                "organization_id": organization.pk,
+                "url": scan.url.url,
+                "service": "%s" % scan.url.url,
+                "protocol": scan_type,
+                "port": "",
+                "ip_version": "",
+                "scan_type": scan_type,
+                "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
+                "high": calculation.get("high", 0),
+                "medium": calculation.get("medium", 0),
+                "low": calculation.get("low", 0),
+                "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
+                "rating_determined_on": scan.rating_determined_on,
+                "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                "last_scan_moment": scan.last_scan_moment.isoformat()
+            })
+
+        else:
+            # endpoint scans
+            dataset["scans"].append({
+                "organization": organization.name,
+                "organization_id": organization.pk,
+                "url": scan.endpoint.url.url,
+                "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                "protocol": scan.endpoint.protocol,
+                "port": scan.endpoint.port,
+                "ip_version": scan.endpoint.ip_version,
+                "scan_type": scan_type,
+                "explanation": calculation.get("explanation", ""),  # sometimes you dont get one.
+                "high": calculation.get("high", 0),
+                "medium": calculation.get("medium", 0),
+                "low": calculation.get("low", 0),
+                "rating_determined_on_humanized": naturaltime(scan.rating_determined_on),
+                "rating_determined_on": scan.rating_determined_on,
+                "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                "last_scan_moment": scan.last_scan_moment.isoformat()
+            })
 
     return dataset
 
