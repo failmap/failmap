@@ -1890,6 +1890,9 @@ class LatestScanFeed(Feed):
                          "plain_https", "ftp"]:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
+        if scan_type in ["DNSSEC"]:
+            return UrlGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
+
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
@@ -1903,7 +1906,12 @@ class LatestScanFeed(Feed):
         badge = "✅" if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
             "🔴" if calculation['high'] else "🔶" if calculation['medium'] else "🍋"
 
-        return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
+        if item.type in ["DNSSEC"]:
+            # url generic scan:
+            return "%s %s - %s" % (badge, rating, item.url.url)
+        else:
+            # endpoint scan
+            return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
 
     def item_description(self, item):
         calculation = get_calculation(item)
@@ -1914,7 +1922,12 @@ class LatestScanFeed(Feed):
 
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
-        return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)
+        if item.type in ["DNSSEC"]:
+            # url generic scan:
+            return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.url.url)
+        else:
+            # endpoint scan
+            return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)
 
 
 def organization_autcomplete(request, country: str = "NL", organization_type="municipality", parameter: str = ""):

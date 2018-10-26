@@ -322,6 +322,10 @@ class TlsQualysScan(ExplainMixin):
         db_table = 'scanner_tls_qualys'
         ordering = ['-rating_determined_on', ]
 
+    @property
+    def type(self):
+        return "tls_qualys"
+
     def __str__(self):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
@@ -363,6 +367,10 @@ class TlsScan(ExplainMixin):
 
     def __str__(self):
         return "%s - %s" % (self.scan_date, self.rating)
+
+    @property
+    def type(self):
+        return "tls"
 
     class Meta:
         verbose_name = _('tlsscan')
