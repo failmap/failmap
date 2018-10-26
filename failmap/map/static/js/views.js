@@ -135,21 +135,24 @@ const report_mixin = {
                             data: high,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255,99,132,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         },
                         {
                             label: '# Medium risk',
                             data: medium,
                             backgroundColor: 'rgba(255, 102, 0, 0.2)',
                             borderColor: 'rgba(255,102,0,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         },
                         {
                             label: '# Low risk',
                             data: low,
                             backgroundColor: 'rgba(255, 255, 0, 0.2)',
                             borderColor: 'rgba(255,255,0,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         },
                         ]
                     },
@@ -205,14 +208,16 @@ const report_mixin = {
                             data: urls,
                             backgroundColor: 'rgba(0, 0, 0, 0.2)',
                             borderColor: 'rgba(0,0,0,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         },
                         {
                             label: '# Services',
                             data: endpoints,
                             backgroundColor: 'rgba(0, 40, 255, 0.2)',
                             borderColor: 'rgba(0,40,255,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         },
                         ]
                     },
@@ -656,7 +661,8 @@ function views() {
                             data: high,
                             backgroundColor: 'rgba(255, 99, 132, 0.2)',
                             borderColor: 'rgba(255,99,132,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         });
 
                 if (axis.indexOf('m') !== -1)
@@ -665,7 +671,8 @@ function views() {
                             data: medium,
                             backgroundColor: 'rgba(255, 102, 0, 0.2)',
                             borderColor: 'rgba(255,102,0,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         });
 
 
@@ -675,7 +682,8 @@ function views() {
                             data: low,
                             backgroundColor: 'rgba(255, 255, 0, 0.2)',
                             borderColor: 'rgba(255,255,0,1)',
-                            borderWidth: 1
+                            borderWidth: 1,
+                            lineTension: 0
                         });
 
                 let ctx = document.getElementById(element).getContext('2d');
