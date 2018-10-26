@@ -1608,7 +1608,9 @@ def calculate_map_data(days: int = 366):
     # fake request
     from django.test.client import RequestFactory
     rf = RequestFactory()
-    get_request = rf.get('/hello/', HTTP_HOST='localhost')
+
+    from django.conf import settings
+    get_request = rf.get('/', HTTP_HOST=settings.ALLOWED_HOSTS[0])
 
     # all vulnerabilities * 14 days
     filters = ["security_headers_strict_transport_security", "security_headers_x_content_type_options", "ftp", "DNSSEC",
