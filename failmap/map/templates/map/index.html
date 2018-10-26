@@ -1189,31 +1189,36 @@
                 <p></p>
             </div>
             <div class="row">
-                <div class="col-md-12">
+                <div class="col-md-4" v-for="category in categories">
                     <table style="width:100%" class="table table-striped">
                         <thead>
                             <tr>
-                                <th><i class="fas fa-chart-pie"></i> {% trans "Category" %}</th>
-                                <th><i class="fas fa-list-ul"></i> {% trans "Only urls" %}</th>
-                                <th><i class="fas fa-city"></i> {% trans "Organization types" %}*</th>
-                                <th><i class="fas fa-building"></i> {% trans "Organizations" %}*</th>
-                                <th><i class="fas fa-map-marker-alt"></i> {% trans "Map Data" %}*</th>
-                                <th><i class="far fa-compass"></i> {% trans "Urls" %}*</th>
-                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}<th><i class="fas fa-comments"></i>  {% trans "Explanations" %}</th> {%  endif %}
+                                <th colspan="2"><h3><i class="fas fa-chart-pie"></i> {% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</h3></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="category in categories">
-                                <td>{% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</td>
+                            <tr>
+                                <th><i class="fas fa-list-ul"></i> {% trans "Only urls" %}</th>
                                 <td>⬇️ <a :href="create_link(category, 'urls_only')">{% trans "Download" %}</a></td>
+                            </tr><tr>
+                                <th><i class="fas fa-city"></i> {% trans "Organization types" %}*</th>
                                 <td>⬇️ <a :href="create_link(category, 'organization_types')">{% trans "Download" %}</a></td>
+                            </tr><tr>
+                                <th><i class="fas fa-building"></i> {% trans "Organizations" %}*</th>
                                 <td>⬇️ <a :href="create_link(category, 'organizations')">{% trans "Download" %}</a></td>
+                            </tr><tr>
+                                <th><i class="fas fa-map-marker-alt"></i> {% trans "Map Data" %}*</th>
                                 <td>⬇️ <a :href="create_link(category, 'coordinates')">{% trans "Download" %}</a></td>
+                            </tr><tr>
+                                <th><i class="far fa-compass"></i> {% trans "Urls" %}*</th>
                                 <td>⬇️ <a :href="create_link(category, 'urls')">{% trans "Download" %}</a></td>
-                                {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                                    <td>⬇️ <a :href="create_link(category, 'explains')">{% trans "Download" %}️</a></td>
-                                {% endif %}
                             </tr>
+                            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                                <tr>
+                                    <th><i class="fas fa-comments"></i>  {% trans "Explanations" %}</th>
+                                    <td>⬇️ <a :href="create_link(category, 'explains')">{% trans "Download" %}️</a></td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                     <br /><br />
