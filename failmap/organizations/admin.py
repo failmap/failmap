@@ -268,7 +268,7 @@ class ActionMixin:
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('name_details', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
-    list_filter = ('type__name', 'country', 'created_on', 'is_dead', 'is_dead_since')
+    list_filter = ['type__name', 'country', 'created_on', 'is_dead', 'is_dead_since'][::-1]
 
     fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
               'is_dead', 'is_dead_since', 'is_dead_reason')
@@ -410,11 +410,11 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
                     'dead_for', 'unresolvable_for', 'created_on')
 
     search_fields = ('url', 'computed_subdomain', 'computed_domain', 'computed_suffix')
-    list_filter = ('url', 'is_dead', 'is_dead_since', 'is_dead_reason',
+    list_filter = ['is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
-                   'uses_dns_wildcard', 'organization', 'onboarded', 'organization__type__name',
+                   'uses_dns_wildcard', 'organization', 'onboarded', 'onboarding_stage', 'organization__type__name',
                    'organization__country',
-                   HasEndpointScansListFilter)
+                   HasEndpointScansListFilter][::-1]
 
     fieldsets = (
         (None, {
@@ -554,7 +554,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
 
     list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
     search_fields = ('organization__name', 'geojsontype')
-    list_filter = ('organization', 'geojsontype')
+    list_filter = ['organization', 'geojsontype'][::-1]
 
     # We wanted to place these on another tab, otherwise leaflet blocks mouse scrolling (which is annoying).
     # But then leaflet doesn't initialize properly, making the map unworkable. So they're on the first tab anyway.
