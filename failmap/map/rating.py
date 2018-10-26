@@ -79,7 +79,10 @@ def compose_task(
     if organizations_filter or urls_filter:
         days = 2
     else:
-        days = 366
+        # no, you always want to have a pretty quick update. If you want to revise the entire dataset, you might
+        # have adjusted the value of the ratings somewhere. Then that would be a special operation to recalculate
+        # the entire database. So this can just be two days as well.
+        days = 2
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
