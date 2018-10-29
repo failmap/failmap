@@ -1291,6 +1291,14 @@ def map_default(request, days_back: int = 0, displayed_issue: str = None):
 def map_data(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
              displayed_issue: str = None):
 
+    data = get_map_data(country, organization_type, days_back, displayed_issue)
+
+    return JsonResponse(data, encoder=JSEncoder)
+
+
+def get_map_data(country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
+                 displayed_issue: str = None):
+
     if not days_back:
         when = datetime.now(pytz.utc)
     else:
@@ -1319,13 +1327,20 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
         desired_url_scans = possible_url_scans
         desired_endpoint_scans = possible_endpoint_scans
 
-    # look if we have data in the cache, which will save some calculations and a slower query
-    cached = MapDataCache.objects.all().filter(country=country,
-                                               organization_type=get_organization_type(organization_type), when=when,
-                                               filters=desired_url_scans + desired_endpoint_scans).first()
+        # look if we have data in the cache, which will save some calculations and a slower query
+        cached = MapDataCache.objects.all().filter(country=country,
+                                                   organization_type=get_organization_type(organization_type),
+                                                   when=when,
+                                                   filters=['']).first()
+    else:
+        # look if we have data in the cache, which will save some calculations and a slower query
+        cached = MapDataCache.objects.all().filter(country=country,
+                                                   organization_type=get_organization_type(organization_type),
+                                                   when=when,
+                                                   filters=desired_url_scans + desired_endpoint_scans).first()
 
     if cached:
-        return JsonResponse(cached.dataset, encoder=JSEncoder)
+        return cached.dataset
 
     """
     Returns a json structure containing all current map data.
@@ -1520,7 +1535,7 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
     # except OperationalError:
     #     # The public user does not have permission to run insert statements....
 
-    return JsonResponse(data, encoder=JSEncoder)
+    return data
 
 
 def empty_response():

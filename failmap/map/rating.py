@@ -9,7 +9,7 @@ from deepdiff import DeepDiff
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from failmap.map.views import map_data
+from failmap.map.views import get_map_data
 from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner.scanner import q_configurations_to_display
@@ -1605,20 +1605,18 @@ def calculate_vulnerability_graphs(days: int = 366):
 
 
 @app.task(queue='storage')
+def calculate_map_data_today():
+    calculate_map_data.si(1).apply_async()
+
+
+@app.task(queue='storage')
 def calculate_map_data(days: int = 366):
     log.info("calculate_map_data")
 
-    # fake request
-    from django.test.client import RequestFactory
-    rf = RequestFactory()
-
-    from django.conf import settings
-    get_request = rf.get('/', HTTP_HOST=settings.ALLOWED_HOSTS[0])
-
-    # all vulnerabilities * 14 days
+    # all vulnerabilities
     filters = ["security_headers_strict_transport_security", "security_headers_x_content_type_options", "ftp", "DNSSEC",
-               "security_headers_x_frame_options", "security_headers_x_xss_protection", "tls_qualys", "plain_https",  ""
-               ]
+               "security_headers_x_frame_options", "security_headers_x_xss_protection", "tls_qualys", "plain_https",
+               '']
 
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
@@ -1635,10 +1633,23 @@ def calculate_map_data(days: int = 366):
                     filters=[filter]
                 ).delete()
 
-                log.debug("Country: %s, Organization_type: %s, day: %s, filter: %s" % (
+                log.debug("Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s" % (
                     map_configuration['country'], map_configuration['organization_type__name'],
-                    days_back, filter
+                    days_back, when, filter
                 ))
-                map_data(get_request,
-                         map_configuration['country'], map_configuration['organization_type__name'],
-                         days_back, filter)
+                data = get_map_data(map_configuration['country'], map_configuration['organization_type__name'],
+                                    days_back, filter)
+
+                from django.db import OperationalError
+
+                try:
+                    cached = MapDataCache()
+                    cached.organization_type = OrganizationType(pk=map_configuration['organization_type'])
+                    cached.country = map_configuration['country']
+                    cached.filters = [filter]
+                    cached.when = when
+                    cached.dataset = data
+                    cached.save()
+                except OperationalError as a:
+                    # The public user does not have permission to run insert statements....
+                    log.exception(a)
