@@ -1,9 +1,13 @@
+from datetime import datetime, timedelta
+
+import pytz
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group, User
+from django.contrib.humanize.templatetags.humanize import naturaltime
 # overwrites for period tasks, allowing import and export buttons to work.
-from django_celery_beat.admin import PeriodicTaskAdmin
+from django_celery_beat.admin import PeriodicTaskAdmin, PeriodicTaskForm
 from django_celery_beat.models import CrontabSchedule, IntervalSchedule, PeriodicTask, SolarSchedule
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -20,10 +24,82 @@ class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 admin.site.register(Job, JobAdmin)
 
 
+class MyPeriodicTaskForm(PeriodicTaskForm):
+
+    fieldsets = PeriodicTaskAdmin.fieldsets
+
+    """
+    Interval schedule does not support due_ or something. Which is absolutely terrible and vague.
+    I can't understand why there is not an is_due() for each type of schedule. This makes it very hazy
+    when something will run.
+
+    Because of this, we'll move to the horrifically designed absolute nightmare format Crontab.
+    Crontab would be half-great if the parameters where named.
+
+    Get your crontab guru going, this is the only way you'll understand what you're doing.
+    https://crontab.guru/#0_21_*_*_*
+    """
+
+    def clean(self):
+        print('cleaning')
+
+        cleaned_data = super(PeriodicTaskForm, self).clean()
+
+        # if not self.cleaned_data['last_run_at']:
+        #     self.cleaned_data['last_run_at'] = datetime.now(pytz.utc)
+
+        return cleaned_data
+
+
 class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
-    list_display = ('name', 'enabled', 'interval', 'queue', 'task', 'args')
+    # most / all time schedule functions in celery beat are moot. So the code below likely makes no sense.
+
+    list_display = ('name', 'enabled', 'interval', 'crontab', 'next',  'due',
+                    'precise', 'queue', 'task', 'args', 'last_run', 'runs')
+
+    form = MyPeriodicTaskForm
 
     save_as = True
+
+    @staticmethod
+    def last_run(obj):
+        return obj.last_run_at
+
+    @staticmethod
+    def runs(obj):
+        # print(dir(obj))
+        return obj.total_run_count
+
+    @staticmethod
+    def due(obj):
+        if obj.last_run_at:
+            return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
+        else:
+            # y in seconds
+            z, y = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
+            date = datetime.now(pytz.utc) + timedelta(seconds=y)
+
+            return naturaltime(date)
+
+    @staticmethod
+    def precise(obj):
+        if obj.last_run_at:
+            return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
+        else:
+            return obj.schedule.remaining_estimate(last_run_at=datetime.now(pytz.utc))
+
+    @staticmethod
+    def next(obj):
+        if obj.last_run_at:
+            return obj.schedule.remaining_estimate(last_run_at=obj.last_run_at)
+        else:
+            # y in seconds
+            z, y = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
+            # somehow the cron jobs still give the correct countdown even last_run_at is not set.
+
+            date = datetime.now(pytz.utc) + timedelta(seconds=y)
+
+            return date
 
     class Meta:
         ordering = ["-name"]
