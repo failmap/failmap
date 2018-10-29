@@ -310,6 +310,10 @@ class VulnerabilityStatistic(models.Model):
     high = models.PositiveIntegerField(default=0, blank=False, null=False)
     medium = models.PositiveIntegerField(default=0, blank=False, null=False)
     low = models.PositiveIntegerField(default=0, blank=False, null=False)
+    urls = models.PositiveIntegerField(default=0, blank=False, null=False,
+                                       help_text="Makes only sense on the total number of vulnerabilities")
+    endpoints = models.PositiveIntegerField(default=0, blank=False, null=False,
+                                            help_text="Makes only sense on the total number of vulnerabilities")
 
 
 class MapDataCache(models.Model):

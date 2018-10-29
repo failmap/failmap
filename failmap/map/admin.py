@@ -241,7 +241,7 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
 @admin.register(VulnerabilityStatistic)
 class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low')
+    list_display = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low', 'urls', 'endpoints')
     list_filter = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low')
     search_fields = (['country', 'organization_type', 'scan_type'])
 

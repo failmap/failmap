@@ -251,7 +251,7 @@ const report_mixin = {
                             }],
                             yAxes: [{
                                 display: true,
-                                stacked: true,
+                                stacked: false,
                                 scaleLabel: {
                                     display: false,
                                     labelString: 'Value'
@@ -621,10 +621,86 @@ function views() {
                 // data.total
                 // security_headers_strict_transport_security
 
+                var urls = Array();
+                var endpoints = Array();
+                var labels = Array();
+
                 fetch('/data/vulnstats/' + this.country + '/' + this.category + '/0')
                     .then(response => response.json()).then(data => {
 
                         this.vulnerability_graph('timeline_all_vulnerabilities', data.total, 'hml');
+
+                        for(let i=0; i<data.total.length; i++){
+                            labels.push(data.total[i].date);
+                            urls.push(data.total[i].urls);
+                            endpoints.push(data.total[i].endpoints);
+                        }
+
+                         // and a single endpoint/url graph:
+                        let context = document.getElementById("timeline_available_urls_and_endpoints").getContext('2d');
+                        let myChart2 = new Chart(context, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+
+                                datasets: [{
+                                    label: '# Internet Adresses',
+                                    data: urls,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                    borderColor: 'rgba(0,0,0,1)',
+                                    borderWidth: 1,
+                                    lineTension: 0
+                                },
+                                {
+                                    label: '# Services',
+                                    data: endpoints,
+                                    backgroundColor: 'rgba(0, 40, 255, 0.2)',
+                                    borderColor: 'rgba(0,40,255,1)',
+                                    borderWidth: 1,
+                                    lineTension: 0
+                                },
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                title: {
+                                    display: true,
+                                    text: 'Internet connectivity overview'
+                                },
+                                tooltips: {
+                                    mode: 'index',
+                                    intersect: false,
+                                },
+                                hover: {
+                                    mode: 'nearest',
+                                    intersect: true
+                                },
+                                scales: {
+                                    xAxes: [{
+                                        display: true,
+                                        type: 'time',
+                                        distribution: 'linear',
+                                        time: {
+                                            unit: 'month'
+                                        },
+                                        scaleLabel: {
+                                            display: false,
+                                            labelString: 'Month'
+                                        }
+                                    }],
+                                    yAxes: [{
+                                        display: true,
+                                        stacked: false,
+                                        scaleLabel: {
+                                            display: false,
+                                            labelString: 'Value'
+                                        }
+                                    }]
+                                }
+                            }
+                        });
+
                         this.vulnerability_graph('timeline_tls_qualys_vulnerabilities', data.tls_qualys, 'hl');
                         this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https, 'hm');
                         this.vulnerability_graph('timeline_hsts_vulnerabilities', data.security_headers_strict_transport_security, 'm');

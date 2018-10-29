@@ -86,7 +86,7 @@ def compose_task(
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
-    tasks.append(calculate_vulnerability_graphs.si(days))
+    tasks.append(calculate_vulnerability_statistics.si(days))
 
     # also try to speed up the map view
     tasks.append(calculate_map_data.si(days))
@@ -1486,12 +1486,14 @@ def default_organization_rating(organizations: List[Organization]):
 
 
 @app.task(queue='storage')
-def calculate_vulnerability_graphs(days: int = 366):
+def calculate_vulnerability_statistics(days: int = 366):
     log.info("Calculation vulnerability graphs")
 
     # for everything that is displayed on the site:
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type')
+
+    # from django.db import connection
 
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
@@ -1534,7 +1536,8 @@ def calculate_vulnerability_graphs(days: int = 366):
             # This query will deliver double ratings for urls that are doubly listed, which is dubious.
             # this happens because multiple organizations can have the same URL.
             # It's fair that there are more issues if more organizations share the same url?
-            sql = """SELECT map_urlrating.id as id, map_urlrating2.calculation as calculation FROM
+            sql = """SELECT map_urlrating.id as id, map_urlrating.total_endpoints,
+                            map_urlrating2.calculation as calculation FROM
                        map_urlrating
                    INNER JOIN
                    (SELECT MAX(id) as id2 FROM map_urlrating or2
@@ -1546,16 +1549,18 @@ def calculate_vulnerability_graphs(days: int = 366):
                    INNER JOIN map_urlrating as map_urlrating2 ON map_urlrating2.id = map_urlrating.id
                     WHERE organization.type_id = '%(OrganizationTypeId)s'
                     AND organization.country = '%(country)s'
+                    AND map_urlrating.total_endpoints > 0
                 """ % {"when": when, "OrganizationTypeId": organization_type_id, "country": country}
 
             urlratings = UrlRating.objects.raw(sql)
+            number_of_endpoints = 0
+
+            # print(connection.queries)
 
             # group by vulnerability type
             for urlrating in urlratings:
 
-                # rare occasions there are no endpoints.
-                if "endpoints" not in urlrating.calculation:
-                    continue
+                number_of_endpoints += urlrating.total_endpoints
 
                 # url reports
                 for rating in urlrating.calculation['ratings']:
@@ -1590,6 +1595,8 @@ def calculate_vulnerability_graphs(days: int = 366):
                         measurement['total']['medium'] += rating['medium']
                         measurement['total']['low'] += rating['low']
 
+            number_of_urls = len(list(urlratings))
+
             # store these results per scan type, and only retrieve this per scan type...
             for scan_type in scan_types:
                 if scan_type in measurement:
@@ -1601,6 +1608,8 @@ def calculate_vulnerability_graphs(days: int = 366):
                     vs.high = measurement[scan_type]['high']
                     vs.medium = measurement[scan_type]['medium']
                     vs.low = measurement[scan_type]['low']
+                    vs.urls = number_of_urls
+                    vs.endpoints = number_of_endpoints
                     vs.save()
 
 
