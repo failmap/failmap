@@ -1270,11 +1270,16 @@
             <a name="footer" class="jumptonav"></a>
 
             <div class="col-md-3">
+
                 {% if config.PROJECT_NAME %}
                     <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank"><b>{{ config.PROJECT_NAME }}</b></a><br />
                 {% endif %}
                 {% if config.PROJECT_TAGLINE %}
                     <i>{{ config.PROJECT_TAGLINE }}</i><br />
+                {% endif %}
+
+                {% if config.SHOW_DONATION %}
+                    <a class="btn btn-success btn-lg btn-block" href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/" target="_blank">{% trans "Support us, donate here!" %}</a>
                 {% endif %}
 
                 <ul>

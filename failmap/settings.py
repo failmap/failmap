@@ -707,6 +707,7 @@ CONSTANCE_CONFIG = {
     'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
     'SHOW_FTP': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_DONATION': (True, 'Show donation buttons and links on the site.', bool),
 
     'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK': ('', 'Link to the comply or explain discussion forum.', str),
     'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS': ('', 'E-mail where to receive explanations.', str),
@@ -777,7 +778,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                  'SHOW_TICKER',
                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP', 'SHOW_SCAN_SCHEDULE'
+                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP', 'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
                  )),
 
     ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
