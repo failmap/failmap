@@ -63,7 +63,9 @@ class Command(DumpDataCommand):
         "scanners.UrlIp",
         "map.Configuration",
         "map.AdministrativeRegion",
-        "game"
+        "game",
+        "hypersh",
+        "django_celery_beat"
     )
 
     def handle(self, *app_labels, **options):

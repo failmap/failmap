@@ -10,4 +10,4 @@ class Command(CreateDatasetCommand):
 
     FILENAME = "failmap_debug_dataset_{}.{options[format]}"
 
-    APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat')
+    APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat', 'game', 'hypersh')
