@@ -117,6 +117,6 @@ def create_verify_job(task_module: str):
 
 class Volunteer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    organization = models.TextField(max_length=200)
-    added_by = models.TextField(max_length=200)
-    notes = models.TextField(max_length=2048)
+    organization = models.TextField(max_length=200, blank=True, null=True)
+    added_by = models.TextField(max_length=200, blank=True, null=True)
+    notes = models.TextField(max_length=2048, blank=True, null=True)

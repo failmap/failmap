@@ -168,7 +168,47 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     inlines = (VolunteerInline, )
 
     list_display = ('username', 'organization', 'first_name', 'last_name',
-                    'email', 'is_staff', 'is_superuser', 'in_groups')
+                    'email', 'is_active', 'is_staff', 'is_superuser', 'in_groups')
+
+    actions = []
+
+    def add_volunteer(self, request, queryset):
+
+        # password is random and non-recoverable. It has to be set explicitly by the admin
+        import string
+        from random import choice
+        alphabet = string.ascii_letters + string.digits
+        password = ''.join(choice(alphabet) for i in range(42))
+
+        # determine number:
+        volunteer_number = User.objects.all().filter(username__contains="Volunteer").count()
+        volunteer_number += 1
+
+        user = User.objects.create_user(username="Volunteer%s" % volunteer_number,
+                                        is_active=False,
+                                        is_staff=True,
+                                        is_superuser=False,
+                                        password=password)
+
+        user.save()
+
+        # and add the user to the comply or explain group.
+        user.groups.add(Group.objects.get(name="comply_or_explain"))
+        user.save()
+
+        # add volunteering information
+        volunteer = Volunteer()
+        volunteer.organization = "tbd"
+        volunteer.added_by = "Automatically added"
+        volunteer.notes = "-"
+        volunteer.user = user
+        volunteer.save()
+
+        self.message_user(request, "Volunteer added!")
+
+        return True
+    add_volunteer.short_description = '💖 Add Volunteer (select something first)'
+    actions.append(add_volunteer)
 
     @staticmethod
     def in_groups(obj):
