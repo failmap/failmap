@@ -1982,6 +1982,9 @@ def upcoming_and_past_scans(request):
         # Don't show system tasks that are not in the knowledge-domain of the site user.
         name__contains="failmap"
     ).exclude(
+        # Don't show system tasks that are not in the knowledge-domain of the site user.
+        name__contains="hiddden"
+    ).exclude(
         # Don't show tasks that are performed extremely frequently like onboarding.
         crontab__minute__in=["*/5", "*/1", "*/10", "*/15", "*/30"]
     )
