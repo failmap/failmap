@@ -167,7 +167,15 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
     inlines = (VolunteerInline, )
 
-    list_display = ('username', 'organization', 'first_name', 'last_name', 'email', 'is_staff')
+    list_display = ('username', 'organization', 'first_name', 'last_name',
+                    'email', 'is_staff', 'is_superuser', 'in_groups')
+
+    @staticmethod
+    def in_groups(obj):
+        value = ""
+        for group in obj.groups.all():
+            value += group.name
+        return value
 
     @staticmethod
     def organization(obj):
