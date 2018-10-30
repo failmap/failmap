@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-24 08:20+0000\n"
+"POT-Creation-Date: 2018-10-30 15:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:987
-#: failmap/map/static/js/views.js:992 failmap/map/static/js/views.js:995
+#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:1071
+#: failmap/map/static/js/views.js:1076 failmap/map/static/js/views.js:1079
 msgid "View Full Screen"
 msgstr "🌈"
 
@@ -1789,23 +1789,23 @@ msgstr "🌈"
 msgid "week"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:293 failmap/map/static/js/views.js:296
-#: failmap/map/static/js/views.js:305 failmap/map/static/js/views.js:308
+#: failmap/map/static/js/views.js:298 failmap/map/static/js/views.js:301
+#: failmap/map/static/js/views.js:310 failmap/map/static/js/views.js:313
 msgid "Second opinion"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:294 failmap/map/static/js/views.js:297
-#: failmap/map/static/js/views.js:299 failmap/map/static/js/views.js:301
-#: failmap/map/static/js/views.js:303 failmap/map/static/js/views.js:306
-#: failmap/map/static/js/views.js:309
+#: failmap/map/static/js/views.js:299 failmap/map/static/js/views.js:302
+#: failmap/map/static/js/views.js:304 failmap/map/static/js/views.js:306
+#: failmap/map/static/js/views.js:308 failmap/map/static/js/views.js:311
+#: failmap/map/static/js/views.js:314
 msgid "Documentation"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:312
+#: failmap/map/static/js/views.js:317
 msgid "Explanation of finding"
 msgstr ""
 
-#: failmap/map/static/js/views.js:313
+#: failmap/map/static/js/views.js:318
 msgid ""
 "Hi!,\n"
 "\n"
@@ -1828,23 +1828,23 @@ msgid ""
 "Kind regards,\n"
 msgstr ""
 
-#: failmap/map/static/js/views.js:365
+#: failmap/map/static/js/views.js:370
 msgid "score perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:367
+#: failmap/map/static/js/views.js:372
 msgid "score high"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:369
+#: failmap/map/static/js/views.js:374
 msgid "score medium"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:371
+#: failmap/map/static/js/views.js:376
 msgid "score low"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js:993
+#: failmap/map/static/js/views.js:1077
 msgid "Exit Full Screen"
 msgstr "🌈"
 
