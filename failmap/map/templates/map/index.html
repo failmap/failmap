@@ -128,6 +128,10 @@
             <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info">{% trans "Comply or explain" %}</a></li>
             {% endif %}
 
+            {% if config.SHOW_SCAN_SCHEDULE %}
+            <li class="nav-item"><a class="nav-link" href="#schedule">{% trans "Scan schedule" %}</a></li>
+            {%  endif %}
+
             {% if config.SHOW_DATASETS %}
             <li class="nav-item"><a class="nav-link" href="#datasets">{% trans "Datasets" %}</a></li>
             {% endif %}
