@@ -771,3 +771,8 @@ th.active .arrow {
     background-color: #e3d1cb33;
     border-radius: 3px;
 }
+
+.schedule_row {
+    font-size: 1.2em;
+    margin-bottom: 6px;
+}

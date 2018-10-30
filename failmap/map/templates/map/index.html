@@ -1180,6 +1180,32 @@
 </section>
 {% endif %}
 
+
+{% if config.SHOW_SCAN_SCHEDULE %}
+<section name="scan_schedule">
+    <div class="container">
+        <div id="schedule">
+            <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                <a name="schedule" class="jumptonav"></a>
+                <h2>{% trans "Scan schedule" %}</h2>
+                {% trans "Below scans and tasks will be performed in the future. This can help you getting a better perspective on when updates will be hapening to your organization. Note that all times are approximate due to caching and rounding. The time listed is the time the scan starts, it might take a while before your organization is scanned." %}
+                <p></p>
+            </div>
+            <div class="row schedule_row" v-for="next_item in next">
+                {% verbatim %}
+                <div class="col-md-3 schedule_item">
+                    {{ next_item.human_date }}
+                </div>
+                <div class="col-md-9 schedule_item" v-html="next_item.name">
+                </div>
+                {% endverbatim %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 {% if config.SHOW_DATASETS %}
 <section name="datasets">
     <div class="container">

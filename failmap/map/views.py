@@ -17,9 +17,11 @@ from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
+from django_celery_beat.models import PeriodicTask
 from import_export.resources import modelresource_factory
 
 from failmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
@@ -1962,3 +1964,47 @@ def organization_autcomplete(request, country: str = "NL", organization_type="mu
     qs = qs.filter(name__icontains=parameter).values_list('name', flat=True)
 
     return JsonResponse(list(qs), encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
+
+
+def upcoming_and_past_scans(request):
+
+    def next(obj):
+        z, y = obj.schedule.is_due(last_run_at=datetime.now(pytz.utc))
+        date = datetime.now(pytz.utc) + timedelta(seconds=y)
+        return date
+
+    periodic_tasks = PeriodicTask.objects.all().filter(
+        enabled=True
+    ).exclude(
+        # Don't show system tasks that are not in the knowledge-domain of the site user.
+        name__contains="celery.backend_cleanup"
+    ).exclude(
+        # Don't show system tasks that are not in the knowledge-domain of the site user.
+        name__contains="failmap"
+    ).exclude(
+        # Don't show tasks that are performed extremely frequently like onboarding.
+        crontab__minute__in=["*/5", "*/1", "*/10", "*/15", "*/30"]
+    )
+    next_scans = []  # upcoming scans
+    last_scans = []  # scans performed in the past
+
+    # get standardized task names.
+    # do not add
+    for periodic_task in periodic_tasks:
+        scan = {}
+        next_date = next(periodic_task)
+        scan['name'] = mark_safe(periodic_task.name)
+        scan['date'] = next_date
+        scan['human_date'] = naturaltime(next_date).capitalize()
+        # Tried cron_descriptor, but the text isn't as good as crontab guru.
+        # the translations aren't that great, also doesn't match django locale.
+        # scan['repetition'] = descripter.get_description(DescriptionTypeEnum.FULL)
+
+        next_scans.append(scan)
+
+    # ordering
+    next_scans = sorted(next_scans, key=lambda k: k['date'], reverse=False)
+
+    # last scans is not supportes, since celery doesn't store this information.
+    data = {'next': next_scans, 'last': last_scans}
+    return JsonResponse(data, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)

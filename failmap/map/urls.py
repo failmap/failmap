@@ -75,6 +75,8 @@ urlpatterns = [
     # this is not a single dataset, so building all kinds of exports was a bit harder, when needed we can build it.
     path('data/export/explains/<c:country>/<slug:organization_type>/', views.export_explains),
 
+    path('data/upcoming_and_past_scans/', views.upcoming_and_past_scans),
+
     # Proxy maptile requests,
     # In production this can be done by caching proxy, this makes sure it works for dev. as well.
     url(r'^proxy/(?P<url>https://api.mapbox.com/styles/v1/mapbox/.*./$)',

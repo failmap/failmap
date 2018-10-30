@@ -7,6 +7,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group, User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 # overwrites for period tasks, allowing import and export buttons to work.
+from django.utils.safestring import mark_safe
 from django_celery_beat.admin import PeriodicTaskAdmin, PeriodicTaskForm
 from django_celery_beat.models import CrontabSchedule, IntervalSchedule, PeriodicTask, SolarSchedule
 from import_export import resources
@@ -54,12 +55,20 @@ class MyPeriodicTaskForm(PeriodicTaskForm):
 class IEPeriodicTaskAdmin(PeriodicTaskAdmin, ImportExportModelAdmin):
     # most / all time schedule functions in celery beat are moot. So the code below likely makes no sense.
 
-    list_display = ('name', 'enabled', 'interval', 'crontab', 'next',  'due',
-                    'precise', 'queue', 'task', 'args', 'last_run', 'runs')
+    list_display = ('name_safe', 'enabled', 'interval', 'crontab', 'next',  'due',
+                    'precise', 'last_run_at', 'queue', 'task', 'args', 'last_run', 'runs')
+
+    list_filter = ('enabled', 'queue', 'crontab')
+
+    search_fields = ('name', 'queue', 'args')
 
     form = MyPeriodicTaskForm
 
     save_as = True
+
+    @staticmethod
+    def name_safe(obj):
+        return mark_safe(obj.name)
 
     @staticmethod
     def last_run(obj):

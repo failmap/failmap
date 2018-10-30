@@ -1591,6 +1591,30 @@ function views() {
         },
     });
 
+    window.vueSchedule = new Vue({
+        name: "schedule",
+        el: '#schedule',
+        data: {
+            next: Array(),
+            previous: Array(),
+        },
+
+        mounted: function () {
+            this.load()
+        },
+
+        methods: {
+            load: function() {
+                fetch('/data/upcoming_and_past_scans/').then(response => response.json()).then(data => {
+                    this.next = data.next;
+                    this.previous = data.previous;
+                }).catch((fail) => {
+                    console.log('An error occurred: ' + fail)
+                });
+            },
+        },
+    });
+
     window.vueInfo = new Vue({
         name: 'infobox',
         el: '#infobox',

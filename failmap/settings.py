@@ -696,6 +696,7 @@ CONSTANCE_CONFIG = {
     'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (False, 'Shows a link to the comply or explain discussion forum. The url of this'
                                               'forum can be edited below.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
+    'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
     'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
@@ -776,7 +777,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
                  'SHOW_TICKER',
                  'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
                  'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP'
+                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP', 'SHOW_SCAN_SCHEDULE'
                  )),
 
     ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
