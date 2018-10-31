@@ -2,6 +2,7 @@
 # from __future__ import unicode_literals
 
 import importlib
+import logging
 
 import celery
 from django.contrib.auth.models import User
@@ -10,6 +11,8 @@ from django.utils import timezone
 from jsonfield import JSONField
 
 from ..celery import app
+
+log = logging.getLogger(__name__)
 
 
 class Job(models.Model):
@@ -77,40 +80,40 @@ class Job(models.Model):
 
 
 @app.task(queue='storage')
-def create_job(task_module: str):
+def create_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_task()
+    task = module.compose_task(**kwargs)
 
     return Job.create(task, task_module, None)
 
 
 @app.task(queue='storage')
-def create_discover_job(task_module: str):
+def create_discover_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_discover_task()
+    task = module.compose_discover_task(**kwargs)
 
     return Job.create(task, task_module, None)
 
 
 @app.task(queue='storage')
-def create_verify_job(task_module: str):
+def create_verify_job(task_module: str, **kwargs):
     """Helper to allow Jobs to be created using Celery Beat.
 
     task_module: module from which to call `compose_discover_task` which results in the task to be executed
     """
 
     module = importlib.import_module(task_module)
-    task = module.compose_verify_task()
+    task = module.compose_verify_task(**kwargs)
 
     return Job.create(task, task_module, None)
 

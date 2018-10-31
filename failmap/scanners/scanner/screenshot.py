@@ -62,6 +62,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
     # We might not be allowed to scan for this at all.
     if not allowed_to_scan("scanner_screenshot"):

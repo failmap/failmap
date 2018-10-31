@@ -43,7 +43,10 @@ class TlsScanManager:
             gs.evidence = evidence
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.rating_determined_on = datetime.now(pytz.utc)
+            gs.is_the_latest_scan = True
             gs.save()
+
+            TlsScan.objects.all().filter(endpoint=gs.endpoint).exclude(pk=gs.pk).update(is_the_latest_scan=False)
 
     @staticmethod
     def had_scan_with_points(endpoint: Endpoint):

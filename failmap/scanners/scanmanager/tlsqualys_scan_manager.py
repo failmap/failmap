@@ -44,7 +44,10 @@ class TlsQualysScanManager:
             gs.rating_determined_on = datetime.now(pytz.utc)
             gs.scan_time = datetime.now(pytz.utc)
             gs.scan_date = datetime.now(pytz.utc)
+            gs.is_the_latest_scan = True
             gs.save()
+
+            TlsQualysScan.objects.all().filter(endpoint=gs.endpoint).exclude(pk=gs.pk).update(is_the_latest_scan=False)
 
     @staticmethod
     def had_scan_with_points(endpoint: Endpoint):

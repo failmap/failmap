@@ -13,6 +13,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
     """
     Helps with identifying issues with scanners. It shows the relevant permissions, configurations and lists the

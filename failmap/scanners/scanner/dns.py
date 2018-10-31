@@ -114,7 +114,7 @@ def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict
 
 def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(),) -> Task:
+                      endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     if not allowed_to_discover("nsec_compose_task"):
         return group()
@@ -134,7 +134,7 @@ def certificate_transparency(organizations: List[Organization] = None, urls: Lis
 
 def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
-                                          endpoints_filter: dict = dict(),) -> Task:
+                                          endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     if not allowed_to_discover("certificate_transparency_compose_task"):
         return group()
@@ -149,7 +149,7 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
 
 def compose_discover_task(organizations_filter: dict = dict(),
                           urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict(),) -> Task:
+                          endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     # these approaches have the highest chance of getting new subdomains.
     if not allowed_to_discover("certificate_transparency_compose_task"):
@@ -174,7 +174,7 @@ def compose_discover_task(organizations_filter: dict = dict(),
 # it will not revive anything(!) Should that be a revive task?
 def compose_verify_task(organizations_filter: dict = dict(),
                         urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict(),) -> Task:
+                        endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
 
@@ -249,7 +249,7 @@ def brute_known_subdomains(organizations: List[Organization] = None, urls: List[
 
 def brute_known_subdomains_compose_task(organizations_filter: dict = dict(),
                                         urls_filter: dict = dict(),
-                                        endpoints_filter: dict = dict(),) -> Task:
+                                        endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     if not allowed_to_discover("brute_known_subdomains_compose_task"):
         return group()

@@ -59,6 +59,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
 
     # for some reason declaring the chunks function outside of this function does not resolve. I mean... why?
@@ -93,9 +94,7 @@ def compose_task(
             endpoint__port=443,
             endpoint__is_dead=False,
             organization__in=organizations,  # whem empty, no results...
-            **urls_filter,
-        ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
-                  ).order_by("?")
+            **urls_filter)
     else:
         urls = Url.objects.filter(
             q_configurations_to_scan(),
@@ -104,9 +103,15 @@ def compose_task(
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            **urls_filter,
-        ).exclude(endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=7)
-                  ).order_by("?")
+            **urls_filter)
+
+    # exclude everything that has been scanned in the last N days
+    # this is a separate filter, given you cannot perform date logic in json (aka code injection)
+    if kwargs.get('exclude_urls_scanned_in_the_last_n_days', 0):
+        days = int(kwargs.get('exclude_urls_scanned_in_the_last_n_days', 0))
+        log.debug("Skipping everything that has been scanned in the last %s days." % days)
+        urls = urls.exclude(
+            endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=days))
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.

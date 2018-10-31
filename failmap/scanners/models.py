@@ -208,6 +208,30 @@ def one_year_in_the_future():
     return datetime.now(pytz.utc) + timedelta(days=365)
 
 
+class LatestScanMixin(models.Model):
+    """
+    This contains a boolean field that notes if this was the latest scan for this url/endpoint.
+
+    This is needed to make sure scanners can easily filter on the latest result on a certain url. There is no
+    django ORM construct for this. The latest is automatically maintained by the scanmanager, which will both
+    set new scans as being the latest while unsetting all previous scans to not be the latest.
+
+    url:          date:     value:  latest:
+    example.com   1 april   F       False
+    example.com   2 april   B       False
+    example.com   3 april   A       True
+    ... etc
+    """
+
+    is_the_latest_scan = models.BooleanField(
+        default=False,
+        help_text="Notes if this was the latest scan for this url/endpoint. Scanmanagers set this value.",
+    )
+
+    class Meta:
+        abstract = True
+
+
 class ExplainMixin(models.Model):
     """
     An explanation excludes the grading to impact the report. The result is added in the report,
@@ -290,7 +314,7 @@ class ExplainMixin(models.Model):
         abstract = True
 
 
-class TlsQualysScan(ExplainMixin):
+class TlsQualysScan(ExplainMixin, LatestScanMixin):
     """
     Model for scanner tls qualys
     """
@@ -330,7 +354,7 @@ class TlsQualysScan(ExplainMixin):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
-class TlsScan(ExplainMixin):
+class TlsScan(ExplainMixin, LatestScanMixin):
     """
     Model for our own TLS scans
     """
@@ -379,7 +403,7 @@ class TlsScan(ExplainMixin):
 
 
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
-class GenericScanMixin(ExplainMixin):
+class GenericScanMixin(ExplainMixin, LatestScanMixin):
     """
     This is a fact, a point in time.
     """

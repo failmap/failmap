@@ -45,6 +45,9 @@ class UrlScanManager:
             gs.rating_determined_on = datetime.now(pytz.utc)
             gs.save()
 
+            UrlGenericScan.objects.all().filter(url=gs.url, type=gs.type).exclude(
+                pk=gs.pk).update(is_the_latest_scan=False)
+
     @staticmethod
     def had_scan_with_points(scan_type: str, url: Url):
         """

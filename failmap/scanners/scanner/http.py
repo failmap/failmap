@@ -62,6 +62,7 @@ def compose_discover_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
     """Compose taskset to scan specified endpoints.
 
@@ -129,6 +130,7 @@ def compose_verify_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
     """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
     as much.

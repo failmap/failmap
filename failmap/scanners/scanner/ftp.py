@@ -35,6 +35,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
     """
     Todo's:
@@ -77,7 +78,7 @@ def compose_task(
 
 
 def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict()) -> Task:
+                          endpoints_filter: dict = dict(), **kwargs) -> Task:
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
     ports = [21]
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
@@ -96,7 +97,7 @@ def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict
 
 
 def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
-                        endpoints_filter: dict = dict()) -> Task:
+                        endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}

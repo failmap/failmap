@@ -86,7 +86,7 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(TlsScan)
 class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'rating', 'rating_no_trust', 'comply_or_explain_is_explained', 'compared_to_qualys',
-                    'explanation', 'last_scan_moment', 'rating_determined_on', 'explain')
+                    'explanation', 'last_scan_moment', 'rating_determined_on', 'explain', 'is_the_latest_scan')
     search_fields = ('endpoint__url__url', 'rating', 'rating_no_trust',
                      'scan_date', 'rating_determined_on')
 
@@ -96,13 +96,14 @@ class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'endpoint__protocol',
                    'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead',
                    'comply_or_explain_is_explained', 'comply_or_explain_explained_on',
-                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until'
+                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
+                   'is_the_latest_scan'
                    ][::-1]
 
     fieldsets = (
         (None, {
             'fields': ('endpoint', 'rating', 'rating_no_trust', 'explanation', 'evidence',
-                       'rating_determined_on', 'last_scan_moment')
+                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
         }),
         ('comply or explain', {
             'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
@@ -123,13 +124,14 @@ class TlsScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return "%s %s | %s %s" % (first, latest.qualys_rating, second, latest.qualys_rating_no_trust)
 
     readonly_fields = ('endpoint', 'rating', 'rating_no_trust', 'explanation', 'evidence',
-                       'rating_determined_on', 'last_scan_moment')
+                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
 
 
 @admin.register(TlsQualysScan)
 class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust', 'qualys_message',
-                    'last_scan_moment', 'rating_determined_on', 'comply_or_explain_is_explained', 'explain')
+                    'last_scan_moment', 'rating_determined_on', 'comply_or_explain_is_explained', 'explain',
+                    'is_the_latest_scan')
     search_fields = ('endpoint__url__url', 'qualys_rating', 'qualys_rating_no_trust',
                      'scan_date', 'rating_determined_on')
 
@@ -140,7 +142,8 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'endpoint__protocol',
                    'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead',
                    'comply_or_explain_is_explained', 'comply_or_explain_explained_on',
-                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until'
+                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
+                   'is_the_latest_scan'
                    ][::-1]
 
     # loading related fields in django jet is not done in a smart way: everything is prefetched.
@@ -150,7 +153,7 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                       'rating_determined_on', 'last_scan_moment')
+                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
         }),
         ('comply or explain', {
             'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
@@ -161,7 +164,7 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
     readonly_fields = ('endpoint', 'qualys_rating', 'qualys_rating_no_trust',
-                       'rating_determined_on', 'last_scan_moment')
+                       'rating_determined_on', 'last_scan_moment', 'is_the_latest_scan')
 
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
@@ -189,7 +192,7 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on',
-                    'comply_or_explain_is_explained', 'explain')
+                    'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan')
     search_fields = ('endpoint__url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = ['endpoint__url__organization__country', 'endpoint__url__organization__type__name',
@@ -198,13 +201,14 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'endpoint__protocol',
                    'endpoint__port', 'endpoint__ip_version', 'endpoint__discovered_on', 'endpoint__is_dead',
                    'comply_or_explain_is_explained', 'comply_or_explain_explained_on',
-                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until'
+                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
+                   'is_the_latest_scan'
                    ][::-1]
 
     fieldsets = (
         (None, {
             'fields': ('endpoint', 'type', 'rating', 'explanation',
-                       'evidence', 'last_scan_moment', 'rating_determined_on')
+                       'evidence', 'last_scan_moment', 'rating_determined_on', 'is_the_latest_scan')
         }),
         ('comply or explain', {
             'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
@@ -218,25 +222,27 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
     readonly_fields = ['endpoint', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment',
-                       'rating_determined_on']
+                       'rating_determined_on', 'is_the_latest_scan']
 
 
 @admin.register(UrlGenericScan)
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on',
-                    'comply_or_explain_is_explained', 'explain')
+                    'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan')
     search_fields = ('url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = ['url__organization__country', 'url__organization__type__name', 'type', 'rating',
                    'explanation', 'last_scan_moment', 'rating_determined_on',
                    'comply_or_explain_is_explained', 'comply_or_explain_explained_on',
-                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until'
+                   'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
+                   'is_the_latest_scan'
                    ][::-1]
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on')
+            'fields': ('url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on',
+                       'is_the_latest_scan')
         }),
         ('comply or explain', {
             'fields': ('comply_or_explain_is_explained', 'comply_or_explain_explanation_valid_until',
@@ -249,7 +255,8 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
-    readonly_fields = ['url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on']
+    readonly_fields = ['url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on',
+                       'is_the_latest_scan']
 
 
 @admin.register(EndpointGenericScanScratchpad)

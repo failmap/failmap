@@ -144,6 +144,7 @@ def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
     endpoints_filter: dict = dict(),
+    **kwargs
 ) -> Task:
 
     if not allowed_to_scan("scanner_tls_osaft"):
