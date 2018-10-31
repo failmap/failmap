@@ -36,6 +36,16 @@ def perform_autoscale(containergroup_name, scan_queue):
     # default is a monitor for all queues
     queues = [q.name for q in QUEUES_MATCHING_ROLES['default']]
 
+    # @gen.coroutine sometimes misses an event loop. Therefore make one.
+    # See failmap.celery.__init__ for more information.
+    # 'solves': RuntimeError: There is no current event loop in thread 'Thread-3'.
+    try:
+        import asyncio
+        asyncio.set_event_loop(asyncio.new_event_loop())
+    except BaseException:
+        # an eventloop already exists.
+        pass
+
     # use flower to not reinvent the wheel on querying queue statistics
     broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)
     queue_stats = broker.queues(queues).result()

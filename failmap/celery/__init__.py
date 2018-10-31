@@ -11,6 +11,9 @@ from celery import Celery, Task
 from django.conf import settings
 
 from .worker import QUEUES_MATCHING_ROLES
+import logging
+
+log = logging.getLogger(__package__)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
 
@@ -112,9 +115,29 @@ def status():
     if 'redis://' in app.conf.broker_url:
         queue_names = [q.name for q in QUEUES_MATCHING_ROLES['queuemonitor']]
 
+        # on localhost and remote workers there is no event loop. This causes an exception.
+        # Inspired on https://github.com/tornadoweb/tornado/issues/2352 and
+        # https://github.com/tornadoweb/tornado/issues/2308
+        # this attempt seems to create an event loop without any further issues. This will allow the code to complete.
+        # the reason _why_ there was no event loop in these cases is completely unclear to me. The code in
+        # flower just uses @gen.coroutine and is not to blame.
+        # https://github.com/mher/flower/blob/master/flower/utils/broker.py
+        # 'solves': RuntimeError: There is no current event loop in thread 'Thread-3'.
+        try:
+            import asyncio
+            asyncio.set_event_loop(asyncio.new_event_loop())
+        except BaseException:
+            # an eventloop already exists.
+            pass
+
         # use flower to not reinvent the wheel on querying queue statistics
-        broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)
-        queue_stats = broker.queues(queue_names).result()
+        queue_stats = []
+        try:
+            broker = flower.utils.broker.Broker(app.conf.broker_url, broker_options=app.conf.broker_transport_options)
+            queue_stats = broker.queues(queue_names).result()
+        except RuntimeError as e:
+            log.error("Could not connect to flower to retrieve queue stats.")
+            log.exception(e)
 
         queues = [{'name': x['name'], 'tasks_pending': x['messages']} for x in queue_stats]
     else:
