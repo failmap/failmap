@@ -1278,7 +1278,9 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
 
         changes.append(change)
 
-    return JsonResponse(changes, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
+    data = {'changes': changes, 'slogan': config.TICKER_SLOGAN}
+
+    return JsonResponse(data, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
 def map_default(request, days_back: int = 0, displayed_issue: str = None):

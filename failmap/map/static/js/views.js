@@ -974,7 +974,8 @@ function views() {
         data: {
             tickertext: "",
             visible: false,
-            data: Array
+            changes: Array(),
+            slogan: ""
         },
         methods: {
             colorize: function (value, rank) {
@@ -1013,32 +1014,35 @@ function views() {
                     return;
 
 
-                self = this;
-                $.getJSON('/data/ticker/' + this.country + '/' + this.category + '/0/0', function (data) {
-                    j = 0;
+                fetch('/data/ticker/' + this.country + '/' + this.category + '/0/0').then(response => response.json()).then(data => {
 
-                    self.data = data;
+                    this.changes = data.changes;
+                    this.slogan = data.slogan;
 
-                    for (j=0;j<data.length;j++){
-                        self.tickertext += "  &nbsp; " + data[j]['organization'] + " ";
+                    for (let j=0; j<this.changes.length; j++){
+                        change = this.changes[j];
+                        this.tickertext += "  &nbsp; " + change['organization'] + " ";
 
-                        self.tickertext += "<a style='color: " + self.colorize(data[j]['high_now'], 'high') +"'>" + data[j]['high_now'] + "</a>";
-                        self.tickertext += self.arrow(data[j]['high_changes'], 'high');
-                        self.tickertext += " | ";
+                        this.tickertext += "<a style='color: " + this.colorize(change['high_now'], 'high') +"'>" + change['high_now'] + "</a>";
+                        this.tickertext += this.arrow(change['high_changes'], 'high');
+                        this.tickertext += " | ";
 
-                        self.tickertext += "<a style='color: " + self.colorize(data[j]['medium_now'], 'medium') +"'>" + data[j]['medium_now'] + "</a>";
-                        self.tickertext += self.arrow(data[j]['medium_changes'], 'medium');
-                        self.tickertext += " | ";
+                        this.tickertext += "<a style='color: " + this.colorize(change['medium_now'], 'medium') +"'>" + change['medium_now'] + "</a>";
+                        this.tickertext += this.arrow(change['medium_changes'], 'medium');
+                        this.tickertext += " | ";
 
-                        self.tickertext += "<a style='color: " + self.colorize(data[j]['low_now'], 'low') +"'>" + data[j]['low_now'] + "</a>";
-                        self.tickertext += self.arrow(data[j]['low_changes'], 'low');
-                        self.tickertext += " ";
+                        this.tickertext += "<a style='color: " + this.colorize(change['low_now'], 'low') +"'>" + change['low_now'] + "</a>";
+                        this.tickertext += this.arrow(change['low_changes'], 'low');
+                        this.tickertext += " ";
 
                         if (j % 10 === 0) {
-                            self.tickertext += " - <b> failmap.org, monitor governments </b> - "
+                            this.tickertext += " - <b> " + this.slogan + " </b> - "
                         }
                     }
-                });
+
+
+                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+
             }, 42)
         }
     });
