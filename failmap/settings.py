@@ -649,7 +649,7 @@ CONSTANCE_CONFIG = {
     'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
     'PROJECT_COUNTRY': ('NL', 'Two letter ISO code of the country that should be shown.', str),
     'PROJECT_TAGLINE': ('', 'Tagline for this project.', str),
-    'PROJECT_WEBSITE': ('', 'The url where this site is located.', str),
+    'PROJECT_WEBSITE': ('', 'The url where this site is located. Without trailing slash. Eg: https://example.com', str),
     'PROJECT_MAIL': ('', 'The address where people can contact for more info about this project.', str),
     'PROJECT_ISSUE_MAIL': ('', 'The address where people can mail when they encounter issues, for example when they '
                                'are using the incorrect findings button.', str),

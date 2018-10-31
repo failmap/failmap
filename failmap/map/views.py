@@ -1873,8 +1873,9 @@ class UpdatesOnOrganizationFeed(Feed):
     # item_link is only needed if NewsItem has no get_absolute_url method.
     # unique links are required to properly display a feed.
     def item_link(self, item):
-        return "https://faalkaart.nl/#report-%s/%s/%s/%s" % \
-               (item["organization_id"], item["url"], item["service"], item["rating_determined_on"])
+        return "%s/#report-%s/%s/%s/%s" % \
+               (config.PROJECT_WEBSITE,
+                item["organization_id"], item["url"], item["service"], item["rating_determined_on"])
 
 
 # @cache_page(ten_minutes), you can't cache this using the decorator.
@@ -1949,10 +1950,10 @@ class LatestScanFeed(Feed):
     def item_link(self, item):
         if item.type in ["DNSSEC"]:
             # url generic scan:
-            return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.url.url)
+            return "%s/#updates/%s/%s" % (config.PROJECT_WEBSITE, item.last_scan_moment, item.url.url)
         else:
             # endpoint scan
-            return "https://faalkaart.nl/#updates/%s/%s" % (item.last_scan_moment, item.endpoint.url.url)
+            return "%s/#updates/%s/%s" % (config.PROJECT_WEBSITE, item.last_scan_moment, item.endpoint.url.url)
 
 
 def organization_autcomplete(request, country: str = "NL", organization_type="municipality", parameter: str = ""):
