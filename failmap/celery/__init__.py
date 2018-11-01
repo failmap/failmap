@@ -112,6 +112,8 @@ def status():
         'concurrency': worker_stats['pool']['max-concurrency'],
     } for worker_name, worker_stats in stats.items()]
 
+    workers = sorted(workers, key=lambda k: (k['name']), reverse=False)
+
     if 'redis://' in app.conf.broker_url:
         queue_names = [q.name for q in QUEUES_MATCHING_ROLES['queuemonitor']]
 
@@ -142,6 +144,8 @@ def status():
         queues = [{'name': x['name'], 'tasks_pending': x['messages']} for x in queue_stats]
     else:
         raise NotImplementedError('Currently only Redis is supported!')
+
+    queues = sorted(queues, key=lambda k: (k['name']), reverse=False)
 
     alerts = []
     if not workers:

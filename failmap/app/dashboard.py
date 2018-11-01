@@ -79,12 +79,6 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
             order=1
         ))
 
-        self.children.append(dashboard_modules.RebuildRatings(
-            _('Rebuild Ratings'),
-            column=0,
-            order=0
-        ))
-
         self.children.append(dashboard_modules.TaskProcessing(
             _('Task Processing Status (WIP)'),
             column=0,
