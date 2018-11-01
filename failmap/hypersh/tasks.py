@@ -56,6 +56,9 @@ def perform_autoscale(containergroup_name, scan_queue):
             maximize(cg)
             return
 
+        # you don't know if there are still running tasks. You also can't inspect it
+        # therefore we're using acks_late in celery to make sure that when this number is 0
+        # all tasks have been performed (successfully)
         if stat['name'] == scan_queue and stat['messages'] == 0:
             minimize(cg)
             return
