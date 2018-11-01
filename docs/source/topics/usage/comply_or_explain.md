@@ -101,6 +101,23 @@ who is doing the explanation is secret because of privacy reasons (but not the o
 When handling explain request we expect a professional attitude which is constructive.
 
 
+## How to view the latest issues
+We don't have a helpdesk system set up yet, and instead are using a gitlab repository to receive issues.
+
+The address for this site is: https://gitlab.com/failmap/tickets/issues
+
+This list will look empty when you're not logged in. But if you are logged in, and with the right permissions, you'll
+see a list like this:
+
+![Scans](comply_or_explain/gitlab_issues.png)
+
+
+To access this list of issues, you need a gitlab account. You can create one here: https://gitlab.com/users/sign_in
+
+After creating an account, share your account name with a volunteer that's already in gitlab. A list is displayed here: https://gitlab.com/failmap/tickets/project_members
+
+You'll be grated access and then will be able to see the content of the service desk and able to reply: https://gitlab.com/failmap/tickets/issues/service_desk
+
 
 ## How to explain a scan
 
