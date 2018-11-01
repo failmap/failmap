@@ -605,7 +605,7 @@ def check_network(code_location=""):
 
 def redirects_to_safety(endpoint: Endpoint):
     """
-    Also includes the ip-version of the endpoint.
+    Also includes the ip-version of the endpoint. Implies that the endpoint resolves.
 
     :param endpoint:
     :return:

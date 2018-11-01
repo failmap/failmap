@@ -14,7 +14,8 @@ from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanner.http import can_connect, connect_result, redirects_to_safety
+from failmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
+                                           resolves_on_v4, resolves_on_v6)
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__package__)
@@ -62,10 +63,8 @@ def compose_task(
             tasks.append(well_done.si(complete_endpoint))
 
         for incomplete_endpoint in incomplete_endpoints:
-            if incomplete_endpoint.ip_version == 6:
-                tasks.append(scan_v6.si(incomplete_endpoint) | store.s(incomplete_endpoint))
-            else:
-                tasks.append(scan_v4.si(incomplete_endpoint) | store.s(incomplete_endpoint))
+            queue = "ipv4" if incomplete_endpoint.ip_version == 4 else "ipv6"
+            tasks.append(scan.si(incomplete_endpoint).set(queue=queue) | store.s(incomplete_endpoint))
 
     return group(tasks)
 
@@ -122,24 +121,11 @@ def well_done(endpoint):
         EndpointScanManager.add_scan("plain_https", endpoint, "0", cleaned_up)
 
 
-@app.task(queue='ipv4')
-def scan_v4(endpoint):
-    return scan(endpoint)
-
-
-@app.task(queue='ipv6')
-def scan_v6(endpoint):
-    return scan(endpoint)
-
-
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
+@app.task()
 def scan(endpoint):
     """
     Using an incomplete endpoint
-
-    :param endpoint:
-    :return:
-    """
 
     # calculate the score
     # Organizations with wildcards can have this problem a lot:
@@ -159,6 +145,22 @@ def scan(endpoint):
     # 2: There is no guarantee that a wildcard serves a blank page.
     # 3: In the transition phase to default https (coming years), it's not possible to say
     #    what should be the "leading" site.
+
+    :param endpoint:
+    :return:
+    """
+
+    # if the address doesn't resolve, why bother scanning at all?
+    resolves = False
+    if endpoint.ip_version == 4:
+        resolves = resolves_on_v4(endpoint.url.url)
+    if endpoint.ip_version == 6:
+        resolves = resolves_on_v6(endpoint.url.url)
+
+    if not resolves:
+        # no need to further check, can't even get the IP address...
+        return False, False, False
+
     can_connect_result = can_connect(protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)
     redirects_to_safety_result = None
 
@@ -166,13 +168,21 @@ def scan(endpoint):
     if not can_connect_result:
         redirects_to_safety_result = redirects_to_safety(endpoint)
 
-    return can_connect_result, redirects_to_safety_result
+    return resolves, can_connect_result, redirects_to_safety_result
 
 
 @app.task(queue='storage')
 def store(results, endpoint):
 
-    can_connect_result, redirects_to_safety_result = results
+    resolves, can_connect_result, redirects_to_safety_result = results
+
+    if not resolves:
+        # Don't administrate endpoints that don't resolve, that is a task for the http verify scanner. Here we just
+        # don't try to redirect to safety or otherwise miscalculate the result. If the http verify scanner is not run
+        # there will be mismatches between this (or previous results) and reality.
+        log.debug("Endpoint on %s doesn't resolve anymore. "
+                  "Run the DNS verify scanner to prevent scanning non resolving endpoints." % endpoint)
+        return
 
     connect_result(can_connect_result, protocol="https", url=endpoint.url, port=443, ip_version=endpoint.ip_version)
 
