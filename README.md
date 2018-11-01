@@ -30,6 +30,13 @@ This repository contains the mapping application fo Failmap: the public frontend
 Getting started
 ===============
 Keywords: quickstart, installation
+
+## 0: If you want a complete production setup
+Then read the installation tutorial, which is significantly easier than the below development setup!
+
+For full installation with everything and anything, check: https://gitlab.com/failmap/server/
+
+
 ## 1: Install dependencies on your system
 Setup your system to run this software using your favourite package manager.
 
