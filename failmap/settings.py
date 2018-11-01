@@ -559,6 +559,16 @@ CELERY_WORKER_PREFETCH_MULTIPLIER = 2
 # numer of tasks to be executed in parallel by celery
 CELERY_WORKER_CONCURRENCY = 10
 
+# Workers will scale up and scale down depending on the number of tasks
+# available. To prevent workers from scaling down while still doing work,
+# the ACKS_LATE setting is used. This insures that a task is removed from
+# the task queue after the task is performed. This might result in some
+# issues where tasks that don't finish or crash keep being executed:
+# thus for tasks that are not programmed perfectly it will raise a number
+# of repeated exceptions which will need to be debugged.
+CELERY_ACKS_LATE = True
+
+
 # Settings for statsd metrics collection. Statsd defaults over UDP port 8125.
 # https://django-statsd.readthedocs.io/en/latest/#celery-signals-integration
 STATSD_HOST = os.environ.get('STATSD_HOST', '127.0.0.1')
