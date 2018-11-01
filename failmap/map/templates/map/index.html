@@ -111,35 +111,35 @@
         <ul class="navbar-nav mr-auto">
 
             {% if config.SHOW_INTRO %}
-            <li class="nav-item"><a class="nav-link" href="#info">{% trans "Info" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#info"><i class="fas fa-info-circle"></i> {% trans "Info" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_GOOD_BAD %}
-            <li class="nav-item"><a class="nav-link" href="#charts">{% trans "Charts" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#charts"><i class="fas fa-list-ol"></i> {% trans "Charts" %}</a></li>
             {% endif %}
 
-            <li class="nav-item"><a class="nav-link" href="#reports">{% trans "Reports" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#reports"><i class="far fa-file-alt"></i> {% trans "Reports" %}</a></li>
 
             {% if config.SHOW_EXTENSIVE_STATISTICS %}
-            <li class="nav-item"><a class="nav-link" href="#extensive_statistics">{% trans "Statistics" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#extensive_statistics"><i class="fas fa-chart-area"></i> {% trans "Statistics" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info">{% trans "Comply or explain" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info"><i class='fas fa-comments'></i> {% trans "Comply or explain" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_SCAN_SCHEDULE %}
-            <li class="nav-item"><a class="nav-link" href="#schedule">{% trans "Scan schedule" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#schedule"><i class="far fa-clock"></i> {% trans "Scan schedule" %}</a></li>
             {%  endif %}
 
             {% if config.SHOW_DATASETS %}
-            <li class="nav-item"><a class="nav-link" href="#datasets">{% trans "Datasets" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#datasets"><i class="fas fa-download"></i> {% trans "Datasets" %}</a></li>
             {% endif %}
         </ul>
         {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
         <ul class="navbar-nav navbar-right ml-auto">
         {% if debug %}
-            <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'>{% trans "DEBUG" %}</span></li>
+            <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'><i class="fas fa-bug"></i> {% trans "DEBUG" %}</span></li>
         {% endif %}
         {% if admin %}
             <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
@@ -215,7 +215,7 @@
     <div class="container theme-showcase" role="main">
         <a name="info" class="jumptonav"></a>
         <div class="jumbotron">
-            <h1 class="display-4">{% trans "What do i see?" %}</h1>
+            <h1 class="display-4"><i class="fas fa-info-circle"></i> {% trans "What do i see?" %}</h1>
             <p class="lead">{% trans "whats do i see explained" %}</p>
             <p>{% blocktrans with RESPONSIBLE_ORGANIZATION_NAME=config.RESPONSIBLE_ORGANIZATION_NAME PROJECT_ISSUE_MAIL=config.PROJECT_ISSUE_MAIL %} This website is run by {{ RESPONSIBLE_ORGANIZATION_NAME }}. To submit new domains, or ask questions, contact us via: {{ PROJECT_ISSUE_MAIL }}.{% endblocktrans %}</p>
         </div>
@@ -231,7 +231,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="charts" class="jumptonav"></a>
-                <h2>{% trans "Charts" %}</h2>
+                <h2><i class="fas fa-list-ol"></i> {% trans "Charts" %}</h2>
                 <p>{% trans "Chart introduction" %}</p>
                 <p></p>
             </div>
@@ -253,7 +253,7 @@
                 <div class="page-header">
                     <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                     <a name="reports" id="report-anchor" class="jumptonav"></a>
-                    <h2><span class="organization_points"></span>{% trans "Report" %}</h2>
+                    <h2><span class="organization_points"></span><i class="far fa-file-alt"></i> {% trans "Report" %}</h2>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
@@ -420,7 +420,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="extensive_statistics" class="jumptonav"></a>
-                <h2>{% trans "Extensive statistics" %}</h2>
+                <h2><i class="fas fa-chart-area"></i> {% trans "Extensive statistics" %}</h2>
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -1109,7 +1109,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="comply_or_explain_info" class="jumptonav"></a>
-                <h2>{% trans "Comply or explain" %}</h2>
+                <h2><i class='fas fa-comments'></i> {% trans "Comply or explain" %}</h2>
                 <p>
                 {% trans "Comply or explain introduction" %}
                     {% if config.SHOW_DATASETS %}
@@ -1192,7 +1192,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="schedule" class="jumptonav"></a>
-                <h2>{% trans "Scan schedule" %}</h2>
+                <h2><i class="far fa-clock"></i> {% trans "Scan schedule" %}</h2>
                 {% trans "Below scans and tasks will be performed in the future. This can help you getting a better perspective on when updates will be hapening to your organization. Note that all times are approximate due to caching and rounding. The time listed is the time the scan starts, it might take a while before your organization is scanned." %}
                 <p></p>
             </div>
@@ -1217,7 +1217,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="datasets" class="jumptonav"></a>
-                <h2>{% trans "Datasets" %}</h2>
+                <h2><i class="fas fa-download"></i> {% trans "Datasets" %}</h2>
                 {% trans "Datasets explanation" %}
                 <p></p>
             </div>
