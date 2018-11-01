@@ -168,7 +168,7 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     inlines = (VolunteerInline, )
 
     list_display = ('username', 'organization', 'first_name', 'last_name',
-                    'email', 'is_active', 'is_staff', 'is_superuser', 'in_groups')
+                    'email', 'is_active', 'is_staff', 'is_superuser', 'last_login', 'in_groups')
 
     actions = []
 
