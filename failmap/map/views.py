@@ -961,8 +961,10 @@ def vulnerability_graphs(request, country: str = "NL", organization_type="munici
     country = get_country(country)
     when = datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
+    one_year_ago = when - timedelta(days=365)
+
     data = VulnerabilityStatistic.objects.all().filter(
-        organization_type=organization_type_id, country=country, when__lte=when
+        organization_type=organization_type_id, country=country, when__lte=when, when__gte=one_year_ago
     ).order_by('scan_type', 'when')
 
     """
