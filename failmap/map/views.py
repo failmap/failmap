@@ -910,8 +910,10 @@ def organization_vulnerability_timeline(request, organization_id: int, organizat
 
     # We don't do anything with organization_type: str="", country: str="", it's just so the requests are compatible
     # and easier to code.
+    one_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
 
-    ratings = OrganizationRating.objects.all().filter(organization=organization_id).order_by('when')
+    ratings = OrganizationRating.objects.all().filter(organization=organization_id,
+                                                      when__gte=one_year_ago).order_by('when')
 
     stats = []
 
