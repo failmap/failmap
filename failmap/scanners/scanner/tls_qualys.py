@@ -138,7 +138,7 @@ def compose_task(
 
 # Note that this is a per worker instance rate limit, and not a global rate limit.
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
-@app.task(queue='qualys', rate_limit='1/m')
+@app.task(queue='qualys', rate_limit='1/m', acks_late=True)
 def qualys_scan_bulk(urls):
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
     # capacity severely.

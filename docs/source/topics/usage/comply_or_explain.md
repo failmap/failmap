@@ -6,7 +6,7 @@ An explanation can be given for each scan that is done on an organization. Each 
 has an expiration date. An explanation will thus expire after some time and should be set to a reasonable amount of time.
 (typically a year).
 
-All explanations are published on the website and can also be downloaded for (later) import in other systems.
+All explanations are published on the website and can also be downloaded for analysis.
 
 
 Some common reasons why an explanation is used:
@@ -17,20 +17,21 @@ Some common reasons why an explanation is used:
 - The result contains a glitch, for example: two conflicting results are shown instead of one.
 
 
-## Explanation and abuse
-Comply or explain can be extremely powerful. With this power also comes responsibility. There are several tools that prevent
-abuse. Some of them are:
+## Explanation and correctness
+Comply or explain can be extremely powerful. With this power also comes responsibility. There are several tools that make sure
+correct information is displayed. Some of these are:
 
 ### Transparency
 An explanation can applied to any issue, even high risk issues. Explaining something does not make the finding go away. Instead
-the finding is shown accompanied by the explanation. This is done because a third-party scan will still see your service
+the finding is shown accompanied by the explanation. This is done because a third-party scan will still see the service
 as insecure: the third party can now correlate their can result with your explanation.
 
 Here is an example of a high-risk issue that has been explained. Note that the high-risk has a strike through but is still present.
+
 ![Example explanation by Groningen](comply_or_explain/example_explain_groningen.png)
 
 
-### Known common incorrect explanations
+### Preventing known common incorrect explanations
 Not everyone is a tech or security wizard. This leads to some explanations being given that do not make sense from a security and
 usually the operational perspective. The following are two examples of explanations which will be ignored:
 
@@ -43,20 +44,20 @@ which is also important when serving public information.
 
 Invalid explanation 2: We don't offer this kind of security as a matter of policy.
 
-Not implementing the most basic security norms because of a differing policy is possible. But the policy has to be explained publicly.
-Usually a vague explanation like this will be met with scrutiny: why is your policy more important than the universally advised
+Not implementing the most basic security norms because of a differing policy is possible. But the policy has to be explained
+publicly and has to align with the norms set by the known compliance drivers.
+Usually a vague explanation like this will be met with scrutiny: why is your policy more important than common
 security practices? What makes you decide security in this case is not as relevant?
 
 
 ### Explanation agreement and public accountability
-Every volunteer handling explanations agrees to the guidelines outlined in the explanation code of conduct. This helps
-define expected behaviour of our volunteers such as being professional and security oriented.
+Every volunteer handling explanations agrees to be excellent: helpful, professional and honest.
 
 
 
 ## Example Explanation: SIP Telephone services
-Below screenshot shows a municipality explaining a high risk: their domain runs SIP (phone services) on ports 80 and 443.
-The vendor of these services has explained they will only use these ports for voice traffic between clients using their
+Below screenshot shows an organization explaining a high risk issue: their domain runs SIP (phone services) on ports 80 and 443.
+The vendor of these services has explained they will only use these ports for telephone data between their clients using their
 own (public and trusted) certificate.
 
 The certificate used by the third party is technically correct, but does not use the name of the municipality. Therefore
@@ -66,8 +67,8 @@ Usually ports 80 and 443 are used for the HTTP protocol: websites and webservice
 because they are easier to configure on the firewall.
 
 Our scanner sees that the incorrectly named certificate is used on a standard website port. Therefore it marks the website
-as not trusted. Yet because the url is only used by phones, and there is no website configured, the finding has been
-explained.
+as not trusted. Yet because the url is only used by phones, and there is no website configured, the organization actually
+trusts this certificate setup. The finding has been explained.
 
 ![Example explanation by Groningen](comply_or_explain/example_explain_groningen.png)
 
@@ -77,7 +78,7 @@ This page is located at: https://gitlab.com/failmap/tickets/issues
 
 ## Becoming an comply or explain volunteer
 
-It's possible to participate in the "comply or explain" program as a volunteer. You will be granted access to the
+It's possible to become a volunteer, which can help enter "comply or explain" requests. You will be granted access to the
 private issue feed where you can view explain-requests. You'll also be able to manipulate explain information for scans.
 
 This gives a unique position to help your and other organizations to handle edge cases.
@@ -86,33 +87,118 @@ As a volunteer you will be given:
 
 - Access to the issue list, with confidential issues: https://gitlab.com/failmap/tickets/issues
 - Access to the admin interface using a personal client-certificate.
+- A personal account on the admin interface.
 - Access to the scans in failmap, with the possibility to alter explanations.
-- Access to the chat group: https://gitter.im/internet-cleanup-foundation/
-
-![Scans](comply_or_explain/scans.png)
-
+- Access to the chat group: https://gitter.im/internet-cleanup-foundation/comply_or_explain?source=orgpage
 
 ## Explanation code of conduct
-todo.
+
+Be excellent to each other.
 
 When handling explain-requests, or any issue in failmap, you're working with partially confidential information. For example:
 who is doing the explanation is secret because of privacy reasons (but not the organization explaining it).
 
-When handling explain request we expect a professional attitude which is politically neutral and technically oriented. For example:
-your preference of organization should not alter your judgement.
+When handling explain request we expect a professional attitude which is constructive.
 
 
 
 ## How to explain a scan
 
-### Find the scan
-todo.
+### Install the client-side certificate in your browser
+To reach the admin interface, you need to use a client-side certificate. This certificate will be handed out when you
+sign up as a volunteer.
+
+Here are some guides that explain how to install the certificate:
+
+- https://knowledge.digicert.com/solution/SO5437.html
+- https://www.binarytides.com/client-side-ssl-certificates-firefox-chrome/
+
+Once installed it's possible to visit the failmap admin interface.
+
+
+### Log into the admin interface
+After certificate installation you can visit the failmap admin interface. This interface is usally listed at the following domain:
+
+https://admin.failmap-website/admin/
+
+For the Netherlands this is: https://admin.faalkaart.nl/admin/
+
+Here you'll be greeted with a login screen. Enter the username and password you've received after signing up.
+
+![Scans](comply_or_explain/login.png)
+
+
+### The admin interface
+After succesfully logging in, you're looking at the admin interface. The interface shows a number of columns that show
+the latest changes, static links and the contents of scanners. On the menu on the side you'll also see a link to scanners.
+
+![Scans](comply_or_explain/admin_interface.png)
+
+There are three types of scans in the admin interface. These are detailed in the next chapter.
+
+
+### Types of scans
+The admin interface lists four types of scans:
+
+#### Endpoint Generic Scans
+These are actually a variety of different scans stored in the same database structure. The scans saved here are:
+HTTP header scans, ftp and plain_https scans.
+
+#### TLS Qualys scans
+Scans on the HTTPS quality, performed by Qualys.
+
+
+#### TLS Scans
+This list is empty, and is reserved for future use.
+
+
+#### Url Generic scans
+Just like Endpoint Generic scans, these are multiple scans stored in the same structure. Currently these are only
+DNSSEC scans.
+
+
+### Findig the scan you're looking for
+There is a surprising amount of filters and search options for each scan. It should be pretty easy to find the scan
+you're looking for.
+
+As you can see in the image below, you can filter on: country, organization type, qualys rating, date, message, protocol,
+port, ip version, when it was discovered, if the url is still alive, if there already is an explanation, who gave the
+explanation and so on.
+
+If you know the address, you can just enter the address in the search bar and it will find it for you:
+
+![Scans](comply_or_explain/tls_scans_with_filters.png)
+
+
+### Historical data
+Scans are saved over time: this means you can also see scans from last year. To know that you're working in the latest
+scan, check the "is the latest scan" value. This will show up in the most accurate reports and the map. Otherwise you'll
+editing results of the past, which are only visible in reports of the past.
+
 
 ### Alter comply or explain information
+Clicking the "explain" link, or editing the scan, you'll be presented with the below screen. This allows you to enter information.
+
+Please fill in all the fields, including since when the explanation is valid and the expiry date. Expiry is usally a single
+year.
+
+Note the descriptions for each field below the field for further detailed instructions.
 
 ![Scans](comply_or_explain/explain_screen.png)
 
-### Optional: rebuild reports
+Afterwards click save, and you're done. Repeat the process for any scan you want to alter.
+
+
+### After explaining, just wait
+Every night new reports and map data is calculated. This means your explanations will be processed later in the night and
+will be visible for the rest of the world tomorrow.
+
+
+
+### The shiny: rebuild ratings button
+Please don't use this :)  reports will be rebuilt every night. As this is an intensive process, please don't run this after making
+just a few edits. Just wait until tomorrow.
+
 Reports are usually built every night.
 
 If you want to make changes visible earlier it's possible to rebuild the report using the shiny and glittery "rebuild ratings" button.
