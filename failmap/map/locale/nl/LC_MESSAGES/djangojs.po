@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-30 15:15+0000\n"
+"POT-Creation-Date: 2018-11-02 13:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:1071
-#: failmap/map/static/js/views.js:1076 failmap/map/static/js/views.js:1079
+#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:1234
+#: failmap/map/static/js/views.js:1239 failmap/map/static/js/views.js:1242
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -1784,23 +1784,23 @@ msgstr "Risico's"
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js:298 failmap/map/static/js/views.js:301
-#: failmap/map/static/js/views.js:310 failmap/map/static/js/views.js:313
+#: failmap/map/static/js/views.js:454 failmap/map/static/js/views.js:457
+#: failmap/map/static/js/views.js:466 failmap/map/static/js/views.js:469
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap/map/static/js/views.js:299 failmap/map/static/js/views.js:302
-#: failmap/map/static/js/views.js:304 failmap/map/static/js/views.js:306
-#: failmap/map/static/js/views.js:308 failmap/map/static/js/views.js:311
-#: failmap/map/static/js/views.js:314
+#: failmap/map/static/js/views.js:455 failmap/map/static/js/views.js:458
+#: failmap/map/static/js/views.js:460 failmap/map/static/js/views.js:462
+#: failmap/map/static/js/views.js:464 failmap/map/static/js/views.js:467
+#: failmap/map/static/js/views.js:470
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js:317
+#: failmap/map/static/js/views.js:473
 msgid "Explanation of finding"
 msgstr "Verklaring van een bevinding (pas toe of leg uit)"
 
-#: failmap/map/static/js/views.js:318
+#: failmap/map/static/js/views.js:474
 msgid ""
 "Hi!,\n"
 "\n"
@@ -1823,23 +1823,23 @@ msgid ""
 "Kind regards,\n"
 msgstr ""
 
-#: failmap/map/static/js/views.js:370
+#: failmap/map/static/js/views.js:526
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap/map/static/js/views.js:372
+#: failmap/map/static/js/views.js:528
 msgid "score high"
 msgstr "hoog"
 
-#: failmap/map/static/js/views.js:374
+#: failmap/map/static/js/views.js:530
 msgid "score medium"
 msgstr "midden"
 
-#: failmap/map/static/js/views.js:376
+#: failmap/map/static/js/views.js:532
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:1077
+#: failmap/map/static/js/views.js:1240
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 
