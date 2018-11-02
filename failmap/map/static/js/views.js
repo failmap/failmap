@@ -101,6 +101,151 @@ const report_mixin = {
       })
     },
     methods: {
+        total_summary_row: function(url){
+
+            let ftp = this.worstof("ftp", url.endpoints);
+            let dnssec = this.worstof("DNSSEC", [url]);
+            let xxss = this.worstof("security_headers_x_xss_protection", url.endpoints);
+            let xcto = this.worstof("security_headers_x_content_type_options", url.endpoints);
+            let xfo = this.worstof("security_headers_x_frame_options", url.endpoints);
+            let https = this.worstof("tls_qualys", url.endpoints);
+            let hsts = this.worstof("security_headers_strict_transport_security", url.endpoints);
+            let plain_https = this.worstof("plain_https", url.endpoints);
+
+            text = `<td><b>${url.url}</b></td>`;
+
+            let findings =
+                `<td class='text-center' style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
+                `<td class='text-center' style='background-color: ${https.bgcolor}'>${https.text}</td>` +
+                `<td class='text-center' style='background-color: ${plain_https.bgcolor}'>${plain_https.text}</td>` +
+                `<td class='text-center' style='background-color: ${hsts.bgcolor}'>${hsts.text}</td>` +
+                `<td class='text-center' style='background-color: ${xfo.bgcolor}'>${xfo.text}</td>` +
+                `<td class='text-center' style='background-color: ${xcto.bgcolor}'>${xcto.text}</td>` +
+                `<td class='text-center' style='background-color: ${xxss.bgcolor}'>${xxss.text}</td>` +
+                `<td class='text-center' style='background-color: ${ftp.bgcolor}'>${ftp.text}</td>`;
+
+            return text + findings;
+        },
+
+        worstof: function(risk, endpoints){
+            let high = 0, medium = 0, low = 0;
+            let risk_found = false;
+            let explained = false;
+
+            for(let i=0; i<endpoints.length; i++) {
+                let endpoint = endpoints[i];
+                for (let i = 0; i < endpoint.ratings.length; i++) {
+                    let rating = endpoint.ratings[i];
+
+                    if (rating.type === risk) {
+                        risk_found = true;
+                        high += rating.high;
+                        medium += rating.medium;
+                        low += rating.low;
+                        if (rating.comply_or_explain_valid_at_time_of_report)
+                            explained = true;
+                    }
+                }
+            }
+
+            let text = "";
+            let bgcolor = "";  // green, todo: use classes
+
+            if (high){
+                text = "";
+                bgcolor = "rgba(251, 173, 173, 0.3)";
+            } else if (medium){
+                text = "";
+                bgcolor = "rgba(249, 209, 139, 0.3)";
+            } else if (low){
+                text = "";
+                bgcolor = "rgba(249, 247, 139, 0.3)";
+            } else if (risk_found) {
+                text = "";
+                bgcolor = "rgba(191, 255, 171, 0.3)";
+            }
+
+            if (explained) {
+                text = "<i class='fas fa-comments'></i>";
+                bgcolor = "rgba(191, 255, 171, 0.3)";
+            }
+
+            return {'bgcolor': bgcolor, 'text': text}
+
+        },
+
+        endpoint_summary_row: function(endpoint, is_endpoint=false){
+
+            let ftp = {"bgcolor": '', "text": '-'};
+            let dnssec = {"bgcolor": '', "text": '-'};
+            let xxss = {"bgcolor": '', "text": '-'};
+            let xcto = {"bgcolor": '', "text": '-'};
+            let xfo = {"bgcolor": '', "text": '-'};
+            let https = {"bgcolor": '', "text": '-'};
+            let hsts = {"bgcolor": '', "text": '-'};
+            let plain_https = {"bgcolor": '', "text": '-'};
+
+            let text = '';
+            if (is_endpoint) {
+                text = `<td>${endpoint.protocol}/${endpoint.port} IPv${endpoint.ip_version}</td>`;
+            } else {
+                text = `<td>${endpoint.url}</td>`;
+            }
+
+            console.log(endpoint);
+
+            for(let i=0; i<endpoint.ratings.length; i++){
+                let rating = endpoint.ratings[i];
+
+                console.log(rating.type);
+
+                if (rating.type === "security_headers_strict_transport_security"){
+                    hsts.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    hsts.text = this.rating_text(rating);
+                }
+                if (rating.type === "tls_qualys"){
+                    https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    https.text = this.rating_text(rating);
+                }
+                if (rating.type === "plain_https"){
+                    plain_https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    plain_https.text = this.rating_text(rating);
+                }
+                if (rating.type === "security_headers_x_xss_protection"){
+                    xxss.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    xxss.text = this.rating_text(rating);
+                }
+                if (rating.type === "security_headers_x_frame_options"){
+                    xfo.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    xfo.text = this.rating_text(rating);
+                }
+                if (rating.type === "security_headers_x_content_type_options"){
+                    xcto.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    xcto.text = this.rating_text(rating);
+                }
+                if (rating.type === "DNSSEC"){
+                    dnssec.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    dnssec.text = this.rating_text(rating);
+                }
+                if (rating.type === "ftp"){
+                    ftp.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    ftp.text = this.rating_text(rating);
+                }
+            }
+
+            let findings =
+                `<td style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
+                `<td style='background-color: ${https.bgcolor}'>${https.text}</td>` +
+                `<td style='background-color: ${plain_https.bgcolor}'>${plain_https.text}</td>` +
+                `<td style='background-color: ${hsts.bgcolor}'>${hsts.text}</td>` +
+                `<td style='background-color: ${xfo.bgcolor}'>${xfo.text}</td>` +
+                `<td style='background-color: ${xcto.bgcolor}'>${xcto.text}</td>` +
+                `<td style='background-color: ${xxss.bgcolor}'>${xxss.text}</td>` +
+                `<td style='background-color: ${ftp.bgcolor}'>${ftp.text}</td>`;
+
+            return text + findings;
+
+        },
 
         vulnerability_timeline_for_organization: function(organization_id){
             fetch('/data/organization_vulnerability_timeline/' + organization_id)
@@ -255,6 +400,9 @@ const report_mixin = {
                                 scaleLabel: {
                                     display: false,
                                     labelString: 'Value'
+                                },
+                                ticks: {
+                                    min: 0,
                                 }
                             }]
                         }
@@ -262,6 +410,14 @@ const report_mixin = {
                 });
 
             }).catch((fail) => {console.log('An error occurred: ' + fail)});
+        },
+
+        rating_text: function (rating) {
+            if (rating.comply_or_explain_valid_at_time_of_report) return "<i class='fas fa-comments'></i>";
+            if (rating.high > 0) return "red";
+            if (rating.medium > 0) return "orange";
+            if (rating.low > 0) return "yellow";
+            return "✅";
         },
 
         colorize: function (high, medium, low) {
@@ -695,6 +851,9 @@ function views() {
                                         scaleLabel: {
                                             display: false,
                                             labelString: 'Value'
+                                        },
+                                        ticks: {
+                                            min: 0,
                                         }
                                     }]
                                 }
