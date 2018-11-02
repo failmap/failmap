@@ -211,20 +211,6 @@ Every night new reports and map data is calculated. This means your explanations
 will be visible for the rest of the world tomorrow.
 
 
-
-### The shiny: rebuild ratings button
-Please don't use this :)  reports will be rebuilt every night. As this is an intensive process, please don't run this after making
-just a few edits. Just wait until tomorrow.
-
-Reports are usually built every night.
-
-If you want to make changes visible earlier it's possible to rebuild the report using the shiny and glittery "rebuild ratings" button.
-Note that it can still take an hour to process that request: rebuilding reports take time, as well as the amount of work
-currently done by the system may delay your request. Additionally caching on the server will prevent you seeing the new report.
-
-The report first shows on the admin website, as that doesn't use caching.
-
-
 ## Frequently asked questions
 
 ### Why is my explanation gone?

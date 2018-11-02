@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-02 13:32+0000\n"
+"POT-Creation-Date: 2018-11-02 14:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -227,7 +227,7 @@ msgstr "Pas toe of leg uit"
 #: failmap/map/templates/map/index.html:132
 #: failmap/map/templates/map/index.html:1236
 msgid "Scan schedule"
-msgstr "Scan schema"
+msgstr "Schema"
 
 #: failmap/map/templates/map/index.html:136
 #: failmap/map/templates/map/index.html:1261
