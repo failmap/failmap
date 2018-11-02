@@ -554,7 +554,8 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
 
     list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
     search_fields = ('organization__name', 'geojsontype')
-    list_filter = ['organization', 'geojsontype'][::-1]
+    list_filter = ['organization__type', 'organization__country', 'organization', 'geojsontype', 'created_on',
+                   'is_dead', 'is_dead_since'][::-1]
 
     # We wanted to place these on another tab, otherwise leaflet blocks mouse scrolling (which is annoying).
     # But then leaflet doesn't initialize properly, making the map unworkable. So they're on the first tab anyway.
