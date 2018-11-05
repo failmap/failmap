@@ -229,7 +229,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'domain', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on',
-                    'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan')
+                    'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan', 'short_evidence')
     search_fields = ('url__url', 'type', 'rating',
                      'explanation', 'last_scan_moment', 'rating_determined_on')
     list_filter = ['url__organization__country', 'url__organization__type__name', 'type', 'rating',
@@ -238,6 +238,10 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                    'comply_or_explain_case_handled_by', 'comply_or_explain_explanation_valid_until',
                    'is_the_latest_scan'
                    ][::-1]
+
+    @staticmethod
+    def short_evidence(obj):
+        return obj.evidence[0:60]
 
     fieldsets = (
         (None, {
