@@ -196,24 +196,50 @@ def analyze_result(result: List[str]):
     :return:
     """
 
-    strings = {
-        "ERROR": [],
-        "WARNING": [],
-        "INFO": []
-    }
+    errors = []
+    warnings = []
+    infos = []
 
     for line in result:
         # remove the cringy timestamp
         line = line.strip()
         line = line[line.find(" "):len(line)].strip()
-        if line.startswith("%s" % "INFO"):
-            strings["INFO"].append(line)
-        if line.startswith("%s" % "NOTICE"):
-            strings["INFO"].append(line)
-        if line.startswith("%s" % "WARNING"):
-            strings["WARNING"].append(line)
-        if line.startswith("%s" % "ERROR"):
-            strings["ERROR"].append(line)
+
+        # log.debug(line)
+
+        if line.startswith("INFO"):
+            infos.append(line)
+        if line.startswith("NOTICE"):
+            infos.append(line)
+        if line.startswith("WARNING"):
+            # The MISSING_DS is never a problem it seems.
+            """
+                This warning means that there INDEED is an OK DNSSEC implementation as long as you check the parent.
+
+                NL:
+                descr: "De child gebruikt zo te zien DNSSEC, maar de parent heeft geen veilige delegation op basis
+                van DNSSEC.  Hierdoor is de 'chain of trust' tussen de parent en de child verbroken en 'validating
+                resolvers', die op DNSSEC-juistheid controleren, zullen niet in staat zijn om de antwoorden van de
+                child te valideren."
+                format: 'De Chain of trust voor %s is niet in orde - Er is een DNSKEY aangetroffen bij de child,
+                maar DS record bij de parent.'
+
+                EN:
+                descr: 'The child seems to use DNSSEC, but the parent has no secure delegation.  The chain of trust
+                between the parent and the child is broken and validating resolvers will not be able to validate
+                answers from the child.'
+                format: 'Broken chain of trust for %s - DNSKEY found at child, but no DS was found at parent.'
+
+                Search for MISSING_DS here: https://github.com/dotse/dnscheck
+            """
+
+            if line.startswith("WARNING [DNSSEC:MISSING_DS]"):
+                infos.append("WARNING [DNSSEC:MISSING_DS]")
+            else:
+                warnings.append(line)
+
+        if line.startswith("ERROR"):
+            errors.append(line)
 
         # a beautiful feature of DNSCHECK is that if there is no DNSSEC, an INFO message is given.
         # We'll upgrade the severity here:
@@ -227,108 +253,64 @@ def analyze_result(result: List[str]):
         35.422: INFO Done testing DNSSEC for gratiz.nl.
         """
 
+        # first line if language files are not installed
+        if line.startswith("%s" % "INFO Did not find DNSKEY"):
+            log.error(line)
+            errors.append(line)
+        if line.startswith("%s" % "INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
+            log.error(line)
+            errors.append(line)
+
+        # Why are the following upgraded? There is no explanation for this.
         # translations for the english language files
-        if line.startswith("%s" % "INFO Did not find DS record"):
-            strings["ERROR"].append(line)
+        # When NO DS is found, a warning will already be present in the output.
+        # WARNING [DNSSEC:MISSING_DS]
+        # SIDN ‐ If the parent has a DS record, the child must support DNSSEC (DNSSEC:NO_DS_FOUND).
+        # https://gtldresult.icann.org/applicationstatus/applicationdetails:downloadattachment/12382?t:ac=915
+        # All municipalities in NL that currently have imperfect DNS have the NO_DS_FOUND error.
+        # The warning will be suppressed, as the parent can be checked for a correct DS.
+        # you can also see this behavior in DNSVIZ, everything has a DS, except the child. And that is fine.
+
+        # It's not clear if this really is a problematic warning.
+        # if line.startswith("%s" % "INFO Did not find DS record"):
+        #     log.error(line)
+        #     errors.append(line)
+        # if line.startswith("%s" % "INFO [DNSSEC:NO_DS_FOUND]"):
+        #     log.error(line)
+        #     errors.append(line)
 
         if line.startswith("%s" % "INFO Authenticated denial records not found"):
-            strings["ERROR"].append(line)
-
-        if line.startswith("%s" % "INFO Did not find DNSKEY"):
-            strings["ERROR"].append(line)
+            log.error(line)
+            errors.append(line)
 
         if line.startswith("%s" % "INFO No DNSKEY(s) found at child"):
-            strings["ERROR"].append(line)
-
-        # in case the language files are not installed:
-        if line.startswith("%s" % "INFO [DNSSEC:NO_DS_FOUND]"):
-            strings["ERROR"].append(line)
+            log.error(line)
+            errors.append(line)
 
         if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
-            strings["ERROR"].append(line)
-
-        if line.startswith("%s" % "INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
-            strings["ERROR"].append(line)
+            log.error(line)
+            errors.append(line)
 
         if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
-            strings["ERROR"].append(line)
+            log.error(line)
+            errors.append(line)
 
-    highest_level = "ERROR" if strings["ERROR"] \
-        else "WARNING" if strings["WARNING"] \
-        else "INFO" if strings["INFO"] \
-        else "NONE"
+    highest_level = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
 
     if highest_level == "NONE":
         raise ValueError("Did not correctly parse DNSSCAN result string. %s " % result)
 
-    relevant_strings = strings[highest_level]
+    relevant_strings = []
+
+    # upgrade relevant to the highest level by overwriting previous levels.
+    if infos:
+        relevant_strings = infos
+    if warnings:
+        relevant_strings = warnings
+    if errors:
+        relevant_strings = errors
+
+    # log.debug("Relevant:")
+    # log.debug(relevant_strings)
 
     return highest_level, relevant_strings
-
-
-def test_analyze_result():
-
-    # standard info
-    result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
-        2.543: INFO Found DS record for faalkaart.nl at parent.
-        3.175: INFO Nameserver 37.97.255.53 does DNSSEC extra processing.
-        3.212: INFO Nameserver 80.69.67.67 does DNSSEC extra processing.
-        3.245: INFO Nameserver 80.69.69.69 does DNSSEC extra processing.
-        3.245: INFO Servers for faalkaart.nl have consistent extra processing status.
-        3.282: INFO Authenticated denial records found for faalkaart.nl, of type NSEC3.
-        3.296: INFO NSEC3PARAM record found for faalkaart.nl.
-        3.296: INFO NSEC3 for faalkaart.nl is set to use 100 iterations, which is less than 100 and thus OK.
-        3.296: INFO Found DNSKEY record for faalkaart.nl at child.
-        3.296: INFO Consistent security for faalkaart.nl.
-        3.297: INFO Checking DNSSEC at child (faalkaart.nl)."""
-
-    result = result.splitlines()
-    level, relevant = analyze_result(result)
-
-    assert level == "INFO"
-
-    # standard error
-    result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
-        2.543: INFO Found DS record for faalkaart.nl at parent.
-        3.175: ERROR Nameserver 37.97.255.53 does DNSSEC extra processing.
-        3.348: INFO Algorithm number 7 is OK.
-        3.348: INFO Parent DS(faalkaart.nl/7/2/52353) refers to valid key at child: DNSKEY(faalkaart.nl/7/52353)
-        3.349: INFO Parent DS(faalkaart.nl) refers to secure entry point (SEP) at child: DS(faalkaart.nl/7/2/52353)
-        3.349: INFO DNSSEC parent checks for faalkaart.nl complete.
-        3.349: INFO Done testing DNSSEC for faalkaart.nl."""
-
-    result = result.splitlines()
-    level, relevant = analyze_result(result)
-
-    assert level == "ERROR"
-
-    # subtle missing DNSSEC
-    result = """0.000: INFO Begin testing DNSSEC for faalkaart.nl.
-        2.543: INFO Found DS record for faalkaart.nl at parent.
-        3.175: ERROR Nameserver 37.97.255.53 does DNSSEC extra processing.
-        3.348: INFO Algorithm number 7 is OK.
-        3.348: INFO Parent DS(faalkaart.nl/7/2/52353) refers to valid key at child: DNSKEY(faalkaart.nl/7/52353)
-        3.349: INFO Parent DS(faalkaart.nl) refers to secure entry point (SEP) at child: DS(faalkaart.nl/7/2/52353)
-        3.349: INFO Did not find DS record something something darkside.
-        3.349: INFO Done testing DNSSEC for faalkaart.nl."""
-
-    result = result.splitlines()
-    level, relevant = analyze_result(result)
-
-    assert level == "ERROR"
-
-    # missing translation files
-    result = """
-    0.000: INFO [DNSSEC:BEGIN] nu.nl
-    1.969: INFO [DNSSEC:NO_DS_FOUND] nu.nl
-    2.995: INFO [DNSSEC:CONSISTENT_EXTRA_PROCESSING] nu.nl
-    3.058: INFO [DNSSEC:NSEC_NOT_FOUND] nu.nl
-    3.091: INFO [DNSSEC:DNSKEY_NOT_FOUND] nu.nl
-    3.091: INFO [DNSSEC:SKIPPED_NO_KEYS] nu.nl
-    3.091: INFO [DNSSEC:END] nu.nl
-    """
-
-    result = result.splitlines()
-    level, relevant = analyze_result(result)
-
-    assert level == "ERROR"
