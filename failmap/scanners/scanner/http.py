@@ -35,7 +35,7 @@ import requests
 import urllib3
 from celery import Task, group
 from django.conf import settings
-from requests import ConnectTimeout, HTTPError, ReadTimeout, Timeout
+from requests import ConnectTimeout, HTTPError, ReadTimeout, Request, Session, Timeout
 from requests.exceptions import ConnectionError
 
 from failmap.celery import app
@@ -385,7 +385,64 @@ def can_connect(self, protocol: str, url: Url, port: int, ip_version: int) -> bo
             return True
         else:
             log.debug("Exception indicates we could not connect to server. Error: %s" % strerror)
+
+            # This might be due to the fact that a firewall is blocking direct requests to the IP with a different
+            # host. Seen this in edienstenburgerzaken.purmerend.nl, which is annoying. So we're going to try
+            # to connect again, but then with the normal host, without IP. Note that this requires that the
+            # correct queue is used to connect to the network. This might not work on your development machine
+            # as it might connect over the wrong network
+
+            # Basically perform the same checks on the url directly, with a more extensive request that can be debugged
+
+            try:
+                log.debug("Trying again with a matching url and host header -> No connection to IP with a host header.")
+
+                s = Session()
+
+                uri = "%s://%s:%s" % (protocol, url.url, port)
+
+                req = Request('GET', uri, headers={'Host': url.url, 'User-Agent': get_random_user_agent()})
+                prepped = s.prepare_request(req)
+
+                # pretty_print_request(prepped)
+
+                s.send(prepped, verify=False, timeout=(30, 30), allow_redirects=False,)
+
+                return True
+            except (ConnectionRefusedError, ConnectionError, HTTPError) as Ex:
+                # Same handling as above.
+                strerror = Ex.args
+                strerror = str(strerror)
+
+                if any([error in strerror for error in ["BadStatusLine", "CertificateError",
+                                                        "certificate verify failed", "bad handshake"]]):
+                    log.debug("Exception indicates that there is a server, but we're not able to "
+                              "communicate with it correctly. Error: %s" % strerror)
+                    return True
+            except (ConnectTimeout, Timeout, ReadTimeout):
+                return False
+
+            # At this point we might have received a different exception. Let's see which ones...
+            log.debug("Did also not connect using the hostname as url. Giving up.")
             return False
+
+
+# thank you https://stackoverflow.com/questions/20658572/python-requests-print-entire-http-request-raw
+def pretty_print_request(req):
+    """
+    At this point it is completely built and ready
+    to be fired; it is "prepared".
+
+    However pay attention at the formatting used in
+    this function because it is programmed to be pretty
+    printed and may differ from the actual request.
+    """
+    print('{}\n{}\n{}\n\n{}'.format(
+        '-----------START-----------',
+        req.method + ' ' + req.url,
+        '\n'.join('{}: {}'.format(k, v) for k, v in req.headers.items()),
+        req.body,
+    ))
 
 
 @app.task(queue='storage')
@@ -663,7 +720,9 @@ def get_random_user_agent():
         "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
         # Windows 7
         "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36"
+        "(KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
+
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:64.0) Gecko/20100101 Firefox/64.0"
     ]
 
     return random.choice(user_agents)
