@@ -174,7 +174,7 @@ Just like Endpoint Generic scans, these are multiple scans stored in the same st
 DNSSEC scans.
 
 
-### Findig the scan you're looking for
+### Finding the scan you're looking for
 There is a surprising amount of filters and search options for each scan. It should be pretty easy to find the scan
 you're looking for.
 
@@ -185,6 +185,17 @@ explanation and so on.
 If you know the address, you can just enter the address in the search bar and it will find it for you:
 
 ![Scans](comply_or_explain/tls_scans_with_filters.png)
+
+
+
+For Example: 
+
+If you're looking for everything related to the url "veere.nl", you can enter "veere.nl" in the search box. Or 
+use the following urls to directly navigate to the relevant scans:
+
+https://admin.faalkaart.nl/admin/scanners/tlsqualysscan/?q=veere.nl
+https://admin.faalkaart.nl/admin/scanners/urlgenericscan/?q=veere.nl
+https://admin.faalkaart.nl/admin/scanners/endpointgenericscan/?q=veere.nl
 
 
 ### Historical data
