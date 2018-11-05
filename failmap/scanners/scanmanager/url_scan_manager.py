@@ -43,6 +43,7 @@ class UrlScanManager:
             gs.type = scan_type
             gs.last_scan_moment = datetime.now(pytz.utc)
             gs.rating_determined_on = datetime.now(pytz.utc)
+            gs.is_the_latest_scan = True
             gs.save()
 
             UrlGenericScan.objects.all().filter(url=gs.url, type=gs.type).exclude(
