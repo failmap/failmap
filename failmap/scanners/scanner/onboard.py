@@ -34,7 +34,7 @@ def compose_task(
     V endpoint_finished     done, ready for next stage
     V scans_running         running a series of scans on the endpoints
     V scans_finished        done, ready for next stage
-    V crawl_started         trying to find more endpoints (via DNS)
+    V crawling              trying to find more endpoints (via DNS)
     V crawl_finished        IMPLICIT! Last step will not be saved.
     - onboarded             onboarding completed
 
