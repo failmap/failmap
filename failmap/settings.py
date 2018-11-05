@@ -942,9 +942,9 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     ], 'permissions': ['admin']},
 
     {'app_label': 'hypersh', 'label': _('☁️ hypersh cloud scans'), 'items': [
-        {'name': 'containerenvironment'},
-        {'name': 'containerconfiguration'},
-        {'name': 'containergroup'},
+        {'name': 'containerenvironment', 'label': _('Environment variables'), },
+        {'name': 'containerconfiguration', 'label': _('Container configuration'), },
+        {'name': 'containergroup', 'label': _('Container instances'), },
         {'name': 'credential'},
     ], 'permissions': ['admin']},
 
