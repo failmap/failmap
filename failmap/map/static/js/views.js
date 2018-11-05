@@ -463,7 +463,7 @@ const report_mixin = {
             if (rating.type === "security_headers_x_content_type_options")
                 return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "DNSSEC")
-                return  '<a href="https://dnssec-debugger.verisignlabs.com/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (verisign)</a> ' +
+                return  '<a href="https://zonemaster.iis.se/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (zonemaster)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "ftp")
                 return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a> ' +
