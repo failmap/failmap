@@ -138,8 +138,6 @@ def forward_onboarding_status(url):
         url.onboarded_on = timezone.now()
         url.onboarding_stage = "onboarded"
 
-        url.onboarding_stage = "scans_finished"
-
     url.save()
 
 
