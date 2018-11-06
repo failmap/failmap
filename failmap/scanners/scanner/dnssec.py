@@ -287,13 +287,15 @@ def analyze_result(result: List[str]):
             log.info(line)
             errors.append(line)
 
-        if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
-            log.info(line)
-            errors.append(line)
+        # NSEC_NOT_FOUND can still mean NSEC3PARAM_FOUND and NSEC3_ITERATIONS_OK
+        # so we don't need to check on this NSEC parameter
+        # if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
+        #     log.info(line)
+        #     errors.append(line)
 
-        if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
-            log.info(line)
-            errors.append(line)
+        # if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
+        #     log.info(line)
+        #     errors.append(line)
 
     highest_level = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
 
