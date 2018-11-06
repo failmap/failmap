@@ -194,7 +194,7 @@ def compose_verify_task(organizations_filter: dict = dict(),
 
 
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities
-@app.task(queue="all_internet")
+@app.task(queue="internet")
 def url_resolves(url):
 
     v4, v6 = get_ips(url.url)
