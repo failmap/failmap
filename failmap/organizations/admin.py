@@ -72,7 +72,8 @@ class EndpointGenericScanInline(nested_admin.NestedTabularInline):
 
     # this is purely informational, to save clicks when debugging.
     readonly_fields = ('comply_or_explain_is_explained',
-                       'endpoint', 'type', 'rating', 'explanation', 'rating_determined_on', 'last_scan_moment')
+                       'endpoint', 'type', 'rating', 'explanation', 'rating_determined_on', 'last_scan_moment',
+                       'is_the_latest_scan')
 
     ordering = ['-rating_determined_on']
 
@@ -104,7 +105,7 @@ class TlsQualysScanInline(nested_admin.NestedTabularInline):
     # this is purely informational, to save clicks when debugging.
     readonly_fields = ('comply_or_explain_is_explained',
                        'qualys_rating', 'qualys_rating_no_trust', 'qualys_message', 'rating_determined_on',
-                       'last_scan_moment')
+                       'last_scan_moment', 'is_the_latest_scan')
 
     ordering = ['-rating_determined_on']
 
@@ -136,7 +137,7 @@ class UrlGenericScanAdminInline(CompactInline):
 
     readonly_fields = ('comply_or_explain_is_explained',
                        'type', 'rating', 'explanation', 'evidence', 'rating_determined_on',
-                       'last_scan_moment',)
+                       'last_scan_moment', 'is_the_latest_scan')
 
 
 class CoordinateAdminInline(CompactInline):
