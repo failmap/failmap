@@ -438,7 +438,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             'fields': ('computed_subdomain', 'computed_domain', 'computed_suffix')
         })
     )
-    readonly_fields = ['created_on', 'onboarded']
+    readonly_fields = ['created_on']
 
     @staticmethod
     def domain(obj):
