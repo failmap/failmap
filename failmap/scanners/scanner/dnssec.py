@@ -255,10 +255,10 @@ def analyze_result(result: List[str]):
 
         # first line if language files are not installed
         if line.startswith("%s" % "INFO Did not find DNSKEY"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
         if line.startswith("%s" % "INFO [DNSSEC:DNSKEY_NOT_FOUND]"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
 
         # Why are the following upgraded? There is no explanation for this.
@@ -273,26 +273,26 @@ def analyze_result(result: List[str]):
 
         # It's not clear if this really is a problematic warning.
         # if line.startswith("%s" % "INFO Did not find DS record"):
-        #     log.error(line)
+        #     log.info(line)
         #     errors.append(line)
         # if line.startswith("%s" % "INFO [DNSSEC:NO_DS_FOUND]"):
-        #     log.error(line)
+        #     log.info(line)
         #     errors.append(line)
 
         if line.startswith("%s" % "INFO Authenticated denial records not found"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
 
         if line.startswith("%s" % "INFO No DNSKEY(s) found at child"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
 
         if line.startswith("%s" % "INFO [DNSSEC:NSEC_NOT_FOUND]"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
 
         if line.startswith("%s" % "INFO [DNSSEC:SKIPPED_NO_KEYS]"):
-            log.error(line)
+            log.info(line)
             errors.append(line)
 
     highest_level = "ERROR" if errors else "WARNING" if warnings else "INFO" if infos else "NONE"
