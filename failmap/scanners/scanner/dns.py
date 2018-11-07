@@ -178,10 +178,10 @@ def compose_verify_task(organizations_filter: dict = dict(),
 
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
 
-    default_filter = {"not_resolvable": "False"}
+    default_filter = {"not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
 
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'))
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
     if not urls:

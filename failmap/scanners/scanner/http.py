@@ -24,10 +24,12 @@ HTTP: 80, 280, 591, 593, 2480, 4444, 4445, 4567, 5000, 5104, 5800, 5988, 7001, 8
 Likely: 80, 8080, 8008, 8888, 8088
 
 """
+import ipaddress
 import logging
 import random
 import socket
 from datetime import datetime
+from ipaddress import AddressValueError
 
 import pytz
 import requests
@@ -213,6 +215,7 @@ def get_ips(url: str):
 
 # It's possible you don't get an address back, it could not be configured on our or their side.
 def get_ipv4(url: str):
+    # https://www.iana.org/assignments/iana-ipv4-special-registry/iana-ipv4-special-registry.xhtml
     ipv4 = ""
 
     try:
@@ -222,11 +225,23 @@ def get_ipv4(url: str):
         # when not known: [Errno 8] nodename nor servname provided, or not known
         log.debug("Get IPv4 error: %s" % ex)
 
+    # the contents of the DNS record can be utter garbage, there is absolutely no guarantee that this is an IP
+    # it could be an entire novel, or images
+    try:
+        if ipv4:
+            address = ipaddress.IPv4Address(ipv4)
+            if not address.is_global:
+                ipv4 = ""
+    except (AddressValueError, ValueError):
+        log.debug("IPv4 address was not recognized: %s" % ipv4)
+        ipv4 = ""
+
     return ipv4
 
 
 # It's possible you don't get an address back, it could not be configured on our or their side.
 def get_ipv6(url: str):
+    # https://www.iana.org/assignments/iana-ipv6-special-registry/iana-ipv6-special-registry.xhtml
     ipv6 = ""
 
     try:
@@ -236,7 +251,7 @@ def get_ipv6(url: str):
 
         # six to four addresses make no sense
         if str(ipv6).startswith("::ffff:"):
-            log.error("Six-to-Four address %s discovered on %s, "
+            log.debug("Six-to-Four address %s discovered on %s, "
                       "did you configure IPv6 connectivity correctly? "
                       "Removing this IPv6 address from result to prevent "
                       "database pollution." %
@@ -247,6 +262,15 @@ def get_ipv6(url: str):
     except Exception as ex:
         # when not known: [Errno 8nodename nor servname provided, or not known
         log.debug("Get IPv6 error: %s" % ex)
+
+    try:
+        if ipv6:
+            address = ipaddress.IPv6Address(ipv6)
+            if not address.is_global:
+                ipv6 = ""
+    except (AddressValueError, ValueError):
+        log.debug("IPv6 address was not recognized: %s" % ipv6)
+        ipv6 = ""
 
     return ipv6
 
