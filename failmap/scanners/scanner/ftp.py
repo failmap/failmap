@@ -8,7 +8,7 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
-from ftplib import FTP, FTP_TLS, error_perm, error_proto, error_reply, error_temp
+from ftplib import FTP, error_perm, error_proto, error_reply, error_temp
 
 from celery import Task, group
 from django.utils import timezone
@@ -54,7 +54,7 @@ def compose_task(
     if not allowed_to_scan("scanner_ftp"):
         return group()
 
-    default_filter = {"protocol": "ftp"}
+    default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
@@ -155,12 +155,13 @@ def store(result: dict, endpoint: Endpoint):
     return {'status': 'success', 'result': level}
 
 
-# todo: also support FPT only over ipv6.
-@app.task(queue='ipv4',
+# supporting 4 and 6, whatever resolves to the FTP server is fine.
+@app.task(queue='4and6',
           bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
-          expires=EXPIRES)
+          expires=EXPIRES,
+          rate_limit="6/m")
 def scan(self, address: str, port: int):
     """
     Uses the dnssec scanner of dotse, which works pretty well.
@@ -169,6 +170,19 @@ def scan(self, address: str, port: int):
 
     Possible problems as seen on: https://github.com/stjernstedt/Interlan/blob/master/script/functions
     Timeout of 240 seconds. Nothing more (oh wow).
+
+
+    # To determine what encryption protocols are supported, a login() is required.
+    # Various options auto-negotiate to the highest possible security grade.
+    # so meaning supporting SSLv2 is not often used. yet, as with webservers,
+    # SSL2 is insecure and should be disabled completely.
+    # Example protocols...
+    #    'supports_PROTOCOL_SSLv2': False,
+    #    'supports_PROTOCOL_SSLv3': False,
+    #    'supports_PROTOCOL_TLSv1': False,
+    #    'supports_PROTOCOL_TLSv1_1': False,
+    #    'supports_PROTOCOL_TLSv1_2': False,
+    #    'supports_PROTOCOL_TLSv1_3': False,
 
     """
 
@@ -185,33 +199,32 @@ def scan(self, address: str, port: int):
     }
 
     # todo: this only connects to encrypted servers?
-    ftp = FTP_TLS()
+    ftp = FTP()
 
     try:
-        ftp.connect(address, port, 3)
+        ftp.connect(host=address, port=port, timeout=100)
         log.debug('Connecting to %s ' % address)
-    except OSError:
+    except OSError as Ex:
+        log.debug("OSError: %s" % Ex)
         # [Errno 64] Host is down
         # log.debug('Could not connect to %s' % ip)
         # you'll get a lot HOST IS DOWN messages.
         return results
-    except EOFError:
+    except EOFError as Ex:
+        log.debug("EOFError: %s" % Ex)
         # ftp behaves unexpectedly, so there is FTP but we don't know anything about it.
         # we cannot draw any conclusion regarding it's safety?
         return results
-    except (error_perm, error_proto, error_temp, error_reply):
+    except (error_perm, error_proto, error_temp, error_reply) as Ex:
+        log.debug("FTP Error: %s" % Ex)
         # ftplib.error_perm: 502 Command not implemented. We can't assess it further.
         return results
-    except Exception:
+    except Exception as Ex:
+        log.debug("Base Exception %s" % Ex)
         # Or whatever exception in really rare cases.
         return results
 
     results['status'] = 'connected'
-    try:
-        results['welcome'] = ftp.getwelcome()
-    except Exception:
-        # we don't really care about the welcome message, it's here for beautification only.
-        pass
 
     '''
     It's not allowed to perform "login" attempts, as that might look like an attack. We also don't want to test
@@ -234,57 +247,27 @@ def scan(self, address: str, port: int):
     '''
 
     try:
-        feats = ftp.voidcmd('FEAT')
-        results['features'] = feats
-
-        results['supports_tls'] = "AUTH TLS" in feats
-        results['supports_ssl'] = "AUTH SSL" in feats
+        results['features'] = ftp.voidcmd('FEAT')
+        results['supports_tls'] = "AUTH TLS" in results['features']
+        results['supports_ssl'] = "AUTH SSL" in results['features']
         log.debug(results)
     except (error_reply, error_perm, error_temp, error_proto):
-        # An error was received, such as a not-implemented.
-        # ftplib.error_perm: 502 Command not implemented.
-        results['status'] = str(error_reply)
-        # Server might not understand FEAT command.
-        # log.error(results)
+        results['status'] += str(error_reply)
 
-        # We can try AUTH TLS and AUTH SSL to see if something is supported, even if we don't have a list of FEAT
-        try:
-            ftp.voidcmd("AUTH TLS")
-            results['supports_tls'] = True
-        except (error_reply, error_perm, error_temp, error_proto):
-            # we already had an error
-            # ftplib.error_perm: 500 'AUTH TLS': command not understood
-            results['supports_tls'] = False
-        except Exception:
-            # really don't know what to do here...
-            pass
+    # Even if the feat command delivered nothing, we're doing to AUTH anyway.
+    if not results['supports_tls'] and not results['supports_ssl']:
+        results['supports_tls'] = try_tls(ftp)
 
-        try:
-            ftp.voidcmd("AUTH SSL")
-            results['supports_ssl'] = True
-        except (error_reply, error_perm, error_temp, error_proto):
-            # we already had an error
-            # ftplib.error_perm: 500 'AUTH TLS': command not understood
-            results['supports_ssl'] = False
-        except Exception:
-            # really don't know what to do here...
-            pass
+        if not results['supports_tls']:
+            # the fallback, even if it's not as secure.
+            results['supports_ssl'] = try_ssl(ftp)
 
-    except Exception:
-        # ConnectionResetError: [Errno 54] Connection reset by peer etc...
-        pass
-
-    # To determine what encryption protocols are supported, a login() is required.
-    # Various options auto-negotiate to the highest possible security grade.
-    # so meaning supporting SSLv2 is not often used. yet, as with webservers,
-    # SSL2 is insecure and should be disabled completely.
-    # Example protocols...
-    #    'supports_PROTOCOL_SSLv2': False,
-    #    'supports_PROTOCOL_SSLv3': False,
-    #    'supports_PROTOCOL_TLSv1': False,
-    #    'supports_PROTOCOL_TLSv1_1': False,
-    #    'supports_PROTOCOL_TLSv1_2': False,
-    #    'supports_PROTOCOL_TLSv1_3': False,
+    # Don't get the welcome, it might give an exception and doesn't add that much
+    # try:
+    #     results['welcome'] = ftp.getwelcome()
+    # except Exception:
+    #     # we don't really care about the welcome message, it's here for beautification only.
+    #     pass
 
     # try to gracefully close the connection, if that's not accepted by the server we flip the table and leave.
     try:
@@ -295,16 +278,40 @@ def scan(self, address: str, port: int):
     return results
 
 
+def try_ssl(ftp):
+    try:
+        ftp.voidcmd("AUTH SSL")
+        return True
+    except (error_reply, error_perm, error_temp, error_proto) as Ex:
+        log.debug(str(Ex))
+        return False
+    except Exception as Ex:
+        log.debug(str(Ex))
+        return False
+
+
+def try_tls(ftp):
+    try:
+        ftp.voidcmd("AUTH TLS")
+        return True
+    except (error_reply, error_perm, error_temp, error_proto) as Ex:
+        log.debug(str(Ex))
+        return False
+    except Exception as Ex:
+        log.debug(str(Ex))
+        return False
+
+
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
 # it will do on all known urls, and try a range of well known FTP ports and alternative ports.
-@app.task(queue='ipv4')
+@app.task(queue='4and6')
 def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
     connected = False
     ftp = FTP()
     try:
-        ftp.connect(url, port, 3)
+        ftp.connect(url, port, 100)
         connected = True
         ftp.close()
     except Exception:

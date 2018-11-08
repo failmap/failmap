@@ -1493,8 +1493,6 @@ def calculate_vulnerability_statistics(days: int = 366):
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type')
 
-    # from django.db import connection
-
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
         scan_types.add('total')  # the total would be separated per char if directly passed into set()
@@ -1536,9 +1534,15 @@ def calculate_vulnerability_statistics(days: int = 366):
             # This query will deliver double ratings for urls that are doubly listed, which is dubious.
             # this happens because multiple organizations can have the same URL.
             # It's fair that there are more issues if more organizations share the same url?
-            sql = """SELECT map_urlrating.id as id, map_urlrating.total_endpoints,
-                            map_urlrating2.calculation as calculation FROM
-                       map_urlrating
+
+            # you also have to include a filter on reagions that are not shown on the map anymore,
+            # those are mostly dead organizations... that's why this query works on map data...
+
+            # gets all url-ratings, even on urls that are dead / not relevant at a certain time period.
+            # this doesn't really work out it seems... as you dont know what url ratings are relevant when
+            sql = """SELECT map_urlrating.id as id, map_urlrating.id as my_id, map_urlrating.total_endpoints,
+                            map_urlrating2.calculation as calculation, url.id as url_id2
+                   FROM map_urlrating
                    INNER JOIN
                    (SELECT MAX(id) as id2 FROM map_urlrating or2
                    WHERE `when` <= '%(when)s' GROUP BY url_id) as x
@@ -1550,37 +1554,113 @@ def calculate_vulnerability_statistics(days: int = 366):
                     WHERE organization.type_id = '%(OrganizationTypeId)s'
                     AND organization.country = '%(country)s'
                     AND map_urlrating.total_endpoints > 0
+                    ORDER BY map_urlrating.url_id
                 """ % {"when": when, "OrganizationTypeId": organization_type_id, "country": country}
 
-            urlratings = UrlRating.objects.raw(sql)
+            # There is a cartesian product on organization, for the simple reason that organizations sometimes
+            # use the same url. The filter on organization cannot be changed to left outer join, because it might
+            # remove relevant organizations.... it has to be a left outer join with the  WHERE filter included then.
+            # Left joining doesnt' solve it because the link of url_organization. We might get a random organization
+            # for the urlrating that fits it. But there should only be one organization per urlrating? No. Because
+            # url ratings are shared amongst organization. That's why it works on the map, but not here.
+
+            # So we're doing something else: filter out the url_ratings we've already processed in the python
+            # code, which is slow and ugly. But for the moment it makes sense as the query is very complicated otherwise
+
+            # so instead use the map data as a starter and dig down from that data.
+
+            sql = """
+                    SELECT
+                        map_organizationrating.rating,
+                        organization.name,
+                        organizations_organizationtype.name,
+                        coordinate_stack.area,
+                        coordinate_stack.geoJsonType,
+                        organization.id,
+                        or3.calculation,
+                        map_organizationrating.high,
+                        map_organizationrating.medium,
+                        map_organizationrating.low,
+                        map_organizationrating.total_issues,
+                        map_organizationrating.total_urls,
+                        map_organizationrating.high_urls,
+                        map_organizationrating.medium_urls,
+                        map_organizationrating.low_urls
+                    FROM map_organizationrating
+                    INNER JOIN
+                      (SELECT id as stacked_organization_id
+                      FROM organization stacked_organization
+                      WHERE (stacked_organization.created_on <= '%(when)s' AND stacked_organization.is_dead = 0)
+                      OR (
+                      '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
+                      AND stacked_organization.is_dead = 1)) as organization_stack
+                      ON organization_stack.stacked_organization_id = map_organizationrating.organization_id
+                    INNER JOIN
+                      organization on organization.id = stacked_organization_id
+                    INNER JOIN
+                      organizations_organizationtype on organizations_organizationtype.id = organization.type_id
+                    INNER JOIN
+                      (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
+                      FROM coordinate stacked_coordinate
+                      WHERE (stacked_coordinate.created_on <= '%(when)s' AND stacked_coordinate.is_dead = 0)
+                      OR
+                      ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
+                      AND stacked_coordinate.is_dead = 1) GROUP BY area, organization_id) as coordinate_stack
+                      ON coordinate_stack.organization_id = map_organizationrating.organization_id
+                    INNER JOIN
+                      (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
+                      WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
+                      ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
+                    INNER JOIN map_organizationrating as or3 ON or3.id = map_organizationrating.id
+                    WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
+                    GROUP BY coordinate_stack.area, organization.name
+                    ORDER BY map_organizationrating.`when` ASC
+                    """ % {"when": when, "OrganizationTypeId": organization_type_id,
+                           "country": country}
+
+            organizationratings = OrganizationRating.objects.raw(sql)
             number_of_endpoints = 0
+            number_of_urls = 0
+            # log.debug(sql)
 
-            # print(connection.queries)
+            log.info("Nr of urlratings: %s" % len(list(organizationratings)))
 
-            # group by vulnerability type
-            for urlrating in urlratings:
+            # some urls are in multiple organizaitons, make sure that it's only shown once.
+            processed_urls = []
 
-                number_of_endpoints += urlrating.total_endpoints
+            for organizationrating in organizationratings:
 
-                # url reports
-                for rating in urlrating.calculation['ratings']:
-                    if rating['type'] not in measurement:
-                        measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+                # log.debug("Processing rating of %s " %
+                #     organizationrating.calculation["organization"].get("name", "UNKOWN"))
 
-                    # if rating['type'] not in scan_types:
-                    scan_types.add(rating['type'])
+                urlratings = organizationrating.calculation["organization"].get("urls", [])
 
-                    measurement[rating['type']]['high'] += rating['high']
-                    measurement[rating['type']]['medium'] += rating['medium']
-                    measurement[rating['type']]['low'] += rating['low']
+                number_of_urls += len(urlratings)
 
-                    measurement['total']['high'] += rating['high']
-                    measurement['total']['medium'] += rating['medium']
-                    measurement['total']['low'] += rating['low']
+                # group by vulnerability type
+                for urlrating in urlratings:
 
-                # endpoint reports
-                for endpoint in urlrating.calculation['endpoints']:
-                    for rating in endpoint['ratings']:
+                    # prevent the same urls counting double or more...
+                    if urlrating["url"] in processed_urls:
+                        # log.debug("Removed url because it's already in the report: %s" % urlrating["url"])
+                        continue
+
+                    processed_urls.append(urlrating["url"])
+
+                    # log.debug("Url: %s" % (urlrating["url"]))
+
+                    number_of_endpoints += len(urlrating["endpoints"])
+
+                    # print(connection.queries)
+                    # exit()
+
+                    # www.kindpakket.groningen.nl is missing
+                    # url reports
+                    for rating in urlrating['ratings']:
+
+                        # log.debug("- type: %s H: %s, M: %s, L: %s" %
+                        #     (rating['type'], rating['high'], rating['medium'], rating['low']))
+
                         if rating['type'] not in measurement:
                             measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
 
@@ -1595,10 +1675,31 @@ def calculate_vulnerability_statistics(days: int = 366):
                         measurement['total']['medium'] += rating['medium']
                         measurement['total']['low'] += rating['low']
 
-            number_of_urls = len(list(urlratings))
+                    # endpoint reports
+                    for endpoint in urlrating['endpoints']:
+
+                        for rating in endpoint['ratings']:
+                            if rating['type'] not in measurement:
+                                measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                            # debugging, perhaps it appears that the latest scan is not set properly
+                            # if rating['type'] == 'ftp' and rating['high']:
+                            #     log.debug("High ftp added for %s" % urlrating["url"])
+
+                            # if rating['type'] not in scan_types:
+                            scan_types.add(rating['type'])
+
+                            measurement[rating['type']]['high'] += rating['high']
+                            measurement[rating['type']]['medium'] += rating['medium']
+                            measurement[rating['type']]['low'] += rating['low']
+
+                            measurement['total']['high'] += rating['high']
+                            measurement['total']['medium'] += rating['medium']
+                            measurement['total']['low'] += rating['low']
 
             # store these results per scan type, and only retrieve this per scan type...
             for scan_type in scan_types:
+                # log.debug(scan_type)
                 if scan_type in measurement:
                     vs = VulnerabilityStatistic()
                     vs.when = when

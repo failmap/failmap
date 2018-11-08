@@ -25,6 +25,8 @@ class Command(BaseCommand):
         reflag_endpointgenericscan(type="Strict-Transport-Security")
         reflag_endpointgenericscan(type="X-Frame-Options")
         reflag_endpointgenericscan(type="X-Content-Type-Options")
+        reflag_endpointgenericscan(type="ftp")
+        reflag_endpointgenericscan(type="plain_https")
 
 
 def reflag_tlssscan():
@@ -50,7 +52,7 @@ def reflag_tlssscan():
 
 
 def reflag_tls_qualysscan():
-    log.debug("Setting flags on tls_qualysscan type: %s")
+    log.debug("Setting flags on tls_qualysscan type")
     TlsQualysScan.objects.all().update(is_the_latest_scan=False)
 
     # get the latest scans
