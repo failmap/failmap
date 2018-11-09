@@ -102,7 +102,7 @@ INSTALLED_APPS = [
     # We don't use this yet, as it had issues during build.
     # 'django.contrib.sites',  # Required for determining domain url for use in emails
     # 'markdown_deux',  # Required for Knowledgebase item formatting
-    'bootstrapform',  # Required for nicer formatting of forms with the default templates
+    # 'bootstrapform',  # Required for nicer formatting of forms with the default templates
     # 'helpdesk',  # This is us!
 
     # 'mapwidgets', # we don't support gdal, as it's not in alpine stable yet.
