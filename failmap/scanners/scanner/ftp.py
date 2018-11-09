@@ -46,9 +46,6 @@ def compose_task(
     [X] Added risk filter on the map for this issue
     [X] Added graphs, stats and more
     [X] Created translations
-
-    Other
-    [x] Export DNSSEC scans / Urlgenericscans and map settings...
     """
 
     if not allowed_to_scan("scanner_ftp"):
@@ -63,18 +60,20 @@ def compose_task(
         log.warning('Applied filters resulted in no endpoints, thus no ftp tasks!')
         return group()
 
-    # only unique endpoints
+    for endpoint in endpoints:
+        log.info("Going to scan: %s" % endpoint)
+
     endpoints = list(set(endpoints))
 
     log.info('Creating ftp scan task for %s endpoints.', len(endpoints))
+    tasks = []
 
-    # The number of top level urls is negligible, so randomization is not needed.
+    for endpoint in endpoints:
+        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
+        tasks.append(scan.si(endpoint.url.url, endpoint.port).set(queue=queue)
+                     | store.s(endpoint))
 
-    task = group(
-        scan.si(endpoint.url.url, endpoint.port) | store.s(endpoint) for endpoint in endpoints
-    )
-
-    return task
+    return group(tasks)
 
 
 def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
@@ -86,14 +85,17 @@ def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict
 
     log.info('Creating ftp discover task for %s urls.', len(urls))
 
-    task = group(
+    tasks = []
+    for ip_version in [4, 6]:
+        queue = "ipv4" if ip_version == 4 else "ipv6"
         # first iterate through ports, so there is more time between different connection attempts. Which reduces load
         # for the tested server. Also, the first port has the most hits :)
-        discover.si(url.url, port) | store_when_new_or_kill_if_gone.s(
-            url, port, 'ftp', 4) for port in ports for url in urls
-    )
+        for port in ports:
+            for url in urls:
+                tasks.append(discover.si(url.url, port).set(queue=queue)
+                             | store_when_new_or_kill_if_gone.s(url, port, 'ftp', ip_version))
 
-    return task
+    return group(tasks)
 
 
 def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
@@ -104,14 +106,14 @@ def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict =
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
 
-    task = group(
-        # first iterate through ports, so there is more time between different connection attempts. Which reduces load
-        # for the tested server. Also, the first port has the most hits :)
-        discover.si(endpoint.url.url, endpoint.port) | store_when_new_or_kill_if_gone.s(
-            endpoint.url, endpoint.port, 'ftp', 4) for endpoint in endpoints
-    )
+    tasks = []
 
-    return task
+    for endpoint in endpoints:
+        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
+        tasks.append(discover.si(endpoint.url.url, endpoint.port).set(queue=queue)
+                     | store_when_new_or_kill_if_gone.s(endpoint.url, endpoint.port, 'ftp', endpoint.ip_version))
+
+    return group(tasks)
 
 
 @app.task(queue='storage')
@@ -156,8 +158,7 @@ def store(result: dict, endpoint: Endpoint):
 
 
 # supporting 4 and 6, whatever resolves to the FTP server is fine.
-@app.task(queue='4and6',
-          bind=True,
+@app.task(bind=True,
           default_retry_delay=RETRY_DELAY,
           retry_kwargs={'max_retries': MAX_RETRIES},
           expires=EXPIRES,
@@ -202,29 +203,32 @@ def scan(self, address: str, port: int):
     ftp = FTP()
 
     try:
-        ftp.connect(host=address, port=port, timeout=100)
+        ftp.connect(host=address, port=port, timeout=30)
+        results['status'] += "Connected"
         log.debug('Connecting to %s ' % address)
     except OSError as Ex:
         log.debug("OSError: %s" % Ex)
+        results['status'] += getattr(Ex, 'message', repr(Ex))
         # [Errno 64] Host is down
         # log.debug('Could not connect to %s' % ip)
         # you'll get a lot HOST IS DOWN messages.
         return results
     except EOFError as Ex:
         log.debug("EOFError: %s" % Ex)
+        results['status'] += getattr(Ex, 'message', repr(Ex))
         # ftp behaves unexpectedly, so there is FTP but we don't know anything about it.
         # we cannot draw any conclusion regarding it's safety?
         return results
     except (error_perm, error_proto, error_temp, error_reply) as Ex:
         log.debug("FTP Error: %s" % Ex)
+        results['status'] += getattr(Ex, 'message', repr(Ex))
         # ftplib.error_perm: 502 Command not implemented. We can't assess it further.
         return results
     except Exception as Ex:
         log.debug("Base Exception %s" % Ex)
+        results['status'] += getattr(Ex, 'message', repr(Ex))
         # Or whatever exception in really rare cases.
         return results
-
-    results['status'] = 'connected'
 
     '''
     It's not allowed to perform "login" attempts, as that might look like an attack. We also don't want to test
@@ -250,17 +254,22 @@ def scan(self, address: str, port: int):
         results['features'] = ftp.voidcmd('FEAT')
         results['supports_tls'] = "AUTH TLS" in results['features']
         results['supports_ssl'] = "AUTH SSL" in results['features']
-        log.debug(results)
-    except (error_reply, error_perm, error_temp, error_proto):
-        results['status'] += str(error_reply)
+        # log.debug(results)
+    except (error_reply, error_perm, error_temp, error_proto) as Ex:
+        results['status'] += "FEAT Command: " + getattr(Ex, 'message', repr(Ex))
+    except Exception as Ex:
+        # and the other few million exception possibilities
+        results['status'] += "FEAT Command: " + getattr(Ex, 'message', repr(Ex))
 
     # Even if the feat command delivered nothing, we're doing to AUTH anyway.
     if not results['supports_tls'] and not results['supports_ssl']:
-        results['supports_tls'] = try_tls(ftp)
+        results['supports_tls'], result = try_tls(ftp)
+        results['status'] += "Supports tls: %s" % result
 
         if not results['supports_tls']:
             # the fallback, even if it's not as secure.
-            results['supports_ssl'] = try_ssl(ftp)
+            results['supports_ssl'], result = try_ssl(ftp)
+            results['status'] += "Supports ssl: %s" % result
 
     # Don't get the welcome, it might give an exception and doesn't add that much
     # try:
@@ -272,8 +281,10 @@ def scan(self, address: str, port: int):
     # try to gracefully close the connection, if that's not accepted by the server we flip the table and leave.
     try:
         ftp.quit()
+        results['status'] += "Quit successfully"
     except Exception:
         ftp.close()
+        results['status'] += "Force closed connection"
 
     return results
 
@@ -281,37 +292,37 @@ def scan(self, address: str, port: int):
 def try_ssl(ftp):
     try:
         ftp.voidcmd("AUTH SSL")
-        return True
+        return True, ""
     except (error_reply, error_perm, error_temp, error_proto) as Ex:
         log.debug(str(Ex))
-        return False
+        return False, getattr(Ex, 'message', repr(Ex))
     except Exception as Ex:
         log.debug(str(Ex))
-        return False
+        return False, getattr(Ex, 'message', repr(Ex))
 
 
 def try_tls(ftp):
     try:
         ftp.voidcmd("AUTH TLS")
-        return True
+        return True, ""
     except (error_reply, error_perm, error_temp, error_proto) as Ex:
         log.debug(str(Ex))
-        return False
+        return False, getattr(Ex, 'message', repr(Ex))
     except Exception as Ex:
         log.debug(str(Ex))
-        return False
+        return False, getattr(Ex, 'message', repr(Ex))
 
 
 # tries and discover FTP servers by A) trying to open an FTP connection to a standard port.
 # it will do on all known urls, and try a range of well known FTP ports and alternative ports.
-@app.task(queue='4and6')
+@app.task
 def discover(url: str, port: int):
     # https://en.wikipedia.org/wiki/List_of_TCP_and_UDP_port_numbers
 
     connected = False
     ftp = FTP()
     try:
-        ftp.connect(url, port, 100)
+        ftp.connect(url, port, 30)
         connected = True
         ftp.close()
     except Exception:
