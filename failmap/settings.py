@@ -371,13 +371,25 @@ LOGGING = {
         }
     },
     'loggers': {
-        '': {
-            'handlers': ['console'],  # used when there is no log defined or loaded.
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-        },
+        # Used when there is no log defined or loaded. Disabled given we always use __package__ to log.
+        # Would you enable it, all logging messages will be logged twice.
+        # '': {
+        #     'handlers': ['console'],
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        # },
+
+        # Default Django logging, we expect django to work, and therefore only show INFO messages.
+        # It can be smart to sometimes want to see what's going on here, but not all the time.
+        # https://docs.djangoproject.com/en/2.1/topics/logging/#django-s-logging-extensions
         'django': {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+
+        # We expect to be able to debug failmap all of the time.
+        'failmap': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
     },
 }

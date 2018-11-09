@@ -318,7 +318,8 @@ def index(request):
         'sentry_token': settings.SENTRY_TOKEN,
         'country': config.PROJECT_COUNTRY,
         'debug': settings.DEBUG,
-        'language': request.LANGUAGE_CODE
+        'language': request.LANGUAGE_CODE,
+        'timestamp': datetime.now(pytz.UTC).isoformat()
     })
 
 
