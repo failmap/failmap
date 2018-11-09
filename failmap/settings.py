@@ -100,10 +100,11 @@ INSTALLED_APPS = [
     'crispy_forms',  # for the game
 
     # django helpdesk requirements:
-    'django.contrib.sites',  # Required for determining domain url for use in emails
-    'markdown_deux',  # Required for Knowledgebase item formatting
+    # We don't use this yet, as it had issues during build.
+    # 'django.contrib.sites',  # Required for determining domain url for use in emails
+    # 'markdown_deux',  # Required for Knowledgebase item formatting
     'bootstrapform',  # Required for nicer formatting of forms with the default templates
-    'helpdesk',  # This is us!
+    # 'helpdesk',  # This is us!
 
     # 'mapwidgets', # we don't support gdal, as it's not in alpine stable yet.
     'colorful',
@@ -190,6 +191,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 # hopefully fixes helpdesk issue https://github.com/django-helpdesk/django-helpdesk/issues/184
+# These settings also make sense if you don't use helpdesk, so they are still here.
 DATABASE_OPTIONS = {
     'mysql': {'init_command': "SET character_set_connection=utf8,"
                               "collation_connection=utf8_unicode_ci,"
@@ -859,13 +861,14 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 #######
 # Begin helpdesk settings:
+# Helpdesk removed.
 # Unfortunately we cannot manage these settings with constance. And therefore you should be still editing
 # this file. We're sorry.
-SITE_ID = 1  # For django-helpdesk. We only run one site...
+# SITE_ID = 1  # For django-helpdesk. We only run one site...
 
 # helps against spam, will leak all your data, so be careful. Spam could be protected against on your mailserver...
-AKISMET_API_KEY = os.environ.get('AKISMET_API_KEY', '')
-TYPEPAD_ANTISPAM_API_KEY = os.environ.get('TYPEPAD_ANTISPAM_API_KEY', '')
+# AKISMET_API_KEY = os.environ.get('AKISMET_API_KEY', '')
+# TYPEPAD_ANTISPAM_API_KEY = os.environ.get('TYPEPAD_ANTISPAM_API_KEY', '')
 
 # If you use another server for sending mail, see config example here:
 # http://django-helpdesk.readthedocs.io/en/0.2.x/configuration.html
@@ -873,7 +876,7 @@ TYPEPAD_ANTISPAM_API_KEY = os.environ.get('TYPEPAD_ANTISPAM_API_KEY', '')
 # EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
 # EMAIL_HOST_PASSWORD = '123456'
 # Make sure the MEDIA_ROOT is NOT readable from the webserver directly. So no https://bla/media.
-MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/../')
+# MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/../')
 
 # End of helpdesk settings
 #######
@@ -940,18 +943,19 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'django_celery_beat.solarschedule'},
     ], 'permissions': ['admin']},
 
-    {'app_label': 'helpdesk', 'label': _('ℹ️ helpdesk'), 'items': [
-        {'name': 'queue'},
-        {'name': 'ticket'},
-        {'name': 'followup'},
-        {'name': 'customfield'},
-        {'name': 'presetreply'},
-        {'name': 'emailtemplate'},
-        {'name': 'escalationexclusion'},
-        {'name': 'ignoreemail'},
-        {'name': 'kbcategory'},
-        {'name': 'kbitem'},
-    ], 'permissions': ['admin']},
+    #
+    # {'app_label': 'helpdesk', 'label': _('ℹ️ helpdesk'), 'items': [
+    #     {'name': 'queue'},
+    #     {'name': 'ticket'},
+    #     {'name': 'followup'},
+    #     {'name': 'customfield'},
+    #     {'name': 'presetreply'},
+    #     {'name': 'emailtemplate'},
+    #     {'name': 'escalationexclusion'},
+    #     {'name': 'ignoreemail'},
+    #     {'name': 'kbcategory'},
+    #     {'name': 'kbitem'},
+    # ], 'permissions': ['admin']},
 
     {'app_label': 'hypersh', 'label': _('☁️ hypersh cloud scans'), 'items': [
         {'name': 'containerenvironment', 'label': _('Environment variables'), },

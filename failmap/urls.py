@@ -42,7 +42,8 @@ frontend_urls = [
 ]
 interactive_urls = [
     path('authentication/', include('django.contrib.auth.urls')),
-    url(r'helpdesk/', include('helpdesk.urls')),
+    # not using helpdesk anymore, might in the future.
+    # url(r'helpdesk/', include('helpdesk.urls')),
 ]
 
 urlpatterns = frontend_urls.copy()

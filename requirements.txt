@@ -96,15 +96,16 @@ django-autocomplete-light
 
 django-admin-sortable2  # nice sorting in the admin, used in map configurations.
 
+# Django helpdesk started having migration issues during build. Given we don't use it yet i've just removed it.
 # Helpdesk requirements
 # Runs django-helpdesk, https://github.com/django-helpdesk
-django-helpdesk  # more complete ticketing, might help a lot with interaction.
-django-bootstrap-form>=3.3,<4
-email-reply-parser
-django-markdown-deux
-beautifulsoup4
-lxml
-six
+# django-helpdesk  # more complete ticketing, might help a lot with interaction.
+# django-bootstrap-form>=3.3,<4
+# email-reply-parser
+# django-markdown-deux
+# beautifulsoup4
+# lxml
+# six
 
 django-colorful  # game team colors
 django-select2  # game, add multiple urls in one go.
