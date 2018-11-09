@@ -250,7 +250,6 @@ const report_mixin = {
         vulnerability_timeline_for_organization: function(organization_id){
             fetch('/data/organization_vulnerability_timeline/' + organization_id)
                 .then(response => response.json()).then(data => {
-                // data
 
                 let labels = Array();
                 let high = Array();
@@ -783,6 +782,11 @@ function views() {
 
                 fetch('/data/vulnstats/' + this.country + '/' + this.category + '/0')
                     .then(response => response.json()).then(data => {
+
+                        // no data returned.
+                        if(jQuery.isEmptyObject(data)){
+                            return;
+                        }
 
                         this.vulnerability_graph('timeline_all_vulnerabilities', data.total, 'hml');
 

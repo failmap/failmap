@@ -101,6 +101,9 @@ def get_defaults(request, ):
         is_the_default_option=True
     ).order_by('display_order').values('country', 'organization_type__name').first()
 
+    if not data:
+        return JsonResponse({'country': "NL", 'category': "municipality"}, safe=False, encoder=JSEncoder)
+
     return JsonResponse({'country': data['country'], 'category': data['organization_type__name']},
                         safe=False, encoder=JSEncoder)
 
@@ -1292,6 +1295,10 @@ def map_default(request, days_back: int = 0, displayed_issue: str = None):
         is_displayed=True,
         is_the_default_option=True
     ).order_by('display_order').values('country', 'organization_type__name').first()
+
+    # On an empty database, just get the Netherlands.
+    if not defaults:
+        return map_data(request, "NL", "municipality", days_back, displayed_issue)
 
     return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
 
