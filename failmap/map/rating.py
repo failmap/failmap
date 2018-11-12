@@ -508,8 +508,8 @@ def create_timeline(url: Url):
     for endpoint in happenings['dead_endpoints']:
         some_day = endpoint.is_dead_since.date()
         timeline[some_day]["dead"] = True
-        if endpoint not in timeline[moment_date]["dead_endpoints"]:
-            timeline[moment_date]["dead_endpoints"].append(endpoint)
+        if endpoint not in timeline[some_day]["dead_endpoints"]:
+            timeline[some_day]["dead_endpoints"].append(endpoint)
 
     # unique endpoints only
     for moment in moments:
@@ -608,11 +608,13 @@ def rate_timeline(timeline, url: Url):
         # we don't need to remove the previous ratings, unless we want to save memory (Nah :))
         if "dead_endpoints" in timeline[moment]:
             for dead_endpoint in timeline[moment]["dead_endpoints"]:
-                # endpoints can die this moment
-                if dead_endpoint in relevant_endpoints:
+                # endpoints can die this moment,
+                # note that this removes only once. if the endpoint was rated twice with the same rating, the older one
+                # is still in there. Therefore it's not an IF but a WHILE statement.
+                while dead_endpoint in relevant_endpoints:
                     relevant_endpoints.remove(dead_endpoint)
                 # remove the endpoint from the past
-                if dead_endpoint in previous_endpoints:
+                while dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
         endpoint_scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
@@ -625,6 +627,7 @@ def rate_timeline(timeline, url: Url):
         endpoint_issues_high, endpoint_issues_medium, endpoint_issues_low = 0, 0, 0
         explained_endpoint_issues_high, explained_endpoint_issues_medium, explained_endpoint_issues_low = 0, 0, 0
         for endpoint in relevant_endpoints:
+            # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
             total_endpoints += 1
             url_was_once_rated = True
 
@@ -736,6 +739,8 @@ def rate_timeline(timeline, url: Url):
             calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
             endpoint_reports.append({
+                "id": endpoint.pk,
+                "concat": "%s/%s IPv%s" % (endpoint.protocol, endpoint.port, endpoint.ip_version),
                 "ip": endpoint.ip_version,
                 "ip_version": endpoint.ip_version,
                 "port": endpoint.port,
