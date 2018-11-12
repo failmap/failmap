@@ -22,6 +22,10 @@ from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
 log = logging.getLogger(__package__)
 
 
+ENDPOINT_SCAN_TYPES = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
+                       "X-XSS-Protection", "tls_qualys", "plain_https", "ftp"]
+URL_SCAN_TYPES = ['DNSSEC']
+
 FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 
 """
@@ -201,6 +205,7 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
         tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).exclude(qualys_rating=0).\
             prefetch_related("endpoint").defer("endpoint__url")
+        tls_qualys_scans = latest_rating_per_day_only(tls_qualys_scans)
         tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
     else:
         tls_qualys_scans = []
@@ -224,6 +229,7 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
 
     generic_scans = EndpointGenericScan.objects.all().filter(type__in=allowed_to_report, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
+    generic_scans = latest_rating_per_day_only(generic_scans)
     generic_scan_dates = [x.rating_determined_on for x in generic_scans]
     # this is not faster.
     # generic_scan_dates = list(generic_scans.values_list("rating_determined_on", flat=True))
@@ -231,6 +237,7 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # url generic scans
     generic_url_scans = UrlGenericScan.objects.all().filter(type__in=allowed_to_report, url__in=urls).\
         prefetch_related("url")
+    generic_url_scans = latest_rating_per_day_only(generic_url_scans)
     generic_url_scan_dates = [x.rating_determined_on for x in generic_url_scans]
 
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
@@ -277,8 +284,139 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
         'non_resolvable_urls': non_resolvable_urls,
         'dead_urls': dead_urls
     }
-
+    # count_queries()
     return moments, happenings
+
+
+def latest_rating_per_day_only(scans):
+    """
+    Update 12 nov 2018: If there are multiple changes per day on the url on the same issue, this might not give the
+    correct results yet. For example: DNSSEC was scanned as ERROR and INFO on Nov 5 2018. Both are retrieved. Due to
+    some reason, the ERROR one gets in the report, while the last_scan_moment of the INFO one is more recent.
+    The one with the highest last_scan_moment (the newest) should be added to the report, the other one can be
+    ignored.
+
+    Example input:
+    ID      Last Scan Moment            Rating Determined On      Type      Rating
+    Scan 1  Nov. 12, 2018, 12:15 a.m.	Nov. 5, 2018, 3:25 p.m.   DNSSEC    INFO
+    Scan 2  Nov. 5, 2018, 12:06 p.m.	Nov. 5, 2018, 12:06 p.m.  DNSSEC    ERROR
+
+    Result:
+    Scan 1  Nov. 12, 2018, 12:15 a.m.	Nov. 5, 2018, 3:25 p.m.   DNSSEC    INFO
+
+    :param scans: You'll get all the scans, for all dates and multiple types.
+    :return: All scans, for all dates and multiple types, with the scan with the highest scan moment per type+date
+
+    Actually the reporting code is optimized to filter out double scans for a single day, and it takes the last one.
+    But still we want to be sure the result is clean. Does that mean we can only accept one report per day?
+    Why? There are multiple moments and multiple dates. And one scan always comes after the other.
+
+    So why do we only have one report per day. And why is the rating_determined_on ignored?
+    We do this otherwise every change would lead to a new report, which generates an enormous growth in the number
+    of reports. To give an impression:
+
+    On Novemer 2018 the following is in the database:
+    URL Generic Scans: 1850
+    TLS Scans: 29345
+    Endpoint generic scans: 173998
+    TOTAL: 205.193 changes in scans. Would we create a report containing each of these changes, we'd have the same
+    amount of reports.
+
+    Using reduction per day, we only have a total of 61377 URL ratings, which is about a fourth of the total and
+    it only has 24252 organization ratings, which is just over 10%. An organization rating of Rotterdam is about
+    1.5 megabyte of JSON in total. (<1 Megabyte without the whitespace). Would an average rating be 500 KB:
+    500000kb * 24252 reports = 12126000000kb = 12.126 gigabyte. (with compression etc) it is now just ±1 gigabyte.
+
+    So imagine it's 10x more, the DB would be 10 gigabyte at least: all to have a minute accuracy improvement which
+    basically nobody cares about. A day resolution is more than enough.
+
+    This is the reason functions like this exist, to just help and optimize the amount of storage.
+
+    It's possible to have scans from a series of endpoints/urls.
+    """
+    # we don't want to care about the order the scans came in: it can by any set of scans in any order, and it will
+    # get the correct result quickly. For this we use a hash table of all scans, matched with the scan.
+
+    hash_table = []
+    # build the hash table
+    for scan in scans:
+        # A combination that is unique, enough to identify a scan, but that will cause a collision if we don't
+        # filter out the problematic values.
+        hash = hash_scan_per_day_and_type(scan)
+        # use a high precision here, since we want to have the absolute latest scan
+        # only when a rating changes, a new scan is added, this makes it fairly easy to get the latest
+        if not in_hash_table(hash_table, hash):
+            hash_table.append({'hash': hash, 'scan': scan})
+        else:
+            # here is where the magic happens: only the scan with the highest rating_determined_on can stay
+            # find the one, check it and replace it.
+            existing_item = in_hash_table(hash_table, hash)
+            if existing_item['scan'].rating_determined_on < scan.rating_determined_on:
+                # Due to the ordering of the scans, usually this message will NEVER appear and the first scan
+                # was always the latest. Perhaps per database this default ordering differs. Since we don't have
+                # testcases, i don't dare to touch the rest of this code.
+                log.debug("Scan ID %s on %s had also another scan today that had a rating that lasted longer."
+                          % (scan.pk, scan.type))
+                hash_table.remove(existing_item)
+                hash_table.append({'hash': hash, 'scan': scan})
+            else:
+                log.debug("Scan ID %s on %s had also another scan today that had a rating that lasted shorter. IGNORED"
+                          % (scan.pk, scan.type))
+
+    # return a list of scans:
+    filtered_scans = []
+    for hash in hash_table:
+        filtered_scans.append(hash['scan'])
+
+    return filtered_scans
+
+
+def in_hash_table(hash_table, hash):
+    # https://stackoverflow.com/questions/8653516/python-list-of-dictionaries-search
+    try:
+        return next((item for item in hash_table if item["hash"] == hash))
+
+    except StopIteration:
+        return False
+
+
+def count_queries(message: str = ""):
+    """
+    Helps figuring out if django is silently adding more queries / slows things down. Happens when you're
+    asking for a property that was not in the original query.
+
+    Note, this stops counting at 9000. See BaseDatabaseWrapper.queries_limit
+
+    :return:
+    """
+    from django.db import connection
+    queries_performed = len(connection.queries)
+    if queries_performed > 9000:
+        log.debug("Maximum number of queries reached.")
+
+    length_short, length_medium, length_long = 0, 0, 0
+
+    for query in connection.queries:
+        if len(query['sql']) <= 100:
+            length_short += 1
+        if 100 < len(query['sql']) < 300:
+            length_medium += 1
+        if len(query['sql']) >= 300:
+            length_long += 1
+
+    log.debug("# queries: %3s L: %2s, M %2s, S:%2s(%s)" %
+              (len(connection.queries), length_long, length_medium, length_short, message))
+
+
+def hash_scan_per_day_and_type(scan):
+
+    # hopefully it doesn't run extra queries?
+    if scan.type in URL_SCAN_TYPES:
+        pk = scan.url.pk
+    else:
+        pk = scan.endpoint.pk
+
+    return "%s%s%s" % (pk, scan.type, scan.rating_determined_on.date())
 
 
 def create_timeline(url: Url):
@@ -844,27 +982,27 @@ def show_timeline_console(timeline, url: Url):
             for item in timeline[moment]['tls_qualys']['scans']:
                 calculation = get_calculation(item)
                 message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
-                                                               calculation.get('medium', '?'),
-                                                               calculation.get('low', '?'),
-                                                               item) + newline
+                                                                  calculation.get('medium', '?'),
+                                                                  calculation.get('low', '?'),
+                                                                  item) + newline
 
         if 'generic_url_scan' in timeline[moment]:
             message += "|  |- url generic_scan" + newline
             for item in timeline[moment]['generic_url_scan']['scans']:
                 calculation = get_calculation(item)
                 message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
-                                                               calculation.get('medium', '?'),
-                                                               calculation.get('low', '?'),
-                                                               item) + newline
+                                                                  calculation.get('medium', '?'),
+                                                                  calculation.get('low', '?'),
+                                                                  item) + newline
 
         if 'generic_scan' in timeline[moment]:
             message += "|  |- endpoint generic_scan" + newline
             for item in timeline[moment]['generic_scan']['scans']:
                 calculation = get_calculation(item)
                 message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
-                                                               calculation.get('medium', '?'),
-                                                               calculation.get('low', '?'),
-                                                               item) + newline
+                                                                  calculation.get('medium', '?'),
+                                                                  calculation.get('low', '?'),
+                                                                  item) + newline
 
         if 'dead' in timeline[moment]:
             message += "|  |- dead endpoints" + newline
