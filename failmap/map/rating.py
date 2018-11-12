@@ -826,6 +826,9 @@ def show_timeline_console(timeline, url: Url):
     newline = "\r\n"
     message = ""
     message += "" + newline
+    message += "This timeline shows all changes over time on the following url:" + newline
+    message += "Use this timeline for debugging purposes, to see what changes are registered." + newline
+    message += "" + newline
     message += url.url + newline
     for moment in timeline:
 
