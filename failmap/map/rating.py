@@ -830,7 +830,9 @@ def show_timeline_console(timeline, url: Url):
     for moment in timeline:
 
         message += "|" + newline
-        message += "|- %s: %s" % (moment, timeline[moment]) + newline
+        message += "|- %s" % moment + newline
+        # for debugging
+        # message += "|- %s: Contents: %s" % (moment, timeline[moment]) + newline
 
         if 'tls_qualys' in timeline[moment]:
             message += "|  |- tls_qualys" + newline
@@ -838,34 +840,28 @@ def show_timeline_console(timeline, url: Url):
                 message += "|  |  |- Endpoint %s" % item + newline
             for item in timeline[moment]['tls_qualys']['scans']:
                 calculation = get_calculation(item)
-                message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
+                message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
+                                                               calculation.get('medium', '?'),
+                                                               calculation.get('low', '?'),
+                                                               item) + newline
+
+        if 'generic_url_scan' in timeline[moment]:
+            message += "|  |- url generic_scan" + newline
+            for item in timeline[moment]['generic_url_scan']['scans']:
+                calculation = get_calculation(item)
+                message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
+                                                               calculation.get('medium', '?'),
+                                                               calculation.get('low', '?'),
+                                                               item) + newline
 
         if 'generic_scan' in timeline[moment]:
-            message += "|  |- generic_scan" + newline
+            message += "|  |- endpoint generic_scan" + newline
             for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "plain_https":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s low: %s" % (calculation.high, item) + newline
-            for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "Strict-Transport-Security":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
-            for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "X-Frame-Options":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
-            for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "X-Content-Type-Options":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
-            for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "X-XSS-Protection":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
-            for item in timeline[moment]['generic_scan']['scans']:
-                if item.type == "ftp":
-                    calculation = get_calculation(item)
-                    message += "|  |  |- %5s points: %s" % (calculation.high, item) + newline
+                calculation = get_calculation(item)
+                message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
+                                                               calculation.get('medium', '?'),
+                                                               calculation.get('low', '?'),
+                                                               item) + newline
 
         if 'dead' in timeline[moment]:
             message += "|  |- dead endpoints" + newline
@@ -880,7 +876,7 @@ def show_timeline_console(timeline, url: Url):
 
     message += "" + newline
     # support this on command line
-    print(message)
+    # print(message) Use a command for this
 
     # first step to a UI
     return message
