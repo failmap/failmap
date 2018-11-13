@@ -333,7 +333,8 @@
                             <tr>
                                 <th style="width:40%"></th>
                                 <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "DNSSEC" %}{% verbatim %}</span></div></th>
-                                <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "tls_qualys" %}{% verbatim %}</span></div></th>
+                                <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "tls_qualys_encryption_quality" %}{% verbatim %}</span></div></th>
+                                <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "tls_qualys_certificate_trusted" %}{% verbatim %}</span></div></th>
                                 <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "plain_https" %}{% verbatim %}</span></div></th>
                                 <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "Strict-Transport-Security" %}{% verbatim %}</span></div></th>
                                 <th style="white-space: nowrap; vertical-align: bottom; height: 240px;"><div style="transform: translate(21px, -10px) rotate(315deg); width: 30px;"><span>{% endverbatim %}{% trans "X-Frame-Options" %}{% verbatim %}</span></div></th>
@@ -663,70 +664,55 @@
                             </tr>
                             {% endif %}
                             {% if config.SHOW_HTTP_TLS_QUALYS %}
-                            <tr v-if="x['explained']['tls_qualys']">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']">
                                 {% verbatim %}
                                 <td colspan="3">{% endverbatim %} {% trans "Encryption quality" %}{% verbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="redrow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "Broken" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Broken Transport Security, rated F'] }}</td>
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Broken Transport Security, rated F'] }}</td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                                <td></td>
-                                <td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Certificate not valid for domain name.'] }}</td>
-                            </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                                <td></td>
-                                <td>{% endverbatim %}{% trans "No trust, C" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.'] }}
-                                </td>
-                            </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                                <td></td>
-                                <td>{% endverbatim %}{% trans "No trust, B" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.'] }}
-                                </td>
-                            </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                                <td></td>
-                                <td>{% endverbatim %}{% trans "No trust, A-" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.'] }}
-                                </td>
-                            </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="redrow">
-                                <td></td>
-                                <td>{% endverbatim %}{% trans "No trust, A" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Could not establish trust.  For the certificate installation: Good Transport Security, rated A.'] }}
-                                </td>
-                            </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="orangerow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="orangerow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "TLS rated C" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated C.'] }}
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated C.'] }}
                                 </td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="orangerow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="orangerow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "TLS rated B" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Less than optimal Transport Security, rated B.'] }}
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated B.'] }}
                                 </td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "TLS rated A-" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A-.'] }}</td>
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A-.'] }}</td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "TLS rated A" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Good Transport Security, rated A.'] }}</td>
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A.'] }}</td>
                             </tr>
-                            <tr v-if="x['explained']['tls_qualys']" class="greenrow">
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
                                 <td>{% endverbatim %}{% trans "TLS rated A+" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys']['Perfect Transport Security, rated A+.'] }}{% endverbatim %}</td>
+                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Perfect Transport Security, rated A+.'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys_encryption_quality']">
+                                {% verbatim %}
+                                <td colspan="3">{% endverbatim %} {% trans "Certificate trust" %}{% verbatim %}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys_certificate_trusted']" class="redrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is not trusted.'] }}</td>
+                            </tr>
+                            <tr v-if="x['explained']['tls_qualys_certificate_trusted']" class="greenrow">
+                                <td></td>
+                                <td>{% endverbatim %}{% trans "Trust" %}{% verbatim %}:</td>
+                                <td>{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is trusted.'] }}{% endverbatim %}</td>
                             </tr>
                             {%  endif %}
                             </tbody>
@@ -877,8 +863,12 @@
 
                     <table class="table table-striped">
                         <tr>
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.high)">{% verbatim %}{{ tls_qualys.high }}{% endverbatim %}</td> {% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption Quality" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys_encryption_quality.high)">{% verbatim %}{{ tls_qualys_encryption_quality.high }}{% endverbatim %}</td> {% endif %}
+                        </tr>
+                        <tr>
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Certificate Trust" %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys_certificate_trusted.high)">{% verbatim %}{{ tls_qualys_certificate_trusted.high }}{% endverbatim %}</td> {% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
@@ -900,7 +890,7 @@
                     <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.medium)">{% verbatim %}{{ tls_qualys.medium }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys_encryption_quality.medium)">{% verbatim %}{{ tls_qualys_encryption_quality.medium }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_MISSING_TLS %}<td>{% trans "Missing encryption" %}</td>{% endif %}
@@ -929,7 +919,7 @@
                     <table class="table table-striped">
                         <tr>
                             {% if config.SHOW_HTTP_TLS_QUALYS %}<td>{% trans "Encryption" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys.low)">{% verbatim %}{{ tls_qualys.low }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_TLS_QUALYS %}<td :class="'number-sm ' + goodbad(tls_qualys_encryption_quality.low)">{% verbatim %}{{ tls_qualys_encryption_quality.low }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
@@ -965,16 +955,26 @@
                 </div>
             </div>
 
-            {% if config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS %}
             <div class="row">
+
                 {% if config.SHOW_HTTP_TLS_QUALYS %}
                 <div class="col-md-6">
-                    <h4>{% trans "Encryption failure" %}</h4>
+                    <h4>{% trans "Encryption quality issues (TLS)" %}</h4>
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <canvas id="timeline_tls_qualys_vulnerabilities"></canvas>
+                        <canvas id="timeline_tls_qualys_encryption_quality_vulnerabilities"></canvas>
                     </div>
                 </div>
                 {% endif %}
+
+                {% if config.SHOW_HTTP_TLS_QUALYS %}
+                <div class="col-md-6">
+                    <h4>{% trans "Certificate trust issues (TLS)" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_tls_qualys_certificate_trusted_vulnerabilities"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if config.SHOW_HTTP_MISSING_TLS %}
                 <div class="col-md-6">
                     <h4>{% trans "Lack of encryption failure" %}</h4>
@@ -983,53 +983,7 @@
                     </div>
                 </div>
                 {% endif %}
-            </div>
-            {% endif %}
 
-            {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
-            <div class="row">
-                {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
-                <div class="col-md-6">
-                    <h4>{% trans "Forcing of encryption failure" %}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <canvas id="timeline_hsts_vulnerabilities"></canvas>
-                    </div>
-                </div>
-                {% endif %}
-                {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
-                <div class="col-md-6">
-                    <h4>{% trans "X-Frame Options failure" %}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <canvas id="timeline_xfo_vulnerabilities"></canvas>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% if config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
-            <div class="row">
-                {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
-                <div class="col-md-6">
-                    <h4>{% trans "X-Content-Type-Options failure" %}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <canvas id="timeline_xcto_vulnerabilities"></canvas>
-                    </div>
-                </div>
-                {% endif %}
-                {% if config.SHOW_HTTP_HEADERS_X_XSS%}
-                <div class="col-md-6">
-                    <h4>{% trans "X-XSS-Protection failure" %}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <canvas id="timeline_xxss_vulnerabilities"></canvas>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            {% if config.SHOW_FTP %}
-            <div class="row">
                 {% if config.SHOW_FTP %}
                 <div class="col-md-6">
                     <h4>{% trans "FTP failure" %}</h4>
@@ -1038,15 +992,54 @@
                     </div>
                 </div>
                 {% endif %}
+
+                {% if config.SHOW_DNS_DNSSEC %}
                 <div class="col-md-6">
                     <h4>{% trans "DNSSEC failure" %}</h4>
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
                         <canvas id="timeline_dnssec_vulnerabilities"></canvas>
                     </div>
                 </div>
-            </div>
-            {% endif %}
+                {% endif %}
 
+                {% if config.SHOW_HTTP_HEADERS_HSTS %}
+                <div class="col-md-6">
+                    <h4>{% trans "Forcing of encryption failure" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_hsts_vulnerabilities"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_XFO %}
+                <div class="col-md-6">
+                    <h4>{% trans "X-Frame Options failure" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xfo_vulnerabilities"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+
+
+                {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
+                <div class="col-md-6">
+                    <h4>{% trans "X-Content-Type-Options failure" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xcto_vulnerabilities"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_X_XSS%}
+                <div class="col-md-6">
+                    <h4>{% trans "X-XSS-Protection failure" %}</h4>
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
+                        <canvas id="timeline_xxss_vulnerabilities"></canvas>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div> <!-- Graphs Row -->
         </div>
         {% endif %}
 
@@ -1056,16 +1049,26 @@
                 <h3>{% trans "Latest changes" %}</h3>
                 <p>{% trans "Latest changes explanation" %}</p>
             </div>
-            {% if config.SHOW_HTTP_TLS_QUALYS or config.SHOW_HTTP_MISSING_TLS %}
+
             <div class="row">
                 {% if config.SHOW_HTTP_TLS_QUALYS %}
                 <div class="col-md-6">
-                    <h4>{% trans "Encryption updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys"
+                    <h4>{% trans "Encryption quality updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys_encryption_quality"
                                                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_tls_qualys"></span>
+                    <span id="latest_tls_qualys_encryption_quality"></span>
                 </div>
                 {% endif %}
+
+                {% if config.SHOW_HTTP_TLS_QUALYS %}
+                <div class="col-md-6">
+                    <h4>{% trans "Certificate trust updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/tls_qualys_certificate_trusted"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_tls_qualys_certificate_trusted"></span>
+                </div>
+                {% endif %}
+
                 {% if config.SHOW_HTTP_MISSING_TLS %}
                 <div class="col-md-6">
                     <h4>{% trans "Lack of encryption updates" %}</h4>
@@ -1074,50 +1077,7 @@
                     <span id="latest_plain_https"></span>
                 </div>
                 {% endif %}
-            </div>
-            {% endif %}
-            {% if config.SHOW_HTTP_HEADERS_HSTS or config.SHOW_HTTP_HEADERS_XFO %}
-            <div class="row">
-                {% if config.SHOW_HTTP_HEADERS_HSTS %}
-                <div class="col-md-6">
-                    <h4>{% trans "Forcing encryption updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security"
-                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_strict_transport_security"></span>
-                </div>
-                {% endif %}
-                {% if config.SHOW_HTTP_HEADERS_XFO %}
-                <div class="col-md-6">
-                    <h4>{% trans "X-Frame-Options updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options"
-                                                       target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_frame_options"></span>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% if config.SHOW_HTTP_HEADERS_X_XSS or config.SHOW_HTTP_HEADERS_X_CONTENT %}
-            <div class="row">
-                {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
-                <div class="col-md-6">
-                    <h4>{% trans "X-Content-Type-Option updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options"
-                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_content_type_options"></span>
-                </div>
-                {% endif %}
-                {% if config.SHOW_HTTP_HEADERS_X_XSS %}
-                <div class="col-md-6">
-                    <h4>{% trans "X-XSS-Protection updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection"
-                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_xss_protection"></span>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-            {% if config.SHOW_FTP %}
-            <div class="row">
+
                 {% if config.SHOW_FTP %}
                 <div class="col-md-6">
                     <h4>{% trans "FTP updates" %}</h4>
@@ -1126,6 +1086,7 @@
                     <span id="latest_ftp"></span>
                 </div>
                 {% endif %}
+
                 {% if config.SHOW_DNS_DNSSEC %}
                 <div class="col-md-6">
                     <h4>{% trans "DNSSEC updates" %}</h4>
@@ -1134,8 +1095,44 @@
                     <span id="latest_DNSSEC"></span>
                 </div>
                 {%  endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_HSTS %}
+                <div class="col-md-6">
+                    <h4>{% trans "Forcing encryption updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_strict_transport_security"></span>
+                </div>
+                {% endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_XFO %}
+                <div class="col-md-6">
+                    <h4>{% trans "X-Frame-Options updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options"
+                                                       target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_frame_options"></span>
+                </div>
+                {% endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
+                <div class="col-md-6">
+                    <h4>{% trans "X-Content-Type-Option updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_content_type_options"></span>
+                </div>
+                {% endif %}
+
+                {% if config.SHOW_HTTP_HEADERS_X_XSS %}
+                <div class="col-md-6">
+                    <h4>{% trans "X-XSS-Protection updates" %}</h4>
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection"
+                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <span id="latest_security_headers_x_xss_protection"></span>
+                </div>
+                {% endif %}
+
             </div>
-            {% endif %}
         </div>
         {% endif %}
     </div>
@@ -1603,7 +1600,8 @@
         <input type='radio' v-model="displayed_issue" name="displayed_issue" value="DNSSEC" id="DNSSEC"> <label for="DNSSEC">{% trans "report_header_DNSSEC" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_TLS_QUALYS %}
-        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="tls_qualys" id="TLS_QUALYS"> <label for="TLS_QUALYS">{% trans "report_header_tls_qualys" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="tls_qualys_encryption_quality" id="tls_qualys_encryption_quality"> <label for="tls_qualys_encryption_quality">{% trans "report_header_tls_qualys_encryption_quality" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="tls_qualys_certificate_trusted" id="tls_qualys_certificate_trusted"> <label for="tls_qualys_certificate_trusted">{% trans "report_header_tls_qualys_certificate_trusted" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_MISSING_TLS %}
         <input type='radio' v-model="displayed_issue" name="displayed_issue" value="plain_https" id="plain_https"> <label for="plain_https">{% trans "report_header_plain_https" %}</label><br />

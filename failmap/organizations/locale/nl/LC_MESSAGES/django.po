@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-02 14:51+0000\n"
+"POT-Creation-Date: 2018-11-13 15:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/organizations/admin.py:346
+#: failmap/organizations/admin.py:347
 #, python-format
 msgid ""
 "Url %s is already matched to \"%s\", and is alive. Please add any remaining "
@@ -26,7 +26,7 @@ msgid ""
 "url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:363
+#: failmap/organizations/admin.py:364
 #, python-format
 msgid ""
 "This url %s already exists and is alive. Please add the desired "
@@ -36,15 +36,15 @@ msgid ""
 "Search for <a href=\"../?url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:373
+#: failmap/organizations/admin.py:374
 msgid "Has endpoint scans (todo)"
 msgstr ""
 
-#: failmap/organizations/admin.py:387
+#: failmap/organizations/admin.py:388
 msgid "Yes"
 msgstr "Ja"
 
-#: failmap/organizations/admin.py:388
+#: failmap/organizations/admin.py:389
 msgid "No"
 msgstr "Nee"
 

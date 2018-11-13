@@ -52,7 +52,10 @@ var dynamic_translations = function(){
     gettext('FTP Server supports TLS encryption protocol.');
     gettext('FTP Server does not support encrypted transport or has protocol issues.');
     gettext('An FTP connection could not be established properly. Not possible to verify encryption.');
-
+    gettext('not trusted');
+    gettext('trusted');
+    gettext('Certificate is not trusted.');
+    gettext('Certificate is trusted.');
 
     // vulnerabilities:
     gettext('report_header_tls_qualys');
@@ -63,6 +66,8 @@ var dynamic_translations = function(){
     gettext('report_header_security_headers_strict_transport_security');
     gettext('report_header_DNSSEC');
     gettext('report_header_ftp');
+    gettext('report_header_tls_qualys_certificate_trusted');
+    gettext('report_header_tls_qualys_encryption_quality');
 
     // some categories:
     gettext('category_menu_municipality');
@@ -85,6 +90,8 @@ var dynamic_translations = function(){
     gettext('tls_qualys');
     gettext('DNSSEC');
     gettext('ftp');
+    gettext('tls_qualys_encryption_quality');
+    gettext('tls_qualys_certificate_trusted');
 
     // and germany
     gettext('category_menu_bundesland');

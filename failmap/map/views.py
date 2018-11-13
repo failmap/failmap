@@ -1304,7 +1304,7 @@ def map_default(request, days_back: int = 0, displayed_issue: str = None):
     return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
 
 
-@cache_page(four_hours)
+# @cache_page(four_hours)
 def map_data(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
              displayed_issue: str = None):
 
@@ -1324,14 +1324,15 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     desired_url_scans = []
     desired_endpoint_scans = []
 
-    possible_url_scans = ["DNSSEC"]
-    possible_endpoint_scans = ["security_headers_strict_transport_security",
-                               "security_headers_x_content_type_options",
-                               "security_headers_x_frame_options",
-                               "security_headers_x_xss_protection",
-                               "tls_qualys",
-                               "plain_https",
-                               "ftp"]
+    possible_url_scans = ['DNSSEC']
+    possible_endpoint_scans = ['security_headers_strict_transport_security',
+                               'security_headers_x_content_type_options',
+                               'security_headers_x_frame_options',
+                               'security_headers_x_xss_protection',
+                               'tls_qualys_certificate_trusted',
+                               'tls_qualys_encryption_quality',
+                               'plain_https',
+                               'ftp']
 
     if displayed_issue in possible_url_scans:
         desired_url_scans += [displayed_issue]
@@ -1569,7 +1570,7 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
         "remark": remark,
     }
 
-    if scan_type not in ["tls_qualys",
+    if scan_type not in ["tls_qualys_encryption_quality", "tls_qualys_certificate_trusted",
                          "Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
                          "plain_https", "ftp", 'DNSSEC']:
         return empty_response()
@@ -1581,7 +1582,7 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
         ).order_by('-rating_determined_on')[0:6])
 
     if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                     "plain_https", "ftp"]:
+                     "plain_https", "ftp", 'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']:
         scans = list(EndpointGenericScan.objects.filter(
             type=scan_type,
             endpoint__url__organization__type=get_organization_type(organization_type),
@@ -1669,7 +1670,7 @@ def latest_updates(organization_id):
     scans = sorted(scans, key=lambda k: getattr(k, 'rating_determined_on', datetime.now(pytz.utc)), reverse=True)
 
     for scan in scans:
-        scan_type = getattr(scan, "type", "tls_qualys")
+        scan_type = scan.type
         calculation = get_calculation(scan)
         if scan_type in ['DNSSEC']:
             # url scans
@@ -1823,7 +1824,7 @@ def get_explanation(type, scan):
     explain = {
         'organizations': scan.url.organization.name if type == "url" else list(
             scan.endpoint.url.organization.all().values('id', 'name')),
-        'scan_type': getattr(scan, "type", "tls_qualys"),
+        'scan_type': scan.type,
         'explanation': scan.comply_or_explain_explanation,
         'explained_by': scan.comply_or_explain_explained_by,
         'explained_on': scan.comply_or_explain_explained_on.isoformat(
@@ -1927,7 +1928,7 @@ class LatestScanFeed(Feed):
     def items(self, scan_type):
         # print(scan_type)
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https", "ftp"]:
+                         "plain_https", "ftp", "tls_qualys_certificate_trusted", "tls_qualys_encryption_quality"]:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
         if scan_type in ["DNSSEC"]:

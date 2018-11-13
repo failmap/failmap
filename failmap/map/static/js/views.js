@@ -108,7 +108,8 @@ const report_mixin = {
             let xxss = this.worstof("security_headers_x_xss_protection", url.endpoints);
             let xcto = this.worstof("security_headers_x_content_type_options", url.endpoints);
             let xfo = this.worstof("security_headers_x_frame_options", url.endpoints);
-            let https = this.worstof("tls_qualys", url.endpoints);
+            let https_trust = this.worstof("tls_qualys_certificate_trusted", url.endpoints);
+            let https_quality = this.worstof("tls_qualys_encryption_quality", url.endpoints);
             let hsts = this.worstof("security_headers_strict_transport_security", url.endpoints);
             let plain_https = this.worstof("plain_https", url.endpoints);
 
@@ -116,7 +117,8 @@ const report_mixin = {
 
             let findings =
                 `<td class='text-center' style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
-                `<td class='text-center' style='background-color: ${https.bgcolor}'>${https.text}</td>` +
+                `<td class='text-center' style='background-color: ${https_trust.bgcolor}'>${https_trust.text}</td>` +
+                `<td class='text-center' style='background-color: ${https_quality.bgcolor}'>${https_quality.text}</td>` +
                 `<td class='text-center' style='background-color: ${plain_https.bgcolor}'>${plain_https.text}</td>` +
                 `<td class='text-center' style='background-color: ${hsts.bgcolor}'>${hsts.text}</td>` +
                 `<td class='text-center' style='background-color: ${xfo.bgcolor}'>${xfo.text}</td>` +
@@ -203,9 +205,13 @@ const report_mixin = {
                     hsts.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     hsts.text = this.rating_text(rating);
                 }
-                if (rating.type === "tls_qualys"){
-                    https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    https.text = this.rating_text(rating);
+                if (rating.type === "tls_qualys_certificate_trusted"){
+                    https_trust.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    https_trust.text = this.rating_text(rating);
+                }
+                if (rating.type === "tls_qualys_encryption_quality"){
+                    https_quality.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
+                    https_quality.text = this.rating_text(rating);
                 }
                 if (rating.type === "plain_https"){
                     plain_https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
@@ -452,7 +458,10 @@ const report_mixin = {
             if (rating.type === "security_headers_strict_transport_security")
                 return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "tls_qualys")
+            if (rating.type === "tls_qualys_certificate_trusted")
+                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
+                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
+            if (rating.type === "tls_qualys_encryption_quality")
                 return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "security_headers_x_xss_protection")
@@ -864,7 +873,8 @@ function views() {
                             }
                         });
 
-                        this.vulnerability_graph('timeline_tls_qualys_vulnerabilities', data.tls_qualys, 'hl');
+                        this.vulnerability_graph('timeline_tls_qualys_certificate_trusted_vulnerabilities', data.tls_qualys_certificate_trusted, 'h');
+                        this.vulnerability_graph('timeline_tls_qualys_encryption_quality_vulnerabilities', data.tls_qualys_encryption_quality, 'hl');
                         this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https, 'hm');
                         this.vulnerability_graph('timeline_hsts_vulnerabilities', data.security_headers_strict_transport_security, 'm');
                         this.vulnerability_graph('timeline_xfo_vulnerabilities', data.security_headers_x_frame_options, 'm');
@@ -1271,11 +1281,18 @@ function views() {
     });
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
-    window.vueLatestTlsQualys = new Vue({
-        name: "latest_tls_qualys",
+    window.vueLatestTlsQualysCertificateTrust = new Vue({
+        name: "latest_tls_qualys_certificate_trusted",
         mixins: [latest_mixin, state_mixin],
-        el: '#latest_tls_qualys',
-        data: {scan: "tls_qualys", element_id: "latest_tls_qualys"}
+        el: '#latest_tls_qualys_certificate_trusted',
+        data: {scan: "tls_qualys_certificate_trusted", element_id: "latest_tls_qualys_certificate_trusted"}
+    });
+
+    window.vueLatestTlsQualysEncryptionQuality = new Vue({
+        name: "latest_tls_qualys_encryption_quality",
+        mixins: [latest_mixin, state_mixin],
+        el: '#latest_tls_qualys_encryption_quality',
+        data: {scan: "tls_qualys_encryption_quality", element_id: "latest_tls_qualys_encryption_quality"}
     });
 
     window.vueLatestPlainHttps = new Vue({
@@ -1363,7 +1380,8 @@ function views() {
 
         data: {
             data: null,
-            tls_qualys: {high: 0, medium:0, low: 0},
+            tls_qualys_certificate_trusted: {high: 0, medium:0, low: 0},
+            tls_qualys_encryption_quality: {high: 0, medium:0, low: 0},
             security_headers_strict_transport_security: {high: 0, medium:0, low: 0},
             security_headers_x_content_type_options: {high: 0, medium:0, low: 0},
             security_headers_x_xss_protection: {high: 0, medium:0, low: 0},
@@ -1387,7 +1405,8 @@ function views() {
                 $.getJSON('/data/improvements/' + this.country + '/' + this.category + '/' + weeks_ago + '/0', function (data) {
                     if ($.isEmptyObject(data)) {
                         self.data = null;
-                        self.tls_qualys = {high: 0, medium:0, low: 0};
+                        self.tls_qualys_certificate_trusted = {high: 0, medium:0, low: 0};
+                        self.tls_qualys_encryption_quality = {high: 0, medium:0, low: 0};
                         self.security_headers_strict_transport_security = {high: 0, medium:0, low: 0};
                         self.security_headers_x_content_type_options = {high: 0, medium:0, low: 0};
                         self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0};
@@ -1397,8 +1416,10 @@ function views() {
                         self.overall = {high: 0, medium:0, low: 0}
                     } else {
                         self.data = data;
-                        if (data.tls_qualys !== undefined)
-                            self.tls_qualys = data.tls_qualys.improvements;
+                        if (data.tls_qualys_certificate_trusted !== undefined)
+                            self.tls_qualys_certificate_trusted = data.tls_qualys_certificate_trusted.improvements;
+                        if (data.tls_qualys_encryption_quality !== undefined)
+                            self.tls_qualys_encryption_quality = data.tls_qualys_encryption_quality.improvements;
                         if (data.security_headers_strict_transport_security !== undefined)
                             self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
                         if (data.security_headers_x_content_type_options !== undefined)
@@ -1508,7 +1529,8 @@ function views() {
                 vueStatistics.set_state(this.country, this.category);
                 vueLatestPlainHttps.set_state(this.country, this.category);
                 vueLatestFtp.set_state(this.country, this.category);
-                vueLatestTlsQualys.set_state(this.country, this.category);
+                vueLatestTlsQualysCertificateTrust.set_state(this.country, this.category);
+                vueLatestTlsQualysEncryptionQuality.set_state(this.country, this.category);
                 vueLatestXContentTypeOptions.set_state(this.country, this.category);
                 vueLatestHSTS.set_state(this.country, this.category);
                 vueLatestXFrameOptions.set_state(this.country, this.category);

@@ -22,9 +22,12 @@ from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
 log = logging.getLogger(__package__)
 
 
-ENDPOINT_SCAN_TYPES = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
-                       "X-XSS-Protection", "tls_qualys", "plain_https", "ftp"]
+ENDPOINT_SCAN_TYPES = ['Strict-Transport-Security', 'X-Content-Type-Options', 'X-Frame-Options',
+                       'X-XSS-Protection', 'tls_qualys', 'plain_https', 'ftp', 'tls_qualys_certificate_trusted',
+                       'tls_qualys_encryption_quality']
 URL_SCAN_TYPES = ['DNSSEC']
+
+ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
 
 FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 
@@ -202,14 +205,9 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # after the update no calls to __get__ at all.
     # qualys_rating=0 means "Unable to connect to the server" and is not returned with a score. This happens in old
     # datasets.
-    if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
-        tls_qualys_scans = TlsQualysScan.objects.all().filter(endpoint__url__in=urls).exclude(qualys_rating=0).\
-            prefetch_related("endpoint").defer("endpoint__url")
-        tls_qualys_scans = latest_rating_per_day_only(tls_qualys_scans)
-        tls_qualys_scan_dates = [x.rating_determined_on for x in tls_qualys_scans]
-    else:
-        tls_qualys_scans = []
-        tls_qualys_scan_dates = []
+    # we don't store tls_qualys scans in a separate table anymore
+    tls_qualys_scans = []
+    tls_qualys_scan_dates = []
 
     allowed_to_report = []
     if config.REPORT_INCLUDE_HTTP_MISSING_TLS:
@@ -226,6 +224,9 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
         allowed_to_report.append("DNSSEC")
     if config.REPORT_INCLUDE_FTP:
         allowed_to_report.append("ftp")
+    if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
+        allowed_to_report.append("tls_qualys_certificate_trusted")
+        allowed_to_report.append("tls_qualys_encryption_quality")
 
     generic_scans = EndpointGenericScan.objects.all().filter(type__in=allowed_to_report, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
@@ -617,9 +618,6 @@ def rate_timeline(timeline, url: Url):
                 while dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
-        endpoint_scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options",
-                               "X-XSS-Protection", "tls_qualys", "plain_https", "ftp"]
-
         total_endpoints, high_endpoints, medium_endpoints, low_endpoints = 0, 0, 0, 0
         explained_high_endpoints, explained_medium_endpoints, explained_low_endpoints = 0, 0, 0
 
@@ -639,11 +637,12 @@ def rate_timeline(timeline, url: Url):
                         these_endpoint_scans['tls_qualys'] = scan
                     if isinstance(scan, EndpointGenericScan):
                         if scan.type in ['Strict-Transport-Security', 'X-Content-Type-Options',
-                                         'X-Frame-Options', 'X-XSS-Protection', 'plain_https', 'ftp']:
+                                         'X-Frame-Options', 'X-XSS-Protection', 'plain_https', 'ftp',
+                                         'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']:
                             these_endpoint_scans[scan.type] = scan
 
             # enrich the ratings with previous ratings, without overwriting them.
-            for endpoint_scan_type in endpoint_scan_types:
+            for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
                 if endpoint_scan_type not in these_endpoint_scans:
                     if endpoint.id in previous_endpoint_ratings:
                         if endpoint_scan_type in previous_endpoint_ratings[endpoint.id]:
@@ -674,7 +673,7 @@ def rate_timeline(timeline, url: Url):
 
             endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
             explained_endpoint_high, explained_endpoint_medium, explained_endpoint_low = 0, 0, 0
-            for endpoint_scan_type in endpoint_scan_types:
+            for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
                 if endpoint_scan_type in these_endpoint_scans:
                     if endpoint_scan_type not in given_ratings[label]:
                         calculation = get_calculation(these_endpoint_scans[endpoint_scan_type])
@@ -1324,11 +1323,8 @@ def get_url_score_modular(url: Url, when: datetime = None):
         else:
             continue
 
-        scan_types = ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                      "tls_qualys", "plain_https", "ftp"]
-
         calculations = []
-        for scan_type in scan_types:
+        for scan_type in ALL_SCAN_TYPES:
             calculation = endpoint_to_points_and_calculation(endpoint, when, scan_type)
             if calculation:
                 calculations.append(calculation)
@@ -1422,15 +1418,10 @@ def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_
     try:
         scan = ""
         if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options",
-                         "X-Frame-Options", "X-XSS-Protection"]:
+                         "X-Frame-Options", "X-XSS-Protection", "plain_https", "ftp", 'tls_qualys_encryption_quality',
+                         'tls_qualys_certificate_trusted']:
             scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
                                                       type=scan_type).latest('rating_determined_on')
-        if scan_type == "plain_https":
-            scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
-                                                      type="plain_https").latest('rating_determined_on')
-        if scan_type == "ftp":
-            scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
-                                                      type="ftp").latest('rating_determined_on')
         if scan_type == "tls_qualys":
             scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when
                                                 ).latest('rating_determined_on')
@@ -1868,7 +1859,7 @@ def calculate_map_data(days: int = 366):
     # all vulnerabilities
     filters = ["security_headers_strict_transport_security", "security_headers_x_content_type_options", "ftp", "DNSSEC",
                "security_headers_x_frame_options", "security_headers_x_xss_protection", "tls_qualys", "plain_https",
-               '']
+               '', 'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']
 
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type__name', 'organization_type')

@@ -27,6 +27,8 @@ class Command(BaseCommand):
         reflag_endpointgenericscan(type="X-Content-Type-Options")
         reflag_endpointgenericscan(type="ftp")
         reflag_endpointgenericscan(type="plain_https")
+        reflag_endpointgenericscan(type="tls_qualys_certificate_trusted")
+        reflag_endpointgenericscan(type="tls_qualys_encryption_quality")
 
 
 def reflag_tlssscan():

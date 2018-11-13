@@ -14,8 +14,7 @@ log = logging.getLogger(__package__)
 
 def get_calculation(scan):
     # Can be probably more efficient by adding some methods to scan.
-    scan_type = getattr(scan, "type", "tls_qualys")
-    calculation = calculation_methods[scan_type](scan)
+    calculation = calculation_methods[scan.type](scan)
 
     # handle comply or explain
     # only when an explanation is given AND the explanation is still valid when creating the report.
@@ -38,7 +37,7 @@ def get_calculation(scan):
 
     # tracking information for the scan (which also might allow upgrading the scan in the future)
     calculation['scan'] = scan.pk
-    calculation['scan_type'] = scan_type
+    calculation['scan_type'] = scan.type
 
     return calculation
 
@@ -110,9 +109,7 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         todo: should be enabled(?)
     """
 
-    high = 0
-    medium = 0
-    low = 0
+    high, medium, low = 0, 0, 0
 
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "True":
@@ -148,8 +145,7 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
 
 
 def http_plain_rating_based_on_scan(scan):
-    high = 0
-    medium = 0
+    high, medium, low = 0, 0, 0
 
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
@@ -173,7 +169,7 @@ def http_plain_rating_based_on_scan(scan):
         "last_scan": scan.last_scan_moment.isoformat(),
         "high": high,
         "medium": medium,
-        "low": 0,
+        "low": low,
     }
 
     return calculation
@@ -181,9 +177,7 @@ def http_plain_rating_based_on_scan(scan):
 
 def ftp_rating_based_on_scan(scan):
     # outdated, insecure
-    high = 0
-    medium = 0
-    low = 0
+    high, medium, low = 0, 0, 0
 
     # changed the ratings in the database. They are not really correct.
     # When there is no https at all, it's worse than having broken https. So rate them the same.
@@ -230,9 +224,7 @@ def dnssec_rating_based_on_scan(scan):
 
 
 def tls_qualys_rating_based_on_scan(scan):
-    high = 0
-    medium = 0
-    low = 0
+    high, medium, low = 0, 0, 0
 
     """
     Qualys gets multiple endpoints
@@ -290,6 +282,57 @@ def tls_qualys_rating_based_on_scan(scan):
     return calculation
 
 
+def tls_qualys_certificate_trusted_rating_based_on_scan(scan):
+    high, medium, low = 0, 0, 0
+
+    explanations = {
+        "not trusted": "Certificate is not trusted.",
+        "trusted": "Certificate is trusted.",
+    }
+
+    explanation = explanations[scan.rating]
+
+    if scan.rating == "not trusted":
+        high += 1
+
+    return calc(scan, explanation, high, medium, low)
+
+
+def tls_qualys_encryption_quality_rating_based_on_scan(scan):
+    high, medium, low = 0, 0, 0
+
+    explanations = {
+        "F": "Broken Transport Security, rated F",
+        "C": "Less than optimal Transport Security, rated C.",
+        "B": "Less than optimal Transport Security, rated B.",
+        "A-": "Good Transport Security, rated A-.",
+        "A": "Good Transport Security, rated A.",
+        "A+": "Perfect Transport Security, rated A+.",
+    }
+
+    explanation = explanations[scan.rating]
+
+    if scan.rating in ["F"]:
+        high += 1
+
+    if scan.rating in ["B", "C"]:
+        low += 1
+
+    return calc(scan, explanation, high, medium, low)
+
+
+def calc(scan, explanation, high, medium, low):
+    return {
+        "type": scan.type,
+        "explanation": explanation,
+        "since": scan.rating_determined_on.isoformat(),
+        "last_scan": scan.last_scan_moment.isoformat(),
+        "high": high,
+        "medium": medium,
+        "low": low,
+    }
+
+
 # don't re-create the dict every time.
 calculation_methods = {
     'Strict-Transport-Security': security_headers_rating_based_on_scan,
@@ -299,5 +342,7 @@ calculation_methods = {
     'plain_https': http_plain_rating_based_on_scan,
     'tls_qualys': tls_qualys_rating_based_on_scan,
     'DNSSEC': dnssec_rating_based_on_scan,
-    'ftp': ftp_rating_based_on_scan
+    'ftp': ftp_rating_based_on_scan,
+    'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted_rating_based_on_scan,
+    'tls_qualys_encryption_quality': tls_qualys_encryption_quality_rating_based_on_scan
 }

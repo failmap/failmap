@@ -35,7 +35,7 @@ from tenacity import before_log, retry, wait_fixed
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, TlsQualysScratchpad
-from failmap.scanners.scanmanager.tlsqualys_scan_manager import TlsQualysScanManager
+from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
 from failmap.scanners.scanner.http import store_url_ips
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
@@ -449,7 +449,14 @@ def save_scan(url, data):
 
         # Qualys might discover endpoints we don't have yet. In that case, be pragmatic and create the endpoint.
         failmap_endpoint = Endpoint.force_get(url, ip_version, 'https', 443)
-        TlsQualysScanManager.add_scan(failmap_endpoint, rating, rating_no_trust, "Ready")
+
+        if rating == "T":
+            trust = "not trusted"
+        else:
+            trust = "trusted"
+
+        EndpointScanManager.add_scan('tls_qualys_certificate_trusted', failmap_endpoint, trust, "")
+        EndpointScanManager.add_scan('tls_qualys_encryption_quality', failmap_endpoint, rating_no_trust, "")
 
     # Store IP address of the scan as metadata
     ips = [ipaddress.ip_address(endpoint['ipAddress']).compressed for endpoint in data['endpoints']]
