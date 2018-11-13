@@ -36,6 +36,7 @@ from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, TlsQualysScratchpad
 from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanmanager.tlsqualys_scan_manager import TlsQualysScanManager
 from failmap.scanners.scanner.http import store_url_ips
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
@@ -455,6 +456,7 @@ def save_scan(url, data):
         else:
             trust = "trusted"
 
+        TlsQualysScanManager.add_scan(failmap_endpoint, rating, rating_no_trust, "Ready")
         EndpointScanManager.add_scan('tls_qualys_certificate_trusted', failmap_endpoint, trust, "")
         EndpointScanManager.add_scan('tls_qualys_encryption_quality', failmap_endpoint, rating_no_trust, "")
 

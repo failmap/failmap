@@ -27,7 +27,8 @@ class Command(BaseCommand):
     [X] Set the latest scan
     [ ] The manual / comply or explain tutorial
     [X] Afterwards set_is_the_latest_scan, add this to that function. (taken from existing dataset)
-    [ ] Translations of new findings
+    [X] Translations of new findings
+    [ ] Remove old TLS Qualys code after a while
     [ ] Possible other features
 
     The scans are currently saved as tls_qualys scans. They will be split into:
