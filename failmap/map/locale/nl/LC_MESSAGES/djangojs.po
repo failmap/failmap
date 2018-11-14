@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-14 07:36+0000\n"
+"POT-Creation-Date: 2018-11-14 11:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,8 +18,8 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:1248
-#: failmap/map/static/js/views.js:1253 failmap/map/static/js/views.js:1256
+#: failmap/map/static/js/failmap.js:61 failmap/map/static/js/views.js:1258
+#: failmap/map/static/js/views.js:1263 failmap/map/static/js/views.js:1266
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -51,39 +51,39 @@ msgstr "Onbekend"
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
 
-#: failmap/map/static/js/script.js:15
+#: failmap/map/static/js/script.js:16
 msgid "2 weeks ago"
 msgstr "2 weken geleden"
 
-#: failmap/map/static/js/script.js:16
+#: failmap/map/static/js/script.js:17
 msgid "3 weeks ago"
 msgstr "3 weken geleden"
 
-#: failmap/map/static/js/script.js:17
+#: failmap/map/static/js/script.js:18
 msgid "1 month ago"
 msgstr "1 maand geleden"
 
-#: failmap/map/static/js/script.js:18
+#: failmap/map/static/js/script.js:19
 msgid "2 months ago"
 msgstr "2 maanden geleden"
 
-#: failmap/map/static/js/script.js:19
+#: failmap/map/static/js/script.js:20
 msgid "3 months ago"
 msgstr "3 maanden geleden"
 
-#: failmap/map/static/js/script.js:20
+#: failmap/map/static/js/script.js:21
 msgid "7 days ago"
 msgstr "7 dagen geleden"
 
-#: failmap/map/static/js/script.js:21
+#: failmap/map/static/js/script.js:22
 msgid "now"
 msgstr "Op dit moment"
 
-#: failmap/map/static/js/script.js:24
+#: failmap/map/static/js/script.js:25
 msgid "Has a secure equivalent, which wasn't so in the past."
 msgstr "Biedt nu een beveiligd alternative, wat vroeger niet zo was."
 
-#: failmap/map/static/js/script.js:26
+#: failmap/map/static/js/script.js:27
 msgid ""
 "Site does not redirect to secure url, and has no secure alternative on a "
 "standard port."
@@ -91,7 +91,7 @@ msgstr ""
 "Een beveiligd alternatief op het standaard poortnummer ontbreekt. De "
 "onbeveiligde website wijst niet door naar een beveiligde site."
 
-#: failmap/map/static/js/script.js:27
+#: failmap/map/static/js/script.js:28
 msgid ""
 "Redirects to a secure site, while a secure counterpart on the standard port "
 "is missing."
@@ -99,22 +99,22 @@ msgstr ""
 "De onbeveiligde site wijst door naar een beveiligde site, maar niet op een "
 "standaard poort."
 
-#: failmap/map/static/js/script.js:28
+#: failmap/map/static/js/script.js:29
 msgid "Broken Transport Security, rated F"
 msgstr "Onvoldoende versleuteld (F)"
 
-#: failmap/map/static/js/script.js:29
+#: failmap/map/static/js/script.js:30
 msgid "Certificate not valid for domain name."
 msgstr "Certificaat niet geldig voor domeinnaam."
 
-#: failmap/map/static/js/script.js:30
+#: failmap/map/static/js/script.js:31
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated C."
 msgstr ""
 "Vertrouwen onbtreekt. De installatie van het certificaat zelf is matig (C)."
 
-#: failmap/map/static/js/script.js:31
+#: failmap/map/static/js/script.js:32
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated B."
@@ -122,73 +122,73 @@ msgstr ""
 "Vertrouwen onbtreekt. De installatie van het certificaat zelf is redelijk "
 "(B)."
 
-#: failmap/map/static/js/script.js:32
+#: failmap/map/static/js/script.js:33
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A-."
 msgstr ""
 "Vertrouwen onbtreekt. De installatie van het certificaat zelf is goed (A-)."
 
-#: failmap/map/static/js/script.js:33
+#: failmap/map/static/js/script.js:34
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A."
 msgstr ""
 "Vertrouwen onbtreekt. De installatie van het certificaat zelf is goed (A)."
 
-#: failmap/map/static/js/script.js:34
+#: failmap/map/static/js/script.js:35
 msgid "Less than optimal Transport Security, rated C."
 msgstr "Matige versleuteling (C)"
 
-#: failmap/map/static/js/script.js:35
+#: failmap/map/static/js/script.js:36
 msgid "Less than optimal Transport Security, rated B."
 msgstr "Redeijke versleuteling (B)"
 
-#: failmap/map/static/js/script.js:36
+#: failmap/map/static/js/script.js:37
 msgid "Good Transport Security, rated A-."
 msgstr "Goede versleuteling (A-)"
 
-#: failmap/map/static/js/script.js:37
+#: failmap/map/static/js/script.js:38
 msgid "Good Transport Security, rated A."
 msgstr "Perfecte versleuteling (A)"
 
-#: failmap/map/static/js/script.js:38
+#: failmap/map/static/js/script.js:39
 msgid "Perfect Transport Security, rated A+."
 msgstr "Perfecte versleuteling (met extra's) (A+)"
 
-#: failmap/map/static/js/script.js:39
+#: failmap/map/static/js/script.js:40
 msgid "X-Content-Type-Options header present."
 msgstr "De X-Content-Type-Options header is aanwezig."
 
-#: failmap/map/static/js/script.js:40
+#: failmap/map/static/js/script.js:41
 msgid "Missing X-Content-Type-Options header."
 msgstr "De X-Content-Type-Options header ontbreekt."
 
-#: failmap/map/static/js/script.js:41
+#: failmap/map/static/js/script.js:42
 msgid "X-XSS-Protection header present."
 msgstr "De X-XSS-Protection header is aanwezig."
 
-#: failmap/map/static/js/script.js:42
+#: failmap/map/static/js/script.js:43
 msgid "Missing X-XSS-Protection header."
 msgstr "De X-XSS-Protection header ontbreekt."
 
-#: failmap/map/static/js/script.js:43
+#: failmap/map/static/js/script.js:44
 msgid "X-Frame-Options header present."
 msgstr "De X-Frame-Options header is aanwezig."
 
-#: failmap/map/static/js/script.js:44
+#: failmap/map/static/js/script.js:45
 msgid "Missing X-Frame-Options header."
 msgstr "De X-Frame-Options header ontbreekt."
 
-#: failmap/map/static/js/script.js:45
+#: failmap/map/static/js/script.js:46
 msgid "Strict-Transport-Security header present."
 msgstr "Strict-Transport-Security header is aanwezig."
 
-#: failmap/map/static/js/script.js:46
+#: failmap/map/static/js/script.js:47
 msgid "Missing Strict-Transport-Security header."
 msgstr "De Strict-Transport-Security header ontbreekt."
 
-#: failmap/map/static/js/script.js:47
+#: failmap/map/static/js/script.js:48
 msgid ""
 "Missing Strict-Transport-Security header. Offers no insecure alternative "
 "service."
@@ -196,33 +196,33 @@ msgstr ""
 "De Strict-Transport-Security header ontbreekt, maar er wordt geen "
 "alternatieve onbeveiligde http dienst aangeboden op dit adres."
 
-#: failmap/map/static/js/script.js:48
+#: failmap/map/static/js/script.js:49
 msgid "DNSSEC is incorrectly or not configured (errors found)."
 msgstr "DNS beveiliging is niet of onjuist toegepast."
 
-#: failmap/map/static/js/script.js:49
+#: failmap/map/static/js/script.js:50
 msgid "DNSSEC seems to be implemented sufficiently."
 msgstr "DNS beveiliging wordt toegepast."
 
-#: failmap/map/static/js/script.js:50
+#: failmap/map/static/js/script.js:51
 msgid "FTP Server only supports insecure SSL protocol."
 msgstr "FTP Server ondersteund alleen verouderd en onveilig SSL protocol."
 
-#: failmap/map/static/js/script.js:51
+#: failmap/map/static/js/script.js:52
 msgid "FTP Server does not configured to show if encryption is available."
 msgstr ""
 
-#: failmap/map/static/js/script.js:52
+#: failmap/map/static/js/script.js:53
 msgid "FTP Server supports TLS encryption protocol."
 msgstr "FTP Server ondersteund TLS versleuteling."
 
-#: failmap/map/static/js/script.js:53
+#: failmap/map/static/js/script.js:54
 msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr ""
 "FTP Server heeft geen ondersteuning voor versleuteling of de server geeft "
 "protocol fouten."
 
-#: failmap/map/static/js/script.js:54
+#: failmap/map/static/js/script.js:55
 msgid ""
 "An FTP connection could not be established properly. Not possible to verify "
 "encryption."
@@ -230,1587 +230,1587 @@ msgstr ""
 "Er kon geen volledige verbinding worden gemaakt met de server. Het is daarom "
 "onduidelijk of er versleuteling wordt gebruikt."
 
-#: failmap/map/static/js/script.js:55
+#: failmap/map/static/js/script.js:56
 msgid "not trusted"
 msgstr ""
 
-#: failmap/map/static/js/script.js:56
+#: failmap/map/static/js/script.js:57
 msgid "trusted"
 msgstr "Certificaat wordt vertrouwd."
 
-#: failmap/map/static/js/script.js:57
+#: failmap/map/static/js/script.js:58
 msgid "Certificate is not trusted."
 msgstr "Certificaat wordt niet vertrouwd."
 
-#: failmap/map/static/js/script.js:58
+#: failmap/map/static/js/script.js:59
 #, fuzzy
 #| msgid "tls_qualys_certificate_trusted"
 msgid "Certificate is trusted."
 msgstr "Vertrouwen in certificaat"
 
-#: failmap/map/static/js/script.js:61
+#: failmap/map/static/js/script.js:62
 msgid "report_header_tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:62
+#: failmap/map/static/js/script.js:63
 msgid "report_header_plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:63
+#: failmap/map/static/js/script.js:64
 msgid "report_header_security_headers_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
-#: failmap/map/static/js/script.js:64
+#: failmap/map/static/js/script.js:65
 msgid "report_header_security_headers_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
-#: failmap/map/static/js/script.js:65
+#: failmap/map/static/js/script.js:66
 msgid "report_header_security_headers_x_content_type_options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js:66
+#: failmap/map/static/js/script.js:67
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
-#: failmap/map/static/js/script.js:67
+#: failmap/map/static/js/script.js:68
 msgid "report_header_DNSSEC"
 msgstr "DNS beveiliging (DNSSEC)"
 
-#: failmap/map/static/js/script.js:68
+#: failmap/map/static/js/script.js:69
 msgid "report_header_ftp"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/static/js/script.js:69
+#: failmap/map/static/js/script.js:70
 msgid "report_header_tls_qualys_certificate_trusted"
 msgstr "Vertrouwen in certificaat"
 
-#: failmap/map/static/js/script.js:70
+#: failmap/map/static/js/script.js:71
 msgid "report_header_tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling"
 
-#: failmap/map/static/js/script.js:73
+#: failmap/map/static/js/script.js:74
 msgid "category_menu_municipality"
 msgstr "Gemeenten"
 
-#: failmap/map/static/js/script.js:74
+#: failmap/map/static/js/script.js:75
 msgid "category_menu_cyber"
 msgstr "Cyber"
 
-#: failmap/map/static/js/script.js:75
+#: failmap/map/static/js/script.js:76
 msgid "category_menu_unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/script.js:76
+#: failmap/map/static/js/script.js:77
 msgid "category_menu_water_board"
 msgstr "Waterschappen"
 
-#: failmap/map/static/js/script.js:77
+#: failmap/map/static/js/script.js:78
 msgid "category_menu_province"
 msgstr "Provincies"
 
-#: failmap/map/static/js/script.js:78
+#: failmap/map/static/js/script.js:79
 msgid "category_menu_hacking"
 msgstr "Hackers"
 
-#: failmap/map/static/js/script.js:79
+#: failmap/map/static/js/script.js:80
 msgid "category_menu_country"
 msgstr "Land"
 
-#: failmap/map/static/js/script.js:80
+#: failmap/map/static/js/script.js:81
 msgid "category_menu_region"
 msgstr "Regio"
 
-#: failmap/map/static/js/script.js:81
+#: failmap/map/static/js/script.js:82
 msgid "category_menu_county"
 msgstr "County"
 
-#: failmap/map/static/js/script.js:82
+#: failmap/map/static/js/script.js:83
 msgid "category_menu_district"
 msgstr "District"
 
-#: failmap/map/static/js/script.js:85
+#: failmap/map/static/js/script.js:86
 msgid "Strict-Transport-Security"
 msgstr "Strict-Transport-Security (HSTS)"
 
-#: failmap/map/static/js/script.js:86
+#: failmap/map/static/js/script.js:87
 msgid "X-Content-Type-Options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js:87
+#: failmap/map/static/js/script.js:88
 msgid "X-Frame-Options"
 msgstr "X-Frame-Options header"
 
-#: failmap/map/static/js/script.js:88
+#: failmap/map/static/js/script.js:89
 msgid "X-XSS-Protection"
 msgstr "X-XSS-Protection header"
 
-#: failmap/map/static/js/script.js:89
+#: failmap/map/static/js/script.js:90
 msgid "plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:90
+#: failmap/map/static/js/script.js:91
 msgid "tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js:91
+#: failmap/map/static/js/script.js:92
 msgid "DNSSEC"
 msgstr "DNS beveiliging"
 
-#: failmap/map/static/js/script.js:92
+#: failmap/map/static/js/script.js:93
 msgid "ftp"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/static/js/script.js:93
+#: failmap/map/static/js/script.js:94
 msgid "tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling"
 
-#: failmap/map/static/js/script.js:94
+#: failmap/map/static/js/script.js:95
 msgid "tls_qualys_certificate_trusted"
 msgstr "Vertrouwen in certificaat"
 
-#: failmap/map/static/js/script.js:97
+#: failmap/map/static/js/script.js:98
 msgid "category_menu_bundesland"
 msgstr "Bundesland"
 
-#: failmap/map/static/js/script.js:98
+#: failmap/map/static/js/script.js:99
 msgid "category_menu_regierungsbezirk"
 msgstr "Regierungsbezirk"
 
-#: failmap/map/static/js/script.js:99
+#: failmap/map/static/js/script.js:100
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "Landkreis / Kreis / kreisfreie Stadt"
 
-#: failmap/map/static/js/script.js:100
+#: failmap/map/static/js/script.js:101
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "Samtgemeinde, Verwaltungsgemeinschaft"
 
-#: failmap/map/static/js/script.js:101
+#: failmap/map/static/js/script.js:102
 msgid "category_menu_stadt_gemeinde"
 msgstr "Stadt, Gemeinde"
 
-#: failmap/map/static/js/script.js:102
+#: failmap/map/static/js/script.js:103
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "Stadtbezirk / Gemeindeteil mit Selbstverwaltung"
 
-#: failmap/map/static/js/script.js:103
+#: failmap/map/static/js/script.js:104
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "Stadtteil / Gemeindeteil ohne Selbstverwaltung"
 
-#: failmap/map/static/js/script.js:106
+#: failmap/map/static/js/script.js:107
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AD"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:107
+#: failmap/map/static/js/script.js:108
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AE"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:108
+#: failmap/map/static/js/script.js:109
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AF"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:109
+#: failmap/map/static/js/script.js:110
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AG"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:110
+#: failmap/map/static/js/script.js:111
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AI"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:111
+#: failmap/map/static/js/script.js:112
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AL"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:112
+#: failmap/map/static/js/script.js:113
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AM"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:113
+#: failmap/map/static/js/script.js:114
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AO"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:114
+#: failmap/map/static/js/script.js:115
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AQ"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:115
+#: failmap/map/static/js/script.js:116
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AR"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:116
+#: failmap/map/static/js/script.js:117
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_AS"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:117
-msgid "country_AT"
-msgstr "Oostenrijk"
-
 #: failmap/map/static/js/script.js:118
-#, fuzzy
-#| msgid "country_AT"
-msgid "country_AU"
+msgid "country_AT"
 msgstr "Oostenrijk"
 
 #: failmap/map/static/js/script.js:119
 #, fuzzy
 #| msgid "country_AT"
-msgid "country_AW"
+msgid "country_AU"
 msgstr "Oostenrijk"
 
 #: failmap/map/static/js/script.js:120
 #, fuzzy
 #| msgid "country_AT"
-msgid "country_AX"
+msgid "country_AW"
 msgstr "Oostenrijk"
 
 #: failmap/map/static/js/script.js:121
 #, fuzzy
 #| msgid "country_AT"
-msgid "country_AZ"
+msgid "country_AX"
 msgstr "Oostenrijk"
 
 #: failmap/map/static/js/script.js:122
 #, fuzzy
 #| msgid "country_AT"
-msgid "country_BA"
+msgid "country_AZ"
 msgstr "Oostenrijk"
 
 #: failmap/map/static/js/script.js:123
+#, fuzzy
+#| msgid "country_AT"
+msgid "country_BA"
+msgstr "Oostenrijk"
+
+#: failmap/map/static/js/script.js:124
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BB"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:124
+#: failmap/map/static/js/script.js:125
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_BD"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:125
+#: failmap/map/static/js/script.js:126
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_BE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:126
+#: failmap/map/static/js/script.js:127
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:127
+#: failmap/map/static/js/script.js:128
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:128
+#: failmap/map/static/js/script.js:129
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:129
+#: failmap/map/static/js/script.js:130
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:130
+#: failmap/map/static/js/script.js:131
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BJ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:131
+#: failmap/map/static/js/script.js:132
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:132
+#: failmap/map/static/js/script.js:133
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:133
+#: failmap/map/static/js/script.js:134
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:134
+#: failmap/map/static/js/script.js:135
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:135
+#: failmap/map/static/js/script.js:136
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:136
+#: failmap/map/static/js/script.js:137
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_BS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:137
+#: failmap/map/static/js/script.js:138
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_BT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:138
+#: failmap/map/static/js/script.js:139
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:139
+#: failmap/map/static/js/script.js:140
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:140
+#: failmap/map/static/js/script.js:141
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_BZ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:141
+#: failmap/map/static/js/script.js:142
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_CA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:142
+#: failmap/map/static/js/script.js:143
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_CD"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:143
+#: failmap/map/static/js/script.js:144
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:144
+#: failmap/map/static/js/script.js:145
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:145
+#: failmap/map/static/js/script.js:146
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:146
+#: failmap/map/static/js/script.js:147
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:147
+#: failmap/map/static/js/script.js:148
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:148
+#: failmap/map/static/js/script.js:149
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:149
+#: failmap/map/static/js/script.js:150
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:150
+#: failmap/map/static/js/script.js:151
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:151
+#: failmap/map/static/js/script.js:152
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:152
+#: failmap/map/static/js/script.js:153
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:153
+#: failmap/map/static/js/script.js:154
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:154
+#: failmap/map/static/js/script.js:155
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CV"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:155
+#: failmap/map/static/js/script.js:156
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:156
+#: failmap/map/static/js/script.js:157
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:157
+#: failmap/map/static/js/script.js:158
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_CZ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:158
-msgid "country_DE"
-msgstr "Duitsland"
-
 #: failmap/map/static/js/script.js:159
-#, fuzzy
-#| msgid "country_DE"
-msgid "country_DJ"
+msgid "country_DE"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:160
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_DK"
+msgid "country_DJ"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:161
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_DM"
+msgid "country_DK"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:162
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_DO"
+msgid "country_DM"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:163
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_DZ"
+msgid "country_DO"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:164
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_EC"
+msgid "country_DZ"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:165
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_EE"
+msgid "country_EC"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:166
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_EG"
+msgid "country_EE"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:167
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_EH"
+msgid "country_EG"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:168
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_ER"
+msgid "country_EH"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:169
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_ES"
+msgid "country_ER"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:170
 #, fuzzy
 #| msgid "country_DE"
-msgid "country_ET"
+msgid "country_ES"
 msgstr "Duitsland"
 
 #: failmap/map/static/js/script.js:171
+#, fuzzy
+#| msgid "country_DE"
+msgid "country_ET"
+msgstr "Duitsland"
+
+#: failmap/map/static/js/script.js:172
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:172
+#: failmap/map/static/js/script.js:173
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FJ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:173
+#: failmap/map/static/js/script.js:174
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:174
+#: failmap/map/static/js/script.js:175
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:175
+#: failmap/map/static/js/script.js:176
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:176
+#: failmap/map/static/js/script.js:177
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_FR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:177
+#: failmap/map/static/js/script.js:178
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_GA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:178
+#: failmap/map/static/js/script.js:179
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GB"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:179
+#: failmap/map/static/js/script.js:180
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_GD"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:180
+#: failmap/map/static/js/script.js:181
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_GE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:181
+#: failmap/map/static/js/script.js:182
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:182
+#: failmap/map/static/js/script.js:183
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:183
+#: failmap/map/static/js/script.js:184
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:184
+#: failmap/map/static/js/script.js:185
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:185
+#: failmap/map/static/js/script.js:186
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:186
+#: failmap/map/static/js/script.js:187
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GQ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:187
+#: failmap/map/static/js/script.js:188
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:188
+#: failmap/map/static/js/script.js:189
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_GS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:189
+#: failmap/map/static/js/script.js:190
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_GT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:190
+#: failmap/map/static/js/script.js:191
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:191
+#: failmap/map/static/js/script.js:192
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:192
+#: failmap/map/static/js/script.js:193
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_GY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:193
+#: failmap/map/static/js/script.js:194
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_HK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:194
+#: failmap/map/static/js/script.js:195
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_HM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:195
+#: failmap/map/static/js/script.js:196
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_HN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:196
+#: failmap/map/static/js/script.js:197
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_HR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:197
+#: failmap/map/static/js/script.js:198
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_HT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:198
+#: failmap/map/static/js/script.js:199
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_HU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:199
+#: failmap/map/static/js/script.js:200
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_ID"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:200
+#: failmap/map/static/js/script.js:201
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_IE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:201
+#: failmap/map/static/js/script.js:202
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:202
+#: failmap/map/static/js/script.js:203
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:203
+#: failmap/map/static/js/script.js:204
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:204
+#: failmap/map/static/js/script.js:205
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:205
+#: failmap/map/static/js/script.js:206
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IQ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:206
+#: failmap/map/static/js/script.js:207
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_IR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:207
+#: failmap/map/static/js/script.js:208
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_IS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:208
+#: failmap/map/static/js/script.js:209
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_IT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:209
+#: failmap/map/static/js/script.js:210
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_JE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:210
+#: failmap/map/static/js/script.js:211
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_JM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:211
+#: failmap/map/static/js/script.js:212
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_JO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:212
+#: failmap/map/static/js/script.js:213
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_JP"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:213
+#: failmap/map/static/js/script.js:214
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_KE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:214
+#: failmap/map/static/js/script.js:215
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:215
+#: failmap/map/static/js/script.js:216
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:216
+#: failmap/map/static/js/script.js:217
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:217
+#: failmap/map/static/js/script.js:218
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:218
+#: failmap/map/static/js/script.js:219
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:219
+#: failmap/map/static/js/script.js:220
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KP"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:220
+#: failmap/map/static/js/script.js:221
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:221
+#: failmap/map/static/js/script.js:222
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:222
+#: failmap/map/static/js/script.js:223
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:223
+#: failmap/map/static/js/script.js:224
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_KZ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:224
+#: failmap/map/static/js/script.js:225
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LA"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:225
+#: failmap/map/static/js/script.js:226
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LB"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:226
+#: failmap/map/static/js/script.js:227
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LC"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:227
+#: failmap/map/static/js/script.js:228
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:228
+#: failmap/map/static/js/script.js:229
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:229
+#: failmap/map/static/js/script.js:230
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:230
+#: failmap/map/static/js/script.js:231
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LS"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:231
+#: failmap/map/static/js/script.js:232
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LT"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:232
+#: failmap/map/static/js/script.js:233
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:233
+#: failmap/map/static/js/script.js:234
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LV"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:234
+#: failmap/map/static/js/script.js:235
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_LY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:235
+#: failmap/map/static/js/script.js:236
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_MA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:236
+#: failmap/map/static/js/script.js:237
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MC"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:237
+#: failmap/map/static/js/script.js:238
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_MD"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:238
+#: failmap/map/static/js/script.js:239
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_ME"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:239
+#: failmap/map/static/js/script.js:240
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:240
+#: failmap/map/static/js/script.js:241
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:241
+#: failmap/map/static/js/script.js:242
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:242
+#: failmap/map/static/js/script.js:243
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:243
+#: failmap/map/static/js/script.js:244
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_ML"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:244
+#: failmap/map/static/js/script.js:245
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:245
+#: failmap/map/static/js/script.js:246
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:246
+#: failmap/map/static/js/script.js:247
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:247
+#: failmap/map/static/js/script.js:248
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MP"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:248
+#: failmap/map/static/js/script.js:249
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:249
+#: failmap/map/static/js/script.js:250
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_MS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:250
+#: failmap/map/static/js/script.js:251
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_MT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:251
+#: failmap/map/static/js/script.js:252
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:252
+#: failmap/map/static/js/script.js:253
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MV"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:253
+#: failmap/map/static/js/script.js:254
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:254
+#: failmap/map/static/js/script.js:255
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MX"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:255
+#: failmap/map/static/js/script.js:256
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:256
+#: failmap/map/static/js/script.js:257
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_MZ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:257
+#: failmap/map/static/js/script.js:258
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NA"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:258
+#: failmap/map/static/js/script.js:259
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NC"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:259
+#: failmap/map/static/js/script.js:260
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NE"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:260
+#: failmap/map/static/js/script.js:261
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:261
+#: failmap/map/static/js/script.js:262
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:262
+#: failmap/map/static/js/script.js:263
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_NI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:263
-msgid "country_NL"
-msgstr "Nederland"
-
 #: failmap/map/static/js/script.js:264
-#, fuzzy
-#| msgid "country_NL"
-msgid "country_NO"
+msgid "country_NL"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:265
 #, fuzzy
 #| msgid "country_NL"
-msgid "country_NP"
+msgid "country_NO"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:266
 #, fuzzy
 #| msgid "country_NL"
-msgid "country_NR"
+msgid "country_NP"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:267
 #, fuzzy
 #| msgid "country_NL"
-msgid "country_NU"
+msgid "country_NR"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:268
 #, fuzzy
 #| msgid "country_NL"
-msgid "country_NZ"
+msgid "country_NU"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:269
 #, fuzzy
 #| msgid "country_NL"
-msgid "country_OM"
+msgid "country_NZ"
 msgstr "Nederland"
 
 #: failmap/map/static/js/script.js:270
+#, fuzzy
+#| msgid "country_NL"
+msgid "country_OM"
+msgstr "Nederland"
+
+#: failmap/map/static/js/script.js:271
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_PA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:271
+#: failmap/map/static/js/script.js:272
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_PE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:272
+#: failmap/map/static/js/script.js:273
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:273
+#: failmap/map/static/js/script.js:274
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:274
+#: failmap/map/static/js/script.js:275
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PH"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:275
+#: failmap/map/static/js/script.js:276
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PK"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:276
+#: failmap/map/static/js/script.js:277
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:277
+#: failmap/map/static/js/script.js:278
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:278
+#: failmap/map/static/js/script.js:279
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:279
+#: failmap/map/static/js/script.js:280
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PR"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:280
+#: failmap/map/static/js/script.js:281
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_PS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:281
+#: failmap/map/static/js/script.js:282
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_PT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:282
+#: failmap/map/static/js/script.js:283
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:283
+#: failmap/map/static/js/script.js:284
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_PY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:284
+#: failmap/map/static/js/script.js:285
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_QA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:285
+#: failmap/map/static/js/script.js:286
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_RO"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:286
+#: failmap/map/static/js/script.js:287
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_RS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:287
+#: failmap/map/static/js/script.js:288
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_RU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:288
+#: failmap/map/static/js/script.js:289
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_RW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:289
+#: failmap/map/static/js/script.js:290
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_SA"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:290
+#: failmap/map/static/js/script.js:291
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_SB"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:291
+#: failmap/map/static/js/script.js:292
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_SC"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:292
+#: failmap/map/static/js/script.js:293
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_SD"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:293
-msgid "country_SE"
-msgstr "Zweden"
-
 #: failmap/map/static/js/script.js:294
-#, fuzzy
-#| msgid "country_SE"
-msgid "country_SG"
+msgid "country_SE"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:295
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SH"
+msgid "country_SG"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:296
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SI"
+msgid "country_SH"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:297
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SK"
+msgid "country_SI"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:298
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SL"
+msgid "country_SK"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:299
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SM"
+msgid "country_SL"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:300
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SN"
+msgid "country_SM"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:301
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SO"
+msgid "country_SN"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:302
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SR"
+msgid "country_SO"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:303
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SS"
+msgid "country_SR"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:304
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_ST"
+msgid "country_SS"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:305
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SV"
+msgid "country_ST"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:306
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SX"
+msgid "country_SV"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:307
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SY"
+msgid "country_SX"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:308
 #, fuzzy
 #| msgid "country_SE"
-msgid "country_SZ"
+msgid "country_SY"
 msgstr "Zweden"
 
 #: failmap/map/static/js/script.js:309
+#, fuzzy
+#| msgid "country_SE"
+msgid "country_SZ"
+msgstr "Zweden"
+
+#: failmap/map/static/js/script.js:310
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TC"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:310
+#: failmap/map/static/js/script.js:311
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_TD"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:311
+#: failmap/map/static/js/script.js:312
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TF"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:312
+#: failmap/map/static/js/script.js:313
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TG"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:313
+#: failmap/map/static/js/script.js:314
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TH"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:314
+#: failmap/map/static/js/script.js:315
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TJ"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:315
+#: failmap/map/static/js/script.js:316
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_TL"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:316
+#: failmap/map/static/js/script.js:317
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TM"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:317
+#: failmap/map/static/js/script.js:318
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_TN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:318
+#: failmap/map/static/js/script.js:319
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TO"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:319
+#: failmap/map/static/js/script.js:320
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TR"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:320
+#: failmap/map/static/js/script.js:321
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TT"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:321
+#: failmap/map/static/js/script.js:322
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TW"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:322
+#: failmap/map/static/js/script.js:323
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_TZ"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:323
+#: failmap/map/static/js/script.js:324
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_UA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:324
+#: failmap/map/static/js/script.js:325
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_UG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:325
+#: failmap/map/static/js/script.js:326
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_US"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:326
+#: failmap/map/static/js/script.js:327
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_UY"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:327
+#: failmap/map/static/js/script.js:328
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_UZ"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:328
+#: failmap/map/static/js/script.js:329
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_VA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:329
+#: failmap/map/static/js/script.js:330
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_VC"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:330
+#: failmap/map/static/js/script.js:331
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_VE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:331
+#: failmap/map/static/js/script.js:332
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_VG"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:332
+#: failmap/map/static/js/script.js:333
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_VI"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:333
+#: failmap/map/static/js/script.js:334
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_VN"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:334
+#: failmap/map/static/js/script.js:335
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_VU"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:335
+#: failmap/map/static/js/script.js:336
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_WF"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:336
+#: failmap/map/static/js/script.js:337
 #, fuzzy
 #| msgid "country_SE"
 msgid "country_WS"
 msgstr "Zweden"
 
-#: failmap/map/static/js/script.js:337
+#: failmap/map/static/js/script.js:338
 #, fuzzy
 #| msgid "country_DE"
 msgid "country_YE"
 msgstr "Duitsland"
 
-#: failmap/map/static/js/script.js:338
+#: failmap/map/static/js/script.js:339
 #, fuzzy
 #| msgid "country_AT"
 msgid "country_ZA"
 msgstr "Oostenrijk"
 
-#: failmap/map/static/js/script.js:339
+#: failmap/map/static/js/script.js:340
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_ZM"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:340
+#: failmap/map/static/js/script.js:341
 #, fuzzy
 #| msgid "country_NL"
 msgid "country_ZW"
 msgstr "Nederland"
 
-#: failmap/map/static/js/script.js:344
+#: failmap/map/static/js/script.js:345
 msgid "One week earlier"
 msgstr "Een week eerder"
 
-#: failmap/map/static/js/script.js:345
+#: failmap/map/static/js/script.js:346
 msgid "One week later"
 msgstr "Een week later"
 
-#: failmap/map/static/js/script.js:346
+#: failmap/map/static/js/script.js:347
 msgid "Moment"
 msgstr ""
 
-#: failmap/map/static/js/script.js:347
+#: failmap/map/static/js/script.js:348
 msgid "Risks"
 msgstr "Risico's"
 
@@ -1874,7 +1874,7 @@ msgstr "midden"
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js:1254
+#: failmap/map/static/js/views.js:1264
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
 

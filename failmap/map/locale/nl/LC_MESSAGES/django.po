@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-14 07:36+0000\n"
+"POT-Creation-Date: 2018-11-14 11:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -42,15 +42,15 @@ msgstr "administratief gebied"
 msgid "administrative_regions"
 msgstr "administratieve gebieden"
 
-#: failmap/map/models.py:276
+#: failmap/map/models.py:281
 msgid "order"
 msgstr "volgorde"
 
-#: failmap/map/models.py:284
+#: failmap/map/models.py:289
 msgid "configuration"
 msgstr "configuratie"
 
-#: failmap/map/models.py:285
+#: failmap/map/models.py:290
 msgid "configurations"
 msgstr "configuraties"
 
@@ -59,27 +59,27 @@ msgid "tls_qualys"
 msgstr "Toepassing van versleuteling"
 
 #: failmap/map/templates/map/dynamic_translations.html:5
-#: failmap/map/templates/map/index.html:339
+#: failmap/map/templates/map/index.html:340
 msgid "plain_https"
 msgstr "Ontbreken van versleuteling"
 
 #: failmap/map/templates/map/dynamic_translations.html:6
-#: failmap/map/templates/map/index.html:343
+#: failmap/map/templates/map/index.html:344
 msgid "X-XSS-Protection"
 msgstr "X-XSS-Protection"
 
 #: failmap/map/templates/map/dynamic_translations.html:7
-#: failmap/map/templates/map/index.html:341
+#: failmap/map/templates/map/index.html:342
 msgid "X-Frame-Options"
 msgstr "Voorkomen van Clickjacking aanvallen (X-Frame-Options)"
 
 #: failmap/map/templates/map/dynamic_translations.html:8
-#: failmap/map/templates/map/index.html:342
+#: failmap/map/templates/map/index.html:343
 msgid "X-Content-Type-Options"
 msgstr "X-Content-Type-Options"
 
 #: failmap/map/templates/map/dynamic_translations.html:9
-#: failmap/map/templates/map/index.html:340
+#: failmap/map/templates/map/index.html:341
 msgid "Strict-Transport-Security"
 msgstr "Strict-Transport-Security (HSTS)"
 
@@ -192,60 +192,60 @@ msgstr "Strict-Transport-Security header is aanwezig."
 msgid "Missing Strict-Transport-Security header."
 msgstr "De Strict-Transport-Security header ontbreekt."
 
-#: failmap/map/templates/map/index.html:19
+#: failmap/map/templates/map/index.html:20
 msgid "Site Title"
 msgstr "Faalkaart - Geeft inzicht in beveiliging."
 
-#: failmap/map/templates/map/index.html:106
+#: failmap/map/templates/map/index.html:107
 msgid "Map"
 msgstr "Kaart"
 
-#: failmap/map/templates/map/index.html:114
+#: failmap/map/templates/map/index.html:115
 msgid "Info"
 msgstr "Wat is dit?"
 
-#: failmap/map/templates/map/index.html:118
-#: failmap/map/templates/map/index.html:235
+#: failmap/map/templates/map/index.html:119
+#: failmap/map/templates/map/index.html:236
 msgid "Charts"
 msgstr "De beste/slechtste"
 
-#: failmap/map/templates/map/index.html:121
+#: failmap/map/templates/map/index.html:122
 msgid "Reports"
 msgstr "Rapportages"
 
-#: failmap/map/templates/map/index.html:124
+#: failmap/map/templates/map/index.html:125
 msgid "Statistics"
 msgstr "Statistieken"
 
-#: failmap/map/templates/map/index.html:128
-#: failmap/map/templates/map/index.html:1150
-#: failmap/map/templates/map/index.html:1327
+#: failmap/map/templates/map/index.html:129
+#: failmap/map/templates/map/index.html:1124
+#: failmap/map/templates/map/index.html:1301
 msgid "Comply or explain"
 msgstr "Pas toe of leg uit"
 
-#: failmap/map/templates/map/index.html:132
-#: failmap/map/templates/map/index.html:1233
+#: failmap/map/templates/map/index.html:133
+#: failmap/map/templates/map/index.html:1207
 msgid "Scan schedule"
 msgstr "Schema"
 
-#: failmap/map/templates/map/index.html:136
-#: failmap/map/templates/map/index.html:1258
+#: failmap/map/templates/map/index.html:137
+#: failmap/map/templates/map/index.html:1232
 msgid "Datasets"
 msgstr "Datasets"
 
-#: failmap/map/templates/map/index.html:143
+#: failmap/map/templates/map/index.html:144
 msgid "DEBUG"
 msgstr "ONGEDIERTEBESTRIJDINGSMODUS"
 
-#: failmap/map/templates/map/index.html:147
+#: failmap/map/templates/map/index.html:148
 msgid "Admin"
 msgstr "Beheer"
 
-#: failmap/map/templates/map/index.html:219
+#: failmap/map/templates/map/index.html:220
 msgid "What do i see?"
 msgstr "Wat zie ik hier?"
 
-#: failmap/map/templates/map/index.html:220
+#: failmap/map/templates/map/index.html:221
 msgid "whats do i see explained"
 msgstr ""
 "Deze website laat zien hoe goed de overheid veiligheid toepast op haar "
@@ -255,7 +255,7 @@ msgstr ""
 "wordt het risico voor niemand groter, maar kan je toch zien of de veiligheid "
 "op orde is. Dit zou allemaal op orde moeten zijn... toch?"
 
-#: failmap/map/templates/map/index.html:221
+#: failmap/map/templates/map/index.html:222
 #, python-format
 msgid ""
 " This website is run by %(RESPONSIBLE_ORGANIZATION_NAME)s. To submit new "
@@ -265,96 +265,96 @@ msgstr ""
 "Het insturen van domeinen, stellen van vragen et cetera kunt u doen op: <a "
 "href='mailto:%(PROJECT_ISSUE_MAIL)s'>%(PROJECT_ISSUE_MAIL)s</a>"
 
-#: failmap/map/templates/map/index.html:233
-#: failmap/map/templates/map/index.html:255
-#: failmap/map/templates/map/index.html:463
-#: failmap/map/templates/map/index.html:1148
-#: failmap/map/templates/map/index.html:1231
-#: failmap/map/templates/map/index.html:1256
+#: failmap/map/templates/map/index.html:234
+#: failmap/map/templates/map/index.html:256
+#: failmap/map/templates/map/index.html:464
+#: failmap/map/templates/map/index.html:1122
+#: failmap/map/templates/map/index.html:1205
+#: failmap/map/templates/map/index.html:1230
 msgid "back to map"
 msgstr "Terug naar de kaart"
 
-#: failmap/map/templates/map/index.html:236
+#: failmap/map/templates/map/index.html:237
 msgid "Chart introduction"
 msgstr "Dit zijn de beste en slechtste organisaties en urls op dit moment."
 
-#: failmap/map/templates/map/index.html:257
+#: failmap/map/templates/map/index.html:258
 msgid "Report"
 msgstr "Rapport"
 
-#: failmap/map/templates/map/index.html:261
+#: failmap/map/templates/map/index.html:262
 msgid "Show report for organization"
 msgstr "Toon verslag voor organisatie"
 
-#: failmap/map/templates/map/index.html:276
-#: failmap/map/templates/map/index.html:1429
+#: failmap/map/templates/map/index.html:277
+#: failmap/map/templates/map/index.html:1405
 msgid "Report for"
 msgstr "Rapport van"
 
-#: failmap/map/templates/map/index.html:278
-#: failmap/map/templates/map/index.html:1431
+#: failmap/map/templates/map/index.html:279
+#: failmap/map/templates/map/index.html:1407
 msgid "close report"
 msgstr "Sluiten"
 
-#: failmap/map/templates/map/index.html:279
-#: failmap/map/templates/map/index.html:1432
+#: failmap/map/templates/map/index.html:280
+#: failmap/map/templates/map/index.html:1408
 msgid "print report"
 msgstr "Afdrukken"
 
-#: failmap/map/templates/map/index.html:281
-#: failmap/map/templates/map/index.html:1464
+#: failmap/map/templates/map/index.html:282
+#: failmap/map/templates/map/index.html:1440
 msgid "Data from"
 msgstr "Gegevens van"
 
-#: failmap/map/templates/map/index.html:284
-#: failmap/map/templates/map/index.html:1467
+#: failmap/map/templates/map/index.html:285
+#: failmap/map/templates/map/index.html:1443
 msgid "Promise message"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:286
-#: failmap/map/templates/map/index.html:1469
+#: failmap/map/templates/map/index.html:287
+#: failmap/map/templates/map/index.html:1445
 msgid "RSS change feed teaser"
 msgstr "Volg de laatste wijzigingen van deze organisatie via deze"
 
-#: failmap/map/templates/map/index.html:288
-#: failmap/map/templates/map/index.html:1059
-#: failmap/map/templates/map/index.html:1068
-#: failmap/map/templates/map/index.html:1077
-#: failmap/map/templates/map/index.html:1086
-#: failmap/map/templates/map/index.html:1095
-#: failmap/map/templates/map/index.html:1104
-#: failmap/map/templates/map/index.html:1113
-#: failmap/map/templates/map/index.html:1122
-#: failmap/map/templates/map/index.html:1131
-#: failmap/map/templates/map/index.html:1471
+#: failmap/map/templates/map/index.html:289
+#: failmap/map/templates/map/index.html:1033
+#: failmap/map/templates/map/index.html:1042
+#: failmap/map/templates/map/index.html:1051
+#: failmap/map/templates/map/index.html:1060
+#: failmap/map/templates/map/index.html:1069
+#: failmap/map/templates/map/index.html:1078
+#: failmap/map/templates/map/index.html:1087
+#: failmap/map/templates/map/index.html:1096
+#: failmap/map/templates/map/index.html:1105
+#: failmap/map/templates/map/index.html:1447
 msgid "rss feed"
 msgstr "RSS feed"
 
-#: failmap/map/templates/map/index.html:290
-#: failmap/map/templates/map/index.html:1473
+#: failmap/map/templates/map/index.html:291
+#: failmap/map/templates/map/index.html:1449
 msgid "Report ask domains leader"
 msgstr "Ontbreken er domeinen?"
 
-#: failmap/map/templates/map/index.html:291
-#: failmap/map/templates/map/index.html:1474
+#: failmap/map/templates/map/index.html:292
+#: failmap/map/templates/map/index.html:1450
 msgid "Report ask domains subject"
 msgstr "Nieuwe%20domeinen%20voor%20"
 
-#: failmap/map/templates/map/index.html:291
-#: failmap/map/templates/map/index.html:1474
+#: failmap/map/templates/map/index.html:292
+#: failmap/map/templates/map/index.html:1450
 msgid "Report ask domains body"
 msgstr ""
 "Beste,%0D%0A%0D%0AGraag de volgende domeinen toevoegen aan de kaart:%0D%0A%0D"
 "%0A%0D%0A%0D%0A%0D%0A%0D%0ATip: stuur een zonefile mee met alle domeinen.%0D"
 "%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
 
-#: failmap/map/templates/map/index.html:291
-#: failmap/map/templates/map/index.html:1474
+#: failmap/map/templates/map/index.html:292
+#: failmap/map/templates/map/index.html:1450
 msgid "Report ask sendin domains"
 msgstr "Stuur hier domeinen in."
 
-#: failmap/map/templates/map/index.html:297
-#: failmap/map/templates/map/index.html:1436
+#: failmap/map/templates/map/index.html:298
+#: failmap/map/templates/map/index.html:1412
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:30
 #: failmap/map/templates/map/topwin.html:30 failmap/map/views.py:1875
@@ -362,8 +362,8 @@ msgstr "Stuur hier domeinen in."
 msgid "High"
 msgstr "Hoog risico"
 
-#: failmap/map/templates/map/index.html:302
-#: failmap/map/templates/map/index.html:1441
+#: failmap/map/templates/map/index.html:303
+#: failmap/map/templates/map/index.html:1417
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:33
 #: failmap/map/templates/map/topwin.html:33 failmap/map/views.py:1875
@@ -371,8 +371,8 @@ msgstr "Hoog risico"
 msgid "Medium"
 msgstr "Midden risico"
 
-#: failmap/map/templates/map/index.html:307
-#: failmap/map/templates/map/index.html:1446
+#: failmap/map/templates/map/index.html:308
+#: failmap/map/templates/map/index.html:1422
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:36
 #: failmap/map/templates/map/topwin.html:36 failmap/map/views.py:1875
@@ -380,43 +380,43 @@ msgstr "Midden risico"
 msgid "Low"
 msgstr "Laag risico"
 
-#: failmap/map/templates/map/index.html:313
+#: failmap/map/templates/map/index.html:314
 msgid "Risks and internet connectivity over time"
 msgstr "Tijdslijn van risico's en dienstverlening"
 
-#: failmap/map/templates/map/index.html:328
+#: failmap/map/templates/map/index.html:329
 msgid "Risk summary overview"
 msgstr "Overzichtstabel"
 
-#: failmap/map/templates/map/index.html:336
-#: failmap/map/templates/map/index.html:602
+#: failmap/map/templates/map/index.html:337
+#: failmap/map/templates/map/index.html:603
 msgid "DNSSEC"
 msgstr "DNS beveiliging (DNSSEC)"
 
-#: failmap/map/templates/map/index.html:337
+#: failmap/map/templates/map/index.html:338
 msgid "tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling (TLS)"
 
-#: failmap/map/templates/map/index.html:338
+#: failmap/map/templates/map/index.html:339
 msgid "tls_qualys_certificate_trusted"
-msgstr ""
+msgstr "Vertrouwen in certificaat (TLS)"
 
-#: failmap/map/templates/map/index.html:344
-#: failmap/map/templates/map/index.html:621
+#: failmap/map/templates/map/index.html:345
+#: failmap/map/templates/map/index.html:619
 msgid "FTP"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/templates/map/index.html:362
+#: failmap/map/templates/map/index.html:363
 msgid "Full report"
 msgstr "Volledig rapport"
 
-#: failmap/map/templates/map/index.html:375
-#: failmap/map/templates/map/index.html:1489
+#: failmap/map/templates/map/index.html:376
+#: failmap/map/templates/map/index.html:1465
 msgid "Incorrect finding on mail subject"
 msgstr "verkeerde%20bevinding%20op%20"
 
-#: failmap/map/templates/map/index.html:375
-#: failmap/map/templates/map/index.html:1489
+#: failmap/map/templates/map/index.html:376
+#: failmap/map/templates/map/index.html:1465
 msgid "Incorrect finding on mail body"
 msgstr ""
 "Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een "
@@ -427,157 +427,157 @@ msgstr ""
 "verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A"
 "%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
 
-#: failmap/map/templates/map/index.html:376
-#: failmap/map/templates/map/index.html:1490
+#: failmap/map/templates/map/index.html:377
+#: failmap/map/templates/map/index.html:1466
 msgid "Report incorrect finding"
 msgstr "Meld onjuiste verbinding"
 
-#: failmap/map/templates/map/index.html:386
-#: failmap/map/templates/map/index.html:1500
+#: failmap/map/templates/map/index.html:387
+#: failmap/map/templates/map/index.html:1476
 msgid "Url level findings"
 msgstr "Algemene bevindingen"
 
-#: failmap/map/templates/map/index.html:392
-#: failmap/map/templates/map/index.html:427
-#: failmap/map/templates/map/index.html:432
-#: failmap/map/templates/map/index.html:1506
-#: failmap/map/templates/map/index.html:1541
-#: failmap/map/templates/map/index.html:1546
+#: failmap/map/templates/map/index.html:393
+#: failmap/map/templates/map/index.html:428
+#: failmap/map/templates/map/index.html:433
+#: failmap/map/templates/map/index.html:1482
+#: failmap/map/templates/map/index.html:1517
+#: failmap/map/templates/map/index.html:1522
 msgid "Since"
 msgstr "Sinds"
 
-#: failmap/map/templates/map/index.html:392
-#: failmap/map/templates/map/index.html:427
-#: failmap/map/templates/map/index.html:432
-#: failmap/map/templates/map/index.html:1506
-#: failmap/map/templates/map/index.html:1541
-#: failmap/map/templates/map/index.html:1546
+#: failmap/map/templates/map/index.html:393
+#: failmap/map/templates/map/index.html:428
+#: failmap/map/templates/map/index.html:433
+#: failmap/map/templates/map/index.html:1482
+#: failmap/map/templates/map/index.html:1517
+#: failmap/map/templates/map/index.html:1522
 msgid "Last check"
 msgstr "meest recente controle"
 
-#: failmap/map/templates/map/index.html:418
-#: failmap/map/templates/map/index.html:1532
+#: failmap/map/templates/map/index.html:419
+#: failmap/map/templates/map/index.html:1508
 msgid "Service"
 msgstr "Dienst"
 
-#: failmap/map/templates/map/index.html:424
-#: failmap/map/templates/map/index.html:1538
+#: failmap/map/templates/map/index.html:425
+#: failmap/map/templates/map/index.html:1514
 msgid "Explained"
 msgstr "Verklaring"
 
-#: failmap/map/templates/map/index.html:425
-#: failmap/map/templates/map/index.html:1539
+#: failmap/map/templates/map/index.html:426
+#: failmap/map/templates/map/index.html:1515
 msgid "Explained on"
 msgstr "Verklaard op"
 
-#: failmap/map/templates/map/index.html:425
-#: failmap/map/templates/map/index.html:1539
+#: failmap/map/templates/map/index.html:426
+#: failmap/map/templates/map/index.html:1515
 msgid "explanation expires"
 msgstr "verloopt"
 
-#: failmap/map/templates/map/index.html:465
+#: failmap/map/templates/map/index.html:466
 msgid "Extensive statistics"
 msgstr "Uitgebreide statistieken"
 
-#: failmap/map/templates/map/index.html:469
-#: failmap/map/templates/map/index.html:1278
+#: failmap/map/templates/map/index.html:470
+#: failmap/map/templates/map/index.html:1252
 msgid "Organizations"
 msgstr "Organisaties"
 
-#: failmap/map/templates/map/index.html:470
+#: failmap/map/templates/map/index.html:471
 msgid "Organizations Explained"
 msgstr ""
 "Organisaties hebben vaak meerdere internet adressen. Alle fouten op deze "
 "adressen bij elkaar opgeteld bepalen of de organisatie haar beveiliging op "
 "orde heeft."
 
-#: failmap/map/templates/map/index.html:473
+#: failmap/map/templates/map/index.html:474
 msgid "Internet addresses"
 msgstr "Internet adressen"
 
-#: failmap/map/templates/map/index.html:474
+#: failmap/map/templates/map/index.html:475
 msgid "Internet addresses Explained"
 msgstr ""
 "Van de onderstaande adressen hebben we een beveilingsstatus weten te bepalen."
 
-#: failmap/map/templates/map/index.html:481
-#: failmap/map/templates/map/index.html:529
+#: failmap/map/templates/map/index.html:482
+#: failmap/map/templates/map/index.html:530
 msgid "stats remark green"
 msgstr "Wauw!"
 
-#: failmap/map/templates/map/index.html:484
-#: failmap/map/templates/map/index.html:532
+#: failmap/map/templates/map/index.html:485
+#: failmap/map/templates/map/index.html:533
 msgid "stats remark orange"
 msgstr "Bijna!"
 
-#: failmap/map/templates/map/index.html:487
-#: failmap/map/templates/map/index.html:535
+#: failmap/map/templates/map/index.html:488
+#: failmap/map/templates/map/index.html:536
 msgid "stats remark red"
 msgstr "Dat kan beter."
 
-#: failmap/map/templates/map/index.html:490
+#: failmap/map/templates/map/index.html:491
 msgid "stats remark gray"
 msgstr "Geen informatie beschikbaar"
 
-#: failmap/map/templates/map/index.html:497
-#: failmap/map/templates/map/index.html:541
+#: failmap/map/templates/map/index.html:498
+#: failmap/map/templates/map/index.html:542
 msgid "When"
 msgstr "Tijdstip"
 
-#: failmap/map/templates/map/index.html:498
-#: failmap/map/templates/map/index.html:542
+#: failmap/map/templates/map/index.html:499
+#: failmap/map/templates/map/index.html:543
 msgid "Number"
 msgstr "Aantal"
 
-#: failmap/map/templates/map/index.html:499
-#: failmap/map/templates/map/index.html:543
+#: failmap/map/templates/map/index.html:500
+#: failmap/map/templates/map/index.html:544
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/templates/map/index.html:500
-#: failmap/map/templates/map/index.html:544
+#: failmap/map/templates/map/index.html:501
+#: failmap/map/templates/map/index.html:545
 msgid "Average"
 msgstr "Matig"
 
-#: failmap/map/templates/map/index.html:501
-#: failmap/map/templates/map/index.html:545
+#: failmap/map/templates/map/index.html:502
+#: failmap/map/templates/map/index.html:546
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/templates/map/index.html:575
+#: failmap/map/templates/map/index.html:576
 msgid "Technical TLS"
 msgstr "Integriteit en vertrouwelijkheid"
 
-#: failmap/map/templates/map/index.html:576
+#: failmap/map/templates/map/index.html:577
 msgid "Technical stats TLS explained"
 msgstr ""
 "Goede versleuteling garandeert dat informatie niet door anderen gelezen of "
 "aangepast kan worden."
 
-#: failmap/map/templates/map/index.html:581
+#: failmap/map/templates/map/index.html:582
 msgid "Technical stats headers"
 msgstr "Veiligheid inhoud website"
 
-#: failmap/map/templates/map/index.html:582
+#: failmap/map/templates/map/index.html:583
 msgid "Technical stats headers explained"
 msgstr "Of de website diverse aanvallen voorkomt."
 
-#: failmap/map/templates/map/index.html:593
-#: failmap/map/templates/map/index.html:730
+#: failmap/map/templates/map/index.html:594
+#: failmap/map/templates/map/index.html:718
 msgid "Technology"
 msgstr "Beveiliging"
 
-#: failmap/map/templates/map/index.html:594
-#: failmap/map/templates/map/index.html:731
+#: failmap/map/templates/map/index.html:595
+#: failmap/map/templates/map/index.html:719
 msgid "Result"
 msgstr "Resultaat"
 
-#: failmap/map/templates/map/index.html:595
-#: failmap/map/templates/map/index.html:732
+#: failmap/map/templates/map/index.html:596
+#: failmap/map/templates/map/index.html:720
 msgid "Total"
 msgstr "Aantal"
 
-#: failmap/map/templates/map/index.html:606
+#: failmap/map/templates/map/index.html:607
 msgid "DNSSEC incorrect"
 msgstr "Niet of onjuist geïmplementeerd"
 
@@ -585,249 +585,249 @@ msgstr "Niet of onjuist geïmplementeerd"
 msgid "DNSSEC correct"
 msgstr "Correct toegepast"
 
-#: failmap/map/templates/map/index.html:625
+#: failmap/map/templates/map/index.html:623
 msgid "FTP insecure"
 msgstr "Onversleuteld"
 
-#: failmap/map/templates/map/index.html:631
+#: failmap/map/templates/map/index.html:628
 msgid "FTP outdated"
 msgstr "Verouderde versleuteling"
 
-#: failmap/map/templates/map/index.html:637
+#: failmap/map/templates/map/index.html:633
 msgid "FTP secure"
 msgstr "Versleuteld"
 
-#: failmap/map/templates/map/index.html:646
+#: failmap/map/templates/map/index.html:640
 msgid "Application of encryption"
 msgstr "Toepassing van versleuteling"
 
-#: failmap/map/templates/map/index.html:650
-#: failmap/map/templates/map/index.html:656
+#: failmap/map/templates/map/index.html:644
+#: failmap/map/templates/map/index.html:649
 msgid "Not at all"
 msgstr "Helemaal niet"
 
-#: failmap/map/templates/map/index.html:662
+#: failmap/map/templates/map/index.html:654
 msgid "Redirect from unsafe address"
 msgstr "Doorverwijzing vanaf onveilig adres"
 
-#: failmap/map/templates/map/index.html:670
+#: failmap/map/templates/map/index.html:661
 msgid "Encryption quality"
 msgstr "Kwaliteit van versleuteling (TLS)"
 
-#: failmap/map/templates/map/index.html:674
+#: failmap/map/templates/map/index.html:665
 msgid "Broken"
 msgstr "Onvoldoende"
 
-#: failmap/map/templates/map/index.html:679
+#: failmap/map/templates/map/index.html:670
 msgid "TLS rated C"
 msgstr "Matig"
 
-#: failmap/map/templates/map/index.html:685
+#: failmap/map/templates/map/index.html:675
 msgid "TLS rated B"
 msgstr "Redelijk"
 
-#: failmap/map/templates/map/index.html:691
+#: failmap/map/templates/map/index.html:680
 msgid "TLS rated A-"
 msgstr "Goed"
 
-#: failmap/map/templates/map/index.html:696
+#: failmap/map/templates/map/index.html:685
 msgid "TLS rated A"
 msgstr "Perfect"
 
-#: failmap/map/templates/map/index.html:701
+#: failmap/map/templates/map/index.html:690
 msgid "TLS rated A+"
 msgstr "Perfect en meer+"
 
-#: failmap/map/templates/map/index.html:706
+#: failmap/map/templates/map/index.html:694
 msgid "Certificate trust"
 msgstr "Vertrouwen in certificaat (TLS)"
 
-#: failmap/map/templates/map/index.html:710
+#: failmap/map/templates/map/index.html:698
 msgid "No trust"
 msgstr "Geen vertrouwen"
 
-#: failmap/map/templates/map/index.html:715
+#: failmap/map/templates/map/index.html:703
 msgid "Trust"
 msgstr "Vertrouwen"
 
-#: failmap/map/templates/map/index.html:738
+#: failmap/map/templates/map/index.html:725
 msgid "Stats HSTS"
 msgstr "Afdwingen van versleuteling"
 
+#: failmap/map/templates/map/index.html:729
 #: failmap/map/templates/map/index.html:742
-#: failmap/map/templates/map/index.html:757
-#: failmap/map/templates/map/index.html:772
-#: failmap/map/templates/map/index.html:788
+#: failmap/map/templates/map/index.html:755
+#: failmap/map/templates/map/index.html:768
 msgid "Stats hasn't"
 msgstr "Niet"
 
-#: failmap/map/templates/map/index.html:748
-#: failmap/map/templates/map/index.html:763
-#: failmap/map/templates/map/index.html:778
-#: failmap/map/templates/map/index.html:794
+#: failmap/map/templates/map/index.html:734
+#: failmap/map/templates/map/index.html:747
+#: failmap/map/templates/map/index.html:760
+#: failmap/map/templates/map/index.html:773
 msgid "Stats has"
 msgstr "Wel"
 
-#: failmap/map/templates/map/index.html:753
+#: failmap/map/templates/map/index.html:738
 msgid "Stats X-Frame-Options"
 msgstr "Voorkomen van Clickjacking aanvallen"
 
-#: failmap/map/templates/map/index.html:768
+#: failmap/map/templates/map/index.html:751
 msgid "Stats X-XSS Protection"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:783
+#: failmap/map/templates/map/index.html:764
 msgid "Stats X-Content Type Options"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:808
+#: failmap/map/templates/map/index.html:785
 #: failmap/map/templates/map/topfail.html:27
 #: failmap/map/templates/map/topwin.html:27
 msgid "Services"
 msgstr "Diensten"
 
-#: failmap/map/templates/map/index.html:809
+#: failmap/map/templates/map/index.html:786
 msgid "Services explained"
 msgstr "Een adres kan allerlei diensten aanbieden, waaronder websites."
 
-#: failmap/map/templates/map/index.html:811
+#: failmap/map/templates/map/index.html:787
 msgid "Number of service checked"
 msgstr "Er wordt controle uitgevoerd op {{ x['endpoints'] }} diensten."
 
-#: failmap/map/templates/map/index.html:816
+#: failmap/map/templates/map/index.html:792
 msgid "IP Version"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:820
+#: failmap/map/templates/map/index.html:796
 msgid "Protocol"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:824
+#: failmap/map/templates/map/index.html:800
 msgid "Port"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:828
+#: failmap/map/templates/map/index.html:804
 msgid "Amount"
 msgstr "Aantal"
 
-#: failmap/map/templates/map/index.html:831
+#: failmap/map/templates/map/index.html:807
 msgid "Percentage"
 msgstr "%"
 
-#: failmap/map/templates/map/index.html:855
+#: failmap/map/templates/map/index.html:831
 msgid "Improvements"
 msgstr "Verbeteringen"
 
-#: failmap/map/templates/map/index.html:856
+#: failmap/map/templates/map/index.html:832
 msgid "Improvements explained"
 msgstr ""
 "Dit zijn de verbeteringen van <b>de laatste zeven dagen</b>. Positieve "
 "getallen laten een vooruitgang zien, terwijl negatieve getallen "
 "verslechtering laten zien."
 
-#: failmap/map/templates/map/index.html:860
+#: failmap/map/templates/map/index.html:836
 msgid "High risk improvements"
 msgstr "Hoog risico verbeteringen"
 
-#: failmap/map/templates/map/index.html:867
+#: failmap/map/templates/map/index.html:843
 msgid "Encryption Quality"
 msgstr "Kwaliteit van versleuteling (TLS)"
 
-#: failmap/map/templates/map/index.html:871
+#: failmap/map/templates/map/index.html:847
 msgid "Certificate Trust"
 msgstr "Vertrouwen in certificaat (TLS)"
 
-#: failmap/map/templates/map/index.html:875
-#: failmap/map/templates/map/index.html:897
+#: failmap/map/templates/map/index.html:851
+#: failmap/map/templates/map/index.html:872
 msgid "Missing encryption"
 msgstr "Aanwezigheid van versleuteling"
 
-#: failmap/map/templates/map/index.html:879
+#: failmap/map/templates/map/index.html:855
 msgid "Missing FTP encryption"
 msgstr "Aanwezigheid van FTP versleuteling"
 
-#: failmap/map/templates/map/index.html:886
+#: failmap/map/templates/map/index.html:862
 msgid "Medium risk improvements"
 msgstr "Midden risico verbeteringen"
 
-#: failmap/map/templates/map/index.html:893
-#: failmap/map/templates/map/index.html:922
+#: failmap/map/templates/map/index.html:868
+#: failmap/map/templates/map/index.html:896
 msgid "Encryption"
 msgstr "Kwaliteit Versleuteling"
 
-#: failmap/map/templates/map/index.html:901
+#: failmap/map/templates/map/index.html:876
 msgid "HSTS Header"
 msgstr "HSTS Header"
 
-#: failmap/map/templates/map/index.html:905
+#: failmap/map/templates/map/index.html:880
 msgid "XFO Header"
 msgstr "XFO Header"
 
-#: failmap/map/templates/map/index.html:909
+#: failmap/map/templates/map/index.html:884
 msgid "FTP connection issue (security unknown)"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:915
+#: failmap/map/templates/map/index.html:890
 msgid "Low risk improvements"
 msgstr "Laag risico verbeteringen"
 
-#: failmap/map/templates/map/index.html:926
+#: failmap/map/templates/map/index.html:900
 msgid "X-XSS"
 msgstr "X-XSS Header"
 
-#: failmap/map/templates/map/index.html:930
+#: failmap/map/templates/map/index.html:904
 msgid "X-Content"
 msgstr "X-Content header"
 
-#: failmap/map/templates/map/index.html:944
+#: failmap/map/templates/map/index.html:918
 msgid "Graphs"
 msgstr "Grafieken"
 
-#: failmap/map/templates/map/index.html:949
+#: failmap/map/templates/map/index.html:923
 msgid "Overall"
 msgstr "Alles bij elkaar"
 
-#: failmap/map/templates/map/index.html:963
+#: failmap/map/templates/map/index.html:937
 msgid "Encryption quality issues (TLS)"
 msgstr "Kwaliteit van versleuteling (TLS)"
 
-#: failmap/map/templates/map/index.html:972
+#: failmap/map/templates/map/index.html:946
 msgid "Certificate trust issues (TLS)"
 msgstr "Vertrouwen in certificaat (TLS)"
 
-#: failmap/map/templates/map/index.html:981
+#: failmap/map/templates/map/index.html:955
 msgid "Lack of encryption failure"
 msgstr "Gebrek aan versleuteling (alleen http)"
 
-#: failmap/map/templates/map/index.html:990
+#: failmap/map/templates/map/index.html:964
 msgid "FTP failure"
 msgstr "Bestandsoverdracht (FTP) historie"
 
-#: failmap/map/templates/map/index.html:999
+#: failmap/map/templates/map/index.html:973
 msgid "DNSSEC failure"
 msgstr "DNSSEC historie"
 
-#: failmap/map/templates/map/index.html:1008
+#: failmap/map/templates/map/index.html:982
 msgid "Forcing of encryption failure"
 msgstr "Forceren van versleuteling (HSTS header)"
 
-#: failmap/map/templates/map/index.html:1017
+#: failmap/map/templates/map/index.html:991
 msgid "X-Frame Options failure"
 msgstr "X-Frame Options (clickjack bescherming) historie"
 
-#: failmap/map/templates/map/index.html:1027
+#: failmap/map/templates/map/index.html:1001
 msgid "X-Content-Type-Options failure"
 msgstr "X-Content-Type-Options historie"
 
-#: failmap/map/templates/map/index.html:1036
+#: failmap/map/templates/map/index.html:1010
 msgid "X-XSS-Protection failure"
 msgstr "X-XSS-Protection historie"
 
-#: failmap/map/templates/map/index.html:1050
+#: failmap/map/templates/map/index.html:1024
 msgid "Latest changes"
 msgstr "Laatste wijzigingen"
 
-#: failmap/map/templates/map/index.html:1051
+#: failmap/map/templates/map/index.html:1025
 msgid "Latest changes explanation"
 msgstr ""
 "Dit is een overzicht van de meest recente wijzigingen. Deze worden aan het "
@@ -835,55 +835,55 @@ msgstr ""
 "getoond kan het zijn dat dezelfde gegevens langer blijven staan wanneer er "
 "niets veranderd. Scans worden dagelijks uitgevoerd."
 
-#: failmap/map/templates/map/index.html:1057
+#: failmap/map/templates/map/index.html:1031
 msgid "Encryption quality updates"
 msgstr "Versleutelingskwaliteit updates (TLS)"
 
-#: failmap/map/templates/map/index.html:1058
-#: failmap/map/templates/map/index.html:1067
-#: failmap/map/templates/map/index.html:1076
-#: failmap/map/templates/map/index.html:1085
-#: failmap/map/templates/map/index.html:1094
-#: failmap/map/templates/map/index.html:1103
-#: failmap/map/templates/map/index.html:1112
-#: failmap/map/templates/map/index.html:1121
-#: failmap/map/templates/map/index.html:1130
+#: failmap/map/templates/map/index.html:1032
+#: failmap/map/templates/map/index.html:1041
+#: failmap/map/templates/map/index.html:1050
+#: failmap/map/templates/map/index.html:1059
+#: failmap/map/templates/map/index.html:1068
+#: failmap/map/templates/map/index.html:1077
+#: failmap/map/templates/map/index.html:1086
+#: failmap/map/templates/map/index.html:1095
+#: failmap/map/templates/map/index.html:1104
 msgid "RSS feed teaser"
 msgstr "Volg de laatste bevinden via deze"
 
-#: failmap/map/templates/map/index.html:1066
+#: failmap/map/templates/map/index.html:1040
 msgid "Certificate trust updates"
 msgstr "Certificaatvertrouwen updates (TLS)"
 
-#: failmap/map/templates/map/index.html:1075
+#: failmap/map/templates/map/index.html:1049
 msgid "Lack of encryption updates"
 msgstr "Gebrek aan versleuteling Updates"
 
-#: failmap/map/templates/map/index.html:1084
+#: failmap/map/templates/map/index.html:1058
 msgid "FTP updates"
 msgstr "Bestandsoverdracht (FTP) wijzigingen"
 
-#: failmap/map/templates/map/index.html:1093
+#: failmap/map/templates/map/index.html:1067
 msgid "DNSSEC updates"
 msgstr "DNSSEC updates"
 
-#: failmap/map/templates/map/index.html:1102
+#: failmap/map/templates/map/index.html:1076
 msgid "Forcing encryption updates"
 msgstr "Forceren van versleuteling Updates"
 
-#: failmap/map/templates/map/index.html:1111
+#: failmap/map/templates/map/index.html:1085
 msgid "X-Frame-Options updates"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1120
+#: failmap/map/templates/map/index.html:1094
 msgid "X-Content-Type-Option updates"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1129
+#: failmap/map/templates/map/index.html:1103
 msgid "X-XSS-Protection updates"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1152
+#: failmap/map/templates/map/index.html:1126
 msgid "Comply or explain introduction"
 msgstr ""
 "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard "
@@ -893,13 +893,13 @@ msgstr ""
 "genoemd op deze site kunnen zelf een bevinding verklaren door op 'leg uit' "
 "te klikken bij een bevinding."
 
-#: failmap/map/templates/map/index.html:1154
+#: failmap/map/templates/map/index.html:1128
 msgid ""
 "You can download the entire dataset for further analysis in the <a href="
 "\"#datasets\">datasets</a> section."
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1159
+#: failmap/map/templates/map/index.html:1133
 #, python-format
 msgid ""
 "\n"
@@ -911,19 +911,19 @@ msgid ""
 "                    "
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1195
+#: failmap/map/templates/map/index.html:1169
 msgid "View report"
 msgstr "Bekijk rapport"
 
-#: failmap/map/templates/map/index.html:1210
+#: failmap/map/templates/map/index.html:1184
 msgid "No explanations yet."
 msgstr "De lijst met verklaringen is leeg."
 
-#: failmap/map/templates/map/index.html:1216
+#: failmap/map/templates/map/index.html:1190
 msgid "Show more"
 msgstr "Toon meer"
 
-#: failmap/map/templates/map/index.html:1234
+#: failmap/map/templates/map/index.html:1208
 msgid ""
 "Below scans and tasks will be performed in the future. This can help you "
 "getting a better perspective on when updates will be hapening to your "
@@ -936,168 +936,168 @@ msgstr ""
 "scantijden niet exact zijn: wanneer een scan gestart wordt kan het even "
 "duren voordat alles gescand is."
 
-#: failmap/map/templates/map/index.html:1259
+#: failmap/map/templates/map/index.html:1233
 msgid "Datasets explanation"
 msgstr ""
 "Download de gegevensbundels die worden gebruikt op deze site. Deze bundels "
 "zijn geschikt voor automatische verwerking. Zo kunnen bijvoorbeeld "
 "beheerders van dit soort sites deze gegevens importeren."
 
-#: failmap/map/templates/map/index.html:1272
+#: failmap/map/templates/map/index.html:1246
 msgid "Only urls"
 msgstr "Alleen urls"
 
-#: failmap/map/templates/map/index.html:1273
-#: failmap/map/templates/map/index.html:1276
-#: failmap/map/templates/map/index.html:1279
-#: failmap/map/templates/map/index.html:1282
-#: failmap/map/templates/map/index.html:1285
-#: failmap/map/templates/map/index.html:1290
+#: failmap/map/templates/map/index.html:1247
+#: failmap/map/templates/map/index.html:1250
+#: failmap/map/templates/map/index.html:1253
+#: failmap/map/templates/map/index.html:1256
+#: failmap/map/templates/map/index.html:1259
+#: failmap/map/templates/map/index.html:1264
 msgid "Download"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1275
+#: failmap/map/templates/map/index.html:1249
 msgid "Organization types"
 msgstr "Organisatie typen"
 
-#: failmap/map/templates/map/index.html:1281
+#: failmap/map/templates/map/index.html:1255
 msgid "Map Data"
 msgstr "Kaartgegevens"
 
-#: failmap/map/templates/map/index.html:1284
+#: failmap/map/templates/map/index.html:1258
 #: failmap/map/templates/map/topfail.html:24
 #: failmap/map/templates/map/topwin.html:24
 msgid "Urls"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1289
+#: failmap/map/templates/map/index.html:1263
 msgid "Explanations"
 msgstr "Verklaringen"
 
-#: failmap/map/templates/map/index.html:1296
+#: failmap/map/templates/map/index.html:1270
 msgid "export_failmap_compatible_explained"
 msgstr ""
 "Deze gegevens zijn geoptimaliseerd om in websites als deze te importeren."
 
-#: failmap/map/templates/map/index.html:1320
+#: failmap/map/templates/map/index.html:1294
 msgid "Support us, donate here!"
 msgstr "Ondersteun ons! Doneer!"
 
-#: failmap/map/templates/map/index.html:1324
+#: failmap/map/templates/map/index.html:1298
 msgid "General inquiry e-mail"
 msgstr "Algemeen contactadres"
 
-#: failmap/map/templates/map/index.html:1325
+#: failmap/map/templates/map/index.html:1299
 msgid "Issues e-mail"
 msgstr "Vragen / opmerkingen / klachten"
 
-#: failmap/map/templates/map/index.html:1332
+#: failmap/map/templates/map/index.html:1306
 msgid "Also on social media"
 msgstr "Ook op social media"
 
-#: failmap/map/templates/map/index.html:1351
+#: failmap/map/templates/map/index.html:1325
 msgid "About this website"
 msgstr "Over deze website"
 
-#: failmap/map/templates/map/index.html:1353
+#: failmap/map/templates/map/index.html:1327
 msgid "Get the sourcecode"
 msgstr "Download de broncode"
 
-#: failmap/map/templates/map/index.html:1354
+#: failmap/map/templates/map/index.html:1328
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/templates/map/index.html:1359
+#: failmap/map/templates/map/index.html:1333
 msgid "Made possible by"
 msgstr "Mogelijk gemaakt door"
 
-#: failmap/map/templates/map/index.html:1367
+#: failmap/map/templates/map/index.html:1341
 msgid "This website is run by"
 msgstr "Deze website wordt beheerd door"
 
-#: failmap/map/templates/map/index.html:1375
+#: failmap/map/templates/map/index.html:1349
 msgid "Contact"
 msgstr "Contact"
 
-#: failmap/map/templates/map/index.html:1413
+#: failmap/map/templates/map/index.html:1389
 msgid "Review many more details below!"
 msgstr "Bekijk de details hieronder!"
 
-#: failmap/map/templates/map/index.html:1572
+#: failmap/map/templates/map/index.html:1548
 msgid "Scan moment"
 msgstr "Scantijd"
 
-#: failmap/map/templates/map/index.html:1573
-#: failmap/map/templates/map/index.html:1638
+#: failmap/map/templates/map/index.html:1549
+#: failmap/map/templates/map/index.html:1614
 #: failmap/map/templates/map/terrible_urls.html:15
 msgid "Url"
 msgstr "Internet Adres"
 
-#: failmap/map/templates/map/index.html:1592
+#: failmap/map/templates/map/index.html:1568
 msgid "Moment"
 msgstr "Moment"
 
-#: failmap/map/templates/map/index.html:1595
+#: failmap/map/templates/map/index.html:1571
 msgid "One week earlier"
 msgstr "-1 week"
 
-#: failmap/map/templates/map/index.html:1596
+#: failmap/map/templates/map/index.html:1572
 msgid "One week later"
 msgstr "+1 week"
 
-#: failmap/map/templates/map/index.html:1599
+#: failmap/map/templates/map/index.html:1575
 msgid "Risk filter"
 msgstr "Risico filter"
 
-#: failmap/map/templates/map/index.html:1601
+#: failmap/map/templates/map/index.html:1577
 msgid "report_header_DNSSEC"
 msgstr "DNS beveiliging (DNSSEC)"
 
-#: failmap/map/templates/map/index.html:1604
+#: failmap/map/templates/map/index.html:1580
 msgid "report_header_tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling (TLS)"
 
-#: failmap/map/templates/map/index.html:1605
+#: failmap/map/templates/map/index.html:1581
 msgid "report_header_tls_qualys_certificate_trusted"
 msgstr "Vertrouwen in het certificaat (TLS)"
 
-#: failmap/map/templates/map/index.html:1608
+#: failmap/map/templates/map/index.html:1584
 msgid "report_header_plain_https"
 msgstr "Ontbreken van versleuteling"
 
-#: failmap/map/templates/map/index.html:1611
+#: failmap/map/templates/map/index.html:1587
 msgid "report_header_ftp"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/templates/map/index.html:1614
+#: failmap/map/templates/map/index.html:1590
 msgid "report_header_security_headers_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
-#: failmap/map/templates/map/index.html:1617
+#: failmap/map/templates/map/index.html:1593
 msgid "report_header_security_headers_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
-#: failmap/map/templates/map/index.html:1620
+#: failmap/map/templates/map/index.html:1596
 msgid "report_header_security_headers_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
-#: failmap/map/templates/map/index.html:1623
+#: failmap/map/templates/map/index.html:1599
 msgid "report_header_security_headers_x_content_type_options"
 msgstr "X-Content-Type-Options Header"
 
-#: failmap/map/templates/map/index.html:1625
+#: failmap/map/templates/map/index.html:1601
 msgid "Clear Filter"
 msgstr "Wis filter"
 
-#: failmap/map/templates/map/index.html:1635
+#: failmap/map/templates/map/index.html:1611
 msgid "H"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1636
+#: failmap/map/templates/map/index.html:1612
 msgid "M"
 msgstr ""
 
-#: failmap/map/templates/map/index.html:1637
+#: failmap/map/templates/map/index.html:1613
 msgid "L"
 msgstr ""
 
