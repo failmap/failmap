@@ -13,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='endpointgenericscan',
             name='rating',
-            field=models.CharField(default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
+            field=models.CharField(
+                default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
         ),
         migrations.AlterField(
             model_name='urlgenericscan',
             name='rating',
-            field=models.CharField(default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
+            field=models.CharField(
+                default=0, help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent.", max_length=16),
         ),
     ]
