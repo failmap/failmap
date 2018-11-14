@@ -720,6 +720,7 @@ CONSTANCE_CONFIG = {
                                               'forum can be edited below.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
     'TICKER_SLOGAN': ('failmap.org - monitor everything', 'Text to show between every 10 changes.', str),
+    'TICKER_VISIBLE_VIA_JS_COMMAND': (False, 'Only show the ticker using the Javascript command "show_ticker()"', bool),
     'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
@@ -799,33 +800,39 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
 
     ('Website', ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
                  'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
-                 'SHOW_DNS_DNSSEC', 'SHOW_HTTP_TLS_QUALYS', 'SHOW_HTTP_MISSING_TLS',
-                 'SHOW_HTTP_HEADERS_HSTS', 'SHOW_HTTP_HEADERS_XFO', 'SHOW_HTTP_HEADERS_X_XSS',
-                 'SHOW_HTTP_HEADERS_X_CONTENT', 'SHOW_FTP', 'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
+                 'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
                  )),
-
-    ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
-                           'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK', 'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS'
-                           )),
 
     ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
                    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')),
 
+    ('Scanning', ('SCAN_AT_ALL', )),
+
     ('Scanner Capabilities', ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN')),
 
-    ('Scanning', ('SCAN_AT_ALL', 'SCAN_DNS_DNSSEC', 'SCAN_HTTP_TLS_QUALYS', 'SCAN_HTTP_TLS_OSAFT',
-                  'SCAN_HTTP_MISSING_TLS', 'SCAN_HTTP_HEADERS_HSTS',
-                  'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS', 'SCAN_HTTP_HEADERS_X_CONTENT', 'SCAN_FTP',
-                  'CREATE_HTTP_SCREENSHOT')),
+    ('Scanning (beta)', ('SCAN_HTTP_TLS_OSAFT', 'CREATE_HTTP_SCREENSHOT')),
 
-    ('Reporting', ('REPORT_INCLUDE_DNS_DNSSEC', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_MISSING_TLS',
-                   'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
-                   'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-                   'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_FTP')),
+    ('TLS Scans (Qualys)', ('SCAN_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'SHOW_HTTP_TLS_QUALYS', )),
+
+    ('Missing TLS Scans', ('SCAN_HTTP_MISSING_TLS', 'REPORT_INCLUDE_HTTP_MISSING_TLS', 'SHOW_HTTP_MISSING_TLS', )),
+
+    ('DNSSEC Scans', ('SCAN_DNS_DNSSEC', 'REPORT_INCLUDE_DNS_DNSSEC', 'SHOW_DNS_DNSSEC')),
+
+    ('FTP Scans', ('SCAN_FTP', 'REPORT_INCLUDE_FTP', 'SHOW_FTP', )),
+
+    ('Security Headers Scans', ('SCAN_HTTP_HEADERS_HSTS', 'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS',
+                                'SCAN_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
+                                'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
+                                'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT',  'SHOW_HTTP_HEADERS_HSTS',
+                                'SHOW_HTTP_HEADERS_XFO',
+                                'SHOW_HTTP_HEADERS_X_XSS', 'SHOW_HTTP_HEADERS_X_CONTENT', )),
+
+    ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
+                           'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK', 'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS')),
 
     ('Game', ('GOOGLE_MAPS_API_KEY',)),
 
-    ('Ticker', ('SHOW_TICKER', 'TICKER_SLOGAN')),
+    ('Ticker', ('SHOW_TICKER', 'TICKER_SLOGAN', 'TICKER_VISIBLE_VIA_JS_COMMAND')),
 
     ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL'))
 ])
