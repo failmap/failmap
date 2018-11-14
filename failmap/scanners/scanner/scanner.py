@@ -103,6 +103,33 @@ def q_configurations_to_scan(level: str = 'url'):
     return qs
 
 
+def q_configurations_to_report(level: str = 'url'):
+    """
+    Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly
+    for the organization tables, or with a join from url to organization.
+
+    To evaluate: This is a quick fix, the organization might refer to configuration in the future?
+
+    An emtpy set means EVERYTHING will be reported.
+
+    :param level:
+    :return:
+    """
+    configurations = list(Configuration.objects.all().filter(is_reported=True).values('country', 'organization_type'))
+    qs = Q()
+
+    if level == 'organization':
+        for configuration in configurations:
+            qs.add(Q(type=configuration['organization_type'], country=configuration['country']), Q.OR)
+
+    if level == 'url':
+        for configuration in configurations:
+            qs.add(Q(organization__type=configuration['organization_type'],
+                     organization__country=configuration['country']), Q.OR)
+
+    return qs
+
+
 def q_configurations_to_display(level: str = 'url'):
     """
     Retrieves configurations and makes q-queries for them. You can select if you want to have the q-queries directly

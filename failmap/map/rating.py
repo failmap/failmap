@@ -12,7 +12,7 @@ from django.db.models import Q
 from failmap.map.views import get_map_data
 from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
-from failmap.scanners.scanner.scanner import q_configurations_to_display
+from failmap.scanners.scanner.scanner import q_configurations_to_report
 
 from ..celery import Task, app
 from .calculate import get_calculation
@@ -48,11 +48,14 @@ def compose_task(
     if endpoints_filter:
         raise NotImplementedError('This scanner does not work on a endpoint level.')
 
-    log.info(organizations_filter)
+    log.info("Organization filter: %s" % organizations_filter)
+    log.info("Url filter: %s" % urls_filter)
 
     # Only displayed configurations are reported. Because why have reports on things you don't display?
     # apply filter to organizations (or if no filter, all organizations)
-    organizations = Organization.objects.filter(q_configurations_to_display('organization'), **organizations_filter)
+    organizations = Organization.objects.filter(q_configurations_to_report('organization'), **organizations_filter)
+
+    log.debug("Organizations: %s" % len(organizations))
 
     # Create tasks for rebuilding ratings for selected organizations and urls.
     # Wheneven a url has been (re)rated the organization for that url need to
@@ -64,7 +67,7 @@ def compose_task(
     tasks = []
 
     for organization in organizations:
-        urls = Url.objects.filter(q_configurations_to_display(), organization=organization, **urls_filter)
+        urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter)
         if not urls:
             continue
 
@@ -76,8 +79,8 @@ def compose_task(
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
         log.debug("Organization filter: %s" % organizations_filter)
         log.debug("Url filter: %s" % urls_filter)
-        log.debug("urls to display: %s" % q_configurations_to_display())
-        log.debug("organizatins to display: %s" % q_configurations_to_display('organization'))
+        log.debug("urls to display: %s" % q_configurations_to_report())
+        log.debug("organizatins to display: %s" % q_configurations_to_report('organization'))
         raise Exception('Applied filters resulted in no tasks!')
 
     # when trying to report on a specific url or organization (so not everything) also don't rebuild all caches
@@ -90,6 +93,8 @@ def compose_task(
         # have adjusted the value of the ratings somewhere. Then that would be a special operation to recalculate
         # the entire database. So this can just be two days as well.
         days = 2
+
+    log.debug("Number of tasks: %s" % len(tasks))
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.

@@ -177,7 +177,8 @@ def add_configuration(country, organization_type):
 @admin.register(Configuration)
 class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', )
+    list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',
+                    'is_reported')
     search_fields = (['country', 'organization_type', ])
     list_filter = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',)
     fields = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', )
@@ -219,6 +220,24 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
     stop_scanning.short_description = '💔  Stop scanning'
     actions.append(stop_scanning)
+
+    def allow_reporting(self, request, queryset):
+
+        for configuration in queryset:
+            configuration.is_reported = True
+            configuration.save()
+
+    allow_reporting.short_description = '📄️  Allow Reporting'
+    actions.append(allow_reporting)
+
+    def stop_reporting(self, request, queryset):
+
+        for configuration in queryset:
+            configuration.is_reported = False
+            configuration.save()
+
+    stop_reporting.short_description = '📄  Stop Reporting'
+    actions.append(stop_reporting)
 
     def set_default(self, request, queryset):
 
