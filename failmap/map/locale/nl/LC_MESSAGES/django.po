@@ -20,11 +20,11 @@ msgstr ""
 
 #: failmap/map/models.py:113
 msgid "Organization Rating"
-msgstr "Beoordeling"
+msgstr "Organisatie beoordeling"
 
 #: failmap/map/models.py:114
 msgid "Organization Ratings"
-msgstr "Beoordelingen"
+msgstr "Organisatie beoordelingen"
 
 #: failmap/map/models.py:197
 msgid "Url Rating"

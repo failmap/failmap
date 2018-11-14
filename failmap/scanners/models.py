@@ -413,7 +413,7 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
         help_text="The type of scan that was performed. Instead of having different tables for each"
                   "scan, this label separates the scans.")
     rating = models.CharField(
-        max_length=10,
+        max_length=16,
         default=0,
         help_text="Preferably an integer, 'True' or 'False'. Keep ratings over time consistent."
     )

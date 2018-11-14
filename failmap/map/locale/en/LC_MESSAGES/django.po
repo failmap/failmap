@@ -21,16 +21,10 @@ msgstr ""
 #: failmap/map/models.py:113
 msgid "Organization Rating"
 msgstr ""
-"Organizations often have an extensive online presence with several websites "
-"and other services. The sum of the security of all of these services defines "
-"if the organization is secure or not."
 
 #: failmap/map/models.py:114
 msgid "Organization Ratings"
 msgstr ""
-"Organizations often have an extensive online presence with several websites "
-"and other services. The sum of the security of all of these services defines "
-"if the organization is secure or not."
 
 #: failmap/map/models.py:197
 msgid "Url Rating"
