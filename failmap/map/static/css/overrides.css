@@ -519,7 +519,7 @@ path {
     display: inline-block;
     padding-left: 1vw;
     text-indent: 0;
-    animation: marquee 5000s linear infinite;
+    animation: marquee 8000s linear infinite;
 }
 .marquee span:hover {
     animation-play-state: paused
@@ -535,15 +535,19 @@ path {
     font-size: 140px;
 }
 
-#ticker {
+#ticker_bar {
+    /* Inspired by news and stock tickers */
     z-index: 1002;
-    width: 100%;
-    height: 200px;
+    width: 96vw;
     position: fixed;
     bottom: 0;
     left: 0;
-    background-color: white;
-    border-top: 2px solid black;
+    border: 1px solid #4c4c4c;
+    margin: 2vw;
+    box-shadow: 4px 28px 62px -16px rgba(120,120,120,0.65);
+    background: white linear-gradient(to bottom, rgba(237, 237, 237, 1) 0%, rgba(246, 246, 246, 1) 53%, rgba(255, 255, 255, 1) 100%);
+    line-height: 183px;
+    height: 190px;
 }
 
 section {

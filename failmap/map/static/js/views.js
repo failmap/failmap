@@ -742,16 +742,13 @@ const top_mixin = {
 };
 
 
-function extracrunchycyber(){
-    vueMapStateBar.countries = ["NL", "DE"];
+// This is for demo purposes only
+function show_ticker() {
+    vueTicker.visible = true;
 }
 
 
-function extra() {
-    vueMapStateBar.countries = ["NL", "DE", "SE"];
-    vueMapStateBar.categories = ["municipality", "cyber", "unknown"];
-}
-
+// This helps showing some regions that might not be set to 'displayed' and is for demo purposes
 function germany() {
     vueMapStateBar.countries = ["NL", "DE"];
     vueMapStateBar.categories = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
@@ -1146,9 +1143,13 @@ function views() {
         el: '#ticker',
         data: {
             tickertext: "",
-            visible: false,
+            visible: true,
             changes: Array(),
             slogan: ""
+        },
+        mounted: function () {
+            console.log("Ticker");
+            this.visible = !(TICKER_VISIBLE_VIA_JS_COMMAND === 'true');
         },
         methods: {
             colorize: function (value, rank) {
@@ -1156,13 +1157,13 @@ function views() {
                     return "black";
 
                 if (rank === "high")
-                    return "red";
+                    return "crimson";
 
                 if (rank === "medium")
-                    return "orange";
+                    return "darkorange";
 
                 if (rank === "low")
-                    return "yellow";
+                    return "gold";
 
                 if (high > 0) return "red";
                 if (medium > 0) return "orange";
@@ -1170,18 +1171,17 @@ function views() {
             },
             arrow: function(value, rank){
                 if (value > 0)
-                    return "<a style='color: red'>▲</a>"+ value + " ";
+                    return "<a style='color: red'>▲</a>+"+ value + " ";
                 if (value === 0)
                     return "▶0";
                 if (value < 0)
-                    return "<a style='color: green'>▼</a>" + (value * -1) + " ";
+                    return "<a style='color: green'>▼</a>-" + (value * -1) + " ";
             },
             get_tickertext: function() {
                 // weird that this should be a function...
                 return this.tickertext;
             },
-            load: debounce(function () {
-                // /data/ticker/NL/municipality/0/0
+            load: function () {
 
                 if (!this.country || !this.category)
                     return;
@@ -1193,30 +1193,40 @@ function views() {
                     this.slogan = data.slogan;
 
                     for (let j=0; j<this.changes.length; j++){
-                        change = this.changes[j];
-                        this.tickertext += "  &nbsp; " + change['organization'] + " ";
+                        let change = this.changes[j];
 
-                        this.tickertext += "<a style='color: " + this.colorize(change['high_now'], 'high') +"'>" + change['high_now'] + "</a>";
-                        this.tickertext += this.arrow(change['high_changes'], 'high');
-                        this.tickertext += " | ";
+                        this.tickertext += " &nbsp; &nbsp; " + change['organization'].toUpperCase() + " &nbsp; ";
 
-                        this.tickertext += "<a style='color: " + this.colorize(change['medium_now'], 'medium') +"'>" + change['medium_now'] + "</a>";
-                        this.tickertext += this.arrow(change['medium_changes'], 'medium');
-                        this.tickertext += " | ";
+                        if (!change['high_now'] && !change['medium_now'] && !change['low_now']){
 
-                        this.tickertext += "<a style='color: " + this.colorize(change['low_now'], 'low') +"'>" + change['low_now'] + "</a>";
-                        this.tickertext += this.arrow(change['low_changes'], 'low');
-                        this.tickertext += " ";
+                            this.tickertext += "<a style='color: green'>PERFECT</a>  ";
+
+                        } else {
+
+                            this.tickertext += "<a style='color: " + this.colorize(change['high_now'], 'high') + "'>" + change['high_now'] + "</a>";
+                            this.tickertext += this.arrow(change['high_changes'], 'high');
+                            this.tickertext += " &nbsp; ";
+
+                            this.tickertext += "<a style='color: " + this.colorize(change['medium_now'], 'medium') + "'>" + change['medium_now'] + "</a>";
+                            this.tickertext += this.arrow(change['medium_changes'], 'medium');
+                            this.tickertext += " &nbsp; ";
+
+                            this.tickertext += "<a style='color: " + this.colorize(change['low_now'], 'low') + "'>" + change['low_now'] + "</a>";
+                            this.tickertext += this.arrow(change['low_changes'], 'low');
+                            this.tickertext += "  ";
+
+                        }
 
                         if (j % 10 === 0) {
-                            this.tickertext += " - <b> " + this.slogan + " </b> - "
+                            this.tickertext += " &nbsp; &nbsp; <b> " + this.slogan.toUpperCase() + " </b> &nbsp; "
+                        } else {
+                            // show space between each rating, except the first / after the closing message
+                            this.tickertext += " &nbsp; ";
                         }
                     }
 
-
-                }).catch((fail) => {console.log('An error occurred: ' + fail)});
-
-            }, 42)
+                }).catch((fail) => {console.log('A Ticker error occurred: ' + fail)});
+            }
         }
     });
 

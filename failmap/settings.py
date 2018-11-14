@@ -719,7 +719,7 @@ CONSTANCE_CONFIG = {
     'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (False, 'Shows a link to the comply or explain discussion forum. The url of this'
                                               'forum can be edited below.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
-    'TICKER_SLOGAN': ('failmap.org - monitor everything', 'Text to show between every 10 changes.', str),
+    'TICKER_SLOGAN': ('FAILMAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
     'TICKER_VISIBLE_VIA_JS_COMMAND': (False, 'Only show the ticker using the Javascript command "show_ticker()"', bool),
     'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 

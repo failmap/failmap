@@ -15,6 +15,7 @@
     <meta name="country" content="{{ country }}">
     <meta name="debug" content="{{ debug }}">
     <meta name="mapbox_token" content="{{ config.MAPBOX_ACCESS_TOKEN }}">
+    <meta name="TICKER_VISIBLE_VIA_JS_COMMAND" content="{{ config.TICKER_VISIBLE_VIA_JS_COMMAND | lower }}">
 
     <title>{% trans "Site Title" %}</title>
 
@@ -372,7 +373,7 @@
                                     <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                                     <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
                                     <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
-                                        {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
+                                        {% endverbatim %}{% trans "Report incorrect finding" %}</a>
                                 </div>
                             </div>
 
@@ -596,123 +597,110 @@
                             </thead>
                             <tbody>
                             {% if config.SHOW_DNS_DNSSEC %}
-                            {% verbatim %}
+
                             <tr v-if="x['explained']['DNSSEC']">
-                                <td colspan="3">{% endverbatim %}{% trans "DNSSEC" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "DNSSEC" %}</td>
                             </tr>
                             <tr v-if="x['explained']['DNSSEC']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "DNSSEC incorrect" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['DNSSEC']['DNSSEC is incorrectly or not configured (errors found).'] }}
-                                </td>
+                                <td>{% trans "DNSSEC incorrect" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['DNSSEC']['DNSSEC is incorrectly or not configured (errors found).'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['DNSSEC']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "DNSSEC correct" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['DNSSEC']['DNSSEC seems to be implemented sufficiently.'] }}{% endverbatim %}
-                                </td>
+                                <td>{% trans "DNSSEC correct" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['DNSSEC']['DNSSEC seems to be implemented sufficiently.'] }}{% endverbatim %}</td>
                             </tr>
                             {% endif %}
 
                             {% if config.SHOW_FTP %}
-                            {% verbatim %}
                             <tr v-if="x['explained']['ftp']">
-                                <td colspan="3">{% endverbatim %}{% trans "FTP" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "FTP" %}</td>
                             </tr>
                             <tr v-if="x['explained']['ftp']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "FTP insecure" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['ftp']['FTP Server does not support encrypted transport or has protocol issues.'] }}
-                                </td>
+                                <td>{% trans "FTP insecure" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['ftp']['FTP Server does not support encrypted transport or has protocol issues.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['ftp']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "FTP outdated" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['ftp']['FTP Server only supports insecure SSL protocol.'] }}
-                                </td>
+                                <td>{% trans "FTP outdated" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['ftp']['FTP Server only supports insecure SSL protocol.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['ftp']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "FTP secure" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['ftp']['FTP Server supports TLS encryption protocol.'] }}{% endverbatim %}
-                                </td>
+                                <td>{% trans "FTP secure" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['ftp']['FTP Server supports TLS encryption protocol.'] }}{% endverbatim %}</td>
                             </tr>
                             {% endif %}
 
                             {% if config.SHOW_HTTP_MISSING_TLS %}
-                            {% verbatim %}
                             <tr v-if="x['explained']['plain_https']">
-                                <td colspan="3">{% endverbatim %}{% trans "Application of encryption" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Application of encryption" %}</td>
                             </tr>
                             <tr v-if="x['explained']['plain_https']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}
-                                </td>
+                                <td>{% trans "Not at all" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['plain_https']['Site does not redirect to secure url, and has nosecure alternative on a standard port.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['plain_https']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Not at all" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['plain_https']['Site does not redirect to secure url, and has no secure alternative on a standard port.'] }}
-                                </td>
+                                <td>{% trans "Not at all" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['plain_https']['Site does not redirect to secure url, and has no secure alternative on a standard port.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['plain_https']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Redirect from unsafe address" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}{% endverbatim %}
-                                </td>
+                                <td>{% trans "Redirect from unsafe address" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['plain_https']['Redirects to a secure site, while a secure counterpart on the standard port is missing.'] }}{% endverbatim %}</td>
                             </tr>
                             {% endif %}
+
                             {% if config.SHOW_HTTP_TLS_QUALYS %}
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']">
-                                {% verbatim %}
-                                <td colspan="3">{% endverbatim %} {% trans "Encryption quality" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Encryption quality" %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Broken" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Broken Transport Security, rated F'] }}</td>
+                                <td>{% trans "Broken" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Broken Transport Security, rated F'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "TLS rated C" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated C.'] }}
-                                </td>
+                                <td>{% trans "TLS rated C" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated C.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "TLS rated B" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated B.'] }}
-                                </td>
+                                <td>{% trans "TLS rated B" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Less than optimal Transport Security, rated B.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "TLS rated A-" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A-.'] }}</td>
+                                <td>{% trans "TLS rated A-" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A-.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "TLS rated A" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A.'] }}</td>
+                                <td>{% trans "TLS rated A" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Good Transport Security, rated A.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "TLS rated A+" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_encryption_quality']['Perfect Transport Security, rated A+.'] }}</td>
+                                <td>{% trans "TLS rated A+" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_encryption_quality']['Perfect Transport Security, rated A+.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_encryption_quality']">
-                                {% verbatim %}
-                                <td colspan="3">{% endverbatim %} {% trans "Certificate trust" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Certificate trust" %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_certificate_trusted']" class="redrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "No trust" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is not trusted.'] }}</td>
+                                <td>{% trans "No trust" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is not trusted.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['tls_qualys_certificate_trusted']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Trust" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is trusted.'] }}{% endverbatim %}</td>
+                                <td>{% trans "Trust" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['tls_qualys_certificate_trusted']['Certificate is trusted.'] }}{% endverbatim %}</td>
                             </tr>
                             {%  endif %}
                             </tbody>
@@ -732,69 +720,58 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% verbatim %}
                             <tr v-if="x['explained']['security_headers_strict_transport_security']">
-                                <td colspan="3">{% endverbatim %}{% trans "Stats HSTS" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Stats HSTS" %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}
-                                </td>
+                                <td>{% trans "Stats hasn't" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}
-                                </td>
+                                <td>{% trans "Stats has" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_frame_options']">
-                                <td colspan="3">{% endverbatim %}{% trans "Stats X-Frame-Options" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Stats X-Frame-Options" %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}
-                                </td>
+                                <td>{% trans "Stats hasn't" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}
-                                </td>
+                                <td>{% trans "Stats has" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_xss_protection']">
-                                <td colspan="3">{% endverbatim %}{% trans "Stats X-XSS Protection" %}{% verbatim %}</td>
+                                <td colspan="3">{% trans "Stats X-XSS Protection" %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}
-                                </td>
+                                <td>{% trans "Stats hasn't" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}
-                                </td>
+                                <td>{% trans "Stats has" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_content_type_options']">
-                                <td colspan="3">{% endverbatim %}{% trans "Stats X-Content Type Options" %}{% verbatim %}
-                                </td>
+                                <td colspan="3">{% trans "Stats X-Content Type Options" %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats hasn't" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}
-                                </td>
+                                <td>{% trans "Stats hasn't" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}{% endverbatim %}</td>
                             </tr>
                             <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow">
                                 <td></td>
-                                <td>{% endverbatim %}{% trans "Stats has" %}{% verbatim %}:</td>
-                                <td>{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}
-                                </td>
+                                <td>{% trans "Stats has" %}:</td>
+                                <td>{% verbatim %}{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}{% endverbatim %}</td>
                             </tr>
-                            {% endverbatim %}
                             </tbody>
                         </table>
                     </div>
@@ -806,8 +783,7 @@
                 <div class="col-md-12" v-for="(x, key) in data.data" v-if="key == 'now'">
                     <h3>{% trans "Services" %}</h3>
                     <p>{% trans "Services explained" %}</p>
-                    {% verbatim %}
-                        <p>{% endverbatim %}{% trans "Number of service checked" %}</p>
+                        <p>{% trans "Number of service checked" %}</p>
                         <table class="table table-striped" id="services_table">
                             <thead>
                                 <tr>
@@ -839,10 +815,10 @@
                                     <td>{{ service['amount'] }}</td>
                                     <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
                                 </tr>
+                                {% endverbatim %}
                             </tbody>
                         </table>
                     </div>
-                    {% endverbatim %}
             </div>
             {% endif %}
         </div>
@@ -857,9 +833,9 @@
             <div class="row">
                 <div class="col-md-4" style="text-align:center">
                     <h4>{% trans "High risk improvements" %}</h4>
-                    {% verbatim %}
-                        <span :class="goodbad(overall.high) + '_large'">{{ overall.high }}</span>
-                    {% endverbatim %}
+
+                    <span :class="goodbad(overall.high) + '_large'">{% verbatim %}{{ overall.high }}{% endverbatim %}</span>
+
 
                     <table class="table table-striped">
                         <tr>
@@ -883,9 +859,8 @@
                 </div>
                 <div class="col-md-4" style="text-align:center">
                     <h4>{% trans "Medium risk improvements" %}</h4>
-                    {% verbatim %}
-                        <span :class="goodbad(overall.medium) + '_large'">{{ overall.medium }}</span>
-                    {% endverbatim %}
+
+                    <span :class="goodbad(overall.medium) + '_large'">{% verbatim %}{{ overall.medium }}{% endverbatim %}</span>
 
                     <table class="table table-striped">
                         <tr>
@@ -912,9 +887,8 @@
                 </div>
                 <div class="col-md-4" style="text-align:center">
                     <h4>{% trans "Low risk improvements" %}</h4>
-                    {% verbatim %}
-                        <span :class="goodbad(overall.low) + '_large'">{{ overall.low }}</span>
-                    {% endverbatim %}
+
+                    <span :class="goodbad(overall.low) + '_large'">{% verbatim %}{{ overall.low }}{% endverbatim %}</span>
 
                     <table class="table table-striped">
                         <tr>
@@ -1404,7 +1378,9 @@
 
 {% if config.SHOW_TICKER %}
 <div id="ticker" v-cloak>
-    <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>
+    <div id="ticker_bar" v-if="visible">
+        <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>
+    </div>
 </div>
 {% endif %}
 
@@ -1486,7 +1462,7 @@
                                 <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                                 <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
                                 <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
-                                    {% endverbatim %}{% trans "Report incorrect finding" %}{% verbatim %}{% endverbatim %}</a>
+                                    {% endverbatim %}{% trans "Report incorrect finding" %}</a>
                             </div>
                         </div>
 
