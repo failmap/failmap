@@ -761,11 +761,6 @@ def rate_timeline(timeline, url: Url):
 
         previous_endpoints += relevant_endpoints
 
-        # prevent empty ratings cluttering the database and skewing the stats.
-        # todo: only do this if there never was a urlrating before this.
-        if not endpoint_reports and not url_was_once_rated:
-            continue
-
         # Add url generic scans, using the same logic as endpoints.
         # - It reuses ratings from the previous moment, but if there are new ratings for a specific scan type only the
         # rating for this specific scan type is overwritten.
@@ -820,6 +815,11 @@ def rate_timeline(timeline, url: Url):
                         url_issues_medium += calculation["medium"]
                         total_low += calculation["low"]
                         url_issues_low += calculation["low"]
+
+        # prevent empty ratings cluttering the database and skewing the stats.
+        # todo: only do this if there never was a urlrating before this.
+        if not endpoint_reports and not url_was_once_rated and not url_calculations:
+            continue
 
         total_url_issues = url_issues_high + url_issues_medium + url_issues_low
         explained_total_url_issues = explained_url_issues_high + explained_url_issues_medium + explained_url_issues_low
