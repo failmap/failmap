@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-14 11:35+0000\n"
+"POT-Creation-Date: 2018-11-19 16:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -346,8 +346,8 @@ msgstr "Send in new domains."
 #: failmap/map/templates/map/index.html:1412
 #: failmap/map/templates/map/terrible_urls.html:16
 #: failmap/map/templates/map/topfail.html:30
-#: failmap/map/templates/map/topwin.html:30 failmap/map/views.py:1875
-#: failmap/map/views.py:1945
+#: failmap/map/templates/map/topwin.html:30 failmap/map/views.py:1886
+#: failmap/map/views.py:1956
 msgid "High"
 msgstr "High risk"
 
@@ -355,8 +355,8 @@ msgstr "High risk"
 #: failmap/map/templates/map/index.html:1417
 #: failmap/map/templates/map/terrible_urls.html:17
 #: failmap/map/templates/map/topfail.html:33
-#: failmap/map/templates/map/topwin.html:33 failmap/map/views.py:1875
-#: failmap/map/views.py:1945
+#: failmap/map/templates/map/topwin.html:33 failmap/map/views.py:1886
+#: failmap/map/views.py:1956
 msgid "Medium"
 msgstr "Medium risk"
 
@@ -364,8 +364,8 @@ msgstr "Medium risk"
 #: failmap/map/templates/map/index.html:1422
 #: failmap/map/templates/map/terrible_urls.html:18
 #: failmap/map/templates/map/topfail.html:36
-#: failmap/map/templates/map/topwin.html:36 failmap/map/views.py:1875
-#: failmap/map/views.py:1945
+#: failmap/map/templates/map/topwin.html:36 failmap/map/views.py:1886
+#: failmap/map/views.py:1956
 msgid "Low"
 msgstr "Low risk"
 
@@ -1132,7 +1132,7 @@ msgstr ""
 msgid "Fail Map Introduction"
 msgstr ""
 
-#: failmap/map/views.py:1874 failmap/map/views.py:1944
+#: failmap/map/views.py:1885 failmap/map/views.py:1955
 msgid "Perfect"
 msgstr ""
 

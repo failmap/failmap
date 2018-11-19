@@ -28,10 +28,6 @@ var dynamic_translations = function(){
     gettext('Redirects to a secure site, while a secure counterpart on the standard port is missing.');
     gettext('Broken Transport Security, rated F');
     gettext('Certificate not valid for domain name.');
-    gettext('Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated C.');
-    gettext('Could not establish trust.  For the certificate installation: Less than optimal Transport Security, rated B.');
-    gettext('Could not establish trust.  For the certificate installation: Good Transport Security, rated A-.');
-    gettext('Could not establish trust.  For the certificate installation: Good Transport Security, rated A.');
     gettext('Less than optimal Transport Security, rated C.');
     gettext('Less than optimal Transport Security, rated B.');
     gettext('Good Transport Security, rated A-.');
@@ -57,6 +53,8 @@ var dynamic_translations = function(){
     gettext('trusted');
     gettext('Certificate is not trusted.');
     gettext('Certificate is trusted.');
+    gettext('Content-Security-Policy header found, which covers the security aspect of the X-Frame-Options header.');
+    gettext('Content-Security-Policy header found, which covers the security aspect of the X-XSS-Protection header.');
 
     // vulnerabilities:
     gettext('report_header_tls_qualys');

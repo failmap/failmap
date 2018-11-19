@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-14 11:35+0000\n"
+"POT-Creation-Date: 2018-11-19 16:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/organizations/admin.py:347
+#: failmap/organizations/admin.py:355
 #, python-format
 msgid ""
 "Url %s is already matched to \"%s\", and is alive. Please add any remaining "
@@ -26,7 +26,7 @@ msgid ""
 "url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:364
+#: failmap/organizations/admin.py:372
 #, python-format
 msgid ""
 "This url %s already exists and is alive. Please add the desired "
@@ -36,15 +36,15 @@ msgid ""
 "Search for <a href=\"../?url=%s&is_dead=False\">🔍 %s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py:374
+#: failmap/organizations/admin.py:382
 msgid "Has endpoint scans (todo)"
 msgstr ""
 
-#: failmap/organizations/admin.py:388
+#: failmap/organizations/admin.py:396
 msgid "Yes"
 msgstr "Ja"
 
-#: failmap/organizations/admin.py:389
+#: failmap/organizations/admin.py:397
 msgid "No"
 msgstr "Nee"
 
@@ -60,34 +60,34 @@ msgstr "organisatie type"
 msgid "organization_types"
 msgstr "organisatie typen"
 
-#: failmap/organizations/models.py:97
+#: failmap/organizations/models.py:107
 msgid "organization"
 msgstr "organisatie"
 
-#: failmap/organizations/models.py:98
+#: failmap/organizations/models.py:108
 msgid "organizations"
 msgstr "organisaties"
 
-#: failmap/organizations/models.py:172
+#: failmap/organizations/models.py:182
 msgid "coordinate"
 msgstr "coordinaat"
 
-#: failmap/organizations/models.py:173
+#: failmap/organizations/models.py:183
 msgid "coordinates"
 msgstr "coordinaten"
 
-#: failmap/organizations/models.py:308
+#: failmap/organizations/models.py:328
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""
 
-#: failmap/organizations/models.py:311
+#: failmap/organizations/models.py:331
 msgid "Url already exists, existing url is alive and resolvable."
 msgstr "URL bestaat al, het bestaande URL is in leven en bereikbaar."
 
-#: failmap/organizations/models.py:415
+#: failmap/organizations/models.py:435
 msgid "promise"
 msgstr "belofte"
 
-#: failmap/organizations/models.py:416
+#: failmap/organizations/models.py:436
 msgid "promises"
 msgstr "beloften"
