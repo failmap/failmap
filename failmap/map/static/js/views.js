@@ -770,7 +770,7 @@ function views() {
         el: '#graphs',
 
         mounted: function() {
-            this.load(0)
+            // this.load(0)
         },
 
         methods: {
