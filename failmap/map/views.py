@@ -1440,7 +1440,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           WHERE (stacked_coordinate.created_on <= '%(when)s' AND stacked_coordinate.is_dead = 0)
           OR
           ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
-          AND stacked_coordinate.is_dead = 1) GROUP BY area, organization_id) as coordinate_stack
+          AND stacked_coordinate.is_dead = 1) GROUP BY organization_id) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationrating.organization_id
         INNER JOIN
           (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
@@ -1452,6 +1452,13 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         ORDER BY map_organizationrating.`when` ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
+
+    # coordinate_stack was also grouped by area, which doesn't help if there are updates: if the type of shape changes
+    # then the area is selected for each type of shape (since the filter is both true for now and the past). Thus
+    # removing area grouping will make sure that the share type can change without delivering double results.
+    # You can test this with dutch provinces, who where imported as a different type suddenly. When loading the data
+    # the map showed old and new coordinates on and off, meaning the result was semi-random somewhere. This was due to
+    # area being in the stack. See change on issue #130. All maps seemed to be correct over time after this change still
 
     # print(sql)
 

@@ -346,6 +346,16 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
                                                              type__name=organization_type,
                                                              is_dead=False)
         except Organization.DoesNotExist:
+            log.debug("Could not find organization by property 'alt_name', trying another way.")
+
+    if not matching_organization and "localname" in properties:
+        try:
+            matching_organization = Organization.objects.get(name=properties["localname"],
+                                                             country=country,
+                                                             type__name=organization_type,
+                                                             is_dead=False)
+
+        except Organization.DoesNotExist:
             # out of options...
             # This happens sometimes, as you might get areas that are outside the country or not on the map yet.
             log.debug("Could not find organization by property 'alt_name', we're out of options.")
@@ -367,7 +377,11 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
     #         log.info("Missing boundary:administrative")
     #         return
 
-    old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
+    if not when:
+        old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False)
+    else:
+        old_coordinate = Coordinate.objects.filter(organization=matching_organization, is_dead=False,
+                                                   created_on__lte=when)
 
     if old_coordinate.count() == 1 and old_coordinate[0].area == coordinates["coordinates"]:
         log.info("Retrieved coordinates are the same, not changing anything.")
@@ -415,7 +429,7 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
     """
     curl -f -o NL_province.zip 'https://wambachers-osm.website/boundaries/exportBoundaries
     ?cliVersion=1.0
-    &cliKey=c0e3473f-6ba2-4571-9331-4b3084022021  done: add cliKey to config
+    &cliKey=[key]  done: add cliKey to config
     &exportFormat=json
     &exportLayout=levels
     &exportAreas=land
