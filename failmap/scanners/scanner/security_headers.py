@@ -87,11 +87,26 @@ def analyze_headers(result: requests.Response, endpoint):
     egss.domain = endpoint.uri_url()
     egss.save()
 
+    """
+    #125: CSP can replace X-XSS-Protection and X-Frame-Options. Thus if a (more modern) CSP header is present, assume
+    that decisions have been made about what's in it and ignore the previously mentioned headers.
+
+    We don't mandate CSP yet because it's utterly complex and therefore comes with an extremely low adoption ratio.
+
+    https://stackoverflow.com/questions/43039706/replacing-x-frame-options-with-csp
+    X-Frame-Options: SAMEORIGIN ➡ Content-Security-Policy: frame-ancestors 'self'
+
+    https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+    X-XSS-Protection -> ('unsafe-inline')
+
+    X-Content-Type-Options is not affected.
+    """
+
     if config.SCAN_HTTP_HEADERS_X_XSS:
-        generic_check(endpoint, response.headers, 'X-XSS-Protection')
+        generic_check_using_csp_fallback(endpoint, response.headers, 'X-XSS-Protection')
 
     if config.SCAN_HTTP_HEADERS_XFO:
-        generic_check(endpoint, response.headers, 'X-Frame-Options')
+        generic_check_using_csp_fallback(endpoint, response.headers, 'X-Frame-Options')
 
     if config.SCAN_HTTP_HEADERS_X_CONTENT:
         generic_check(endpoint, response.headers, 'X-Content-Type-Options')
@@ -158,6 +173,27 @@ def generic_check(endpoint: Endpoint, headers, header):
                                      endpoint,
                                      'False',
                                      "Security Header not present: %s" % header)
+
+
+def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
+
+    # this is case insensitive
+    if header in headers.keys():
+        log.debug('Has %s' % header)
+        EndpointScanManager.add_scan(header, endpoint, 'True', headers[header])
+    else:
+        # CSP fallback:
+        if "Content-Security-Policy" in headers.keys():
+            EndpointScanManager.add_scan(
+                header, endpoint, 'Using CSP',
+                "Content-Security-Policy header found, which can handle the security from %s. Value: %s." %
+                (header, headers["Content-Security-Policy"]))
+
+        else:
+            log.debug('Has no %s' % header)
+            EndpointScanManager.add_scan(
+                header, endpoint, 'False',
+                "Security Header not present: %s, alternative header Content-Security-Policy not present." % header)
 
 
 def error_response_400_500(endpoint):

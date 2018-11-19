@@ -107,6 +107,8 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
         'Referrer-Policy':
         Classified as: Ignored
         todo: should be enabled(?)
+
+        todo: we're going to need to split this up per header, there are too many code paths forming.
     """
 
     high, medium, low = 0, 0, 0
@@ -114,7 +116,9 @@ def security_headers_rating_based_on_scan(scan, header='Strict-Transport-Securit
     # We add what is done well, so it's more obvious it's checked.
     if scan.rating == "True":
         explanation = header + " header present."
-
+    elif scan.rating == "Using CSP":
+        explanation = "Content-Security-Policy header found, which covers the security aspect of the %s header." \
+                      % header
     else:
         explanation = "Missing " + header + " header."
 
