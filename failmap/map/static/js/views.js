@@ -93,6 +93,10 @@ const report_mixin = {
         loading: false,
         visible: false,  // fullscreenreport
         promise: false,
+
+        // so they can be destroyed and re-initialized
+        myChart: null,
+        myChart2: null,
     },
     // https://vuejs.org/v2/api/#updated
     updated: function () {
@@ -274,8 +278,16 @@ const report_mixin = {
                     endpoints.push(data[i].endpoints);
                 }
 
+                // remove previous charts
+                if (this.myChart)
+                    this.myChart.destroy();
+
+                if (this.myChart2)
+                    this.myChart2.destroy();
+
+
                 let ctx = document.getElementById("organization_vulnerability_timeline").getContext('2d');
-                let myChart = new Chart(ctx, {
+                this.myChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -348,7 +360,7 @@ const report_mixin = {
 
 
                 let context = document.getElementById("organization_connectivity_timeline").getContext('2d');
-                let myChart2 = new Chart(context, {
+                this.myChart2 = new Chart(context, {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -765,6 +777,8 @@ function views() {
         // the mixin requires data to exist, otherwise massive warnings.
         data: {
             nothing: "",
+            // hold references to existing charts, so they can be deleted / updated.
+            charts: []
         },
 
         el: '#graphs',
@@ -804,7 +818,10 @@ function views() {
 
                          // and a single endpoint/url graph:
                         let context = document.getElementById("timeline_available_urls_and_endpoints").getContext('2d');
-                        let myChart2 = new Chart(context, {
+                        if (this.charts['internet'] !== undefined)
+                            this.charts['internet'].destroy();
+
+                        this.charts['internet'] = new Chart(context, {
                             type: 'line',
                             data: {
                                 labels: labels,
@@ -884,6 +901,12 @@ function views() {
             },
             vulnerability_graph: function(element, data, axis){
 
+                // always try to clean up the previous graph: also when data is undefined etc.
+                // updating the data might be nicer, but since it's so far away from the category switch you wont notice
+                // if a stat is missing, it will have an empty spot now, which is good enough.
+                if (this.charts[element] !== undefined)
+                        this.charts[element].destroy();
+
                 if (data === undefined)
                     return;
 
@@ -933,7 +956,7 @@ function views() {
                         });
 
                 let ctx = document.getElementById(element).getContext('2d');
-                let myChart = new Chart(ctx, {
+                this.charts[element] = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: labels,
