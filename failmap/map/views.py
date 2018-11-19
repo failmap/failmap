@@ -935,20 +935,24 @@ def organization_vulnerability_timeline(request, organization_id: int, organizat
 def organization_vulnerability_timeline_via_name(request, organization_name: str,
                                                  organization_type: str = "", country: str = ""):
 
-    if not organization_type or country:
+    log.debug("Country: %s Category: %s Name: %s" % (country, organization_type, organization_name))
+
+    if not organization_type or not country:
         # getting defaults
         data = Configuration.objects.all().filter(
             is_displayed=True,
             is_the_default_option=True
-        ).order_by('display_order').values('country', 'organization_type__name').first()
+        ).order_by('display_order').values('country', 'organization_type').first()
 
         country = data['country']
-        category = data['organization_type__name']
+        category = data['organization_type']
     else:
-        country = get_country(country)
-        category = get_organization_type(organization_type)
+        country = get_country(code=country)
+        category = get_organization_type(name=organization_type)
 
-    organization = Organization.objects.all().filter(country=country, type__name=category,
+    log.debug("Country: %s Category: %s Name: %s" % (country, category, organization_name))
+
+    organization = Organization.objects.all().filter(country=country, type=category,
                                                      name=organization_name,
                                                      is_dead=False).first()
 

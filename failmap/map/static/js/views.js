@@ -254,7 +254,7 @@ const report_mixin = {
         },
 
         vulnerability_timeline_for_organization: function(organization_id){
-            fetch('/data/organization_vulnerability_timeline/' + organization_id)
+            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.category + '/' + this.country)
                 .then(response => response.json()).then(data => {
 
                 let labels = Array();

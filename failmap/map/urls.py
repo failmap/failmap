@@ -54,10 +54,10 @@ urlpatterns = [
     path('data/organization_vulnerability_timeline/<oid:organization_id>', views.organization_vulnerability_timeline),
     path('data/organization_vulnerability_timeline/<oid:organization_id>/<slug:organization_type>/<c:country>',
          views.organization_vulnerability_timeline),
-    path('data/organization_vulnerability_timeline/<slug:organization_name>/<slug:organization_type>/<c:country>',
+    path('data/organization_vulnerability_timeline/<str:organization_name>/<slug:organization_type>/<c:country>',
          views.organization_vulnerability_timeline_via_name),
     path(
-        'data/organization_vulnerability_timeline/<slug:organization_name>/',
+        'data/organization_vulnerability_timeline/<str:organization_name>/',
         views.organization_vulnerability_timeline_via_name),
     path('data/report/<c:country>/<slug:organization_type>/<str:organization_name>/<w:weeks_back>',
          views.organization_report),
