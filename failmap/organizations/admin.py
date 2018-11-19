@@ -50,7 +50,15 @@ handfull of days.</p>
 class UrlAdminInline(CompactInline):
     model = Url.organization.through
     extra = 0
-    show_change_link = True
+    show_change_link = False
+    can_delete = False
+    # 'is_dead',
+    # For now not trying to fix the "through" relationship errors for getting fields from the URL object.
+    # <class 'failmap.organizations.admin.UrlAdminInline'>: (admin.E035) The value of 'readonly_fields[1]' is not
+    # a callable, an attribute of 'UrlAdminInline', or an attribute of 'organizations.Url_organization'.
+    readonly_fields = ('url', )
+
+    exclude = []
 
 
 # A highly limiting feature of the django admin interface is that inlines only
@@ -274,7 +282,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
               'is_dead', 'is_dead_since', 'is_dead_reason')
 
-    inlines = [CoordinateAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
+    inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
 
     @staticmethod
     def name_details(self):
