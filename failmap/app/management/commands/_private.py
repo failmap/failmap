@@ -153,6 +153,9 @@ class ScannerTaskCommand(TaskCommand):
         self.mutual_group.add_argument('-u', '--url_addresses', nargs='*',
                                        help="Perform scans on these urls (default is all).")
 
+        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
+                                       help="Perform scans on these organization types (default is all).")
+
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
@@ -170,6 +173,11 @@ class ScannerTaskCommand(TaskCommand):
             # create a case-insensitive filter to match organizations by name
             regex = '^(' + '|'.join(options['url_addresses']) + ')$'
             urls_filter = {'url__iregex': regex}
+
+        if options['organization_type']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_type']) + ')$'
+            organizations_filter = {'type__name__iregex': regex}
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_task(organizations_filter=organizations_filter,
