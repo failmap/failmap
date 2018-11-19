@@ -81,7 +81,7 @@ def compose_task(
         log.debug("Url filter: %s" % urls_filter)
         log.debug("urls to display: %s" % q_configurations_to_report())
         log.debug("organizatins to display: %s" % q_configurations_to_report('organization'))
-        raise Exception('Applied filters resulted in no tasks!')
+        return group()
 
     # when trying to report on a specific url or organization (so not everything) also don't rebuild all caches
     # from the past. This saves a lot of rebuild time, making results visible in a "fixing state" and the entire rebuild

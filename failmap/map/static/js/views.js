@@ -1076,6 +1076,8 @@ function views() {
 
                     self.endpoints_now = data.data.now['endpoints'];
 
+                    self.services = [];
+
                     for(let i=0; i<data.data.now['endpoint'].length; i++){
                         let z = data.data.now['endpoint'][i][1];
                         self.services.push({
