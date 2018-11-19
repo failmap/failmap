@@ -279,7 +279,7 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ['type__name', 'country', 'created_on', 'is_dead', 'is_dead_since'][::-1]
 
-    fields = ('name', 'type', 'country', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
+    fields = ('name', 'type', 'country', 'internal_notes', 'twitter_handle', 'created_on', 'wikidata', 'wikipedia',
               'is_dead', 'is_dead_since', 'is_dead_reason')
 
     inlines = [CoordinateAdminInline, UrlAdminInline, OrganizationRatingAdminInline, PromiseAdminInline]  #
@@ -427,7 +427,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization', 'created_on', 'onboarded', 'onboarding_stage')
+            'fields': ('url', 'organization', 'internal_notes', 'created_on', 'onboarded', 'onboarding_stage')
         }),
         ('DNS', {
             'fields': ('uses_dns_wildcard', ),

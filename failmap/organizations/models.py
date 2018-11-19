@@ -41,6 +41,16 @@ class Organization(models.Model):
         on_delete=models.PROTECT,
         default=1)
     name = models.CharField(max_length=50, db_index=True)
+
+    internal_notes = models.TextField(
+        max_length=500,
+        help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not "
+                  "straightforward. This helps with answering questions why the organization was added lateron. "
+                  "These notes will not be published, but are also not secret.",
+        blank=True,
+        null=True,
+    )
+
     twitter_handle = models.CharField(
         max_length=150,
         help_text="Include the @ symbol. Used in the top lists to let visitors tweet to the"
@@ -188,6 +198,16 @@ class Url(models.Model):
     url = models.CharField(
         max_length=255,
         help_text="Lowercase url name. For example: mydomain.tld or subdomain.domain.tld"
+    )
+
+    internal_notes = models.TextField(
+        max_length=500,
+        help_text="These notes can contain information on WHY this URL was added. Can be handy if it's not "
+                  "straightforward. This helps with answering questions why the URL was added lateron. For example: "
+                  "some urls are owned via a 100% shareholder construction by a state company / municipality "
+                  "while the company itself is private. These notes will not be published, but are also not secret.",
+        blank=True,
+        null=True,
     )
 
     created_on = models.DateTimeField(
