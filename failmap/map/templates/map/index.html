@@ -139,34 +139,19 @@
         </ul>
         {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
         <ul class="navbar-nav navbar-right ml-auto">
-        {% if debug %}
-            <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'><i class="fas fa-bug"></i> {% trans "DEBUG" %}</span></li>
-        {% endif %}
-        {% if admin %}
-            <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-            <!-- This allows testing different themes -->
-            <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Theme<span class="caret"></span></a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
-                        <a href="#" data-theme="default" class="dropdown-item theme-link">Default</a>
-                        <a href="#" data-theme="darkly" class="dropdown-item theme-link">Darkly</a>
-                    </div>
-                </li>
-        {% else %}
             <li class="nav-item nav-link" style="padding-right:20px;">
                 <a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a>
             </li>
             <li class="nav-item nav-link" style="padding-right:20px;">
                 <a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
             </li>
-        {% endif %}
         </ul>
     </div>
     </div>
 </nav>
 
 <div id="map_state_bar">
+
     <nav class="navbar navbar-expand-md navbar-light" id="countrynavbar" v-if="countries.length > 1" v-cloak style="background-color: ghostwhite">
         <div class="container">
             <div class="collapse navbar-collapse">
@@ -193,6 +178,40 @@
             </div>
         </div>
     </nav>
+
+    {% if debug or admin %}
+    <nav class="navbar navbar-expand-md navbar-light">
+        <div class="container">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        <div class="collapse navbar-collapse" id="adminbarcollapse">
+            <ul class="navbar-nav mr-auto">
+
+                {% if debug %}
+                <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'><i class="fas fa-bug"></i> {% trans "DEBUG" %}</span></li>
+                {% endif %}
+
+            </ul>
+            {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
+            <ul class="navbar-nav navbar-right ml-auto">
+            {% if admin %}
+                <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                <!-- This allows testing different themes -->
+                <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Theme<span class="caret"></span></a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                            <a href="#" data-theme="default" class="dropdown-item theme-link">Default</a>
+                            <a href="#" data-theme="darkly" class="dropdown-item theme-link">Darkly</a>
+                        </div>
+                    </li>
+            {% endif %}
+            </ul>
+        </div>
+        </div>
+    </nav>
+    {% endif %}
 </div>
 
 {% if config.SHOW_ANNOUNCEMENT and config.ANNOUNCEMENT %}

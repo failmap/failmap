@@ -23,7 +23,7 @@ certifi
 pytz
 
 # task processing framework
-redis==2.10.6  # forcing a specific version of redis, 3.0.1 gives timeout errors during build.
+redis<3  # forcing a specific version of redis, 3.0.1 gives timeout errors during build.
 celery[redis,eventlet]
 django-celery-beat
 flower  # used for queue statistics
