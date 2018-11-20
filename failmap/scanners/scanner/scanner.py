@@ -65,10 +65,10 @@ def allowed_to_discover(scanner_name: str = ""):
         return config.DISCOVER_URLS_USING_NSEC
 
     if scanner_name == 'certificate_transparency_compose_task':
-        return config.DISCOVER_URLS_USING_KNOWN_SUBDOMAINS
+        return config.DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY
 
     if scanner_name == 'brute_known_subdomains_compose_task':
-        return config.DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY
+        return config.DISCOVER_URLS_USING_KNOWN_SUBDOMAINS
 
     return False
 

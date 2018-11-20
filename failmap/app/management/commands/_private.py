@@ -199,6 +199,9 @@ class DiscoverTaskCommand(TaskCommand):
         self.mutual_group.add_argument('-o', '--organization_names', nargs='*',
                                        help="Perform scans on these organizations (default is all).")
 
+        self.mutual_group.add_argument('-y', '--organization_type', nargs='*',
+                                       help="Perform scans on these organization types (default is all).")
+
     def compose(self, *args, **options):
         """Compose set of tasks based on provided arguments."""
 
@@ -209,6 +212,11 @@ class DiscoverTaskCommand(TaskCommand):
             # create a case-insensitive filter to match organizations by name
             regex = '^(' + '|'.join(options['organization_names']) + ')$'
             organization_filter = {'name__iregex': regex}
+
+        if options['organization_type']:
+            # create a case-insensitive filter to match organizations by name
+            regex = '^(' + '|'.join(options['organization_type']) + ')$'
+            organization_filter = {'type__name__iregex': regex}
 
         # compose set of tasks to be executed
         return self.scanner_module.compose_discover_task(organization_filter)

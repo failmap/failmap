@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import DiscoverTaskCommand
-from failmap.scanners.scanner import dns, ftp, http
+from failmap.scanners.scanner import dns, dns_known_subdomains, ftp, http
 
 log = logging.getLogger(__name__)
 
@@ -16,6 +16,7 @@ class Command(DiscoverTaskCommand):
         'ftp': ftp,
         'http': http,
         'subdomains': dns,
+        'known_subdomains': dns_known_subdomains
     }
 
     def add_arguments(self, parser):

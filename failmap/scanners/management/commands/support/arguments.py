@@ -19,7 +19,7 @@ def valid_organization(name):
     if name in ["_ALL_", "*"]:
         return "*"
     try:
-        o = Organization.objects.get(name=name)
+        o = Organization.objects.get(name__iexact=name)
         return o.name
     except ObjectDoesNotExist:
         raise argparse.ArgumentTypeError("%s is not a valid organization or _ALL_" % name)
