@@ -36,6 +36,9 @@
                 <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
                     <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
               </span></th>
+                <th @click="sortBy('relative')" :class="{ active: sortKey == 'relative' }">{% trans "Relative" %}
+                    <span class="arrow" :class="sortOrders['relative'] > 0 ? 'asc' : 'dsc'">
+              </span></th>
             </tr>
             </thead>
             <tbody>
@@ -48,6 +51,7 @@
                 <td>{{ rank['high'] }}</td>
                 <td>{{ rank['medium'] }}</td>
                 <td>{{ rank['low'] }}</td>
+                <td>{{ rank['relative'] }}</td>
                 {% endverbatim %}
             </tr>
             </tbody>

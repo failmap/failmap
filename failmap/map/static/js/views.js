@@ -1300,7 +1300,7 @@ function views() {
         el: '#topfail',
         data: {
             data_url: "/data/topfail/",
-            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1}
+            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1, 'relative': 1, 'total_urls': 1, 'total_endpoints': 1}
         },
         mixins: [top_mixin, state_mixin]
     });

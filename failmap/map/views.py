@@ -2,6 +2,7 @@ import collections
 import logging
 import re
 from datetime import datetime, timedelta
+from math import ceil
 
 import pytz
 import simplejson as json
@@ -628,7 +629,14 @@ def top_fail(request, country: str = "NL", organization_type="municipality", wee
             "medium": i[7],
             "low": i[8],
             "total_urls": i[9],
-            "total_endpoints": i[10]
+            "total_endpoints": i[10],
+            "high_div_endpoints": "%s" % ceil((int(i[6]) / int(i[10])) * 100),
+            "mid_div_endpoints": "%s" % ceil((int(i[7]) / int(i[10])) * 100),
+            "low_div_endpoints": "%s" % ceil((int(i[8]) / int(i[10])) * 100),
+
+            # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
+            "relative": ceil((int(i[6]) / int(i[10])) * 1000) + ceil((int(i[7]) / int(i[10])) * 100) +
+            ceil((int(i[8]) / int(i[10])) * 10)
         }
         rank = rank + 1
 
