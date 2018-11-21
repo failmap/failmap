@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-19 16:54+0000\n"
+"POT-Creation-Date: 2018-11-21 12:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/game/forms.py:32
+#: failmap/game/forms.py
 msgid "This contest does not exist."
 msgstr ""
 
-#: failmap/game/forms.py:76
+#: failmap/game/forms.py
 msgid "Incorrect secret or team. Try again!"
 msgstr "Verkeerd geheim of team. Probeer opnieuw!"
 
-#: failmap/game/forms.py:159
+#: failmap/game/forms.py
 #, fuzzy, python-format
 #| msgid ""
 #| "This organization %(organization)s already exists in the database for "
@@ -36,53 +36,53 @@ msgid ""
 "type / layer."
 msgstr "De organisatie %(organization)s zit al in deze groep."
 
-#: failmap/game/models.py:16
+#: failmap/game/models.py
 msgid "Contest name"
 msgstr "Naam van de wedstrijd"
 
-#: failmap/game/models.py:48
+#: failmap/game/models.py
 msgid "contest"
 msgstr "wedstrijd"
 
-#: failmap/game/models.py:49
+#: failmap/game/models.py
 msgid "contests"
 msgstr "wedstrijden"
 
-#: failmap/game/models.py:61
+#: failmap/game/models.py
 msgid "Team name"
 msgstr "Team-naam"
 
-#: failmap/game/models.py:91
+#: failmap/game/models.py
 msgid "team"
 msgstr "team"
 
-#: failmap/game/models.py:92
+#: failmap/game/models.py
 msgid "teams"
 msgstr "teams"
 
-#: failmap/game/models.py:190
+#: failmap/game/models.py
 msgid "organisation submission"
 msgstr "organisatie inzending"
 
-#: failmap/game/models.py:191
+#: failmap/game/models.py
 msgid "organisation submissions"
 msgstr "organisatie inzendingen"
 
-#: failmap/game/models.py:256
+#: failmap/game/models.py
 msgid "url submission"
 msgstr "url inzending"
 
-#: failmap/game/models.py:257
+#: failmap/game/models.py
 #, fuzzy
 #| msgid "submissions"
 msgid "url submissions"
 msgstr "url inzendingen"
 
-#: failmap/game/templates/game/base.html:73
+#: failmap/game/templates/game/base.html
 msgid "Game"
 msgstr ""
 
-#: failmap/game/templates/game/base.html:74
+#: failmap/game/templates/game/base.html
 msgid "Toggle navigation"
 msgstr ""
 

@@ -31,19 +31,33 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
+        # -a means _all_ languages in the config. Only makes the languages for the "django" domain, so no javascript.
+        # all *.py, *.html and *.txt files
+        # only show a pointer to the file, instead of file+line number. The line number causes pollution when updating
+        # and it's pretty easy to discover the translation anyway.
+        log.debug("Making messages for all locales from *.py, *.html and *.txt files.")
+        call_command('makemessages', '--ignore', 'vendor', '--ignore', '.tox',  '-a', '--add-location', 'file')
 
-        # try and find new strings for all languages
-        call_command('makemessages', '-a')
+        # -d djangojs =
+        # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/#creating-message-files-from-js-code
+        # Now add messages for *.js files
+        log.debug("Making messages for all locales from *.js files.")
+        call_command('makemessages', '--ignore', 'vendor', '--ignore', '.tox',
+                     '--add-location', 'file', '-a', '-d', 'djangojs')
 
-        # django-admin compilemessages
+        log.debug("Compiling messages")
         for language in settings.LANGUAGES:
-            # -d djangojs =
-            # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/#creating-message-files-from-js-code
-            call_command('makemessages', '-d', 'djangojs', '-l', language[0])
+
+            # Compiles .po files created by makemessages to .mo files for use with the built-in gettext support.
+            # Default is to process all.
+            # if you don't specify the locale, it will do ALL LOCALES IT KNOWS! which takes a long time to do nothing
+            # This command is not feature complete and WILL also compile messages in the .tox directory which is a
+            # waste of time and obfuscates output.
+            # https://code.djangoproject.com/ticket/29973#ticket
             call_command('compilemessages', '-l', language[0])
 
         log.info('You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po')
         log.info('Compiled files are located in ./locale/(language code)/LC_MESSAGES/django(js).mo')
         log.info('')
         log.info('Run this command again to have your changes compiled.')
-        log.info('Remember to keep the amount of translations in javascript as low as possible.')
+        log.info('Remember to keep the amount of translations in javascript as low as possible. Design > translation.')

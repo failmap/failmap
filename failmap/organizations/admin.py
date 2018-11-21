@@ -352,11 +352,10 @@ class MyUrlAdminForm(forms.ModelForm):
 
                 # format_html = XSS :)
                 raise ValidationError(format_html(_(
-                    'Url %s is already matched to "%s", and is alive. '
+                    'Url %(url)s is already matched to "%(organization)s", and is alive. '
                     'Please add any remaining organizations to the existing version of this url. '
-                    'Search for <a href="../?url=%s&is_dead=False">🔍 %s</a>.'
-                    % (self.cleaned_data.get("url"), organization,
-                       self.cleaned_data.get("url"), self.cleaned_data.get("url")))))
+                    'Search for <a href="../?url=%(url)s&is_dead=False">🔍 %(url)s</a>.'
+                    % {'url': self.cleaned_data.get("url"), 'organization': organization})))
 
         # make sure the Url is not added if it is still alive: the existing url should be edited and the
         # organization should be added. (we might be able to do this automatically since we know the url is not
@@ -369,11 +368,11 @@ class MyUrlAdminForm(forms.ModelForm):
 
             # format_html = XSS :)
             raise ValidationError(format_html(_(
-                'This url %s already exists and is alive. Please add the desired organizations to the existing url. '
-                'This was not done automatically because it might be possible specific other data was entered in this '
-                'form that cannot blindly be copied (as it might interfere with the existing url). '
-                'Search for <a href="../?url=%s&is_dead=False">🔍 %s</a>.'
-                % (self.data.get("url"), self.data.get("url"), self.data.get("url")))))
+                'This url %(url)s already exists and is alive. Please add the desired organizations to the existing '
+                'url. This was not done automatically because it might be possible specific other data was entered in '
+                'this form that cannot blindly be copied (as it might interfere with the existing url). '
+                'Search for <a href="../?url=%(url)s&is_dead=False">🔍 %(url)s</a>.'
+                % {'url': self.data.get("url")})))
 
 
 class HasEndpointScansListFilter(admin.SimpleListFilter):

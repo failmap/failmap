@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-19 16:54+0000\n"
+"POT-Creation-Date: 2018-11-21 12:10+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,1507 +18,1502 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: docs/build/html/_static/doctools.js:193
+#: docs/build/html/_static/doctools.js
 msgid "Permalink to this headline"
 msgstr ""
 
-#: docs/build/html/_static/doctools.js:199
+#: docs/build/html/_static/doctools.js
 msgid "Permalink to this definition"
 msgstr ""
 
-#: docs/build/html/_static/doctools.js:232
+#: docs/build/html/_static/doctools.js
 msgid "Hide Search Matches"
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:400
+#: docs/build/html/_static/searchtools.js
 msgid "Searching"
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:405
+#: docs/build/html/_static/searchtools.js
 msgid "Preparing search..."
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:569
+#: docs/build/html/_static/searchtools.js
 msgid "Search Results"
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:571
+#: docs/build/html/_static/searchtools.js
 msgid ""
 "Your search did not match any documents. Please make sure that all words are "
 "spelled correctly and that you've selected enough categories."
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:573
+#: docs/build/html/_static/searchtools.js
 #, javascript-format
 msgid "Search finished, found %s page(s) matching the search query."
 msgstr ""
 
-#: docs/build/html/_static/searchtools.js:626
+#: docs/build/html/_static/searchtools.js
 msgid ", in "
 msgstr ""
 
-#: static/admin/js/actions.js:48 static/admin/js/actions.min.js:2
+#: static/admin/js/actions.js static/admin/js/actions.min.js
 msgid "%(sel)s of %(cnt)s selected"
 msgid_plural "%(sel)s of %(cnt)s selected"
 msgstr[0] ""
 msgstr[1] ""
 
-#: static/admin/js/actions.js:117 static/admin/js/actions.min.js:4
+#: static/admin/js/actions.js static/admin/js/actions.min.js
 msgid ""
 "You have unsaved changes on individual editable fields. If you run an "
 "action, your unsaved changes will be lost."
 msgstr ""
 
-#: static/admin/js/actions.js:129 static/admin/js/actions.min.js:5
+#: static/admin/js/actions.js static/admin/js/actions.min.js
 msgid ""
 "You have selected an action, but you haven't saved your changes to "
 "individual fields yet. Please click OK to save. You'll need to re-run the "
 "action."
 msgstr ""
 
-#: static/admin/js/actions.js:131 static/admin/js/actions.min.js:5
+#: static/admin/js/actions.js static/admin/js/actions.min.js
 msgid ""
 "You have selected an action, and you haven't made any changes on individual "
 "fields. You're probably looking for the Go button rather than the Save "
 "button."
 msgstr ""
 
-#: static/admin/js/calendar.js:12 static/js/graphs.js:29
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "January"
 msgstr ""
 
-#: static/admin/js/calendar.js:13 static/js/graphs.js:29
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "February"
 msgstr ""
 
-#: static/admin/js/calendar.js:14 static/js/graphs.js:29
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "March"
 msgstr ""
 
-#: static/admin/js/calendar.js:15 static/js/graphs.js:30
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "April"
 msgstr ""
 
-#: static/admin/js/calendar.js:16 static/js/graphs.js:30 static/js/graphs.js:34
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "May"
 msgstr ""
 
-#: static/admin/js/calendar.js:17 static/js/graphs.js:30
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "June"
 msgstr ""
 
-#: static/admin/js/calendar.js:18 static/js/graphs.js:31
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "July"
 msgstr ""
 
-#: static/admin/js/calendar.js:19 static/js/graphs.js:31
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "August"
 msgstr ""
 
-#: static/admin/js/calendar.js:20 static/js/graphs.js:31
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "September"
 msgstr ""
 
-#: static/admin/js/calendar.js:21 static/js/graphs.js:32
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "October"
 msgstr ""
 
-#: static/admin/js/calendar.js:22 static/js/graphs.js:32
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "November"
 msgstr ""
 
-#: static/admin/js/calendar.js:23 static/js/graphs.js:32
+#: static/admin/js/calendar.js static/js/graphs.js
 msgid "December"
 msgstr ""
 
-#: static/admin/js/calendar.js:26
+#: static/admin/js/calendar.js
 msgctxt "one letter Sunday"
 msgid "S"
 msgstr ""
 
-#: static/admin/js/calendar.js:27
+#: static/admin/js/calendar.js
 msgctxt "one letter Monday"
 msgid "M"
 msgstr ""
 
-#: static/admin/js/calendar.js:28
+#: static/admin/js/calendar.js
 msgctxt "one letter Tuesday"
 msgid "T"
 msgstr ""
 
-#: static/admin/js/calendar.js:29
+#: static/admin/js/calendar.js
 msgctxt "one letter Wednesday"
 msgid "W"
 msgstr ""
 
-#: static/admin/js/calendar.js:30
+#: static/admin/js/calendar.js
 msgctxt "one letter Thursday"
 msgid "T"
 msgstr ""
 
-#: static/admin/js/calendar.js:31
+#: static/admin/js/calendar.js
 msgctxt "one letter Friday"
 msgid "F"
 msgstr ""
 
-#: static/admin/js/calendar.js:32
+#: static/admin/js/calendar.js
 msgctxt "one letter Saturday"
 msgid "S"
 msgstr ""
 
-#: static/admin/js/collapse.js:10 static/admin/js/collapse.js:21
-#: static/admin/js/collapse.min.js:4
+#: static/admin/js/collapse.js static/admin/js/collapse.min.js
 msgid "Show"
 msgstr ""
 
-#: static/admin/js/collapse.js:18 static/admin/js/collapse.min.js:4
+#: static/admin/js/collapse.js static/admin/js/collapse.min.js
 msgid "Hide"
 msgstr ""
 
-#: static/jet/js/build/bundle.min.js:3
+#: static/jet/js/build/bundle.min.js
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js:61 static/js/views.js:738 static/js/views.js:743
-#: static/js/views.js:746
+#: static/js/failmap.js static/js/views.js
 msgid "View Full Screen"
 msgstr ""
 
-#: static/js/failmap.js:94
+#: static/js/failmap.js
 msgid "Search organization"
 msgstr ""
 
-#: static/js/failmap.js:97
+#: static/js/failmap.js
 msgid "Perfect"
 msgstr ""
 
-#: static/js/failmap.js:98
+#: static/js/failmap.js
 msgid "Good"
 msgstr ""
 
-#: static/js/failmap.js:99
+#: static/js/failmap.js
 msgid "Mediocre"
 msgstr ""
 
-#: static/js/failmap.js:100
+#: static/js/failmap.js
 msgid "Bad"
 msgstr ""
 
-#: static/js/failmap.js:101
+#: static/js/failmap.js
 msgid "Unknown"
 msgstr ""
 
-#: static/js/failmap.js:102
+#: static/js/failmap.js
 msgid "legend_basic_security"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/graphs.js
 msgid "Jan"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/graphs.js
 msgid "Feb"
 msgstr ""
 
-#: static/js/graphs.js:33
+#: static/js/graphs.js
 msgid "Mar"
 msgstr ""
 
-#: static/js/graphs.js:34
+#: static/js/graphs.js
 msgid "Apr"
 msgstr ""
 
-#: static/js/graphs.js:34
+#: static/js/graphs.js
 msgid "Jun"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js
 msgid "Jul"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js
 msgid "Aug"
 msgstr ""
 
-#: static/js/graphs.js:35
+#: static/js/graphs.js
 msgid "Sept"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js
 msgid "Oct"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js
 msgid "Nov"
 msgstr ""
 
-#: static/js/graphs.js:36
+#: static/js/graphs.js
 msgid "Dec"
 msgstr ""
 
-#: static/js/graphs.js:145
+#: static/js/graphs.js
 msgid "low"
 msgstr ""
 
-#: static/js/graphs.js:147
+#: static/js/graphs.js
 msgid "medium"
 msgstr ""
 
-#: static/js/graphs.js:149
+#: static/js/graphs.js
 msgid "high"
 msgstr ""
 
-#: static/js/script.js:15
+#: static/js/script.js
 msgid "2 weeks ago"
 msgstr ""
 
-#: static/js/script.js:16
+#: static/js/script.js
 msgid "3 weeks ago"
 msgstr ""
 
-#: static/js/script.js:17
+#: static/js/script.js
 msgid "1 month ago"
 msgstr ""
 
-#: static/js/script.js:18
+#: static/js/script.js
 msgid "2 months ago"
 msgstr ""
 
-#: static/js/script.js:19
+#: static/js/script.js
 msgid "3 months ago"
 msgstr ""
 
-#: static/js/script.js:20
+#: static/js/script.js
 msgid "7 days ago"
 msgstr ""
 
-#: static/js/script.js:21
+#: static/js/script.js
 msgid "now"
 msgstr ""
 
-#: static/js/script.js:24
+#: static/js/script.js
 msgid "Has a secure equivalent, which wasn't so in the past."
 msgstr ""
 
-#: static/js/script.js:26
+#: static/js/script.js
 msgid ""
 "Site does not redirect to secure url, and has no secure alternative on a "
 "standard port."
 msgstr ""
 
-#: static/js/script.js:27
+#: static/js/script.js
 msgid ""
 "Redirects to a secure site, while a secure counterpart on the standard port "
 "is missing."
 msgstr ""
 
-#: static/js/script.js:28
+#: static/js/script.js
 msgid "Broken Transport Security, rated F"
 msgstr ""
 
-#: static/js/script.js:29
+#: static/js/script.js
 msgid "Certificate not valid for domain name."
 msgstr ""
 
-#: static/js/script.js:30
+#: static/js/script.js
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated C."
 msgstr ""
 
-#: static/js/script.js:31
+#: static/js/script.js
 msgid ""
 "Could not establish trust.  For the certificate installation: Less than "
 "optimal Transport Security, rated B."
 msgstr ""
 
-#: static/js/script.js:32
+#: static/js/script.js
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A-."
 msgstr ""
 
-#: static/js/script.js:33
+#: static/js/script.js
 msgid ""
 "Could not establish trust.  For the certificate installation: Good Transport "
 "Security, rated A."
 msgstr ""
 
-#: static/js/script.js:34
+#: static/js/script.js
 msgid "Less than optimal Transport Security, rated C."
 msgstr ""
 
-#: static/js/script.js:35
+#: static/js/script.js
 msgid "Less than optimal Transport Security, rated B."
 msgstr ""
 
-#: static/js/script.js:36
+#: static/js/script.js
 msgid "Good Transport Security, rated A-."
 msgstr ""
 
-#: static/js/script.js:37
+#: static/js/script.js
 msgid "Good Transport Security, rated A."
 msgstr ""
 
-#: static/js/script.js:38
+#: static/js/script.js
 msgid "Perfect Transport Security, rated A+."
 msgstr ""
 
-#: static/js/script.js:39
+#: static/js/script.js
 msgid "X-Content-Type-Options header present."
 msgstr ""
 
-#: static/js/script.js:40
+#: static/js/script.js
 msgid "Missing X-Content-Type-Options header."
 msgstr ""
 
-#: static/js/script.js:41
+#: static/js/script.js
 msgid "X-XSS-Protection header present."
 msgstr ""
 
-#: static/js/script.js:42
+#: static/js/script.js
 msgid "Missing X-XSS-Protection header."
 msgstr ""
 
-#: static/js/script.js:43
+#: static/js/script.js
 msgid "X-Frame-Options header present."
 msgstr ""
 
-#: static/js/script.js:44
+#: static/js/script.js
 msgid "Missing X-Frame-Options header."
 msgstr ""
 
-#: static/js/script.js:45
+#: static/js/script.js
 msgid "Strict-Transport-Security header present."
 msgstr ""
 
-#: static/js/script.js:46
+#: static/js/script.js
 msgid "Missing Strict-Transport-Security header."
 msgstr ""
 
-#: static/js/script.js:47
+#: static/js/script.js
 msgid ""
 "Missing Strict-Transport-Security header. Offers no insecure alternative "
 "service."
 msgstr ""
 
-#: static/js/script.js:48
+#: static/js/script.js
 msgid "DNSSEC is incorrectly or not configured (errors found)."
 msgstr ""
 
-#: static/js/script.js:49
+#: static/js/script.js
 msgid "DNSSEC seems to be implemented sufficiently."
 msgstr ""
 
-#: static/js/script.js:50
+#: static/js/script.js
 msgid "FTP Server only supports insecure SSL protocol."
 msgstr ""
 
-#: static/js/script.js:51
+#: static/js/script.js
 msgid "FTP Server does not configured to show if encryption is available."
 msgstr ""
 
-#: static/js/script.js:52
+#: static/js/script.js
 msgid "FTP Server supports TLS encryption protocol."
 msgstr ""
 
-#: static/js/script.js:53
+#: static/js/script.js
 msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr ""
 
-#: static/js/script.js:54
+#: static/js/script.js
 msgid ""
 "An FTP connection could not be established properly. Not possible to verify "
 "encryption."
 msgstr ""
 
-#: static/js/script.js:58
+#: static/js/script.js
 msgid "report_header_tls_qualys"
 msgstr ""
 
-#: static/js/script.js:59
+#: static/js/script.js
 msgid "report_header_plain_https"
 msgstr ""
 
-#: static/js/script.js:60
+#: static/js/script.js
 msgid "report_header_security_headers_x_xss_protection"
 msgstr ""
 
-#: static/js/script.js:61
+#: static/js/script.js
 msgid "report_header_security_headers_x_frame_options"
 msgstr ""
 
-#: static/js/script.js:62
+#: static/js/script.js
 msgid "report_header_security_headers_x_content_type_options"
 msgstr ""
 
-#: static/js/script.js:63
+#: static/js/script.js
 msgid "report_header_security_headers_strict_transport_security"
 msgstr ""
 
-#: static/js/script.js:64
+#: static/js/script.js
 msgid "report_header_DNSSEC"
 msgstr ""
 
-#: static/js/script.js:65
+#: static/js/script.js
 msgid "report_header_ftp"
 msgstr ""
 
-#: static/js/script.js:68
+#: static/js/script.js
 msgid "category_menu_municipality"
 msgstr ""
 
-#: static/js/script.js:69
+#: static/js/script.js
 msgid "category_menu_cyber"
 msgstr ""
 
-#: static/js/script.js:70
+#: static/js/script.js
 msgid "category_menu_unknown"
 msgstr ""
 
-#: static/js/script.js:71
+#: static/js/script.js
 msgid "category_menu_water_board"
 msgstr ""
 
-#: static/js/script.js:72
+#: static/js/script.js
 msgid "category_menu_province"
 msgstr ""
 
-#: static/js/script.js:73
+#: static/js/script.js
 msgid "category_menu_hacking"
 msgstr ""
 
-#: static/js/script.js:74
+#: static/js/script.js
 msgid "category_menu_country"
 msgstr ""
 
-#: static/js/script.js:75
+#: static/js/script.js
 msgid "category_menu_region"
 msgstr ""
 
-#: static/js/script.js:76
+#: static/js/script.js
 msgid "category_menu_county"
 msgstr ""
 
-#: static/js/script.js:77
+#: static/js/script.js
 msgid "category_menu_district"
 msgstr ""
 
-#: static/js/script.js:80
+#: static/js/script.js
 msgid "category_menu_bundesland"
 msgstr ""
 
-#: static/js/script.js:81
+#: static/js/script.js
 msgid "category_menu_regierungsbezirk"
 msgstr ""
 
-#: static/js/script.js:82
+#: static/js/script.js
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr ""
 
-#: static/js/script.js:83
+#: static/js/script.js
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr ""
 
-#: static/js/script.js:84
+#: static/js/script.js
 msgid "category_menu_stadt_gemeinde"
 msgstr ""
 
-#: static/js/script.js:85
+#: static/js/script.js
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:86
+#: static/js/script.js
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr ""
 
-#: static/js/script.js:89
+#: static/js/script.js
 msgid "country_AD"
 msgstr ""
 
-#: static/js/script.js:90
+#: static/js/script.js
 msgid "country_AE"
 msgstr ""
 
-#: static/js/script.js:91
+#: static/js/script.js
 msgid "country_AF"
 msgstr ""
 
-#: static/js/script.js:92
+#: static/js/script.js
 msgid "country_AG"
 msgstr ""
 
-#: static/js/script.js:93
+#: static/js/script.js
 msgid "country_AI"
 msgstr ""
 
-#: static/js/script.js:94
+#: static/js/script.js
 msgid "country_AL"
 msgstr ""
 
-#: static/js/script.js:95
+#: static/js/script.js
 msgid "country_AM"
 msgstr ""
 
-#: static/js/script.js:96
+#: static/js/script.js
 msgid "country_AO"
 msgstr ""
 
-#: static/js/script.js:97
+#: static/js/script.js
 msgid "country_AQ"
 msgstr ""
 
-#: static/js/script.js:98
+#: static/js/script.js
 msgid "country_AR"
 msgstr ""
 
-#: static/js/script.js:99
+#: static/js/script.js
 msgid "country_AS"
 msgstr ""
 
-#: static/js/script.js:100
+#: static/js/script.js
 msgid "country_AT"
 msgstr ""
 
-#: static/js/script.js:101
+#: static/js/script.js
 msgid "country_AU"
 msgstr ""
 
-#: static/js/script.js:102
+#: static/js/script.js
 msgid "country_AW"
 msgstr ""
 
-#: static/js/script.js:103
+#: static/js/script.js
 msgid "country_AX"
 msgstr ""
 
-#: static/js/script.js:104
+#: static/js/script.js
 msgid "country_AZ"
 msgstr ""
 
-#: static/js/script.js:105
+#: static/js/script.js
 msgid "country_BA"
 msgstr ""
 
-#: static/js/script.js:106
+#: static/js/script.js
 msgid "country_BB"
 msgstr ""
 
-#: static/js/script.js:107
+#: static/js/script.js
 msgid "country_BD"
 msgstr ""
 
-#: static/js/script.js:108
+#: static/js/script.js
 msgid "country_BE"
 msgstr ""
 
-#: static/js/script.js:109
+#: static/js/script.js
 msgid "country_BF"
 msgstr ""
 
-#: static/js/script.js:110
+#: static/js/script.js
 msgid "country_BG"
 msgstr ""
 
-#: static/js/script.js:111
+#: static/js/script.js
 msgid "country_BH"
 msgstr ""
 
-#: static/js/script.js:112
+#: static/js/script.js
 msgid "country_BI"
 msgstr ""
 
-#: static/js/script.js:113
+#: static/js/script.js
 msgid "country_BJ"
 msgstr ""
 
-#: static/js/script.js:114
+#: static/js/script.js
 msgid "country_BL"
 msgstr ""
 
-#: static/js/script.js:115
+#: static/js/script.js
 msgid "country_BM"
 msgstr ""
 
-#: static/js/script.js:116
+#: static/js/script.js
 msgid "country_BN"
 msgstr ""
 
-#: static/js/script.js:117
+#: static/js/script.js
 msgid "country_BO"
 msgstr ""
 
-#: static/js/script.js:118
+#: static/js/script.js
 msgid "country_BR"
 msgstr ""
 
-#: static/js/script.js:119
+#: static/js/script.js
 msgid "country_BS"
 msgstr ""
 
-#: static/js/script.js:120
+#: static/js/script.js
 msgid "country_BT"
 msgstr ""
 
-#: static/js/script.js:121
+#: static/js/script.js
 msgid "country_BW"
 msgstr ""
 
-#: static/js/script.js:122
+#: static/js/script.js
 msgid "country_BY"
 msgstr ""
 
-#: static/js/script.js:123
+#: static/js/script.js
 msgid "country_BZ"
 msgstr ""
 
-#: static/js/script.js:124
+#: static/js/script.js
 msgid "country_CA"
 msgstr ""
 
-#: static/js/script.js:125
+#: static/js/script.js
 msgid "country_CD"
 msgstr ""
 
-#: static/js/script.js:126
+#: static/js/script.js
 msgid "country_CF"
 msgstr ""
 
-#: static/js/script.js:127
+#: static/js/script.js
 msgid "country_CG"
 msgstr ""
 
-#: static/js/script.js:128
+#: static/js/script.js
 msgid "country_CH"
 msgstr ""
 
-#: static/js/script.js:129
+#: static/js/script.js
 msgid "country_CI"
 msgstr ""
 
-#: static/js/script.js:130
+#: static/js/script.js
 msgid "country_CK"
 msgstr ""
 
-#: static/js/script.js:131
+#: static/js/script.js
 msgid "country_CL"
 msgstr ""
 
-#: static/js/script.js:132
+#: static/js/script.js
 msgid "country_CM"
 msgstr ""
 
-#: static/js/script.js:133
+#: static/js/script.js
 msgid "country_CN"
 msgstr ""
 
-#: static/js/script.js:134
+#: static/js/script.js
 msgid "country_CO"
 msgstr ""
 
-#: static/js/script.js:135
+#: static/js/script.js
 msgid "country_CR"
 msgstr ""
 
-#: static/js/script.js:136
+#: static/js/script.js
 msgid "country_CU"
 msgstr ""
 
-#: static/js/script.js:137
+#: static/js/script.js
 msgid "country_CV"
 msgstr ""
 
-#: static/js/script.js:138
+#: static/js/script.js
 msgid "country_CW"
 msgstr ""
 
-#: static/js/script.js:139
+#: static/js/script.js
 msgid "country_CY"
 msgstr ""
 
-#: static/js/script.js:140
+#: static/js/script.js
 msgid "country_CZ"
 msgstr ""
 
-#: static/js/script.js:141
+#: static/js/script.js
 msgid "country_DE"
 msgstr ""
 
-#: static/js/script.js:142
+#: static/js/script.js
 msgid "country_DJ"
 msgstr ""
 
-#: static/js/script.js:143
+#: static/js/script.js
 msgid "country_DK"
 msgstr ""
 
-#: static/js/script.js:144
+#: static/js/script.js
 msgid "country_DM"
 msgstr ""
 
-#: static/js/script.js:145
+#: static/js/script.js
 msgid "country_DO"
 msgstr ""
 
-#: static/js/script.js:146
+#: static/js/script.js
 msgid "country_DZ"
 msgstr ""
 
-#: static/js/script.js:147
+#: static/js/script.js
 msgid "country_EC"
 msgstr ""
 
-#: static/js/script.js:148
+#: static/js/script.js
 msgid "country_EE"
 msgstr ""
 
-#: static/js/script.js:149
+#: static/js/script.js
 msgid "country_EG"
 msgstr ""
 
-#: static/js/script.js:150
+#: static/js/script.js
 msgid "country_EH"
 msgstr ""
 
-#: static/js/script.js:151
+#: static/js/script.js
 msgid "country_ER"
 msgstr ""
 
-#: static/js/script.js:152
+#: static/js/script.js
 msgid "country_ES"
 msgstr ""
 
-#: static/js/script.js:153
+#: static/js/script.js
 msgid "country_ET"
 msgstr ""
 
-#: static/js/script.js:154
+#: static/js/script.js
 msgid "country_FI"
 msgstr ""
 
-#: static/js/script.js:155
+#: static/js/script.js
 msgid "country_FJ"
 msgstr ""
 
-#: static/js/script.js:156
+#: static/js/script.js
 msgid "country_FK"
 msgstr ""
 
-#: static/js/script.js:157
+#: static/js/script.js
 msgid "country_FM"
 msgstr ""
 
-#: static/js/script.js:158
+#: static/js/script.js
 msgid "country_FO"
 msgstr ""
 
-#: static/js/script.js:159
+#: static/js/script.js
 msgid "country_FR"
 msgstr ""
 
-#: static/js/script.js:160
+#: static/js/script.js
 msgid "country_GA"
 msgstr ""
 
-#: static/js/script.js:161
+#: static/js/script.js
 msgid "country_GB"
 msgstr ""
 
-#: static/js/script.js:162
+#: static/js/script.js
 msgid "country_GD"
 msgstr ""
 
-#: static/js/script.js:163
+#: static/js/script.js
 msgid "country_GE"
 msgstr ""
 
-#: static/js/script.js:164
+#: static/js/script.js
 msgid "country_GG"
 msgstr ""
 
-#: static/js/script.js:165
+#: static/js/script.js
 msgid "country_GH"
 msgstr ""
 
-#: static/js/script.js:166
+#: static/js/script.js
 msgid "country_GL"
 msgstr ""
 
-#: static/js/script.js:167
+#: static/js/script.js
 msgid "country_GM"
 msgstr ""
 
-#: static/js/script.js:168
+#: static/js/script.js
 msgid "country_GN"
 msgstr ""
 
-#: static/js/script.js:169
+#: static/js/script.js
 msgid "country_GQ"
 msgstr ""
 
-#: static/js/script.js:170
+#: static/js/script.js
 msgid "country_GR"
 msgstr ""
 
-#: static/js/script.js:171
+#: static/js/script.js
 msgid "country_GS"
 msgstr ""
 
-#: static/js/script.js:172
+#: static/js/script.js
 msgid "country_GT"
 msgstr ""
 
-#: static/js/script.js:173
+#: static/js/script.js
 msgid "country_GU"
 msgstr ""
 
-#: static/js/script.js:174
+#: static/js/script.js
 msgid "country_GW"
 msgstr ""
 
-#: static/js/script.js:175
+#: static/js/script.js
 msgid "country_GY"
 msgstr ""
 
-#: static/js/script.js:176
+#: static/js/script.js
 msgid "country_HK"
 msgstr ""
 
-#: static/js/script.js:177
+#: static/js/script.js
 msgid "country_HM"
 msgstr ""
 
-#: static/js/script.js:178
+#: static/js/script.js
 msgid "country_HN"
 msgstr ""
 
-#: static/js/script.js:179
+#: static/js/script.js
 msgid "country_HR"
 msgstr ""
 
-#: static/js/script.js:180
+#: static/js/script.js
 msgid "country_HT"
 msgstr ""
 
-#: static/js/script.js:181
+#: static/js/script.js
 msgid "country_HU"
 msgstr ""
 
-#: static/js/script.js:182
+#: static/js/script.js
 msgid "country_ID"
 msgstr ""
 
-#: static/js/script.js:183
+#: static/js/script.js
 msgid "country_IE"
 msgstr ""
 
-#: static/js/script.js:184
+#: static/js/script.js
 msgid "country_IL"
 msgstr ""
 
-#: static/js/script.js:185
+#: static/js/script.js
 msgid "country_IM"
 msgstr ""
 
-#: static/js/script.js:186
+#: static/js/script.js
 msgid "country_IN"
 msgstr ""
 
-#: static/js/script.js:187
+#: static/js/script.js
 msgid "country_IO"
 msgstr ""
 
-#: static/js/script.js:188
+#: static/js/script.js
 msgid "country_IQ"
 msgstr ""
 
-#: static/js/script.js:189
+#: static/js/script.js
 msgid "country_IR"
 msgstr ""
 
-#: static/js/script.js:190
+#: static/js/script.js
 msgid "country_IS"
 msgstr ""
 
-#: static/js/script.js:191
+#: static/js/script.js
 msgid "country_IT"
 msgstr ""
 
-#: static/js/script.js:192
+#: static/js/script.js
 msgid "country_JE"
 msgstr ""
 
-#: static/js/script.js:193
+#: static/js/script.js
 msgid "country_JM"
 msgstr ""
 
-#: static/js/script.js:194
+#: static/js/script.js
 msgid "country_JO"
 msgstr ""
 
-#: static/js/script.js:195
+#: static/js/script.js
 msgid "country_JP"
 msgstr ""
 
-#: static/js/script.js:196
+#: static/js/script.js
 msgid "country_KE"
 msgstr ""
 
-#: static/js/script.js:197
+#: static/js/script.js
 msgid "country_KG"
 msgstr ""
 
-#: static/js/script.js:198
+#: static/js/script.js
 msgid "country_KH"
 msgstr ""
 
-#: static/js/script.js:199
+#: static/js/script.js
 msgid "country_KI"
 msgstr ""
 
-#: static/js/script.js:200
+#: static/js/script.js
 msgid "country_KM"
 msgstr ""
 
-#: static/js/script.js:201
+#: static/js/script.js
 msgid "country_KN"
 msgstr ""
 
-#: static/js/script.js:202
+#: static/js/script.js
 msgid "country_KP"
 msgstr ""
 
-#: static/js/script.js:203
+#: static/js/script.js
 msgid "country_KR"
 msgstr ""
 
-#: static/js/script.js:204
+#: static/js/script.js
 msgid "country_KW"
 msgstr ""
 
-#: static/js/script.js:205
+#: static/js/script.js
 msgid "country_KY"
 msgstr ""
 
-#: static/js/script.js:206
+#: static/js/script.js
 msgid "country_KZ"
 msgstr ""
 
-#: static/js/script.js:207
+#: static/js/script.js
 msgid "country_LA"
 msgstr ""
 
-#: static/js/script.js:208
+#: static/js/script.js
 msgid "country_LB"
 msgstr ""
 
-#: static/js/script.js:209
+#: static/js/script.js
 msgid "country_LC"
 msgstr ""
 
-#: static/js/script.js:210
+#: static/js/script.js
 msgid "country_LI"
 msgstr ""
 
-#: static/js/script.js:211
+#: static/js/script.js
 msgid "country_LK"
 msgstr ""
 
-#: static/js/script.js:212
+#: static/js/script.js
 msgid "country_LR"
 msgstr ""
 
-#: static/js/script.js:213
+#: static/js/script.js
 msgid "country_LS"
 msgstr ""
 
-#: static/js/script.js:214
+#: static/js/script.js
 msgid "country_LT"
 msgstr ""
 
-#: static/js/script.js:215
+#: static/js/script.js
 msgid "country_LU"
 msgstr ""
 
-#: static/js/script.js:216
+#: static/js/script.js
 msgid "country_LV"
 msgstr ""
 
-#: static/js/script.js:217
+#: static/js/script.js
 msgid "country_LY"
 msgstr ""
 
-#: static/js/script.js:218
+#: static/js/script.js
 msgid "country_MA"
 msgstr ""
 
-#: static/js/script.js:219
+#: static/js/script.js
 msgid "country_MC"
 msgstr ""
 
-#: static/js/script.js:220
+#: static/js/script.js
 msgid "country_MD"
 msgstr ""
 
-#: static/js/script.js:221
+#: static/js/script.js
 msgid "country_ME"
 msgstr ""
 
-#: static/js/script.js:222
+#: static/js/script.js
 msgid "country_MF"
 msgstr ""
 
-#: static/js/script.js:223
+#: static/js/script.js
 msgid "country_MG"
 msgstr ""
 
-#: static/js/script.js:224
+#: static/js/script.js
 msgid "country_MH"
 msgstr ""
 
-#: static/js/script.js:225
+#: static/js/script.js
 msgid "country_MK"
 msgstr ""
 
-#: static/js/script.js:226
+#: static/js/script.js
 msgid "country_ML"
 msgstr ""
 
-#: static/js/script.js:227
+#: static/js/script.js
 msgid "country_MM"
 msgstr ""
 
-#: static/js/script.js:228
+#: static/js/script.js
 msgid "country_MN"
 msgstr ""
 
-#: static/js/script.js:229
+#: static/js/script.js
 msgid "country_MO"
 msgstr ""
 
-#: static/js/script.js:230
+#: static/js/script.js
 msgid "country_MP"
 msgstr ""
 
-#: static/js/script.js:231
+#: static/js/script.js
 msgid "country_MR"
 msgstr ""
 
-#: static/js/script.js:232
+#: static/js/script.js
 msgid "country_MS"
 msgstr ""
 
-#: static/js/script.js:233
+#: static/js/script.js
 msgid "country_MT"
 msgstr ""
 
-#: static/js/script.js:234
+#: static/js/script.js
 msgid "country_MU"
 msgstr ""
 
-#: static/js/script.js:235
+#: static/js/script.js
 msgid "country_MV"
 msgstr ""
 
-#: static/js/script.js:236
+#: static/js/script.js
 msgid "country_MW"
 msgstr ""
 
-#: static/js/script.js:237
+#: static/js/script.js
 msgid "country_MX"
 msgstr ""
 
-#: static/js/script.js:238
+#: static/js/script.js
 msgid "country_MY"
 msgstr ""
 
-#: static/js/script.js:239
+#: static/js/script.js
 msgid "country_MZ"
 msgstr ""
 
-#: static/js/script.js:240
+#: static/js/script.js
 msgid "country_NA"
 msgstr ""
 
-#: static/js/script.js:241
+#: static/js/script.js
 msgid "country_NC"
 msgstr ""
 
-#: static/js/script.js:242
+#: static/js/script.js
 msgid "country_NE"
 msgstr ""
 
-#: static/js/script.js:243
+#: static/js/script.js
 msgid "country_NF"
 msgstr ""
 
-#: static/js/script.js:244
+#: static/js/script.js
 msgid "country_NG"
 msgstr ""
 
-#: static/js/script.js:245
+#: static/js/script.js
 msgid "country_NI"
 msgstr ""
 
-#: static/js/script.js:246
+#: static/js/script.js
 msgid "country_NL"
 msgstr ""
 
-#: static/js/script.js:247
+#: static/js/script.js
 msgid "country_NO"
 msgstr ""
 
-#: static/js/script.js:248
+#: static/js/script.js
 msgid "country_NP"
 msgstr ""
 
-#: static/js/script.js:249
+#: static/js/script.js
 msgid "country_NR"
 msgstr ""
 
-#: static/js/script.js:250
+#: static/js/script.js
 msgid "country_NU"
 msgstr ""
 
-#: static/js/script.js:251
+#: static/js/script.js
 msgid "country_NZ"
 msgstr ""
 
-#: static/js/script.js:252
+#: static/js/script.js
 msgid "country_OM"
 msgstr ""
 
-#: static/js/script.js:253
+#: static/js/script.js
 msgid "country_PA"
 msgstr ""
 
-#: static/js/script.js:254
+#: static/js/script.js
 msgid "country_PE"
 msgstr ""
 
-#: static/js/script.js:255
+#: static/js/script.js
 msgid "country_PF"
 msgstr ""
 
-#: static/js/script.js:256
+#: static/js/script.js
 msgid "country_PG"
 msgstr ""
 
-#: static/js/script.js:257
+#: static/js/script.js
 msgid "country_PH"
 msgstr ""
 
-#: static/js/script.js:258
+#: static/js/script.js
 msgid "country_PK"
 msgstr ""
 
-#: static/js/script.js:259
+#: static/js/script.js
 msgid "country_PL"
 msgstr ""
 
-#: static/js/script.js:260
+#: static/js/script.js
 msgid "country_PM"
 msgstr ""
 
-#: static/js/script.js:261
+#: static/js/script.js
 msgid "country_PN"
 msgstr ""
 
-#: static/js/script.js:262
+#: static/js/script.js
 msgid "country_PR"
 msgstr ""
 
-#: static/js/script.js:263
+#: static/js/script.js
 msgid "country_PS"
 msgstr ""
 
-#: static/js/script.js:264
+#: static/js/script.js
 msgid "country_PT"
 msgstr ""
 
-#: static/js/script.js:265
+#: static/js/script.js
 msgid "country_PW"
 msgstr ""
 
-#: static/js/script.js:266
+#: static/js/script.js
 msgid "country_PY"
 msgstr ""
 
-#: static/js/script.js:267
+#: static/js/script.js
 msgid "country_QA"
 msgstr ""
 
-#: static/js/script.js:268
+#: static/js/script.js
 msgid "country_RO"
 msgstr ""
 
-#: static/js/script.js:269
+#: static/js/script.js
 msgid "country_RS"
 msgstr ""
 
-#: static/js/script.js:270
+#: static/js/script.js
 msgid "country_RU"
 msgstr ""
 
-#: static/js/script.js:271
+#: static/js/script.js
 msgid "country_RW"
 msgstr ""
 
-#: static/js/script.js:272
+#: static/js/script.js
 msgid "country_SA"
 msgstr ""
 
-#: static/js/script.js:273
+#: static/js/script.js
 msgid "country_SB"
 msgstr ""
 
-#: static/js/script.js:274
+#: static/js/script.js
 msgid "country_SC"
 msgstr ""
 
-#: static/js/script.js:275
+#: static/js/script.js
 msgid "country_SD"
 msgstr ""
 
-#: static/js/script.js:276
+#: static/js/script.js
 msgid "country_SE"
 msgstr ""
 
-#: static/js/script.js:277
+#: static/js/script.js
 msgid "country_SG"
 msgstr ""
 
-#: static/js/script.js:278
+#: static/js/script.js
 msgid "country_SH"
 msgstr ""
 
-#: static/js/script.js:279
+#: static/js/script.js
 msgid "country_SI"
 msgstr ""
 
-#: static/js/script.js:280
+#: static/js/script.js
 msgid "country_SK"
 msgstr ""
 
-#: static/js/script.js:281
+#: static/js/script.js
 msgid "country_SL"
 msgstr ""
 
-#: static/js/script.js:282
+#: static/js/script.js
 msgid "country_SM"
 msgstr ""
 
-#: static/js/script.js:283
+#: static/js/script.js
 msgid "country_SN"
 msgstr ""
 
-#: static/js/script.js:284
+#: static/js/script.js
 msgid "country_SO"
 msgstr ""
 
-#: static/js/script.js:285
+#: static/js/script.js
 msgid "country_SR"
 msgstr ""
 
-#: static/js/script.js:286
+#: static/js/script.js
 msgid "country_SS"
 msgstr ""
 
-#: static/js/script.js:287
+#: static/js/script.js
 msgid "country_ST"
 msgstr ""
 
-#: static/js/script.js:288
+#: static/js/script.js
 msgid "country_SV"
 msgstr ""
 
-#: static/js/script.js:289
+#: static/js/script.js
 msgid "country_SX"
 msgstr ""
 
-#: static/js/script.js:290
+#: static/js/script.js
 msgid "country_SY"
 msgstr ""
 
-#: static/js/script.js:291
+#: static/js/script.js
 msgid "country_SZ"
 msgstr ""
 
-#: static/js/script.js:292
+#: static/js/script.js
 msgid "country_TC"
 msgstr ""
 
-#: static/js/script.js:293
+#: static/js/script.js
 msgid "country_TD"
 msgstr ""
 
-#: static/js/script.js:294
+#: static/js/script.js
 msgid "country_TF"
 msgstr ""
 
-#: static/js/script.js:295
+#: static/js/script.js
 msgid "country_TG"
 msgstr ""
 
-#: static/js/script.js:296
+#: static/js/script.js
 msgid "country_TH"
 msgstr ""
 
-#: static/js/script.js:297
+#: static/js/script.js
 msgid "country_TJ"
 msgstr ""
 
-#: static/js/script.js:298
+#: static/js/script.js
 msgid "country_TL"
 msgstr ""
 
-#: static/js/script.js:299
+#: static/js/script.js
 msgid "country_TM"
 msgstr ""
 
-#: static/js/script.js:300
+#: static/js/script.js
 msgid "country_TN"
 msgstr ""
 
-#: static/js/script.js:301
+#: static/js/script.js
 msgid "country_TO"
 msgstr ""
 
-#: static/js/script.js:302
+#: static/js/script.js
 msgid "country_TR"
 msgstr ""
 
-#: static/js/script.js:303
+#: static/js/script.js
 msgid "country_TT"
 msgstr ""
 
-#: static/js/script.js:304
+#: static/js/script.js
 msgid "country_TW"
 msgstr ""
 
-#: static/js/script.js:305
+#: static/js/script.js
 msgid "country_TZ"
 msgstr ""
 
-#: static/js/script.js:306
+#: static/js/script.js
 msgid "country_UA"
 msgstr ""
 
-#: static/js/script.js:307
+#: static/js/script.js
 msgid "country_UG"
 msgstr ""
 
-#: static/js/script.js:308
+#: static/js/script.js
 msgid "country_US"
 msgstr ""
 
-#: static/js/script.js:309
+#: static/js/script.js
 msgid "country_UY"
 msgstr ""
 
-#: static/js/script.js:310
+#: static/js/script.js
 msgid "country_UZ"
 msgstr ""
 
-#: static/js/script.js:311
+#: static/js/script.js
 msgid "country_VA"
 msgstr ""
 
-#: static/js/script.js:312
+#: static/js/script.js
 msgid "country_VC"
 msgstr ""
 
-#: static/js/script.js:313
+#: static/js/script.js
 msgid "country_VE"
 msgstr ""
 
-#: static/js/script.js:314
+#: static/js/script.js
 msgid "country_VG"
 msgstr ""
 
-#: static/js/script.js:315
+#: static/js/script.js
 msgid "country_VI"
 msgstr ""
 
-#: static/js/script.js:316
+#: static/js/script.js
 msgid "country_VN"
 msgstr ""
 
-#: static/js/script.js:317
+#: static/js/script.js
 msgid "country_VU"
 msgstr ""
 
-#: static/js/script.js:318
+#: static/js/script.js
 msgid "country_WF"
 msgstr ""
 
-#: static/js/script.js:319
+#: static/js/script.js
 msgid "country_WS"
 msgstr ""
 
-#: static/js/script.js:320
+#: static/js/script.js
 msgid "country_YE"
 msgstr ""
 
-#: static/js/script.js:321
+#: static/js/script.js
 msgid "country_ZA"
 msgstr ""
 
-#: static/js/script.js:322
+#: static/js/script.js
 msgid "country_ZM"
 msgstr ""
 
-#: static/js/script.js:323
+#: static/js/script.js
 msgid "country_ZW"
 msgstr ""
 
-#: static/js/script.js:327
+#: static/js/script.js
 msgid "One week earlier"
 msgstr ""
 
-#: static/js/script.js:328
+#: static/js/script.js
 msgid "One week later"
 msgstr ""
 
-#: static/js/script.js:329
+#: static/js/script.js
 msgid "Moment"
 msgstr ""
 
-#: static/js/script.js:330
+#: static/js/script.js
 msgid "Risks"
 msgstr ""
 
-#: static/js/views.js:44
+#: static/js/views.js
 msgid "week"
 msgstr ""
 
-#: static/js/views.js:183 static/js/views.js:186 static/js/views.js:195
-#: static/js/views.js:198
+#: static/js/views.js
 msgid "Second opinion"
 msgstr ""
 
-#: static/js/views.js:184 static/js/views.js:187 static/js/views.js:189
-#: static/js/views.js:191 static/js/views.js:193 static/js/views.js:196
-#: static/js/views.js:199
+#: static/js/views.js
 msgid "Documentation"
 msgstr ""
 
-#: static/js/views.js:215
+#: static/js/views.js
 msgid "score perfect"
 msgstr ""
 
-#: static/js/views.js:217
+#: static/js/views.js
 msgid "score high"
 msgstr ""
 
-#: static/js/views.js:219
+#: static/js/views.js
 msgid "score medium"
 msgstr ""
 
-#: static/js/views.js:221
+#: static/js/views.js
 msgid "score low"
 msgstr ""
 
-#: static/js/views.js:744
+#: static/js/views.js
 msgid "Exit Full Screen"
 msgstr ""

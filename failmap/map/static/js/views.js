@@ -172,7 +172,8 @@ const report_mixin = {
             }
 
             if (explained) {
-                text = "<i class='fas fa-comments'></i>";
+                // if this is a string with "", translations say unterminated string. As ES6 template it's fine.
+                text = `<i class='fas fa-comments'></i>`;
                 bgcolor = "rgba(191, 255, 171, 0.3)";
             }
 
@@ -243,6 +244,7 @@ const report_mixin = {
                 }
             }
 
+
             let findings =
                 `<td style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
                 `<td style='background-color: ${https.bgcolor}'>${https.text}</td>` +
@@ -257,6 +259,7 @@ const report_mixin = {
 
         },
 
+        // translations say "unterminated string", which doesn't make sense.
         vulnerability_timeline_for_organization: function(organization_id){
             fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.category + '/' + this.country)
                 .then(response => response.json()).then(data => {
