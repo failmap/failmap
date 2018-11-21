@@ -6,7 +6,6 @@ import pytz
 from celery import group
 from constance import config
 from deepdiff import DeepDiff
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from failmap.map.views import get_map_data
@@ -72,8 +71,8 @@ def compose_task(
             continue
 
         # make sure default organization rating is in place
-        tasks.append(rerate_urls.si(urls)
-                     | rerate_organizations.si([organization]))
+        tasks.append(rebuild_url_ratings.si(urls)
+                     | rate_organizations_now.si([organization]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")
@@ -109,64 +108,89 @@ def compose_task(
 
 
 @app.task(queue='storage')
-def rerate_urls(urls: List):
+def update_report_tasks(url: Url):
+    """
+    A small update function that only rebuilds a single url and the organization report for a single day. Using this
+    during onboarding, it's possible to show changes much faster than a complete rebuild.
+
+    :param url:
+    :return:
+    """
+    tasks = []
+
+    organizations = list(url.organization.all())
+
+    # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
+    # the moment to rerate organizations is when the url_ratings has finished.
+
+    tasks.append(rebuild_url_ratings.si([url]) | rate_organizations_now.si(organizations))
+
+    # Calculating statistics is _extremely slow_ so we're not doing that in this method to keep the pace.
+    # Otherwise you'd have a 1000 statistic rebuilds pending, all doing a marginal job.
+    # calculate_vulnerability_statistics.si(1) | calculate_map_data.si(1)
+
+    return group(tasks)
+
+
+@app.task(queue='storage')
+def rebuild_url_ratings(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
     for url in urls:
-        delete_url_ratings(url)
+        # Delete the ratings for this url, they are going to be rebuilt
+        UrlRating.objects.all().filter(url=url).delete()
+
+        # Creating a timeline and rating it is much faster than doing an individual calculation.
+        # Mainly because it gets all data in just a few queries and then builds upon that.
         rate_timeline(create_timeline(url), url)
 
 
 @app.task(queue='storage')
-def rerate_organizations(organizations: List):
+def rebuild_organization_ratings(organizations: List):
     """Remove organization rating and rebuild anew."""
 
     for organization in organizations:
-        delete_organization_ratings(organization)
-        add_organization_rating(organizations=[organization], build_history=True)
+        log.info('Adding rating for organization %s', organization)
+
+        # Given yuou're rebuilding, you have to delete all previous ratings:
+        OrganizationRating.objects.all().filter(organization=organization).delete()
+
+        # Make sure the organization has the default rating
+        default_organization_rating(organizations=[organization])
+
+        # and then rebuild the ratings per moment. This is not really fast.
+        # todo: reduce the number of significants moments to be weekly in the past, which will safe a lot of time
+        moments, happenings = significant_moments(organizations=[organization])
+        for moment in moments:
+            rate_organization_on_moment(organization, moment)
 
 
-@app.task(queue='storage')
-def add_organization_rating(organizations: List[Organization], build_history: bool = False, when: datetime = None):
+constance_cache = {}
+
+
+def constance_cached_value(key):
     """
-    :param organizations: List of organization
-    :param build_history: Optional. Find all relevant moments of this organization and create a rating
-    :param when: Optional. Datetime, ignored if build_history is on
+    Tries to minimize access to the database for constance. Every time you want a value, you'll get the latest value.
+
+    That's great but not really needed: it takes 8 roundtrips per url, which is not slow but still slows things down.
+    That means about 5000 * 8 database hits per rebuild. = 40.000, which does have an impact.
+
+    This cache holds the value for ten minutes.
+
+    :param key:
     :return:
     """
+    now = datetime.now(pytz.utc).timestamp()
+    expired = now - 600  # 10 minute cache, 600 seconds. So changes still affect a rebuild.
 
-    if when:
-        assert isinstance(when, datetime)
+    if constance_cache.get(key, None):
+        if constance_cache[key]['time'] > expired:
+            return constance_cache[key]['value']
 
-    for organization in organizations:
-        log.info('Adding rating for organization %s', organization)
-        if build_history:
-            default_organization_rating(organizations=[organization])
-            moments, happenings = significant_moments(organizations=[organization])
-            for moment in moments:
-                rate_organization_on_moment(organization, moment)
-        else:
-            rate_organization_on_moment(organization, when)
-
-
-def add_url_rating(urls: List[Url], build_history: bool = False, when: datetime = None):
-
-    if when:
-        isinstance(when, datetime)
-
-    for url in urls:
-        if build_history:
-            rate_timeline(create_timeline(url), url)
-        else:
-            rate_url(url, when)
-
-
-def delete_url_ratings(url: Url):
-    UrlRating.objects.all().filter(url=url).delete()
-
-
-def delete_organization_ratings(organization: Organization):
-    OrganizationRating.objects.all().filter(organization=organization).delete()
+    # add value to cache, or update cache
+    value = getattr(config, key)
+    constance_cache[key] = {'value': value, 'time': datetime.now(pytz.utc).timestamp()}
+    return value
 
 
 def significant_moments(organizations: List[Organization] = None, urls: List[Url] = None):
@@ -215,21 +239,21 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     tls_qualys_scan_dates = []
 
     allowed_to_report = []
-    if config.REPORT_INCLUDE_HTTP_MISSING_TLS:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_MISSING_TLS'):
         allowed_to_report.append("plain_https")
-    if config.REPORT_INCLUDE_HTTP_HEADERS_HSTS:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_HSTS'):
         allowed_to_report.append("Strict-Transport-Security")
-    if config.REPORT_INCLUDE_HTTP_HEADERS_XFO:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_XFO'):
         allowed_to_report.append("X-Frame-Options")
-    if config.REPORT_INCLUDE_HTTP_HEADERS_X_XSS:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_XSS'):
         allowed_to_report.append("X-XSS-Protection")
-    if config.REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'):
         allowed_to_report.append("X-Content-Type-Options")
-    if config.REPORT_INCLUDE_DNS_DNSSEC:
+    if constance_cached_value('REPORT_INCLUDE_DNS_DNSSEC'):
         allowed_to_report.append("DNSSEC")
-    if config.REPORT_INCLUDE_FTP:
+    if constance_cached_value('REPORT_INCLUDE_FTP'):
         allowed_to_report.append("ftp")
-    if config.REPORT_INCLUDE_HTTP_TLS_QUALYS:
+    if constance_cached_value('REPORT_INCLUDE_HTTP_TLS_QUALYS'):
         allowed_to_report.append("tls_qualys_certificate_trusted")
         allowed_to_report.append("tls_qualys_encryption_quality")
 
@@ -414,6 +438,48 @@ def count_queries(message: str = ""):
               (len(connection.queries), length_long, length_medium, length_short, message))
 
 
+def show_last_query():
+    from django.db import connection
+
+    if not len(connection.queries):
+        return
+
+    log.debug(connection.queries[len(connection.queries) - 1])
+
+
+def show_queries():
+    from django.db import connection
+    log.debug(connection.queries)
+
+
+def query_contains_begin():
+    """
+    A large number of empty begin queries was issues on sqlite during development. This was just as much as the normal
+    inserts and saves, which is 60.000 roundtrips. Staring with BEGIN but never finishing the transaction makes no
+    sense. WHY? When are the transactions stopped?
+
+    It's embedded in Django's save and delete functions. It always issues a BEGIN statement, even if it's not needed.
+
+    This is the reason:
+    https://github.com/django/django/blob/f1d163449396f8bab6c50f4b8b54829d139feda2/django/db/backends/sqlite3/base.py
+
+    From the code:
+    Start a transaction explicitly in autocommit mode.
+    Staying in autocommit mode works around a bug of sqlite3 that breaks savepoints when autocommit is disabled.
+
+    And more meaningful comments here:
+    https://github.com/django/django/blob/717ee63e5615a6c3a018351a07028513f9b01f0b/django/db/backends/base/base.py
+
+    OK, we're rolling with it. Thnx open source docs and django devs for being clear.
+    :return:
+    """
+    from django.db import connection
+
+    for query in connection.queries:
+        if query['sql'] == 'BEGIN':
+            log.error('BEGIN')
+
+
 def hash_scan_per_day_and_type(scan):
 
     # hopefully it doesn't run extra queries?
@@ -532,7 +598,6 @@ def latest_moment_of_datetime(datetime_: datetime):
 
 def rate_timeline(timeline, url: Url):
     log.info("Rebuilding ratings for url %s on %s moments" % (url, len(timeline)))
-
     previous_endpoint_ratings = {}
     previous_url_ratings = {}
     previous_endpoints = []
@@ -965,11 +1030,10 @@ def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, 
     u.explained_endpoint_issues_high = explained_endpoint_issues_high
     u.explained_endpoint_issues_medium = explained_endpoint_issues_medium
     u.explained_endpoint_issues_low = explained_endpoint_issues_low
-
     u.save()
 
 
-def show_timeline_console(timeline, url: Url):
+def inspect_timeline(timeline, url: Url):
     newline = "\r\n"
     message = ""
     message += "" + newline
@@ -1030,6 +1094,14 @@ def show_timeline_console(timeline, url: Url):
 
     # first step to a UI
     return message
+
+
+@app.task(queue='storage')
+def rate_organizations_now(organizations: List[Organization]):
+
+    for organization in organizations:
+        now = datetime.now(pytz.utc)
+        rate_organization_on_moment(organization, now)
 
 
 # also callable as admin action
@@ -1105,13 +1177,13 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
 
     total_issues = total_high + total_medium + total_low
 
-    # don't need this anymore
-    # try:
-    #     last = OrganizationRating.objects.filter(
-    #         organization=organization, when__lte=when).latest('when')
-    # except OrganizationRating.DoesNotExist:
-    #     log.debug("Could not find the last organization rating, creating a dummy one.")
-    #     last = OrganizationRating()  # create an empty one
+    # Still do deepdiff to prevent double reports.
+    try:
+        last = OrganizationRating.objects.filter(
+            organization=organization, when__lte=when).latest('when')
+    except OrganizationRating.DoesNotExist:
+        log.debug("Could not find the last organization rating, creating a dummy one.")
+        last = OrganizationRating()  # create an empty one
 
     calculation = {
         "organization": {
@@ -1142,63 +1214,43 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     }
 
     # this is 10% faster without deepdiff, the major pain is elsewhere.
-    # if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
-    # if True:
-    log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
-    organizationrating = OrganizationRating()
-    organizationrating.organization = organization
-    organizationrating.rating = total_rating
-    organizationrating.high = total_high
-    organizationrating.medium = total_medium
-    organizationrating.low = total_low
-    organizationrating.when = when
-    organizationrating.calculation = calculation
+    if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
 
-    organizationrating.total_issues = total_issues
-    organizationrating.total_urls = total_urls
-    organizationrating.high_urls = high_urls
-    organizationrating.medium_urls = medium_urls
-    organizationrating.low_urls = low_urls
+        log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
+        organizationrating = OrganizationRating()
+        organizationrating.organization = organization
+        organizationrating.rating = total_rating
+        organizationrating.high = total_high
+        organizationrating.medium = total_medium
+        organizationrating.low = total_low
+        organizationrating.when = when
+        organizationrating.calculation = calculation
 
-    organizationrating.total_endpoints = total_endpoints
-    organizationrating.high_endpoints = high_endpoints
-    organizationrating.medium_endpoints = medium_endpoints
-    organizationrating.low_endpoints = low_endpoints
+        organizationrating.total_issues = total_issues
+        organizationrating.total_urls = total_urls
+        organizationrating.high_urls = high_urls
+        organizationrating.medium_urls = medium_urls
+        organizationrating.low_urls = low_urls
 
-    organizationrating.total_url_issues = total_url_issues
-    organizationrating.total_endpoint_issues = total_endpoint_issues
-    organizationrating.url_issues_high = url_issues_high
-    organizationrating.url_issues_medium = url_issues_medium
-    organizationrating.url_issues_low = url_issues_low
-    organizationrating.endpoint_issues_high = endpoint_issues_high
-    organizationrating.endpoint_issues_medium = endpoint_issues_medium
-    organizationrating.endpoint_issues_low = endpoint_issues_low
+        organizationrating.total_endpoints = total_endpoints
+        organizationrating.high_endpoints = high_endpoints
+        organizationrating.medium_endpoints = medium_endpoints
+        organizationrating.low_endpoints = low_endpoints
 
-    organizationrating.save()
+        organizationrating.total_url_issues = total_url_issues
+        organizationrating.total_endpoint_issues = total_endpoint_issues
+        organizationrating.url_issues_high = url_issues_high
+        organizationrating.url_issues_medium = url_issues_medium
+        organizationrating.url_issues_low = url_issues_low
+        organizationrating.endpoint_issues_high = endpoint_issues_high
+        organizationrating.endpoint_issues_medium = endpoint_issues_medium
+        organizationrating.endpoint_issues_low = endpoint_issues_low
 
-    # doing a check beforehand is faster
-    # else:
-    # This happens because some urls are dead etc: our filtering already removes this from the relevant information
-    # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
-    #    log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
-
-
-def get_latest_urlratings(urls: List[Url], when):
-    # per item implementation, one query per item.
-    all_url_ratings = []
-
-    for url in urls:
-        try:
-            urlratings = UrlRating.objects.filter(url=url, when__lte=when)
-            urlrating = urlratings.latest("when")  # kills the queryset, results 1
-            all_url_ratings.append(urlrating)
-        except UrlRating.DoesNotExist:
-            log.debug("Url has no rating at this moment: %s %s" % (url, when))
-
-    # https://stackoverflow.com/questions/403421/
-    all_url_ratings.sort(key=lambda x: (x.high, x.medium, x.low), reverse=True)
-
-    return all_url_ratings
+        organizationrating.save()
+    else:
+        # This happens because some urls are dead etc: our filtering already removes this from the relevant information
+        # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
+        log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
 
 
 def get_latest_urlratings_fast(urls: List[Url], when):
@@ -1235,209 +1287,6 @@ def get_latest_urlratings_fast(urls: List[Url], when):
     # https://docs.python.org/3/library/json.html#json.JSONEncoder
     return UrlRating.objects.raw(sql)
 
-    # cursor.execute(sql)
-    # rows = cursor.fetchall()
-    # for row in rows:
-    #     data = {
-    #         "rating": row[0],
-    #         "high": row[1],
-    #         "medium": row[2],
-    #         "low": row[3],
-#
-    #         "calculation": json.loads(row[4]),
-    #         # "calculation": row[4],
-    #         "url": row[5],
-    #     }
-    #     all_url_ratings.append(data)
-    # # print(all_url_ratings)
-    # return all_url_ratings
-
-
-# but this will give the correct score, possibly on the wrong endpoints (why?)
-def rate_url(url: Url, when: datetime = None):
-    if not when:
-        when = datetime.now(pytz.utc)
-
-    # contains since, last scan, rating, reason rating was given.
-    explanation, rating = get_url_score_modular(url, when)
-
-    # it's very possible there is no rating yet
-    # we do show the not_resolvable history.
-    try:
-        last_url_rating = UrlRating.objects.filter(url=url,
-                                                   url__urlrating__when__lte=when,
-                                                   url__is_dead=False).latest("when")
-    except ObjectDoesNotExist:
-        # make sure there is no exception later on.
-        last_url_rating = UrlRating()
-
-    # avoid duplication. We think the explanation is the most unique identifier.
-    # therefore the order in which URLs are grabbed (if there are new ones) is important.
-    # it cannot be random, otherwise the explanation will be different every time.
-    # deepdiff is also extremely slow, logically, since the json objects are pretty large.
-
-    # Comparing to json, nothing or deepdiff makes very little difference in performance.
-    # import json
-    # a = json.dumps(last_url_rating.calculation, sort_keys=True)
-    # b = json.dumps(explanation, sort_keys=True)
-
-    # DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True)
-    # if explanation:
-    # if explanation and a == b:
-    if explanation and DeepDiff(last_url_rating.calculation, explanation, ignore_order=True, report_repetition=True):
-        u = UrlRating()
-        u.url = url
-        u.rating = rating
-        u.when = when
-        u.calculation = explanation
-        u.save()
-    else:
-        log.warning("The calculation is still the same, not creating a new UrlRating")
-
-
-def get_url_score_modular(url: Url, when: datetime = None):
-    if not when:
-        when = datetime.now(pytz.utc)
-
-    log.debug("Calculating url score for %s on %s" % (url.url, when))
-
-    """
-    A relevant endpoint is an endpoint that is still alive or was alive at the time.
-    Due to being alive (or at the time) it can get scores from various scanners more easily.
-
-    Afterwards we'll check if at this time there also where dead endpoints.
-    Dead endpoints add 0 points to the rating, but it can lower a rating.(?)
-    """
-    endpoints = relevant_endpoints_at_timepoint(url=url, when=when)
-
-    # We're not going to have duplicate endpoints. This might happen if someone accidentally adds an
-    # endpoint with the same info.
-    # The solution before this was just to check on IP version. But the problem remains that scans
-    # are connected to an endpoint. Reduction/merging of duplicate endpoints should take place elsewhere.
-    processed_endpoints = []
-
-    overall_high, overall_medium, overall_low = 0, 0, 0
-    endpoint_calculations = []
-    for endpoint in endpoints:
-        endpoint_highs, endpoint_mediums, endpoint_lows = 0, 0, 0
-
-        # protect from rating the same endpoints, if someone made a mistake and added a copy. See above comment.
-        label = "%s%s%s" % (endpoint.is_ipv6(), endpoint.port, endpoint.protocol)
-        if label not in processed_endpoints:
-            processed_endpoints.append(label)
-        else:
-            continue
-
-        calculations = []
-        for scan_type in ALL_SCAN_TYPES:
-            calculation = endpoint_to_points_and_calculation(endpoint, when, scan_type)
-            if calculation:
-                calculations.append(calculation)
-                endpoint_highs += calculation["high"]
-                endpoint_mediums += calculation["medium"]
-                endpoint_lows += calculation["low"]
-
-        overall_high += endpoint_highs
-        overall_medium += endpoint_mediums
-        overall_low += endpoint_lows
-
-        if calculations:
-            endpoint_calculations.append({
-                "ip": endpoint.ip_version,
-                "port": endpoint.port,
-                "protocol": endpoint.protocol,
-                "high": endpoint_highs,
-                "medium": endpoint_mediums,
-                "low": endpoint_lows,
-                "ratings": calculations
-            })
-
-        else:
-            log.debug('No tls or http rating at this moment. Not saving. %s %s' % (url, when))
-
-    if not endpoints:
-        log.error('No relevant endpoints at this time, probably didnt exist yet. %s %s' % (url, when))
-        close_url_rating(url, when)
-
-    if endpoint_calculations:
-        url_rating_calculation = {
-            "url": {
-                "url": url.url,
-                "high": overall_high,
-                "medium": overall_medium,
-                "low": overall_low,
-                "endpoints": endpoint_calculations
-            }
-        }
-
-        return url_rating_calculation, 0
-    else:
-        return {}, 0
-
-
-def close_url_rating(url: Url, when: datetime):
-    log.debug('Trying to close off the latest rating')
-    """
-    This creates url ratings for urls that have a rating, but where all endpoints went dead.
-
-    Where the "get relevant endpoints" returns no endpoints anymore, and there has been a
-    rating before. This function creates a rating with 0 points for the url. Things have
-    apparently been cleaned up.
-
-    This will be called a lot. Perhaps cache the results?
-    :return:
-    """
-
-    # if did have score in past (we assume there was a check if there where endpoints before)
-    # create 0 rating.
-
-    default_calculation = {
-        "url":
-        {
-            "url": url.url,
-            "high": 0,
-            "medium": 0,
-            "low": 0,
-            "endpoints": []
-        }
-    }
-
-    try:
-        urlratings = UrlRating.objects.filter(url=url, when__lte=when)
-        urlrating = urlratings.latest("when")
-        if DeepDiff(urlrating.calculation, default_calculation, ignore_order=True, report_repetition=True):
-            log.debug('Added an empty zero rating. The url has probably been cleaned up.')
-            x = UrlRating()
-            x.calculation = default_calculation
-            x.when = when
-            x.url = url
-            x.rating = 0
-            x.save()
-        else:
-            log.debug('This was already cleaned up.')
-    except ObjectDoesNotExist:
-        log.debug('There where no prior ratings, so cannot close this url.')
-
-
-def endpoint_to_points_and_calculation(endpoint: Endpoint, when: datetime, scan_type: str):
-    try:
-        scan = ""
-        if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options",
-                         "X-Frame-Options", "X-XSS-Protection", "plain_https", "ftp", 'tls_qualys_encryption_quality',
-                         'tls_qualys_certificate_trusted']:
-            scan = EndpointGenericScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when,
-                                                      type=scan_type).latest('rating_determined_on')
-        if scan_type == "tls_qualys":
-            scan = TlsQualysScan.objects.filter(endpoint=endpoint, rating_determined_on__lte=when
-                                                ).latest('rating_determined_on')
-
-        calculation = get_calculation(scan)
-        log.debug("On %s, Endpoint %s" % (when, endpoint))
-        return calculation
-    except ObjectDoesNotExist:
-        log.debug("No %s scan on endpoint %s." % (scan_type, endpoint))
-        return {}
-
 
 def relevant_urls_at_timepoint_allinone(organization: Organization, when: datetime):
     # doing this, without the flat list results in about 40% faster execution, most notabily on large organizations
@@ -1465,129 +1314,6 @@ def relevant_urls_at_timepoint_allinone(organization: Organization, when: dateti
     ).values_list("id", flat=True)
     # print(both.query)
     return list(set(both))
-
-
-# to save some database roundtrips
-# @lru_cache(maxsize=None)  # TypeError: unhashable type: 'list'
-def relevant_urls_at_timepoint(organizations: List[Organization], when: datetime):
-    """
-    It's possible that the url only has endpoints that are dead, but the URL resolves fine.
-
-    :param organizations:
-    :param when:
-    :return:
-    """
-
-    urls = Url.objects.filter(organization__in=organizations)
-
-    resolvable_in_the_past = urls.filter(
-        created_on__lte=when,
-        not_resolvable=True,
-        not_resolvable_since__gte=when,
-    )
-    log.debug("Resolvable in the past:  %s" % resolvable_in_the_past.count())
-
-    alive_in_the_past = urls.filter(
-        created_on__lte=when,
-        is_dead=True,
-        is_dead_since__gte=when,
-    )
-    log.debug("Alive in the past:  %s" % alive_in_the_past.count())
-
-    currently_alive_and_resolvable = urls.filter(
-        created_on__lte=when,
-        not_resolvable=False,
-        is_dead=False,
-    )  # or is_dead=False,
-    log.debug("Alive urls:  %s" % currently_alive_and_resolvable.count())
-
-    possibly_relevant_urls = (list(resolvable_in_the_past) +
-                              list(alive_in_the_past) +
-                              list(currently_alive_and_resolvable))
-
-    relevant_urls = []
-    for url in possibly_relevant_urls:
-        # Check if they also had relevant endpoint. We do this separately to reduce the
-        # complexity of history in queries and complexer ORM queries. It's slower, but easier to understand.
-        # And using the lru_cache, it should be pretty fast (faster than having these subqueries executed
-        # every time)
-        has_endpoints = relevant_endpoints_at_timepoint(url=url, when=when)
-        if has_endpoints:
-            log.debug("The url %s is relevant on %s and has endpoints: " % (url, when))
-            relevant_urls.append(url)
-        else:
-            log.debug("While the url %s was relevant on %s, it does not have any relevant endpoints." % (url, when))
-
-    return relevant_urls
-
-
-# to save some database roundtrips
-# @lru_cache(maxsize=None)  # TypeError: unhashable type: 'list'
-def relevant_endpoints_at_timepoint(url: Url, when: datetime):
-    """
-    The IN query is of course (a little bit) slower, so the function is called with a URL directly.
-    Using two separate queries is also (a little bit) slower, so they are merged with a Q statement.
-
-    Alive then:
-    SELECT  "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
-            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
-            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
-    FROM
-            "scanners_endpoint"
-    WHERE ( "scanners_endpoint"."url_id" IN (131)
-    AND     "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00 AND "scanners_endpoint"."is_dead" = True
-    AND     "scanners_endpoint"."is_dead_since" >= 2016-12-31 00:00:00)
-
-    Still alive endpoints:
-    SELECT  "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
-            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
-            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
-    FROM    "scanners_endpoint"
-    WHERE ( "scanners_endpoint"."url_id" IN (131)
-    AND     "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
-    AND     "scanners_endpoint"."is_dead" = False)
-
-    Both, with a Q construct:
-    SELECT
-            "scanners_endpoint"."id", "scanners_endpoint"."url_id", "scanners_endpoint"."ip_version",
-            "scanners_endpoint"."port", "scanners_endpoint"."protocol", "scanners_endpoint"."discovered_on",
-            "scanners_endpoint"."is_dead", "scanners_endpoint"."is_dead_since", "scanners_endpoint"."is_dead_reason"
-    FROM    "scanners_endpoint"
-    WHERE   ("scanners_endpoint"."url_id" IN (131)
-    AND     (
-                (   "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
-                AND "scanners_endpoint"."is_dead" = False)
-            OR
-                (   "scanners_endpoint"."discovered_on" <= 2016-12-31 00:00:00
-                AND "scanners_endpoint"."is_dead" = True
-                AND "scanners_endpoint"."is_dead_since" >= 2016-12-31 00:00:00)))
-
-
-
-    :param url:
-    :param when:
-    :return:
-    """
-    endpoints = Endpoint.objects.all()
-
-    both = endpoints.filter(
-        url=url).filter(
-        # Alive then and still alive
-        Q(discovered_on__lte=when, is_dead=False)
-        |
-        # Alive then
-        Q(discovered_on__lte=when, is_dead=True, is_dead_since__gte=when))
-    # print(both.query)  # looks legit.
-
-    # log.debug("Endpoints alive back then and today (together): %s, " % (both.count()))
-
-    # also saves on merging these:
-    # relevant_endpoints = list(then_alive) + list(still_alive_endpoints)
-    relevant_endpoints = list(both)
-
-    # [log.debug("relevant endpoint for %s: %s" % (when, endpoint)) for endpoint in relevant_endpoints]
-
-    return relevant_endpoints
 
 
 @app.task(queue='storage')

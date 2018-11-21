@@ -6,6 +6,7 @@ from celery import group
 from django.utils import timezone
 
 from failmap.celery import Task, app
+from failmap.map.rating import update_report_tasks
 from failmap.organizations.models import Url
 from failmap.scanners.scanner.scanner import q_configurations_to_scan, url_filters
 from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
@@ -76,6 +77,7 @@ def compose_task(
             log.info("Scanning on: %s", url)
             update_stage(url, "scans_running")
             tasks.append(scan_tasks(url)
+                         | update_report_tasks(url)
                          | update_stage.si(url, "scans_finished"))
 
         elif url.onboarding_stage == "scans_finished":

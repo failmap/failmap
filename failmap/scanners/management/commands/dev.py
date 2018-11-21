@@ -2,8 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import (add_organization_rating, create_timeline, rerate_urls,
-                                show_timeline_console)
+from failmap.map.rating import (add_organization_rating, create_timeline, inspect_timeline,
+                                rebuild_url_ratings)
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
 
@@ -62,11 +62,11 @@ def test_osaft():
 
 
 def rebuild_ratings():
-    from failmap.map.rating import rerate_organizations
+    from failmap.map.rating import rebuild_organization_ratings
 
     organization = Organization.objects.filter(name="Arnhem").get()
-    rerate_urls(list(Url.objects.all().filter(organization=organization)))
-    rerate_organizations(organizations=[organization])
+    rebuild_url_ratings(list(Url.objects.all().filter(organization=organization)))
+    rebuild_organization_ratings(organizations=[organization])
 
 
 def tasking():
@@ -99,14 +99,14 @@ def develop_timeline():
         urls = Url.objects.all().filter(organization=organization)
         for url in urls:
             data = create_timeline(url=url)
-            show_timeline_console(data, url)
-            rerate_urls([url])
+            inspect_timeline(data, url)
+            rebuild_url_ratings([url])
         add_organization_rating(organizations=[organization], create_history=True)
 
     if False:
         organizations = Organization.objects.all().order_by('name')
         for organization in organizations:
-            rerate_urls(Url.objects.all().filter(organization=organization))
+            rebuild_url_ratings(Url.objects.all().filter(organization=organization))
 
     if False:
         # url = Url.objects.all().filter(url='www.amersfoort.nl').get()
@@ -123,8 +123,8 @@ def develop_timeline():
         url = Url.objects.all().filter(url='geo.aaenhunze.nl').get()
         url = Url.objects.all().filter(url='webserver03.bloemendaal.nl').get()
         data = create_timeline(url=url)
-        show_timeline_console(data, url)
-        rerate_urls([url])
+        inspect_timeline(data, url)
+        rebuild_url_ratings([url])
 
         # OrganizationRating.objects.all().delete()
         # for organization in url.organization.all():
@@ -180,8 +180,8 @@ def develop_determineratings():
     # pyflakes when = datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc)
     # when = datetime.now(pytz.utc)
     # organization = Organization.objects.filter(name="Zederik").get()
-    # rerate_urls(Url.objects.all().filter(organization=organization))
-    # rerate_organizations(organizations=[organization])
+    # rebuild_url_ratings(Url.objects.all().filter(organization=organization))
+    # rebuild_organization_ratings(organizations=[organization])
     # ratings are always different since we now also save last scan date.
     # only creates things for near midnight. Should check if today, and then save for now.
     # add_organization_rating(organization, create_history=True)

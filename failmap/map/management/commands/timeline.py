@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import create_timeline, show_timeline_console
+from failmap.map.rating import create_timeline, inspect_timeline
 from failmap.organizations.models import Url
 
 log = logging.getLogger(__package__)
@@ -27,4 +27,4 @@ class Command(BaseCommand):
         urls = Url.objects.all().filter(url__iregex=regex, is_dead=False)
 
         for url in urls:
-            print(show_timeline_console(create_timeline(url), url))
+            print(inspect_timeline(create_timeline(url), url))

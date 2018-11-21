@@ -2,7 +2,7 @@ import logging
 
 from failmap.app.management.commands._private import TaskCommand
 
-from ...rating import rerate_organizations
+from ...rating import rebuild_organization_ratings
 
 log = logging.getLogger(__name__)
 
@@ -12,4 +12,4 @@ class Command(TaskCommand):
 
     help = __doc__
 
-    task = rerate_organizations
+    task = rebuild_organization_ratings
