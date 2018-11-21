@@ -159,7 +159,8 @@ def rebuild_organization_ratings(organizations: List):
         default_organization_rating(organizations=[organization])
 
         # and then rebuild the ratings per moment. This is not really fast.
-        # todo: reduce the number of significants moments to be weekly in the past, which will safe a lot of time
+        # done: reduce the number of significants moments to be weekly in the past, which will safe a lot of time
+        # not needed: the rebuild already takes a lot of time, so why bother with that extra hour or so.
         moments, happenings = significant_moments(organizations=[organization])
         for moment in moments:
             rate_organization_on_moment(organization, moment)
