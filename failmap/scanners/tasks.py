@@ -2,11 +2,11 @@
 
 from celery import group
 
-from failmap.scanners.scanner import (dns, dnssec, dummy, ftp, http, plain_http, screenshot,
+from failmap.scanners.scanner import (dns, dnssec, dummy, ftp, http, mail, plain_http, screenshot,
                                       security_headers, tls_osaft, tls_qualys)
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, tls_osaft, screenshot, dns]
+__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, tls_osaft, screenshot, dns, mail]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.

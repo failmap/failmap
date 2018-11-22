@@ -524,6 +524,55 @@ class Screenshot(models.Model):
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
 
 
+class InternetNLScan(models.Model):
+
+    type = models.CharField(
+        max_length=4,
+        help_text="mail or web",
+        blank=True,
+        null=True
+    )
+
+    success = models.BooleanField(
+        default=False,
+        help_text="If the scan finished successfully."
+    )
+
+    started = models.BooleanField(
+        default=False,
+        help_text="If the scan is started, normally this is a YES."
+    )
+
+    started_on = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    finished = models.BooleanField(
+        default=False,
+        help_text="If the scan is complete."
+    )
+
+    finished_on = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    status_url = models.TextField(
+        max_length=500,
+        help_text="The url where the status of the batch scan can be retrieved.",
+        blank=True,
+        null=True
+    )
+
+    message = models.TextField(
+        max_length=500,
+        help_text="A status message received from the service",
+        blank=True,
+        null=True
+    )
+
+
 # A debugging table to help with API interactions.
 # This can be auto truncated after a few days.
 # Not anymore, since it's used to see if there are DNS problems (unresolvable domains)

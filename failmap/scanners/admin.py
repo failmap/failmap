@@ -4,8 +4,8 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
-from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, Screenshot,
-                     TlsQualysScan, TlsQualysScratchpad, TlsScan, UrlGenericScan, UrlIp)
+from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, InternetNLScan,
+                     Screenshot, TlsQualysScan, TlsQualysScratchpad, TlsScan, UrlGenericScan, UrlIp)
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -269,3 +269,11 @@ class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmi
     search_fields = ('type', 'domain', 'when', 'data')
     list_filter = ['type', 'domain', 'when', 'data'][::-1]
     fields = ('type', 'domain', 'when', 'data')
+
+
+@admin.register(InternetNLScan)
+class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('started_on', 'finished_on', 'success', 'message')
+    search_fields = ('message', 'status_url')
+    list_filter = ('started_on', 'finished_on', 'success', 'message', )
+    fields = ('started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'status_url')

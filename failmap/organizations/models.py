@@ -255,6 +255,11 @@ class Url(models.Model):
         help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
                   "something on this host.")
 
+    dns_supports_mx = models.BooleanField(
+        default=False,
+        help_text="If there is at least one MX record available, so we can perform mail generic mail scans. (for these"
+                  "scans we don't need to know what mail-ports and protocols/endpoints are available).")
+
     onboarding_stage = models.CharField(
         max_length=150,
         blank=True,

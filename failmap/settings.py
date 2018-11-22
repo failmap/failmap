@@ -757,6 +757,11 @@ CONSTANCE_CONFIG = {
     'SCAN_HTTP_HEADERS_X_XSS': (True, 'Do you want to scan for missing X-XSS headers?', bool),
     'SCAN_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to scan for missing X-Content-Type issues?', bool),
     'SCAN_FTP': (True, 'Do you want to scan for FTP servers that are missing encryption?', bool),
+    # todo username and password for internetnl, make separate category
+    'SCAN_MAIL_INTERNET_NL': (True, 'Do you want to scan for email security configuration using internet.nl?', bool),
+    'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API', str),
+    'INTERNET_NL_API_PASSWORD': ('', 'Password for the internet.nl API', str),
+
     'CREATE_HTTP_SCREENSHOT': (True, 'Todo: Does not work yet! Do you want to create screenshots for HTTP endpoints?',
                                bool),
 
@@ -819,6 +824,8 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('DNSSEC Scans', ('SCAN_DNS_DNSSEC', 'REPORT_INCLUDE_DNS_DNSSEC', 'SHOW_DNS_DNSSEC')),
 
     ('FTP Scans', ('SCAN_FTP', 'REPORT_INCLUDE_FTP', 'SHOW_FTP', )),
+
+    ('Internet.nl Scans', ('SCAN_MAIL_INTERNET_NL', 'INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
 
     ('Security Headers Scans', ('SCAN_HTTP_HEADERS_HSTS', 'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS',
                                 'SCAN_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
@@ -928,6 +935,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'tlsscan', 'permissions': ['scanners.change_tlsscan']},
         {'name': 'tlsqualysscan', 'permissions': ['scanners.change_tlsqualysscan']},
         {'name': 'urlgenericscan', 'permissions': ['scanners.change_urlgenericscan']},
+        {'name': 'internetnlscan', 'permissions': ['scanners.change_internetnlscan']},
         {'name': 'screenshot', 'permissions': ['admin']},
         {'name': 'urlip', 'permissions': ['admin']},
         {'name': 'tlsqualysscratchpad', 'permissions': ['admin']},

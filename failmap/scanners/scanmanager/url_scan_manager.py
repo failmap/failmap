@@ -27,11 +27,16 @@ class UrlScanManager:
         except ObjectDoesNotExist:
             gs = UrlGenericScan()
 
+        # here we figured out that you can still pass a bool while type hinting.
+        # log.debug("Explanation new: '%s', old: '%s' eq: %s, Rating new: '%s', old: '%s', eq: %s" %
+        #           (message, gs.explanation, message == gs.explanation, rating, gs.rating, str(rating) == gs.rating))
+
         # last scan had exactly the same result, so don't create a new scan and just update the last scan date.
-        if gs.explanation == message and gs.rating == rating:
+        # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
+        if gs.explanation == message and gs.rating == str(rating):
             log.debug("Scan had the same rating and message, updating last_scan_moment only.")
             gs.last_scan_moment = datetime.now(pytz.utc)
-            gs.save()
+            gs.save(update_fields=['last_scan_moment'])
         else:
             # message and rating changed for this scan_type, so it's worth while to save the scan.
             log.debug("Message or rating changed: making a new generic scan.")

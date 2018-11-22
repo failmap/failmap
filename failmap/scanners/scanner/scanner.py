@@ -43,6 +43,9 @@ def allowed_to_scan(scanner_name: str = ""):
     if scanner_name == 'scanner_screenshot':
         return config.CREATE_HTTP_SCREENSHOT
 
+    if scanner_name == 'scanner_mail_internet_nl':
+        return config.SCAN_MAIL_INTERNET_NL
+
     if scanner_name == 'scanner_security_headers':
         return (config.SCAN_HTTP_HEADERS_HSTS or
                 config.SCAN_HTTP_HEADERS_XFO or

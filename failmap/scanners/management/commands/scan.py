@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
-from failmap.scanners.scanner import (debug, dnssec, dummy, ftp, http, onboard, plain_http,
+from failmap.scanners.scanner import (debug, dnssec, dummy, ftp, http, mail, onboard, plain_http,
                                       screenshot, security_headers, tls_osaft, tls_qualys)
 
 log = logging.getLogger(__name__)
@@ -23,7 +23,8 @@ class Command(ScannerTaskCommand):
         'screenshot': screenshot,
         'onboard': onboard,
         'dummy': dummy,
-        'debug': debug
+        'debug': debug,
+        'mail': mail
     }
 
     def add_arguments(self, parser):

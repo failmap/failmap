@@ -421,7 +421,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     list_filter = ['is_dead', 'is_dead_since', 'is_dead_reason',
                    'not_resolvable', 'not_resolvable_since', 'not_resolvable_reason',
                    'uses_dns_wildcard', 'organization', 'onboarded', 'onboarding_stage', 'organization__type__name',
-                   'organization__country',
+                   'organization__country', 'dns_supports_mx',
                    HasEndpointScansListFilter][::-1]
 
     fieldsets = (
@@ -429,7 +429,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             'fields': ('url', 'organization', 'internal_notes', 'created_on', 'onboarded', 'onboarding_stage')
         }),
         ('DNS', {
-            'fields': ('uses_dns_wildcard', ),
+            'fields': ('uses_dns_wildcard', 'dns_supports_mx', ),
         }),
         ('Resolvability', {
             'description': 'Non resolving urls cannot be reached anymore.',
