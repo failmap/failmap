@@ -262,14 +262,14 @@ def check_running_scans():
         if response['message'] == "OK":
             log.debug("Hooray, a scan has finished.")
             scan.finished = True
-            scan.finish_on = datetime.now(pytz.utc)
+            scan.finished_on = datetime.now(pytz.utc)
             scan.success = True
             store(response)
 
         if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
             log.debug("Scan encountered an error.")
             scan.finished = True
-            scan.finish_on = datetime.now(pytz.utc)
+            scan.finished_on = datetime.now(pytz.utc)
 
         scan.save()
 
