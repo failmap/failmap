@@ -2,7 +2,7 @@ import logging
 
 from failmap.app.management.commands._private import TaskCommand
 
-from ...rating import rebuild_organization_ratings
+from ...report import rebuild_organization_ratings
 
 log = logging.getLogger(__name__)
 

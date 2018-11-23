@@ -3,7 +3,7 @@ from argparse import ArgumentTypeError
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import calculate_map_data
+from failmap.map.report import calculate_map_data
 
 log = logging.getLogger(__package__)
 

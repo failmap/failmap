@@ -13,7 +13,7 @@ from django.conf import settings
 from failmap.celery import PRIO_HIGH, PRIO_LOW, PRIO_NORMAL, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.tls_scan_manager import TlsScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 from failmap.scanners.timeout import timeout
 
@@ -811,7 +811,8 @@ def store_grade(combined_ratings, endpoint):
     if trusted != "T":
         trusted = grade
 
-    TlsScanManager.add_scan(endpoint, trusted, grade, "", grade_report(ratings, trust_ratings, report))
+    store_endpoint_scan_result('tls_osaft_certificate_trusted', endpoint, trusted, "")
+    store_endpoint_scan_result('tls_osaft_encryption_quality', endpoint, grade, "")
 
 
 @timeout(3)

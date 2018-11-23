@@ -19,6 +19,8 @@ class Command(BaseCommand):
 
     Without typing --accept, only a preview of the changes will be given.
 
+    This was called undo in the past.
+
     Examples:
 
         Preview endpoints to be revived on october 15 2018:

@@ -15,7 +15,7 @@ from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Ti
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
@@ -144,17 +144,13 @@ def analyze_headers(result: requests.Response, endpoint):
         else:
             if 'Strict-Transport-Security' in response.headers:
                 log.debug('Has Strict-Transport-Security')
-                EndpointScanManager.add_scan('Strict-Transport-Security',
-                                             endpoint,
-                                             'True',
-                                             response.headers['Strict-Transport-Security'])
+                store_endpoint_scan_result('Strict-Transport-Security', endpoint, 'True',
+                                           response.headers['Strict-Transport-Security'])
             else:
                 log.debug('Has no Strict-Transport-Security, yet offers no insecure http service.')
-                EndpointScanManager.add_scan('Strict-Transport-Security',
-                                             endpoint,
-                                             'False',
-                                             "Security Header not present: Strict-Transport-Security, "
-                                             "yet offers no insecure http service.")
+                store_endpoint_scan_result('Strict-Transport-Security', endpoint, 'False',
+                                           "Security Header not present: Strict-Transport-Security, "
+                                           "yet offers no insecure http service.")
 
     return {'status': 'success'}
 
@@ -163,16 +159,10 @@ def generic_check(endpoint: Endpoint, headers, header):
     # this is case insensitive
     if header in headers.keys():
         log.debug('Has %s' % header)
-        EndpointScanManager.add_scan(header,
-                                     endpoint,
-                                     'True',
-                                     headers[header])
+        store_endpoint_scan_result(header, endpoint, 'True', headers[header])
     else:
         log.debug('Has no %s' % header)
-        EndpointScanManager.add_scan(header,
-                                     endpoint,
-                                     'False',
-                                     "Security Header not present: %s" % header)
+        store_endpoint_scan_result(header, endpoint, 'False', "Security Header not present: %s" % header)
 
 
 def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
@@ -180,18 +170,18 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
     # this is case insensitive
     if header in headers.keys():
         log.debug('Has %s' % header)
-        EndpointScanManager.add_scan(header, endpoint, 'True', headers[header])
+        store_endpoint_scan_result(header, endpoint, 'True', headers[header])
     else:
         # CSP fallback:
         if "Content-Security-Policy" in headers.keys():
-            EndpointScanManager.add_scan(
+            store_endpoint_scan_result(
                 header, endpoint, 'Using CSP',
                 "Content-Security-Policy header found, which can handle the security from %s. Value: %s." %
                 (header, headers["Content-Security-Policy"]))
 
         else:
             log.debug('Has no %s' % header)
-            EndpointScanManager.add_scan(
+            store_endpoint_scan_result(
                 header, endpoint, 'False',
                 "Security Header not present: %s, alternative header Content-Security-Policy not present." % header)
 
@@ -199,12 +189,12 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
 def error_response_400_500(endpoint):
     # Set all headers for this endpoint to 400_500, which are not shown in the report.
     # These are not shown in the report anymore. Not using this
-    EndpointScanManager.add_scan('X-XSS-Protection', endpoint, '400_500', "")
-    EndpointScanManager.add_scan('X-Frame-Options', endpoint, '400_500', "")
-    EndpointScanManager.add_scan('X-Content-Type-Options', endpoint, '400_500', "")
+    store_endpoint_scan_result('X-XSS-Protection', endpoint, '400_500', "")
+    store_endpoint_scan_result('X-Frame-Options', endpoint, '400_500', "")
+    store_endpoint_scan_result('X-Content-Type-Options', endpoint, '400_500', "")
 
     if endpoint.protocol == "https":
-        EndpointScanManager.add_scan('Strict-Transport-Security', endpoint, '400_500', "")
+        store_endpoint_scan_result('Strict-Transport-Security', endpoint, '400_500', "")
 
 
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})

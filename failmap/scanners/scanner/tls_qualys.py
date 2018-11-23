@@ -35,8 +35,7 @@ from tenacity import before_log, retry, wait_fixed
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, TlsQualysScratchpad
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
-from failmap.scanners.scanmanager.tlsqualys_scan_manager import TlsQualysScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.http import store_url_ips
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
@@ -456,11 +455,8 @@ def save_scan(url, data):
         else:
             trust = "trusted"
 
-        # If you're deleting TlsQualysScanManager because of legacy reasons, also delete the two lines or the entire
-        # script of split_tls_qualys scans.
-        TlsQualysScanManager.add_scan(failmap_endpoint, rating, rating_no_trust, "Ready")
-        EndpointScanManager.add_scan('tls_qualys_certificate_trusted', failmap_endpoint, trust, "")
-        EndpointScanManager.add_scan('tls_qualys_encryption_quality', failmap_endpoint, rating_no_trust, "")
+        store_endpoint_scan_result('tls_qualys_certificate_trusted', failmap_endpoint, trust, "")
+        store_endpoint_scan_result('tls_qualys_encryption_quality', failmap_endpoint, rating_no_trust, "")
 
     # Store IP address of the scan as metadata
     ips = [ipaddress.ip_address(endpoint['ipAddress']).compressed for endpoint in data['endpoints']]

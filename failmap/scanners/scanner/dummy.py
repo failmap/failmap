@@ -13,7 +13,7 @@ from django.conf import settings
 
 from failmap.celery import ParentFailed, app
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
                                               q_configurations_to_scan)
 
@@ -99,9 +99,9 @@ def store(result, endpoint):
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        EndpointScanManager.add_scan('Dummy', endpoint, 'True', message_result_ok)
+        store_endpoint_scan_result('Dummy', endpoint, 'True', message_result_ok)
     else:
-        EndpointScanManager.add_scan('Dummy', endpoint, 'False', message_result_false)
+        store_endpoint_scan_result('Dummy', endpoint, 'False', message_result_false)
 
     # return something informative
     return {'status': 'success', 'result': result}

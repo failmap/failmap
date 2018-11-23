@@ -2,7 +2,7 @@ import logging
 
 from celery import group
 
-from failmap.map.rating import (calculate_map_data, calculate_vulnerability_statistics,
+from failmap.map.report import (calculate_map_data, calculate_vulnerability_statistics,
                                 rebuild_organization_ratings, rebuild_url_ratings)
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.scanner import q_configurations_to_report

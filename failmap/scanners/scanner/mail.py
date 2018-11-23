@@ -61,7 +61,7 @@ from requests.auth import HTTPBasicAuth
 from failmap.celery import app
 from failmap.organizations.models import Url
 from failmap.scanners.models import InternetNLScan, UrlGenericScan
-from failmap.scanners.scanmanager.url_scan_manager import UrlScanManager
+from failmap.scanners.scanmanager import store_url_scan_result
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan, url_filters
 
 log = logging.getLogger(__name__)
@@ -209,7 +209,7 @@ def clean_urls_without_mx(urls: List[Url]):
         # log.debug("Found %s obsolete scans for this url %s." % (len(list(obsolete_scans)), url))
 
         for obsolete_scan in obsolete_scans:
-            UrlScanManager.add_scan(
+            store_url_scan_result(
                 scan_type=obsolete_scan.type,
                 url=obsolete_scan.url,
                 rating="mx removed",
@@ -541,7 +541,7 @@ def store(result: dict):
             continue
 
         # link changes every time, so can't save that as message.
-        UrlScanManager.add_scan(
+        store_url_scan_result(
             scan_type='internet_nl_mail_overall_score',
             url=url,
             rating=domain['score'],
@@ -552,7 +552,7 @@ def store(result: dict):
         # startls, dane etc.
         for category in domain['categories']:
             scan_type = 'internet_nl_mail_%s' % category['category']
-            UrlScanManager.add_scan(
+            store_url_scan_result(
                 scan_type=scan_type,
                 url=url,
                 rating=category['passed'],
@@ -563,7 +563,7 @@ def store(result: dict):
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in domain['views']:
             scan_type = 'internet_nl_%s' % view['name']
-            UrlScanManager.add_scan(
+            store_url_scan_result(
                 scan_type=scan_type,
                 url=url,
                 rating=view['result'],

@@ -17,7 +17,7 @@ from leaflet.admin import LeafletGeoAdminMixin
 
 import failmap.scanners.scanner.http as scanner_http
 from failmap import types
-from failmap.map.rating import OrganizationRating, UrlRating
+from failmap.map.report import OrganizationRating, UrlRating
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
@@ -527,7 +527,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     actions.append('declare_dead')
 
     def timeline_debug(self, request, queryset):
-        from failmap.map.rating import create_timeline, inspect_timeline
+        from failmap.map.report import create_timeline, inspect_timeline
         from django.http import HttpResponse
 
         content = "<pre>"

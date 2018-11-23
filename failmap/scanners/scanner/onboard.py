@@ -6,7 +6,7 @@ from celery import group
 from django.utils import timezone
 
 from failmap.celery import Task, app
-from failmap.map.rating import update_report_tasks
+from failmap.map.report import update_report_tasks
 from failmap.organizations.models import Url
 from failmap.scanners.scanner.scanner import q_configurations_to_scan, url_filters
 from failmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks

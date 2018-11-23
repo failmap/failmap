@@ -22,8 +22,9 @@ log = logging.getLogger(__package__)
 
 
 ENDPOINT_SCAN_TYPES = ['Strict-Transport-Security', 'X-Content-Type-Options', 'X-Frame-Options',
-                       'X-XSS-Protection', 'tls_qualys', 'plain_https', 'ftp', 'tls_qualys_certificate_trusted',
+                       'X-XSS-Protection', 'plain_https', 'ftp', 'tls_qualys_certificate_trusted',
                        'tls_qualys_encryption_quality']
+
 URL_SCAN_TYPES = ['DNSSEC']
 
 ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
@@ -704,13 +705,8 @@ def rate_timeline(timeline, url: Url):
             these_endpoint_scans = {}
             if endpoint.id in endpoint_scans:
                 for scan in endpoint_scans[endpoint.id]:
-                    if isinstance(scan, TlsQualysScan):
-                        these_endpoint_scans['tls_qualys'] = scan
-                    if isinstance(scan, EndpointGenericScan):
-                        if scan.type in ['Strict-Transport-Security', 'X-Content-Type-Options',
-                                         'X-Frame-Options', 'X-XSS-Protection', 'plain_https', 'ftp',
-                                         'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']:
-                            these_endpoint_scans[scan.type] = scan
+                    if scan.type in ENDPOINT_SCAN_TYPES:
+                        these_endpoint_scans[scan.type] = scan
 
             # enrich the ratings with previous ratings, without overwriting them.
             for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
@@ -844,9 +840,8 @@ def rate_timeline(timeline, url: Url):
 
         if url.id in url_scans:
             for scan in url_scans[url.id]:
-                if isinstance(scan, UrlGenericScan):
-                    if scan.type in ['DNSSEC']:
-                        these_url_scans[scan.type] = scan
+                if scan.type in ['DNSSEC']:
+                    these_url_scans[scan.type] = scan
 
         # enrich the ratings with previous ratings, which saves queries.
         for url_scan_type in url_scan_types:

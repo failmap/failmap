@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import create_timeline, inspect_timeline
+from failmap.map.report import create_timeline, inspect_timeline
 from failmap.organizations.models import Url
 
 log = logging.getLogger(__package__)

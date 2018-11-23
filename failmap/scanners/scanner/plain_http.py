@@ -13,7 +13,7 @@ from celery import Task, group
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result, endpoint_has_scans
 from failmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
                                            resolves_on_v4, resolves_on_v6)
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
@@ -117,8 +117,8 @@ def get_endpoints_with_missing_encryption(url):
 
 @app.task(queue='storage')
 def well_done(endpoint):
-    if EndpointScanManager.had_scan_with_points("plain_https", endpoint):
-        EndpointScanManager.add_scan("plain_https", endpoint, "0", cleaned_up)
+    if endpoint_has_scans("plain_https", endpoint):
+        store_endpoint_scan_result("plain_https", endpoint, "0", cleaned_up)
 
 
 # Task is written to work both on v4 and v6, but the network conf of the machine differs.
@@ -188,15 +188,15 @@ def store(results, endpoint):
 
     # issue resolved.
     if can_connect_result:
-        if EndpointScanManager.had_scan_with_points("plain_https", endpoint):
-            EndpointScanManager.add_scan("plain_https", endpoint, "0", cleaned_up)
+        if endpoint_has_scans("plain_https", endpoint):
+            store_endpoint_scan_result("plain_https", endpoint, "0", cleaned_up)
 
     # Really no security at all
     if not can_connect_result and redirects_to_safety_result is False:
         log.info("%s does not have a https site. Saving/updating scan." % endpoint.url)
-        EndpointScanManager.add_scan("plain_https", endpoint, "1000", no_https_at_all)
+        store_endpoint_scan_result("plain_https", endpoint, "1000", no_https_at_all)
 
     # some redirections that might have flaws etc.
     if not can_connect_result and redirects_to_safety_result is True:
         log.info("%s redirects to safety, saved by the bell." % endpoint.url)
-        EndpointScanManager.add_scan("plain_https", endpoint, "25", saved_by_the_bell)
+        store_endpoint_scan_result("plain_https", endpoint, "25", saved_by_the_bell)

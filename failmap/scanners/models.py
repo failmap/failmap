@@ -213,7 +213,7 @@ class LatestScanMixin(models.Model):
     This contains a boolean field that notes if this was the latest scan for this url/endpoint.
 
     This is needed to make sure scanners can easily filter on the latest result on a certain url. There is no
-    django ORM construct for this. The latest is automatically maintained by the scanmanager, which will both
+    django ORM construct for this. The latest is automatically maintained by the nonsense, which will both
     set new scans as being the latest while unsetting all previous scans to not be the latest.
 
     url:          date:     value:  latest:
@@ -543,6 +543,75 @@ class InternetNLScan(models.Model):
         help_text="If the scan is started, normally this is a YES."
     )
 
+    """
+    during deploy this somehow converts to a datetime(6) NULL... which causes a syntax error.
+    this error did not pop up during development, tests or migration during tests. Weird.
+    it also doesn't deviate much from the other column specifications with a datetimefield... so wtf.
+    DATETIME(6) is the fractional seconds precision. So that is something real and supported. What is the
+    syntax error then?
+    o your MySQL server version for the right syntax to use near '(6) NULL, `finished` bool NOT NULL, `finished_on`
+    datetime(6) NULL, `url` varcha' at line 1"). Is "started_on" or started a reserved word?
+    only type is a reserved word. But type is not in the first version of this query.
+    https://dev.mysql.com/doc/refman/5.5/en/keywords.html
+    can i see the whole query?
+
+    failmap sqlmigrate scanners 0051_internetnlscan
+
+    This is the whole query:
+    BEGIN;
+    --
+    -- Create model InternetNLScan
+    --
+    CREATE TABLE `scanners_internetnlscan` 
+    (
+        `id` integer AUTO_INCREMENT NOT NULL PRIMARY KEY, 
+        `success` bool NOT NULL, 
+        `started` bool NOT NULL, 
+        `started_on` datetime(6) NULL, 
+        `finished` bool NOT NULL, 
+        `finished_on` datetime(6) NULL, `url` varchar(500) NULL, 
+        `message` varchar(500) NULL
+    );
+    COMMIT;
+
+    It crashes on the (6) NULL at `started_on`. So what's up?
+    This? https://django-mysql.readthedocs.io/en/latest/management_commands/fix_datetime_columns.html
+    Server version: 5.5.62-0+deb8u1 (Debian)
+    That version doesn't support datetime(6) yet...? 
+    i guess they dropped 5.5 support in this version of django?
+
+    Python version: 3.6.6
+    Django version: 2.1.3
+    Failmap version: 1.1+b9ef27fe
+
+    https://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
+    MySQL 5.6.4 and up expands fractional seconds support for TIME, DATETIME, and TIMESTAMP values, with up to 
+    microseconds (6 digits) precision: 
+
+    With MySQL 5.5, Django uses datetime for DateTimeField, from 5.6 onwards it uses datetime(6) with microseconds.
+    super_stitch@faalserver:~# mysql --version
+    mysql  Ver 14.14 Distrib 5.5.62, for debian-linux-gnu (x86_64) using readline 6.3
+
+    So this seems to be a bug. I guess we have to upgrade to 5.6?
+    I think the django script sees Distrib 5.5.62 which contains "5.6" :) Which would mean we didn't create datetime 
+    since july this year or the bug was freshly introduced.
+
+    So the issue is probably somewhere in Django.
+    The mysql with microseconds came out 5 years ago. And there is no similar issue yet. So now what...
+
+    5.5 support seems to be dropped from django. Rightly so.
+    https://code.djangoproject.com/ticket/28552
+
+    And there you also see the microsecond_precision flag dropped.
+    'The end of upstream support for MySQL 5.5 is December 2018. Therefore, Django 2.1 (released a couple months 
+    earlier in August 2018) may set MySQL 5.6 as the minimum version that it supports.'
+
+    Which is also in the release notes: https://docs.djangoproject.com/en/2.1/releases/2.1/
+    So we where lucky to be able to run this version at all. So we can stay on an old django version to support legacy
+    sql. Which means no support etc. Or move to 1.11 LTS, but that means also a lot of changes and stagnation in
+    adoption of new features. I guess we're updating the database then. And if that's a lot of work, set django fixed
+    to 2.0
+    """
     started_on = models.DateTimeField(
         blank=True,
         null=True

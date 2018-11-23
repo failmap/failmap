@@ -1,7 +1,7 @@
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import default_organization_rating
+from failmap.map.report import default_organization_rating
 
 
 class Command(BaseCommand):

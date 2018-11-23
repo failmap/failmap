@@ -16,7 +16,7 @@ from django.utils import timezone
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.endpoint_scan_manager import EndpointScanManager
+from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
                                               q_configurations_to_scan, url_filters)
 
@@ -151,7 +151,7 @@ def store(result: dict, endpoint: Endpoint):
     log.debug('Storing result: %s, for url: %s.', level, endpoint)
 
     if result:
-        EndpointScanManager.add_scan('ftp', endpoint, level, message, str(result))
+        store_endpoint_scan_result('ftp', endpoint, level, message, str(result))
 
     # return something informative
     return {'status': 'success', 'result': level}

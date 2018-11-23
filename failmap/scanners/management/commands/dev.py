@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from failmap.map.rating import (add_organization_rating, create_timeline, inspect_timeline,
+from failmap.map.report import (add_organization_rating, create_timeline, inspect_timeline,
                                 rebuild_url_ratings)
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
@@ -62,7 +62,7 @@ def test_osaft():
 
 
 def rebuild_ratings():
-    from failmap.map.rating import rebuild_organization_ratings
+    from failmap.map.report import rebuild_organization_ratings
 
     organization = Organization.objects.filter(name="Arnhem").get()
     rebuild_url_ratings(list(Url.objects.all().filter(organization=organization)))
@@ -168,7 +168,7 @@ def develop_determineratings():
     # return
     from datetime import datetime
     import pytz
-    from failmap.map.rating import relevant_endpoints_at_timepoint
+    from failmap.map.report import relevant_endpoints_at_timepoint
 
     u = Url.objects.all().filter(url='www.arnhem.nl').get()
     relevant_endpoints_at_timepoint(url=u, when=datetime(2016, 12, 31, 0, 0, tzinfo=pytz.utc))

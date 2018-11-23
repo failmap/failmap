@@ -1,8 +1,7 @@
 """Scans DNSSEC using the dotSE DNSCHECK tool.
 
 This is also a reference implementation of a standardized scanner. This scanner works on Url level, not on endpoint
-level. Therefore we use UrlScanManager and not EndpointScanManager. Both have similar similar signatures.
-
+level.
 
 It's a nightmare to get the tool running on your system so use the one in docker:
 docker-build
@@ -30,7 +29,7 @@ from django.conf import settings
 from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager.url_scan_manager import UrlScanManager
+from failmap.scanners.scanmanager import store_url_scan_result
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
@@ -128,7 +127,7 @@ def store_dnssec(result: List[str], url: Url):
     # You can save any (string) value and any (string) message.
     # The EndpointScanManager deduplicates the data for you automatically.
     if result:
-        UrlScanManager.add_scan('DNSSEC', url, level, messages[level], evidence=",\n".join(result))
+        store_url_scan_result('DNSSEC', url, level, messages[level], evidence=",\n".join(result))
 
     # return something informative
     return {'status': 'success', 'result': level}

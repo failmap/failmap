@@ -499,7 +499,7 @@ def store_grade(ratings, trust_ratings, endpoint):
 
     log.debug('Conlcusion: rated %s with trust?: %s', (lowest_rating, trust))
 
-    # EndpointScanManager.add_scan('ssl_tls', endpoint, grade, explanation)
+    # store_endpoint_scan_result('ssl_tls', endpoint, grade, explanation)
 
 
 @timeout(3)
