@@ -61,10 +61,6 @@ class Command(BaseCommand):
     def scan_organization(self, organization, scan_type):
         log.debug("Calling %s scan on: %s" % (scan_type, organization))
 
-        # explicitly written so the imported functions are used, don't use strings as dynamic function names.
-        if scan_type == "brute_known_subdomains":
-            brute_known_subdomains(organizations=[organization])
-
         if scan_type == "brute_three_letters":
             brute_three_letters(organizations=[organization])
 
@@ -76,11 +72,5 @@ class Command(BaseCommand):
 
         if scan_type == "search_engines":
             search_engines(organizations=[organization])
-
-        if scan_type == "certificate_transparency":
-            certificate_transparency(organizations=[organization])
-
-        if scan_type == "nsec":
-            nsec(organizations=[organization])
 
         # we don't do anything with added subdomains, that should be handled at the "added url event" or whatever
