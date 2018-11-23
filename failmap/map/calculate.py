@@ -12,7 +12,7 @@ import pytz
 log = logging.getLogger(__package__)
 
 
-def security_headers_rating_based_on_scan(scan):
+def get_security_header_calculation(scan):
     """
     Rationale for classifcation
 
@@ -218,10 +218,10 @@ def standard_calculation(scan, explanation, high, medium, low):
 
 # don't re-create the dict every time.
 calculation_methods = {
-    'http_security_header_strict_transport_security': security_headers_rating_based_on_scan,
-    'http_security_header_x_content_type_options': security_headers_rating_based_on_scan,
-    'http_security_header_x_frame_options': security_headers_rating_based_on_scan,
-    'http_security_header_x_xss_protection': security_headers_rating_based_on_scan,
+    'http_security_header_strict_transport_security': get_security_header_calculation,
+    'http_security_header_x_content_type_options': get_security_header_calculation,
+    'http_security_header_x_frame_options': get_security_header_calculation,
+    'http_security_header_x_xss_protection': get_security_header_calculation,
     'plain_https': http_plain_rating_based_on_scan,
     'DNSSEC': dnssec_rating_based_on_scan,
     'ftp': ftp_rating_based_on_scan,
