@@ -19,4 +19,4 @@ URL_SCAN_TYPES = [
 ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
 
 # Beta scanners are:
-# screenshot, osaft
+# screenshot, osaft, some of these are not endpoint or URL types.
