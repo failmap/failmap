@@ -1,7 +1,9 @@
 """
 This was an attempt to write a TLS scanner, but it failed due to complexities. You'll get 75% right and then the
 hard parts start. Therefore there are various other scanners that deliver better results, better consistency and
-have more contributers. This library therefore is obsolete and will be removed.
+have more contributers. This library therefore is obsolete.
+
+We keep this code to remember that TLS scanning is no trivial task and you should not just attempt to write a scanner.
 """
 
 import logging
