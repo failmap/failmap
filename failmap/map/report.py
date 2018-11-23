@@ -20,14 +20,7 @@ from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
 
 log = logging.getLogger(__package__)
 
-
-ENDPOINT_SCAN_TYPES = ['Strict-Transport-Security', 'X-Content-Type-Options', 'X-Frame-Options',
-                       'X-XSS-Protection', 'plain_https', 'ftp', 'tls_qualys_certificate_trusted',
-                       'tls_qualys_encryption_quality']
-
-URL_SCAN_TYPES = ['DNSSEC']
-
-ALL_SCAN_TYPES = URL_SCAN_TYPES + ENDPOINT_SCAN_TYPES
+from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 

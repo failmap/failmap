@@ -4,7 +4,8 @@ from datetime import datetime
 import pytz
 from django.core.management.base import BaseCommand
 
-from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
+from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__name__)
 
@@ -17,61 +18,11 @@ class Command(BaseCommand):
     make sense at all, but works."""
 
     def handle(self, *args, **options):
-        reflag_tlssscan()
-        reflag_tls_qualysscan()
-        reflag_urlgenericscan(type="DNSSEC")
+        for scan_type in URL_SCAN_TYPES:
+            reflag_urlgenericscan(type=scan_type)
 
-        reflag_endpointgenericscan(type="X-XSS-Protection")
-        reflag_endpointgenericscan(type="Strict-Transport-Security")
-        reflag_endpointgenericscan(type="X-Frame-Options")
-        reflag_endpointgenericscan(type="X-Content-Type-Options")
-        reflag_endpointgenericscan(type="ftp")
-        reflag_endpointgenericscan(type="plain_https")
-        reflag_endpointgenericscan(type="tls_qualys_certificate_trusted")
-        reflag_endpointgenericscan(type="tls_qualys_encryption_quality")
-
-
-def reflag_tlssscan():
-    log.debug("Setting flags on tlsscan type")
-
-    TlsScan.objects.all().update(is_the_latest_scan=False)
-
-    # get the latest scans
-    sql = '''
-        SELECT
-            id,
-            last_scan_moment,
-            is_the_latest_scan
-        FROM scanners_tlsscan
-        INNER JOIN
-            (SELECT MAX(id) as id2 FROM scanners_tlsscan egs2
-             WHERE `last_scan_moment` <= '%(when)s' GROUP BY endpoint_id
-             ) as x
-        ON x.id2 = scanners_tlsscan.id
-    ''' % {'when': datetime.now(pytz.utc)}
-
-    updatescans(TlsScan.objects.raw(sql))
-
-
-def reflag_tls_qualysscan():
-    log.debug("Setting flags on tls_qualysscan type")
-    TlsQualysScan.objects.all().update(is_the_latest_scan=False)
-
-    # get the latest scans
-    sql = '''
-        SELECT
-            id,
-            last_scan_moment,
-            is_the_latest_scan
-        FROM scanner_tls_qualys
-        INNER JOIN
-            (SELECT MAX(id) as id2 FROM scanner_tls_qualys egs2
-             WHERE `last_scan_moment` <= '%(when)s' GROUP BY endpoint_id
-             ) as x
-        ON x.id2 = scanner_tls_qualys.id
-    ''' % {'when': datetime.now(pytz.utc)}
-
-    updatescans(TlsQualysScan.objects.raw(sql))
+        for scan_type in ENDPOINT_SCAN_TYPES:
+            reflag_endpointgenericscan(type=scan_type)
 
 
 def reflag_urlgenericscan(type):
