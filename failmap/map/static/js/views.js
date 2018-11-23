@@ -109,12 +109,12 @@ const report_mixin = {
 
             let ftp = this.worstof("ftp", url.endpoints);
             let dnssec = this.worstof("DNSSEC", [url]);
-            let xxss = this.worstof("security_headers_x_xss_protection", url.endpoints);
-            let xcto = this.worstof("security_headers_x_content_type_options", url.endpoints);
-            let xfo = this.worstof("security_headers_x_frame_options", url.endpoints);
+            let xxss = this.worstof("http_security_header_x_xss_protection", url.endpoints);
+            let xcto = this.worstof("http_security_header_x_content_type_options", url.endpoints);
+            let xfo = this.worstof("http_security_header_x_frame_options", url.endpoints);
             let https_trust = this.worstof("tls_qualys_certificate_trusted", url.endpoints);
             let https_quality = this.worstof("tls_qualys_encryption_quality", url.endpoints);
-            let hsts = this.worstof("security_headers_strict_transport_security", url.endpoints);
+            let hsts = this.worstof("http_security_header_strict_transport_security", url.endpoints);
             let plain_https = this.worstof("plain_https", url.endpoints);
 
             text = `<td><b>${url.url}</b></td>`;
@@ -206,7 +206,7 @@ const report_mixin = {
 
                 console.log(rating.type);
 
-                if (rating.type === "security_headers_strict_transport_security"){
+                if (rating.type === "http_security_header_strict_transport_security"){
                     hsts.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     hsts.text = this.rating_text(rating);
                 }
@@ -222,15 +222,15 @@ const report_mixin = {
                     plain_https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     plain_https.text = this.rating_text(rating);
                 }
-                if (rating.type === "security_headers_x_xss_protection"){
+                if (rating.type === "http_security_header_x_xss_protection"){
                     xxss.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     xxss.text = this.rating_text(rating);
                 }
-                if (rating.type === "security_headers_x_frame_options"){
+                if (rating.type === "http_security_header_x_frame_options"){
                     xfo.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     xfo.text = this.rating_text(rating);
                 }
-                if (rating.type === "security_headers_x_content_type_options"){
+                if (rating.type === "http_security_header_x_content_type_options"){
                     xcto.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
                     xcto.text = this.rating_text(rating);
                 }
@@ -470,7 +470,7 @@ const report_mixin = {
         },
         // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
         second_opinion_links: function (rating, url) {
-            if (rating.type === "security_headers_strict_transport_security")
+            if (rating.type === "http_security_header_strict_transport_security")
                 return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
             if (rating.type === "tls_qualys_certificate_trusted")
@@ -479,11 +479,11 @@ const report_mixin = {
             if (rating.type === "tls_qualys_encryption_quality")
                 return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
                         '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "security_headers_x_xss_protection")
+            if (rating.type === "http_security_header_x_xss_protection")
                 return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
-            if (rating.type === "security_headers_x_frame_options")
+            if (rating.type === "http_security_header_x_frame_options")
                 return  '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
-            if (rating.type === "security_headers_x_content_type_options")
+            if (rating.type === "http_security_header_x_content_type_options")
                 return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
             if (rating.type === "DNSSEC")
                 return  '<a href="https://zonemaster.iis.se/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (zonemaster)</a> ' +
@@ -797,7 +797,7 @@ function views() {
                     return;
 
                 // data.total
-                // security_headers_strict_transport_security
+                // http_security_header_strict_transport_security
 
                 var urls = Array();
                 var endpoints = Array();
@@ -893,10 +893,10 @@ function views() {
                         this.vulnerability_graph('timeline_tls_qualys_certificate_trusted_vulnerabilities', data.tls_qualys_certificate_trusted, 'h');
                         this.vulnerability_graph('timeline_tls_qualys_encryption_quality_vulnerabilities', data.tls_qualys_encryption_quality, 'hl');
                         this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https, 'hm');
-                        this.vulnerability_graph('timeline_hsts_vulnerabilities', data.security_headers_strict_transport_security, 'm');
-                        this.vulnerability_graph('timeline_xfo_vulnerabilities', data.security_headers_x_frame_options, 'm');
-                        this.vulnerability_graph('timeline_xcto_vulnerabilities', data.security_headers_x_content_type_options, 'l');
-                        this.vulnerability_graph('timeline_xxss_vulnerabilities', data.security_headers_x_xss_protection, 'l');
+                        this.vulnerability_graph('timeline_hsts_vulnerabilities', data.http_security_header_strict_transport_security, 'm');
+                        this.vulnerability_graph('timeline_xfo_vulnerabilities', data.http_security_header_x_frame_options, 'm');
+                        this.vulnerability_graph('timeline_xcto_vulnerabilities', data.http_security_header_x_content_type_options, 'l');
+                        this.vulnerability_graph('timeline_xxss_vulnerabilities', data.http_security_header_x_xss_protection, 'l');
                         this.vulnerability_graph('timeline_dnssec_vulnerabilities', data.DNSSEC, 'h');
                         this.vulnerability_graph('timeline_unencrypted_ftp_vulnerabilities', data.ftp, 'hm');
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
@@ -1319,6 +1319,7 @@ function views() {
     });
 
     // todo: https://css-tricks.com/intro-to-vue-5-animations/
+    // can these all be reduced to the same thing?
     window.vueLatestTlsQualysCertificateTrust = new Vue({
         name: "latest_tls_qualys_certificate_trusted",
         mixins: [latest_mixin, state_mixin],
@@ -1348,31 +1349,31 @@ function views() {
     });
 
     window.vueLatestHSTS = new Vue({
-        name: "latest_security_headers_strict_transport_security",
+        name: "latest_http_security_header_strict_transport_security",
         mixins: [latest_mixin, state_mixin],
-        el: '#latest_security_headers_strict_transport_security',
-        data: {scan: "Strict-Transport-Security", element_id: "latest_security_headers_strict_transport_security"}
+        el: '#latest_http_security_header_strict_transport_security',
+        data: {scan: "http_security_header_strict_transport_security", element_id: "latest_http_security_header_strict_transport_security"}
     });
 
     window.vueLatestXContentTypeOptions = new Vue({
-        name: "latest_security_headers_x_frame_options",
+        name: "latest_http_security_header_x_content_type_options",
         mixins: [latest_mixin, state_mixin],
-        el: '#latest_security_headers_x_frame_options',
-        data: {scan: "X-Content-Type-Options", element_id: "latest_security_headers_x_frame_options"}
+        el: '#latest_http_security_header_x_content_type_options',
+        data: {scan: "http_security_header_x_content_type_options", element_id: "latest_http_security_header_x_content_type_options"}
     });
 
     window.vueLatestXFrameOptions = new Vue({
-        name: "latest_security_headers_x_content_type_options",
+        name: "latest_http_security_header_x_frame_options",
         mixins: [latest_mixin, state_mixin],
-        el: '#latest_security_headers_x_content_type_options',
-        data: {scan: "X-Frame-Options", element_id: "latest_security_headers_x_content_type_options"}
+        el: '#latest_http_security_header_x_frame_options',
+        data: {scan: "http_security_header_x_frame_options", element_id: "latest_http_security_header_x_frame_options"}
     });
 
     window.vueLatestXXSSProtection = new Vue({
-        name: "latest_security_headers_x_xss_protection",
+        name: "latest_http_security_header_x_xss_protection",
         mixins: [latest_mixin, state_mixin],
-        el: '#latest_security_headers_x_xss_protection',
-        data: {scan: "X-XSS-Protection", element_id: "latest_security_headers_x_xss_protection"}
+        el: '#latest_http_security_header_x_xss_protection',
+        data: {scan: "http_security_header_x_xss_protection", element_id: "latest_http_security_header_x_xss_protection"}
     });
 
     window.vueLatestDNSSEC = new Vue({
@@ -1420,10 +1421,10 @@ function views() {
             data: null,
             tls_qualys_certificate_trusted: {high: 0, medium:0, low: 0},
             tls_qualys_encryption_quality: {high: 0, medium:0, low: 0},
-            security_headers_strict_transport_security: {high: 0, medium:0, low: 0},
-            security_headers_x_content_type_options: {high: 0, medium:0, low: 0},
-            security_headers_x_xss_protection: {high: 0, medium:0, low: 0},
-            security_headers_x_frame_options: {high: 0, medium:0, low: 0},
+            http_security_header_strict_transport_security: {high: 0, medium:0, low: 0},
+            http_security_header_x_content_type_options: {high: 0, medium:0, low: 0},
+            http_security_header_x_xss_protection: {high: 0, medium:0, low: 0},
+            http_security_header_x_frame_options: {high: 0, medium:0, low: 0},
             plain_https: {high: 0, medium:0, low: 0},
             ftp: {high: 0, medium:0, low: 0},
             overall: {high: 0, medium:0, low: 0}
@@ -1445,10 +1446,10 @@ function views() {
                         self.data = null;
                         self.tls_qualys_certificate_trusted = {high: 0, medium:0, low: 0};
                         self.tls_qualys_encryption_quality = {high: 0, medium:0, low: 0};
-                        self.security_headers_strict_transport_security = {high: 0, medium:0, low: 0};
-                        self.security_headers_x_content_type_options = {high: 0, medium:0, low: 0};
-                        self.security_headers_x_xss_protection = {high: 0, medium:0, low: 0};
-                        self.security_headers_x_frame_options = {high: 0, medium:0, low: 0};
+                        self.http_security_header_strict_transport_security = {high: 0, medium:0, low: 0};
+                        self.http_security_header_x_content_type_options = {high: 0, medium:0, low: 0};
+                        self.http_security_header_x_xss_protection = {high: 0, medium:0, low: 0};
+                        self.http_security_header_x_frame_options = {high: 0, medium:0, low: 0};
                         self.plain_https = {high: 0, medium:0, low: 0};
                         self.ftp = {high: 0, medium:0, low: 0};
                         self.overall = {high: 0, medium:0, low: 0}
@@ -1458,14 +1459,14 @@ function views() {
                             self.tls_qualys_certificate_trusted = data.tls_qualys_certificate_trusted.improvements;
                         if (data.tls_qualys_encryption_quality !== undefined)
                             self.tls_qualys_encryption_quality = data.tls_qualys_encryption_quality.improvements;
-                        if (data.security_headers_strict_transport_security !== undefined)
-                            self.security_headers_strict_transport_security = data.security_headers_strict_transport_security.improvements;
-                        if (data.security_headers_x_content_type_options !== undefined)
-                            self.security_headers_x_content_type_options = data.security_headers_x_content_type_options.improvements;
-                        if (data.security_headers_x_xss_protection !== undefined)
-                            self.security_headers_x_xss_protection = data.security_headers_x_xss_protection.improvements;
-                        if (data.security_headers_x_frame_options !== undefined)
-                            self.security_headers_x_frame_options = data.security_headers_x_frame_options.improvements;
+                        if (data.http_security_header_strict_transport_security !== undefined)
+                            self.http_security_header_strict_transport_security = data.http_security_header_strict_transport_security.improvements;
+                        if (data.http_security_header_x_content_type_options !== undefined)
+                            self.http_security_header_x_content_type_options = data.http_security_header_x_content_type_options.improvements;
+                        if (data.http_security_header_x_xss_protection !== undefined)
+                            self.http_security_header_x_xss_protection = data.http_security_header_x_xss_protection.improvements;
+                        if (data.http_security_header_x_frame_options !== undefined)
+                            self.http_security_header_x_frame_options = data.http_security_header_x_frame_options.improvements;
                         if (data.plain_https !== undefined)
                             self.plain_https = data.plain_https.improvements;
                         if (data.ftp !== undefined)

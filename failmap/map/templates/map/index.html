@@ -739,57 +739,57 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr v-if="x['explained']['security_headers_strict_transport_security']">
+                            <tr v-if="x['explained']['http_security_header_strict_transport_security']">
                                 <td colspan="3">{% trans "Stats HSTS" %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_strict_transport_security']" class="orangerow">
+                            <tr v-if="x['explained']['http_security_header_strict_transport_security']" class="orangerow">
                                 <td></td>
                                 <td>{% trans "Stats hasn't" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_strict_transport_security']['Missing Strict-Transport-Security header.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_strict_transport_security']['Missing Strict-Transport-Security header.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_strict_transport_security']" class="greenrow">
+                            <tr v-if="x['explained']['http_security_header_strict_transport_security']" class="greenrow">
                                 <td></td>
                                 <td>{% trans "Stats has" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_strict_transport_security']['Strict-Transport-Security header present.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_strict_transport_security']['Strict-Transport-Security header present.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_frame_options']">
+                            <tr v-if="x['explained']['http_security_header_x_frame_options']">
                                 <td colspan="3">{% trans "Stats X-Frame-Options" %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_frame_options']" class="orangerow">
+                            <tr v-if="x['explained']['http_security_header_x_frame_options']" class="orangerow">
                                 <td></td>
                                 <td>{% trans "Stats hasn't" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_frame_options']['Missing X-Frame-Options header.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_frame_options']['Missing X-Frame-Options header.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_frame_options']" class="greenrow">
+                            <tr v-if="x['explained']['http_security_header_x_frame_options']" class="greenrow">
                                 <td></td>
                                 <td>{% trans "Stats has" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_frame_options']['X-Frame-Options header present.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_frame_options']['X-Frame-Options header present.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_xss_protection']">
+                            <tr v-if="x['explained']['http_security_header_x_xss_protection']">
                                 <td colspan="3">{% trans "Stats X-XSS Protection" %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_xss_protection']" class="orangerow">
+                            <tr v-if="x['explained']['http_security_header_x_xss_protection']" class="orangerow">
                                 <td></td>
                                 <td>{% trans "Stats hasn't" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_xss_protection']['Missing X-XSS-Protection header.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_xss_protection']['Missing X-XSS-Protection header.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_xss_protection']" class="greenrow">
+                            <tr v-if="x['explained']['http_security_header_x_xss_protection']" class="greenrow">
                                 <td></td>
                                 <td>{% trans "Stats has" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_xss_protection']['X-XSS-Protection header present.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_xss_protection']['X-XSS-Protection header present.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_content_type_options']">
+                            <tr v-if="x['explained']['http_security_header_x_content_type_options']">
                                 <td colspan="3">{% trans "Stats X-Content Type Options" %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_content_type_options']" class="orangerow">
+                            <tr v-if="x['explained']['http_security_header_x_content_type_options']" class="orangerow">
                                 <td></td>
                                 <td>{% trans "Stats hasn't" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_content_type_options']['Missing X-Content-Type-Options header.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_content_type_options']['Missing X-Content-Type-Options header.'] }}{% endverbatim %}</td>
                             </tr>
-                            <tr v-if="x['explained']['security_headers_x_content_type_options']" class="greenrow">
+                            <tr v-if="x['explained']['http_security_header_x_content_type_options']" class="greenrow">
                                 <td></td>
                                 <td>{% trans "Stats has" %}:</td>
-                                <td>{% verbatim %}{{ x['explained']['security_headers_x_content_type_options']['X-Content-Type-Options header present.'] }}{% endverbatim %}</td>
+                                <td>{% verbatim %}{{ x['explained']['http_security_header_x_content_type_options']['X-Content-Type-Options header present.'] }}{% endverbatim %}</td>
                             </tr>
                             </tbody>
                         </table>
@@ -892,11 +892,11 @@
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_HSTS %}<td>{% trans "HSTS Header" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(security_headers_strict_transport_security.medium)">{% verbatim %}{{ security_headers_strict_transport_security.medium }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_HSTS %}<td :class="'number-sm ' + goodbad(http_security_header_strict_transport_security.medium)">{% verbatim %}{{ http_security_header_strict_transport_security.medium }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_XFO %}<td>{% trans "XFO Header" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(security_headers_x_frame_options.medium)">{% verbatim %}{{ security_headers_x_frame_options.medium }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_XFO %}<td :class="'number-sm ' + goodbad(http_security_header_x_frame_options.medium)">{% verbatim %}{{ http_security_header_x_frame_options.medium }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_FTP %}<td>{% trans "FTP connection issue (security unknown)" %}</td>{% endif %}
@@ -916,11 +916,11 @@
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td>{% trans "X-XSS" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(security_headers_x_xss_protection.low)">{% verbatim %}{{ security_headers_x_xss_protection.low }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_XSS %}<td :class="'number-sm ' + goodbad(http_security_header_x_xss_protection.low)">{% verbatim %}{{ http_security_header_x_xss_protection.low }}{% endverbatim %}</td>{% endif %}
                         </tr>
                         <tr>
                             {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td>{% trans "X-Content" %}</td>{% endif %}
-                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(security_headers_x_content_type_options.low)">{% verbatim %}{{ security_headers_x_content_type_options.low }}{% endverbatim %}</td>{% endif %}
+                            {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}<td :class="'number-sm ' + goodbad(http_security_header_x_content_type_options.low)">{% verbatim %}{{ http_security_header_x_content_type_options.low }}{% endverbatim %}</td>{% endif %}
                         </tr>
                     </table>
 
@@ -1092,36 +1092,36 @@
                 {% if config.SHOW_HTTP_HEADERS_HSTS %}
                 <div class="col-md-6">
                     <h4>{% trans "Forcing encryption updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/Strict-Transport-Security"
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/http_security_header_strict_transport_security"
                                                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_strict_transport_security"></span>
+                    <span id="latest_http_security_header_strict_transport_security"></span>
                 </div>
                 {% endif %}
 
                 {% if config.SHOW_HTTP_HEADERS_XFO %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Frame-Options updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %}<a href="/data/feed/X-Frame-Options"
+                    <p>{% trans "RSS feed teaser" %}<a href="/data/feed/http_security_header_x_frame_options"
                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_frame_options"></span>
+                    <span id="latest_http_security_header_x_frame_options"></span>
                 </div>
                 {% endif %}
 
                 {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
                 <div class="col-md-6">
                     <h4>{% trans "X-Content-Type-Option updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-Content-Type-Options"
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/http_security_header_x_content_type_options"
                                                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_content_type_options"></span>
+                    <span id="latest_http_security_header_x_content_type_options"></span>
                 </div>
                 {% endif %}
 
                 {% if config.SHOW_HTTP_HEADERS_X_XSS %}
                 <div class="col-md-6">
                     <h4>{% trans "X-XSS-Protection updates" %}</h4>
-                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/X-XSS-Protection"
+                    <p>{% trans "RSS feed teaser" %} <a href="/data/feed/http_security_header_x_xss_protection"
                                                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
-                    <span id="latest_security_headers_x_xss_protection"></span>
+                    <span id="latest_http_security_header_x_xss_protection"></span>
                 </div>
                 {% endif %}
 
@@ -1605,16 +1605,16 @@
         <input type='radio' v-model="displayed_issue" name="displayed_issue" value="ftp" id="ftp"> <label for="ftp">{% trans "report_header_ftp" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_HSTS %}
-        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_strict_transport_security" id="HSTS"> <label for="HSTS">{% trans "report_header_security_headers_strict_transport_security" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="http_security_header_strict_transport_security" id="HSTS"> <label for="HSTS">{% trans "report_header_http_security_header_strict_transport_security" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_XFO %}
-        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_frame_options" id="XFO"> <label for="XFO">{% trans "report_header_security_headers_x_frame_options" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="http_security_header_x_frame_options" id="XFO"> <label for="XFO">{% trans "report_header_http_security_header_x_frame_options" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_X_XSS %}
-        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_xss_protection" id="X_XSS"> <label for="X_XSS">{% trans "report_header_security_headers_x_xss_protection" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="http_security_header_x_xss_protection" id="X_XSS"> <label for="X_XSS">{% trans "report_header_http_security_header_x_xss_protection" %}</label><br />
         {% endif %}
         {% if config.SHOW_HTTP_HEADERS_X_CONTENT %}
-        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="security_headers_x_content_type_options" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_security_headers_x_content_type_options" %}</label><br />
+        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="http_security_header_x_content_type_options" id="X_CONTENT"> <label for="X_CONTENT">{% trans "report_header_http_security_header_x_content_type_options" %}</label><br />
         {% endif %}
         <button type="button" class="btn btn-success btn-sm" @click="clear_filter()" v-show="displayed_issue">{% trans "Clear Filter" %}</button><br />
     {% endif %}

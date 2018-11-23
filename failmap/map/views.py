@@ -34,6 +34,8 @@ from .. import __version__
 from ..app.common import JSEncoder
 from .calculate import get_calculation
 
+from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, ALL_SCAN_TYPES
+
 log = logging.getLogger(__package__)
 
 one_minute = 60
@@ -1336,26 +1338,16 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     desired_url_scans = []
     desired_endpoint_scans = []
 
-    possible_url_scans = ['DNSSEC']
-    possible_endpoint_scans = ['security_headers_strict_transport_security',
-                               'security_headers_x_content_type_options',
-                               'security_headers_x_frame_options',
-                               'security_headers_x_xss_protection',
-                               'tls_qualys_certificate_trusted',
-                               'tls_qualys_encryption_quality',
-                               'plain_https',
-                               'ftp']
-
-    if displayed_issue in possible_url_scans:
+    if displayed_issue in URL_SCAN_TYPES:
         desired_url_scans += [displayed_issue]
 
-    if displayed_issue in possible_endpoint_scans:
+    if displayed_issue in ENDPOINT_SCAN_TYPES:
         desired_endpoint_scans += [displayed_issue]
 
     # fallback if no data, which is the default.
     if not desired_url_scans and not desired_endpoint_scans:
-        desired_url_scans = possible_url_scans
-        desired_endpoint_scans = possible_endpoint_scans
+        desired_url_scans = URL_SCAN_TYPES
+        desired_endpoint_scans = ENDPOINT_SCAN_TYPES
 
         # look if we have data in the cache, which will save some calculations and a slower query
         cached = MapDataCache.objects.all().filter(country=country,
@@ -1589,26 +1581,17 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
         "remark": remark,
     }
 
-    if scan_type not in ["tls_qualys_encryption_quality", "tls_qualys_certificate_trusted",
-                         "Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https", "ftp", 'DNSSEC']:
+    if scan_type not in ALL_SCAN_TYPES:
         return empty_response()
 
-    if scan_type == "tls_qualys":
-        scans = list(TlsQualysScan.objects.filter(
-            endpoint__url__organization__type=get_organization_type(organization_type),
-            endpoint__url__organization__country=get_country(country)
-        ).order_by('-rating_determined_on')[0:6])
-
-    if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                     "plain_https", "ftp", 'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']:
+    if scan_type in ENDPOINT_SCAN_TYPES:
         scans = list(EndpointGenericScan.objects.filter(
             type=scan_type,
             endpoint__url__organization__type=get_organization_type(organization_type),
             endpoint__url__organization__country=get_country(country)
         ).order_by('-rating_determined_on')[0:6])
 
-    if scan_type in ['DNSSEC']:
+    if scan_type in URL_SCAN_TYPES:
         scans = list(UrlGenericScan.objects.filter(
             type=scan_type,
             url__organization__type=get_organization_type(organization_type),
@@ -1618,12 +1601,12 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
     for scan in scans:
         calculation = get_calculation(scan)
 
-        if scan_type in ['DNSSEC']:
+        if scan_type in URL_SCAN_TYPES:
             # url scans
             dataset["scans"].append({
                 "url": scan.url.url,
                 "service": "%s" % scan.url.url,
-                "protocol": "DNSSEC",
+                "protocol": scan_type,
                 "port": "-",
                 "ip_version": "-",
                 "explanation": calculation.get("explanation", ""),
@@ -1946,11 +1929,10 @@ class LatestScanFeed(Feed):
     # second parameter via magic
     def items(self, scan_type):
         # print(scan_type)
-        if scan_type in ["Strict-Transport-Security", "X-Content-Type-Options", "X-Frame-Options", "X-XSS-Protection",
-                         "plain_https", "ftp", "tls_qualys_certificate_trusted", "tls_qualys_encryption_quality"]:
+        if scan_type in ENDPOINT_SCAN_TYPES:
             return EndpointGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
-        if scan_type in ["DNSSEC"]:
+        if scan_type in URL_SCAN_TYPES:
             return UrlGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
         return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]

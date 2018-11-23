@@ -71,6 +71,7 @@ def compose_task(
 
 @app.task(queue="storage")
 def analyze_headers(result: requests.Response, endpoint):
+    # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
     # todo: Content-Security-Policy, Referrer-Policy
 
     # if scan task failed, ignore the result (exception) and report failed status
@@ -144,11 +145,11 @@ def analyze_headers(result: requests.Response, endpoint):
         else:
             if 'Strict-Transport-Security' in response.headers:
                 log.debug('Has Strict-Transport-Security')
-                store_endpoint_scan_result('Strict-Transport-Security', endpoint, 'True',
+                store_endpoint_scan_result('http_security_header_strict_transport_security', endpoint, 'True',
                                            response.headers['Strict-Transport-Security'])
             else:
                 log.debug('Has no Strict-Transport-Security, yet offers no insecure http service.')
-                store_endpoint_scan_result('Strict-Transport-Security', endpoint, 'False',
+                store_endpoint_scan_result('http_security_header_strict_transport_security', endpoint, 'False',
                                            "Security Header not present: Strict-Transport-Security, "
                                            "yet offers no insecure http service.")
 
@@ -157,44 +158,37 @@ def analyze_headers(result: requests.Response, endpoint):
 
 def generic_check(endpoint: Endpoint, headers, header):
     # this is case insensitive
+
+    scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
+
     if header in headers.keys():
         log.debug('Has %s' % header)
-        store_endpoint_scan_result(header, endpoint, 'True', headers[header])
+        store_endpoint_scan_result(scan_type, endpoint, 'True', headers[header])
     else:
         log.debug('Has no %s' % header)
-        store_endpoint_scan_result(header, endpoint, 'False', "Security Header not present: %s" % header)
+        store_endpoint_scan_result(scan_type, endpoint, 'False', "Security Header not present: %s" % header)
 
 
 def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
+    scan_type = "http_security_header_%s" % header.lower().replace("-", "_")
 
     # this is case insensitive
     if header in headers.keys():
         log.debug('Has %s' % header)
-        store_endpoint_scan_result(header, endpoint, 'True', headers[header])
+        store_endpoint_scan_result(scan_type, endpoint, 'True', headers[header])
     else:
         # CSP fallback:
         if "Content-Security-Policy" in headers.keys():
             store_endpoint_scan_result(
-                header, endpoint, 'Using CSP',
+                scan_type, endpoint, 'Using CSP',
                 "Content-Security-Policy header found, which can handle the security from %s. Value: %s." %
                 (header, headers["Content-Security-Policy"]))
 
         else:
             log.debug('Has no %s' % header)
             store_endpoint_scan_result(
-                header, endpoint, 'False',
+                scan_type, endpoint, 'False',
                 "Security Header not present: %s, alternative header Content-Security-Policy not present." % header)
-
-
-def error_response_400_500(endpoint):
-    # Set all headers for this endpoint to 400_500, which are not shown in the report.
-    # These are not shown in the report anymore. Not using this
-    store_endpoint_scan_result('X-XSS-Protection', endpoint, '400_500', "")
-    store_endpoint_scan_result('X-Frame-Options', endpoint, '400_500', "")
-    store_endpoint_scan_result('X-Content-Type-Options', endpoint, '400_500', "")
-
-    if endpoint.protocol == "https":
-        store_endpoint_scan_result('Strict-Transport-Security', endpoint, '400_500', "")
 
 
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})

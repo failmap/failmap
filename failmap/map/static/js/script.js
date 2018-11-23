@@ -59,10 +59,10 @@ var dynamic_translations = function(){
     // vulnerabilities:
     gettext('report_header_tls_qualys');
     gettext('report_header_plain_https');
-    gettext('report_header_security_headers_x_xss_protection');
-    gettext('report_header_security_headers_x_frame_options');
-    gettext('report_header_security_headers_x_content_type_options');
-    gettext('report_header_security_headers_strict_transport_security');
+    gettext('report_header_http_security_header_x_xss_protection');
+    gettext('report_header_http_security_header_x_frame_options');
+    gettext('report_header_http_security_header_x_content_type_options');
+    gettext('report_header_http_security_header_strict_transport_security');
     gettext('report_header_DNSSEC');
     gettext('report_header_ftp');
     gettext('report_header_tls_qualys_certificate_trusted');

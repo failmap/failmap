@@ -1,11 +1,11 @@
 """
-A list of all scan types that are reliable and can be used in production environments.
+A list of all scan types that are reliable and can be used in production environments (reporting, etc).
 """
 ENDPOINT_SCAN_TYPES = [
-    'Strict-Transport-Security',
-    'X-Content-Type-Options',
-    'X-Frame-Options',
-    'X-XSS-Protection',
+    'http_security_header_strict_transport_security',
+    'http_security_header_x_content_type_options',
+    'http_security_header_x_frame_options',
+    'http_security_header_x_xss_protection',
     'plain_https',
     'ftp',
     'tls_qualys_certificate_trusted',

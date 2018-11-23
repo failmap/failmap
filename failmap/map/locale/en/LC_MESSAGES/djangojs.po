@@ -231,19 +231,19 @@ msgid "report_header_plain_https"
 msgstr "Missing transport encryption"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_security_headers_x_xss_protection"
+msgid "report_header_http_security_header_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_security_headers_x_frame_options"
+msgid "report_header_http_security_header_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_security_headers_x_content_type_options"
+msgid "report_header_http_security_header_x_content_type_options"
 msgstr "X-Content-Type-Options"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_security_headers_strict_transport_security"
+msgid "report_header_http_security_header_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
 #: failmap/map/static/js/script.js

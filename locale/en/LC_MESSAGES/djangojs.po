@@ -439,19 +439,19 @@ msgid "report_header_plain_https"
 msgstr ""
 
 #: static/js/script.js
-msgid "report_header_security_headers_x_xss_protection"
+msgid "report_header_http_security_header_x_xss_protection"
 msgstr ""
 
 #: static/js/script.js
-msgid "report_header_security_headers_x_frame_options"
+msgid "report_header_http_security_header_x_frame_options"
 msgstr ""
 
 #: static/js/script.js
-msgid "report_header_security_headers_x_content_type_options"
+msgid "report_header_http_security_header_x_content_type_options"
 msgstr ""
 
 #: static/js/script.js
-msgid "report_header_security_headers_strict_transport_security"
+msgid "report_header_http_security_header_strict_transport_security"
 msgstr ""
 
 #: static/js/script.js

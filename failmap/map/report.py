@@ -20,7 +20,7 @@ from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
 
 log = logging.getLogger(__package__)
 
-from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, ALL_SCAN_TYPES
 
 FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 
@@ -237,13 +237,13 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     if constance_cached_value('REPORT_INCLUDE_HTTP_MISSING_TLS'):
         allowed_to_report.append("plain_https")
     if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_HSTS'):
-        allowed_to_report.append("Strict-Transport-Security")
+        allowed_to_report.append("http_security_header_strict_transport_security")
     if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_XFO'):
-        allowed_to_report.append("X-Frame-Options")
+        allowed_to_report.append("http_security_header_x_frame_options")
     if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_XSS'):
-        allowed_to_report.append("X-XSS-Protection")
+        allowed_to_report.append("http_security_header_x_xss_protection")
     if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'):
-        allowed_to_report.append("X-Content-Type-Options")
+        allowed_to_report.append("http_security_header_x_content_type_options")
     if constance_cached_value('REPORT_INCLUDE_DNS_DNSSEC'):
         allowed_to_report.append("DNSSEC")
     if constance_cached_value('REPORT_INCLUDE_FTP'):
@@ -1576,32 +1576,27 @@ def calculate_map_data_today():
 def calculate_map_data(days: int = 366):
     log.info("calculate_map_data")
 
-    # all vulnerabilities
-    filters = ["security_headers_strict_transport_security", "security_headers_x_content_type_options", "ftp", "DNSSEC",
-               "security_headers_x_frame_options", "security_headers_x_xss_protection", "tls_qualys", "plain_https",
-               '', 'tls_qualys_certificate_trusted', 'tls_qualys_encryption_quality']
-
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
-            for filter in filters:
+            for scan_type in ALL_SCAN_TYPES:
 
                 # You can expect something to change each day. Therefore just store the map data each day.
                 MapDataCache.objects.all().filter(
                     when=when, country=map_configuration['country'],
                     organization_type=OrganizationType(pk=map_configuration['organization_type']),
-                    filters=[filter]
+                    filters=[scan_type]
                 ).delete()
 
                 log.debug("Country: %s, Organization_type: %s, day: %s, date: %s, filter: %s" % (
                     map_configuration['country'], map_configuration['organization_type__name'],
-                    days_back, when, filter
+                    days_back, when, scan_type
                 ))
                 data = get_map_data(map_configuration['country'], map_configuration['organization_type__name'],
-                                    days_back, filter)
+                                    days_back, scan_type)
 
                 from django.db import OperationalError
 
@@ -1609,7 +1604,7 @@ def calculate_map_data(days: int = 366):
                     cached = MapDataCache()
                     cached.organization_type = OrganizationType(pk=map_configuration['organization_type'])
                     cached.country = map_configuration['country']
-                    cached.filters = [filter]
+                    cached.filters = [scan_type]
                     cached.when = when
                     cached.dataset = data
                     cached.save()
