@@ -5,11 +5,11 @@ from django.urls import reverse
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
-from ..app.models import Job
-from ..celery import PRIO_HIGH, app
-from .geojson import import_from_scratch, update_coordinates
-from .models import (AdministrativeRegion, Configuration, MapDataCache, OrganizationRating,
-                     UrlRating, VulnerabilityStatistic)
+from failmap.app.models import Job
+from failmap.celery import PRIO_HIGH, app
+from failmap.map.geojson import import_from_scratch, update_coordinates
+from failmap.map.models import (AdministrativeRegion, Configuration, MapDataCache, OrganizationRating,
+                                UrlRating, VulnerabilityStatistic)
 
 
 @admin.register(OrganizationRating)

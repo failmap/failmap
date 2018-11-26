@@ -5,8 +5,11 @@ import pytz
 from django.core.management.base import BaseCommand
 
 from failmap.organizations.models import Organization, Url
+from failmap.scanners.scanner.http import resolves
+from failmap.scanners.scanner.dns import discover_wildcard
 
 log = logging.getLogger(__package__)
+from typing import List
 
 
 class Command(BaseCommand):
@@ -45,7 +48,7 @@ class Command(BaseCommand):
                     log.info("Added %s to %s" % (url, organization))
 
 
-def get_non_existing(urls):
+def get_non_existing(urls: List[str]):
 
     not_exists = []
 
@@ -54,9 +57,16 @@ def get_non_existing(urls):
         if exists:
             log.debug("Exists: %s" % url)
         else:
-            log.debug("Does NOT exist: %s" % url)
-            not_exists.append(url)
-
+            # check for wildcard dns...
+            if discover_wildcard(url):
+                log.info("Cannot add %s because it's DNS has wildcards enabled. This means everything resolves. "
+                         "Use -F to override this check and still add the url. (todo: support -f) :) lolopensource")
+            else:
+                if resolves(url):
+                    log.debug("Does not exist in the database, it resolved: %s" % url)
+                    not_exists.append(url)
+                else:
+                    log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s" % url)
     if not_exists:
         log.debug("These urls do not exist:")
         log.debug(" ".join(not_exists))

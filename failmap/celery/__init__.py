@@ -10,7 +10,7 @@ import flower.utils.broker
 from celery import Celery, Task
 from django.conf import settings
 
-from .worker import QUEUES_MATCHING_ROLES
+from failmap.celery.worker import QUEUES_MATCHING_ROLES
 import logging
 
 log = logging.getLogger(__package__)

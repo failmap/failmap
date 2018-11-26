@@ -28,13 +28,14 @@ from import_export.resources import modelresource_factory
 from failmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
                                 VulnerabilityStatistic)
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
-from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
+from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
-from .. import __version__
-from ..app.common import JSEncoder
-from .calculate import get_calculation
+from failmap import __version__
+from failmap.app.common import JSEncoder
+from failmap.map.calculate import get_calculation
 
 from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, ALL_SCAN_TYPES
+import iso3166
 
 log = logging.getLogger(__package__)
 
@@ -46,20 +47,8 @@ ten_minutes = 60 * 10
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
 
-# This list changes roughly every second.
-COUNTRIES = ['AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD',
-             'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BR', 'BS', 'BT', 'BW', 'BY', 'BZ', 'CA', 'CD',
-             'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CR', 'CU', 'CV', 'CW', 'CY', 'CZ', 'DE', 'DJ', 'DK',
-             'DM', 'DO', 'DZ', 'EC', 'EE', 'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB',
-             'GD', 'GE', 'GG', 'GH', 'GL', 'GM', 'GN', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN', 'HR',
-             'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM', 'JO', 'JP', 'KE', 'KG',
-             'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU',
-             'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK', 'ML', 'MM', 'MN', 'MV', 'MO', 'MP', 'MR', 'MS',
-             'MT', 'MU', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ',
-             'OM', 'PA', 'PE', 'PF', 'PG', 'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RO', 'RS',
-             'RU', 'RW', 'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS', 'ST',
-             'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TL', 'TM', 'TN', 'TO', 'TR', 'TT', 'TW', 'TZ',
-             'UA', 'UG', 'US', 'UY', 'UZ', 'VA', 'WF', 'WS', 'YE', 'ZA', 'ZM', 'ZW', 'VC', 'VE', 'VG', 'VI', 'VN', 'VU']
+# This list changes roughly every second, but that's not our problem anymore.
+COUNTRIES = iso3166.countries_by_alpha2
 
 # even while this might be a bit expensive (caching helps), it still is more helpful then
 # defining everything by hand.
@@ -476,6 +465,9 @@ def terrible_urls(request, country: str = "NL", organization_type="municipality"
     # currently this goes wrong when the endpoints are dead but the url still resolves.
     # then there should be an url rating of 0 (as no endpoints). But we don't save that yet.
     # So this feature cannot work until the url ratings are actually correct.
+    # The value of this output is not really relevant: it's a list where there are only small differences
+    # and there are just a few that have a little more endpoints than the others... and those are always at the
+    # top...
     if not weeks_back:
         when = datetime.now(pytz.utc)
     else:
@@ -1257,6 +1249,8 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
+    print(sql)
+
     newest_urlratings = list(OrganizationRating.objects.raw(sql))
 
     # this of course doesn't work with the first day, as then we didn't measure
@@ -1276,12 +1270,21 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
 
     oldest_urlratings = list(OrganizationRating.objects.raw(sql))
 
+    # insuccesful rebuild? Or not enough organizations?
+    if not oldest_urlratings:
+        data = {'changes': {}, 'slogan': config.TICKER_SLOGAN}
+        return JsonResponse(data, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
+
     changes = []
     # stats for the newest, should be made a function:
 
     # silently implying that both querysets have the same length and so on. Which might not be the case(?!)
     i = 0
     for newest_urlrating in newest_urlratings:
+        if i > len(oldest_urlratings):
+            # probably a failed rebuild ratings caused this situation to happen,
+            # just return what we have... would that be out of sync?
+            break
 
         change = {
             'organization': newest_urlrating.name,
@@ -1660,14 +1663,12 @@ def latest_updates(organization_id):
     }
 
     # semi-union, given not all columns are the same. (not python/django-esque solution)
-    tls_scans = list(TlsQualysScan.objects.all().filter(
-        endpoint__url__organization=organization).order_by('-rating_determined_on')[0:10])
     generic_endpoint_scans = list(EndpointGenericScan.objects.filter(
         endpoint__url__organization=organization).order_by('-rating_determined_on')[0:60])
     url_endpoint_scans = list(UrlGenericScan.objects.filter(
         url__organization=organization).order_by('-rating_determined_on')[0:60])
 
-    scans = tls_scans + generic_endpoint_scans + url_endpoint_scans
+    scans = generic_endpoint_scans + url_endpoint_scans
 
     scans = sorted(scans, key=lambda k: getattr(k, 'rating_determined_on', datetime.now(pytz.utc)), reverse=True)
 
@@ -1737,14 +1738,6 @@ def explain_list(request, country, organization_type):
                                                     endpoint__url__organization__country=country,
                                                     endpoint__url__organization__type_id=organization_type
                                                     ).order_by('comply_or_explain_explained_on')[0:10]
-    tqss = TlsQualysScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                              endpoint__url__organization__country=country,
-                                              endpoint__url__organization__type_id=organization_type
-                                              ).order_by('comply_or_explain_explained_on')[0:10]
-    tss = TlsScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                       endpoint__url__organization__country=country,
-                                       endpoint__url__organization__type_id=organization_type
-                                       ).order_by('comply_or_explain_explained_on')[0:10]
 
     explains = []
 
@@ -1752,12 +1745,6 @@ def explain_list(request, country, organization_type):
         explains.append(get_explanation('url', scan))
 
     for scan in egss:
-        explains.append(get_explanation('endpoint', scan))
-
-    for scan in tqss:
-        explains.append(get_explanation('endpoint', scan))
-
-    for scan in tss:
         explains.append(get_explanation('endpoint', scan))
 
     # sorting
@@ -1779,14 +1766,6 @@ def export_explains(request, country, organization_type):
                                                     endpoint__url__organization__country=country,
                                                     endpoint__url__organization__type_id=organization_type
                                                     ).order_by('comply_or_explain_explained_on')
-    tqss = TlsQualysScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                              endpoint__url__organization__country=country,
-                                              endpoint__url__organization__type_id=organization_type
-                                              ).order_by('comply_or_explain_explained_on')
-    tss = TlsScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                       endpoint__url__organization__country=country,
-                                       endpoint__url__organization__type_id=organization_type
-                                       ).order_by('comply_or_explain_explained_on')
 
     explains = []
 
@@ -1794,12 +1773,6 @@ def export_explains(request, country, organization_type):
         explains.append(get_explanation('url', scan))
 
     for scan in egss:
-        explains.append(get_explanation('endpoint', scan))
-
-    for scan in tqss:
-        explains.append(get_explanation('endpoint', scan))
-
-    for scan in tss:
         explains.append(get_explanation('endpoint', scan))
 
     # sorting
@@ -1866,7 +1839,7 @@ class UpdatesOnOrganizationFeed(Feed):
 
     # it seems weird to do this.
     def get_object(self, request, *args, **kwargs):
-        return kwargs['organization_id']
+        return kwargs.get('organization_id', 0)
 
     # second parameter via magic
     def items(self, organization_id):
@@ -1912,15 +1885,15 @@ class LatestScanFeed(Feed):
     # magic
     def get_object(self, request, *args, **kwargs):
         # print("args: %s" % kwargs['scan_type'])
-        return kwargs['scan_type']
+        return kwargs.get('scan_type', '')
 
-    def title(self, scan_type):
+    def title(self, scan_type: str=""):
         if scan_type:
             return "%s Scan Updates" % scan_type
         else:
             return "Vulnerabilities Feed"
 
-    def link(self, scan_type):
+    def link(self, scan_type: str=""):
         if scan_type:
             return "/data/feed/%s" % scan_type
         else:
@@ -1935,7 +1908,8 @@ class LatestScanFeed(Feed):
         if scan_type in URL_SCAN_TYPES:
             return UrlGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
-        return TlsQualysScan.objects.order_by('-last_scan_moment')[0:30]
+        # have some default.
+        return UrlGenericScan.objects.filter(type='DNSSEC').order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
         calculation = get_calculation(item)

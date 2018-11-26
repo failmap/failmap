@@ -4,8 +4,8 @@ from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
-from .models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, InternetNLScan,
-                     Screenshot, TlsQualysScan, TlsQualysScratchpad, TlsScan, UrlGenericScan, UrlIp)
+from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad, InternetNLScan,
+                                     Screenshot, TlsQualysScan, TlsQualysScratchpad, TlsScan, UrlGenericScan, UrlIp)
 
 
 class TlsQualysScanAdminInline(CompactInline):

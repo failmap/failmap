@@ -5,8 +5,8 @@ from django.conf.urls import url
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 
-from . import views
-from .. import converters
+from failmap.map import views
+from failmap import converters
 
 # todo: organization type converter doesn't work yet... using slug as an alternative.
 register_converter(converters.OrganizationTypeConverter, 'ot')

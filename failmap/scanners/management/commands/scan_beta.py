@@ -1,20 +1,18 @@
 import logging
 
-from failmap.app.management.commands._private import VerifyTaskCommand
-from failmap.scanners.scanner import dns, ftp, http
+from failmap.app.management.commands._private import ScannerTaskCommand
+from failmap.scanners.scanner import (screenshot, tls_osaft)
 
 log = logging.getLogger(__name__)
 
-
 scanners = {
-    'ftp': ftp,
-    'http': http,
-    'subdomains': dns
+    'tls': tls_osaft,
+    'screenshot': screenshot,
 }
 
 
-class Command(VerifyTaskCommand):
-    """Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
+class Command(ScannerTaskCommand):
+    """*BETA* Can perform a host of scans. Run like: failmap scan [scanner_name] and then options."""
 
     help = __doc__
 

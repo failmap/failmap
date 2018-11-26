@@ -7,7 +7,7 @@ from failmap.map.report import (calculate_map_data, calculate_vulnerability_stat
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.scanner import q_configurations_to_report
 
-from ..celery import Task
+from failmap.celery import Task
 
 log = logging.getLogger(__package__)
 
@@ -61,8 +61,7 @@ def compose_task(
     log.debug("Number of tasks: %s" % len(tasks))
 
     # Given this is a complete rebuild, also rebuild the statistics for the past year. (only a year is shown max)
-    tasks.append(calculate_vulnerability_statistics.si(366))
-    tasks.append(calculate_map_data.si(366))
+    # if you want to rebuild reports, just run a "calculate map data" by hand also. Code was removed here.
 
     task = group(tasks)
 

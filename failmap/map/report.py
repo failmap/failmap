@@ -10,13 +10,12 @@ from django.db.models import Q
 
 from failmap.map.views import get_map_data
 from failmap.organizations.models import Organization, OrganizationType, Url
-from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 from failmap.scanners.scanner.scanner import q_configurations_to_report
 
-from ..celery import Task, app
-from .calculate import get_calculation
-from .models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
-                     VulnerabilityStatistic)
+from failmap.celery import Task, app
+from failmap.map.calculate import get_calculation
+from failmap.map.models import Configuration, MapDataCache, OrganizationRating, UrlRating, VulnerabilityStatistic
 
 log = logging.getLogger(__package__)
 
@@ -130,6 +129,8 @@ def update_report_tasks(url: Url):
 def rebuild_url_ratings(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
+    # todo: only for allowed organizations...
+
     for url in urls:
         # Delete the ratings for this url, they are going to be rebuilt
         UrlRating.objects.all().filter(url=url).delete()
@@ -141,7 +142,9 @@ def rebuild_url_ratings(urls: List):
 
 @app.task(queue='storage')
 def rebuild_organization_ratings(organizations: List):
-    """Remove organization rating and rebuild anew."""
+    """Remove organization rating and rebuild a new."""
+
+    # todo: only for allowed organizations...
 
     for organization in organizations:
         log.info('Adding rating for organization %s', organization)

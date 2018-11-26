@@ -7,7 +7,7 @@ from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmis
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                     Screenshot, TlsQualysScan, TlsQualysScratchpad, TlsScan,
+                                     Screenshot, TlsQualysScratchpad, TlsScan,
                                      UrlGenericScan, UrlIp)
 
 log = logging.getLogger(__package__)
@@ -63,7 +63,6 @@ def and_its_gone():
     TlsQualysScratchpad.objects.all().delete()
     Screenshot.objects.all().delete()
     EndpointGenericScan.objects.all().delete()
-    TlsQualysScan.objects.all().delete()
     Endpoint.objects.all().delete()
     UrlIp.objects.all().delete()
     TlsScan.objects.all().delete()

@@ -3,14 +3,12 @@ import itertools
 import logging
 import random
 import string
-import subprocess
 import sys
 import tempfile
 from datetime import datetime
 from typing import List
 
 import pytz
-import untangle
 from celery import Task, group
 from django.conf import settings
 from tenacity import before_log, retry, wait_fixed
@@ -18,75 +16,13 @@ from tenacity import before_log, retry, wait_fixed
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.http import get_ips
-from failmap.scanners.scanner.scanner import (allowed_to_discover, q_configurations_to_scan,
-                                              url_filters)
-
-"""
-Performs a range of DNS scans:
-- Using Search engines
-- Using Wordlists
-- Using Certificate Transparency
-- Using NSEC
-
-It separates the scans as it might be desirable to use different scanners.
-
-Todo: the list of known subdomains might help (a lot) with breaking nsec3 hashes?
-https://github.com/anonion0/nsec3map
-
-"""
-# todo: if ScannerHttp.has_internet_connection():
+from failmap.scanners.scanner.scanner import (allowed_to_discover, q_configurations_to_scan, url_filters)
 
 
+# Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
 sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
 
 log = logging.getLogger(__package__)
-
-theharvester = settings.TOOLS['theHarvester']['executable']
-dnsrecon = settings.TOOLS['dnsrecon']['executable']
-
-# the length is used for checking wildcards, dnsrecon doesn't always does that right.
-# if the returned list of domains is about as long as the wordlist... then it's a wildcard
-# except if the wordlist is very small.
-wordlists = {
-    'dutch_basic': {
-        'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "OpenTaal-210G-basis-gekeurd.txt",
-        'length': 180000
-    },
-    # organizations _LOVE_ three letter acronyms! I mean TLA's! :)
-    # Let's call the Anti Acronym Association of America.
-    'three_letters': {
-        'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "threeletterwordlist.txt",
-        'length': 18000
-    },
-    'known_subdomains': {
-        'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "knownsubdomains.txt",
-        'length': 200
-    },
-    # We want to know if a domain uses wildcards, and also store it. So dnsrecon might be suited
-    # for this, it doesn't output if a url has wildcard support.
-    'nonsense': {
-        'path': settings.TOOLS['dnsrecon']['wordlist_dir'] + "nonsense.txt",
-        'length': 2
-    }
-}
-
-
-"""
-It is possible an organization does not use their tld, but a subdomain.
-For example: www.example.com might resolve but example.com doesn't.
-
-It's very convenient to add non-existing top-level domains, as that is a starting point for dns scans.
-"""
-
-
-def search_engines(organizations: List[Organization] = None, urls: List[Url] = None):
-    urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
-    return [new_url for new_url in search_engines_scan(urls)]
-
-
-def nsec(organizations: List[Organization] = None, urls: List[Url] = None):
-    urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
-    return [new_url for new_url in nsec_scan(urls)]
 
 
 def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict(),
@@ -130,11 +66,6 @@ def nsec_compose_task(organizations_filter: dict = dict(),
 
     task = group(nsec_scan.si([url]) for url in urls)
     return task
-
-
-def certificate_transparency(organizations: List[Organization] = None, urls: List[Url] = None):
-    urls = toplevel_urls(organizations=organizations) if organizations else [] + urls if urls else []
-    return [new_url for new_url in certificate_transparency_scan(urls)]
 
 
 def certificate_transparency_compose_task(organizations_filter: dict = dict(),
@@ -228,35 +159,6 @@ def handle_resolves(resolves, url):
     return
 
 
-def brute_dutch(organizations: List[Organization] = None, urls: List[Url] = None):
-    urls = toplevel_urls_without_wildcards(organizations) if organizations else [] + urls if urls else []
-    return wordlist_scan_old(urls, str(wordlists["dutch_basic"]["path"]))
-
-
-def brute_three_letters(organizations: List[Organization] = None, urls: List[Url] = None):
-    urls = toplevel_urls_without_wildcards(organizations) if organizations else [] + urls if urls else []
-    return wordlist_scan_old(urls, str(wordlists["three_letters"]["path"]))
-
-
-def standard(organizations: List[Organization] = None, urls: List[Url] = None):
-    """
-    Runs scans that are not heavy and potentially return a lot of results:
-
-    certificate_transparency: 1 request results dozens of urls
-    nsec: a few dns requests deliver all subdomains there are out there for a domain
-
-    not used:
-    search_engine: this requires a search engine scan and cannot be bulk-automated due to rate limiting
-    brute_force:
-
-    :param organizations:
-    :param urls:
-    :return:
-    """
-
-    certificate_transparency(organizations=organizations, urls=urls)
-    nsec(organizations=organizations, urls=urls)
-
 
 def toplevel_urls(organizations):
     return Url.objects.all().filter(organization__in=organizations,
@@ -305,6 +207,10 @@ def has_wildcards(urls: List[Url]):
 
 
 def url_discover_wildcard(url: Url):
+    return discover_wildcard(url.url)
+
+
+def discover_wildcard(url: str):
     """
     We need to perform a check ourselves, since we cannot get from the DNSRecon report if the url
     uses wildcards. We store this ourselves so we can better filter domains.
@@ -315,18 +221,18 @@ def url_discover_wildcard(url: Url):
     sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
     from lib.dnshelper import DnsHelper
 
-    log.debug("Checking for DNS wildcards on domain: %s" % url.url)
+    log.debug("Checking for DNS wildcards on domain: %s" % url)
 
     wildcard = False
 
-    resolver = DnsHelper(url.url, get_random_dns_ip(), 3)
+    resolver = DnsHelper(url, get_random_dns_resolver_ip(), 3)
 
     # Do this test twice, there are dns servers that say NO the first time, but say yes the second (i mean wtf)
-    ips_1 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url.url))
-    ips_2 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url.url))
+    ips_1 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url))
+    ips_2 = resolver.get_a("%s.%s" % (''.join(random.choice(string.ascii_lowercase) for i in range(16)), url))
 
     if len(ips_1) > 0 or len(ips_2) > 0:
-        log.debug("%s has wildcards enabled." % url.url)
+        log.debug("%s has wildcards enabled." % url)
         return True
 
     return wildcard
@@ -372,64 +278,6 @@ def dnsrecon_parse_report_contents(url: Url, contents: List):
             if added:
                 addedlist.append(added)
 
-    return addedlist
-
-
-def search_engines_scan(urls: List[Url]):
-    """
-    :param urls: List[Url]
-    :return: List[Url]
-    """
-    addedlist = []
-    for url in urls:
-        # Todo: sometimes the report contains subdomains for other organizations at top level domain: add these also
-        # Searching the internet for subdomains might result in overly long and incorrect lists.
-        # The only correct way is to curate domains by hand.
-        # So, we should also try to import those. So we have maximum result from our scan.
-        log.info("Harvesting DNS of toplevel domain: %s" % url.url)
-        log.warning("Search engines have strict rate limiting, do not use this function in an "
-                    "automated scan.")
-        # a bug in the harvester breaks the file at the first dot and uses that as the xml file,
-        # and the full filename as the html file.
-        file = ("%s_harvester_all" % url.url).replace(".", "_") + ".xml"
-        path = settings.TOOLS['theHarvester']['output_dir'] + file
-
-        log.debug("DNS results will be stored in file: %s" % path)
-        engine = "all"
-        subprocess.call(['python', theharvester,
-                         '-d', url.url,
-                         '-b', engine,
-                         '-s', '0',
-                         '-l', '100',
-                         '-f', path])
-
-        # read XML file, extract hosts + vhosts (both can contain the url).
-        # explicitly search for .toplevel.nl (with leading dot) to not find .blatoplevel.nl
-        subdomains = []
-        obj = untangle.parse(path)
-        hosts = []
-        if hasattr(obj.theHarvester, 'host'):
-            hosts += [host for host in obj.theHarvester.host]
-
-        if hasattr(obj.theHarvester, 'vhost'):
-            hosts += [host for host in obj.theHarvester.vhost]
-
-        for host in hosts:
-            hostname = host.hostname.cdata
-            log.debug("Hostname: %s" % hostname)
-            if hostname.endswith("." + url.url):
-                subdomains.append(hostname[0:len(hostname) - len(url.url) - 1])
-                log.debug("Subdomain: %s" % hostname[0:len(hostname) - len(url.url) - 1])
-
-        subdomains = [x.lower() for x in subdomains]
-        subdomains = set(subdomains)  # only unique
-
-        log.debug("Found subdomains: %s" % subdomains)
-
-        for subdomain in subdomains:
-            added = url.add_subdomain(subdomain)
-            if added:
-                addedlist.append(added)
     return addedlist
 
 
@@ -482,7 +330,7 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
         for url in urls_without_wildcards:
             log.info("Wordlist scan on: %s" % url.url)
 
-            resolver_ip = get_random_dns_ip()
+            resolver_ip = get_random_dns_resolver_ip()
             log.debug("Using the DNS service from %s" % resolver_ip)
             resolver = DnsHelper(url.url, resolver_ip, 3)
             found_hosts = brute_domain(resolver, tmp_wordlist.name, url.url, None, verbose=False)
@@ -511,7 +359,7 @@ def remove_wildcards(urls: List[Url]):
     return urls_without_wildcards
 
 
-def get_random_dns_ip():
+def get_random_dns_resolver_ip():
     """
     Using one of the public and popular DNS services.
 
@@ -525,50 +373,6 @@ def get_random_dns_ip():
     # 149.112.112.112 == 9.9.9.9 (quad9)
 
     return random.choice(['1.1.1.1', '9.9.9.9', '8.8.8.8', '8.26.56.26'])
-
-
-# this can be highly invasive and slow, so try to behave: rate limit: 1 to 2 per minute.
-@app.task(ignore_result=True, queue="internet", rate_limit='40/h')
-def wordlist_scan_old(urls: List[Url], wordlist: str):
-    """
-
-    :param urls:
-    :param wordlist:
-    :return:
-    """
-
-    # any organization can determine at any points that there are now wildcards in effect
-    # would we not check this, all urls below the current url will be seen as valid, which
-    # results in database polution and a lot of extra useless scans.
-    urls = remove_and_save_wildcards(urls)
-
-    imported_urls = []
-    for url in urls:
-        log.info("Bruting DNS of toplevel domain: %s" % url.url)
-        log.debug("Using wordlist: %s" % wordlist)
-        file = "%s_data_brute.json" % url.url
-        path = settings.TOOLS['dnsrecon']['output_dir'] + file
-
-        log.debug("DNS results will be stored in file: %s" % path)
-
-        # never continue with wildcard domains
-        p = subprocess.Popen(['python', dnsrecon,
-                              '--domain', url.url,
-                              '-t', 'brt',
-                              '-D', wordlist,
-                              '-j', path], stdin=subprocess.PIPE)
-        p.stdin.write('n'.encode(encoding='utf-8'))
-        p.stdin.write('n'.encode(encoding='utf-8'))
-        p.stdin.write('n'.encode(encoding='utf-8'))
-        p.stdin.write('n'.encode(encoding='utf-8'))
-        p.stdin.write('n'.encode(encoding='utf-8'))
-        p.stdin.write('n'.encode(encoding='utf-8'))  # never brute a wildcard,
-        # The above input doens't always work it seems...
-        p.communicate()
-
-        imported_urls += import_dnsrecon_report(url, path)
-
-    return imported_urls
 
 
 # don't overload the crt.sh service, rate limit

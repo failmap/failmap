@@ -22,9 +22,9 @@ from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
 
-from ..app.models import Job
-from ..celery import PRIO_HIGH
-from .models import Coordinate, Organization, OrganizationType, Promise, Url
+from failmap.app.models import Job
+from failmap.celery import PRIO_HIGH
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 
 log = logging.getLogger(__name__)
 

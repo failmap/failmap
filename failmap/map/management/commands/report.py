@@ -2,7 +2,7 @@ import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
 
-from ... import rating
+from failmap.map import report
 
 log = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Command(ScannerTaskCommand):
     def handle(self, *args, **options):
 
         try:
-            self.scanner_module = rating
+            self.scanner_module = report
             return super().handle(self, *args, **options)
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")

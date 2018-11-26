@@ -4,7 +4,7 @@ import platform
 import django
 from django.core.management.base import BaseCommand
 
-from .... import __version__
+from failmap import __version__
 
 log = logging.getLogger(__package__)
 

@@ -2,9 +2,6 @@
 # Any testing/debug only requirements should to into requirements.dev.txt.
 # Requirements only needed for release should go in requirements.deploy.txt.
 
-# Django jet is blocking migration to 2.0
-# error:     from django.views.i18n import javascript_catalog
-# ImportError: cannot import name 'javascript_catalog'
 django
 django-jet
 django-countries
@@ -32,13 +29,18 @@ flower  # used for queue statistics
 django-statsd-mozilla
 django_uwsgi
 
-# scanner dependencies
+# scanner deps
 requests
-dnspython  # dnsrecon
-netaddr  # dnsrecon
-untangle  # dns scans https://github.com/stchris/untangle
-Pillow  # screenshots
-python-resize-image  # screenshots
+
+# dnsrecon / DNS scanning dependencies
+dnspython
+netaddr
+
+# screenshots
+Pillow
+python-resize-image
+
+# url parsing in the database, and several other locations
 tldextract
 
 # logging
@@ -108,8 +110,11 @@ django-admin-sortable2  # nice sorting in the admin, used in map configurations.
 # lxml
 # six
 
-django-colorful  # game team colors
-django-select2  # game, add multiple urls in one go.
+# game team colors
+django-colorful
+
+# game, add multiple urls in one go.
+django-select2
 
 # function caching / query caching for slow stats graphs queries
 # another way has to be found, but until then
@@ -117,7 +122,11 @@ django-select2  # game, add multiple urls in one go.
 # and when wrapping raw queries it is more heavy than just using djangos caching framework.
 # django-redis  # caching of graph resultsets
 
+# ISO country code conversion
+iso3166
 
-iso3166  # ISO country code conversion
-docker  # hyper scaling
-tenacity  # generic retry library
+# hyper scaling
+docker
+
+# generic retry library
+tenacity

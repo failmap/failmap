@@ -2,7 +2,7 @@ from django.conf.urls import url
 from django.http import JsonResponse
 from jet.dashboard import dashboard
 
-from ..celery import status
+from failmap.celery import status
 
 
 def task_processing_status(request):

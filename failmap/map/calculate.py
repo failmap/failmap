@@ -204,6 +204,12 @@ def tls_qualys_encryption_quality_rating_based_on_scan(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
+def dummy_calculated_values(scan):
+    explanation = "This is a dummy scan."
+    high, medium, low = 0, 0, 0
+    return standard_calculation(scan, explanation, high, medium, low)
+
+
 def standard_calculation(scan, explanation, high, medium, low):
     return {
         "type": scan.type,
@@ -226,7 +232,8 @@ calculation_methods = {
     'DNSSEC': dnssec_rating_based_on_scan,
     'ftp': ftp_rating_based_on_scan,
     'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted_rating_based_on_scan,
-    'tls_qualys_encryption_quality': tls_qualys_encryption_quality_rating_based_on_scan
+    'tls_qualys_encryption_quality': tls_qualys_encryption_quality_rating_based_on_scan,
+    'Dummy': dummy_calculated_values
 }
 
 

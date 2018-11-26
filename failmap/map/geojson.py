@@ -22,8 +22,8 @@ from wikidata.client import Client
 
 from failmap.celery import app
 
-from ..organizations.models import Coordinate, Organization, OrganizationType, Url
-from .models import AdministrativeRegion
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from failmap.map.models import AdministrativeRegion
 
 log = logging.getLogger(__package__)
 
@@ -88,7 +88,10 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
                 continue
 
-            data = get_osm_data_wambachers(country, organization_type)
+            if config.WAMBACHERS_OSM_CLIKEY:
+                data = get_osm_data_wambachers(country, organization_type)
+            else:
+                data = get_osm_data(country, organization_type)
             for feature in data["features"]:
 
                 if "properties" not in feature:
@@ -117,7 +120,10 @@ def update_coordinates(country: str = "NL", organization_type: str = "municipali
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
     # you are about to load 50 megabyte of data. Or MORE! :)
-    data = get_osm_data_wambachers(country, organization_type)
+    if config.WAMBACHERS_OSM_CLIKEY:
+        data = get_osm_data_wambachers(country, organization_type)
+    else:
+        data = get_osm_data(country, organization_type)
 
     log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
 
@@ -422,10 +428,20 @@ def store_updates(feature: Dict, country: str = "NL", organization_type: str = "
 
 
 def get_osm_data_wambachers(country: str = "NL", organization_type: str = "municipality"):
+    """
+    When the config.WAMBACHERS_OSM_CLIKEY is configured, this routine will get the map data.
+
+    It's the same as OSM, but with major seas and lakes cut out. That makes a nicer terrain on the website.
     # uses https://wambachers-osm.website/boundaries/ to download map data. Might not be the most updated, but it has
     # a more complete and better set of queries. For example; it DOES get northern ireland and it clips out the sea,
     # which makes it very nice to look at.
     # yes, i've donated, and so should you :)
+
+    :param country:
+    :param organization_type:
+    :return:
+    """
+
     """
     curl -f -o NL_province.zip 'https://wambachers-osm.website/boundaries/exportBoundaries
     ?cliVersion=1.0

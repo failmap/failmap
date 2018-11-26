@@ -4,47 +4,41 @@ import logging
 from django.core.management.base import BaseCommand
 
 from failmap.organizations.models import Url
-from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, TlsQualysScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot
+from django.db import transaction
 
 log = logging.getLogger(__package__)
 
 
 class Command(BaseCommand):
     """
-    Everything that can die / is not resolvable etc for a short while is merged in a certain timespan.
+    Removes endpoints that died, but a similar endpoint was created within 7 days. Helps recovering from bad network
+    connections. The dead endpoint assumes the life-information from the newer endpoint. The newer endpoint is deleted.
 
-    First know that everything in failmap stacks. This is needed to show gaps over time. Consider the following
-    timespan:
+    Example:
+        Endpoint A 01 jan 2018, amsterdam.nl 80/http IPv4 exists
+        Endpoint A 02 jan 2018, amsterdam.nl 80/http IPv4 dies
+        Endpoint B 03 jan 2018, amsterdam.nl 80/http IPv4 exists
 
-    January 2017: amsterdam.nl domain exists.
-    Februari 2017: amsterdam.nl domain died.
-    March 2017: amsterdam.nl domain exists again.
+    After cleaning the outage the following will have happened:
 
-    In order to show this historical data (the outage of amsterdam.nl for a few months), we have an "is_dead" flag on
-    each url. When the url is discovered later, a new url is added, with new endpoints and such.
+        Endpoint A 01 jan 2018 amsterdam.nl 80/http IPv4 exists
+        (endpoint B is deleted, where endpoint A received the "is_dead, is_dead_reason, is_dead_since" fields from B)
 
-    Due to bad network connections and other unreliable things, it might be that something is declared dead incorrectly.
-    For example: something is down a single day and then up again. This might be our fault via coding bugs etc.
+    This can save a few hundred endpoints. Especially if your network connection is terrible.
 
-    This library helps fixing those issues, mainly to speed up rating rebuilding and debugging.
+    Command is carried out in a transaction. If an error occurs, the database remains untouched.
 
-    This library will merge everything that is dead for a certain timespan (a week) together. So the in the above case
-    nothing will hapen. But the following will be merged:
-
-    13 january 2017: my.amsterdam.nl exists
-    14 january 2017: my.amsterdam.nl dies
-    15 januaru 2017: my.amsterdam.nl exists
-
-    Now there are two "my.amsterdam.nl" urls. This can be the case, but in such a short timespan it just clutters up
-    the database with extra records.
+    todo: support days parameter.
 
     """
-    help = 'Merges similar things that have been dead for a very short while.'
+    help = __doc__
 
     def handle(self, *args, **options):
         merge_endpoints_that_recently_died()
 
 
+@transaction.atomic
 def merge_endpoints_that_recently_died():
     # with a timespan of a week: if within a week a new similar endpoint was created, merge them into the old one.
 
@@ -79,14 +73,15 @@ def merge_endpoints_that_recently_died():
             if not identical_endpoints:
                 continue
 
-            log.info("Found identical endpoints for %s: " % dead_endpoint)
-            log.info([ep for ep in identical_endpoints])
+            log.info("Found identical endpoints for %s. (created: %s, died: %s)" % (
+                dead_endpoint, dead_endpoint.discovered_on, dead_endpoint.is_dead_since))
+            for ep in identical_endpoints:
+                log.info("Identical: %s (created: %s, died: %s)" % (ep, ep.discovered_on, ep.is_dead_since))
 
             for identical_endpoint in identical_endpoints:
 
                 # merge everything that relates to the identical endpoints to the dead_endpoint:
                 EndpointGenericScan.objects.all().filter(endpoint=identical_endpoint).update(endpoint=dead_endpoint)
-                TlsQualysScan.objects.all().filter(endpoint=identical_endpoint).update(endpoint=dead_endpoint)
                 Screenshot.objects.all().filter(endpoint=identical_endpoint).update(endpoint=dead_endpoint)
 
                 # Copy the state of the enpoint. It goes from oldest to newest. So the latest state is used.
@@ -98,12 +93,3 @@ def merge_endpoints_that_recently_died():
 
                 # then remove the identical endpoint, and declare the dead_endpoint to be alive again.
                 identical_endpoint.delete()
-
-
-def remove_short_deaths():
-    """
-    Remove scans that
-
-    :return:
-    """
-    raise NotImplementedError

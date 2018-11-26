@@ -1,6 +1,6 @@
 """Generic Types for type hinting."""
 
-from .celery import Task
+from failmap.celery import Task
 
 
 def compose_task(

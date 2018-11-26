@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django_fsm_log.admin import StateLogInline
 from import_export.admin import ImportExportModelAdmin
 
-from .models import ContainerConfiguration, ContainerEnvironment, ContainerGroup, Credential
+from failmap.hypersh.models import ContainerConfiguration, ContainerEnvironment, ContainerGroup, Credential
 
 log = logging.getLogger(__name__)
 

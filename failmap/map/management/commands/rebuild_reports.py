@@ -2,7 +2,7 @@ import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
 
-from ... import rebuild_report
+from failmap.map import rebuild_report
 
 log = logging.getLogger(__name__)
 

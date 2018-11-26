@@ -13,7 +13,6 @@ import subprocess
 from datetime import datetime
 
 import pytz
-import untangle
 from django.conf import settings
 
 from failmap.scanners.models import Endpoint
@@ -256,8 +255,10 @@ def determine_grade(report, url):
         return
 
     try:
-        log.debug('untangle.parse("%s")' % report)
-        obj = untangle.parse(report)
+        # log.debug('untangle.parse("%s")' % report)
+        # obj = untangle.parse(report)
+        # removed untangle, as this was the only file using it, and this is here for legacy purposes.
+        raise NotImplemented
     except Exception:
         log.error('Something wrong with report file: %s' % report)
         return

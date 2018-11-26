@@ -4,14 +4,15 @@ from datetime import datetime
 import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 
-from .datasethelpers import check_referential_integrity
+from failmap.organizations.management.commands.support.datasethelpers import check_referential_integrity
 
 log = logging.getLogger(__package__)
 
 
 # Remove ALL organization and URL ratings and rebuild them
 class Command(DumpDataCommand):
-    help = "Create a near complete export for testing and migrating to another server."
+    help = "A dataset that is free of things that are easy to recreate. Such things are all logs from scanners," \
+           "screenshots and such."
 
     FILENAME = "failmap_dataset_{}.{options[format]}"
 
@@ -56,7 +57,6 @@ class Command(DumpDataCommand):
         "organizations.Url",
         "organizations.Promise",
         "scanners.Endpoint",
-        "scanners.TlsQualysScan",
         "scanners.TlsScan",
         "scanners.EndpointGenericScan",
         "scanners.UrlGenericScan",

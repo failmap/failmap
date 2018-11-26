@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-21 12:11+0000\n"
+"POT-Creation-Date: 2018-11-26 16:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -229,19 +229,27 @@ msgid "report_header_plain_https"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_https_security_header_x_xss_protection"
+#, fuzzy
+#| msgid "report_header_https_security_header_x_xss_protection"
+msgid "report_header_http_security_header_x_xss_protection"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_https_security_header_x_frame_options"
+#, fuzzy
+#| msgid "report_header_https_security_header_x_frame_options"
+msgid "report_header_http_security_header_x_frame_options"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_https_security_header_x_content_type_options"
+#, fuzzy
+#| msgid "report_header_https_security_header_x_content_type_options"
+msgid "report_header_http_security_header_x_content_type_options"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js
-msgid "report_header_https_security_header_strict_transport_security"
+#, fuzzy
+#| msgid "report_header_https_security_header_strict_transport_security"
+msgid "report_header_http_security_header_strict_transport_security"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js

@@ -13,7 +13,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Job, Volunteer
+from failmap.app.models import Job, Volunteer
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):

@@ -10,7 +10,7 @@ from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
 
-from ..celery import app
+from failmap.celery import app
 
 log = logging.getLogger(__name__)
 

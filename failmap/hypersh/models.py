@@ -16,7 +16,7 @@ from django_fsm_log.models import StateLog
 from hyper_sh import Client
 from raven.contrib.django.raven_compat.models import client
 
-from ..celery import app
+from failmap.celery import app
 
 DEFAULT_IMAGE = 'failmap/failmap:latest'
 DEFAULT_COMMAND = 'celery worker --loglevel=info --concurrency=1'

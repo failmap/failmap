@@ -3,7 +3,7 @@ from jet.dashboard import modules
 from jet.dashboard.dashboard import Dashboard
 from jet.dashboard.models import UserDashboardModule
 
-from . import dashboard_modules
+from failmap.app import dashboard_modules
 
 
 class ResetUserWidgetConfiguration:

@@ -6,16 +6,17 @@ from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
-from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlIp
+from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
 
 log = logging.getLogger(__package__)
 
 
 # Remove ALL organization and URL ratings and rebuild them
 class Command(DumpDataCommand):
-    help = "Create a small export for testing."
+    help = "The test-dataset exports 20 organizations, with their minimal information such as scans. Log info" \
+           "will not be attached."
 
-    FILENAME = "failmap_testdataset_{}.{options[format]}"
+    FILENAME = "failmap_test_dataset_{}.{options[format]}"
 
     APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat')
 
@@ -76,9 +77,6 @@ class Command(DumpDataCommand):
 
         endpoints = Endpoint.objects.all().filter(url__in=urls)
         objects += endpoints
-
-        tlsqualysscans = TlsQualysScan.objects.all().filter(endpoint__in=endpoints)
-        objects += tlsqualysscans
 
         endpointgenericscans = EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
         objects += endpointgenericscans
