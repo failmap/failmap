@@ -16,8 +16,8 @@ from tenacity import before_log, retry, wait_fixed
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.http import get_ips
-from failmap.scanners.scanner.scanner import (allowed_to_discover, q_configurations_to_scan, url_filters)
-
+from failmap.scanners.scanner.scanner import (allowed_to_discover, q_configurations_to_scan,
+                                              url_filters)
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
 sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
@@ -157,7 +157,6 @@ def handle_resolves(resolves, url):
         url.save()
 
     return
-
 
 
 def toplevel_urls(organizations):

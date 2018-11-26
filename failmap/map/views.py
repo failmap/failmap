@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 from math import ceil
 
+import iso3166
 import pytz
 import simplejson as json
 from constance import config
@@ -25,17 +26,14 @@ from django.views.decorators.cache import cache_page
 from django_celery_beat.models import PeriodicTask
 from import_export.resources import modelresource_factory
 
+from failmap import __version__
+from failmap.app.common import JSEncoder
+from failmap.map.calculate import get_calculation
 from failmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
                                 VulnerabilityStatistic)
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
-
-from failmap import __version__
-from failmap.app.common import JSEncoder
-from failmap.map.calculate import get_calculation
-
-from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, ALL_SCAN_TYPES
-import iso3166
+from failmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 
@@ -1249,8 +1247,6 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    print(sql)
-
     newest_urlratings = list(OrganizationRating.objects.raw(sql))
 
     # this of course doesn't work with the first day, as then we didn't measure
@@ -1887,13 +1883,13 @@ class LatestScanFeed(Feed):
         # print("args: %s" % kwargs['scan_type'])
         return kwargs.get('scan_type', '')
 
-    def title(self, scan_type: str=""):
+    def title(self, scan_type: str = ""):
         if scan_type:
             return "%s Scan Updates" % scan_type
         else:
             return "Vulnerabilities Feed"
 
-    def link(self, scan_type: str=""):
+    def link(self, scan_type: str = ""):
         if scan_type:
             return "/data/feed/%s" % scan_type
         else:

@@ -1,12 +1,14 @@
+import logging
 from datetime import datetime
+
 import pytz
+from constance import config
+from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from failmap.organizations.models import Organization, OrganizationType, Url
+
 from failmap.map.models import Configuration
-import logging
-from django.conf import settings
-from constance import config
+from failmap.organizations.models import Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 
@@ -65,9 +67,6 @@ def test_map_views(organization_type, organization):
 
     Todo: how is this done in other tests? -> via a docker IP. So these tests will have to be rewritten.
     """
-
-    address = "http://localhost:8000/"
-
     from django.test.client import RequestFactory
     rf = RequestFactory()
     request = rf.get('/')
@@ -138,6 +137,7 @@ def test_hypersh_commands():
 
 
 def test_map_commands(organization, url):
+    # todo: also test game in next game iteration
     # this is going to take a while
     call_debug_command('rebuild_reports', '-o', organization.name)
     call_debug_command('report', '-o', organization.name)

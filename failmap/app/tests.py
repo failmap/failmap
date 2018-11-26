@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
 
-from failmap.celery import app
 from failmap.app.models import Job
+from failmap.celery import app
 
 
 @pytest.fixture

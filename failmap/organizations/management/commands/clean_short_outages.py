@@ -2,10 +2,10 @@ import datetime
 import logging
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
 from failmap.organizations.models import Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot
-from django.db import transaction
 
 log = logging.getLogger(__package__)
 

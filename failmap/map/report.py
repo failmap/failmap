@@ -8,18 +8,18 @@ from constance import config
 from deepdiff import DeepDiff
 from django.db.models import Q
 
+from failmap.celery import Task, app
+from failmap.map.calculate import get_calculation
+from failmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
+                                VulnerabilityStatistic)
 from failmap.map.views import get_map_data
 from failmap.organizations.models import Organization, OrganizationType, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 from failmap.scanners.scanner.scanner import q_configurations_to_report
-
-from failmap.celery import Task, app
-from failmap.map.calculate import get_calculation
-from failmap.map.models import Configuration, MapDataCache, OrganizationRating, UrlRating, VulnerabilityStatistic
+from failmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 
-from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES, ALL_SCAN_TYPES
 
 FAILMAP_STARTED = datetime(year=2016, month=1, day=1, hour=13, minute=37, second=42, tzinfo=pytz.utc)
 

@@ -4,7 +4,7 @@ from datetime import datetime
 import pytz
 from django.core.exceptions import ObjectDoesNotExist
 
-from failmap.scanners.models import Endpoint, Url, EndpointGenericScan, UrlGenericScan
+from failmap.scanners.models import Endpoint, EndpointGenericScan, Url, UrlGenericScan
 
 log = logging.getLogger(__package__)
 

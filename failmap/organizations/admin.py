@@ -17,14 +17,13 @@ from leaflet.admin import LeafletGeoAdminMixin
 
 import failmap.scanners.scanner.http as scanner_http
 from failmap import types
+from failmap.app.models import Job
+from failmap.celery import PRIO_HIGH
 from failmap.map.report import OrganizationRating, UrlRating
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
-
-from failmap.app.models import Job
-from failmap.celery import PRIO_HIGH
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 
 log = logging.getLogger(__name__)
 

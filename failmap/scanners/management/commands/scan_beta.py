@@ -1,7 +1,7 @@
 import logging
 
 from failmap.app.management.commands._private import ScannerTaskCommand
-from failmap.scanners.scanner import (screenshot, tls_osaft)
+from failmap.scanners.scanner import screenshot, tls_osaft
 
 log = logging.getLogger(__name__)
 

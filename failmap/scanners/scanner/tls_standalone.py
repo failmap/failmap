@@ -254,11 +254,12 @@ def determine_grade(report, url):
         log.error('No report given: %s' % report)
         return
 
+    raise NotImplementedError
     try:
         # log.debug('untangle.parse("%s")' % report)
         # obj = untangle.parse(report)
         # removed untangle, as this was the only file using it, and this is here for legacy purposes.
-        raise NotImplemented
+        obj = {}
     except Exception:
         log.error('Something wrong with report file: %s' % report)
         return

@@ -13,7 +13,7 @@ from celery import Task, group
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint
-from failmap.scanners.scanmanager import store_endpoint_scan_result, endpoint_has_scans
+from failmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
 from failmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
                                            resolves_on_v4, resolves_on_v6)
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan

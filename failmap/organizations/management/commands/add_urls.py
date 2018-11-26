@@ -1,15 +1,15 @@
 import logging
 from datetime import datetime
+from typing import List
 
 import pytz
 from django.core.management.base import BaseCommand
 
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.scanner.http import resolves
 from failmap.scanners.scanner.dns import discover_wildcard
+from failmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
-from typing import List
 
 
 class Command(BaseCommand):

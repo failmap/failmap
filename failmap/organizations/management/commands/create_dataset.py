@@ -4,7 +4,8 @@ from datetime import datetime
 import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 
-from failmap.organizations.management.commands.support.datasethelpers import check_referential_integrity
+from failmap.organizations.management.commands.support.datasethelpers import \
+    check_referential_integrity
 
 log = logging.getLogger(__package__)
 

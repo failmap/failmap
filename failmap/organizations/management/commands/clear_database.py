@@ -7,8 +7,8 @@ from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmis
 from failmap.map.models import OrganizationRating, UrlRating
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from failmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                     Screenshot, TlsQualysScratchpad, TlsScan,
-                                     UrlGenericScan, UrlIp)
+                                     Screenshot, TlsQualysScratchpad, TlsScan, UrlGenericScan,
+                                     UrlIp)
 
 log = logging.getLogger(__package__)
 

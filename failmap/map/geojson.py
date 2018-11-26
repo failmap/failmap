@@ -21,9 +21,8 @@ from rdp import rdp
 from wikidata.client import Client
 
 from failmap.celery import app
-
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 from failmap.map.models import AdministrativeRegion
+from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
 log = logging.getLogger(__package__)
 

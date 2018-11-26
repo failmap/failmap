@@ -2,12 +2,10 @@ import logging
 
 from celery import group
 
-from failmap.map.report import (calculate_map_data, calculate_vulnerability_statistics,
-                                rebuild_organization_ratings, rebuild_url_ratings)
+from failmap.celery import Task
+from failmap.map.report import rebuild_organization_ratings, rebuild_url_ratings
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.scanner.scanner import q_configurations_to_report
-
-from failmap.celery import Task
 
 log = logging.getLogger(__package__)
 

@@ -9,7 +9,8 @@ import tempfile
 from celery.signals import celeryd_init, worker_shutdown
 from django.conf import settings
 
-from failmap.celery.worker import tls_client_certificate, worker_configuration, worker_verify_role_capabilities
+from failmap.celery.worker import (tls_client_certificate, worker_configuration,
+                                   worker_verify_role_capabilities)
 
 log = logging.getLogger(__name__)
 
