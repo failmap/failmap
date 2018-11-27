@@ -1494,11 +1494,6 @@ function views() {
         name: "fullscreenreport",
         el: '#fullscreenreport',
         mixins: [state_mixin, report_mixin],
-
-        filters: {
-            // you cannot run filters in rawHtml, so this doesn't work.
-            // therefore we explicitly do this elsewhere
-        }
     });
 
     // there are some issues with having the map in a Vue. Somehow the map doesn't
