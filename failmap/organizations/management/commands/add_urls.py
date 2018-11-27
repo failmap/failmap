@@ -26,33 +26,37 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        non_existing = get_non_existing(options['urls'])
+        new_urls = get_new_urls(options['urls'])
 
-        if non_existing:
-            log.info("Found new urls, to what organizations do you want to add these?")
-            log.info("The new urls are: %s" % " ".join(non_existing))
-            organizations = inquire_organization()
+        if not new_urls:
+            return
 
-            for url in non_existing:
+        log.info("Found new urls, to what organizations do you want to add these?")
+        log.info("The new urls are: %s" % " ".join(new_urls))
+        organizations = inquire_organization()
 
-                new_url = Url()
-                new_url.url = url
-                new_url.created_on = datetime.now(pytz.utc)
+        for url in new_urls:
+
+            new_url = Url()
+            new_url.url = url
+            new_url.created_on = datetime.now(pytz.utc)
+            new_url.save()
+
+            for organization in organizations:
+
+                new_url.organization.add(organization)
                 new_url.save()
 
-                for organization in organizations:
-
-                    new_url.organization.add(organization)
-                    new_url.save()
-
-                    log.info("Added %s to %s" % (url, organization))
+                log.info("Added %s to %s" % (url, organization))
 
 
-def get_non_existing(urls: List[str]):
+def get_new_urls(urls: List[str]):
 
-    not_exists = []
+    new_urls = []
 
     for url in urls:
+        # make sure urls are always lowercase.
+        url = url.lower()
         exists = Url.objects.all().filter(url=url).exists()
         if exists:
             log.debug("Exists: %s" % url)
@@ -64,14 +68,14 @@ def get_non_existing(urls: List[str]):
             else:
                 if resolves(url):
                     log.debug("Does not exist in the database, it resolved: %s" % url)
-                    not_exists.append(url)
+                    new_urls.append(url)
                 else:
                     log.debug("Does not exist in the database, but didn't resolve, so can't be added: %s" % url)
-    if not_exists:
+    if new_urls:
         log.debug("These urls do not exist:")
-        log.debug(" ".join(not_exists))
+        log.debug(" ".join(new_urls))
 
-    return not_exists
+    return new_urls
 
 
 def inquire_organization():

@@ -285,6 +285,9 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
         if not website or website == "None":
             return
 
+        # via this way uppercase urls entered the system. ALl urls are lowercase.
+        website = website.lower()
+
         extract = tldextract.extract(website)
 
         if extract.subdomain:
