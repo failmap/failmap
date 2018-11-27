@@ -1,46 +1,30 @@
 {% extends 'game/base.html' %}
 {% block content %}
-    <h1>Scores</h1>
-    <p>Contest: {{ contest.name }}, from {{ contest.from_moment }} until {{ contest.until_moment }}.</p>
-    <p>This contest targets {{ contest.target_country }}.</p>
-    <table class="table">
-    <thead>
-    <tr>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th>
-        <th colspan="3" style="background-color: lightgrey">Issues found per severity</th>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th>
-        <th>&nbsp;</th>
-    </tr>
-    <tr>
-        <th>Rank</th>
-        <th>Team</th>
-        <th>High</th>
-        <th>Medium</th>
-        <th>Low</th>
-        <th>Rejected</th>
-        <th>Added organizations</th>
-        <th>Total</th>
-    </tr>
-    </thead>
-    <tbody>
+    <p style="width: 100%; text-align: center; font-size: 10vw;">{{ contest.name | truncatechars:16 }}</p>
+
+    <p style="width: 100%; text-align: center; font-size: 2em;">Starts at {{ contest.from_moment }}. Deadline: {{ contest.until_moment }}.</p>
+
     {% for score in scores %}
-        <tr style="{% if team.name == score.team %} font-weight: bold; background-color: #ddffdd;{% endif %}">
-            <td>{{ forloop.counter }}</td>
-            <td style="background-color: {{ score.team_color }};">{{ score.team }}</td>
-            <td>{{ score.high }} * {{ score.high_multiplier }} = {{ score.high_score }}</td>
-            <td>{{ score.medium }} * {{ score.medium_multiplier }} = {{ score.medium_score }}</td>
-            <td>{{ score.low }} * {{ score.low_multiplier }} = {{ score.low_score }}</td>
-            <td>{{ score.rejected }} * -{{ score.rejected_multiplier }} = -{{ score.rejected_score }}</td>
-            <td>{{ score.added_organizations }} * {{ score.added_organizations_multiplier }} = {{ score.added_organizations_score }}</td>
-            <td>{{ score.total_score }}</td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="5">-</td></tr>
+        <table class="table table-sm table-striped table-bordered table-hover" style="width: 29%; float:left; margin: 20px;">
+            <tbody>
+
+            <tr><td colspan="3" style="font-weight: bold; font-family: impact, sans-serif; font-size: 6em; text-align: center;"># {{ forloop.counter }}</td></tr>
+            <tr><td colspan="3" style="font-size: 3em; text-align: center;">{{ score.team | truncatechars:12 }}</td></tr>
+            <tr><td>Total score</td>  <td colspan="2" style="text-align: center; font-size: 2em;">{{ score.total_score }}</td></tr>
+            <tr><td>Organizations</td>    <td>{{ score.added_organizations }}</td><td><small>* {{ score.added_organizations_multiplier }} = {{ score.added_organizations_score }}</small></td></tr>
+            <tr><td><small>Rejected</small></td>   <td><small>{{ score.rejected_organizations }}</small></td><td><small>* -{{ score.rejected_organizations_multiplier }} = -{{ score.rejected_organizations_score }}</small></td></tr>
+            <tr><td>Urls</td>    <td>{{ score.added_urls }}</td><td><small>* {{ score.added_urls_multiplier }} = {{ score.added_urls_score }}</small></td></tr>
+            <tr><td><small>Rejected</small></td>   <td><small>{{ score.rejected_urls }}</small></td><td><small>* -{{ score.rejected_urls_multiplier }} = -{{ score.rejected_urls_score }}</small></td></tr>
+            <tr><td>High risk</td>  <td>{{ score.high }}</td><td><small>* {{ score.high_multiplier }} = {{ score.high_score }}</small></td></tr>
+            <tr><td>Medium risk</td>    <td>{{ score.medium }}</td><td><small> * {{ score.medium_multiplier }} = {{ score.medium_score }}</small></td></tr>
+            <tr><td>Low risk</td>   <td>{{ score.low }}</td><td><small>* {{ score.low_multiplier }} = {{ score.low_score }}</small></td></tr>
+            </tbody>
+        </table>
     {% endfor %}
-    </tbody>
-    </table>
+
+    <br style="clear: both">
+
+    <p>This contest targets {{ contest.target_country }}.</p>
 
     {% if team.name %}
         <a href="/game/submit_organization" role="button" class="btn btn-success">Submit Organization</a>

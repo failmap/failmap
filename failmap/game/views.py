@@ -17,7 +17,8 @@ from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.map.calculate import get_calculation
 from failmap.organizations.models import Organization, OrganizationType, Url
-from failmap.scanners.models import EndpointGenericScan, TlsQualysScan, TlsScan, UrlGenericScan
+from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
+from failmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 
@@ -140,31 +141,35 @@ def scores(request):
         will change in a day or two. On the long run it might increase the score a bit when incorrect fixes are applied
         or a new error is found. If the discovered issue is fixed it doesn't deliver additional points.
         """
-        scans = list(TlsQualysScan.objects.all().filter(
+        scans = list(EndpointGenericScan.objects.all().filter(
             endpoint__url__urlsubmission__added_by_team=team.id,
-            endpoint__url__urlsubmission__has_been_accepted=True
-        ))
-
-        scans += list(TlsScan.objects.all().filter(
-            endpoint__url__urlsubmission__added_by_team=team.id,
-            endpoint__url__urlsubmission__has_been_accepted=True
-        ))
-
-        scans += list(EndpointGenericScan.objects.all().filter(
-            endpoint__url__urlsubmission__added_by_team=team.id,
-            endpoint__url__urlsubmission__has_been_accepted=True
+            endpoint__url__urlsubmission__has_been_accepted=True,
+            type__in=ENDPOINT_SCAN_TYPES
         ))
 
         scans += list(UrlGenericScan.objects.all().filter(
             url__urlsubmission__added_by_team=team.id,
-            url__urlsubmission__has_been_accepted=True
+            url__urlsubmission__has_been_accepted=True,
+            type__in=URL_SCAN_TYPES
         ))
+
+        added_urls = UrlSubmission.objects.all().filter(
+            added_by_team=team.id,
+            has_been_accepted=True,
+            has_been_rejected=False
+        ).count()
 
         added_organizations = OrganizationSubmission.objects.all().filter(
             added_by_team=team.id,
             has_been_accepted=True,
             has_been_rejected=False
 
+        ).count()
+
+        rejected_organizations = OrganizationSubmission.objects.all().filter(
+            added_by_team=team.id,
+            has_been_accepted=False,
+            has_been_rejected=True,
         ).count()
 
         rejected_urls = UrlSubmission.objects.all().filter(
@@ -181,7 +186,6 @@ def scores(request):
 
         for scan in scans:
             temp_calculation = get_calculation(scan)
-
             final_calculation['high'] += temp_calculation['high']
             final_calculation['medium'] += temp_calculation['medium']
             final_calculation['low'] += temp_calculation['low']
@@ -190,8 +194,10 @@ def scores(request):
             'low': 100,
             'medium': 250,
             'high': 1000,
-            'rejected': 1337,
+            'rejected_organization': 1337,
+            'rejected_url': 1337,
             'organization': 500,
+            'url': 250,
         }
 
         score = {
@@ -209,13 +215,24 @@ def scores(request):
             'added_organizations': added_organizations,
             'added_organizations_multiplier': score_multiplier['organization'],
             'added_organizations_score': added_organizations * score_multiplier['organization'],
-            'rejected': rejected_urls,
-            'rejected_multiplier': score_multiplier['rejected'],
-            'rejected_score': rejected_urls * score_multiplier['rejected'],
-            'total_score': final_calculation['high'] * score_multiplier['high'] +
-            final_calculation['medium'] * score_multiplier['medium'] +
-            final_calculation['low'] * score_multiplier['low'] +
-            added_organizations * score_multiplier['organization'] - rejected_urls * score_multiplier['rejected']
+            'added_urls': added_urls,
+            'added_urls_multiplier': score_multiplier['url'],
+            'added_urls_score': added_urls * score_multiplier['url'],
+            'rejected_organizations': rejected_organizations,
+            'rejected_organizations_multiplier': score_multiplier['rejected_organization'],
+            'rejected_organizations_score': rejected_organizations * score_multiplier['rejected_organization'],
+            'rejected_urls': rejected_urls,
+            'rejected_urls_multiplier': score_multiplier['rejected_url'],
+            'rejected_urls_score': rejected_urls * score_multiplier['rejected_url'],
+            'total_score':
+                final_calculation['high'] * score_multiplier['high'] +
+                final_calculation['medium'] * score_multiplier['medium'] +
+                final_calculation['low'] * score_multiplier['low'] +
+                added_organizations * score_multiplier['organization'] +
+                added_urls * score_multiplier['url'] - (
+                rejected_urls * score_multiplier['rejected_url'] +
+                rejected_organizations * score_multiplier['rejected_organization']
+            )
         }
 
         scores.append(score)
@@ -225,7 +242,8 @@ def scores(request):
 
     return render(request, 'game/scores.html', {'team': get_team_info(request),
                                                 'scores': scores,
-                                                'contest': contest})
+                                                'contest': contest,
+                                                'menu_selected': 'scores'})
 
 
 def contests(request):
