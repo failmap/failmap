@@ -110,6 +110,7 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
 
 
 class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
+    print(dir(Dashboard))
     columns = 2
 
     def init_with_context(self, context):
@@ -117,7 +118,34 @@ class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
         self.children.append(modules.RecentActions(
             _('Recent Actions for %s' % context['app_label'].capitalize()),
             40,
-            column=0,
-            order=1,
+            column=1,
+            order=0,
             include_list=[context['app_label'] + '.*'],
+        ))
+
+        if context['app_label'] == "game":
+            self.children.append(modules.LinkList(
+                _('Quick Actions'),
+                children=[
+                    {
+                        'title': _('Verify New Urls'),
+                        'url': '/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
+                        'external': False,
+                    },
+                    {
+                        'title': _('Verify New Organizations'),
+                        'url': '/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
+                        'external': False,
+                    },
+                ],
+                column=0,
+                order=0,
+                layout='stacked'
+            ))
+
+        self.children.append(modules.AppList(
+            _('Applications'),
+            models=('%s.*' % context['app_label'],),
+            column=0,
+            order=1
         ))
