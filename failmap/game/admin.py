@@ -1,11 +1,15 @@
 import logging
+from random import choice, choices, randint
 
+from constance import config
 from django.contrib import admin
 from django.db import transaction
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
+from failmap.app.models import GameUser
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 
@@ -24,32 +28,219 @@ class OrganizationSubmissionInline(CompactInline):
     extra = 0
     can_delete = False
     ordering = ["organization_name"]
+    readonly_fields = ['organization_country', 'added_by_team', 'organization_type_name', 'organization_name',
+                       'organization_address', 'organization_evidence', 'organization_address_geocoded',
+                       'organization_wikipedia', 'organization_wikidata_code', 'organization_in_system',
+                       'has_been_accepted', 'has_been_rejected', 'added_on']
+
+
+class UrlSubmissionInline(CompactInline):
+    model = UrlSubmission
+    extra = 0
+    can_delete = False
+    readonly_fields = ['added_by_team', 'for_organization', 'url', 'url_in_system', 'has_been_accepted',
+                       'has_been_rejected', 'added_on']
 
 
 @admin.register(Contest)
 class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('name', 'target_country', 'from_moment', 'until_moment')
+    list_display = ('name', 'target_country', 'from_moment', 'until_moment', 'admin_user', 'teams')
     search_fields = ('name', 'target_country')
     list_filter = ('name', 'target_country')
+
+    @staticmethod
+    def teams(obj):
+        return Team.objects.all().filter(participating_in_contest__name=obj.name).count()
 
     fieldsets = (
         (None, {
             'fields': ('name', 'from_moment', 'until_moment')
         }),
         ('Configuration', {
-            'fields': ('target_country', 'logo_filename'),
+            'fields': ('target_country', 'admin_user', 'logo_filename'),
         }),
     )
 
+    actions = []
+
+    @transaction.atomic
+    def add_a_dozen_teams(self, request, queryset):
+        for contest in queryset:
+            make_teams = 12
+            team_counter = 0
+            while team_counter < make_teams:
+                team_counter += 1
+                new_team = Team()
+                new_team.name = generate_team_name()
+                new_team.color = generate_pastel_color()
+                new_team.participating_in_contest = contest
+                new_team.secret = generate_team_password()
+                new_team.allowed_to_submit_things = True
+                new_team.save()
+
+        self.message_user(request, "Urls have been rejected.")
+    add_a_dozen_teams.short_description = "Add 12 teams"
+    actions.append('add_a_dozen_teams')
+
+    # todo: generate a printout for teams and this contest, to hand out.
+    def show_printout(self, request, queryset):
+        for contest in queryset:
+            from django.http import HttpResponse
+            content = ""
+            content += create_printout(contest)
+            return HttpResponse(content)
+
+    show_printout.short_description = "Create Printout"
+    actions.append('show_printout')
+
     inlines = [TeamInline]
+
+
+def create_printout(contest):
+    login_url = "%s/game/" % config.PROJECT_WEBSITE
+    game_url = "%s/game/scores/" % config.PROJECT_WEBSITE
+
+    username = "%s" % contest.admin_user.username  # associate an account to login.
+    game_user = GameUser.objects.all().filter(user=contest.admin_user).first()
+    if not game_user or game_user.password is None:
+        raise ValueError("Set a game user for this contest, do so in the users list. Also set the password.")
+
+    password = "%s" % game_user.password
+
+    # todo: margin top per page.
+    content = "<style>body{font-family: verdana, sans-serif;}</style>"
+    content += """<style media='print'>
+            /* show background colors in print */
+            * { -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important; 
+            }
+            @page {
+                size: auto;   /* auto is the initial value */
+                margin: 0;  /* this affects the margin in the printer settings */
+                padding-top: 72px;
+                padding-bottom: 72px;
+            }
+            body  {
+               padding-left: 66px;
+            }
+               </style>"""
+    content += "<h1>%s</h1>" % contest.name
+    content += "<p>Starts at %s. Deadline: %s.</p>" % (contest.from_moment, contest.until_moment)
+    content += "<br />"
+    content += "<h2>Teams</h2>"
+    teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
+    for team in teams:
+        content += "<br style='page-break-after: always;'>"
+        content += "<br />"
+        content += "<h3>Hi team <span style='background-color: %s; width: 60px; height: 20px;'>%s</span>!</h3>" % \
+                   (team.color, team.name)
+        content += "Thanks for joining this contest! These instructions try to help you get started.<br><br>"
+        content += "To participate, first go to the gaming interface: <br>"
+        content += "<b>%s</b> <br>" % login_url
+        content += "<br />"
+        content += "Then <b>click login</b> at the top right corner.<br>"
+        content += "<br />"
+        content += "Use the following account information: <br>"
+        content += "Username: <b>%s</b><br>" % username
+        content += "Password: <b>%s</b><br />" % password
+        content += "<br />"
+        content += "Then, select this contest: <b>%s</b><br />" % contest.name
+        content += "<br />"
+        content += "Then select your team and fill in it's secret:<br />"
+        content += "Team: <span style='background-color: %s; width: 60px; height: 20px;'><b>%s</b></span><br />" % \
+                   (team.color, team.name)
+        content += "Secret: <b>%s</b><br />" % team.secret
+        content += "<br />"
+        content += "<i>P.S. It's possible to see the scorebord without logging in at:</i><br>"
+        content += "<i>%s</i><br>" % game_url
+        content += "<br />"
+        content += "If you have any questions, please ask the contest organizer!<br>"
+        content += "<br />"
+        content += "Have fun!<br>"
+        content += "<i>-- the %s contest organizers</s><br>" % contest.name
+        content += "<br /><br />"
+
+    return content
+
+
+def generate_team_password():
+    """
+    The password has to be fairly simple
+
+    :return:
+    """
+
+    # do not include similar characters like g9, liI1 etc. J oO0Q B8, YV
+    letters = "ACDEFGHKLMNPRSTUVWXZ234567"  # len = 26
+
+    password = ''.join(choices(letters, k=16))
+    # to make it easier to read, add spaces per 4 characters.
+    return "%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16])
+
+
+def generate_pastel_color():
+    def r(): return randint(125, 255)
+    return '#%02X%02X%02X' % (r(), r(), r())
+
+
+def generate_team_name():
+    return generate_team_name_docker()
+
+
+def generate_team_name_docker():
+    # generate nice names like docker container names
+    # https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go
+
+    # slightly redacted list to make all names always positive.
+    traits = [
+        "admiring", "adoring", "affectionate", "amazing", "awesome", "blissful", "bold", "brave", "charming", "clever",
+        "cool", "compassionate", "competent", "confident", "crazy", "dazzling", "determined", "dreamy", "eager",
+        "ecstatic", "elastic", "elated", "elegant", "eloquent", "epic", "fervent", "festive", "flamboyant", "focused",
+        "friendly", "gallant", "gifted", "goofy", "gracious", "happy", "hardcore", "heuristic", "hopeful", "infallible",
+        "inspiring", "jolly", "jovial", "keen", "kind", "laughing", "loving", "lucid", "magical", "mystifying",
+        "modest", "musing", "naughty", "nifty", "nostalgic", "objective", "optimistic", "peaceful", "pensive",
+        "practical", "priceless", "quizzical", "recursing", "relaxed", "reverent", "romantic", "serene", "sharp",
+        "silly", "sleepy", "sweet", "tender", "trusting", "unruffled", "upbeat", "vibrant", "vigilant", "vigorous",
+        "wizardly", "wonderful", "youthful", "zealous", "zen",
+    ]
+
+    # See the elaborate explanations of all these names in the original file.
+    names = [
+        "albattani", "allen", "almeida", "antonelli", "agnesi", "archimedes", "ardinghelli", "aryabhata", "austin",
+        "babbage", "banach", "banzai", "bardeen", "bartik", "bassi", "beaver", "bell", "benz", "bhabha", "bhaskara",
+        "black", "blackburn", "blackwell", "bohr", "booth", "borg", "bose", "boyd", "brahmagupta", "brattain", "brown",
+        "burnell", "buck", "burnell", "cannon", "carson", "cartwright", "chandrasekhar", "chaplygin", "chatelet",
+        "chatterjee", "chebyshev", "cocks", "cohen", "chaum", "clarke", "colden", "cori", "cray", "curran", "curie",
+        "darwin", "davinci", "dewdney", "dhawan", "diffie", "dijkstra", "dirac", "driscoll", "dubinsky", "easley",
+        "edison", "einstein", "elbakyan", "elgamal", "elion", "ellis", "engelbart", "euclid", "euler", "faraday",
+        "feistel", "fermat", "fermi", "feynman", "franklin", "gagarin", "galileo", "galois", "ganguly", "gates",
+        "gauss", "germain", "goldberg", "goldstine", "goldwasser", "golick", "goodall", "gould", "greider",
+        "grothendieck", "haibt", "hamilton", "haslett", "hawking", "hellman", "heisenberg", "hermann", "herschel",
+        "hertz", "heyrovsky", "hodgkin", "hofstadter", "hoover", "hopper", "hugle", "hypatia", "ishizaka", "jackson",
+        "jang", "jennings", "jepsen", "johnson", "joliot", "jones", "kalam", "kapitsa", "kare", "keldysh", "keller",
+        "kepler", "khayyam", "khorana", "kilby", "kirch", "knuth", "kowalevski", "lalande", "lamarr", "lamport",
+        "leakey", "leavitt", "lederberg", "lehmann", "lewin", "lichterman", "liskov", "lovelace", "lumiere", "mahavira",
+        "margulis", "matsumoto", "maxwell", "mayer", "mccarthy", "mcclintock", "mclaren", "mclean", "mcnulty", "mendel",
+        "mendeleev", "meitner", "meninsky", "merkle", "mestorf", "minsky", "mirzakhani", "moore", "morse", "murdock",
+        "moser", "napier", "nash", "neumann", "newton", "nightingale", "nobel", "noether", "northcutt", "noyce",
+        "panini", "pare", "pascal", "pasteur", "payne", "perlman", "pike", "poincare", "poitras", "proskuriakova",
+        "ptolemy", "raman", "ramanujan", "ride", "montalcini", "ritchie", "rhodes", "robinson", "roentgen", "rosalind",
+        "rubin", "saha", "sammet", "sanderson", "shannon", "shaw", "shirley", "shockley", "shtern", "sinoussi",
+        "snyder", "solomon", "spence", "sutherland", "stallman", "stonebraker", "swanson", "swartz", "swirles",
+        "taussig", "tereshkova", "tesla", "tharp", "thompson", "torvalds", "tu", "turing", "varahamihira", "vaughan",
+        "visvesvaraya", "volhard", "villani", "wescoff", "wiles", "williams", "williamson", "wilson", "wing", "wozniak",
+        "wright", "wu", "yalow", "yonath", "zhukovsky"
+    ]
+
+    return "%s %s" % (choice(traits).capitalize(), choice(names).capitalize())
 
 
 # todo: submissioninline, read only... there are going to be MANY new things...
 @admin.register(Team)
 class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('name', 'color', 'participating_in_contest', 'allowed_to_submit_things')
+    list_display = ('name', 'team_color', 'participating_in_contest', 'allowed_to_submit_things')
     search_fields = ('name', 'participating_in_contest__name')
     list_filter = ('name', 'participating_in_contest__name', 'participating_in_contest__target_country')
 
@@ -62,7 +253,35 @@ class TeamAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         }),
     )
 
-    inlines = [OrganizationSubmissionInline]
+    @staticmethod
+    def team_color(obj):
+        return mark_safe("<div style='background-color: %s; width: 60px; height: 20px;'></div>" % obj.color)
+
+    actions = []
+
+    @transaction.atomic
+    def allow_team(self, request, queryset):
+        for team in queryset:
+            team.allowed_to_submit_things = True
+            team.save()
+
+        self.message_user(request, "Teams are allowed .")
+    allow_team.short_description = "Allow to submit"
+    actions.append('allow_team')
+
+    @transaction.atomic
+    def disallow_team(self, request, queryset):
+        for team in queryset:
+            team.allowed_to_submit_things = False
+            team.save()
+
+        self.message_user(request, "Teams are disallowed.")
+
+    disallow_team.short_description = "Disallow to submit"
+    actions.append('disallow_team')
+
+    # UrlSubmissionInline will make the load slow / non-loading.
+    inlines = [OrganizationSubmissionInline, ]
 
 
 @admin.register(UrlSubmission)

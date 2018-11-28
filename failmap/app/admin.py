@@ -1,4 +1,6 @@
+import string
 from datetime import datetime, timedelta
+from random import choice
 
 import pytz
 from django.contrib import admin
@@ -13,7 +15,7 @@ from django_celery_beat.models import CrontabSchedule, IntervalSchedule, Periodi
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from failmap.app.models import Job, Volunteer
+from failmap.app.models import GameUser, Job, Volunteer
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -150,6 +152,12 @@ class VolunteerInline(admin.StackedInline):
     verbose_name_plural = 'Volunteer information'
 
 
+class GameUserInline(admin.StackedInline):
+    model = GameUser
+    can_delete = False
+    verbose_name_plural = 'Game User'
+
+
 # Thank you:
 # https://stackoverflow.com/questions/47941038/how-should-i-add-django-import-export-on-the-user-model?rq=1
 class UserResource(resources.ModelResource):
@@ -165,18 +173,45 @@ class GroupResource(resources.ModelResource):
 
 class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
-    inlines = (VolunteerInline, )
+    inlines = (VolunteerInline, GameUserInline)
 
     list_display = ('username', 'organization', 'first_name', 'last_name',
                     'email', 'is_active', 'is_staff', 'is_superuser', 'last_login', 'in_groups')
 
     actions = []
 
+    def add_game_user(self, request, queryset):
+        game_user_number = User.objects.all().filter(username__contains="game_user_").count()
+        game_user_number += 1
+
+        password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
+        password = "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
+
+        user = User.objects.create_user(username="game_user_%s" % game_user_number,
+                                        # can log into other things
+                                        is_active=True,
+                                        # No access to admin interface needed
+                                        is_staff=False,
+                                        # No permissions needed anywhere
+                                        is_superuser=False,
+                                        password=password)
+        user.save()
+
+        # store the password to this account in plain text. It doesn't have any permissions so well...
+        # in django we trust :)
+        game_user = GameUser()
+        game_user.user = user
+        game_user.password = password
+        game_user.save()
+
+        self.message_user(request, "Game user added, rename if needed!")
+
+    add_game_user.short_description = '💖 Add Game User (select a user first)'
+    actions.append(add_game_user)
+
     def add_volunteer(self, request, queryset):
 
         # password is random and non-recoverable. It has to be set explicitly by the admin
-        import string
-        from random import choice
         alphabet = string.ascii_letters + string.digits
         password = ''.join(choice(alphabet) for i in range(42))
 

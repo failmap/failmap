@@ -123,3 +123,9 @@ class Volunteer(models.Model):
     organization = models.TextField(max_length=200, blank=True, null=True)
     added_by = models.TextField(max_length=200, blank=True, null=True)
     notes = models.TextField(max_length=2048, blank=True, null=True)
+
+
+class GameUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    # store the password in plain_text, so it's recoverable.
+    password = models.TextField(max_length=200, blank=True, null=True)

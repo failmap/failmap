@@ -117,6 +117,7 @@ def submit_organisation(request):
 def scores(request):
 
     # todo: this param handling code is absolutely disgusting, it should be more beautiful.
+    # todo: should we just get the last contest if there is no contest at all?
     submitted_contest = request.GET.get('contest', "")
     if submitted_contest is not None and submitted_contest.isnumeric():
         submitted_contest = int(submitted_contest)
@@ -131,7 +132,8 @@ def scores(request):
     else:
         contest = get_default_contest(request)
 
-    teams = Team.objects.all().filter(participating_in_contest=contest)
+    # remove disqualified teams.
+    teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
 
     scores = []
     for team in teams:

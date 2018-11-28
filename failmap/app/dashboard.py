@@ -129,12 +129,14 @@ class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
                 children=[
                     {
                         'title': _('Verify New Urls'),
-                        'url': '/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
+                        'url': '/admin/game/urlsubmission/?'
+                               'has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
                         'external': False,
                     },
                     {
                         'title': _('Verify New Organizations'),
-                        'url': '/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
+                        'url': '/admin/game/organizationsubmission/?'
+                               'has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
                         'external': False,
                     },
                 ],
