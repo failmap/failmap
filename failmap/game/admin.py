@@ -113,7 +113,7 @@ def create_printout(contest):
     content += """<style media='print'>
             /* show background colors in print */
             * { -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important; 
+                color-adjust: exact !important;
             }
             @page {
                 size: auto;   /* auto is the initial value */
