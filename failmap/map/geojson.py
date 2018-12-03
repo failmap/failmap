@@ -287,22 +287,31 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
 
         # via this way uppercase urls entered the system. ALl urls are lowercase.
         website = website.lower()
-
         extract = tldextract.extract(website)
 
         if extract.subdomain:
-            url = Url(url="%s.%s.%s" % (extract.subdomain, extract.domain, extract.suffix))
-            url.save()
-            url.organization.add(new_organization)
-            url.save()
-            log.info("Also found a subdomain website for this organization: %s" % website)
+            add_url(url="%s.%s.%s" % (extract.subdomain, extract.domain, extract.suffix), organization=new_organization)
 
         # Even if it doesn't resolve directly, it is helpful for some scans:
-        url = Url(url="%s.%s" % (extract.domain, extract.suffix))
-        url.save()
-        url.organization.add(new_organization)
-        url.save()
-        log.info("Also found a top level website for this organization: %s" % website)
+        add_url(url="%s.%s" % (extract.domain, extract.suffix), organization=new_organization)
+
+
+def add_url(organization, url):
+    # only add the url if it's not existing, otherwise, add the existing url.
+
+    # first, because get crashes hard if there are data inconsistencies.
+    existing_url = Url.objects.all().filter(url=url, is_dead=False).first()
+
+    if not existing_url:
+        log.info("Added new url to this organization: %s" % url)
+        existing_url = Url(url=url)
+        existing_url.save()
+        existing_url.organization.add(organization)
+        existing_url.save()
+    else:
+        log.info("Added existing url to this organization: %s" % url)
+        existing_url.organization.add(organization)
+        existing_url.save()
 
 
 def store_updates(feature: Dict, country: str = "NL", organization_type: str = "municipality", when=None):

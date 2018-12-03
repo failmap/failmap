@@ -330,8 +330,9 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 continue
 
             # it's possible that the url already is in the system. If so, tie that to the submitted organization.
+            # could be dead etc... (stacking?)
             try:
-                url = Url.objects.all().get(url=urlsubmission.url)
+                url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
             except Url.DoesNotExist:
                 # if it already exists, then add the url to the organization.
                 url = Url(url=urlsubmission.url)
@@ -392,11 +393,11 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 # this might revive some old organizations, so domain knowledge is required.
                 # In this case the organization already exists with the same name, type and alive.
                 # this means we don't need to add a new one, or with new coordinates.
-                Organization.objects.all().get(
+                Organization.objects.all().filter(
                     name=osm.organization_name,
                     country=osm.organization_country,
                     is_dead=False,
-                    type=OrganizationType.objects.get(name=osm.organization_type_name))
+                    type=OrganizationType.objects.get(name=osm.organization_type_name)).first()
             except Organization.DoesNotExist:
                 # Create a new one
                 # address and evidence are saved elsewhere. Since we have a reference we can auto-update after

@@ -217,7 +217,6 @@ class UrlSubmissionForm(forms.Form):
     team = None
 
     def __init__(self, *args, **kwargs):
-        log.debug("__init__")
 
         self.contest = kwargs.pop('contest', None)
         self.team = kwargs.pop('team', None)
@@ -232,16 +231,18 @@ class UrlSubmissionForm(forms.Form):
                 url='/game/autocomplete/organization-autocomplete/',
                 forward=['organization_type_name', 'country']
             ),
-            help_text="Hints:"
-                      "<ul>"
-                      "<li>If you can't find the organization, try the abbreviated name.</li>"
-                      "<li>You can also search for organization type, and it's name at the same time.</li>"
-                      "<li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>"
-                      "here</a></li>"
-                      "<li>If your newly added organization is missing, please ask the competition host to verify your "
-                      "organization.</li>"
-                      "<li>Urls entered below will be added to all organizations selected here.</li>"
-                      "</ul>"
+            help_text="""
+            Hints:"
+                <ul>
+                    <li>If you can't find the organization, try the abbreviated name.</li>
+                    <li>You can also search for organization type, and it's name at the same time.</li>
+                    <li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>
+                    here</a></li>
+                    <li>If your newly added organization is missing, please ask the competition host to verify your 
+                    organization.</li>
+                    <li>Urls entered below will be added to all organizations selected here.</li>
+                </ul>
+            """
         )
 
         # try and inject values into the tagswidget
@@ -253,7 +254,6 @@ class UrlSubmissionForm(forms.Form):
             initial = valid
             choices = []
             for site in valid:
-                # log.debug("Valid; %s" % site)
                 choices.append((site, site))
                 # can't add initial here, results in infinite loop
             # log.debug("things where submitted: %s" % valid)
@@ -268,7 +268,6 @@ class UrlSubmissionForm(forms.Form):
         # this overrides some of the implied validation that happens in MultipleChoiceField, which doesn't
         # match the sites that are submitted, as they are filterd (seen above)
         # This is a terrible hack, which is what you get when the complexity for the control is so insanely high.
-        log.debug(self.data)
         if valid:
             self.data._mutable = True
             # have to add multiple... one each. A MultiValueDict...
@@ -292,8 +291,11 @@ class UrlSubmissionForm(forms.Form):
             help_text="""
             Hints:      
                 <ul>
-                <li>Subdomains are removed. The system will search for subdomains by itself.</li>
-                <li>Protocols such as https:// and http:// are removed.</li>
+                <li>The following is all the same url (google.com): 
+                https://google.com, https://www.google.com, http://nonsense.google.com, bla.nonsense.google.com,
+                google.com 
+                </li>
+                <li>Subdomains and protocols are removed: the system will discover these.</li>
                 <li>Each address will be resolved to see if it exists. This can take a while.</li>
                 <li>You can enter multiple sites at once using comma or space as a delimiter. 
                 For example: The value 
@@ -301,10 +303,6 @@ class UrlSubmissionForm(forms.Form):
                 <li>The url will be added to all organizations selected above, be careful.</li>
                 <li>It's not possible to enter IP addresses: the IP's behind services/organizations often change.</li>
                 <li>Urls that don't resolve or are in incorrect format will be automatically removed.</li>
-                <li>The following is all the same url (google.com): 
-                https://google.com, https://www.google.com, http://nonsense.google.com, bla.nonsense.google.com,
-                google.com 
-                </li>
                 </ul>
             """
         )
@@ -334,7 +332,6 @@ class UrlSubmissionForm(forms.Form):
 
     @staticmethod
     def filter_websites(sites):
-        log.debug("filter_websites")
         incomplete = []
         not_resolvable = []
         valid = []
@@ -361,7 +358,6 @@ class UrlSubmissionForm(forms.Form):
         return incomplete, not_resolvable, valid
 
     def clean_websites(self):
-        log.debug("clean_websites")
         try:
             sites = self.data.getlist('websites', [])
             incomplete, not_resolvable, valid = self.filter_websites(sites)
@@ -390,7 +386,6 @@ class UrlSubmissionForm(forms.Form):
         return valid
 
     def clean_for_organization(self):
-        log.debug("clean_for_organization")
         if not self.contest:
             raise ValidationError('You\'re not in a contest', 'no_contest')
 
@@ -403,7 +398,6 @@ class UrlSubmissionForm(forms.Form):
 
         existing = []
 
-        log.debug('organizations: %s', organizations)
 
         for organization in organizations:
             if not Organization.objects.filter(pk=organization,
@@ -419,7 +413,6 @@ class UrlSubmissionForm(forms.Form):
         return existing
 
     def clean(self):
-        log.debug("clean")
         try:
             organizations = self.data.getlist('for_organization', [])
         except AttributeError:
@@ -462,7 +455,6 @@ class UrlSubmissionForm(forms.Form):
 
     @transaction.atomic
     def save(self):
-        log.debug("save")
 
         # validate again to prevent duplicates within the transaction
         # we can also check if the data is not in the db yet, which is nicer as it potentially saves a lot of time
@@ -470,10 +462,6 @@ class UrlSubmissionForm(forms.Form):
 
         organizations = self.cleaned_data.get('for_organization', None)
         websites = self.cleaned_data.get('websites', None)
-
-        log.debug('adding new')
-        log.debug('organizations: %s', organizations)
-        log.debug('websites: %s', websites)
 
         for organization in organizations:
             for website in websites:
