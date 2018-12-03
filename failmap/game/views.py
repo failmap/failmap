@@ -71,7 +71,7 @@ def submit_url(request):
             form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
             return render(request, 'game/submit_url.html', {'form': form, 'success': True,
-                                                            'url': added_url, })
+                                                            'url': ', '.join(added_url), })
 
     else:
         form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
@@ -344,12 +344,19 @@ def submitted_urls(request):
 
     submitted_urls = UrlSubmission.objects.all().filter(
         added_by_team__participating_in_contest=contest).order_by(
-        'for_organization', 'url').select_related('added_by_team', 'for_organization', 'url_in_system')
+        'for_organization', '-added_on', 'url').select_related('added_by_team', 'for_organization', 'url_in_system')
 
     # sqlite, when there is a NULL in the IN query, the set is NULL and you'll get nothing back.
-    already_known_urls = Url.objects.all().filter(organization__country=contest.target_country).exclude(
-        id__in=submitted_urls.values('url_in_system').filter(url_in_system__isnull=False)
-    ).order_by('url')  # No join / cartesian product for us :( .select_related('organization')
+    # subdomains are irrellevant given contestants cannot add them.
+    # the IN query will be too long, and that means exceptions. so an in query to exclude the submitted
+    # urls has been removed.
+    # you can see the adding date for this :)
+    already_known_urls = Url.objects.all().filter(
+        organization__country=contest.target_country,
+        computed_subdomain="",
+        organization__is_dead=False,
+    ).order_by('-created_on').values('url', 'onboarding_stage', 'not_resolvable', 'organization__country',
+                                     'organization__name', 'created_on')
 
     return render(request, 'game/submitted_urls.html',
                   {'submitted_urls': submitted_urls,

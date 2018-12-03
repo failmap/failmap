@@ -217,6 +217,7 @@ class UrlSubmissionForm(forms.Form):
     team = None
 
     def __init__(self, *args, **kwargs):
+        log.debug("__init__")
 
         self.contest = kwargs.pop('contest', None)
         self.team = kwargs.pop('team', None)
@@ -244,6 +245,7 @@ class UrlSubmissionForm(forms.Form):
         )
 
         # try and inject values into the tagswidget
+        valid = []
         try:
             sites = self.data.getlist('websites', [])
             incomplete, not_resolvable, valid = self.filter_websites(sites)
@@ -251,15 +253,32 @@ class UrlSubmissionForm(forms.Form):
             initial = valid
             choices = []
             for site in valid:
+                # log.debug("Valid; %s" % site)
                 choices.append((site, site))
+                # can't add initial here, results in infinite loop
             # log.debug("things where submitted: %s" % valid)
         except AttributeError:
             # nothing was submitted
             initial = []
             choices = []
 
-        def getChoices():
-            return [("a", "a"), ('repelsteeltje', 'repelsteeltje'), ('elger.nl', 'elger.nl')]
+        # you'll never see an error...
+        # override what is submitted (which can contain https:// / http:// with the valid sites
+        # to prevent the 'Select a valid choice. https://blaat.nl is not one of the available choices.' message
+        # this overrides some of the implied validation that happens in MultipleChoiceField, which doesn't
+        # match the sites that are submitted, as they are filterd (seen above)
+        # This is a terrible hack, which is what you get when the complexity for the control is so insanely high.
+        log.debug(self.data)
+        if valid:
+            self.data._mutable = True
+            # have to add multiple... one each. A MultiValueDict...
+            # remove all values from any websites keys, and only add the valid ones as possible data.
+            self.data.pop('websites')
+
+            for site in valid:
+                # this only overwrites the first one...
+                # https://kite.com/python/docs/django.http.request.QueryDict
+                self.data.update({'websites': site})
 
         # https://github.com/applegrew/django-select2/issues/33
         # finding this took me two hours :) but it's still faster than developing it yourself.
@@ -270,16 +289,24 @@ class UrlSubmissionForm(forms.Form):
             choices=choices,
             initial=initial,
             label="Addresses of Services, Websites and other online presence.",
-            help_text="Hints:"
-                      "<ul>"
-                      "<li>You can enter multiple sites at once using comma or space as a delimiter. "
-                      "Example: The value "
-                      "<i>failmap.org, microsoft.com, apple.com </i> should by copy-pasting.</li>"
-                      "<li>The url will be added to all organizations selected above, be careful.</li>"
-                      "<li>It's not possible to enter IP addresses, as the IP's behind services/organizations "
-                      "often change.</li>"
-                      "<li>Urls that don't resolve or are in incorrect format will be automatically removed.</li>"
-                      "</ul>",
+            help_text="""
+            Hints:      
+                <ul>
+                <li>Subdomains are removed. The system will search for subdomains by itself.</li>
+                <li>Protocols such as https:// and http:// are removed.</li>
+                <li>Each address will be resolved to see if it exists. This can take a while.</li>
+                <li>You can enter multiple sites at once using comma or space as a delimiter. 
+                For example: The value 
+                <i>failmap.org, microsoft.com, apple.com </i> can be copy-pasted succesfully.</li>
+                <li>The url will be added to all organizations selected above, be careful.</li>
+                <li>It's not possible to enter IP addresses: the IP's behind services/organizations often change.</li>
+                <li>Urls that don't resolve or are in incorrect format will be automatically removed.</li>
+                <li>The following is all the same url (google.com): 
+                https://google.com, https://www.google.com, http://nonsense.google.com, bla.nonsense.google.com,
+                google.com 
+                </li>
+                </ul>
+            """
         )
 
         # Helps Django Autocomplete light with selecting the right autocompleted values.
@@ -307,6 +334,7 @@ class UrlSubmissionForm(forms.Form):
 
     @staticmethod
     def filter_websites(sites):
+        log.debug("filter_websites")
         incomplete = []
         not_resolvable = []
         valid = []
@@ -333,12 +361,21 @@ class UrlSubmissionForm(forms.Form):
         return incomplete, not_resolvable, valid
 
     def clean_websites(self):
+        log.debug("clean_websites")
         try:
             sites = self.data.getlist('websites', [])
             incomplete, not_resolvable, valid = self.filter_websites(sites)
         except AttributeError:
             # nothing submitted
             incomplete, not_resolvable, valid = [], [], []
+
+        if incomplete and not_resolvable:
+            raise ValidationError('Please review your submission and try again. '
+                                  'Removed because of being incomplete addresses: '
+                                  '%s. Removed because not resolvable: %s. '
+                                  '' %
+                                  (', '.join(incomplete), ', '.join(not_resolvable)),
+                                  code='not_complete_and_not_resolvable')
 
         if incomplete:
             raise ValidationError('The following websites are not complete and have been removed: '
@@ -353,6 +390,7 @@ class UrlSubmissionForm(forms.Form):
         return valid
 
     def clean_for_organization(self):
+        log.debug("clean_for_organization")
         if not self.contest:
             raise ValidationError('You\'re not in a contest', 'no_contest')
 
@@ -381,12 +419,14 @@ class UrlSubmissionForm(forms.Form):
         return existing
 
     def clean(self):
+        log.debug("clean")
         try:
             organizations = self.data.getlist('for_organization', [])
         except AttributeError:
             organizations = []
 
-        websites = self.clean_websites()
+        # clean_websites already has been called automatically...
+        websites = self.data.getlist('websites', [])
 
         if not organizations:
             raise forms.ValidationError("Organization missing!")
@@ -422,9 +462,10 @@ class UrlSubmissionForm(forms.Form):
 
     @transaction.atomic
     def save(self):
+        log.debug("save")
 
-        # validate again to prevent duplicates
-        self.clean_websites()
+        # validate again to prevent duplicates within the transaction
+        # we can also check if the data is not in the db yet, which is nicer as it potentially saves a lot of time
         self.clean()
 
         organizations = self.cleaned_data.get('for_organization', None)
@@ -436,6 +477,14 @@ class UrlSubmissionForm(forms.Form):
 
         for organization in organizations:
             for website in websites:
+
+                exists = UrlSubmission.objects.all().filter(
+                    for_organization=Organization.objects.get(pk=organization),
+                    url=website,
+                ).exists()
+
+                if exists:
+                    continue
 
                 submission = UrlSubmission(
                     added_by_team=Team.objects.get(pk=self.team),

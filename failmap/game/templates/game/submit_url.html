@@ -5,27 +5,25 @@
 {% block content %}
 
     <script>
-
+    // tabs are not supported: https://github.com/select2/select2/issues/3359
     $(".js-example-tokenizer").select2({
         tags: true,
-        tokenSeparators: [',', ' ']
-    })
+        tokenSeparators: [',', ' ', ';']
+    });
 
     </script>
 
     {% if success %}
+        {% if url %}
         <div class="alert alert-success" role="alert">
-            <strong>URL added!</strong> {{ url }} has been added!
-         </div>
+            <strong>URL added!</strong> The url(s) {{ url }} have been added!
+        </div>
+        {% else %}
+        <div class="alert alert-warning" role="alert">
+            <strong>Nothing added!</strong> The submitted urls are already in the database.
+        </div>
+        {% endif %}
     {% endif %}
-
-    {%  comment %}
-    {% if error %}
-        <div class="alert alert-danger" role="alert">
-            <strong>Error!</strong> {{ error }}
-         </div>
-    {% endif %}
-    {% endcomment %}
 
     <h1>Suggest a new url</h1>
     <p>

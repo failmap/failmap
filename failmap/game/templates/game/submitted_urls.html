@@ -15,12 +15,12 @@
     <h2>Submitted urls</h2>
     {% for url in submitted_urls %}
         {% ifchanged url.for_organization %}
-            </table><h3>{{ url.for_organization }}</h3><table class="table">
+            </table><h3>{{ url.for_organization }}</h3><table class="table table-sm table-striped table-bordered table-hover">
             <tr>
                 <th width="50%">Url</th>
                 <th width="10%">Acceptation</th>
                 <th width="30%">Added when</th>
-                <th width="10%">Processed</th>
+                <th width="10%">Onboarding</th>
             </tr>
         {% endifchanged %}
 
@@ -42,29 +42,25 @@
     {% endfor %}
     </tbody>
     </table>
+    <br><br>
 
-
-    <h2>Already known urls</h2>
-    <p>These urls where already in the database before the contest started.</p>
-    <p>These can be used to get some inspiration for finding new urls. Be careful of adding wildcard urls: it will
-    bite you if they don't exist (= all resolve to the same site / services).</p>
-    <table class="table">
+    <h2>Accepted and Existing addresses</h2>
+    <table class="table table-sm table-striped table-bordered table-hover">
     <thead>
     <tr>
         <th>Url</th>
-        <th>Dead (administrative)</th>
-        <th>Resolvable</th>
-        <th>Wildcard DNS (danger)</th>
-        <th>Processed</th>
+        <th>Organization</th>
+        <th>Added</th>
+        <th>Onboarding</th>
     </tr>
     </thead>
     <tbody>
     {% for url in already_known_urls %}
         <tr>
-            <td>{{ url.url }}</td>
-            <td>{{ url.not_resolvable }} </td>
-            <td>{{ url.is_dead }}</td>
-            <td>{{ url.uses_dns_wildcard }}</td>
+            <td>{{ url.url }} (try: <a href="http://{{ url.url }}" target="_blank">http</a>,
+                              <a href="https://{{ url.url }}" target="_blank">https</a>)</td>
+            <td>{{ url.organization__name }} </td>
+            <td>{{ url.created_on|naturaltime }}</td>
             <td>{{ url.onboarding_stage }}</td>
         </tr>
         {% empty %}

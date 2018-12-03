@@ -15,7 +15,7 @@
     {% for organization in submitted_organizations %}
 
         {% ifchanged organization.organization_type_name %}
-            </tbody></table><h3>{{ organization.organization_type_name }}</h3><table class="table">
+            </tbody></table><h3>{{ organization.organization_type_name }}</h3><table class="table table-sm table-striped table-bordered table-hover">
                 <thead>
                 <tr>
                     <th width="20%">Organization</th>
@@ -49,7 +49,7 @@
 
     {% for organization in already_known_organizations %}
         {% ifchanged organization.type.name %}
-            </tbody></table><h3>{{ organization.type.name }}</h3><table class="table">
+            </tbody></table><h3>{{ organization.type.name }}</h3><table class="table table-sm table-striped table-bordered table-hover">
                 <thead>
                 <tr>
                     <th width="50%">Name</th>
