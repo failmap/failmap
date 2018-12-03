@@ -238,7 +238,7 @@ class UrlSubmissionForm(forms.Form):
                     <li>You can also search for organization type, and it's name at the same time.</li>
                     <li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>
                     here</a></li>
-                    <li>If your newly added organization is missing, please ask the competition host to verify your 
+                    <li>If your newly added organization is missing, please ask the competition host to verify your
                     organization.</li>
                     <li>Urls entered below will be added to all organizations selected here.</li>
                 </ul>
@@ -289,16 +289,16 @@ class UrlSubmissionForm(forms.Form):
             initial=initial,
             label="Addresses of Services, Websites and other online presence.",
             help_text="""
-            Hints:      
+            Hints:
                 <ul>
-                <li>The following is all the same url (google.com): 
+                <li>The following is all the same url (google.com):
                 https://google.com, https://www.google.com, http://nonsense.google.com, bla.nonsense.google.com,
-                google.com 
+                google.com
                 </li>
                 <li>Subdomains and protocols are removed: the system will discover these.</li>
                 <li>Each address will be resolved to see if it exists. This can take a while.</li>
-                <li>You can enter multiple sites at once using comma or space as a delimiter. 
-                For example: The value 
+                <li>You can enter multiple sites at once using comma or space as a delimiter.
+                For example: The value
                 <i>failmap.org, microsoft.com, apple.com </i> can be copy-pasted succesfully.</li>
                 <li>The url will be added to all organizations selected above, be careful.</li>
                 <li>It's not possible to enter IP addresses: the IP's behind services/organizations often change.</li>
@@ -397,7 +397,6 @@ class UrlSubmissionForm(forms.Form):
             organizations = []
 
         existing = []
-
 
         for organization in organizations:
             if not Organization.objects.filter(pk=organization,

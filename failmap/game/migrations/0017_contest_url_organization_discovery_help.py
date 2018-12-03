@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='contest',
             name='url_organization_discovery_help',
-            field=models.TextField(default='', help_text='HTML: information where contestants can find good sources of urls / organizations. Displayed on both the URL and Organization adding forms.', max_length=1024),
+            field=models.TextField(
+                default='', help_text='HTML: information where contestants can find good sources of urls / organizations. Displayed on both the URL and Organization adding forms.', max_length=1024),
         ),
     ]

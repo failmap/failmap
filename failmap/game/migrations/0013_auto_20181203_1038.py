@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='team',
             name='name',
-            field=models.CharField(default='Unspecified', help_text='Whatever name the team wants. Must be at least PEGI 88.', max_length=42, verbose_name='Team name'),
+            field=models.CharField(
+                default='Unspecified', help_text='Whatever name the team wants. Must be at least PEGI 88.', max_length=42, verbose_name='Team name'),
         ),
     ]

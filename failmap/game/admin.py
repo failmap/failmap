@@ -1,4 +1,6 @@
 import logging
+import re
+import urllib
 from random import choice, choices, randint
 
 from constance import config
@@ -12,9 +14,6 @@ from jet.admin import CompactInline
 from failmap.app.models import GameUser
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
-import urllib
-import re
-
 
 log = logging.getLogger(__package__)
 
@@ -158,7 +157,7 @@ def create_printout(contest):
         teamcontent += "<br />"
         teamcontent += "Then select your team and fill in it's secret:<br />"
         teamcontent += "Team: <span style='background-color: %s; width: 60px; height: 20px;'><b>%s</b></span><br />" % \
-                   (team.color, team.name)
+            (team.color, team.name)
         teamcontent += "Secret: <b>%s</b><br />" % team.secret
         teamcontent += "<br />"
         teamcontent += "If you have any questions, please ask the contest organizer!<br>"
