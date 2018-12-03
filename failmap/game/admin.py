@@ -12,6 +12,9 @@ from jet.admin import CompactInline
 from failmap.app.models import GameUser
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+import urllib
+import re
+
 
 log = logging.getLogger(__package__)
 
@@ -122,7 +125,10 @@ def create_printout(contest):
                 padding-bottom: 72px;
             }
             body  {
-               padding-left: 66px;
+                padding-left: 66px;
+            }
+            .noprint, .noprint * {
+                display: none !important;
             }
                </style>"""
     content += "<h1>%s</h1>" % contest.name
@@ -130,36 +136,52 @@ def create_printout(contest):
     content += "<br />"
     content += "<h2>Teams</h2>"
     teams = Team.objects.all().filter(participating_in_contest=contest, allowed_to_submit_things=True)
+    p = re.compile(r'<.*?>')
     for team in teams:
-        content += "<br style='page-break-after: always;'>"
-        content += "<br />"
-        content += "<h3>Hi team <span style='background-color: %s; width: 60px; height: 20px;'>%s</span>!</h3>" % \
+        teamcontent = ""
+        teamcontent += "<hr style='page-break-after: always; border: 0px; padding-bottom: 20px;'>"
+        teamcontent += "<p style='font-weight: bold; font-size: 2em; " \
+                       "padding-top: 100px; margin-bottom: 0px; padding-bottom: 0px;'>" \
+                       "Hi team <span style='background-color: %s;'>%s</span>!</p>" \
+                       "<br><br>" % (team.color, team.name)
+        teamcontent += "Thanks for joining this contest! These instructions try to help you get started.<br><br>"
+        teamcontent += "To participate, first go to the gaming interface: <br>"
+        teamcontent += "<b>%s</b> <br>" % login_url
+        teamcontent += "<br />"
+        teamcontent += "Then <b>click login</b> at the top right corner.<br>"
+        teamcontent += "<br />"
+        teamcontent += "Use the following account information: <br>"
+        teamcontent += "Username: <b>%s</b><br>" % username
+        teamcontent += "Password: <b>%s</b><br />" % password
+        teamcontent += "<br />"
+        teamcontent += "Then, select this contest: <b>%s</b><br />" % contest.name
+        teamcontent += "<br />"
+        teamcontent += "Then select your team and fill in it's secret:<br />"
+        teamcontent += "Team: <span style='background-color: %s; width: 60px; height: 20px;'><b>%s</b></span><br />" % \
                    (team.color, team.name)
-        content += "Thanks for joining this contest! These instructions try to help you get started.<br><br>"
-        content += "To participate, first go to the gaming interface: <br>"
-        content += "<b>%s</b> <br>" % login_url
-        content += "<br />"
-        content += "Then <b>click login</b> at the top right corner.<br>"
-        content += "<br />"
-        content += "Use the following account information: <br>"
-        content += "Username: <b>%s</b><br>" % username
-        content += "Password: <b>%s</b><br />" % password
-        content += "<br />"
-        content += "Then, select this contest: <b>%s</b><br />" % contest.name
-        content += "<br />"
-        content += "Then select your team and fill in it's secret:<br />"
-        content += "Team: <span style='background-color: %s; width: 60px; height: 20px;'><b>%s</b></span><br />" % \
-                   (team.color, team.name)
-        content += "Secret: <b>%s</b><br />" % team.secret
-        content += "<br />"
-        content += "<i>P.S. It's possible to see the scorebord without logging in at:</i><br>"
-        content += "<i>%s</i><br>" % game_url
-        content += "<br />"
-        content += "If you have any questions, please ask the contest organizer!<br>"
-        content += "<br />"
-        content += "Have fun!<br>"
-        content += "<i>-- the %s contest organizers</s><br>" % contest.name
-        content += "<br /><br />"
+        teamcontent += "Secret: <b>%s</b><br />" % team.secret
+        teamcontent += "<br />"
+        teamcontent += "If you have any questions, please ask the contest organizer!<br>"
+        teamcontent += "<br />"
+        teamcontent += "Have fun!<br>"
+        teamcontent += "<i>-- the %s contest organizers</s><br>" % contest.name
+        teamcontent += "<br /><br />"
+        teamcontent += "<i>P.S. It's possible to see the scorebord without logging in at:</i><br>"
+        teamcontent += "<i>%s</i><br>" % game_url
+        teamcontent += "<br />"
+
+        # only the beginning of the tag, so the closing style and any properties etc don't matter.
+        without_html = teamcontent.replace("<br", "\n<br")
+        without_html = p.sub('', without_html)
+
+        stuff = urllib.parse.quote(without_html)
+        mailcontent = ""
+        mailcontent += "<a class='noprint' href='mailto:address" \
+                       "?subject=Your %s Contest Login Info" \
+                       "&body=%s'>E-Mail this</a>" % (contest.name, stuff)
+
+        content += teamcontent
+        content += mailcontent
 
     return content
 

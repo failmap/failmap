@@ -35,8 +35,8 @@
     <tbody>
     {% for a_contest in active_contests %}
         <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
-            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
-                <input type="submit" value="join" class="btn btn-primary"></form></td>
+            <td style="text-align: center;"><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
+                <input type="submit" value="join" class="btn btn-primary btn-lg"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
             <td>{{ a_contest.teams }}</td>
@@ -46,7 +46,7 @@
             <td><span title="{{ a_contest.until_moment }}">{{ a_contest.until_moment|naturaltime }}</span></td>
         </tr>
         {% empty %}
-        <tr><td colspan="6">-</td></tr>
+        <tr><td colspan="7">No currently open contests.</td></tr>
     {% endfor %}
     </tbody>
     </table>
@@ -67,8 +67,8 @@
     <tbody>
     {% for a_contest in future_contests %}
         <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
-            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
-                <input type="submit" value="join" class="btn btn-primary"></form></td>
+            <td style="text-align: center;"><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
+                <input type="submit" value="join" class="btn btn-primary btn-lg"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
             <td>{{ a_contest.teams }}</td>
@@ -78,7 +78,7 @@
             <td><span title="{{ a_contest.until_moment }}">{{ a_contest.until_moment|naturaltime }}</span></td>
         </tr>
         {% empty %}
-        <tr><td colspan="6">-</td></tr>
+        <tr><td colspan="7">No upcoming contests.</td></tr>
     {% endfor %}
     </tbody>
     </table>
@@ -99,8 +99,8 @@
     <tbody>
     {% for a_contest in expired_contests %}
         <tr style="{% if a_contest.name == contest.name %} font-weight: bold; background-color: #ddffdd {% endif %}">
-            <td><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
-                <input type="submit" value="join" class="btn btn-primary"></form></td>
+            <td style="text-align: center;"><form method="POST">{% csrf_token %}<input type="hidden" name="id" value="{{ a_contest.id }}">
+                <input type="submit" value="join" class="btn btn-primary btn-lg"></form></td>
             <td><img class="country-select-flag" id="{{ a_contest.target_country }}" style="margin: 6px 4px 0" src="/static/flags/{{ a_contest.target_country }}.gif">
                 {{ a_contest.name }}</td>
             <td>{{ a_contest.teams }}</td>
@@ -110,7 +110,7 @@
             <td>{{ a_contest.until_moment }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="6">-</td></tr>
+        <tr><td colspan="7">No expired contests.</td></tr>
     {% endfor %}
     </tbody>
     </table>
