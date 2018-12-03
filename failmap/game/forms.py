@@ -55,9 +55,9 @@ class TeamForm(forms.Form):
                 allowed_to_submit_things=True, participating_in_contest=self.contest),
         )
 
-    field_order = ('team', 'secret')
+        self.fields['secret'] = forms.CharField(widget=forms.PasswordInput)
 
-    secret = forms.CharField(widget=forms.PasswordInput)
+        self.order_fields(['team', 'secret'])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -70,7 +70,8 @@ class TeamForm(forms.Form):
         # it's possible NOT to select a team, in that case, don't try and validate secret.
         if team:
             try:
-                team = Team.objects.all().get(id=team.id, secret=secret)
+                team = Team.objects.all().get(id=team.id, secret=secret,
+                                              allowed_to_submit_things=True, participating_in_contest=self.contest)
             except Team.DoesNotExist:
                 raise ValidationError(
                     _('Incorrect secret or team. Try again!'),
