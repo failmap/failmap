@@ -1,0 +1,49 @@
+{% extends 'game/base.html' %}{% load static %}
+
+{% block head %}
+
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/leaflet.css' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/leaflet.fullscreen.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/MarkerCluster.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/MarkerCluster.Failmap.css' %}">
+
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/leaflet-src.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/Leaflet.fullscreen.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/leaflet.markercluster-src.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/failmap.js' %}"></script>
+
+    <meta name="country" content="{{ contest.target_country }}">
+    <meta name="debug" content="{{ debug }}">
+    <meta name="mapbox_token" content="{{ config.MAPBOX_ACCESS_TOKEN }}">
+
+    <script>
+    $( document ).ready(function() {
+
+        let country = document.head.querySelector("[name=country]").getAttribute('content');
+        let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
+        let debug = document.head.querySelector("[name=debug]").getAttribute('content');
+
+        failmap.initialize(mapbox_token, country, debug);
+
+        // todo: add timer that repeats this query every 10 seconds or so.
+        fetch('/game/data/contest/{{ contest.id }}/').then(response => response.json()).then(data => {
+            failmap.plotdata(data);
+        }).catch((fail) => {console.log('An error occurred: ' + fail)});
+    });
+    </script>
+
+{% endblock %}
+
+{% block fullwidth %}
+
+    <section>
+        <div id='map' style="height: calc(100vh - 55px);"></div>
+    </section>
+
+    <!-- Stuff that made failmap.js not really portable -->
+    <div id="fullscreenreport"></div>
+
+{% endblock %}

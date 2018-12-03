@@ -10,9 +10,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.db.utils import OperationalError
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.cache import cache_page
 
+from failmap.app.common import JSEncoder
 from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.map.calculate import get_calculation
@@ -368,9 +369,22 @@ def submitted_urls(request):
                    'contest': contest})
 
 
-@cache_page(ten_minutes)
 def rules_help(request):
     return render(request, 'game/rules_help.html')
+
+
+@login_required(login_url='/authentication/login/')
+def map(request):
+    contest = get_default_contest(request)
+
+    return render(request, 'game/map.html', {'contest': contest, 'team': get_team_info(request)})
+
+
+@login_required(login_url='/authentication/login/')
+def contest_map_data(request, contest_id):
+
+    data = {}
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 @login_required(login_url='/authentication/login/')
