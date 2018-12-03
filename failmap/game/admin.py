@@ -61,7 +61,7 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             'fields': ('name', 'from_moment', 'until_moment')
         }),
         ('Configuration', {
-            'fields': ('target_country', 'admin_user', 'logo_filename'),
+            'fields': ('target_country', 'url_organization_discovery_help', 'admin_user', 'logo_filename'),
         }),
     )
 

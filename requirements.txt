@@ -132,4 +132,5 @@ docker
 tenacity
 
 # game
-spectra
+spectra  # fancy colors for teams
+markdown  # explanations for urls and organizations from the admin

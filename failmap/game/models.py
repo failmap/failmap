@@ -46,6 +46,13 @@ class Contest(models.Model):
         help_text="The country (if any) under which submissions fall."
     )
 
+    url_organization_discovery_help = models.TextField(
+        max_length=1024,
+        default="",
+        help_text="HTML: information where contestants can find good sources of urls / organizations. Displayed on"
+                  " both the URL and Organization adding forms."
+    )
+
     admin_user = models.ForeignKey(
         User,
         null=True,

@@ -58,6 +58,8 @@ def submit_url(request):
     if not request.session.get('team'):
         return redirect('/game/team/')
 
+    contest = get_default_contest(request)
+
     if request.POST:
         form = UrlSubmissionForm(request.POST, team=request.session.get('team'), contest=get_default_contest(request))
 
@@ -77,7 +79,8 @@ def submit_url(request):
         form = UrlSubmissionForm(team=request.session.get('team'), contest=get_default_contest(request))
 
     return render(request, 'game/submit_url.html', {'form': form,
-                                                    'error': form.errors})
+                                                    'error': form.errors,
+                                                    'contest': contest})
 
 
 @login_required(login_url='/authentication/login/')
@@ -111,7 +114,8 @@ def submit_organisation(request):
     return render(request, 'game/submit_organisation.html', {'form': form,
                                                              'GOOGLE_MAPS_API_KEY': config.GOOGLE_MAPS_API_KEY,
                                                              'target_country': contest.target_country,
-                                                             'language': language})
+                                                             'language': language,
+                                                             'contest': contest})
 
 
 def scores(request):

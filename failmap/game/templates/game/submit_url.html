@@ -1,5 +1,5 @@
 {% extends 'game/base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags %} {% load my_tags %}
 
 
 {% block content %}
@@ -10,7 +10,6 @@
         tags: true,
         tokenSeparators: [',', ' ', ';']
     });
-
     </script>
 
     {% if success %}
@@ -26,6 +25,13 @@
     {% endif %}
 
     <h1>Suggest a new url</h1>
+
+    {% if contest.url_organization_discovery_help %}
+        <div class="alert alert-info" role="alert">
+            {{ contest.url_organization_discovery_help | markdown | safe }}
+        </div>
+    {% endif %}
+
     <p>
     It is possible to submit multiple urls to multiple organizations. Make sure that the added information is correct,
     so that you don't bulk-submit a lot of urls for the wrong organization and vice versa.

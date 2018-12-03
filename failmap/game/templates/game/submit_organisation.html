@@ -1,5 +1,5 @@
 {% extends 'game/base.html' %}
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags %} {% load my_tags %}
 {% block content %}
     <style>
     .searchResults {
@@ -59,13 +59,21 @@
     {% endif %}
 
     <h1>Suggest a new organisation</h1>
+
+    {% if contest.url_organization_discovery_help %}
+        <div class="alert alert-info" role="alert">
+            {{ contest.url_organization_discovery_help | markdown | safe }}
+        </div>
+    {% endif %}
+
     <p>
     <b>Tips for suggesting organizations: </b>
         <ol>
-        <li>Search for the organization in your native language.</li>
-        <li>Verify the organization currently still exists. Eg: look at the present/past tense in the snippets.</li>
-        <li>You can only see results for organizations in: {{ target_country }}.</li>
-        <li>If an organization has multiple locations, try to find the most important one.</li>
+            <li>Search for the organization in your native language.</li>
+            <li>Verify the organization currently still exists. Eg: look at the present/past tense in the snippets.</li>
+            <li>You can only see results for organizations in: {{ target_country }}.</li>
+            <li>If an organization has multiple locations, try to find the most important one.</li>
+            <li>Some organizations do not have an exact physical location: try adding something in it's general direction such as a zipcode.</li>
         </ol>
     </p>
 
