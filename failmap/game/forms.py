@@ -42,6 +42,9 @@ class ContestForm(forms.Form):
         #                           code='invalid', )
 
 
+# django forms are absolutely terrible. For cosmetic changes such as not showing an empty ------ in a
+# RadioSelect, there is a lot of hacking, terrible answers on stackoverflow and other mismatches available
+# to the point that you're working hours to fix a miniscule thing that should be trivial.
 class TeamForm(forms.Form):
 
     contest = Contest()
@@ -64,7 +67,9 @@ class TeamForm(forms.Form):
         team = cleaned_data.get("team")
         secret = cleaned_data.get("secret")
 
-        # wait a second to deter brute force attacks (you can still do them)
+        # wait a second to deter brute force attacks (you can still do them, but good luck cracking one...)
+        # 16 positions, 26 characters... each with 1 second delay. (you can of course try brute force in another
+        # submit form perhaps?
         time.sleep(1)
 
         # it's possible NOT to select a team, in that case, don't try and validate secret.

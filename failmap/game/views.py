@@ -202,9 +202,18 @@ def scores(request):
             'url': 250,
         }
 
+        import spectra
+
+        color = spectra.html(team.color.upper())
+        # nope, deep frying doesn't help us
+        # color = color.saturate(100)  # deep fry the color, so something remains even after insane brighten
+        color = color.brighten(10)
+
         score = {
             'team': team.name,
             'team_color': team.color,
+            # transparency makes it lighter and more beautiful.
+            'team_color_soft': "%s%s" % (color.hexcode, '33'),
             'high': final_calculation['high'],
             'high_multiplier': score_multiplier['high'],
             'high_score': final_calculation['high'] * score_multiplier['high'],
