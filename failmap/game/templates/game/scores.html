@@ -21,7 +21,26 @@
         <table class="table table-sm table-striped table-bordered table-hover"
                style="width: 29%; float:left; margin: 20px; box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); background-color: {{ score.team_color_soft }}; {% if team.name == score.team %} border: 1px solid lightgreen; {% endif %}">
             <tbody>
-            <tr><td colspan="3" style="font-weight: bold; font-family: impact, sans-serif; font-size: 6em; text-align: center;"><a name="{{ forloop.counter }}"></a># {{ forloop.counter }}</td></tr>
+            <tr><td colspan="3"
+                    style="font-weight: bold; font-family: impact, sans-serif; font-size: 6em; text-align: center;
+                    {%  if forloop.counter == 1 %}
+                        background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+                        radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
+                    {% endif %}
+                    {% if forloop.counter == 2 %}
+                        /* chrome only, and not at all as impressive */
+                    background: conic-gradient(
+                          #d7d7d7, #c3c3c3, #cccccc, #c6c6c6,
+                          #d3d3d3, #d8d8d8, #d5d5d5, #d8d8d8,
+                          #d3d3d3, #c5c5c5, #c0c0c0, #bfbfbf,
+                          #d0d0d0, #d9d9d9, #d1d1d1, #c5c5c5,
+                          #c8c8c8, #d7d7d7, #d5d5d5, #cdcdcd,
+                          #c4c4c4, #d9d9d9, #cecece, #c5c5c5,
+                          #c5c5c5, #cdcdcd, #d8d8d8, #d9d9d9,
+                          #d7d7d7);
+                    {% endif %}
+                    ">
+                <a name="{{ forloop.counter }}"></a># {{ forloop.counter }}</td></tr>
             <tr><td colspan="3" style="font-size: 3em; text-align: center;  background-color: {{ score.team_color }}; height: 160px; vertical-align: middle;">{{ score.team | truncatechars:24 }}</td></tr>
             <tr><td>Total score</td>  <td colspan="2" style="text-align: center; font-size: 2em;">{{ score.total_score }}</td></tr>
             <tr><td>Organizations</td>    <td>{{ score.added_organizations }}</td><td><small>* {{ score.added_organizations_multiplier }} = {{ score.added_organizations_score }}</small></td></tr>

@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import pytz
+import simplejson as json
 import spectra
 from babel import languages
 from constance import config
@@ -261,7 +262,7 @@ def scores(request):
         scores.append(score)
 
     # order the scores from high to low.
-    scores = sorted(scores, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
+    scores = sorted(scores, key=lambda k: (k['total_score'], k['high'], k['medium'], k['low']), reverse=True)
 
     return render(request, 'game/scores.html', {'team': get_team_info(request),
                                                 'scores': scores,
@@ -449,10 +450,11 @@ def contest_map_data(request):
     # not relevant for scores.
     bare_organizations = list(OrganizationSubmission.objects.all().filter(
         has_been_accepted=False,
+        has_been_rejected=False,
         added_by_team__participating_in_contest=contest.pk
     ))
-    for bare_organizations in bare_organizations:
-        features.append(get_bare_organization_feature(bare_organizations))
+    for bare_organization in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organization))
 
     # and organizations that have been accepted, but don't have urls yet, thus no scans.
     bare_organizations = list(OrganizationSubmission.objects.all().filter(
@@ -460,8 +462,8 @@ def contest_map_data(request):
         organization_in_system__u_many_o_upgrade__url__isnull=True,
         added_by_team__participating_in_contest=contest.pk
     ))
-    for bare_organizations in bare_organizations:
-        features.append(get_bare_organization_feature(bare_organizations))
+    for bare_organization in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organization))
 
     # organizations that have been accepted, do have urls, but don't have a scan yet
     bare_organizations = list(OrganizationSubmission.objects.all().filter(
@@ -470,9 +472,19 @@ def contest_map_data(request):
         organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
         added_by_team__participating_in_contest=contest.pk
     ))
+    # todo: should be the real deal, we can also get the real coordinates if the organization has been added
+    # which might be altered during to contest to match reality.
     # todo: this can have the real ID... for nicer map transitions? That's done by name right?
-    for bare_organizations in bare_organizations:
-        features.append(get_bare_organization_feature(bare_organizations))
+    for bare_organization in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organization))
+
+    bare_urls = list(UrlSubmission.objects.all().filter(
+        has_been_accepted=False,
+        has_been_rejected=False,
+        added_by_team__participating_in_contest=contest.pk
+    ).prefetch_related('for_organization__coordinate_set'))
+    for bare_url in bare_urls:
+        features.append(get_bare_url_feature(bare_url))
 
     # loop over the organizations and calculate the ratings.
     # you prefetch all the related objects, which still have to be iterated... damn,
@@ -486,8 +498,16 @@ def contest_map_data(request):
     for scan in url_scans:
         features = add_or_update_features(features, scan)
 
-    data["features"] = features
+    # update string features to json type.
+    # todo: make sure that there are no strings in the database, because of this uglyness
+    updated_features = []
+    for feature in features:
+        if isinstance(feature['geometry']['coordinates'], str):
+            feature['geometry']['coordinates'] = json.loads(feature['geometry']['coordinates'])
+        else:
+            updated_features.append(feature)
 
+    data["features"] = updated_features
     return JsonResponse(data, encoder=JSEncoder)
 
 
@@ -545,7 +565,8 @@ def get_bare_organization_feature(submitted_organization):
         "type": "Feature",
         "properties":
             {
-                "organization_id": "pending_%s" % submitted_organization.pk,
+                # can't use ID of submission, because this does not match per call.
+                "organization_id": "pending_%s" % submitted_organization.organization_type_name,
                 "organization_type": submitted_organization.organization_type_name,
                 "organization_name": submitted_organization.organization_name,
                 "organization_slug": slugify(submitted_organization.organization_name),
@@ -566,6 +587,47 @@ def get_bare_organization_feature(submitted_organization):
                 # Sometimes the data is a string, sometimes it's a list. The admin
                 # interface might influence this.
                 "coordinates": submitted_organization.organization_address_geocoded
+            }
+    }
+
+
+def get_bare_url_feature(submitted_url):
+    print(submitted_url)
+    print(submitted_url.for_organization.coordinate_set)
+
+    if not submitted_url.for_organization.coordinate_set:
+        geojsontype = "Point"
+        area = [0, 0]
+    else:
+        coordinate = submitted_url.for_organization.coordinate_set.first()
+        geojsontype = coordinate.geojsontype
+        area = coordinate.area
+
+    return {
+        "type": "Feature",
+        "properties":
+            {
+                "organization_id": "%s" % submitted_url.for_organization.pk,
+                "organization_type": submitted_url.for_organization.type.name,
+                "organization_name": submitted_url.for_organization.name,
+                "organization_slug": slugify(submitted_url.for_organization.name),
+                "overall": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "data_from": 0,
+                "color": "pending",
+                "total_urls": 0,
+                "high_urls": 0,
+                "medium_urls": 0,
+                "low_urls": 0,
+            },
+        "geometry":
+            {
+                "type": geojsontype,
+                # Sometimes the data is a string, sometimes it's a list. The admin
+                # interface might influence this.
+                "coordinates": area
             }
     }
 
