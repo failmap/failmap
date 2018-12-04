@@ -478,6 +478,7 @@ def contest_map_data(request):
     for bare_organization in bare_organizations:
         features.append(get_bare_organization_feature(bare_organization))
 
+    # todo: what happens if this area is already in there? should be done with add_or_update_features.
     bare_urls = list(UrlSubmission.objects.all().filter(
         has_been_accepted=False,
         has_been_rejected=False,
