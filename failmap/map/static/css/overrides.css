@@ -96,7 +96,7 @@ body {
 
 /* bootstrap fixed menu terribleness... always overlaps content. */
 body {
-    padding-top: 62px;
+    padding-top: 56px;
 }
 
 /* prevent dynamic content loading in the div before this element to scroll

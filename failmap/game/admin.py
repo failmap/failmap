@@ -385,47 +385,55 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
             # don't add the same thing over and over, allows to re-select the ones already added without a problem
             # once rejected, can't be accepted via buttons: needs to be a manual action
+            # todo: make it possible to reject afterwards, and delete all subdomains etc.
             if osm.has_been_accepted or osm.has_been_rejected:
+                log.debug('Organization has already been accepted or rejected.')
                 continue
 
-            try:
-                # this might revive some old organizations, so domain knowledge is required.
-                # In this case the organization already exists with the same name, type and alive.
-                # this means we don't need to add a new one, or with new coordinates.
-                Organization.objects.all().filter(
-                    name=osm.organization_name,
-                    country=osm.organization_country,
-                    is_dead=False,
-                    type=OrganizationType.objects.get(name=osm.organization_type_name)).first()
-            except Organization.DoesNotExist:
-                # Create a new one
-                # address and evidence are saved elsewhere. Since we have a reference we can auto-update after
-                # geocoding works. In the hopes some quality data has been added, which can be checked more easy then
-                # adding this data in the system again(?)
-                new_org = Organization(
-                    name=osm.organization_name,
-                    country=osm.organization_country,
-                    is_dead=False,
-                    type=OrganizationType.objects.get(name=osm.organization_type_name),
-                    created_on=timezone.now(),
-                )
-                new_org.save()
+            # this might revive some old organizations, so domain knowledge is required.
+            # In this case the organization already exists with the same name, type and alive.
+            # this means we don't need to add a new one, or with new coordinates.
+            already_exists = Organization.objects.all().filter(
+                name=osm.organization_name,
+                country=osm.organization_country,
+                is_dead=False,
+                type=OrganizationType.objects.get(name=osm.organization_type_name)).first()
 
-                # of course it has a new coordinate
-                new_coordinate = Coordinate(
-                    organization=new_org,
-                    geojsontype="Point",
-                    area=osm.organization_address_geocoded,
-                    edit_area=osm.organization_address_geocoded,
-                    created_on=timezone.now(),
-                    creation_metadata="Accepted organization submission"
-                )
-                new_coordinate.save()
+            if already_exists:
+                log.debug('Organization with the same name already exists, in this country and type and is alive.')
+                continue
 
-                # and save tracking information
-                osm.organization_in_system = new_org
-                osm.has_been_accepted = True
-                osm.save()
+            # Create a new one
+            # address and evidence are saved elsewhere. Since we have a reference we can auto-update after
+            # geocoding works. In the hopes some quality data has been added, which can be checked more easy then
+            # adding this data in the system again(?)
+            new_org = Organization(
+                name=osm.organization_name,
+                country=osm.organization_country,
+                is_dead=False,
+                type=OrganizationType.objects.get(name=osm.organization_type_name),
+                created_on=timezone.now(),
+            )
+            new_org.save()
+            log.debug('Saved new organization.')
+
+            # of course it has a new coordinate
+            new_coordinate = Coordinate(
+                organization=new_org,
+                geojsontype="Point",
+                area=osm.organization_address_geocoded,
+                edit_area=osm.organization_address_geocoded,
+                created_on=timezone.now(),
+                creation_metadata="Accepted organization submission"
+            )
+            new_coordinate.save()
+            log.debug('Saved matching coordinate.')
+
+            # and save tracking information
+            osm.organization_in_system = new_org
+            osm.has_been_accepted = True
+            osm.save()
+            log.debug('Saved tracking information for the game.')
 
         self.message_user(request, "Organizations have been accepted and added to the system.")
     accept.short_description = "✅  Accept"

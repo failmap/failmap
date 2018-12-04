@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/leaflet.fullscreen.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/MarkerCluster.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/MarkerCluster.Failmap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
 
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
@@ -29,12 +30,16 @@
         failmap.initialize(mapbox_token, country, debug);
 
         // todo: add timer that repeats this query every 10 seconds or so.
-        fetch('/game/data/contest/{{ contest.id }}/').then(response => response.json()).then(data => {
+        fetch('/game/data/contest/').then(response => response.json()).then(data => {
             failmap.plotdata(data);
         }).catch((fail) => {console.log('An error occurred: ' + fail)});
     });
     </script>
 
+{% endblock %}
+
+{% block content %}
+    Contest: {{ contest.name }}
 {% endblock %}
 
 {% block fullwidth %}

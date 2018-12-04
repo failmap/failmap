@@ -15,5 +15,5 @@ urlpatterns = [
     path('submit_organization/', views.submit_organisation),
     path('autocomplete/organization-autocomplete/', views.OrganizationAutocomplete.as_view()),
     path('autocomplete/organization-type-autocomplete/', views.OrganizationTypeAutocomplete.as_view()),
-    path('data/contest/<int:contest_id>/', views.contest_map_data)
+    path('data/contest/', views.contest_map_data)
 ]

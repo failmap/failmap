@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import pytz
+import spectra
 from babel import languages
 from constance import config
 from dal import autocomplete
@@ -12,6 +13,7 @@ from django.db.models.functions import Lower
 from django.db.utils import OperationalError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.text import slugify
 
 from failmap.app.common import JSEncoder
 from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
@@ -151,26 +153,27 @@ def scores(request):
         scans = list(EndpointGenericScan.objects.all().filter(
             endpoint__url__urlsubmission__added_by_team=team.id,
             endpoint__url__urlsubmission__has_been_accepted=True,
+            rating_determined_on__lte=contest.until_moment,
             type__in=ENDPOINT_SCAN_TYPES
         ))
 
         scans += list(UrlGenericScan.objects.all().filter(
             url__urlsubmission__added_by_team=team.id,
             url__urlsubmission__has_been_accepted=True,
+            rating_determined_on__lte=contest.until_moment,
             type__in=URL_SCAN_TYPES
         ))
 
         added_urls = UrlSubmission.objects.all().filter(
             added_by_team=team.id,
             has_been_accepted=True,
-            has_been_rejected=False
+            has_been_rejected=False,
         ).count()
 
         added_organizations = OrganizationSubmission.objects.all().filter(
             added_by_team=team.id,
             has_been_accepted=True,
             has_been_rejected=False
-
         ).count()
 
         rejected_organizations = OrganizationSubmission.objects.all().filter(
@@ -207,18 +210,22 @@ def scores(request):
             'url': 250,
         }
 
-        import spectra
-
-        color = spectra.html(team.color.upper())
-        # nope, deep frying doesn't help us
-        # color = color.saturate(100)  # deep fry the color, so something remains even after insane brighten
-        color = color.brighten(10)
+        # if you're too lazy to enter a color.
+        # or the control doesn't work.
+        if team.color:
+            color = spectra.html(team.color.upper())
+            # nope, deep frying doesn't help us
+            # color = color.saturate(100)  # deep fry the color, so something remains even after insane brighten
+            color = color.brighten(10)
+            color_code = color.hexcode
+        else:
+            color_code = "#FFFFFF"
 
         score = {
             'team': team.name,
             'team_color': team.color,
             # transparency makes it lighter and more beautiful.
-            'team_color_soft': "%s%s" % (color.hexcode, '33'),
+            'team_color_soft': "%s%s" % (color_code, '33'),
             'high': final_calculation['high'],
             'high_multiplier': score_multiplier['high'],
             'high_score': final_calculation['high'] * score_multiplier['high'],
@@ -381,10 +388,242 @@ def map(request):
 
 
 @login_required(login_url='/authentication/login/')
-def contest_map_data(request, contest_id):
+def contest_map_data(request):
+    """
+    This doesn't have to take in account the time sliding features of failmap.
 
-    data = {}
+    Just take ANY result from the scans matching it with the is_latest_coordinate. It's already
+    linked to organization. So we should be able to get a quick result IN django.
+
+    :param request:
+    :param contest_id:
+    :return:
+    """
+
+    contest = get_default_contest(request)
+
+    data = {
+        "metadata": {
+            "type": "FeatureCollection",
+            "render_date": datetime.now(pytz.utc),
+            "data_from_time": datetime.now(pytz.utc),
+            "remark": "yolo",
+        },
+        "crs":
+            {
+                "type": "name",
+                "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
+        },
+        "features":
+            [
+
+        ]
+    }
+
+    # won't i lose "last scan moment" as it overstretches the competition boundaries? Should use created on?
+    # yes, use created on. If there is a new rating, there will be a scan outside of the competition bounds.
+
+    # is the organization really prefetched? And what one really?
+    # the amount of data stays relatively low given we're not adding all hundreds of subdomains that are auto discovered
+    # todo: during contest, do not onboard auto-discovered subdomains, as it interferes with scans (creates too many).
+    # We don't filter out only top level domains, because we might want to add some special subdomains from
+    # third party service suppliers. For example: organization.thirdpartysupplier.com.
+    # normal contests prohibit these subdomains.
+    endpoint_scans = list(EndpointGenericScan.objects.all().filter(
+        endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
+        endpoint__url__urlsubmission__has_been_accepted=True,
+        type__in=ENDPOINT_SCAN_TYPES,
+        rating_determined_on__lte=contest.until_moment
+    ).prefetch_related('endpoint__url__organization').order_by('endpoint__url__organization'))
+
+    url_scans = list(UrlGenericScan.objects.all().filter(
+        url__urlsubmission__added_by_team__participating_in_contest=contest.pk,
+        url__urlsubmission__has_been_accepted=True,
+        type__in=URL_SCAN_TYPES,
+        rating_determined_on__lte=contest.until_moment
+    ).prefetch_related('url__organization').order_by('url__organization'))
+
+    features = []
+
+    # organizations / urls without scans... / organizations withouts urls
+    # not relevant for scores.
+    bare_organizations = list(OrganizationSubmission.objects.all().filter(
+        has_been_accepted=False,
+        added_by_team__participating_in_contest=contest.pk
+    ))
+    for bare_organizations in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organizations))
+
+    # and organizations that have been accepted, but don't have urls yet, thus no scans.
+    bare_organizations = list(OrganizationSubmission.objects.all().filter(
+        has_been_accepted=True,
+        organization_in_system__u_many_o_upgrade__url__isnull=True,
+        added_by_team__participating_in_contest=contest.pk
+    ))
+    for bare_organizations in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organizations))
+
+    # organizations that have been accepted, do have urls, but don't have a scan yet
+    bare_organizations = list(OrganizationSubmission.objects.all().filter(
+        has_been_accepted=True,
+        organization_in_system__u_many_o_upgrade__urlgenericscan__isnull=True,
+        organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
+        added_by_team__participating_in_contest=contest.pk
+    ))
+    # todo: this can have the real ID... for nicer map transitions? That's done by name right?
+    for bare_organizations in bare_organizations:
+        features.append(get_bare_organization_feature(bare_organizations))
+
+    # loop over the organizations and calculate the ratings.
+    # you prefetch all the related objects, which still have to be iterated... damn,
+    # because now you can't simply iterate over the data.
+    # you can't sort by the first organization, as the second one might be different entirely.
+    # let's build the data iteratively based on organizations in the queryset.
+
+    for scan in endpoint_scans:
+        features = add_or_update_features(features, scan)
+
+    for scan in url_scans:
+        features = add_or_update_features(features, scan)
+
+    data["features"] = features
+
     return JsonResponse(data, encoder=JSEncoder)
+
+
+def add_or_update_features(features, scan):
+    # not really memory efficient
+    new_features = []
+
+    # features are unique by organization ID.
+    organizations = get_organizations(scan)
+
+    # First check if the feature exist, if not create it.
+    existing_features = []
+    for organization in organizations:
+        for feature in features:
+            if feature.get('properties', {}).get('organization_id', None) == organization.pk:
+                # todo: should also be able to add scan results here, as it exists anyway
+                new_features.append(update_feature(feature, scan))
+                existing_features.append(organization.pk)
+
+    not_featured_organizations = []
+    for organization in organizations:
+        if organization.pk not in existing_features:
+            not_featured_organizations.append(organization)
+
+    # create new features of the organizations that don't have one yet
+    for organization in not_featured_organizations:
+        new_features.append(make_new_feature(organization, scan))
+
+    # copy the features that where not relevant to this scan
+    for feature in features:
+        if feature['properties']['organization_id'] not in existing_features:
+            new_features.append(feature)
+
+    return new_features
+
+
+def update_feature(feature, scan):
+    # log.debug('Updating feature %s, with scan %s' % (feature['properties']['organization_id'], scan))
+    calculation = get_calculation(scan)
+
+    feature['properties']['high'] += calculation['high']
+    feature['properties']['medium'] += calculation['medium']
+    feature['properties']['low'] += calculation['low']
+
+    color = "red" if feature['properties']['high'] else "orange" if feature['properties'][
+        'medium'] else "yellow" if feature['properties']['low'] else "green"
+
+    feature['properties']['color'] = color
+
+    return feature
+
+
+def get_bare_organization_feature(submitted_organization):
+    return {
+        "type": "Feature",
+        "properties":
+            {
+                "organization_id": "pending_%s" % submitted_organization.pk,
+                "organization_type": submitted_organization.organization_type_name,
+                "organization_name": submitted_organization.organization_name,
+                "organization_slug": slugify(submitted_organization.organization_name),
+                "overall": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "data_from": 0,
+                "color": "pending",
+                "total_urls": 0,
+                "high_urls": 0,
+                "medium_urls": 0,
+                "low_urls": 0,
+            },
+        "geometry":
+            {
+                "type": "Point",  # nothing else supported yet, as entering coordinates is hard enough already
+                # Sometimes the data is a string, sometimes it's a list. The admin
+                # interface might influence this.
+                "coordinates": submitted_organization.organization_address_geocoded
+            }
+    }
+
+
+def make_new_feature(organization, scan):
+    # log.debug('Making new feature %s, with scan %s' % (organization, scan))
+
+    calculation = get_calculation(scan)
+    color = "red" if calculation['high'] else "orange" if calculation['medium'] else "yellow" if calculation[
+        'low'] else "green"
+
+    from failmap.organizations.models import Coordinate
+
+    # only one multipoint or multipolygon. Unfortunately one query per organization :((((((((((((
+    coordinate = Coordinate.objects.all().filter(organization=organization).order_by('-created_on').first()
+
+    # early contest didn't require the pinpointing of a location, later contests an organization is always required
+    if not coordinate:
+        area = ""
+        geojsontype = ""
+    else:
+        area = coordinate.area
+        geojsontype = coordinate.geojsontype
+
+    return {
+        "type": "Feature",
+        "properties":
+            {
+                "organization_id": organization.pk,
+                "organization_type": organization.type.name,
+                "organization_name": organization.name,
+                "organization_slug": slugify(organization.name),
+                "overall": 0,
+                "high": calculation['high'],
+                "medium": calculation['medium'],
+                "low": calculation['low'],
+                "data_from": scan.last_scan_moment,
+                "color": color,
+                "total_urls": 0,  # = 100%
+                "high_urls": 0,
+                "medium_urls": 0,
+                "low_urls": 0,
+            },
+        "geometry":
+            {
+                "type": geojsontype,
+                # Sometimes the data is a string, sometimes it's a list. The admin
+                # interface might influence this.
+                "coordinates": area
+            }
+    }
+
+
+def get_organizations(scan):
+    if scan.type in ENDPOINT_SCAN_TYPES:
+        return scan.endpoint.url.organization.all()
+    if scan.type in URL_SCAN_TYPES:
+        return scan.url.organization.all()
 
 
 @login_required(login_url='/authentication/login/')
