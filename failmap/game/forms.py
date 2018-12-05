@@ -157,12 +157,25 @@ class OrganisationSubmissionForm(forms.Form):
         name = cleaned_data.get("organization_name")
         country = self.contest.target_country
 
+        # todo: normalize the name for checking if it exists
         exists = Organization.objects.all().filter(
-            type=organization_type_name, name=name, is_dead=False, country=country).exists()
+            type=organization_type_name, name__iexact=name, is_dead=False, country=country).exists()
 
         if exists:
             raise ValidationError(
                 _('This organization %(organization)s already exists in the database for this type / layer.'),
+                code='invalid',
+                params={'organization': name},
+            )
+
+        exists = OrganizationSubmission.objects.all().filter(
+            organization_type_name=organization_type_name,
+            organization_name__iexact=name,
+            organization_country=country).exists()
+
+        if exists:
+            raise ValidationError(
+                _('This organization %(organization)s has been suggested already.'),
                 code='invalid',
                 params={'organization': name},
             )

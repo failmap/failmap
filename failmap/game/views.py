@@ -517,7 +517,8 @@ def contest_map_data(request):
     # todo: make sure that there are no strings in the database, because of this uglyness
     updated_features = []
     for feature in features:
-        if isinstance(feature['geometry']['coordinates'], str):
+        # also check that there is something stored at all...
+        if isinstance(feature['geometry']['coordinates'], str) and feature['geometry']['coordinates']:
             feature['geometry']['coordinates'] = json.loads(feature['geometry']['coordinates'])
         else:
             updated_features.append(feature)
@@ -618,11 +619,9 @@ def add_bare_url_features(features, submitted_urls):
         if organization_in_features(submitted_url.for_organization, features):
             continue
 
-        # else create a nice dummy feature
-
         # take into account that some contests / urls could not associated with a region. If there is no region
         # attached to it, there is also nothing to plot, thus return the existing features
-        if not submitted_url.for_organization.coordinate_set:
+        if not submitted_url.for_organization.coordinate_set.count():
             continue
 
         # get the last known coordinate from this set. They are (usually) ordered by date. But it doesn't matter much
