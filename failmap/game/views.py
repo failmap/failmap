@@ -336,9 +336,9 @@ def submitted_organizations(request):
         added_by_team__participating_in_contest=contest
     ).order_by('organization_type_name', 'organization_name')
 
-    already_known_organizations = Organization.objects.all().filter(country=contest.target_country).exclude(
-        id__in=submitted_organizations.values('organization_in_system').filter(organization_in_system__isnull=False)
-    ).select_related('type').order_by('type__name', 'name')
+    # not excluding the organizations submitted in this contest, as that IN filter will become too large.
+    already_known_organizations = Organization.objects.all().filter(
+        country=contest.target_country).select_related('type').order_by('type__name', 'name')
 
     return render(request, 'game/submitted_organizations.html', {
         'submitted_organizations': submitted_organizations,
@@ -385,7 +385,23 @@ def rules_help(request):
 def map(request):
     contest = get_default_contest(request)
 
-    return render(request, 'game/map.html', {'contest': contest, 'team': get_team_info(request)})
+    # also enrich with submitted urls and orgnaizations
+
+    submitted_organizations = OrganizationSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=contest
+    ).order_by('organization_type_name', 'organization_name')
+
+    submitted_urls = UrlSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=contest).order_by(
+        'for_organization', '-added_on', 'url'
+    ).select_related('added_by_team', 'for_organization', 'url_in_system')
+
+    return render(request, 'game/map.html', {
+        'contest': contest,
+        'team': get_team_info(request),
+        'submitted_urls': submitted_urls,
+        'submitted_organizations': submitted_organizations
+    })
 
 
 @login_required(login_url='/authentication/login/')

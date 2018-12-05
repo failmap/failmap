@@ -15,7 +15,7 @@
     {% for organization in submitted_organizations %}
 
         {% ifchanged organization.organization_type_name %}
-            </tbody></table><h3>{{ organization.organization_type_name }}</h3><table class="table table-sm table-striped table-bordered table-hover">
+            </tbody></table><h3>Layer: {{ organization.organization_type_name }}</h3><table class="table table-sm table-striped table-bordered table-hover">
                 <thead>
                 <tr>
                     <th width="20%">Organization</th>

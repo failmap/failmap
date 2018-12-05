@@ -1,4 +1,4 @@
-{% extends 'game/base.html' %}{% load static %}{% load i18n %}
+{% extends 'game/base.html' %}{% load static %}{% load i18n %}{% load humanize %}
 
 {% block head %}
 
@@ -30,7 +30,7 @@
         let debug = document.head.querySelector("[name=debug]").getAttribute('content');
 
         failmap.initialize(mapbox_token, country, debug, false);
-        views();
+        views(false);
 
         // todo: add timer that repeats this query every 10 seconds or so.
         fetch('/game/data/contest/').then(response => response.json()).then(data => {
@@ -42,11 +42,82 @@
 {% endblock %}
 
 {% block content %}
-    Contest: {{ contest.name }}
+    <br><br>
+
+    <h1>{{ contest.name }}</h1>
+    <br><br>
+
+    <h2>Submitted organizations</h2>
+    <p>This is a list of submitted organizations during this contest. Below it also shows the urls that already exist.
+    This information can help you to quickly determine if an organization is already being investigated and if some
+    information is still missing.</p>
+    {% for organization in submitted_organizations %}
+
+        {% ifchanged organization.organization_type_name %}
+            </tbody></table><h3>Layer: {{ organization.organization_type_name }}</h3><table class="table table-sm table-striped table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th width="20%">Organization</th>
+                    <th width="30%">Address</th>
+                    <th width="10%">Acceptation</th>
+                    <th width="20%">Added on</th>
+                </tr>
+                </thead><tbody>
+        {% endifchanged %}
+
+        <tr style="background-color: {{ organization.added_by_team.color }};" title="Added by {{ organization.added_by_team.name }}">
+            <td>{{ organization.organization_name }}</td>
+            <td>{{ organization.organization_address }}</td>
+            {% if organization.has_been_accepted %}
+            <td style="color: green;">accepted</td>
+            {% elif organization.has_been_rejected %}
+            <td style="color: red;">rejected</td>
+            {% else %}
+            <td style="color: gray;">pending</td>
+            {% endif %}
+            <td>{{ organization.added_on|naturaltime  }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    <br><br>
+
+    <h2>Submitted urls</h2>
+    {% for url in submitted_urls %}
+        {% ifchanged url.for_organization %}
+            </table><h3>{{ url.for_organization }}</h3><table class="table table-sm table-striped table-bordered table-hover">
+            <tr>
+                <th width="50%">Url</th>
+                <th width="10%">Acceptation</th>
+                <th width="30%">Added when</th>
+                <th width="10%">Onboarding</th>
+            </tr>
+        {% endifchanged %}
+
+        <tr style="background-color: {{ url.added_by_team.color }};" title="Added by {{ url.added_by_team.name }}">
+            <td>{{ url.url }} (try: <a href="http://{{ url.url }}" target="_blank">http</a>,
+                              <a href="https://{{ url.url }}" target="_blank">https</a>)</td>
+            {% if url.has_been_accepted %}
+            <td style="color: green;">accepted</td>
+            {% elif url.has_been_rejected %}
+            <td style="color: red;">rejected</td>
+            {% else %}
+            <td style="color: gray;">pending</td>
+            {% endif %}
+            <td>{{ url.added_on|naturaltime }}</td>
+            <td>{{ url.onboarding_stage }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
 {% endblock %}
 
 {% block fullwidth %}
-
     <section>
         <div id='map' style="height: calc(100vh - 55px);"></div>
     </section>
@@ -101,5 +172,4 @@
     </div>
 </script>
 {% endverbatim %}
-
 {% endblock %}

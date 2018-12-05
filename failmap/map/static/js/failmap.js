@@ -48,7 +48,7 @@ const failmap = {
         // don't name this variable location, because that redirects the browser.
         loc = this.initial_location(country_code);
         this.map = L.map('map',
-            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, zoomSnap: 0}
+            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, zoomSnap: 0.2}
             ).setView(loc.coordinates, loc.zoomlevel);
 
         this.map.scrollWheelZoom.disable();

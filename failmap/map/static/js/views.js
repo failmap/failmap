@@ -770,7 +770,7 @@ function germany() {
 }
 
 
-function views() {
+function views(autoload_default_map_data=true) {
 
     window.vueGraphs = new Vue({
         name: "graphs",
@@ -1510,7 +1510,7 @@ function views() {
             // wait until the default category and default languages have been set...
 
             // initial load.
-            this.load(0)
+            // this.load(0)
         },
         mixins: [state_mixin],
 
@@ -1544,9 +1544,18 @@ function views() {
                 this.displayed_issue = "";
             },
             set_state: function(country, category, skip_map){
-                console.log("Set state");
+                console.log("Set map/site state");
                 this.country = country;
                 this.category = category;
+
+                // The first time the map is not allowed to load in any regards:
+                if (!autoload_default_map_data) {
+                    // make sure this only works once
+                    autoload_default_map_data = true;
+                    console.log("Explicitly disabled automatic loading of default map data. Please load map data yourself.");
+                    return;
+                }
+
 
                 // skip_map is used in loading the defaults, where the map is already (probably) loaded.
                 // The first time the map loads based on the default settings in the backend. This shows the map
@@ -1591,6 +1600,7 @@ function views() {
                 // the first time the map defaults are loaded, this saves a trip to the server of what the defaults are
                 // it's possible that this is slower than the rest of the code, and thus a normal map is loaded.
                 if (!this.country || !this.category) {
+
                     $.getJSON('/data/map_default/' + week * 7 + '/' +
                         self.displayed_issue + '/' , function (mapdata) {
                         self.loading = true;
@@ -1665,9 +1675,7 @@ function views() {
             categories: [""],
             countries: [""],
             selected_category: "",
-            selected_country: "",
-            default_category: "",
-            default_country: ""
+            selected_country: ""
         },
 
         mounted: function() {
@@ -1680,8 +1688,6 @@ function views() {
                 fetch('/data/defaults/').then(response => response.json()).then(data => {
                     this.selected_category = data.category;
                     this.selected_country = data.country;
-                    this.default_category = data.category;
-                    this.default_country = data.country;
                     // done in the map.
                     vueMap.set_state(this.selected_country, this.selected_category, true);
                     this.get_countries();
