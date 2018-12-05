@@ -88,7 +88,6 @@ const report_mixin = {
         twitter_handle: '',
         name: "",
         urls: Array,
-        mailto: document.head.querySelector("[name=mailto]").getAttribute('content'),
         selected: null,
         loading: false,
         visible: false,  // fullscreenreport

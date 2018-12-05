@@ -42,13 +42,13 @@ const failmap = {
     yellowIcon: new L.divIcon({className: 'leaflet-marker-yellow'}),
     grayIcon: new L.divIcon({className: 'leaflet-marker-gray'}),
 
-    initialize: function (mapbox_token, country_code, debug) {
+    initialize: function (mapbox_token, country_code, debug, show_filters=true) {
         this.mapbox_token = mapbox_token;
 
         // don't name this variable location, because that redirects the browser.
         loc = this.initial_location(country_code);
         this.map = L.map('map',
-            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, }
+            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, zoomSnap: 0}
             ).setView(loc.coordinates, loc.zoomlevel);
 
         this.map.scrollWheelZoom.disable();
@@ -87,9 +87,11 @@ const failmap = {
         let html = "<div id=\"fullscreen\">" +
             "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
             "</div>";
+
         this.add_div(html, "info_nobackground", false);
 
-        this.add_div('<div id="historycontrol"></div>', "info table-light", true);
+        if (show_filters)
+            this.add_div('<div id="historycontrol"></div>', "info table-light", true);
 
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
         this.add_div("<div><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
@@ -101,6 +103,28 @@ const failmap = {
         labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
         this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
+
+        // scale
+        L.control.scale().addTo(this.map);
+
+        // show whole map:
+        // https://gist.github.com/stefanocudini/a5cde3c11c9b1f277368
+        (function() {
+            var control = new L.Control({position:'topleft'});
+            control.onAdd = function(map) {
+                    var azoom = L.DomUtil.create('a','resetzoom');
+                    azoom.innerHTML = "<span style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
+                    L.DomEvent
+                        .disableClickPropagation(azoom)
+                        .addListener(azoom, 'click', function() {
+                            map.fitBounds(failmap.polygons.getBounds(),
+                                {paddingTopLeft: [0,0], paddingBottomRight: [0, 0]})
+                        }, azoom);
+                    return azoom;
+                };
+            return control;
+        }())
+        .addTo(this.map);
 
         this.light_map = new L.tileLayer(this.tile_uri(), {
             maxZoom: 18,

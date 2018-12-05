@@ -1,4 +1,4 @@
-{% extends 'game/base.html' %}{% load static %}
+{% extends 'game/base.html' %}{% load static %}{% load i18n %}
 
 {% block head %}
 
@@ -9,12 +9,14 @@
     <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
 
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/leaflet-src.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/Leaflet.fullscreen.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/leaflet.markercluster-src.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/raven.min.vue.3.19.1.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/failmap.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/views.js' %}"></script>
 
     <meta name="country" content="{{ contest.target_country }}">
     <meta name="debug" content="{{ debug }}">
@@ -27,7 +29,8 @@
         let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
         let debug = document.head.querySelector("[name=debug]").getAttribute('content');
 
-        failmap.initialize(mapbox_token, country, debug);
+        failmap.initialize(mapbox_token, country, debug, false);
+        views();
 
         // todo: add timer that repeats this query every 10 seconds or so.
         fetch('/game/data/contest/').then(response => response.json()).then(data => {
@@ -50,5 +53,53 @@
 
     <!-- Stuff that made failmap.js not really portable -->
     <div id="fullscreenreport"></div>
+
+
+{% verbatim %}
+<!-- Maybe it's nice to filter by team... -->
+<script type="x-template" id="historycontrol_template">
+    <div id="historycontrol"></div>
+</script>
+<script type="x-template" id="domainlist_template">
+    <div id="domainlist">
+        <div v-if="urls.length > 1" v-cloak>
+            <table width='100%'>
+                <thead>
+                    <tr>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "H" %}</th>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "M" %}</th>
+                        <th style='min-width: 20px; width: 20px;'>{% trans "L" %}</th>
+                        <th>{% trans "Url" %}</th>
+                    </tr>
+                </thead>
+                {% verbatim %}
+                <tbody>
+                    <tr v-for="url in urls">
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.high }}</span></td>
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.medium }}</span></td>
+                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.low }}</span></td>
+                        <td nowrap><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.url }}</span></td>
+                    </tr>
+                </tbody>
+                {% endverbatim %}
+            </table>
+        </div>
+    </div>
+</script>
+{% verbatim %}
+<script type="x-template" id="map_item_hover">
+    <div id="map_hover_info_contents">
+        <div v-if="properties.organization_name" v-cloak>
+            <h4>{{ properties.organization_name }}</h4>
+            <div class="progress">
+                <div class="progress-bar bg-danger" :style="{width:high}"></div>
+                <div class="progress-bar bg-warning" :style="{width:medium}"></div>
+                <div class="progress-bar bg-success" :style="{width:low}"></div>
+                <div class="progress-bar bg-success" :style="{width:perfect}"></div>
+            </div>
+        </div>
+    </div>
+</script>
+{% endverbatim %}
 
 {% endblock %}

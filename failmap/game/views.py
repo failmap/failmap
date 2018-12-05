@@ -457,13 +457,14 @@ def contest_map_data(request):
         features.append(get_bare_organization_feature(bare_organization))
 
     # and organizations that have been accepted, but don't have urls yet, thus no scans.
-    bare_organizations = list(OrganizationSubmission.objects.all().filter(
-        has_been_accepted=True,
-        organization_in_system__u_many_o_upgrade__url__isnull=True,
-        added_by_team__participating_in_contest=contest.pk
-    ))
-    for bare_organization in bare_organizations:
-        features.append(get_bare_organization_feature(bare_organization))
+    # this is included in the fact that there is an url(or not) and no scans.
+    # bare_organizations = list(OrganizationSubmission.objects.all().filter(
+    #     has_been_accepted=True,
+    #     organization_in_system__u_many_o_upgrade__url__isnull=True,
+    #     added_by_team__participating_in_contest=contest.pk
+    # ))
+    # for bare_organization in bare_organizations:
+    #    features.append(get_bare_organization_feature(bare_organization))
 
     # organizations that have been accepted, do have urls, but don't have a scan yet
     bare_organizations = list(OrganizationSubmission.objects.all().filter(
@@ -472,27 +473,24 @@ def contest_map_data(request):
         organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
         added_by_team__participating_in_contest=contest.pk
     ))
-    # todo: should be the real deal, we can also get the real coordinates if the organization has been added
-    # which might be altered during to contest to match reality.
-    # todo: this can have the real ID... for nicer map transitions? That's done by name right?
+
+    # todo: this can have the real ID, real mapping information.
     for bare_organization in bare_organizations:
         features.append(get_bare_organization_feature(bare_organization))
 
-    # todo: what happens if this area is already in there? should be done with add_or_update_features.
+    # submitted url is always for a single organization, it's stored like that to reduce complexity.
     bare_urls = list(UrlSubmission.objects.all().filter(
         has_been_accepted=False,
         has_been_rejected=False,
         added_by_team__participating_in_contest=contest.pk
     ).prefetch_related('for_organization__coordinate_set'))
-    for bare_url in bare_urls:
-        features.append(get_bare_url_feature(bare_url))
+    features = add_bare_url_features(features, bare_urls)
 
     # loop over the organizations and calculate the ratings.
     # you prefetch all the related objects, which still have to be iterated... damn,
     # because now you can't simply iterate over the data.
     # you can't sort by the first organization, as the second one might be different entirely.
     # let's build the data iteratively based on organizations in the queryset.
-
     for scan in endpoint_scans:
         features = add_or_update_features(features, scan)
 
@@ -581,6 +579,7 @@ def get_bare_organization_feature(submitted_organization):
                 "high_urls": 0,
                 "medium_urls": 0,
                 "low_urls": 0,
+                "origin": "get_bare_organization_feature"
             },
         "geometry":
             {
@@ -592,45 +591,72 @@ def get_bare_organization_feature(submitted_organization):
     }
 
 
-def get_bare_url_feature(submitted_url):
-    print(submitted_url)
-    print(submitted_url.for_organization.coordinate_set)
+def add_bare_url_features(features, submitted_urls):
 
-    if not submitted_url.for_organization.coordinate_set:
-        geojsontype = "Point"
-        area = [0, 0]
-    else:
-        coordinate = submitted_url.for_organization.coordinate_set.first()
+    # submitted url is always for a single organization.
+    for submitted_url in submitted_urls:
+        # as the submitted urls doesn't have ratings etc, we only check if we need to add the organization
+        # to the list of features.
+
+        # check if the organization is not yet in the list of features.
+        if organization_in_features(submitted_url.for_organization, features):
+            continue
+
+        # else create a nice dummy feature
+
+        # take into account that some contests / urls could not associated with a region. If there is no region
+        # attached to it, there is also nothing to plot, thus return the existing features
+        if not submitted_url.for_organization.coordinate_set:
+            continue
+
+        # get the last known coordinate from this set. They are (usually) ordered by date. But it doesn't matter much
+        # as it's more an indication than that it actually needs to be true/
+        coordinate = submitted_url.for_organization.coordinate_set.last()
         geojsontype = coordinate.geojsontype
         area = coordinate.area
 
-    return {
-        "type": "Feature",
-        "properties":
-            {
-                "organization_id": "%s" % submitted_url.for_organization.pk,
-                "organization_type": submitted_url.for_organization.type.name,
-                "organization_name": submitted_url.for_organization.name,
-                "organization_slug": slugify(submitted_url.for_organization.name),
-                "overall": 0,
-                "high": 0,
-                "medium": 0,
-                "low": 0,
-                "data_from": 0,
-                "color": "pending",
-                "total_urls": 0,
-                "high_urls": 0,
-                "medium_urls": 0,
-                "low_urls": 0,
-            },
-        "geometry":
-            {
-                "type": geojsontype,
-                # Sometimes the data is a string, sometimes it's a list. The admin
-                # interface might influence this.
-                "coordinates": area
-            }
-    }
+        feature = {
+            "type": "Feature",
+            "properties":
+                {
+                    "organization_id": "%s" % submitted_url.for_organization.pk,
+                    "organization_type": submitted_url.for_organization.type.name,
+                    "organization_name": submitted_url.for_organization.name,
+                    "organization_slug": slugify(submitted_url.for_organization.name),
+                    "overall": 0,
+                    "high": 0,
+                    "medium": 0,
+                    "low": 0,
+                    "data_from": 0,
+                    "color": "pending",
+                    "total_urls": 0,
+                    "high_urls": 0,
+                    "medium_urls": 0,
+                    "low_urls": 0,
+                    "origin": "add_bare_url_features"
+                },
+            "geometry":
+                {
+                    "type": geojsontype,
+                    # Sometimes the data is a string, sometimes it's a list. The admin
+                    # interface might influence this.
+                    "coordinates": area
+                }
+        }
+
+        features.append(feature)
+    return features
+
+
+def organization_in_features(organization, features):
+    id = str(organization.pk)  # stored as string in the feature
+
+    for feature in features:
+        if feature['properties']['organization_id'] == id:
+            return True
+
+    # not in there
+    return False
 
 
 def make_new_feature(organization, scan):
@@ -671,6 +697,7 @@ def make_new_feature(organization, scan):
                 "high_urls": 0,
                 "medium_urls": 0,
                 "low_urls": 0,
+                "origin": "make_new_feature"
             },
         "geometry":
             {
