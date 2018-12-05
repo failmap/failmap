@@ -1510,7 +1510,12 @@ function views(autoload_default_map_data=true) {
             // wait until the default category and default languages have been set...
 
             // initial load.
-            // this.load(0)
+            if (!autoload_default_map_data) {
+                // make sure this only works once
+                console.log("1/2 Explicitly disabled automatic loading of default map data. Please load map data yourself.");
+                return;
+            }
+            this.load(0)
         },
         mixins: [state_mixin],
 
@@ -1549,10 +1554,11 @@ function views(autoload_default_map_data=true) {
                 this.category = category;
 
                 // The first time the map is not allowed to load in any regards:
+                // set state is a second attempt of loading data via the categorynavbar
                 if (!autoload_default_map_data) {
                     // make sure this only works once
                     autoload_default_map_data = true;
-                    console.log("Explicitly disabled automatic loading of default map data. Please load map data yourself.");
+                    console.log("2/2 Explicitly disabled automatic loading of default map data. Please load map data yourself.");
                     return;
                 }
 
