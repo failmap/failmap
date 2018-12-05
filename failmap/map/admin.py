@@ -180,8 +180,8 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
     list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',
                     'is_reported')
     search_fields = (['country', 'organization_type', ])
-    list_filter = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',)
-    fields = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', )
+    list_filter = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', 'is_reported')
+    fields = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', 'is_reported')
 
     actions = []
 

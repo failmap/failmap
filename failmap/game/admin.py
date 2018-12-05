@@ -320,6 +320,16 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions = []
 
     @transaction.atomic
+    def reset_judgement(self, request, queryset):
+        for urlsubmission in queryset:
+            urlsubmission.has_been_accepted = False
+            urlsubmission.has_been_rejected = False
+            urlsubmission.save()
+        self.message_user(request, "URL be accepted/rejected again.")
+    reset_judgement.short_description = "Reset acceptance / rejection."
+    actions.append('reset_judgement')
+
+    @transaction.atomic
     def accept(self, request, queryset):
         for urlsubmission in queryset:
 
@@ -330,19 +340,17 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
             # it's possible that the url already is in the system. If so, tie that to the submitted organization.
             # could be dead etc... (stacking?)
-            try:
-                url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
-            except Url.DoesNotExist:
+            url = Url.objects.all().filter(url=urlsubmission.url, is_dead=False).first()
+
+            if not url:
+                log.debug('adding new url: %s' % urlsubmission.url)
                 # if it already exists, then add the url to the organization.
                 url = Url(url=urlsubmission.url)
                 url.save()
 
             # the organization is already inside the submission and should exist in most cases.
-            try:
-                url.organization.add(urlsubmission.for_organization)
-                url.save()
-            except Exception as e:
-                log.error(e)
+            url.organization.add(urlsubmission.for_organization)
+            url.save()
 
             # add some tracking data to the submission
             urlsubmission.url_in_system = url

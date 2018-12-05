@@ -59,13 +59,14 @@
                 <tr>
                     <th width="20%">Organization</th>
                     <th width="30%">Address</th>
-                    <th width="10%">Acceptation</th>
-                    <th width="20%">Added on</th>
+                    <th width="5%">Acceptation</th>
+                    <th width="10%">Added on</th>
+                    <th width="15%">Search</th>
                 </tr>
                 </thead><tbody>
         {% endifchanged %}
 
-        <tr style="background-color: {{ organization.added_by_team.color }};" title="Added by {{ organization.added_by_team.name }}">
+        <tr style="background-color: {{ organization.added_by_team.color }}33;" title="Added by {{ organization.added_by_team.name }}">
             <td>{{ organization.organization_name }}</td>
             <td>{{ organization.organization_address }}</td>
             {% if organization.has_been_accepted %}
@@ -76,6 +77,13 @@
             <td style="color: gray;">pending</td>
             {% endif %}
             <td>{{ organization.added_on|naturaltime  }}</td>
+            <td>
+                <a href="https://www.duckduckgo.com/?q={{ organization.organization_name }}" target="_blank">duckduckgo</a>,
+                <a href="https://www.google.com/search?q={{ organization.organization_name }}" target="_blank">google</a>
+                {% if contest.target_country == "NL" %}
+                <a href="https://www.kvk.nl/zoeken/?source=all&q={{ organization.organization_name }}" target="_blank">kvk</a>
+                {% endif %}
+            </td>
         </tr>
         {% empty %}
         <tr><td colspan="7">-</td></tr>
@@ -96,7 +104,7 @@
             </tr>
         {% endifchanged %}
 
-        <tr style="background-color: {{ url.added_by_team.color }};" title="Added by {{ url.added_by_team.name }}">
+        <tr style="background-color: {{ url.added_by_team.color }}33;" title="Added by {{ url.added_by_team.name }}">
             <td>{{ url.url }} (try: <a href="http://{{ url.url }}" target="_blank">http</a>,
                               <a href="https://{{ url.url }}" target="_blank">https</a>)</td>
             {% if url.has_been_accepted %}
