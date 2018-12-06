@@ -396,7 +396,9 @@ class UrlSubmissionForm(forms.Form):
                 not_resolvable.append(url)
                 continue
 
-            valid.append(url)
+            # todo: does this add the same url a few times?
+            if url not in valid:
+                valid.append(url)
 
         return incomplete, not_resolvable, valid
 

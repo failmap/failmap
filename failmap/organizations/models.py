@@ -114,7 +114,7 @@ class Organization(models.Model):
     def __str__(self):
 
         if self.type_id not in self.organization_name_cache:
-            log.debug("caching...")
+            # log.debug("caching...")
             self.organization_name_cache[self.type_id] = self.type.name
 
         type_label = self.organization_name_cache[self.type_id]

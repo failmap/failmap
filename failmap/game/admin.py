@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from random import choice, choices, randint
 
 import pytz
+import tldextract
 from constance import config
 from django.contrib import admin
 from django.db import transaction
@@ -17,6 +18,7 @@ from failmap.app.admin import generate_game_user
 from failmap.app.models import GameUser
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from failmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
 
@@ -463,6 +465,19 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             new_coordinate.save()
             log.debug('Saved matching coordinate.')
 
+            # add the toplevel urls if they exist.
+            if osm.suggested_urls:
+                # a disgusting way to parse this list, without using eval.
+                urls = osm.suggested_urls.replace("[", "").replace("'", "").replace("]", "").replace(",", "").split(" ")
+                urls = check_valid_urls(urls)
+                for url in urls:
+                    new_url = Url()
+                    new_url.url = url
+                    new_url.save()
+
+                    new_url.organization.add(new_org)
+                    new_url.save()
+
             # and save tracking information
             osm.organization_in_system = new_org
             osm.has_been_accepted = True
@@ -482,3 +497,28 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, "Organisation(s) have been rejected.")
     reject.short_description = "❌  Reject"
     actions.append('reject')
+
+
+def check_valid_urls(urls):
+    valid = []
+
+    for url in urls:
+        url = url.lower()
+        url = url.replace("https://", "")
+        url = url.replace("http://", "")
+
+        extract = tldextract.extract(url)
+        if not extract.suffix:
+            continue
+
+        # tld extract has also removed ports, usernames, passwords and other nonsense.
+        url = "%s.%s" % (extract.domain, extract.suffix)
+
+        # see if the URL resolves at all:
+        if not resolves(url):
+            continue
+
+        if url not in valid:
+            valid.append(url)
+
+    return valid
