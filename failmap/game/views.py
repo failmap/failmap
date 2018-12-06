@@ -549,7 +549,7 @@ def contest_map_data(request):
         has_been_accepted=False,
         has_been_rejected=False,
         added_by_team__participating_in_contest=contest.pk
-    ))
+    ).distinct())
     for bare_organization in bare_organizations:
         features.append(get_bare_organization_feature(bare_organization))
 
@@ -569,7 +569,7 @@ def contest_map_data(request):
         organization_in_system__u_many_o_upgrade__urlgenericscan__isnull=True,
         organization_in_system__u_many_o_upgrade__endpoint__endpointgenericscan__isnull=True,
         added_by_team__participating_in_contest=contest.pk
-    ))
+    ).distinct())
 
     # todo: this can have the real ID, real mapping information.
     for bare_organization in bare_organizations:

@@ -678,6 +678,7 @@ th.active .arrow {
 
 /* Markers with CSS only, no (slow) images, and easy to change color. */
 
+
 .leaflet-marker-red
 {
     background-color: rgba(255,0,0,0.6);
@@ -720,8 +721,8 @@ th.active .arrow {
 
 .leaflet-marker-gray
 {
-    background-color: rgba(255, 248, 241, 0.6);
-    border: 2px solid rgba(178, 179, 178, 0.5);
+    background-color: rgba(0, 88, 255, 0.6);
+    border: 2px solid rgba(0, 68, 179, 0.5);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;

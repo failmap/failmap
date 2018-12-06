@@ -166,6 +166,14 @@ class OrganisationSubmissionForm(forms.Form):
         help_text=""
     )
 
+    suggested_urls = forms.CharField(
+        widget=Select2TagWidget,
+        label="Comma separated list of urls that you want to add to this organization when the organization has been"
+              " accepted.",
+        required=False,
+        help_text=""
+    )
+
     # todo: clean the geolocated address to fit the rest of the system.
 
     def clean(self):
@@ -217,6 +225,7 @@ class OrganisationSubmissionForm(forms.Form):
         organization_wikidata = self.cleaned_data.get('organization_wikidata', None)
         organization_type_name = self.cleaned_data.get('organization_type_name', None)
         organization_evidence = self.cleaned_data.get('organization_evidence', None)
+        organization_suggested_urls = self.cleaned_data.get('suggested_urls', None)
 
         submission = OrganizationSubmission(
             added_by_team=Team.objects.get(pk=team),
@@ -228,6 +237,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_wikidata_code=organization_wikidata,
             organization_address_geocoded=[lng, lat],
             organization_country=organization_country,
+            suggested_urls=organization_suggested_urls,
             added_on=timezone.now(),
             has_been_accepted=False,
             has_been_rejected=False
@@ -265,8 +275,9 @@ class UrlSubmissionForm(forms.Form):
             help_text="""
             Hints:"
                 <ul>
-                    <li>If you can't find the organization, try the abbreviated name.</li>
-                    <li>You can also search for organization type, and it's name at the same time.</li>
+                    <li>The format displayed is: name / layer (creation date)</li>
+                    <li>It's possible to search by layer, to see all organizations on this layer.</li>
+                    <li>If you can't find the organization, try The Abbreviated Name (TAN).</li>
                     <li>A list of all approved organizations is shown <a href='/game/submitted_organizations/'>
                     here</a></li>
                     <li>If your newly added organization is missing, please ask the competition host to verify your

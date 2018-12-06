@@ -1,6 +1,14 @@
 {% extends 'game/base.html' %}
 {% load crispy_forms_tags %} {% load my_tags %}
 {% block content %}
+    <script>
+    // tabs are not supported: https://github.com/select2/select2/issues/3359
+    $(".js-example-tokenizer").select2({
+        tags: true,
+        tokenSeparators: [',', ' ', ';']
+    });
+    </script>
+
     <style>
     .searchResults {
   padding: 20px 0 50px;

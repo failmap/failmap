@@ -171,6 +171,33 @@ class GroupResource(resources.ModelResource):
         model = Group
 
 
+def generate_game_user():
+    game_user_number = User.objects.all().filter(username__contains="game_user_").count()
+    game_user_number += 1
+
+    password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
+    password = "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
+
+    user = User.objects.create_user(username="game_user_%s" % game_user_number,
+                                    # can log into other things
+                                    is_active=True,
+                                    # No access to admin interface needed
+                                    is_staff=False,
+                                    # No permissions needed anywhere
+                                    is_superuser=False,
+                                    password=password)
+    user.save()
+
+    # store the password to this account in plain text. It doesn't have any permissions so well...
+    # in django we trust :)
+    game_user = GameUser()
+    game_user.user = user
+    game_user.password = password
+    game_user.save()
+
+    return user
+
+
 class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
     inlines = (VolunteerInline, GameUserInline)
@@ -181,29 +208,7 @@ class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     actions = []
 
     def add_game_user(self, request, queryset):
-        game_user_number = User.objects.all().filter(username__contains="game_user_").count()
-        game_user_number += 1
-
-        password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
-        password = "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
-
-        user = User.objects.create_user(username="game_user_%s" % game_user_number,
-                                        # can log into other things
-                                        is_active=True,
-                                        # No access to admin interface needed
-                                        is_staff=False,
-                                        # No permissions needed anywhere
-                                        is_superuser=False,
-                                        password=password)
-        user.save()
-
-        # store the password to this account in plain text. It doesn't have any permissions so well...
-        # in django we trust :)
-        game_user = GameUser()
-        game_user.user = user
-        game_user.password = password
-        game_user.save()
-
+        generate_game_user()
         self.message_user(request, "Game user added, rename if needed!")
 
     add_game_user.short_description = '💖 Add Game User (select a user first)'

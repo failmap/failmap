@@ -1,8 +1,10 @@
 import logging
 import re
 import urllib
+from datetime import datetime, timedelta
 from random import choice, choices, randint
 
+import pytz
 from constance import config
 from django.contrib import admin
 from django.db import transaction
@@ -11,6 +13,7 @@ from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 
+from failmap.app.admin import generate_game_user
 from failmap.app.models import GameUser
 from failmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from failmap.organizations.models import Coordinate, Organization, OrganizationType, Url
@@ -57,29 +60,41 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'from_moment', 'until_moment')
+            'fields': ('name', 'from_moment', 'until_moment'),
+            'description': "<span style='color: red'>"
+                           "Don't forget to disable subdomain discovery AND to onboard every 1 minute.</span>"
         }),
         ('Configuration', {
-            'fields': ('target_country', 'url_organization_discovery_help', 'admin_user', 'logo_filename'),
+            'fields': ('target_country', 'url_organization_discovery_help', 'admin_user'),
         }),
     )
 
     actions = []
 
     @transaction.atomic
+    def add_contest(self, request, queryset):
+        # create a new contest
+        contest = Contest()
+        contest.target_country = "NL"
+        contest.from_moment = datetime.now(pytz.utc)
+        contest.until_moment = datetime.now(pytz.utc) + timedelta(days=3)
+        contest.admin_user = generate_game_user()
+        contest.name = "new_contest_%s" % datetime.now(pytz.utc).date()
+        contest.save()
+
+        # create a number of team members.
+        for i in range(12):
+            generate_team(contest)
+
+        self.message_user(request, "Contest user, contest and teams have been created.")
+    add_contest.short_description = "Add contest (select one)"
+    actions.append('add_contest')
+
+    @transaction.atomic
     def add_a_dozen_teams(self, request, queryset):
         for contest in queryset:
-            make_teams = 12
-            team_counter = 0
-            while team_counter < make_teams:
-                team_counter += 1
-                new_team = Team()
-                new_team.name = generate_team_name()
-                new_team.color = generate_pastel_color()
-                new_team.participating_in_contest = contest
-                new_team.secret = generate_team_password()
-                new_team.allowed_to_submit_things = True
-                new_team.save()
+            for i in range(12):
+                generate_team(contest)
 
         self.message_user(request, "Urls have been rejected.")
     add_a_dozen_teams.short_description = "Add 12 teams"
@@ -97,6 +112,16 @@ class ContestAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append('show_printout')
 
     inlines = [TeamInline]
+
+
+def generate_team(contest):
+    new_team = Team()
+    new_team.name = generate_team_name()
+    new_team.color = generate_pastel_color()
+    new_team.participating_in_contest = contest
+    new_team.secret = generate_team_password()
+    new_team.allowed_to_submit_things = True
+    new_team.save()
 
 
 def create_printout(contest):
@@ -374,7 +399,8 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(OrganizationSubmission)
 class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('added_by_team', 'organization_name', 'has_been_accepted', 'has_been_rejected', 'added_on')
+    list_display = ('added_by_team', 'organization_name', 'organization_type_name',
+                    'has_been_accepted', 'has_been_rejected', 'added_on')
     search_fields = ('added_by_team__name', 'organization_name', 'organization_type_name')
 
     list_filter = ('added_by_team__name', 'has_been_accepted', 'has_been_rejected',
@@ -382,8 +408,8 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     fields = ('added_by_team', 'organization_country', 'organization_type_name', 'organization_name',
               'organization_address', 'organization_address_geocoded', 'organization_wikipedia',
-              'organization_wikidata_code', 'has_been_accepted',
-              'has_been_rejected', 'organization_in_system', 'added_on',)
+              'organization_wikidata_code', 'suggested_urls',
+              'has_been_accepted', 'has_been_rejected', 'organization_in_system', 'added_on',)
 
     actions = []
 

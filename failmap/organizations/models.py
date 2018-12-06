@@ -108,11 +108,21 @@ class Organization(models.Model):
         verbose_name_plural = _('organizations')
 
     # todo: find a smarter way to get the organization type name, instead of a related query... cached enums?
+    # this list resets per restart. So if you do complex changes in these layers / types...
+    organization_name_cache = {}
+
     def __str__(self):
+
+        if self.type_id not in self.organization_name_cache:
+            log.debug("caching...")
+            self.organization_name_cache[self.type_id] = self.type.name
+
+        type_label = self.organization_name_cache[self.type_id]
+
         if self.is_dead:
-            return "✝ %s, %s/%s (%s)" % (self.name, self.country, self.type_id, self.created_on.strftime("%b %Y"))
+            return "✝ %s, %s/%s (%s)" % (self.name, self.country, type_label, self.created_on.strftime("%b %Y"))
         else:
-            return "%s, %s/%s (%s)" % (self.name, self.country, self.type_id, self.created_on.strftime("%b %Y"))
+            return "%s, %s/%s (%s)" % (self.name, self.country, type_label, self.created_on.strftime("%b %Y"))
 
 
 GEOJSON_TYPES = (
