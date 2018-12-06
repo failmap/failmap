@@ -15,6 +15,7 @@ from django.db.utils import OperationalError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils.text import slugify
+from django.views.decorators.cache import cache_page
 
 from failmap.app.common import JSEncoder
 from failmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
@@ -122,6 +123,7 @@ def submit_organisation(request):
                                                              'contest': contest})
 
 
+@cache_page(one_minute)
 def scores(request):
 
     # todo: this param handling code is absolutely disgusting, it should be more beautiful.
@@ -270,6 +272,7 @@ def scores(request):
                                                 'menu_selected': 'scores'})
 
 
+@cache_page(one_minute)
 def contests(request):
 
     if request.POST:
@@ -329,11 +332,14 @@ def contests(request):
 # todo: validate organizatio type name...
 
 
+@cache_page(one_minute)
 def submitted_organizations(request):
     contest = get_default_contest(request)
 
     submitted_organizations = OrganizationSubmission.objects.all().filter(
         added_by_team__participating_in_contest=contest
+    ).annotate(
+        num_urls=Count('organization_in_system__u_many_o_upgrade')
     ).order_by('organization_type_name', 'organization_name')
 
     # not excluding the organizations submitted in this contest, as that IN filter will become too large.
@@ -346,7 +352,7 @@ def submitted_organizations(request):
         'contest': get_default_contest(request)})
 
 
-# todo: contest required!
+@cache_page(one_minute)
 def submitted_urls(request):
     """
     todo: overhaul to vue
@@ -355,9 +361,7 @@ def submitted_urls(request):
     """
     contest = get_default_contest(request)
 
-    submitted_urls = UrlSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=contest).order_by(
-        'for_organization', '-added_on', 'url').select_related('added_by_team', 'for_organization', 'url_in_system')
+    submitted_urls = get_submitted_urls(contest)
 
     # sqlite, when there is a NULL in the IN query, the set is NULL and you'll get nothing back.
     # subdomains are irrellevant given contestants cannot add them.
@@ -381,30 +385,107 @@ def rules_help(request):
     return render(request, 'game/rules_help.html')
 
 
-@login_required(login_url='/authentication/login/')
+@cache_page(one_minute)
 def map(request):
     contest = get_default_contest(request)
 
-    # also enrich with submitted urls and orgnaizations
-
     submitted_organizations = OrganizationSubmission.objects.all().filter(
         added_by_team__participating_in_contest=contest
+    ).annotate(
+        num_urls=Count('organization_in_system__u_many_o_upgrade')
     ).order_by('organization_type_name', 'organization_name')
-
-    submitted_urls = UrlSubmission.objects.all().filter(
-        added_by_team__participating_in_contest=contest).order_by(
-        'for_organization', '-added_on', 'url'
-    ).select_related('added_by_team', 'for_organization', 'url_in_system')
 
     return render(request, 'game/map.html', {
         'contest': contest,
         'team': get_team_info(request),
-        'submitted_urls': submitted_urls,
-        'submitted_organizations': submitted_organizations
+        'submitted_urls': get_submitted_urls(contest),
+        'submitted_organizations': submitted_organizations,
     })
 
 
-@login_required(login_url='/authentication/login/')
+def get_submitted_urls(contest):
+    # Don't use to_attr or prefetch related, as it is not maintainable code and i could not get it to work at all for
+    # hours. which was such a waste.
+
+    submitted_urls = UrlSubmission.objects.all().filter(
+        added_by_team__participating_in_contest=contest).order_by(
+        'for_organization', '-added_on', 'url'
+    ).select_related(
+        'added_by_team', 'for_organization', 'url_in_system',
+    )
+
+    # here are some example attempts:
+    # .prefetch_related(
+    # Prefetch(
+    #     'url_in_system__url__urlgenericscan',
+    #     queryset=UrlGenericScan.objects.filter(
+    #         rating_determined_on__lte=contest.until_moment),
+    #     to_attr='urlscans'
+    # ),
+    # https://stackoverflow.com/questions/27116770/prefetch-related-for-multiple-levels
+    # Prefetch(
+    #     'url_in_system__endpoint_set',
+    #     queryset=Endpoint.objects.prefetch_related(
+    #         Prefetch(
+    #             'endpointgenericscan_set',
+    #             to_attr='endpointgenericscan_list'
+    #         )
+    #     ),
+    #     # queryset=EndpointGenericScan.objects.filter(rating_determined_on__lte=contest.until_moment).all(),
+    #     # queryset=Endpoint.objects.filter(),
+    #     to_attr='endpoint_list'
+    # )
+    # )
+
+    # the old school way, it's easier to read and still very fast.
+    url_scans = list(UrlGenericScan.objects.all().filter(
+        url__urlsubmission__added_by_team__participating_in_contest=contest,
+        rating_determined_on__lte=contest.until_moment
+    ).select_related('url'))
+
+    endpoint_scans = list(EndpointGenericScan.objects.all().filter(
+        endpoint__url__urlsubmission__added_by_team__participating_in_contest=contest,
+        rating_determined_on__lte=contest.until_moment
+    ).select_related('endpoint__url'))
+
+    # create a sorting table where all relevant scans are ordered by url_id, thus search results are instant, save loops
+    lookup_table = {}
+    for url_scan in url_scans:
+        key = url_scan.url.pk
+        # initialize if it doesn't exist yet for this url
+        if key not in lookup_table:
+            lookup_table[key] = {'url_scans': [], 'endpoint_scans': []}
+        lookup_table[key]['url_scans'].append(url_scan)
+
+    for endpoint_scan in endpoint_scans:
+        key = endpoint_scan.endpoint.url.id
+        if key not in lookup_table:
+            lookup_table[key] = {'url_scans': [], 'endpoint_scans': []}
+        lookup_table[key]['endpoint_scans'].append(endpoint_scan)
+
+    custom_submitted_urls = []
+    for submitted_url in submitted_urls:
+        relevant_urls_scans = []
+        relevant_endpoint_scans = []
+
+        if submitted_url.url_in_system:
+
+            # some urls might not have scans yet
+            if submitted_url.url_in_system.pk in lookup_table:
+                relevant_urls_scans = lookup_table[submitted_url.url_in_system.pk]['url_scans']
+                relevant_endpoint_scans = lookup_table[submitted_url.url_in_system.pk]['endpoint_scans']
+
+        custom_submitted_urls.append(
+            {
+                'url': submitted_url,
+                'url_scans': relevant_urls_scans,
+                'endpoint_scans': relevant_endpoint_scans
+            }
+        )
+
+    return custom_submitted_urls
+
+
 def contest_map_data(request):
     """
     This doesn't have to take in account the time sliding features of failmap.
@@ -740,7 +821,7 @@ def teams(request):
         return redirect('/game/contests/')
 
     if request.POST:
-        form = TeamForm(request.POST, contest=get_default_contest(request))
+        form = TeamForm(request.POST, contest=get_default_contest(request), user=request.user)
 
         if form.is_valid():
             if form.cleaned_data['team']:
@@ -751,10 +832,12 @@ def teams(request):
 
             request.session.modified = True
             request.session.save()
-            form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request))
+            form = TeamForm(initial={'team': get_team_id(request)},
+                            contest=get_default_contest(request),
+                            user=request.user)
 
     else:
-        form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request))
+        form = TeamForm(initial={'team': get_team_id(request)}, contest=get_default_contest(request), user=request.user)
 
     return render(request, 'game/team.html', {'form': form, 'team': get_team_info(request)})
 

@@ -1,0 +1,44 @@
+{% load humanize %}{% load i18n %}
+<h2>Submitted urls</h2>
+    {% for submitted_url in submitted_urls %}
+        {% ifchanged submitted_url.url.for_organization %}
+            </table><h3>{{ submitted_url.url.for_organization }}</h3><table class="table table-sm table-striped table-bordered table-hover">
+            <tr>
+                <th width="40%">Url</th>
+                <th width="10%">Try</th>
+                <th width="10%">Acceptation</th>
+                <th width="30%">Added when</th>
+                <th width="10%">Onboarding</th>
+            </tr>
+        {% endifchanged %}
+
+        <tr style="background-color: {{ submitted_url.url.added_by_team.color }}33;" title="Added by {{ submitted_url.url.added_by_team.name }}">
+            <td>{{ submitted_url.url.url }}</td>
+            <td><a href="http://{{ submitted_url.url.url }}" target="_blank">http</a>, <a href="https://{{ submitted_url.url.url }}" target="_blank">https</a></td>
+            {% if submitted_url.url.has_been_accepted %}
+            <td style="color: green;">accepted</td>
+            {% elif submitted_url.url.has_been_rejected %}
+            <td style="color: red;">rejected</td>
+            {% else %}
+            <td style="color: gray;">pending</td>
+            {% endif %}
+            <td>{{ submitted_url.url.added_on|naturaltime }}</td>
+            <td>{{ submitted_url.url.onboarding_stage }} {{ submitted_url.url.endpointscans }}</td>
+        </tr>
+
+        {% if submitted_url.url_scans or submitted_url.endpoint_scans %}
+            <tr style="font-size: 0.6em;"><td colspan="7"><div style="column-count: 3; -webkit-column-count: 3; -moz-column-count: 3;">
+            {% for scan in submitted_url.endpoint_scans %}
+                <div>{% trans scan.type %}: {{ scan.rating }}</div>
+            {% endfor %}
+            {% for scan in submitted_url.url_scans %}
+                <div>{% trans scan.type %}: {{ scan.rating }}</div>
+            {% endfor %}
+            </div></td></tr>
+        {% endif %}
+
+        {% empty %}
+        <tr><td colspan="7">-</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>

@@ -1,9 +1,9 @@
-{% extends 'game/base.html' %}
+{% extends 'game/base.html' %}{% load humanize %}
 {% block content %}
     {% comment for="What is the origin of -?" %}{% endcomment %}
     {% if team and team.name != "-" %}
         <div class="alert alert-success" role="alert">
-            <p style="width: 100%; text-align: center;"><i>You are part of team: <span style="background-color: {{ team.color }}">{{ team.name | truncatechars:24 }}</span>,
+            <p style="width: 100%; text-align: center;"><i>You are part of team: <span style="background-color: {{ team.color }}">{{ team.name }}</span>,
                 {% for score in scores %} {% if team.name == score.team %} currently placed at <a href="#{{ forloop.counter }}">#{{ forloop.counter }}</a>. {% endif %} {% endfor %}</i>
                 <br>
             <br>
@@ -13,9 +13,9 @@
         </div>
     {%  endif %}
 
-    <p style="width: 100%; text-align: center; font-size: 10vw;">{{ contest.name | truncatechars:16 }}</p>
+    <p style="width: 100%; text-align: center; font-size: 10vw;">{{ contest.name }}</p>
 
-    <p style="width: 100%; text-align: center; font-size: 2em;">Starts at {{ contest.from_moment }}. Deadline: {{ contest.until_moment }}.</p>
+    <p style="width: 100%; text-align: center; font-size: 2em;">Starts <abbr title="{{ contest.from_moment }}">{{ contest.from_moment | naturaltime }}</abbr>. Deadline: <abbr title="{{ contest.until_moment }}">{{ contest.until_moment | naturaltime }}</abbr>.</p>
 
     {% for score in scores %}
         <table class="table table-sm table-striped table-bordered table-hover"
@@ -41,7 +41,7 @@
                     {% endif %}
                     ">
                 <a name="{{ forloop.counter }}"></a># {{ forloop.counter }}</td></tr>
-            <tr><td colspan="3" style="font-size: 3em; text-align: center;  background-color: {{ score.team_color }}; height: 160px; vertical-align: middle;">{{ score.team | truncatechars:24 }}</td></tr>
+            <tr><td colspan="3" style="font-size: 3em; text-align: center;  background-color: {{ score.team_color }}; height: 160px; vertical-align: middle;">{{ score.team }}</td></tr>
             <tr><td>Total score</td>  <td colspan="2" style="text-align: center; font-size: 2em;">{{ score.total_score }}</td></tr>
             <tr><td>Organizations</td>    <td>{{ score.added_organizations }}</td><td><small>* {{ score.added_organizations_multiplier }} = {{ score.added_organizations_score }}</small></td></tr>
             <tr><td><small>Rejected</small></td>   <td><small>{{ score.rejected_organizations }}</small></td><td><small>* -{{ score.rejected_organizations_multiplier }} = -{{ score.rejected_organizations_score }}</small></td></tr>

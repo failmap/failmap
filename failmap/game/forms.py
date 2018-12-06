@@ -51,6 +51,7 @@ class TeamForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.contest = kwargs.pop('contest', 0)
+        self.user = kwargs.pop('user', None)
         super(TeamForm, self).__init__(*args, **kwargs)
         self.fields['team'] = forms.ModelChoiceField(
             widget=forms.RadioSelect,
@@ -75,13 +76,30 @@ class TeamForm(forms.Form):
         # it's possible NOT to select a team, in that case, don't try and validate secret.
         if team:
             try:
-                team = Team.objects.all().get(id=team.id, secret=secret,
-                                              allowed_to_submit_things=True, participating_in_contest=self.contest)
+                if has_permission('skip_team_secret', self.user):
+                    return
+
+                team = Team.objects.all().get(
+                    id=team.id,
+                    secret=secret,
+                    allowed_to_submit_things=True,
+                    participating_in_contest=self.contest
+                )
+
             except Team.DoesNotExist:
                 raise ValidationError(
                     _('Incorrect secret or team. Try again!'),
                     code='invalid',
                 )
+
+
+def has_permission(permission_code, user):
+
+    if not user:
+        return False
+
+    if user.is_superuser and permission_code in ['skip_team_secret']:
+        return True
 
 
 class OrganisationSubmissionForm(forms.Form):
@@ -306,7 +324,7 @@ class UrlSubmissionForm(forms.Form):
                 <ul>
                 <li>The following is all the same url (google.com):
                 https://google.com, https://www.google.com, http://nonsense.google.com, bla.nonsense.google.com,
-                google.com
+                GOOGLE.COM, www.google.com, google.com
                 </li>
                 <li>Subdomains and protocols are removed: the system will discover these.</li>
                 <li>Each address will be resolved to see if it exists. This can take a while.</li>
@@ -350,6 +368,7 @@ class UrlSubmissionForm(forms.Form):
         valid = []
 
         for url in sites:
+            url = url.lower()
             url = url.replace("https://", "")
             url = url.replace("http://", "")
 

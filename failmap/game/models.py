@@ -17,17 +17,7 @@ class Contest(models.Model):
     name = models.CharField(
         verbose_name=_("Contest name"),
         max_length=42,
-        help_text="Whatever name the team wants. Must be at least PEGI 88."
-    )
-
-    logo_filename = models.CharField(
-        max_length=255,
-        help_text="A nice filename for contest logos."
-    )
-
-    website = models.CharField(
-        max_length=255,
-        help_text="Whatever name the team wants. Must be at least PEGI 88."
+        help_text="Name of the contest, might be abbreviated, don't use long words."
     )
 
     from_moment = models.DateTimeField(
@@ -50,7 +40,9 @@ class Contest(models.Model):
         max_length=1024,
         default="",
         help_text="HTML: information where contestants can find good sources of urls / organizations. Displayed on"
-                  " both the URL and Organization adding forms."
+                  " both the URL and Organization adding forms.",
+        blank=True,
+        null=True,
     )
 
     admin_user = models.ForeignKey(
@@ -195,6 +187,12 @@ class OrganizationSubmission(models.Model):
         blank=True,
         null=True,
         help_text="Automatically filled when creating a new submission."
+    )
+
+    suggested_urls = models.TextField(
+        help_text="A set of or urls, comma separated that can be added when the organization was approved.",
+        null=True,
+        blank=True,
     )
 
     def __str__(self):
