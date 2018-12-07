@@ -458,7 +458,7 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 organization=new_org,
                 geojsontype="Point",
                 area=osm.organization_address_geocoded,
-                edit_area=osm.organization_address_geocoded,
+                edit_area={"type": "Point", "coordinates": osm.organization_address_geocoded},
                 created_on=timezone.now(),
                 creation_metadata="Accepted organization submission"
             )

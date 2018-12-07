@@ -599,8 +599,10 @@ def contest_map_data(request):
     updated_features = []
     for feature in features:
         # also check that there is something stored at all...
+        # not stored as geojsonfield anymore, because of implicit hate of that field.
         if isinstance(feature['geometry']['coordinates'], str) and feature['geometry']['coordinates']:
             feature['geometry']['coordinates'] = json.loads(feature['geometry']['coordinates'])
+            updated_features.append(feature)
         else:
             updated_features.append(feature)
 

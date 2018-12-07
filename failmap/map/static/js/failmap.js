@@ -7,34 +7,50 @@ const failmap = {
     polygons: L.geoJson(),  // geographical regions
     // todo: if you click the group too fast: Marker.js:181 Uncaught TypeError:
     // Cannot read property 'createIcon' of undefined
-    markers: L.markerClusterGroup({iconCreateFunction: function(cluster){
-        // getAllChildMarkers()
-        // if 1 is red, marker is red else if 1 is orange, else green else gray.
-        let css_class = "unknown";
 
-        // good, medium, bad
-        // todo: if red, break
-        // you can't break a forEach, therefore we're using an old school for loop here
-        let childmarkers = cluster.getAllChildMarkers();
-        let colors = ["unknown", "green", "yellow", "orange"];
-        let selected_color = 0;
+    markers: L.markerClusterGroup(
+        // with this disabled, still get the createIcon error.
+        // It looks like the icons get eaten after showing them once. Can be replicated now.
+        // Even when there are no icons from our code, it crashes.
+        // It does not matter if the location of the marker is the same or differs (slightly)
+        // After the first or second expansion, the
+        // options.icon is undefined; can't access its "createIcon" property
+        // happens. The options/icon is eaten after the first expansionmarkerClusterGroup or something like that.
+        // icon is then null. And even if we don't make a marker, the same issue happens.
+        {
+            // zoomToBoundsOnClick: false,
+            // spiderfyOnMaxZoom: false,
+            iconCreateFunction: function(cluster){
 
-        for (let point of childmarkers) {
-            if (point.feature.properties.color === "red") {
-                css_class = "red"; break;
+            // getAllChildMarkers()
+            // if 1 is red, marker is red else if 1 is orange, else green else gray.
+            let css_class = "unknown";
+
+            // good, medium, bad
+            // todo: if red, break
+            // you can't break a forEach, therefore we're using an old school for loop here
+            let childmarkers = cluster.getAllChildMarkers();
+            let colors = ["unknown", "green", "yellow", "orange"];
+            let selected_color = 0;
+
+            for (let point of childmarkers) {
+                if (point.feature.properties.color === "red") {
+                    css_class = "red"; break;
+                }
+
+                if (colors.indexOf(point.feature.properties.color) > selected_color){
+                    selected_color = colors.indexOf(point.feature.properties.color);
+                    css_class = point.feature.properties.color;
+                }
             }
 
-            if (colors.indexOf(point.feature.properties.color) > selected_color){
-                selected_color = colors.indexOf(point.feature.properties.color);
-                css_class = point.feature.properties.color;
-            }
-        }
-
-        return L.divIcon({
-            html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-            className: 'marker-cluster marker-cluster-' + css_class,
-            iconSize: new L.Point(40, 40) });
-    }}),
+            return L.divIcon({
+                html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                className: 'marker-cluster marker-cluster-' + css_class,
+                // title: 'SWAG',  // properties.organization_name
+                iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
+            }}
+    ),
 
     greenIcon: new L.divIcon({className: 'leaflet-marker-green'}),
     redIcon: new L.divIcon({className: 'leaflet-marker-red'}),
@@ -117,8 +133,17 @@ const failmap = {
                     L.DomEvent
                         .disableClickPropagation(azoom)
                         .addListener(azoom, 'click', function() {
-                            map.fitBounds(failmap.polygons.getBounds(),
-                                {paddingTopLeft: [0,0], paddingBottomRight: [0, 0]})
+                            // do not roll your own min() or max() over the bounds of these markers. It might wrap
+                            // around.
+                            let paddingToLeft = 0;
+                            if (document.documentElement.clientWidth > 768)
+                                paddingToLeft=320;
+
+                            let bounds = failmap.polygons.getBounds();
+                            bounds.extend(failmap.markers.getBounds());
+
+                            map.fitBounds(bounds,
+                                {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
                         }, azoom);
                     return azoom;
                 };
@@ -479,12 +504,12 @@ const failmap = {
     pointToLayer: function (geoJsonPoint, latlng) {
         // console.log(latlng);
         switch (geoJsonPoint.properties.color){
-            case "red": return L.marker(latlng, {icon: failmap.redIcon});
-            case "orange": return L.marker(latlng, {icon: failmap.orangeIcon});
-            case "green": return L.marker(latlng, {icon: failmap.greenIcon});
-            case "yellow": return L.marker(latlng, {icon: failmap.yellowIcon});
+            case "red": return L.marker(latlng, {icon: failmap.redIcon, title: geoJsonPoint.properties.organization_name});
+            case "orange": return L.marker(latlng, {icon: failmap.orangeIcon, title: geoJsonPoint.properties.organization_name});
+            case "green": return L.marker(latlng, {icon: failmap.greenIcon, title: geoJsonPoint.properties.organization_name});
+            case "yellow": return L.marker(latlng, {icon: failmap.yellowIcon, title: geoJsonPoint.properties.organization_name});
         }
-        return L.marker(latlng, {icon: failmap.grayIcon});
+        return L.marker(latlng, {icon: failmap.grayIcon, title: geoJsonPoint.properties.organization_name});
     },
 
     highlightFeature: function (e) {
@@ -552,8 +577,8 @@ const failmap = {
 
     plotdata: function (mapdata) {
         // mapdata is a mix of polygons and multipolygons, and whatever other geojson types.
-        regions = []; // to polygons
-        points = []; // to markers
+        let regions = []; // to polygons
+        let points = []; // to markers
 
         // the data is plotted on two separate layers which both have special properties.
         // both layers have a different way of searching, clicking behaviour and so forth.
@@ -585,8 +610,9 @@ const failmap = {
             failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
 
             // fit the map automatically, regardless of the initial positions
-            if (failmap.polygons.getLayers().length)
-                failmap.map.fitBounds(failmap.polygons.getBounds(), {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+            let bounds = failmap.polygons.getBounds();
+            bounds.extend(failmap.markers.getBounds());
+            failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
         } else {
             // add regions
             failmap.polygons = L.geoJson(regions, {
@@ -599,8 +625,9 @@ const failmap = {
             failmap.add_points(points);
 
             // fit the map automatically, regardless of the initial positions
-            if (failmap.polygons.getLayers().length)
-                failmap.map.fitBounds(failmap.polygons.getBounds(), {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+            let bounds = failmap.polygons.getBounds();
+            bounds.extend(failmap.markers.getBounds());
+            failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
         }
     },
 

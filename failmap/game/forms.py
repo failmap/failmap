@@ -155,8 +155,8 @@ class OrganisationSubmissionForm(forms.Form):
     organization_type_name = forms.ModelChoiceField(
         queryset=OrganizationType.objects.all(),
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
-        label="Type / Map Layer",
-        help_text="Types are rendered as separate layers on the map."
+        label="Map Layer",
+        help_text="On what layer this organization should be shown."
     )
 
     organization_evidence = forms.CharField(
@@ -235,7 +235,7 @@ class OrganisationSubmissionForm(forms.Form):
             organization_type_name=organization_type_name,
             organization_wikipedia=organization_wikipedia,
             organization_wikidata_code=organization_wikidata,
-            organization_address_geocoded=[lng, lat],
+            organization_address_geocoded="[%s, %s]" % (lng, lat),
             organization_country=organization_country,
             suggested_urls=organization_suggested_urls,
             added_on=timezone.now(),

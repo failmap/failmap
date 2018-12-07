@@ -4,7 +4,6 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
-from djgeojson.fields import GeoJSONField
 
 from failmap.organizations.models import Organization, Url
 
@@ -143,7 +142,8 @@ class OrganizationSubmission(models.Model):
         help_text="Sources of information about this organization."
     )
 
-    organization_address_geocoded = GeoJSONField(
+    # geojsonfields require the type defined in the geojson. We don't store geojson but just a coordinate.
+    organization_address_geocoded = models.CharField(
         max_length=5000,
         null=True,
         blank=True,

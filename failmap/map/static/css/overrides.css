@@ -782,3 +782,8 @@ th.active .arrow {
     font-size: 1.2em;
     margin-bottom: 6px;
 }
+
+/* Menu hover menu is just a few pixels below the item. So it disappears if you're not moving too fast which is evil*/
+.dropdown-menu {
+    top: 86% !important;
+}

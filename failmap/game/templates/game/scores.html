@@ -17,9 +17,11 @@
 
     <p style="width: 100%; text-align: center; font-size: 2em;">Starts <abbr title="{{ contest.from_moment }}">{{ contest.from_moment | naturaltime }}</abbr>. Deadline: <abbr title="{{ contest.until_moment }}">{{ contest.until_moment | naturaltime }}</abbr>.</p>
 
+    <div class="row">
     {% for score in scores %}
+        <div class="col-md-4" style="margin-bottom: 30px;">
         <table class="table table-sm table-striped table-bordered table-hover"
-               style="width: 29%; float:left; margin: 20px; box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); background-color: {{ score.team_color_soft }}; {% if team.name == score.team %} border: 1px solid lightgreen; {% endif %}">
+               style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); background-color: {{ score.team_color_soft }}; {% if team.name == score.team %} border: 1px solid lightgreen; {% endif %}">
             <tbody>
             <tr><td colspan="3"
                     style="font-weight: bold; font-family: impact, sans-serif; font-size: 6em; text-align: center;
@@ -52,7 +54,9 @@
             <tr><td>Low risk issues</td>   <td>{{ score.low }}</td><td><small>* {{ score.low_multiplier }} = {{ score.low_score }}</small></td></tr>
             </tbody>
         </table>
+        </div>
     {% endfor %}
+    </div>
 
     <br style="clear: both">
 
