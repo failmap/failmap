@@ -40,7 +40,7 @@ class Organization(models.Model):
         OrganizationType,
         on_delete=models.PROTECT,
         default=1)
-    name = models.CharField(max_length=50, db_index=True)
+    name = models.CharField(max_length=250, db_index=True)
 
     internal_notes = models.TextField(
         max_length=500,

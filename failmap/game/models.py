@@ -125,7 +125,7 @@ class OrganizationSubmission(models.Model):
     # the name should translate to the natural key of an existing (or a new) organization.
     # organizations can be created in the admin interface
     organization_name = models.CharField(
-        max_length=42,
+        max_length=250,
         default="unknown",
         help_text="The contest the team is participating in."
     )
