@@ -340,7 +340,8 @@ class UrlSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ('has_been_accepted', 'has_been_rejected',
                    'added_by_team__name', 'added_by_team__participating_in_contest__name')
 
-    fields = ('added_by_team', 'for_organization', 'url', 'url_in_system', 'has_been_accepted', 'added_on')
+    fields = ('added_by_team', 'for_organization', 'url', 'url_in_system', 'has_been_accepted', 'has_been_rejected',
+              'added_on')
 
     ordering = ('for_organization', 'url')
 
@@ -471,12 +472,23 @@ class OrganizationSubmissionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 urls = osm.suggested_urls.replace("[", "").replace("'", "").replace("]", "").replace(",", "").split(" ")
                 urls = check_valid_urls(urls)
                 for url in urls:
-                    new_url = Url()
-                    new_url.url = url
-                    new_url.save()
 
-                    new_url.organization.add(new_org)
-                    new_url.save()
+                    # don't auto add the URL, to have a bit more control over what is being added
+                    # new_url = Url()
+                    # new_url.url = url
+                    # new_url.save()
+                    # new_url.organization.add(new_org)
+                    # new_url.save()
+
+                    submission = UrlSubmission()
+                    submission.url = url
+                    submission.has_been_rejected = False
+                    submission.has_been_accepted = False
+                    submission.added_by_team = osm.added_by_team
+                    submission.added_on = osm.added_on
+                    # submission.url_in_system = new_url
+                    submission.for_organization = new_org
+                    submission.save()
 
             # and save tracking information
             osm.organization_in_system = new_org
