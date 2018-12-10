@@ -81,16 +81,19 @@ def compose_discover_task(
         organizations = Organization.objects.filter(**organizations_filter)
         # apply filter to urls in organizations (or if no filter, all urls)
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
+        urls = list(set(urls))
         log.info('Creating http scan task for %s urls for %s organizations.', len(urls), len(organizations))
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
+        urls = list(set(urls))
         log.info('Creating http scan task for %s urls.', len(urls))
 
     if endpoints_filter:
         log.warning("Endpoint filters are not implemented: filter has no effect.")
 
     # make sure we're dealing with a list for the coming random function
-    urls = list(urls)
+
+
     # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
     tasks = []

@@ -56,6 +56,9 @@ def compose_task(
                     'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
         return group()
 
+    # unique endpoints only
+    endpoints = list(set(endpoints))
+
     log.info('Creating security headers scan task for %s endpoints for %s urls for %s organizations.',
              len(endpoints), len(urls), len(organizations))
 
