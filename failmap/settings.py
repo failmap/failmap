@@ -446,6 +446,10 @@ TOOLS = {
         'output_dir': OUTPUT_DIR + os.environ.get('OPENSTREETMAP_OUTPUT_DIR',
                                                   "scanners/resources/output/openstreetmap/"),
     },
+    'organizations': {
+        'import_data_dir': OUTPUT_DIR + os.environ.get('ORGANIZATION_IMPORT_DATA_DIR',
+                                                       "scanners/resources/data/organizations/"),
+    },
     'sslscan': {
         # this is beta functionality and not supported in production
         # these are installed system wide and don't require a path (they might when development continues)

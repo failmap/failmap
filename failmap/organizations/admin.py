@@ -574,7 +574,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
                            "If you want to move the coordinate, preferably do so by creating a new one and setting the"
                            " current one as dead (+date etc). Then the map will show coordinates over time, which is "
                            "pretty neat.",
-            'fields': ('organization', 'geojsontype', 'area', 'edit_area')
+            'fields': ('organization', 'geojsontype', 'area', 'edit_area', 'creation_metadata')
         }),
 
         ('Life cycle', {

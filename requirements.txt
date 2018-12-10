@@ -134,3 +134,6 @@ tenacity
 # game
 spectra  # fancy colors for teams
 markdown  # explanations for urls and organizations from the admin
+
+# geocoding organizations from python
+googlemaps

@@ -43,7 +43,7 @@ class Organization(models.Model):
     name = models.CharField(max_length=250, db_index=True)
 
     internal_notes = models.TextField(
-        max_length=500,
+        max_length=2500,
         help_text="These notes can contain information on WHY this organization was added. Can be handy if it's not "
                   "straightforward. This helps with answering questions why the organization was added lateron. "
                   "These notes will not be published, but are also not secret.",

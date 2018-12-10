@@ -17,6 +17,7 @@ const failmap = {
         // options.icon is undefined; can't access its "createIcon" property
         // happens. The options/icon is eaten after the first expansionmarkerClusterGroup or something like that.
         // icon is then null. And even if we don't make a marker, the same issue happens.
+        // is the problem in the retract function not storing anything correctly?
         {
             // zoomToBoundsOnClick: false,
             // spiderfyOnMaxZoom: false,
