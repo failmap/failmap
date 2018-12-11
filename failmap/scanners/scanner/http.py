@@ -93,7 +93,6 @@ def compose_discover_task(
 
     # make sure we're dealing with a list for the coming random function
 
-
     # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
     tasks = []

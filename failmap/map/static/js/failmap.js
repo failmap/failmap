@@ -18,6 +18,8 @@ const failmap = {
         // happens. The options/icon is eaten after the first expansionmarkerClusterGroup or something like that.
         // icon is then null. And even if we don't make a marker, the same issue happens.
         // is the problem in the retract function not storing anything correctly?
+        // cause found: mouseout of a point. Probably the code in that thing.
+
         {
             // zoomToBoundsOnClick: false,
             // spiderfyOnMaxZoom: false,
@@ -50,7 +52,9 @@ const failmap = {
                 className: 'marker-cluster marker-cluster-' + css_class,
                 // title: 'SWAG',  // properties.organization_name
                 iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
-            }}
+            }
+        }
+
     ),
 
     greenIcon: new L.divIcon({className: 'leaflet-marker-green'}),
@@ -231,7 +235,6 @@ const failmap = {
     // the map will always fit to bounds after loading the dataset, but at least it shows the right country if the
     // data lodas slow.
     initial_location: function(country_code) {
-
         // you might want to set the zoomlevel
         // data from: https://worldmap.harvard.edu/data/geonode:country_centroids_az8
         let startpositions = {
@@ -637,9 +640,13 @@ const failmap = {
             // console.log(point);
             pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
+            // which of one of these three triggers the bug?
             pointlayer.on({
                 mouseover: failmap.highlightFeature,
-                mouseout: failmap.resetHighlight,
+                // mouseout triggered a bug that was not in the stack trace of the map.
+                // It prevented to show markers on the same location twice. So expanding markers twice
+                // resulted in a crash. Sine we don't really need this here it has been disabled.
+                // mouseout: failmap.resetHighlight,
                 click: failmap.showreport
             });
 
@@ -746,8 +753,6 @@ const failmap = {
     },
 
     showreport: function (e) {
-        // console.log(e);
-
         let organization_id = e.target.feature.properties['organization_id'];
         if (failmap.map.isFullscreen()) {
             // var layer = e.target;

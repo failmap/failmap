@@ -48,25 +48,25 @@ Date.prototype.humanTimeStamp = function () {
 // and this is where we slowly creep towards vuex.
 const state_mixin = {
     data: {
-        category: "",
+        layer: "",
         country: ""
     },
     // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
     // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
 
     methods: {
-       set_state: function(country, category) {
+       set_state: function(country, layer) {
 
            // do not set the state or call any action when the html element has not been created. See configuration.
            if (!document.getElementById(this.$options.el.replace("#","")))
                return;
 
            // prevent loading when things didn't change.
-           if (country === this.country && category === this.category)
+           if (country === this.country && layer === this.layer)
                return;
 
            this.country = country;
-           this.category = category;
+           this.layer = layer;
            this.load();
        }
     }
@@ -260,7 +260,7 @@ const report_mixin = {
 
         // translations say "unterminated string", which doesn't make sense.
         vulnerability_timeline_for_organization: function(organization_id){
-            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.category + '/' + this.country)
+            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.layer + '/' + this.country)
                 .then(response => response.json()).then(data => {
 
                 let labels = Array();
@@ -570,7 +570,7 @@ const report_mixin = {
                 weeks_ago = 0;
             }
 
-            if (!this.country || !this.category)
+            if (!this.country || !this.layer)
                 return;
 
             // against symptom of autoloading when setting state, this doesn't have the right parameters.
@@ -580,12 +580,12 @@ const report_mixin = {
             vueReport.loading = true;
             vueReport.name = null;
             let self = this;
-            $.getJSON('/data/report/' + this.country + '/' + this.category + '/' + organization_id + '/' + weeks_ago, function (data) {
+            $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_ago, function (data) {
                 self.loading = false;
                 self.urls = data.calculation["organization"]["urls"];
                 self.points = data.rating;
                 self.high = data.calculation["organization"]["high"];
-                self.medium = data.calculation["organization"]["medium"];
+                self.medium = data.calculation["orgaselected_categorynization"]["medium"];
                 self.low = data.calculation["organization"]["low"];
                 self.when = data.when;
                 self.name = data.name;
@@ -635,11 +635,11 @@ const latest_mixin = {
     methods: {
         load: function(){
 
-            if (!this.country || !this.category) {
+            if (!this.country || !this.layer) {
                 return;
             }
 
-            fetch(this.data_url + this.country + '/' + this.category + '/' + this.scan)
+            fetch(this.data_url + this.country + '/' + this.layer + '/' + this.scan)
                 .then(response => response.json()).then(data => {
                     this.scans = data.scans;
             }).catch((fail) => {console.log('An error occurred: ' + fail)});
@@ -701,14 +701,14 @@ const top_mixin = {
         },
         load: function (weeknumber) {
 
-            if (!this.country || !this.category)
+            if (!this.country || !this.layer)
                 return;
 
             if (weeknumber === undefined)
                 weeknumber = 0;
 
             let self = this;
-            $.getJSON(this.$data.data_url + this.country + '/' + this.category + '/' + weeknumber, function (data) {
+            $.getJSON(this.$data.data_url + this.country + '/' + this.layer + '/' + weeknumber, function (data) {
                 self.data = data.ranking.slice(0,10);
                 self.fulldata = data.ranking;
                 self.metadata  = data.metadata;
@@ -765,8 +765,17 @@ function show_ticker() {
 // This helps showing some regions that might not be set to 'displayed' and is for demo purposes
 function germany() {
     vueMapStateBar.countries = ["NL", "DE"];
-    vueMapStateBar.categories = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
+    vueMapStateBar.layers = ["bundesland", "regierungsbezirk", "landkreis_kreis_kreisfreie_stadt",
     "samtgemeinde_verwaltungsgemeinschaft"];
+}
+
+// meant to be called from console: vueMap.preview('NL', 'municipality');
+function preview(country, layer){
+    // also show tiles on failmap.
+    failmap.loadTiles();
+    vueMap.country = country;
+    vueMap.layer = layer;
+    vueMap.load();
 }
 
 
@@ -792,7 +801,7 @@ function views(autoload_default_map_data=true) {
         methods: {
             load: function () {
 
-                if (!this.country || !this.category)
+                if (!this.country || !this.layer)
                     return;
 
                 // data.total
@@ -802,7 +811,7 @@ function views(autoload_default_map_data=true) {
                 var endpoints = Array();
                 var labels = Array();
 
-                fetch('/data/vulnstats/' + this.country + '/' + this.category + '/0')
+                fetch('/data/vulnstats/' + this.country + '/' + this.layer + '/0')
                     .then(response => response.json()).then(data => {
 
                         // no data returned.
@@ -904,7 +913,7 @@ function views(autoload_default_map_data=true) {
             vulnerability_graph: function(element, data, axis){
 
                 // always try to clean up the previous graph: also when data is undefined etc.
-                // updating the data might be nicer, but since it's so far away from the category switch you wont notice
+                // updating the data might be nicer, but since it's so far away from the layer switch you wont notice
                 // if a stat is missing, it will have an empty spot now, which is good enough.
                 if (this.charts[element] !== undefined)
                         this.charts[element].destroy();
@@ -1089,14 +1098,14 @@ function views(autoload_default_map_data=true) {
         methods: {
             load: function (weeknumber) {
 
-                if (!this.country || !this.category)
+                if (!this.country || !this.layer)
                     return;
 
                 if (weeknumber === undefined)
                     weeknumber = 0;
 
                 let self = this;
-                $.getJSON('/data/stats/' + this.country + '/' + this.category + '/' + weeknumber, function (data) {
+                $.getJSON('/data/stats/' + this.country + '/' + this.layer + '/' + weeknumber, function (data) {
                     self.data = data;
 
                     self.endpoints_now = data.data.now['endpoints'];
@@ -1146,14 +1155,14 @@ function views(autoload_default_map_data=true) {
                 if (!weeks_back)
                     weeks_back = 0;
 
-                if (!this.country || !this.category)
+                if (!this.country || !this.layer)
                     return;
 
                 // symptom of state mixing loads this even though it's not needed (and doesn't have the right arguments)
                 if (!organization_id)
                     return;
 
-                $.getJSON('/data/report/' + this.country + '/' + this.category + '/' + organization_id + '/' + weeks_back, function (data) {
+                $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_back, function (data) {
                     vueDomainlist.urls = data.calculation["organization"]["urls"];
                 });
             }, 42)
@@ -1210,11 +1219,11 @@ function views(autoload_default_map_data=true) {
             },
             load: function () {
 
-                if (!this.country || !this.category)
+                if (!this.country || !this.layer)
                     return;
 
 
-                fetch('/data/ticker/' + this.country + '/' + this.category + '/0/0').then(response => response.json()).then(data => {
+                fetch('/data/ticker/' + this.country + '/' + this.layer + '/0/0').then(response => response.json()).then(data => {
 
                     this.changes = data.changes;
                     this.slogan = data.slogan;
@@ -1263,11 +1272,11 @@ function views(autoload_default_map_data=true) {
         mixins: [translation_mixin, state_mixin],
         el: '#export',
         data: {
-            categories: Array
+            layers: Array
         },
         methods: {
-            create_link: function(category, linktype){
-                return '/data/export/' + linktype + '/' + this.country + '/' + category + '/json/';
+            create_link: function(layer, linktype){
+                return '/data/export/' + linktype + '/' + this.country + '/' + layer + '/json/';
             },
             load: function(){
                 // doesn't have a load method, but is auto called via the state_mixin.
@@ -1432,7 +1441,7 @@ function views(autoload_default_map_data=true) {
         methods: {
             load: function (weeks_ago) {
 
-                if (!this.country || !this.category)
+                if (!this.country || !this.layer)
                     return;
 
                 if (!weeks_ago) {
@@ -1440,7 +1449,7 @@ function views(autoload_default_map_data=true) {
                 }
 
                 let self = this;
-                $.getJSON('/data/improvements/' + this.country + '/' + this.category + '/' + weeks_ago + '/0', function (data) {
+                $.getJSON('/data/improvements/' + this.country + '/' + this.layer + '/' + weeks_ago + '/0', function (data) {
                     if ($.isEmptyObject(data)) {
                         self.data = null;
                         self.tls_qualys_certificate_trusted = {high: 0, medium:0, low: 0};
@@ -1507,7 +1516,7 @@ function views(autoload_default_map_data=true) {
         name: "Map",
 
         mounted: function () {
-            // wait until the default category and default languages have been set...
+            // wait until the default layer and default languages have been set...
 
             // initial load.
             if (!autoload_default_map_data) {
@@ -1548,13 +1557,13 @@ function views(autoload_default_map_data=true) {
             clear_filter: function (){
                 this.displayed_issue = "";
             },
-            set_state: function(country, category, skip_map){
+            set_state: function(country, layer, skip_map){
                 console.log("Set map/site state");
                 this.country = country;
-                this.category = category;
+                this.layer = layer;
 
                 // The first time the map is not allowed to load in any regards:
-                // set state is a second attempt of loading data via the categorynavbar
+                // set state is a second attempt of loading data via the layernavbar
                 if (!autoload_default_map_data) {
                     // make sure this only works once
                     autoload_default_map_data = true;
@@ -1572,67 +1581,69 @@ function views(autoload_default_map_data=true) {
                     vueMap.show_week();
                 }
 
-                vueTopfail.set_state(this.country, this.category);
-                vueTopwin.set_state(this.country, this.category);
-                vueStatistics.set_state(this.country, this.category);
-                vueLatestPlainHttps.set_state(this.country, this.category);
-                vueLatestFtp.set_state(this.country, this.category);
-                vueLatestTlsQualysCertificateTrust.set_state(this.country, this.category);
-                vueLatestTlsQualysEncryptionQuality.set_state(this.country, this.category);
-                vueLatestXContentTypeOptions.set_state(this.country, this.category);
-                vueLatestHSTS.set_state(this.country, this.category);
-                vueLatestXFrameOptions.set_state(this.country, this.category);
-                vueLatestXXSSProtection.set_state(this.country, this.category);
-                vueLatestDNSSEC.set_state(this.country, this.category);
-                vueGraphs.set_state(this.country, this.category);
-                vueImprovements.set_state(this.country, this.category);
-                vueExport.set_state(this.country, this.category);
-                vueDomainlist.set_state(this.country, this.category);
-                vueTicker.set_state(this.country, this.category);
-                vueExplains.set_state(this.country, this.category);
+                vueTopfail.set_state(this.country, this.layer);
+                vueTopwin.set_state(this.country, this.layer);
+                vueStatistics.set_state(this.country, this.layer);
+                vueLatestPlainHttps.set_state(this.country, this.layer);
+                vueLatestFtp.set_state(this.country, this.layer);
+                vueLatestTlsQualysCertificateTrust.set_state(this.country, this.layer);
+                vueLatestTlsQualysEncryptionQuality.set_state(this.country, this.layer);
+                vueLatestXContentTypeOptions.set_state(this.country, this.layer);
+                vueLatestHSTS.set_state(this.country, this.layer);
+                vueLatestXFrameOptions.set_state(this.country, this.layer);
+                vueLatestXXSSProtection.set_state(this.country, this.layer);
+                vueLatestDNSSEC.set_state(this.country, this.layer);
+                vueGraphs.set_state(this.country, this.layer);
+                vueImprovements.set_state(this.country, this.layer);
+                vueExport.set_state(this.country, this.layer);
+                vueDomainlist.set_state(this.country, this.layer);
+                vueTicker.set_state(this.country, this.layer);
+                vueExplains.set_state(this.country, this.layer);
 
                 // this needs state as the organizaton name in itself is not unique.
-                vueReport.set_state(this.country, this.category);
-                vueFullScreenReport.set_state(this.country, this.category);
+                vueReport.set_state(this.country, this.layer);
+                vueFullScreenReport.set_state(this.country, this.layer);
             },
             // slowly moving the failmap into a vue. NOPE. denied.
             load: function (week) {
                 if (week === undefined)
                     week = 0;
 
-                let self = this;
-                self.loading = true;
+                this.loading = true;
+
+                if (this.preview){
+                    this.show_data(`/data/map/${this.country}/${this.layer}/${week * 7}/${this.displayed_issue}/`);
+                    return;
+                }
 
                 // the first time the map defaults are loaded, this saves a trip to the server of what the defaults are
                 // it's possible that this is slower than the rest of the code, and thus a normal map is loaded.
-                if (!this.country || !this.category) {
-
-                    $.getJSON('/data/map_default/' + week * 7 + '/' +
-                        self.displayed_issue + '/' , function (mapdata) {
-                        self.loading = true;
-                        failmap.plotdata(mapdata);
-
-                        if (mapdata.features.length > 0) {
-                            self.features = mapdata.features;
-                        }
-                        self.loading = false;
-                    });
-                } else {
-                    $.getJSON('/data/map/' + this.country + '/' + this.category + '/' + week * 7 + '/' +
-                        self.displayed_issue + '/', function (mapdata) {
-                        self.loading = true;
-
-                        failmap.plotdata(mapdata);
-
-                        // make map features (organization data) available to other vues
-                        // do not update this attribute if an empty list is returned as currently
-                        // the map does not remove organizations for these kind of responses.
-                        if (mapdata.features.length > 0) {
-                            self.features = mapdata.features;
-                        }
-                        self.loading = false;
-                    });
+                if (!this.country || !this.layer) {
+                    this.show_data(`/data/map_default/${week * 7}/${this.displayed_issue}/`);
+                    return;
                 }
+
+                this.show_data(`/data/map/${this.country}/${this.layer}/${week * 7}/${this.displayed_issue}/`);
+
+            },
+            show_data: function(url) {
+                console.log(url);
+                fetch(url).then(response => response.json()).then(data => {
+                    this.loading = true;
+                    failmap.plotdata(data);
+
+                    // make map features (organization data) available to other vues
+                    // do not update this attribute if an empty list is returned as currently
+                    // the map does not remove organizations for these kind of responses.
+                    if (data.features.length > 0) {
+                        this.features = data.features;
+                    }
+                    this.loading = false;
+                }).catch((fail) => {
+                    console.log('A map error occurred: ' + fail);
+                    // allow you to load again:
+                    this.loading = false;
+                });
             },
             next_week: function () {
                 if (this.week > 0) {
@@ -1671,16 +1682,16 @@ function views(autoload_default_map_data=true) {
         }
     });
 
-    // merged category and country navbars to have a single point of setting the state at startup.
+    // merged layer and country navbars to have a single point of setting the state at startup.
     window.vueMapStateBar = new Vue({
         name: "MapStateBar",
         mixins: [translation_mixin],
         el: '#map_state_bar',
 
         data: {
-            categories: [""],
+            layers: [""],
             countries: [""],
-            selected_category: "",
+            selected_layer: "",
             selected_country: ""
         },
 
@@ -1692,49 +1703,49 @@ function views(autoload_default_map_data=true) {
         methods: {
             get_defaults: function() {
                 fetch('/data/defaults/').then(response => response.json()).then(data => {
-                    this.selected_category = data.category;
+                    this.selected_layer = data.layer;
                     this.selected_country = data.country;
                     // done in the map.
-                    vueMap.set_state(this.selected_country, this.selected_category, true);
+                    vueMap.set_state(this.selected_country, this.selected_layer, true);
                     this.get_countries();
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
             },
             get_countries: function() {
                 fetch('/data/countries/').then(response => response.json()).then(countries => {
-                    // it's fine to clear the navbar if there are no categories for this country
+                    // it's fine to clear the navbar if there are no layers for this country
                     this.countries = countries;
 
-                    // this is async, therefore you cannot call countries and then categories. You can only do while...
-                    this.get_categories();
+                    // this is async, therefore you cannot call countries and then layers. You can only do while...
+                    this.get_layers();
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
             },
-            get_categories: function() {
-                fetch('/data/categories/' + this.selected_country + '/').then(response => response.json()).then(categories => {
-                    // it's fine to clear the navbar if there are no categories for this country
-                    this.categories = categories;
-                    vueExport.categories = categories;  // todo: Move this to map? Can't. Figure out.
+            get_layers: function() {
+                fetch('/data/layers/' + this.selected_country + '/').then(response => response.json()).then(layers => {
+                    // it's fine to clear the navbar if there are no layers for this country
+                    this.layers = layers;
+                    vueExport.layers = layers;  // todo: Move this to map? Can't. Figure out.
                 });
             },
             set_country: function(country_name) {
-                // when changing the country, a new set of categories will appear.
+                // when changing the country, a new set of layers will appear.
                 this.selected_country = country_name;
 
-                // the first category of the country is the default. Load the map and set that one.
-                fetch('/data/categories/' + this.selected_country + '/').then(response => response.json()).then(categories => {
-                    // yes, there are categories.
-                    if (categories.length) {
-                        this.categories = categories;
-                        this.selected_category = categories[0];
-                        vueMap.set_state(this.selected_country, this.selected_category);
+                // the first layer of the country is the default. Load the map and set that one.
+                fetch('/data/layers/' + this.selected_country + '/').then(response => response.json()).then(layers => {
+                    // yes, there are layers.
+                    if (layers.length) {
+                        this.layers = layers;
+                        this.selected_layer = layers[0];
+                        vueMap.set_state(this.selected_country, this.selected_layer);
                     } else {
-                        this.categories = [""];
-                        vueMap.set_state(this.selected_country, this.selected_category);
+                        this.layers = [""];
+                        vueMap.set_state(this.selected_country, this.selected_layer);
                     }
                 });
             },
-            set_category: function(category_name){
-                this.selected_category = category_name;
-                vueMap.set_state(this.selected_country, this.selected_category);
+            set_layer: function(layer_name){
+                this.selected_layer = layer_name;
+                vueMap.set_state(this.selected_country, this.selected_layer);
             }
         }
     });
@@ -1791,11 +1802,11 @@ function views(autoload_default_map_data=true) {
             },
             load: function() {
 
-             if (!this.country || !this.category)
+             if (!this.country || !this.layer)
                 return;
 
 
-                fetch('/data/explained/' + this.country + '/' + this.category + '/').then(response => response.json()).then(explains => {
+                fetch('/data/explained/' + this.country + '/' + this.layer + '/').then(response => response.json()).then(explains => {
                     this.more_explains = explains.slice(3);
                     this.explains = explains.slice(0, 3);
 

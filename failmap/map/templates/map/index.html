@@ -166,12 +166,12 @@
         </div>
     </nav>
 
-    <nav class="navbar navbar-expand-md navbar-light" id="categorynavbar" v-if="categories.length > 1" v-cloak>
+    <nav class="navbar navbar-expand-md navbar-light" id="layernavbar" v-if="layers.length > 1" v-cloak>
         <div class="container">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item" v-for="(x, key) in categories" v-bind:class="[selected_category == x ? 'selected_category' : '']">
-                        <a class="nav-link" v-on:click="set_category(x)">
+                    <li class="nav-item" v-for="(x, key) in layers" v-bind:class="[selected_layer == x ? 'selected_layer' : '']">
+                        <a class="nav-link" v-on:click="set_layer(x)">
                             {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
                     </li>
                 </ul>
@@ -1252,7 +1252,7 @@
                 <p></p>
             </div>
             <div class="row">
-                <div class="col-md-4" v-for="category in categories">
+                <div class="col-md-4" v-for="layer in layers">
                     <table style="width:100%" class="table table-striped">
                         <thead>
                             <tr>

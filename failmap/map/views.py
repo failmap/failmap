@@ -94,7 +94,7 @@ def get_defaults(request, ):
     if not data:
         return JsonResponse({'country': "NL", 'category': "municipality"}, safe=False, encoder=JSEncoder)
 
-    return JsonResponse({'country': data['country'], 'category': data['organization_type__name']},
+    return JsonResponse({'country': data['country'], 'layer': data['organization_type__name']},
                         safe=False, encoder=JSEncoder)
 
 
@@ -110,7 +110,7 @@ def get_default_country(request, ):
     return JsonResponse([country], safe=False, encoder=JSEncoder)
 
 
-def get_default_category(request, ):
+def get_default_layer(request, ):
 
     organization_type = Configuration.objects.all().filter(
         is_displayed=True,
@@ -123,7 +123,7 @@ def get_default_category(request, ):
     return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
 
 
-def get_default_category_for_country(request, country: str = "NL"):
+def get_default_layer_for_country(request, country: str = "NL"):
 
     organization_type = Configuration.objects.all().filter(
         is_displayed=True,
@@ -152,7 +152,7 @@ def get_countries(request,):
     return JsonResponse(list, safe=False, encoder=JSEncoder)
 
 
-def get_categories(request, country: str = "NL"):
+def get_layers(request, country: str = "NL"):
 
     categories = Configuration.objects.all().filter(
         country=get_country(country),
@@ -1322,6 +1322,155 @@ def map_data(request, country: str = "NL", organization_type: str = "municipalit
              displayed_issue: str = None):
 
     data = get_map_data(country, organization_type, days_back, displayed_issue)
+
+    return JsonResponse(data, encoder=JSEncoder)
+
+
+def map_potential(request, country: str = "NL", organization_type: str = "municipality"):
+    """
+    Creates an overview of all organizations and regions on a certain layer. It does not have ratings or anything else.
+
+    This has been created to see what the potential is for a certain dataset. It also shows how easy it is to show
+    something on the map if you don't have to take in account filters and stacking.
+
+    Warning: the result of this feature is SLOW. It's built to be barely good enough, not to really preview.
+
+    :param request:
+    :param country:
+    :param organization_type:
+    :return:
+    """
+
+    country = get_country(country)
+    organization_type = get_organization_type(organization_type)
+
+    # in this case to_attr results in a
+    # 'Coordinate' object has no attribute '_iterable_class' (if you use .latest, so you cannot get the newest... :()
+    # And this is also interesting: the IN query generated with prefetch on ALL organizations is optimized to be
+    # one query, and that cannot work on a larger dataset. It's dangerous to use it in production at all, as the dataset
+    # grows. So well, separate queries it is, again. Which is extremely slow...
+    """
+    Prefetch, returns this ridiculous query:
+    .prefetch_related(
+        Prefetch(
+            "coordinate_set",
+            queryset=Coordinate.objects.all().filter(is_dead=False).order_by('-created_on'),
+            to_attr='coordinates'
+        )
+    )
+
+    ('SELECT "coordinate"."id", "coordinate"."organization_id", '
+         '"coordinate"."geoJsonType", "coordinate"."area", "coordinate"."edit_area", '
+         '"coordinate"."created_on", "coordinate"."creation_metadata", '
+         '"coordinate"."is_dead", "coordinate"."is_dead_since", '
+         '"coordinate"."is_dead_reason" FROM "coordinate" WHERE '
+         '("coordinate"."is_dead" = %s AND "coordinate"."organization_id" IN (%s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, '
+         '%s, %s, %s, ... <trimmed 5630 bytes string>
+    """
+    organizations = Organization.objects.all().filter(
+        country=country,
+        type=organization_type,
+        is_dead=False
+    ).select_related('organization_type__name')
+
+    data = {
+        "metadata": {
+            "type": "FeatureCollection",
+            "render_date": datetime.now(pytz.utc),
+            "data_from_time": datetime.now(pytz.utc),
+            "remark": remark,
+        },
+        "crs": {
+            "type": "name",
+            "properties": {"name": "urn:ogc:def:crs:OGC:1.3:CRS84"}
+        },
+        "features": []
+    }
+
+    for organization in organizations:
+
+        try:
+            coordinate = Coordinate.objects.all().filter(is_dead=False, organization=organization).latest('created_on')
+        except Coordinate.DoesNotExist:
+            log.debug('Organization %s does not have any coordinate yet....' % organization)
+            continue
+
+        feature = {
+            "type": "Feature",
+            "properties":
+                {
+                    "organization_id": "%s" % organization.pk,
+                    "organization_type": organization.type.name,
+                    "organization_name": organization.name,
+                    "organization_slug": slugify(organization.name),
+                    "overall": 0,
+                    "high": 0,
+                    "medium": 0,
+                    "low": 0,
+                    "data_from": 0,
+                    "color": "green",
+                    "total_urls": 0,
+                    "high_urls": 0,
+                    "medium_urls": 0,
+                    "low_urls": 0,
+                    "origin": "add_bare_url_features"
+                },
+            "geometry":
+                {
+                    "type": coordinate.geojsontype,
+                    # Sometimes the data is a string, sometimes it's a list. The admin
+                    # interface might influence this.
+                    "coordinates": coordinate.area
+                }
+        }
+
+        data["features"].append(feature)
 
     return JsonResponse(data, encoder=JSEncoder)
 
