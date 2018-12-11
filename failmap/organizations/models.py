@@ -449,3 +449,13 @@ class Promise(models.Model):
     class Meta:
         verbose_name = _('promise')
         verbose_name_plural = _('promises')
+
+
+class Dataset(models.Model):
+    """
+    Allows you to define URL datasources to download and import into the system. This acts as a memory of what you
+    have imported. You can even re-import the things listed here. It will use the generic/excel importer.
+    """
+    source = models.URLField()
+    is_imported = models.BooleanField(default=False,)
+    imported_on = models.DateTimeField(blank=True, null=True)

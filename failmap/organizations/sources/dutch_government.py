@@ -1,6 +1,9 @@
 """
 Importer for Dutch governmental organizations, using open data.
 
+Example:
+failmap import_organizations dutch_government
+
 Warning: this is XML, set aside your intuition about programming.
 """
 
@@ -10,7 +13,7 @@ from os import rename
 
 import requests
 
-from failmap.organizations.sources import generic_dataset_import, print_progress_bar
+from failmap.organizations.sources import generic_dataset_import, print_progress_bar, read_data
 
 log = logging.getLogger(__package__)
 
@@ -50,7 +53,8 @@ namespaces = {
 }
 
 
-def parse_data(dataset, data):
+def parse_data(dataset, filename):
+    data = read_data(filename)
     # this is some kind of XML format. for which an XSD is available.
     # for each document another namespace version is available, which makes it harder.
     # how can we identify the correct namespace for p correctly automatically?
@@ -146,5 +150,5 @@ def download(url, filename_to_save):
     return filename_to_save
 
 
-def import_datasets():
+def import_datasets(**options):
     generic_dataset_import(datasets=datasets, parser_function=parse_data, download_function=download)

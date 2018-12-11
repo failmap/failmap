@@ -42,12 +42,12 @@ def get_data(dataset, download_function):
 
     if is_cached(filename):
         log.debug('Getting cached file for: %s' % dataset['url'])
-        return read_data(filename)
+        return filename
 
     download_function(dataset['url'], filename_to_save=filename)
 
     # simply reads and returns the raw data
-    return read_data(filename)
+    return filename
 
 
 def generic_dataset_import(datasets, parser_function, download_function):
@@ -56,7 +56,7 @@ def generic_dataset_import(datasets, parser_function, download_function):
 
     for index, dataset in enumerate(datasets):
         log.info('Importing dataset (%s/%s): %s' % (index+1, len(datasets), dataset))
-        data = get_data(dataset, download_function)
+        data = get_data(dataset=dataset, download_function=download_function)
 
         # the parser has to do whatever it takes to parse the data: unzip, read arbitrary nonsense structures and so on
         organizations = parser_function(dataset, data)
@@ -83,13 +83,15 @@ def is_cached(filename):
 
 
 def url_to_filename(url: str):
+    # keep the extension as some importers do magic with that
+
     m = hashlib.md5()
     m.update(("%s" % url).encode('utf-8'))
 
     # make sure the directory for processing files exists
     makedirs(DOWNLOAD_DIRECTORY, exist_ok=True)
 
-    return DOWNLOAD_DIRECTORY + m.hexdigest()
+    return DOWNLOAD_DIRECTORY + m.hexdigest() + '.' + max(url.split('.'))
 
 
 def check_environment():

@@ -930,6 +930,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'promise'},
         {'name': 'coordinate'},
         {'name': 'organizationtype'},
+        {'name': 'dataset'},
     ], 'permissions': ['admin']},
 
     # todo: sort scan moment to show latest first.

@@ -137,3 +137,9 @@ markdown  # explanations for urls and organizations from the admin
 
 # geocoding organizations from python
 googlemaps
+
+# allowing generic import of these types of files:
+django-excel
+pyexcel-xls
+pyexcel-xlsx
+pyexcel-ods

@@ -18,9 +18,11 @@ from leaflet.admin import LeafletGeoAdminMixin
 import failmap.scanners.scanner.http as scanner_http
 from failmap import types
 from failmap.app.models import Job
-from failmap.celery import PRIO_HIGH
+from failmap.celery import PRIO_HIGH, app
 from failmap.map.report import OrganizationRating, UrlRating
-from failmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
+from failmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
+                                          Promise, Url)
+from failmap.organizations.sources.excel import import_datasets
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
@@ -630,3 +632,35 @@ class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             'description': PROMISE_DESCRIPTION,
         }),
     )
+
+
+@admin.register(Dataset)
+# todo: how to show a form / allowing uploads?
+class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('source', 'is_imported', 'imported_on')
+    search_fields = ('source', )
+    list_filter = ('is_imported', 'imported_on')
+    fields = ('source', 'is_imported', 'imported_on')
+
+    actions = []
+
+    # todo: perhaps a type should be added, and that defines what importer is used here...
+    # Then we also need the options to be expanded with options from the database.
+
+    def import_(self, request, queryset):
+        for dataset in queryset:
+            options = {'url': [dataset.source]}
+            # ok, it's not smart to say something is imported before it has been verified to be imported.
+
+            (import_datasets.si(**options)
+             | dataset_import_finished.si(dataset)).apply_async()
+        self.message_user(request, "Import started, will run in parallel.")
+    import_.short_description = "+ Import"
+    actions.append('import_')
+
+
+@app.task(queue='storage')
+def dataset_import_finished(dataset):
+    dataset.is_imported = True
+    dataset.imported_on = datetime.now(pytz.utc)
+    dataset.save()
