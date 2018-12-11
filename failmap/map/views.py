@@ -92,7 +92,7 @@ def get_defaults(request, ):
     ).order_by('display_order').values('country', 'organization_type__name').first()
 
     if not data:
-        return JsonResponse({'country': "NL", 'category': "municipality"}, safe=False, encoder=JSEncoder)
+        return JsonResponse({'country': "NL", 'layer': "municipality"}, safe=False, encoder=JSEncoder)
 
     return JsonResponse({'country': data['country'], 'layer': data['organization_type__name']},
                         safe=False, encoder=JSEncoder)
@@ -154,12 +154,12 @@ def get_countries(request,):
 
 def get_layers(request, country: str = "NL"):
 
-    categories = Configuration.objects.all().filter(
+    layers = Configuration.objects.all().filter(
         country=get_country(country),
         is_displayed=True
     ).order_by('display_order').values_list('organization_type__name', flat=True)
 
-    return JsonResponse(list(categories), safe=False, encoder=JSEncoder)
+    return JsonResponse(list(layers), safe=False, encoder=JSEncoder)
 
 
 def generic_export(query, set, country: str = "NL", organization_type="municipality", file_format: str = "json"):
@@ -753,7 +753,7 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
                        'included_organizations': 0, 'endpoints': 0,
                        "endpoint": collections.OrderedDict(), "explained": {}}
 
-        # todo: filter out dead organizations and make sure it's the correct category.
+        # todo: filter out dead organizations and make sure it's the correct layer.
         sql = """SELECT * FROM
                    map_organizationrating
                INNER JOIN
@@ -935,7 +935,7 @@ def organization_vulnerability_timeline(request, organization_id: int, organizat
 def organization_vulnerability_timeline_via_name(request, organization_name: str,
                                                  organization_type: str = "", country: str = ""):
 
-    log.debug("Country: %s Category: %s Name: %s" % (country, organization_type, organization_name))
+    log.debug("Country: %s Layer: %s Name: %s" % (country, organization_type, organization_name))
 
     if not organization_type or not country:
         # getting defaults
@@ -945,14 +945,14 @@ def organization_vulnerability_timeline_via_name(request, organization_name: str
         ).order_by('display_order').values('country', 'organization_type').first()
 
         country = data['country']
-        category = data['organization_type']
+        layer = data['organization_type']
     else:
         country = get_country(code=country)
-        category = get_organization_type(name=organization_type)
+        layer = get_organization_type(name=organization_type)
 
-    log.debug("Country: %s Category: %s Name: %s" % (country, category, organization_name))
+    log.debug("Country: %s Layer: %s Name: %s" % (country, layer, organization_name))
 
-    organization = Organization.objects.all().filter(country=country, type=category,
+    organization = Organization.objects.all().filter(country=country, type=layer,
                                                      name=organization_name,
                                                      is_dead=False).first()
 

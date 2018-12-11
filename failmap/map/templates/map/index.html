@@ -307,7 +307,7 @@
                         target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
                         <li>
                         {% trans "Report ask domains leader" %} <a
-                            :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+                            :href="'mailto:{{ config.PROJECT_ISSUE_MAIL }}?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
                         </li>
                         </ul>
                         <br style="clear: both">
@@ -391,7 +391,7 @@
                                 <div class="col-md-8">
                                     <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                                     <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                                    <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
+                                    <a :href="'mailto:{% endverbatim %}{{ config.PROJECT_ISSUE_MAIL }}{% verbatim %}?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                                         {% endverbatim %}{% trans "Report incorrect finding" %}</a>
                                 </div>
                             </div>
@@ -1256,30 +1256,30 @@
                     <table style="width:100%" class="table table-striped">
                         <thead>
                             <tr>
-                                <th colspan="2"><h3><i class="fas fa-chart-pie"></i> {% verbatim %}{{ translate("category_menu_" + category) }}{% endverbatim %}</h3></th>
+                                <th colspan="2"><h3><i class="fas fa-chart-pie"></i> {% verbatim %}{{ translate("category_menu_" + layer) }}{% endverbatim %}</h3></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <th><i class="fas fa-list-ul"></i> {% trans "Only urls" %}</th>
-                                <td>⬇️ <a :href="create_link(category, 'urls_only')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(layer, 'urls_only')">{% trans "Download" %}</a></td>
                             </tr><tr>
                                 <th><i class="fas fa-city"></i> {% trans "Organization types" %}*</th>
-                                <td>⬇️ <a :href="create_link(category, 'organization_types')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(layer, 'organization_types')">{% trans "Download" %}</a></td>
                             </tr><tr>
                                 <th><i class="fas fa-building"></i> {% trans "Organizations" %}*</th>
-                                <td>⬇️ <a :href="create_link(category, 'organizations')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(layer, 'organizations')">{% trans "Download" %}</a></td>
                             </tr><tr>
                                 <th><i class="fas fa-map-marker-alt"></i> {% trans "Map Data" %}*</th>
-                                <td>⬇️ <a :href="create_link(category, 'coordinates')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(layer, 'coordinates')">{% trans "Download" %}</a></td>
                             </tr><tr>
                                 <th><i class="far fa-compass"></i> {% trans "Urls" %}*</th>
-                                <td>⬇️ <a :href="create_link(category, 'urls')">{% trans "Download" %}</a></td>
+                                <td>⬇️ <a :href="create_link(layer, 'urls')">{% trans "Download" %}</a></td>
                             </tr>
                             {% if config.SHOW_COMPLY_OR_EXPLAIN %}
                                 <tr>
                                     <th><i class="fas fa-comments"></i>  {% trans "Explanations" %}</th>
-                                    <td>⬇️ <a :href="create_link(category, 'explains')">{% trans "Download" %}️</a></td>
+                                    <td>⬇️ <a :href="create_link(layer, 'explains')">{% trans "Download" %}️</a></td>
                                 </tr>
                             {% endif %}
                         </tbody>
@@ -1465,7 +1465,7 @@
                     target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
                     <li>
                     {% trans "Report ask domains leader" %} <a
-                        :href="'mailto:' + mailto + '?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
+                        :href="'mailto:{{ config.PROJECT_ISSUE_MAIL }}?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
                     </li>
                     </ul>
                     <br/>
@@ -1480,7 +1480,7 @@
                             <div class="col-md-8">
                                 <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
                                 <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
-                                <a :href="'mailto:' + mailto + '?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
+                                <a :href="'mailto:{% endverbatim %}{{ config.PROJECT_ISSUE_MAIL }}{% verbatim %}?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                                     {% endverbatim %}{% trans "Report incorrect finding" %}</a>
                             </div>
                         </div>
