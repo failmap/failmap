@@ -23,6 +23,10 @@ COUNTRY = 'NL'
 # https://almanak-redactie.overheid.nl/archive/
 # the xml plural / single are to help parsing, they don't need to be in your specification.
 datasets = [
+    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_ministeries.xml',
+     'description': 'Dutch ministries', 'layer': LAYER, 'country': COUNTRY,
+     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
+
     {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_gemeenschappelijke_regelingen.xml',
      'description': 'Gemeenschappelijke Regelingen', 'layer': LAYER, 'country': COUNTRY,
      'xml_plural': 'gemeenschappelijkeRegelingen', 'xml_single': 'gemeenschappelijkeRegeling'},
@@ -43,9 +47,6 @@ datasets = [
      'description': 'Zelfstandige bestuursorganen', 'layer': LAYER, 'country': COUNTRY,
      'xml_plural': 'zelfstandigeBestuursorganen', 'xml_single': 'zelfstandigBestuursorgaan'},
 
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_ministeries.xml',
-     'description': 'Dutch ministries', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
 ]
 
 namespaces = {

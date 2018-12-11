@@ -8,7 +8,10 @@ log = logging.getLogger(__package__)
 
 
 importers = {
+    # failmap import_organizations dutch_government
     'dutch_government': dutch_government,
+
+    # failmap import_organizations excel https://example.com/example.xlsx
     'excel': excel
 }
 

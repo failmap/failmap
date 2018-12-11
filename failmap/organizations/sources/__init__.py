@@ -28,6 +28,7 @@ import googlemaps
 from datetime import datetime
 import tldextract
 import pytz
+from time import sleep
 
 from failmap.organizations.models import Organization, OrganizationType, Coordinate, Url
 
@@ -116,7 +117,22 @@ def geolocate(organizations: List):
         #     continue
 
         # you can only get the geometry with a lot of data attached, so it cannot be done cheaper :(
-        geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
+        try:
+            geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
+
+            # give a little slack, so the server is not overburdened.
+            sleep(0.1)
+
+        except googlemaps.exceptions.ApiError as e:
+            # sometimes the API is just obnoxiously blocking the request, saying the IP is not authorized,
+            # while it is.
+            # single retry would be enough. Otherwise there are real issues. We don't want to retry a lot because
+            # it costs money.
+            log.debug('Error received from API, trying again in 10 seconds.')
+            log.debug(e)
+            sleep(10)
+
+            geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
 
         """
         [{'address_components': [
