@@ -1248,12 +1248,9 @@ def get_latest_urlratings_fast(urls: List[Url], when):
     if not urls:
         return []
 
-    sql = '''SELECT
-                    id,
-                    high,
-                    medium,
-                    low,
-                    calculation
+    # get all columns, instead of naming each of the 20 columns separately, and having the chance that you missed one
+    # and then django performs a separate lookup query for that value (a few times).
+    sql = '''SELECT *
                 FROM map_urlrating
                 INNER JOIN
                   (SELECT MAX(id) as id2 FROM map_urlrating or2
