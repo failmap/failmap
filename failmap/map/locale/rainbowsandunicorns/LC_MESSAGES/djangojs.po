@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-13 10:13+0000\n"
+"POT-Creation-Date: 2018-12-13 13:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -318,6 +318,24 @@ msgstr "🌈"
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_district"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js
+#, fuzzy
+#| msgid "category_menu_province"
+msgid "category_menu_government"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js
+#, fuzzy
+#| msgid "category_menu_hacking"
+msgid "category_menu_healthcare"
+msgstr "🌈"
+
+#: failmap/map/static/js/script.js
+#, fuzzy
+#| msgid "category_menu_province"
+msgid "category_menu_finance"
 msgstr "🌈"
 
 #: failmap/map/static/js/script.js

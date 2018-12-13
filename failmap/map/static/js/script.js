@@ -79,6 +79,9 @@ var dynamic_translations = function(){
     gettext('category_menu_region');
     gettext('category_menu_county');
     gettext('category_menu_district');
+    gettext('category_menu_government');
+    gettext('category_menu_healthcare');
+    gettext('category_menu_finance');
 
     // scan types
     gettext('Strict-Transport-Security');
