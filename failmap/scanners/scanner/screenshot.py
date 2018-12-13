@@ -306,7 +306,6 @@ def check_installation(browser):
 def save_screenshot(endpoint, safe_filename):
     scr = Screenshot()
     scr.created_on = datetime.now(pytz.utc)
-    scr.domain = endpoint.uri_url()
     scr.endpoint = endpoint
     scr.filename = safe_filename
     scr.width_pixels = 1920

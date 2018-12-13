@@ -182,16 +182,16 @@ class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(Screenshot)
 class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('endpoint', 'domain', 'created_on', 'filename')
-    search_fields = ('endpoint__url__url', 'domain', 'created_on', 'filename')
-    list_filter = ['endpoint', 'domain', 'created_on', 'filename'][::-1]
-    fields = ('endpoint', 'domain', 'created_on', 'filename', 'width_pixels', 'height_pixels')
+    list_display = ('endpoint', 'created_on', 'filename')
+    search_fields = ('endpoint__url__url', 'created_on', 'filename')
+    list_filter = ['endpoint', 'created_on', 'filename'][::-1]
+    fields = ('endpoint', 'created_on', 'filename', 'width_pixels', 'height_pixels')
     readonly_fields = ['created_on']
 
 
 @admin.register(EndpointGenericScan)
 class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('endpoint', 'domain', 'type', 'rating',
+    list_display = ('endpoint', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on',
                     'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan')
     search_fields = ('endpoint__url__url', 'type', 'rating',
@@ -228,7 +228,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(UrlGenericScan)
 class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('url', 'domain', 'type', 'rating',
+    list_display = ('url', 'type', 'rating',
                     'explanation', 'last_scan_moment', 'rating_determined_on',
                     'comply_or_explain_is_explained', 'explain', 'is_the_latest_scan', 'short_evidence')
     search_fields = ('url__url', 'type', 'rating',

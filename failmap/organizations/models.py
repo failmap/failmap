@@ -194,12 +194,6 @@ class Coordinate(models.Model):
 
 
 class Url(models.Model):
-    organization_old = models.ForeignKey(
-        Organization,
-        null=True,
-        on_delete=models.PROTECT
-    )
-
     organization = models.ManyToManyField(
         Organization,
         related_name="u_many_o_upgrade"
@@ -323,7 +317,6 @@ class Url(models.Model):
     class Meta:
         managed = True
         db_table = 'url'
-        unique_together = (('organization_old', 'url'),)
 
     def __str__(self):
         if self.is_dead:

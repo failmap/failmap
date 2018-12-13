@@ -8,7 +8,6 @@
 - model: organizations.url
   pk: 9001
   fields:
-    organization_old: 42
     url: faalonië.example.com
     created_on: 2016-05-17 10:25:35+00:00
     not_resolvable: false

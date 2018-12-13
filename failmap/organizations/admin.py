@@ -462,6 +462,11 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     def sub(obj):
         return obj.computed_subdomain
 
+    # save a ton of queries
+    # doesn't work with sets.
+    # https://docs.djangoproject.com/en/2.1/ref/contrib/admin/
+    # list_select_related = ('endpoint_set', )
+
     def visit(self, obj: Url):
         if not obj.endpoint_set.count():
             return

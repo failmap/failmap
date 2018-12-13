@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-11-26 16:01+0000\n"
+"POT-Creation-Date: 2018-12-13 10:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,6 +30,11 @@ msgstr ""
 msgid ""
 "This organization %(organization)s already exists in the database for this "
 "type / layer."
+msgstr ""
+
+#: failmap/game/forms.py
+#, python-format
+msgid "This organization %(organization)s has been suggested already."
 msgstr ""
 
 #: failmap/game/models.py

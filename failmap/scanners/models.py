@@ -439,12 +439,6 @@ class GenericScanMixin(ExplainMixin, LatestScanMixin):
                   "another rating or explanation (which might have the same rating). This date "
                   "cannot change once it's set."
     )
-    domain = models.CharField(
-        max_length=255,
-        help_text="Deprecated. Text value representing the url scanned.",
-        null=True,
-        blank=True,
-    )
 
     class Meta:
         """
@@ -516,8 +510,6 @@ class EndpointGenericScanScratchpad(models.Model):
 class Screenshot(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE)
-    domain = models.CharField(max_length=255, help_text="Deprecated. Used when there is no known URL.",
-                              blank=True, null=True)
     filename = models.CharField(max_length=255)
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)

@@ -88,7 +88,6 @@ def analyze_headers(result: requests.Response, endpoint):
     egss.when = datetime.now(pytz.utc)
     egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
     egss.type = "security headers"
-    egss.domain = endpoint.uri_url()
     egss.save()
 
     """
