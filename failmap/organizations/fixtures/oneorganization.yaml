@@ -34,7 +34,6 @@
 - model: organizations.url
   pk: 1
   fields:
-    organization_old: 1
     url: aaenhunze.nl
     created_on: 2016-05-17 10:25:35+00:00
     not_resolvable: false
@@ -50,7 +49,6 @@
 - model: organizations.url
   pk: 2
   fields:
-    organization_old: 1
     url: sip.aaenhunze.nl
     created_on: 2017-01-17 02:35:53+00:00
     not_resolvable: false
@@ -66,7 +64,6 @@
 - model: organizations.url
   pk: 3
   fields:
-    organization_old: 1
     url: webmail.aaenhunze.nl
     created_on: 2016-03-30 02:47:51+00:00
     not_resolvable: false
@@ -82,7 +79,6 @@
 - model: organizations.url
   pk: 4
   fields:
-    organization_old: 1
     url: www.aaenhunze.nl
     created_on: 2016-07-31 01:28:04+00:00
     not_resolvable: false
@@ -98,7 +94,6 @@
 - model: organizations.url
   pk: 2300
   fields:
-    organization_old: 1
     url: geo.aaenhunze.nl
     created_on: 2016-06-04 14:43:01+00:00
     not_resolvable: false
@@ -114,7 +109,6 @@
 - model: organizations.url
   pk: 2301
   fields:
-    organization_old: 1
     url: loket.aaenhunze.nl
     created_on: 2016-06-04 14:43:33+00:00
     not_resolvable: false
@@ -130,7 +124,6 @@
 - model: organizations.url
   pk: 2302
   fields:
-    organization_old: 1
     url: www2.aaenhunze.nl
     created_on: 2016-06-04 14:44:04+00:00
     not_resolvable: false
@@ -146,7 +139,6 @@
 - model: organizations.url
   pk: 3172
   fields:
-    organization_old: 1
     url: web.aaenhunze.nl
     created_on: 2017-01-15 07:51:27+00:00
     not_resolvable: false
@@ -162,7 +154,6 @@
 - model: organizations.url
   pk: 4554
   fields:
-    organization_old: 1
     url: lync.aaenhunze.nl
     created_on: 2017-09-22 11:45:10.804826+00:00
     not_resolvable: false
@@ -178,7 +169,6 @@
 - model: organizations.url
   pk: 4555
   fields:
-    organization_old: 1
     url: lyncdiscover.aaenhunze.nl
     created_on: 2017-09-22 11:45:10.905389+00:00
     not_resolvable: false
@@ -194,7 +184,6 @@
 - model: organizations.url
   pk: 4556
   fields:
-    organization_old: 1
     url: remote.aaenhunze.nl
     created_on: 2017-09-22 11:45:11.283707+00:00
     not_resolvable: false
@@ -210,7 +199,6 @@
 - model: organizations.url
   pk: 4557
   fields:
-    organization_old: 1
     url: meet.aaenhunze.nl
     created_on: 2017-09-22 11:45:11.365392+00:00
     not_resolvable: false
@@ -226,7 +214,6 @@
 - model: organizations.url
   pk: 4558
   fields:
-    organization_old: 1
     url: iburgerzaken.aaenhunze.nl
     created_on: 2017-09-22 11:45:11.444136+00:00
     not_resolvable: false
@@ -242,7 +229,6 @@
 - model: organizations.url
   pk: 4559
   fields:
-    organization_old: 1
     url: autodiscover.aaenhunze.nl
     created_on: 2017-09-22 11:45:11.535669+00:00
     not_resolvable: false
@@ -568,369 +554,369 @@
       08:51:04.814236+00:00', rating_determined_on: !!timestamp '2017-10-27 09:12:57.838265+00:00'}
 - model: scanners.endpointgenericscan
   pk: 432
-  fields: {type: X-XSS-Protection, endpoint: 4595, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 4595, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.672002+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:46.638669+00:00'}
 - model: scanners.endpointgenericscan
   pk: 433
-  fields: {type: X-Frame-Options, endpoint: 4595, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 4595, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.676303+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:46.643539+00:00'}
 - model: scanners.endpointgenericscan
   pk: 434
-  fields: {type: X-Content-Type-Options, endpoint: 4595, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 4595, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.686512+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:46.649945+00:00'}
 - model: scanners.endpointgenericscan
   pk: 435
-  fields: {type: Strict-Transport-Security, endpoint: 4595, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 4595, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.705714+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:46.657387+00:00'}
 - model: scanners.endpointgenericscan
   pk: 439
-  fields: {type: X-XSS-Protection, endpoint: 4645, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 4645, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.182673+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.413085+00:00'}
 - model: scanners.endpointgenericscan
   pk: 440
-  fields: {type: X-Frame-Options, endpoint: 4645, domain: '', rating: 'True', explanation: SAMEORIGIN,
+  fields: {type: X-Frame-Options, endpoint: 4645, rating: 'True', explanation: SAMEORIGIN,
     last_scan_moment: !!timestamp '2017-10-27 10:12:49.187762+00:00', rating_determined_on: !!timestamp '2017-10-03
       13:36:47.421332+00:00'}
 - model: scanners.endpointgenericscan
   pk: 441
-  fields: {type: X-Content-Type-Options, endpoint: 4645, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 4645, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.195522+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.426216+00:00'}
 - model: scanners.endpointgenericscan
   pk: 442
-  fields: {type: Strict-Transport-Security, endpoint: 4645, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 4645, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.200353+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.431015+00:00'}
 - model: scanners.endpointgenericscan
   pk: 429
-  fields: {type: X-XSS-Protection, endpoint: 5683, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 5683, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.252031+00:00', rating_determined_on: !!timestamp '2017-10-03 13:34:03.349670+00:00'}
 - model: scanners.endpointgenericscan
   pk: 430
-  fields: {type: X-Frame-Options, endpoint: 5683, domain: '', rating: 'True', explanation: SAMEORIGIN,
+  fields: {type: X-Frame-Options, endpoint: 5683, rating: 'True', explanation: SAMEORIGIN,
     last_scan_moment: !!timestamp '2017-10-04 15:31:33.186436+00:00', rating_determined_on: !!timestamp '2017-10-03
       13:34:03.355231+00:00'}
 - model: scanners.endpointgenericscan
   pk: 431
-  fields: {type: X-Content-Type-Options, endpoint: 5683, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 5683, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.265261+00:00', rating_determined_on: !!timestamp '2017-10-03 13:34:03.361233+00:00'}
 - model: scanners.endpointgenericscan
   pk: 32374
-  fields: {type: X-Frame-Options, endpoint: 5683, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 5683, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.257001+00:00', rating_determined_on: !!timestamp '2017-10-27 10:07:46.652059+00:00'}
 - model: scanners.endpointgenericscan
   pk: 436
-  fields: {type: X-XSS-Protection, endpoint: 5684, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 5684, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.942153+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.154445+00:00'}
 - model: scanners.endpointgenericscan
   pk: 437
-  fields: {type: X-Frame-Options, endpoint: 5684, domain: '', rating: 'True', explanation: SAMEORIGIN,
+  fields: {type: X-Frame-Options, endpoint: 5684, rating: 'True', explanation: SAMEORIGIN,
     last_scan_moment: !!timestamp '2017-10-04 15:31:33.270947+00:00', rating_determined_on: !!timestamp '2017-10-03
       13:36:47.160353+00:00'}
 - model: scanners.endpointgenericscan
   pk: 438
-  fields: {type: X-Content-Type-Options, endpoint: 5684, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 5684, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.957599+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.166231+00:00'}
 - model: scanners.endpointgenericscan
   pk: 32375
-  fields: {type: X-Frame-Options, endpoint: 5684, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 5684, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.950977+00:00', rating_determined_on: !!timestamp '2017-10-27 10:07:47.461559+00:00'}
 - model: scanners.endpointgenericscan
   pk: 107
-  fields: {type: plain_https, endpoint: 7423, domain: '', rating: '200', explanation: 'Site
+  fields: {type: plain_https, endpoint: 7423, rating: '200', explanation: 'Site
       does not redirect to secure url, and has nosecure alternative on a standard
       port.', last_scan_moment: !!timestamp '2017-09-23 12:48:19.751282+00:00', rating_determined_on: !!timestamp '2017-09-23
       12:48:19.751315+00:00'}
 - model: scanners.endpointgenericscan
   pk: 449
-  fields: {type: X-XSS-Protection, endpoint: 7423, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 7423, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.418412+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.924798+00:00'}
 - model: scanners.endpointgenericscan
   pk: 450
-  fields: {type: X-Frame-Options, endpoint: 7423, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 7423, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.426444+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.929655+00:00'}
 - model: scanners.endpointgenericscan
   pk: 451
-  fields: {type: X-Content-Type-Options, endpoint: 7423, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 7423, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.433227+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.935368+00:00'}
 - model: scanners.endpointgenericscan
   pk: 105
-  fields: {type: plain_https, endpoint: 7424, domain: '', rating: '200', explanation: 'Site
+  fields: {type: plain_https, endpoint: 7424, rating: '200', explanation: 'Site
       does not redirect to secure url, and has nosecure alternative on a standard
       port.', last_scan_moment: !!timestamp '2017-09-23 12:48:09.455223+00:00', rating_determined_on: !!timestamp '2017-09-23
       12:48:09.455244+00:00'}
 - model: scanners.endpointgenericscan
   pk: 443
-  fields: {type: X-XSS-Protection, endpoint: 7424, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 7424, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.257178+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.618463+00:00'}
 - model: scanners.endpointgenericscan
   pk: 444
-  fields: {type: X-Frame-Options, endpoint: 7424, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 7424, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.263420+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.623361+00:00'}
 - model: scanners.endpointgenericscan
   pk: 445
-  fields: {type: X-Content-Type-Options, endpoint: 7424, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 7424, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.271220+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.627856+00:00'}
 - model: scanners.endpointgenericscan
   pk: 106
-  fields: {type: plain_https, endpoint: 7965, domain: '', rating: '200', explanation: 'Site
+  fields: {type: plain_https, endpoint: 7965, rating: '200', explanation: 'Site
       does not redirect to secure url, and has nosecure alternative on a standard
       port.', last_scan_moment: !!timestamp '2017-09-23 12:48:09.461304+00:00', rating_determined_on: !!timestamp '2017-09-23
       12:48:09.461318+00:00'}
 - model: scanners.endpointgenericscan
   pk: 446
-  fields: {type: X-XSS-Protection, endpoint: 7965, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 7965, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-03
       16:12:00.351694+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.712103+00:00'}
 - model: scanners.endpointgenericscan
   pk: 447
-  fields: {type: X-Frame-Options, endpoint: 7965, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 7965, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-03
       16:12:00.360143+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.722385+00:00'}
 - model: scanners.endpointgenericscan
   pk: 448
-  fields: {type: X-Content-Type-Options, endpoint: 7965, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 7965, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-03
       16:12:00.366909+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:47.727469+00:00'}
 - model: scanners.endpointgenericscan
   pk: 485
-  fields: {type: X-XSS-Protection, endpoint: 10050, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10050, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.920029+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.875846+00:00'}
 - model: scanners.endpointgenericscan
   pk: 486
-  fields: {type: X-Frame-Options, endpoint: 10050, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 10050, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.930754+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.881077+00:00'}
 - model: scanners.endpointgenericscan
   pk: 487
-  fields: {type: X-Content-Type-Options, endpoint: 10050, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10050, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.936418+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.886469+00:00'}
 - model: scanners.endpointgenericscan
   pk: 488
-  fields: {type: Strict-Transport-Security, endpoint: 10050, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 10050, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.946648+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.891108+00:00'}
 - model: scanners.endpointgenericscan
   pk: 474
-  fields: {type: X-XSS-Protection, endpoint: 10051, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10051, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.404689+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.251313+00:00'}
 - model: scanners.endpointgenericscan
   pk: 475
-  fields: {type: X-Frame-Options, endpoint: 10051, domain: '', rating: 'True', explanation: SAMEORIGIN,
+  fields: {type: X-Frame-Options, endpoint: 10051, rating: 'True', explanation: SAMEORIGIN,
     last_scan_moment: !!timestamp '2017-10-27 10:12:50.412903+00:00', rating_determined_on: !!timestamp '2017-10-03
       13:46:21.259751+00:00'}
 - model: scanners.endpointgenericscan
   pk: 476
-  fields: {type: X-Content-Type-Options, endpoint: 10051, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10051, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.418762+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.273247+00:00'}
 - model: scanners.endpointgenericscan
   pk: 477
-  fields: {type: Strict-Transport-Security, endpoint: 10051, domain: '', rating: 'True',
+  fields: {type: Strict-Transport-Security, endpoint: 10051, rating: 'True',
     explanation: max-age=31536000, last_scan_moment: !!timestamp '2017-10-27 10:12:50.431521+00:00',
     rating_determined_on: !!timestamp '2017-10-03 13:46:21.280937+00:00'}
 - model: scanners.endpointgenericscan
   pk: 478
-  fields: {type: X-XSS-Protection, endpoint: 10052, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10052, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.548821+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.472092+00:00'}
 - model: scanners.endpointgenericscan
   pk: 479
-  fields: {type: X-Frame-Options, endpoint: 10052, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 10052, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.560218+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.476128+00:00'}
 - model: scanners.endpointgenericscan
   pk: 480
-  fields: {type: X-Content-Type-Options, endpoint: 10052, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10052, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.564470+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.481794+00:00'}
 - model: scanners.endpointgenericscan
   pk: 467
-  fields: {type: X-XSS-Protection, endpoint: 10053, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10053, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.828000+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.113017+00:00'}
 - model: scanners.endpointgenericscan
   pk: 468
-  fields: {type: X-Frame-Options, endpoint: 10053, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 10053, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.832743+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.121555+00:00'}
 - model: scanners.endpointgenericscan
   pk: 469
-  fields: {type: X-Content-Type-Options, endpoint: 10053, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10053, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.851571+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.128978+00:00'}
 - model: scanners.endpointgenericscan
   pk: 452
-  fields: {type: X-XSS-Protection, endpoint: 10054, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10054, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.510484+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:48.126072+00:00'}
 - model: scanners.endpointgenericscan
   pk: 453
-  fields: {type: X-Frame-Options, endpoint: 10054, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 10054, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.518414+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:48.132512+00:00'}
 - model: scanners.endpointgenericscan
   pk: 454
-  fields: {type: X-Content-Type-Options, endpoint: 10054, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10054, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.536977+00:00', rating_determined_on: !!timestamp '2017-10-03 13:36:48.140499+00:00'}
 - model: scanners.endpointgenericscan
   pk: 493
-  fields: {type: X-XSS-Protection, endpoint: 10671, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 10671, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.233977+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.490854+00:00'}
 - model: scanners.endpointgenericscan
   pk: 494
-  fields: {type: X-Frame-Options, endpoint: 10671, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 10671, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.256034+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.495304+00:00'}
 - model: scanners.endpointgenericscan
   pk: 495
-  fields: {type: X-Content-Type-Options, endpoint: 10671, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 10671, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.263706+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.502120+00:00'}
 - model: scanners.endpointgenericscan
   pk: 496
-  fields: {type: Strict-Transport-Security, endpoint: 10671, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 10671, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.267820+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.507082+00:00'}
 - model: scanners.endpointgenericscan
   pk: 489
-  fields: {type: X-XSS-Protection, endpoint: 13603, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13603, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.055728+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.055226+00:00'}
 - model: scanners.endpointgenericscan
   pk: 490
-  fields: {type: X-Frame-Options, endpoint: 13603, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 13603, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.066776+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.059810+00:00'}
 - model: scanners.endpointgenericscan
   pk: 491
-  fields: {type: X-Content-Type-Options, endpoint: 13603, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 13603, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.081187+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.066315+00:00'}
 - model: scanners.endpointgenericscan
   pk: 492
-  fields: {type: Strict-Transport-Security, endpoint: 13603, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13603, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:51.087055+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:22.072965+00:00'}
 - model: scanners.endpointgenericscan
   pk: 455
-  fields: {type: X-XSS-Protection, endpoint: 13605, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13605, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.527309+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.430788+00:00'}
 - model: scanners.endpointgenericscan
   pk: 456
-  fields: {type: X-Frame-Options, endpoint: 13605, domain: '', rating: 'True', explanation: SAMEORIGIN,
+  fields: {type: X-Frame-Options, endpoint: 13605, rating: 'True', explanation: SAMEORIGIN,
     last_scan_moment: !!timestamp '2017-10-27 10:12:48.534578+00:00', rating_determined_on: !!timestamp '2017-10-03
       13:46:15.435681+00:00'}
 - model: scanners.endpointgenericscan
   pk: 457
-  fields: {type: X-Content-Type-Options, endpoint: 13605, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 13605, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.542537+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.440972+00:00'}
 - model: scanners.endpointgenericscan
   pk: 458
-  fields: {type: Strict-Transport-Security, endpoint: 13605, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13605, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.547351+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.447430+00:00'}
 - model: scanners.endpointgenericscan
   pk: 459
-  fields: {type: X-XSS-Protection, endpoint: 13606, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13606, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.863666+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.816203+00:00'}
 - model: scanners.endpointgenericscan
   pk: 460
-  fields: {type: X-Frame-Options, endpoint: 13606, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 13606, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.870871+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.820851+00:00'}
 - model: scanners.endpointgenericscan
   pk: 461
-  fields: {type: X-Content-Type-Options, endpoint: 13606, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 13606, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.879670+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.825941+00:00'}
 - model: scanners.endpointgenericscan
   pk: 462
-  fields: {type: Strict-Transport-Security, endpoint: 13606, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13606, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:48.885679+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:15.831198+00:00'}
 - model: scanners.endpointgenericscan
   pk: 463
-  fields: {type: X-XSS-Protection, endpoint: 13734, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13734, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.668264+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:16.998535+00:00'}
 - model: scanners.endpointgenericscan
   pk: 464
-  fields: {type: X-Frame-Options, endpoint: 13734, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 13734, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.695274+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.003749+00:00'}
 - model: scanners.endpointgenericscan
   pk: 465
-  fields: {type: X-Content-Type-Options, endpoint: 13734, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 13734, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.740482+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.009007+00:00'}
 - model: scanners.endpointgenericscan
   pk: 466
-  fields: {type: Strict-Transport-Security, endpoint: 13734, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13734, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.754767+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:17.014765+00:00'}
 - model: scanners.endpointgenericscan
   pk: 470
-  fields: {type: X-XSS-Protection, endpoint: 13735, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13735, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.983438+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:19.995315+00:00'}
 - model: scanners.endpointgenericscan
   pk: 471
-  fields: {type: X-Frame-Options, endpoint: 13735, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 13735, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:49.998360+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:20.001590+00:00'}
 - model: scanners.endpointgenericscan
   pk: 472
-  fields: {type: X-Content-Type-Options, endpoint: 13735, domain: '', rating: 'True',
+  fields: {type: X-Content-Type-Options, endpoint: 13735, rating: 'True',
     explanation: nosniff, last_scan_moment: !!timestamp '2017-10-27 10:12:50.011893+00:00',
     rating_determined_on: !!timestamp '2017-10-03 13:46:20.006528+00:00'}
 - model: scanners.endpointgenericscan
   pk: 473
-  fields: {type: Strict-Transport-Security, endpoint: 13735, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13735, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.015873+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:20.012602+00:00'}
 - model: scanners.endpointgenericscan
   pk: 481
-  fields: {type: X-XSS-Protection, endpoint: 13736, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-XSS-Protection, endpoint: 13736, rating: 'False', explanation: 'Security
       Header not present: X-XSS-Protection', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.697800+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.640165+00:00'}
 - model: scanners.endpointgenericscan
   pk: 482
-  fields: {type: X-Frame-Options, endpoint: 13736, domain: '', rating: 'False', explanation: 'Security
+  fields: {type: X-Frame-Options, endpoint: 13736, rating: 'False', explanation: 'Security
       Header not present: X-Frame-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.706696+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.646613+00:00'}
 - model: scanners.endpointgenericscan
   pk: 483
-  fields: {type: X-Content-Type-Options, endpoint: 13736, domain: '', rating: 'False',
+  fields: {type: X-Content-Type-Options, endpoint: 13736, rating: 'False',
     explanation: 'Security Header not present: X-Content-Type-Options', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.718361+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.651371+00:00'}
 - model: scanners.endpointgenericscan
   pk: 484
-  fields: {type: Strict-Transport-Security, endpoint: 13736, domain: '', rating: 'False',
+  fields: {type: Strict-Transport-Security, endpoint: 13736, rating: 'False',
     explanation: 'Security Header not present: Strict-Transport-Security', last_scan_moment: !!timestamp '2017-10-27
       10:12:50.729608+00:00', rating_determined_on: !!timestamp '2017-10-03 13:46:21.656608+00:00'}

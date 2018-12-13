@@ -678,8 +678,12 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             importers = {
                 'excel': excel,
                 'dutch_government': dutch_government,
-                '': excel
+                '': excel,
+                None: excel
             }
+
+            if not importers.get(dataset.type, None):
+                raise ValueError('Datasource parser for %s is not available.' % dataset.type)
 
             (importers[dataset.type].import_datasets.si(**kwargs)
              | dataset_import_finished.si(dataset)).apply_async()
