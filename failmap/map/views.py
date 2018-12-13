@@ -1457,14 +1457,17 @@ def map_potential(request, country: str = "NL", organization_type: str = "munici
                     "high_urls": 0,
                     "medium_urls": 0,
                     "low_urls": 0,
-                    "origin": "add_bare_url_features"
+                    "origin": "add_bare_url_features",
                 },
             "geometry":
                 {
+                    # the coordinate ID makes it easy to check if the geometry has changed shape/location.
+                    "coordinate_id": coordinate.id,
+
                     "type": coordinate.geojsontype,
                     # Sometimes the data is a string, sometimes it's a list. The admin
                     # interface might influence this.
-                    "coordinates": coordinate.area
+                    "coordinates": coordinate.area,
                 }
         }
 
@@ -1566,7 +1569,8 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             map_organizationrating.total_urls,
             map_organizationrating.high_urls,
             map_organizationrating.medium_urls,
-            map_organizationrating.low_urls
+            map_organizationrating.low_urls,
+            coordinate_stack.stacked_coordinate_id
         FROM map_organizationrating
         INNER JOIN
           (SELECT id as stacked_organization_id
@@ -1683,6 +1687,9 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                 },
             "geometry":
                 {
+                    # the coordinate ID makes it easy to check if the geometry has changed shape/location.
+                    "coordinate_id": i[15],
+
                     "type": i[4],
                     # Sometimes the data is a string, sometimes it's a list. The admin
                     # interface might influence this.

@@ -1537,6 +1537,10 @@ function views(autoload_default_map_data=true) {
             selected_organization: -1,
             features: null,
 
+            // keep track if we need to show everything, or can stay zoomed in:
+            previously_loaded_country: null,
+            previously_loaded_layer: null,
+
             displayed_issue: ""
         },
         computed: {
@@ -1630,7 +1634,15 @@ function views(autoload_default_map_data=true) {
                 console.log(url);
                 fetch(url).then(response => response.json()).then(data => {
                     this.loading = true;
-                    failmap.plotdata(data);
+
+                    // Don't need to zoom out when the filters change, only when the layer/country changes.
+                    let fitBounds = false;
+                    if (this.previously_loaded_country !== this.country || this.previously_loaded_layer !== this.layer)
+                        fitBounds = true;
+
+                    failmap.plotdata(data, fitBounds);
+                    this.previously_loaded_country = this.country;
+                    this.previously_loaded_layer = this.layer;
 
                     // make map features (organization data) available to other vues
                     // do not update this attribute if an empty list is returned as currently

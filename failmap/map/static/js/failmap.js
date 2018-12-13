@@ -5,27 +5,10 @@ const failmap = {
     proxy_tiles: true,
 
     polygons: L.geoJson(),  // geographical regions
-    // todo: if you click the group too fast: Marker.js:181 Uncaught TypeError:
-    // Cannot read property 'createIcon' of undefined
 
     markers: L.markerClusterGroup(
-        // with this disabled, still get the createIcon error.
-        // It looks like the icons get eaten after showing them once. Can be replicated now.
-        // Even when there are no icons from our code, it crashes.
-        // It does not matter if the location of the marker is the same or differs (slightly)
-        // After the first or second expansion, the
-        // options.icon is undefined; can't access its "createIcon" property
-        // happens. The options/icon is eaten after the first expansionmarkerClusterGroup or something like that.
-        // icon is then null. And even if we don't make a marker, the same issue happens.
-        // is the problem in the retract function not storing anything correctly?
-        // cause found: mouseout of a point. Probably the code in that thing.
-
         {
-            // zoomToBoundsOnClick: false,
-            // spiderfyOnMaxZoom: false,
             iconCreateFunction: function(cluster){
-
-            // getAllChildMarkers()
             // if 1 is red, marker is red else if 1 is orange, else green else gray.
             let css_class = "unknown";
 
@@ -56,12 +39,6 @@ const failmap = {
         }
 
     ),
-
-    greenIcon: new L.divIcon({className: 'leaflet-marker-green'}),
-    redIcon: new L.divIcon({className: 'leaflet-marker-red'}),
-    orangeIcon: new L.divIcon({className: 'leaflet-marker-orange'}),
-    yellowIcon: new L.divIcon({className: 'leaflet-marker-yellow'}),
-    grayIcon: new L.divIcon({className: 'leaflet-marker-gray'}),
 
     initialize: function (mapbox_token, country_code, debug, show_filters=true) {
         this.mapbox_token = mapbox_token;
@@ -134,7 +111,7 @@ const failmap = {
             var control = new L.Control({position:'topleft'});
             control.onAdd = function(map) {
                     var azoom = L.DomUtil.create('a','resetzoom');
-                    azoom.innerHTML = "<span style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
+                    azoom.innerHTML = "<span title='Show all data on map.' style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
                     L.DomEvent
                         .disableClickPropagation(azoom)
                         .addListener(azoom, 'click', function() {
@@ -170,16 +147,16 @@ const failmap = {
         });
 
         this.dark_map = new L.tileLayer(this.tile_uri(), {
-                maxZoom: 18,
-                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-                '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-                'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
-                'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
-                id: 'mapbox.light',
-                accessToken: this.mapbox_token,
-                style: 'dark-v9',
-                tileSize: 512,
-                zoomOffset: -1
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+            'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
+            'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            id: 'mapbox.light',
+            accessToken: this.mapbox_token,
+            style: 'dark-v9',
+            tileSize: 512,
+            zoomOffset: -1
         });
 
         if (debug)
@@ -508,12 +485,12 @@ const failmap = {
     pointToLayer: function (geoJsonPoint, latlng) {
         // console.log(latlng);
         switch (geoJsonPoint.properties.color){
-            case "red": return L.marker(latlng, {icon: failmap.redIcon, title: geoJsonPoint.properties.organization_name});
-            case "orange": return L.marker(latlng, {icon: failmap.orangeIcon, title: geoJsonPoint.properties.organization_name});
-            case "green": return L.marker(latlng, {icon: failmap.greenIcon, title: geoJsonPoint.properties.organization_name});
-            case "yellow": return L.marker(latlng, {icon: failmap.yellowIcon, title: geoJsonPoint.properties.organization_name});
+            case "red": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
+            case "orange": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
+            case "green": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
+            case "yellow": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
         }
-        return L.marker(latlng, {icon: failmap.grayIcon, title: geoJsonPoint.properties.organization_name});
+        return L.circleMarker(latlng, failmap.style(geoJsonPoint));
     },
 
     highlightFeature: function (e) {
@@ -540,16 +517,10 @@ const failmap = {
 
     resetHighlight: function (e) {
         // todo: add search for points
-        // todo: make this type of thing cleaner.
-        if (failmap.isSearchedFor(e.target.feature)) {
-            if (e.target.feature.geometry.type === "MultiPolygon")
-                e.target.setStyle(failmap.searchResultStyle(e.target.feature));
-            if (e.target.feature.geometry.type === "Polygon")
-                e.target.setStyle(failmap.searchResultStyle(e.target.feature));
-        } else {
-            failmap.polygons.resetStyle(e.target);
-        }
-        // vueInfo.data = Array;
+        if (failmap.isSearchedFor(e.target.feature))
+            e.target.setStyle(failmap.searchResultStyle(e.target.feature));
+        else
+            e.target.setStyle(failmap.style(e.target.feature));
     },
 
     isSearchedFor: function (feature) {
@@ -569,7 +540,16 @@ const failmap = {
             });
         } else {
             // text match
+            // todo: is there a faster, native search option?
+            // todo: how to search in MarkedCluster / give that a different style?
             failmap.polygons.eachLayer(function (layer) {
+                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
+                    layer.setStyle(failmap.searchResultStyle(layer.feature));
+                } else {
+                    layer.setStyle(failmap.style(layer.feature));
+                }
+            });
+            failmap.markers.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     layer.setStyle(failmap.searchResultStyle(layer.feature));
                 } else {
@@ -579,7 +559,42 @@ const failmap = {
         }
     },
 
-    plotdata: function (mapdata) {
+    plotdata: function (mapdata, fitbounds=true) {
+        let geodata = failmap.split_point_and_polygons(mapdata);
+
+        // if there is one already, overwrite the attributes...
+        if (failmap.polygons.getLayers().length || failmap.markers.getLayers().length) {
+            // add all features that are not part of the current map at all
+            // and delete the ones that are not in the current set
+            failmap.clean_map(geodata.polygons, geodata.points);
+
+            // update existing layers (and add ones with the same name)
+            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
+            failmap.markers.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
+        } else {
+            failmap.add_polygons(geodata.polygons);
+            failmap.add_points(geodata.points);
+        }
+
+        if (fitbounds)
+            failmap.show_everything_on_map();
+    },
+
+    show_everything_on_map: function(){
+        // determine if we need to pad the map to the left due to controls being visible.
+        // they are invisible on small viewports (see css)
+        let paddingToLeft = 0;
+        if (document.documentElement.clientWidth > 768)
+            paddingToLeft=320;
+
+        let bounds = failmap.polygons.getBounds();
+        bounds.extend(failmap.markers.getBounds());
+        failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+    },
+
+    split_point_and_polygons: function(mapdata){
+        // needed because MarkedCluster can only work well with points in our case.
+
         // mapdata is a mix of polygons and multipolygons, and whatever other geojson types.
         let regions = []; // to polygons
         let points = []; // to markers
@@ -598,44 +613,27 @@ const failmap = {
             }
         }
 
-        // determine if we need to pad the map to the left due to controls being visible.
-        // they are invisible on small viewports (see css)
-        let paddingToLeft = 0;
-        if (document.documentElement.clientWidth > 768)
-            paddingToLeft=320;
+        return {'polygons': regions, 'points': points}
+    },
 
-        // if there is one already, overwrite the attributes...
-        if (failmap.polygons.getLayers().length || failmap.markers.getLayers().length) {
-            // add all features that are not part of the current map at all
-            // and delete the ones that are not in the current set
-            failmap.clean_map(regions, points);
 
-            // update existing layers (and add ones with the same name)
-            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
-
-            // fit the map automatically, regardless of the initial positions
-            let bounds = failmap.polygons.getBounds();
-            bounds.extend(failmap.markers.getBounds());
-            failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
-        } else {
-            // add regions
-            failmap.polygons = L.geoJson(regions, {
-                style: failmap.style,
-                pointToLayer: failmap.pointToLayer,
-                onEachFeature: failmap.onEachFeature
-            }).addTo(failmap.map); // only if singleton, its somewhat dirty.
-
-            // and points
-            failmap.add_points(points);
-
-            // fit the map automatically, regardless of the initial positions
-            let bounds = failmap.polygons.getBounds();
-            bounds.extend(failmap.markers.getBounds());
-            failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
-        }
+    add_polygons: function(polygons){
+        failmap.polygons = L.geoJson(polygons, {
+            style: failmap.style,
+            pointToLayer: failmap.pointToLayer,
+            onEachFeature: failmap.onEachFeature
+        }).addTo(failmap.map);
     },
 
     add_points: function(points) {
+        // Geojson causes confetti to appear, which is great, but doesn't work with multiple organization on the same
+        // location. You need something that can show multiple things at once place, such as MarkerCluster.
+        // failmap.markers = L.geoJson(points, {
+        //     style: failmap.style,
+        //     pointToLayer: failmap.pointToLayer,
+        //     onEachFeature: failmap.onEachFeature
+        // }).addTo(failmap.map);
+
         points.forEach(function(point){
             // console.log(point);
             pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
@@ -643,16 +641,12 @@ const failmap = {
             // which of one of these three triggers the bug?
             pointlayer.on({
                 mouseover: failmap.highlightFeature,
-                // mouseout triggered a bug that was not in the stack trace of the map.
-                // It prevented to show markers on the same location twice. So expanding markers twice
-                // resulted in a crash. Sine we don't really need this here it has been disabled.
-                // mouseout: failmap.resetHighlight,
+                mouseout: failmap.resetHighlight,
                 click: failmap.showreport
             });
 
             // allow opening of reports and such in the old way.
-            pointlayer.feature = {"properties": point.properties};
-            // console.log(pointlayer);
+            pointlayer.feature = {"properties": point.properties, "geometry": point.geometry};
 
             failmap.markers.addLayer(pointlayer);
         });
@@ -660,60 +654,58 @@ const failmap = {
     },
 
     clean_map: function(regions, points) {
-        // first version: just delete all points.
-        // failmap.markers.clearMarkers();
-        failmap.markers.clearLayers();
-        //failmap.map.removeLayer(failmap.markers);
+        // first version: just delete all points and add them again.
+        // we can use the same logic for points and regions now.
+        // failmap.markers.clearLayers();
+        // failmap.add_points(points);
 
-        failmap.add_points(points);
+        failmap.add_new_layers_remove_non_used(points, failmap.markers);
+        failmap.add_new_layers_remove_non_used(regions, failmap.polygons);
+    },
 
-        // cleaning regions.
-        // case when data is not loaded. todo: fix the cause of this.
-        if (!regions.length) {
-            failmap.polygons.clearLayers();
+    add_new_layers_remove_non_used: function(shapeset, target){
+        // when there is no data at all, we're done quickly
+        if (!shapeset.length) {
+            target.clearLayers();
             return;
         }
 
+        // Here we optimize the number of loops if we make a a few simple arrays. We can then do Contains,
+        // which is MUCH more optimized than a nested foreach loop. It might even be faster with intersect.
+        let shape_names = [];
+        let target_names = [];
+        shapeset.forEach(function (shape){
+            shape_names.push(shape.properties.organization_name)
+        });
+        target.eachLayer(function (layer){
+           target_names.push(layer.feature.properties.organization_name)
+        });
+
         // add layers to the map that are only in the new dataset (new)
-        regions.forEach(function (region){
-            let found = false;
-            failmap.polygons.eachLayer(function (layer){
-                if (layer.feature.properties.organization_name === region.properties.organization_name)
-                    found = true;
-            });
-            //console.log("To add. Found: " + !found + " " + mapdata.features[i].properties.organization_name);
-            if (!found) {
-                // console.log("Going to add an organization named " + mapdata.features[i].properties.organization_name);
-                failmap.polygons.addData(region);
-            }
+        shapeset.forEach(function (shape){
+            if (!target_names.includes(shape.properties.organization_name))
+                target.addData(shape);
         });
 
         // remove existing layers that are not in the new dataset
-        failmap.polygons.eachLayer(function (layer){
-            let found = false;
-
-            regions.forEach(function (region){
-                if (layer.feature.properties.organization_name === region.properties.organization_name)
-                    found = true;
-            });
-
-            // console.log("To remove. Found: " + !found + " " + layer.feature.properties.organization_name);
-            if (!found){
-                failmap.polygons.removeLayer(layer);
-            }
+        target.eachLayer(function (layer){
+            if (!shape_names.includes(layer.feature.properties.organization_name))
+                target.removeLayer(layer);
         });
     },
-
 
     // overwrite some properties
     recolormap: function (features, layer) {
         let existing_feature = layer.feature;
 
         features.forEach(function (new_feature){
+
             if (existing_feature.properties.organization_name !== new_feature.properties.organization_name) {
                 return;
             }
-            if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)) {
+            //if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)) {
+            //if (failmap.evil_json_compare(new_feature.geometry.coordinates, existing_feature.geometry.coordinates)) {
+            if (new_feature.geometry.coordinate_id !== existing_feature.geometry.coordinate_id) {
                 // Geometry changed, updating shape. Will not fade.
                 // It seems not possible to update the geometry of a shape, too bad.
                 failmap.polygons.removeLayer(layer);
@@ -723,32 +715,8 @@ const failmap = {
                 existing_feature.properties.Overall = new_feature.properties.Overall;
                 existing_feature.properties.color = new_feature.properties.color;
                 // make the transition
-                switch (existing_feature.geometry.type) {
-                    case "Polygon":
-                    case "MultiPolygon":
-                        layer.setStyle(failmap.style(layer.feature));
-                        break;
-                    case "Point":
-                        switch (layer.feature.properties.color) {
-                            case "red":
-                                layer.setIcon(failmap.redIcon);
-                                break;
-                            case "orange":
-                                layer.setIcon(failmap.orangeIcon);
-                                break;
-                            case "yellow":
-                                layer.setIcon(failmap.yellowIcon);
-                                break;
-                            case "green":
-                                layer.setIcon(failmap.greenIcon);
-                                break;
-                            default:
-                                layer.setIcon(failmap.grayIcon);
-                        }
-                        break;
-                }
+                layer.setStyle(failmap.style(layer.feature));
             }
-
         });
     },
 
