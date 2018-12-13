@@ -24,8 +24,8 @@ from failmap.map.report import OrganizationRating, UrlRating
 from failmap.organizations.datasources import dutch_government, excel
 from failmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
                                           Promise, Url)
-from failmap.scanners.admin import UrlIp
-from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
+from failmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan,
+                                     UrlIp)
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
 
 log = logging.getLogger(__name__)

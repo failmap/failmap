@@ -354,54 +354,6 @@ class TlsQualysScan(ExplainMixin, LatestScanMixin):
         return "%s - %s" % (self.scan_date, self.qualys_rating)
 
 
-class TlsScan(ExplainMixin, LatestScanMixin):
-    """
-    Model for our own TLS scans
-    """
-    endpoint = models.ForeignKey(Endpoint, on_delete=models.CASCADE)
-
-    # result from the API
-    rating = models.CharField(
-        max_length=3,
-        default="",
-        help_text="F, D, C, B, A-, A, A+, T")
-    rating_no_trust = models.CharField(
-        max_length=3,
-        default="",
-        help_text="rating when trust issues are ignored"
-    )
-    explanation = models.CharField(
-        max_length=255,
-        default=0,
-        help_text="Short explanation from the scanner on how the rating came to be."
-    )
-    evidence = models.TextField(
-        max_length=9001,
-        default=0,
-        help_text="Content that might help understanding the result.",
-        blank=True,
-    )
-
-    scan_date = models.DateField(auto_now_add=True)  # completed scan
-    scan_time = models.TimeField(auto_now_add=True)  # For database indexes
-    last_scan_moment = models.DateTimeField(auto_now_add=True, db_index=True)  # For database indexes
-
-    # This is when the rating was determined. Ratings don't change that much.
-    rating_determined_on = models.DateTimeField()
-
-    def __str__(self):
-        return "%s - %s" % (self.scan_date, self.rating)
-
-    @property
-    def type(self):
-        return "tls"
-
-    class Meta:
-        verbose_name = _('tlsscan')
-        verbose_name_plural = _('tlsscan')
-        ordering = ['-rating_determined_on', ]
-
-
 # https://docs.djangoproject.com/en/dev/topics/db/models/#id6
 class GenericScanMixin(ExplainMixin, LatestScanMixin):
     """

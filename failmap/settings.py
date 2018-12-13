@@ -937,7 +937,6 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'app_label': 'scanners', 'label': _('🔬 scanners'), 'items': [
         {'name': 'endpoint', 'permissions': ['admin']},
         {'name': 'endpointgenericscan', 'permissions': ['scanners.change_endpointgenericscan']},
-        {'name': 'tlsscan', 'permissions': ['scanners.change_tlsscan']},
         {'name': 'tlsqualysscan', 'permissions': ['scanners.change_tlsqualysscan']},
         {'name': 'urlgenericscan', 'permissions': ['scanners.change_urlgenericscan']},
         {'name': 'internetnlscan', 'permissions': ['scanners.change_internetnlscan']},

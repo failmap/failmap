@@ -3,10 +3,8 @@ import logging
 import os
 import platform
 import subprocess
-from datetime import datetime, timedelta
 from random import shuffle
 
-import pytz
 from celery import Task, group
 from django.conf import settings
 
@@ -211,6 +209,9 @@ def compare_results():
 
     :return:
     """
+    # given refactoring, the old approach didn't work anymore. Code saved for when the implemenation is updated.
+
+    """
     from failmap.scanners.models import TlsScan, TlsQualysScan
     tlsscans = TlsScan.objects.all().filter(last_scan_moment__gte=datetime.now(pytz.utc) - timedelta(days=7))
     checked_scans = 0
@@ -248,6 +249,9 @@ def compare_results():
     log.info("%5s host differed." % different_scans)
     log.info("")
     log.info('comparison completed.')
+    """
+
+    raise NotImplementedError
 
 
 def start_osaft_container():
