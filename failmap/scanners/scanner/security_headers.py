@@ -180,17 +180,27 @@ def generic_check_using_csp_fallback(endpoint: Endpoint, headers, header):
         store_endpoint_scan_result(scan_type, endpoint, 'True', headers[header])
     else:
         # CSP fallback:
+        log.debug('CSP fallback used for %s' % header)
         if "Content-Security-Policy" in headers.keys():
             store_endpoint_scan_result(
-                scan_type, endpoint, 'Using CSP',
-                "Content-Security-Policy header found, which can handle the security from %s. Value: %s." %
-                (header, headers["Content-Security-Policy"]))
+                scan_type=scan_type,
+                endpoint=endpoint,
+                rating='Using CSP',
+                message="Content-Security-Policy header found, which can handle the security from %s."
+                        "Value (possibly truncated): %s..." %
+                        (header, headers["Content-Security-Policy"][0:80]),
+                evidence=headers["Content-Security-Policy"]
+            )
 
         else:
             log.debug('Has no %s' % header)
             store_endpoint_scan_result(
-                scan_type, endpoint, 'False',
-                "Security Header not present: %s, alternative header Content-Security-Policy not present." % header)
+                scan_type=scan_type,
+                endpoint=endpoint,
+                rating='False',
+                message="Security Header not present: %s, alternative header Content-Security-Policy not present." %
+                        header
+            )
 
 
 @app.task(bind=True, default_retry_delay=1, retry_kwargs={'max_retries': 3})
