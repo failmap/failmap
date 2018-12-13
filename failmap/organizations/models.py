@@ -459,3 +459,17 @@ class Dataset(models.Model):
     source = models.URLField()
     is_imported = models.BooleanField(default=False,)
     imported_on = models.DateTimeField(blank=True, null=True)
+    type = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="To determine what importer is needed: xls, xlsx, json, dutch_government."
+    )
+    kwargs = models.TextField(
+        max_length=5000,
+        blank=True,
+        null=True,
+        help_text="A JSON / dictionary with extra options for the parser to handle the dataset. "
+                  "This is different per parser. This field is highly coupled with the code of the parser.",
+        default='{}'
+    )

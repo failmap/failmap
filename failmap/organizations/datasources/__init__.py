@@ -27,8 +27,11 @@ from constance import config
 import googlemaps
 from datetime import datetime
 import tldextract
+import requests
 import pytz
 from time import sleep
+from os import rename
+from failmap.scanners.scanner.http import resolves
 
 from failmap.organizations.models import Organization, OrganizationType, Coordinate, Url
 
@@ -51,23 +54,21 @@ def get_data(dataset, download_function):
     return filename
 
 
-def generic_dataset_import(datasets, parser_function, download_function):
+def generic_dataset_import(dataset, parser_function, download_function):
 
     check_environment()
 
-    for index, dataset in enumerate(datasets):
-        log.info('Importing dataset (%s/%s): %s' % (index+1, len(datasets), dataset))
-        data = get_data(dataset=dataset, download_function=download_function)
+    data = get_data(dataset=dataset, download_function=download_function)
 
-        # the parser has to do whatever it takes to parse the data: unzip, read arbitrary nonsense structures and so on
-        organizations = parser_function(dataset, data)
+    # the parser has to do whatever it takes to parse the data: unzip, read arbitrary nonsense structures and so on
+    organizations = parser_function(dataset, data)
 
-        # add geolocation to it
-        if not SKIP_GEO:
-            organizations = geolocate(organizations)
+    # add geolocation to it
+    if not SKIP_GEO:
+        organizations = geolocate_organizations(organizations)
 
-        # and finally dump it in the database...
-        store_data(organizations)
+    # and finally dump it in the database...
+    store_data(organizations)
 
 
 def read_data(filename):
@@ -97,13 +98,25 @@ def url_to_filename(url: str):
 
 def check_environment():
 
-    # we may ignore, and geolocate afterwards the organizations that don't have a geolocation yet?
+    # we may ignore, and geolocate_organizations afterwards the organizations that don't have a geolocation yet?
     # is there are more generic library?
     if not config.GOOGLE_MAPS_API_KEY:
         raise ValueError('The google maps API key is not set, but is required for this feature.')
 
 
-def geolocate(organizations: List):
+def find_suggested_site(search_string):
+    # https://console.cloud.google.com/apis/api/customsearch.googleapis.com/overview
+    # uses google custom search (which doesn't have the captchas etc) to find a website using address information
+    # note that this result can be WRONG! Yet many/most of the time it's correct.
+    # $5 per 1000 queries, up to 10k queries per day. 100 are free.
+    # so large datasets cost money as well. oh well.
+    # This is only a custom site, and our goal is reversed: we need to find the site matching an address.
+    # i can understand why google limits this feature.
+    # the BING API is a bit better, resulting in mostly correct results, but not as good as googles.
+    pass
+
+
+def geolocate_organizations(organizations: List):
 
     # read out once, to prevent a database query every time the variable is needed.
     # note: geocoding costs money(!)
@@ -116,7 +129,14 @@ def geolocate(organizations: List):
         # if geocoded_addresses:
         #     continue
 
+        # implies the lat/lng are actually correct and valid.
+        if organization['lat'] and organization['lng']:
+            geocoded_addresses.append(organizations)
+            continue
+
         # you can only get the geometry with a lot of data attached, so it cannot be done cheaper :(
+        # setup the API restrictions here:
+        # https://console.cloud.google.com/google/maps-apis/apis/geocoding-backend.googleapis.com/credentials
         try:
             geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
 
@@ -176,81 +196,126 @@ def store_data(organizations: List):
         print_progress_bar(iteration, len(organizations), ' store')
 
         # determine if type exists, if not, create it. Don't waste a nice dataset if the layer is not available.
-        try:
-            organization_type, created = OrganizationType.objects.all().get_or_create(name=o['layer'])
-        except OrganizationType.MultipleObjectsReturned:
-            log.debug('Layer %s is multiple times in the database.' % o['layer'])
-            organization_type = OrganizationType.objects.all().filter(name=o['layer']).first()
-
-        try:
-            failmap_organization, created = Organization.objects.all().get_or_create(
-                is_dead=False,
-                name=o['name'],
-                type=organization_type,
-                country=o['country'],
-            )
-        except Organization.MultipleObjectsReturned:
-            created = False
-            log.debug('Organization %s is multiple times in the database.' % o['name'])
-            failmap_organization = Organization.objects.all().filter(
-                is_dead=False,
-                name=o['name'],
-                type=organization_type,
-                country=o['country'],
-            ).first()
-
-        # a new organization does not have the created_on fields set. These have to be set.
-        if created:
-            failmap_organization.internal_notes = o['dataset']
-            failmap_organization.created_on = datetime.now(pytz.utc)
-            failmap_organization.save(update_fields=['created_on'])
+        organization_type = save_organization_type(o['layer'])
+        failmap_organization = save_organization(o, organization_type)
 
         # attach optional coordinate if not exists.
         if o['lat'] and o['lng']:
-            try:
-                coordinate, created = Coordinate.objects.all().get_or_create(
-                    geojsontype="Point",
-                    organization=failmap_organization,
-                    area=[o['lng'], o['lat']],  # we store the order incorrectly it seems?
-                    edit_area={"type": "Point", "coordinates": [o['lng'], o['lat']]},
-                    is_dead=False
-                )
-            except Coordinate.MultipleObjectsReturned:
-                created = False
-                log.debug('Coordinate %s is multiple times in the database.' % [o['lng'], o['lat']])
-                coordinate = Coordinate.objects.all().filter(
-                    geojsontype="Point",
-                    organization=failmap_organization,
-                    area=[o['lng'], o['lat']],  # we store the order incorrectly it seems?
-                    edit_area={"type": "Point", "coordinates": [o['lng'], o['lat']]},
-                    is_dead=False
-                ).first()
+            save_coordinate(failmap_organization, o['lat'], o['lng'], o['address'])
 
-            if created:
-                coordinate.created_on = datetime.now(pytz.utc)
-                coordinate.creation_metadata = o['address']
-                coordinate.save(update_fields=['created_on', 'creation_metadata'])
+        save_websites(failmap_organization, o['websites'])
 
-        # blindly add the url, given you're using high quality datasources this is fine. Urls will be killed
-        # automatically otherwise.
-        for website in o['websites']:
 
-            website = website.lower()
-            website = website.replace("https://", "")
-            website = website.replace("http://", "")
+def download_http_get_no_credentials(url, filename_to_save):
+    response = requests.get(url, stream=True, timeout=(1200, 1200))
+    response.raise_for_status()
 
-            extract = tldextract.extract(website)
+    with open(filename_to_save, 'wb') as f:
+        filename = f.name
+        i = 0
+        for chunk in response.iter_content(chunk_size=1024):
+            i += 1
+            print_progress_bar(1, 100, ' download')
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
 
-            # also save the address with subdomain :)
-            if extract.subdomain:
-                address = "%s.%s.%s" % (extract.subdomain, extract.domain, extract.suffix)
-                save_url(address, failmap_organization)
+    # save as cachable resource
+    # this of course doesn't work if you call it a few times while a download is running, but well, good enough
+    rename(filename, filename_to_save)
 
-            address = "%s.%s" % (extract.domain, extract.suffix)
-            save_url(address, failmap_organization)
+    return filename_to_save
+
+
+def save_websites(organization, websites: List[str]):
+    for website in websites:
+
+        website = website.lower()
+        extract = tldextract.extract(website)
+
+        # has to have a valid suffix at least
+        if not extract.suffix:
+            continue
+
+        # also save the address with subdomain :)
+        if extract.subdomain:
+            address = "%s.%s.%s" % (extract.subdomain, extract.domain, extract.suffix)
+            save_url(address, organization)
+
+        address = "%s.%s" % (extract.domain, extract.suffix)
+        save_url(address, organization)
+
+
+def save_coordinate(organization, lat, lng, address):
+    try:
+        coordinate, created = Coordinate.objects.all().get_or_create(
+            geojsontype="Point",
+            organization=organization,
+            area=[lat, lng],  # we store the order incorrectly it seems?
+            edit_area={"type": "Point", "coordinates": [lat, lng]},
+            is_dead=False
+        )
+
+        if created:
+            coordinate.created_on = datetime.now(pytz.utc)
+            coordinate.creation_metadata = address
+            coordinate.save(update_fields=['created_on', 'creation_metadata'])
+
+    except Coordinate.MultipleObjectsReturned:
+        log.debug('Coordinate %s is multiple times in the database.' % [lat, lng])
+
+        # should we reduce the amount of coordinates?
+
+        # coordinate = Coordinate.objects.all().filter(
+        #     geojsontype="Point",
+        #     organization=organization,
+        #     area=[lat, lng],  # we store the order incorrectly it seems?
+        #     edit_area={"type": "Point", "coordinates": [lat, lng]},
+        #     is_dead=False
+        # ).first()
+
+
+def save_organization(o, organization_type):
+    try:
+        failmap_organization, created = Organization.objects.all().get_or_create(
+            is_dead=False,
+            name=o['name'],
+            type=organization_type,
+            country=o['country'],
+        )
+    except Organization.MultipleObjectsReturned:
+        created = False
+        log.debug('Organization %s is multiple times in the database.' % o['name'])
+        failmap_organization = Organization.objects.all().filter(
+            is_dead=False,
+            name=o['name'],
+            type=organization_type,
+            country=o['country'],
+        ).first()
+
+    # a new organization does not have the created_on fields set. These have to be set.
+    if created:
+        failmap_organization.internal_notes = o['dataset']
+        failmap_organization.created_on = datetime.now(pytz.utc)
+        failmap_organization.save(update_fields=['created_on'])
+
+    return failmap_organization
+
+
+def save_organization_type(name):
+    try:
+        organization_type, created = OrganizationType.objects.all().get_or_create(name=name)
+    except OrganizationType.MultipleObjectsReturned:
+        log.debug('Layer %s is multiple times in the database.' % name)
+        organization_type = OrganizationType.objects.all().filter(name=name).first()
+
+    return organization_type
 
 
 def save_url(website, failmap_organization):
+
+    # don't save non resolving urls.
+    if not resolves(website):
+        return
 
     # don't stack urls with is_dead=False,
     try:
@@ -258,8 +323,13 @@ def save_url(website, failmap_organization):
             url=website,
         )
     except Url.MultipleObjectsReturned:
+        created = False
         log.debug('Url %s is multiple times in the database.' % website)
         url = Url.objects.all().filter(url=website, is_dead=False).first()
+
+    if created:
+        url.created_on = datetime.now(pytz.utc)
+        url.internal_notes = "Added using a source importer."
 
     # the 'if created' results in the same code.
     if not url.organization.all().filter(pk=failmap_organization.pk).exists():

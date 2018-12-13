@@ -4,14 +4,8 @@ from django.core.management.base import BaseCommand
 from django.db.models import Count
 
 from failmap.organizations.models import Url
-from failmap.organizations.sources import dutch_government
 
 log = logging.getLogger(__package__)
-
-
-importers = {
-    'dutch_government': dutch_government,
-}
 
 
 class Command(BaseCommand):

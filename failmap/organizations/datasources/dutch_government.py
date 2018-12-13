@@ -5,53 +5,18 @@ Example:
 failmap import_organizations dutch_government
 
 Warning: this is XML, set aside your intuition about programming.
+
+https://almanak-redactie.overheid.nl/archive/
 """
 
 import logging
 import xml.etree.ElementTree as ET
-from os import rename
 
-import requests
-
-from failmap.organizations.sources import generic_dataset_import, print_progress_bar, read_data
+from failmap.celery import app
+from failmap.organizations.datasources import (download_http_get_no_credentials,
+                                               generic_dataset_import, read_data)
 
 log = logging.getLogger(__package__)
-
-LAYER = 'government'
-COUNTRY = 'NL'
-
-# https://almanak-redactie.overheid.nl/archive/
-# the xml plural / single are to help parsing, they don't need to be in your specification.
-datasets = [
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_ministeries.xml',
-     'description': 'Dutch ministries', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
-
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_gemeenschappelijke_regelingen.xml',
-     'description': 'Gemeenschappelijke Regelingen', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'gemeenschappelijkeRegelingen', 'xml_single': 'gemeenschappelijkeRegeling'},
-
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_organisaties.xml',
-     'description': 'Organisaties', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
-
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_rechterlijke_macht.xml',
-     'description': 'Rechterlijke macht', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
-
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_waterschappen.xml',
-     'description': 'Waterschappen', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'organisaties', 'xml_single': 'organisatie'},
-
-    {'url': 'https://almanak-redactie.overheid.nl/archive/exportOO_zelfstandige_bestuursorganen.xml',
-     'description': 'Zelfstandige bestuursorganen', 'layer': LAYER, 'country': COUNTRY,
-     'xml_plural': 'zelfstandigeBestuursorganen', 'xml_single': 'zelfstandigBestuursorgaan'},
-
-]
-
-namespaces = {
-    'p': 'https://almanak.overheid.nl/static/schema/oo/export/2.4.3',
-}
 
 
 def parse_data(dataset, filename):
@@ -68,7 +33,7 @@ def parse_data(dataset, filename):
     # of course this doesn't work out the box, so how do we autoregister a namespace?
     ET.register_namespace('p', ns)
     # so just fake / overwrite the namespaces variable
-    namespaces['p'] = ns
+    namespaces = {'p': ns}
 
     organizations = root.find('p:%s' % dataset['xml_plural'], namespaces)
 
@@ -77,7 +42,7 @@ def parse_data(dataset, filename):
     for organization in organizations.iterfind('p:%s' % dataset['xml_single'], namespaces):
         name = emulate_get(organization, 'p:naam', namespaces)
         if not name:
-            # gemeenschappelijke regelingen...
+            # gemeenschappelijke regelingen has a title, not a name.
             name = emulate_get(organization, 'p:titel', namespaces)
 
         abbreviation = emulate_get(organization, 'p:afkorting', namespaces)
@@ -128,28 +93,8 @@ def emulate_get(xml, element, namespaces):
         return ""
 
 
-def download(url, filename_to_save):
-    # https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
-
-    # post / get / credentials / protocol, whatever...
-    response = requests.get(url, stream=True, timeout=(1200, 1200))
-    response.raise_for_status()
-
-    with open(filename_to_save, 'wb') as f:
-        filename = f.name
-        i = 0
-        for chunk in response.iter_content(chunk_size=1024):
-            i += 1
-            print_progress_bar(1, 100, ' download')
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
-
-    # save as cachable resource
-    # this of course doesn't work if you call it a few times while a download is running, but well, good enough
-    rename(filename, filename_to_save)
-
-    return filename_to_save
-
-
-def import_datasets(**options):
-    generic_dataset_import(datasets=datasets, parser_function=parse_data, download_function=download)
+@app.task(queue='storage')
+def import_datasets(**dataset):
+    generic_dataset_import(dataset=dataset,
+                           parser_function=parse_data,
+                           download_function=download_http_get_no_credentials)

@@ -6,18 +6,16 @@ Mind the format! See parse_data
 """
 
 import logging
-from os import rename
 
 import iso3166
 import pyexcel as p
-import requests
 
 from failmap.celery import app
-from failmap.organizations.sources import generic_dataset_import, print_progress_bar
+from failmap.organizations.datasources import (download_http_get_no_credentials,
+                                               generic_dataset_import)
 
 log = logging.getLogger(__package__)
 
-# todo: these datasets have to come from a table in the admin. That will give a nice UI.
 datasets = []
 
 
@@ -54,12 +52,16 @@ def parse_data(dataset, filename):
 
         validate_record(record)
 
+        sites = record['Websites (csv)'].strip().split(',')
+        sites = [x.strip() for x in sites]
+
+        # todo: column numbers might still be easier for people that enter data?
         found_organizations.append(
             {
                 'name': record['Name'],
                 'address': record['Address'],
                 'geocoding_hint': record.get('Hint', ''),
-                'websites': record['Websites (csv)'],
+                'websites': sites,
                 'country': record['Countrycode'],
                 'layer': record['Layer'],
                 'lat': record.get('Lat', ''),
@@ -96,33 +98,8 @@ def validate_record(record):
         raise ValueError('Countrycode is not a valid 3166 country code.')
 
 
-def download(url, filename_to_save):
-    # post / get / credentials / protocol, whatever...
-    response = requests.get(url, stream=True, timeout=(10, 10))
-    response.raise_for_status()
-
-    with open(filename_to_save, 'wb') as f:
-        filename = f.name
-        i = 0
-        for chunk in response.iter_content(chunk_size=1024):
-            i += 1
-            print_progress_bar(1, 100, ' download')
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
-
-    rename(filename, filename_to_save)
-
-    return filename_to_save
-
-
 @app.task(queue='storage')
-def import_datasets(**options):
-    if not options['url']:
-        raise ValueError('Please supply an URL for a dataset to download.')
-
-    datasets = [
-        {'url': options['url'][0],
-         'description': 'Randomly uploaded file.'},
-    ]
-
-    generic_dataset_import(datasets=datasets, parser_function=parse_data, download_function=download)
+def import_datasets(**dataset):
+    generic_dataset_import(dataset=dataset,
+                           parser_function=parse_data,
+                           download_function=download_http_get_no_credentials)

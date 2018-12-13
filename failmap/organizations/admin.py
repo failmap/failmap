@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from json import loads
 
 import nested_admin
 import pytz
@@ -20,9 +21,9 @@ from failmap import types
 from failmap.app.models import Job
 from failmap.celery import PRIO_HIGH, app
 from failmap.map.report import OrganizationRating, UrlRating
+from failmap.organizations.datasources import dutch_government, excel
 from failmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
                                           Promise, Url)
-from failmap.organizations.sources.excel import import_datasets
 from failmap.scanners.admin import UrlIp
 from failmap.scanners.models import Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan
 from failmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
@@ -634,13 +635,27 @@ class PromiseAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
 
+class DatasetForm(forms.ModelForm):
+
+    def clean_kwargs(self):
+        value = self.cleaned_data['kwargs']
+        try:
+            loads(value)
+        except ValueError as exc:
+            raise forms.ValidationError(
+                _('Unable to parse JSON: %s') % exc,
+            )
+
+        return value
+
+
 @admin.register(Dataset)
 # todo: how to show a form / allowing uploads?
 class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('source', 'is_imported', 'imported_on')
+    list_display = ('source', 'type', 'is_imported', 'imported_on')
     search_fields = ('source', )
     list_filter = ('is_imported', 'imported_on')
-    fields = ('source', 'is_imported', 'imported_on')
+    fields = ('source', 'type', 'kwargs', 'is_imported', 'imported_on')
 
     actions = []
 
@@ -649,14 +664,29 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def import_(self, request, queryset):
         for dataset in queryset:
-            options = {'url': [dataset.source]}
-            # ok, it's not smart to say something is imported before it has been verified to be imported.
+            kwargs = {'url': dataset.source}
 
-            (import_datasets.si(**options)
+            extra_kwargs = loads(dataset.kwargs)
+            kwargs = {**kwargs, **extra_kwargs}
+
+            # ok, it's not smart to say something is imported before it has been verified to be imported.
+            importers = {
+                'excel': excel,
+                'dutch_government': dutch_government,
+                '': excel
+            }
+
+            (importers[dataset.type].import_datasets.si(**kwargs)
              | dataset_import_finished.si(dataset)).apply_async()
         self.message_user(request, "Import started, will run in parallel.")
     import_.short_description = "+ Import"
     actions.append('import_')
+
+    form = DatasetForm
+
+    save_as = True
+    save_on_top = True
+    preserve_filters = True
 
 
 @app.task(queue='storage')
