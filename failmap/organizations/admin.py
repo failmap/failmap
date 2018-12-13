@@ -158,7 +158,7 @@ class CoordinateAdminInline(CompactInline):
 class OrganizationRatingAdminInline(CompactInline):
     model = OrganizationRating
     extra = 0
-    readonly_fields = ('organization', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    readonly_fields = ('organization', 'high', 'medium', 'low', 'when', 'calculation')
     can_delete = False
     ordering = ["-when"]
 
@@ -166,7 +166,7 @@ class OrganizationRatingAdminInline(CompactInline):
 class UrlRatingAdminInline(CompactInline):
     model = UrlRating
     extra = 0
-    readonly_fields = ('url', 'rating', 'high', 'medium', 'low', 'when', 'calculation')
+    readonly_fields = ('url', 'high', 'medium', 'low', 'when', 'calculation')
     can_delete = False
     ordering = ["-when"]
 
@@ -694,7 +694,6 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     form = DatasetForm
 
     save_as = True
-    save_on_top = True
     preserve_filters = True
 
 

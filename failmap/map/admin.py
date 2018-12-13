@@ -20,8 +20,8 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             id=format(obj.organization_id))
 
     list_display = ('organization', 'high', 'medium', 'low', 'when', 'inspect_organization')
-    search_fields = (['organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
-    list_filter = ['organization', 'organization__country', 'organization__type__name', 'rating', 'when'][::-1]
+    search_fields = (['organization__name', 'when'])
+    list_filter = ['organization', 'organization__country', 'organization__type__name', 'when'][::-1]
     fields = ('organization', 'total_urls', 'total_endpoints',
               'high',
               'medium',
@@ -74,8 +74,8 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                            id=format(obj.url_id))
 
     list_display = ('url', 'high', 'medium', 'low', 'total_endpoints', 'when', 'inspect_url')
-    search_fields = (['url__organization__name', 'rating', 'high', 'medium', 'low', 'when', 'calculation'])
-    list_filter = ['url', 'rating', 'when', 'url__organization__type', 'url__organization__country'][::-1]
+    search_fields = (['url__organization__name', 'when'])
+    list_filter = ['url', 'when', 'url__organization__type', 'url__organization__country'][::-1]
     fields = ('url', 'total_endpoints',
               'total_issues',
 
@@ -268,7 +268,7 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(MapDataCache)
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('pk', 'country', 'organization_type', 'filters', 'when', 'length')
+    list_display = ('pk', 'country', 'organization_type', 'filters', 'when')
     list_filter = ['country', 'organization_type', 'filters', 'when'][::-1]
     search_fields = (['country', 'organization_type', 'filters'])
 
@@ -276,4 +276,5 @@ class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def length(obj):
+        # retrieving this causes a massive slowdown on getting the dataset
         return len(str(obj.dataset))

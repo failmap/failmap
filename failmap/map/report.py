@@ -987,7 +987,6 @@ def save_url_rating(url: Url, date: datetime, high: int, medium: int, low: int, 
         u.when = datetime(year=date.year, month=date.month, day=date.day,
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
-    u.rating = 0
     u.calculation = calculation
     u.total_endpoints = total_endpoints
 
@@ -1113,7 +1112,6 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     if OrganizationRating.objects.all().filter(organization=organization, when=when).exists():
         log.info("Rating already exists for %s on %s. Not overwriting." % (organization, when))
 
-    total_rating = 0
     total_high, total_medium, total_low = 0, 0, 0
 
     # Done: closing off urls, after no relevant endpoints, but still resolvable. Done.
@@ -1135,7 +1133,6 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     url_issues_low, endpoint_issues_high, endpoint_issues_medium, endpoint_issues_low, = 0, 0, 0, 0
 
     for urlrating in all_url_ratings:
-        total_rating += urlrating.rating
         total_high += urlrating.high
         total_medium += urlrating.medium
         total_low += urlrating.low
@@ -1180,7 +1177,6 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     calculation = {
         "organization": {
             "name": organization.name,
-            "rating": total_rating,
             "high": total_high,
             "medium": total_medium,
             "low": total_low,
@@ -1211,7 +1207,6 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
         log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
         organizationrating = OrganizationRating()
         organizationrating.organization = organization
-        organizationrating.rating = total_rating
         organizationrating.high = total_high
         organizationrating.medium = total_medium
         organizationrating.low = total_low
@@ -1255,7 +1250,6 @@ def get_latest_urlratings_fast(urls: List[Url], when):
 
     sql = '''SELECT
                     id,
-                    rating,
                     high,
                     medium,
                     low,
@@ -1326,12 +1320,10 @@ def default_organization_rating(organizations: List[Organization]):
 
         r = OrganizationRating()
         r.when = when
-        r.rating = -1
         r.organization = organization
         r.calculation = {
             "organization": {
                 "name": organization.name,
-                "rating": "-1",
                 "high": "0",
                 "medium": "0",
                 "low": "0",
@@ -1427,7 +1419,6 @@ def calculate_vulnerability_statistics(days: int = 366):
 
             sql = """
                     SELECT
-                        map_organizationrating.rating,
                         organization.name,
                         organizations_organizationtype.name,
                         coordinate_stack.area,
@@ -1577,10 +1568,13 @@ def calculate_map_data_today():
 
 @app.task(queue='storage')
 def calculate_map_data(days: int = 366):
+    from django.db import OperationalError
+
     log.info("calculate_map_data")
 
     map_configurations = Configuration.objects.all().filter(
-        is_displayed=True).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
+        is_displayed=True
+    ).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
@@ -1598,10 +1592,12 @@ def calculate_map_data(days: int = 366):
                     map_configuration['country'], map_configuration['organization_type__name'],
                     days_back, when, scan_type
                 ))
-                data = get_map_data(map_configuration['country'], map_configuration['organization_type__name'],
-                                    days_back, scan_type)
-
-                from django.db import OperationalError
+                data = get_map_data(
+                    map_configuration['country'],
+                    map_configuration['organization_type__name'],
+                    days_back,
+                    scan_type
+                )
 
                 try:
                     cached = MapDataCache()

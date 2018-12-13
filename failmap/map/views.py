@@ -412,8 +412,7 @@ def organization_report(request, country: str = "NL", organization_type="municip
                                                        country=get_country(country),
                                                        type=get_organization_type(organization_type))
         ratings = organization.filter(organizationrating__when__lte=when)
-        values = ratings.values('organizationrating__rating',
-                                'organizationrating__calculation',
+        values = ratings.values('organizationrating__calculation',
                                 'organizationrating__when',
                                 'name',
                                 'pk',
@@ -435,7 +434,6 @@ def organization_report(request, country: str = "NL", organization_type="municip
             "slug": slugify(values['name']),
             "id": values['pk'],
             "twitter_handle": values['twitter_handle'],
-            "rating": values['organizationrating__rating'],
             "when": values['organizationrating__when'].isoformat(),
 
             # fixing json being presented and escaped as a string, this makes it a lot slowr
@@ -488,7 +486,7 @@ def terrible_urls(request, country: str = "NL", organization_type="municipality"
 
     sql = '''
             SELECT
-                rating,
+                low,
                 organization.name,
                 organizations_organizationtype.name,
                 organization.id,
@@ -573,7 +571,7 @@ def top_fail(request, country: str = "NL", organization_type="municipality", wee
 
     sql = '''
             SELECT
-                rating,
+                low,
                 organization.name,
                 organizations_organizationtype.name,
                 organization.id,
@@ -662,7 +660,7 @@ def top_win(request, country: str = "NL", organization_type="municipality", week
     cursor = connection.cursor()
     sql = '''
             SELECT
-                rating,
+                low,
                 organization.name,
                 organizations_organizationtype.name,
                 organization.id,
@@ -787,8 +785,8 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
 
             # do not create stats over empty organizations. That would count empty organizations.
             # you can't really filter them out above? todo: Figure that out at a next release.
-            if rating.rating == -1:
-                continue
+            # if rating.rating == -1:
+            #    continue
 
             measurement["total_organizations"] += 1
 
@@ -1554,7 +1552,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     # a bit slower it seems, but still well within acceptable levels.
     sql = """
         SELECT
-            map_organizationrating.rating,
+            map_organizationrating.low,
             organization.name,
             organizations_organizationtype.name,
             coordinate_stack.area,

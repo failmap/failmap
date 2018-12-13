@@ -31,11 +31,6 @@ class OrganizationRating(models.Model):
     scanner to explain why something is the way it is (over time).
     """
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    rating = models.IntegerField(
-        help_text="Amount of points scored by the organization based on a sum of all URL ratings at"
-                  " this moment. Rating -1 is used as a default first rating, which are displayed "
-                  "in gray on the map. All next ratings are between 0 (perfect) and 2147483647."
-    )
 
     total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.", default=0)
     high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
@@ -122,12 +117,6 @@ class UrlRating(models.Model):
         Aggregrates the results of many scanners to determine a rating for a URL.
     """
     url = models.ForeignKey(Url, on_delete=models.CASCADE)
-    rating = models.IntegerField(
-        help_text="Amount of points scored after rating the URL. Ratings are usually positive, yet "
-                  "this is not a positive integerfield because we might use -1 as an 'unknown' "
-                  "default value for when there are no ratings at all. Ratings can go from 0 "
-                  "up to 2147483647."
-    )
 
     # cumulative issues on both the url and all underlying endpoints.
     total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.", default=0)
