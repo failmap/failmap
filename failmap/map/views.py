@@ -1807,9 +1807,13 @@ def latest_updates(organization_id):
 
     # semi-union, given not all columns are the same. (not python/django-esque solution)
     generic_endpoint_scans = list(EndpointGenericScan.objects.filter(
-        endpoint__url__organization=organization).order_by('-rating_determined_on')[0:60])
+        endpoint__url__organization=organization,
+        type__in=ENDPOINT_SCAN_TYPES
+    ).order_by('-rating_determined_on')[0:60])
     url_endpoint_scans = list(UrlGenericScan.objects.filter(
-        url__organization=organization).order_by('-rating_determined_on')[0:60])
+        url__organization=organization,
+        type__in=URL_SCAN_TYPES
+    ).order_by('-rating_determined_on')[0:60])
 
     scans = generic_endpoint_scans + url_endpoint_scans
 
@@ -1963,7 +1967,6 @@ def updates_on_organization(request, organization_id):
     if not organization_id:
         return empty_response()
 
-    latest_updates(organization_id)
     return JsonResponse(latest_updates(organization_id), encoder=JSEncoder)
 
 

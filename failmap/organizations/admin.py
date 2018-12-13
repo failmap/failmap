@@ -305,6 +305,8 @@ class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
         return format_html("<a href='https://www.wikipedia.org/wiki/%s' target='_blank'>🔍 %s</a>" %
                            (self.wikipedia, self.wikipedia))
 
+    # preserve_filters = True
+
 
 # https://docs.djangoproject.com/en/2.0/ref/forms/validation/
 class MyUrlAdminForm(forms.ModelForm):
