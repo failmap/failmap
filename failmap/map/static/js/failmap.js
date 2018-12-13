@@ -605,7 +605,7 @@ const failmap = {
             paddingToLeft=320;
 
         // if there is one already, overwrite the attributes...
-        if (failmap.polygons.getLayers().length) {
+        if (failmap.polygons.getLayers().length || failmap.markers.getLayers().length) {
             // add all features that are not part of the current map at all
             // and delete the ones that are not in the current set
             failmap.clean_map(regions, points);
