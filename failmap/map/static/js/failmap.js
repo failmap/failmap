@@ -9,7 +9,7 @@ const failmap = {
     possibleIconColors: ["unknown", "green", "yellow", "orange", "red"],
     markers: L.markerClusterGroup(
         {
-            maxClusterRadius: 20,
+            maxClusterRadius: 25,
 
             iconCreateFunction: function(cluster){
                 let css_class = "unknown";
