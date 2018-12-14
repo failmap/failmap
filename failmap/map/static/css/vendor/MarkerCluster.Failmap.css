@@ -6,6 +6,15 @@
     background-color: rgba(56, 99, 204, 0.6);
 }
 
+.marker-cluster-white {
+    background-color: rgba(221, 226, 226, 0.6);
+}
+
+.marker-cluster-white div {
+    background-color: rgba(204, 202, 199, 0.6);
+}
+
+
 .marker-cluster-green {
     background-color: rgba(181, 226, 140, 0.6);
 }

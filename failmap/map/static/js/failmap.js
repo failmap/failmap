@@ -14,7 +14,7 @@ const failmap = {
 
             // good, medium, bad
             // todo: if red, break
-            // you can't break a forEach, therefore we're using an old school for loop here
+            // you can't break a forEach, therefore we're using an old school for loop here (you can continue...)
             let childmarkers = cluster.getAllChildMarkers();
             let colors = ["unknown", "green", "yellow", "orange"];
             let selected_color = 0;
@@ -30,9 +30,25 @@ const failmap = {
                 }
             }
 
+            // todo: merge this search optimization with the previous iteration over everything.
+            // doesn't even need to be an array, as it just matters if the text matches somewhere
+            let searchedfor = false;
+            for (let point of childmarkers) {
+                if (point.options.fillOpacity === 0.7)
+                    searchedfor = true;
+            }
+
+            // todo: terniary operator
+            let classname = "";
+            if (searchedfor){
+                classname = 'marker-cluster marker-cluster-' + css_class;
+            } else {
+                classname = 'marker-cluster marker-cluster-white';
+            }
+
             return L.divIcon({
                 html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-                className: 'marker-cluster marker-cluster-' + css_class,
+                className: classname,
                 // title: 'SWAG',  // properties.organization_name
                 iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
             }
@@ -496,13 +512,11 @@ const failmap = {
     highlightFeature: function (e) {
         let layer = e.target;
 
-        // doesn't work for points, only for polygons and lines
-        if (typeof layer.setStyle === "function") {
-            layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
-            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                layer.bringToFront();
-            }
+        layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
+        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+            layer.bringToFront();
         }
+
         vueInfo.properties = layer.feature.properties;
         vueDomainlist.load(layer.feature.properties.organization_id, vueMap.week);
     },
@@ -516,7 +530,6 @@ const failmap = {
     },
 
     resetHighlight: function (e) {
-        // todo: add search for points
         if (failmap.isSearchedFor(e.target.feature))
             e.target.setStyle(failmap.searchResultStyle(e.target.feature));
         else
@@ -538,10 +551,14 @@ const failmap = {
             failmap.polygons.eachLayer(function (layer) {
                 layer.setStyle(failmap.style(layer.feature));
             });
+            failmap.markers.eachLayer(function (layer) {
+                layer.setStyle(failmap.style(layer.feature));
+            });
+            failmap.markers.refreshClusters();
         } else {
             // text match
+            console.log("Search");
             // todo: is there a faster, native search option?
-            // todo: how to search in MarkedCluster / give that a different style?
             failmap.polygons.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     layer.setStyle(failmap.searchResultStyle(layer.feature));
@@ -556,6 +573,9 @@ const failmap = {
                     layer.setStyle(failmap.style(layer.feature));
                 }
             });
+
+            // check in the clusters if there are any searched for. Is done based on style.
+            failmap.markers.refreshClusters();
         }
     },
 
@@ -566,14 +586,18 @@ const failmap = {
         if (failmap.polygons.getLayers().length || failmap.markers.getLayers().length) {
             // add all features that are not part of the current map at all
             // and delete the ones that are not in the current set
-            failmap.clean_map(geodata.polygons, geodata.points);
+            // the brutal way would be like this, which would not allow transitions:
+            // failmap.markers.clearLayers();
+            // failmap.add_points(points);
+            failmap.add_new_layers_remove_non_used(geodata.points, failmap.markers, "markers");
+            failmap.add_new_layers_remove_non_used(geodata.polygons, failmap.polygons, "polygons");
 
             // update existing layers (and add ones with the same name)
             failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
             failmap.markers.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
         } else {
-            failmap.add_polygons(geodata.polygons);
-            failmap.add_points(geodata.points);
+            failmap.add_polygons_to_map(geodata.polygons);
+            failmap.add_points_to_map(geodata.points);
         }
 
         if (fitbounds)
@@ -617,7 +641,7 @@ const failmap = {
     },
 
 
-    add_polygons: function(polygons){
+    add_polygons_to_map: function(polygons){
         failmap.polygons = L.geoJson(polygons, {
             style: failmap.style,
             pointToLayer: failmap.pointToLayer,
@@ -625,7 +649,7 @@ const failmap = {
         }).addTo(failmap.map);
     },
 
-    add_points: function(points) {
+    add_points_to_map: function(points) {
         // Geojson causes confetti to appear, which is great, but doesn't work with multiple organization on the same
         // location. You need something that can show multiple things at once place, such as MarkerCluster.
         // failmap.markers = L.geoJson(points, {
@@ -635,10 +659,8 @@ const failmap = {
         // }).addTo(failmap.map);
 
         points.forEach(function(point){
-            // console.log(point);
             pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
-            // which of one of these three triggers the bug?
             pointlayer.on({
                 mouseover: failmap.highlightFeature,
                 mouseout: failmap.resetHighlight,
@@ -653,22 +675,14 @@ const failmap = {
         failmap.map.addLayer(failmap.markers);
     },
 
-    clean_map: function(regions, points) {
-        // first version: just delete all points and add them again.
-        // we can use the same logic for points and regions now.
-        // failmap.markers.clearLayers();
-        // failmap.add_points(points);
-
-        failmap.add_new_layers_remove_non_used(points, failmap.markers);
-        failmap.add_new_layers_remove_non_used(regions, failmap.polygons);
-    },
-
-    add_new_layers_remove_non_used: function(shapeset, target){
+    add_new_layers_remove_non_used: function(shapeset, target, layer_type){
         // when there is no data at all, we're done quickly
         if (!shapeset.length) {
             target.clearLayers();
             return;
         }
+
+        console.log(target);
 
         // Here we optimize the number of loops if we make a a few simple arrays. We can then do Contains,
         // which is MUCH more optimized than a nested foreach loop. It might even be faster with intersect.
@@ -683,11 +697,18 @@ const failmap = {
 
         // add layers to the map that are only in the new dataset (new)
         shapeset.forEach(function (shape){
-            if (!target_names.includes(shape.properties.organization_name))
-                target.addData(shape);
+            // polygons has addData, but MarkedCluster doesn't. You can't blindly do addlayer on points.
+            if (!target_names.includes(shape.properties.organization_name)){
+                if (layer_type === "polygons") {
+                    target.addData(shape);
+                } else {
+                    failmap.add_points_to_map([shape]);
+                }
+            }
+
         });
 
-        // remove existing layers that are not in the new dataset
+        // remove existing layers that are not in the new dataset, both support removeLayer.
         target.eachLayer(function (layer){
             if (!shape_names.includes(layer.feature.properties.organization_name))
                 target.removeLayer(layer);
