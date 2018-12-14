@@ -6,51 +6,40 @@ const failmap = {
 
     polygons: L.geoJson(),  // geographical regions
 
+    possibleIconColors: ["unknown", "green", "yellow", "orange", "red"],
+
     markers: L.markerClusterGroup(
         {
+            maxClusterRadius: 20,
+
             iconCreateFunction: function(cluster){
-            // if 1 is red, marker is red else if 1 is orange, else green else gray.
-            let css_class = "unknown";
+                let css_class = "unknown";
 
-            // good, medium, bad
-            // todo: if red, break
-            // you can't break a forEach, therefore we're using an old school for loop here (you can continue...)
-            let childmarkers = cluster.getAllChildMarkers();
-            let colors = ["unknown", "green", "yellow", "orange"];
-            let selected_color = 0;
+                let childmarkers = cluster.getAllChildMarkers();
 
-            for (let point of childmarkers) {
-                if (point.feature.properties.color === "red") {
-                    css_class = "red"; break;
+                let selected_color = 0;
+
+                // doesn't even need to be an array, as it just matters if the text matches somewhere
+                let searchedfor = false;
+                for (let point of childmarkers) {
+                    if (point.options.fillOpacity === 0.7)
+                        searchedfor = true;
+
+
+                    // upgrade colors until you find the highest risk issue.
+                    if (failmap.possibleIconColors.indexOf(point.feature.properties.color) > selected_color){
+                        selected_color = failmap.possibleIconColors.indexOf(point.feature.properties.color);
+                        css_class = point.feature.properties.color;
+                    }
                 }
 
-                if (colors.indexOf(point.feature.properties.color) > selected_color){
-                    selected_color = colors.indexOf(point.feature.properties.color);
-                    css_class = point.feature.properties.color;
-                }
-            }
+                let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
 
-            // todo: merge this search optimization with the previous iteration over everything.
-            // doesn't even need to be an array, as it just matters if the text matches somewhere
-            let searchedfor = false;
-            for (let point of childmarkers) {
-                if (point.options.fillOpacity === 0.7)
-                    searchedfor = true;
-            }
-
-            // todo: terniary operator
-            let classname = "";
-            if (searchedfor){
-                classname = 'marker-cluster marker-cluster-' + css_class;
-            } else {
-                classname = 'marker-cluster marker-cluster-white';
-            }
-
-            return L.divIcon({
-                html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-                className: classname,
-                // title: 'SWAG',  // properties.organization_name
-                iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
+                return L.divIcon({
+                    html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                    className: classname,
+                    // title: 'SWAG',  // properties.organization_name
+                    iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
             }
         }
 
@@ -108,7 +97,7 @@ const failmap = {
             this.add_div('<div id="historycontrol"></div>', "info table-light", true);
 
         this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
-        this.add_div("<div><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
+        this.add_div("<div style='max-width: 300px;'><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
         let labels=[];
         labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
@@ -127,7 +116,7 @@ const failmap = {
             var control = new L.Control({position:'topleft'});
             control.onAdd = function(map) {
                     var azoom = L.DomUtil.create('a','resetzoom');
-                    azoom.innerHTML = "<span title='Show all data on map.' style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
+                    azoom.innerHTML = "<span title='" + gettext("Zoom to show all data on this map.") + "' style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
                     L.DomEvent
                         .disableClickPropagation(azoom)
                         .addListener(azoom, 'click', function() {
