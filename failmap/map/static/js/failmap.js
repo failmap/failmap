@@ -7,7 +7,6 @@ const failmap = {
     polygons: L.geoJson(),  // geographical regions
 
     possibleIconColors: ["unknown", "green", "yellow", "orange", "red"],
-
     markers: L.markerClusterGroup(
         {
             maxClusterRadius: 20,
@@ -38,11 +37,9 @@ const failmap = {
                 return L.divIcon({
                     html: '<div><span>' + cluster.getChildCount() + '</span></div>',
                     className: classname,
-                    // title: 'SWAG',  // properties.organization_name
-                    iconSize: [40, 40] });  // why a new L.Point? new L.Point(40, 40)
+                    iconSize: [40, 40] });
             }
         }
-
     ),
 
     initialize: function (mapbox_token, country_code, debug, show_filters=true) {
@@ -488,7 +485,6 @@ const failmap = {
     },
 
     pointToLayer: function (geoJsonPoint, latlng) {
-        // console.log(latlng);
         switch (geoJsonPoint.properties.color){
             case "red": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
             case "orange": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
@@ -546,7 +542,6 @@ const failmap = {
             failmap.markers.refreshClusters();
         } else {
             // text match
-            console.log("Search");
             // todo: is there a faster, native search option?
             failmap.polygons.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
@@ -584,6 +579,9 @@ const failmap = {
             // update existing layers (and add ones with the same name)
             failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
             failmap.markers.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
+
+            // colors could have changed
+            failmap.markers.refreshClusters();
         } else {
             failmap.add_polygons_to_map(geodata.polygons);
             failmap.add_points_to_map(geodata.points);
@@ -670,8 +668,6 @@ const failmap = {
             target.clearLayers();
             return;
         }
-
-        console.log(target);
 
         // Here we optimize the number of loops if we make a a few simple arrays. We can then do Contains,
         // which is MUCH more optimized than a nested foreach loop. It might even be faster with intersect.
