@@ -1,9 +1,11 @@
-from django.db import models
-from failmap.organizations.models import Url, Organization
 from django.contrib.auth.models import User
+from django.db import models
+
+from failmap.organizations.models import Organization, Url
+
 
 """
-Ideas: 
+Ideas:
 
 Map users to an account.
 how can users add their own / new urls? Should they be able to? How does that propagate back into the system?

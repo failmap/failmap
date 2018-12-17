@@ -16,8 +16,8 @@ from failmap.celery import ParentFailed, app
 from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
 from failmap.scanners.scanmanager import store_endpoint_scan_result
-from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 from failmap.scanners.scanner.http import get_random_user_agent
+from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 
