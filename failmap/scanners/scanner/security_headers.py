@@ -17,6 +17,7 @@ from failmap.organizations.models import Organization, Url
 from failmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
 from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
+from failmap.scanners.scanner.http import get_random_user_agent
 
 log = logging.getLogger(__name__)
 
@@ -262,12 +263,21 @@ def get_headers_request(uri_url):
     Similarly, since a redirect is a flag not to render the content, the content can't be manipulated.
     This also means no X-XSS-Protection or X-Content-Type-Options are needed. So just follow all redirects.
 
+    Update 17 dec 2018: some web servers require a user agent to be sent in order to give a "more correct" response.
+    Given that 'humans with browsers' access these pages, it's normal to also send a user agent.
+
     :return: requests.response
     """
 
+    log.debug('Getting headers for %s' % uri_url)
+
     # ignore wrong certificates, those are handled in a different scan.
     # 10 seconds for network delay, 10 seconds for the site to respond.
-    response = requests.get(uri_url, timeout=(10, 10), allow_redirects=True, verify=False)
+    response = requests.get(uri_url,
+                            timeout=(10, 10),
+                            allow_redirects=True,
+                            verify=False,
+                            headers={'User-Agent': get_random_user_agent()})
 
     # Removed: only continue for valid responses (eg: 200)
     # Error pages, such as 404 are super fancy, with forms and all kinds of content.
