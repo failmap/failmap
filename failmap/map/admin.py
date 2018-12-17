@@ -74,7 +74,7 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                            id=format(obj.url_id))
 
     list_display = ('url', 'high', 'medium', 'low', 'total_endpoints', 'when', 'inspect_url')
-    search_fields = (['url__organization__name', 'when'])
+    search_fields = (['url__organization__name', 'url__url', 'when'])
     list_filter = ['url', 'when', 'url__organization__type', 'url__organization__country'][::-1]
     fields = ('url', 'total_endpoints',
               'total_issues',
