@@ -1724,6 +1724,59 @@ def empty_response():
     return JsonResponse({}, encoder=JSEncoder)
 
 
+# Code saved for use during Pro options. The scan volume is not really indicative as it is neat to see what changes
+# per day / how hard organizations work on changes.
+# @cache_page(one_hour)
+# def scan_change_volume(country: str = "NL", organization_type="municipality"):
+#     """
+#     Gives insight into the volume of scans per type, per day. This helps to determine if there are any changes made,
+#     and to see if scans are being performed at all.
+#
+#     todo: make this per organization.
+#
+#     :return:
+#     """
+#     # i really have no clue how to write this ins Django ORM. Would love to, but it's not easy at all.
+#     sql = """
+#         SELECT
+#             count(scanners_endpointgenericscan.id) as number,
+#             `type`,
+#             DATE(`rating_determined_on`)
+#         FROM
+#             scanners_endpointgenericscan
+#         INNER JOIN
+#             scanners_endpoint on (url.id = scanners_endpointgenericscan.endpoint_id)
+#         INNER JOIN
+#             url on (url.id = scanners_endpoint.url_id)
+#         INNER JOIN
+#             url_organization ON (url_organization.url_id = url.id)
+#         INNER JOIN
+#             organization ON (url_organization.organization_id = organization.id)
+#         WHERE
+#             organization.country = '%(country)s' AND
+#             organization.type_id = %(OrganizationTypeId)s
+#         GROUP BY
+#             `type`,
+#             DATE(`rating_determined_on`)
+#     """ % {"OrganizationTypeId": get_organization_type(organization_type),
+#            "country": get_country(country)}
+#
+#     cursor = connection.cursor()
+#     cursor.execute(sql)
+#     rows = cursor.fetchall()
+#
+#     dataset = []
+#
+#     for i in rows:
+#         dataset.append({
+#             'type': i[1],
+#             'amount': i[0],
+#             'day': i[2]
+#         })
+#
+#     return JsonResponse(dataset, encoder=JSEncoder)
+
+
 @cache_page(ten_minutes)
 def latest_scans(request, scan_type, country: str = "NL", organization_type="municipality"):
     scans = []
