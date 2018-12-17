@@ -1,0 +1,113 @@
+{% load static %} {% load i18n %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Failmap - THE GAME</title>
+    <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/bootstrap.js' %}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
+
+    {{ form.media }}
+
+    <style>
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        html,
+        body {
+            height: 100%;
+            /* The html and body elements cannot have any padding or margin. */
+        }
+
+        /* Wrapper for page content to push down footer */
+        #wrap {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            /* Negative indent footer by it's height */
+            margin: 0 auto -30px;
+        }
+
+        /* Set the fixed height of the footer here */
+        #push,
+        #footer {
+            height: 30px;
+            margin-top: 58px;
+            font-size: 0.9em;
+            font-style: italic;
+            border-top: 1px solid #b9b6b6;
+            padding: 5px;
+            color: #8e8c8c
+        }
+
+        #footer {
+            background-color: #f7f3ee;
+        }
+
+        /* Lastly, apply responsive CSS fixes as necessary */
+        @media (max-width: 767px) {
+            #footer {
+                margin-left: -20px;
+                margin-right: -20px;
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+
+    </style>
+
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom" style="background-color: whitesmoke !important;">
+    <div class="container">
+        <a class="navbar-brand" href="/pro/"><i class="fas fa-map-marker-alt"></i> {% trans "Pro" %}</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="{% trans "Toggle navigation" %}">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" href="/pro/urls/">My Urls</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/scans/">Scans</a></li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="/pro/todo/" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Todo<span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/pro/todo1/">todo 1</a>
+                    </div>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="nav-item"><a class="nav-link" href="/pro/help/">💡️ Help</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/logout/">😭 Log Out</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block fullwidth %}
+{% endblock %}
+
+<div id="wrap">
+    <div class="container">
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+</div>
+
+<div id="footer">
+    <div class="container">
+        Data can be downloaded from the Failmap Website of your country. For a list, see <a href="https://failmap.org">failmap.org</a>.
+    </div>
+</div>
+</body>
+</html>

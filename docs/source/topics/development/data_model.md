@@ -20,6 +20,9 @@ It has been generated with 'failmap docs'.
 ## hypersh
 ![Data Model](data_model/hypersh_models.png)
 
+## pro
+![Data Model](data_model/pro_models.png)
+
 ## All in one
 ![Data Model](data_model/failmap_models.png)
 

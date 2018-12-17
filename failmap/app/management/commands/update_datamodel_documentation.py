@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        apps = ['organizations', 'scanners', 'map', 'game', 'app', 'hypersh']
+        apps = ['organizations', 'scanners', 'map', 'game', 'app', 'hypersh', 'pro']
 
         for app in apps:
             log.info("creating image for: %s", app)

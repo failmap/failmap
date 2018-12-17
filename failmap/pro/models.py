@@ -25,6 +25,8 @@ In the future there might be subdomain datafeeds / ip datafeeds so service provi
 
 
 class Account(models.Model):
+    # todo: created_on, is_dead etc.
+
     name = models.CharField(
         max_length=120,
         blank=True,
@@ -38,6 +40,9 @@ class Account(models.Model):
         default=False,
         help_text="Inactive accounts cannot be logged-in to."
     )
+
+    def __str__(self):
+        return '%s' % self.name
 
 
 class ProUser(models.Model):
@@ -63,6 +68,7 @@ class ProUser(models.Model):
 
 
 class UrlList(models.Model):
+    # Todo: make reports for this. Make sure they can be stored here somewhere.
     name = models.CharField(
         max_length=120,
         blank=True,
@@ -78,6 +84,48 @@ class UrlList(models.Model):
 
     urls = models.ManyToManyField(
         Url
+    )
+
+    # Was a separate class, should the mail settings be a mixin?
+    send_notifications = models.BooleanField(
+        default=False,
+    )
+
+    send_notification_on_new_issue_with_high_risk = models.BooleanField(
+        default=False,
+    )
+
+    send_notification_on_new_issue_with_medium_risk = models.BooleanField(
+        default=False
+    )
+
+    send_notification_on_new_issue_with_low_risk = models.BooleanField(
+        default=False
+    )
+
+    notification_receipients = models.CharField(
+        max_length=800,
+        default='',
+        blank=True,
+        null=True,
+        # todo: validation of e-mail field. Relation?
+    )
+
+    send_reports = models.BooleanField(
+        default=False
+    )
+
+    send_report_format = models.CharField(
+        max_length=40,
+        choices=[('html_inline', 'Inline HTML')],
+        default='html_inline'
+    )
+
+    report_receipients = models.CharField(
+        max_length=800,
+        default='',
+        blank=True,
+        null=True,
     )
 
 

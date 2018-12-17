@@ -1,0 +1,34 @@
+{% extends 'pro/base.html' %}{% load humanize %}
+{% block content %}
+    <h1>Scans</h1>
+    <p>Overview of all scans performed on your urls.</p>
+
+    <table class="table table-sm table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th>Url</th>
+        <th>Organization</th>
+        <th>Links</th>
+        <th>Added</th>
+        <th>Onboarding</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for scan in scans %}
+        <tr>
+            <td>{{ scan.url }} {{ scan.service }}</td>
+            <td>{{ scan.type }}</td>
+            <td>{{ scan.explanation }} </td>
+            <td>{{ scan.high }}</td>
+            <td>{{ scan.medium }}</td>
+            <td>{{ scan.low }}</td>
+        </tr>
+
+
+        {% empty %}
+        <tr><td colspan="6">No scans found.</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock %}
