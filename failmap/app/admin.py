@@ -16,6 +16,7 @@ from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
 from failmap.app.models import GameUser, Job, Volunteer
+from failmap.pro.models import ProUser
 
 
 class JobAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -155,7 +156,13 @@ class VolunteerInline(admin.StackedInline):
 class GameUserInline(admin.StackedInline):
     model = GameUser
     can_delete = False
-    verbose_name_plural = 'Game User'
+    verbose_name_plural = 'Game Users'
+
+
+class ProUserInline(admin.StackedInline):
+    model = ProUser
+    can_delete = False
+    verbose_name_plural = 'Pro Users'
 
 
 # Thank you:
@@ -200,7 +207,7 @@ def generate_game_user():
 
 class UserAdmin(BaseUserAdmin, ImportExportModelAdmin):
     resource_class = UserResource
-    inlines = (VolunteerInline, GameUserInline)
+    inlines = (VolunteerInline, GameUserInline, ProUserInline)
 
     list_display = ('username', 'organization', 'first_name', 'last_name',
                     'email', 'is_active', 'is_staff', 'is_superuser', 'last_login', 'in_groups')
