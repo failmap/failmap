@@ -3,27 +3,36 @@
     <h1>Scans</h1>
     <p>Overview of all scans performed on your urls.</p>
 
+    <h2>Latest scans</h2>
     <table class="table table-sm table-striped table-bordered table-hover">
     <thead>
     <tr>
-        <th>Url</th>
-        <th>Organization</th>
-        <th>Links</th>
-        <th>Added</th>
-        <th>Onboarding</th>
+        <th>Action</th>
+        <th>Scan moment</th>
+        <th>Url / Endpoint</th>
+        <th>Scan type</th>
+        <th>Result</th>
+        <th>Impact</th>
     </tr>
     </thead>
     <tbody>
-    {% for scan in scans %}
-        <tr>
+    {% for scan in latest_scans %}
+        <tr class="table-{{ scan.bootstrap_impact }}">
+            <td>
+                {% if scan.impact != "ok" %}
+                    <button type="button" id="{{ scan.type }}{{ scan.id }}" class="btn btn-primary" {% if scan.being_rescanned %}disabled{% endif %} data-toggle="modal" data-target="#rescanModal"
+                        data-cost="{{ scan.rescan_cost }}"
+                        data-scan-id="{{ scan.id }}"
+                        data-scan-type="{{ scan.type }}"
+                        data-scan-label="{{ scan.url }} {{ scan.service }}">Rescan</button>
+                {% endif %}
+            </td>
+            <td><span title="{{ scan.last_scan_moment_python }}">{{ scan.last_scan_humanized }}</span></td>
             <td>{{ scan.url }} {{ scan.service }}</td>
             <td>{{ scan.type }}</td>
             <td>{{ scan.explanation }} </td>
-            <td>{{ scan.high }}</td>
-            <td>{{ scan.medium }}</td>
-            <td>{{ scan.low }}</td>
+            <td>{{ scan.impact }}</td>
         </tr>
-
 
         {% empty %}
         <tr><td colspan="6">No scans found.</td></tr>
@@ -31,4 +40,55 @@
     </tbody>
     </table>
 
+    <script>
+    function rescan(button, scan_type, scan_id) {
+        fetch(`/pro/rescan_request/${scan_type}/${scan_id}/`)
+            .then(response => response.json()).then(data => {
+                console.log(data);
+                if (!data.error) {
+                    console.log(`${scan_type}${scan_id}`);
+                    document.getElementById(`${scan_type}${scan_id}`).setAttribute('disabled', true);
+                    spendCredits(data.cost)
+                }
+        }).catch((fail) => {console.log('An error occurred: ' + fail)});
+    }
+    </script>
+
+    <div class="modal fade" id="rescanModal" tabindex="-1" role="dialog" aria-labelledby="rescanModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Confirm Rescan</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+              You are requesting a rescan of <span class="scan_label">%s</span> for <i class="fas fa-coins"></i> <span class="rescan-cost">0</span>.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" id="very-ok-button" class="btn btn-primary" data-scan_type="0" data-scan_id="0" onclick="rescan(this, this.dataset.scan_type, this.dataset.scan_id); " data-dismiss="modal"><i class="fas fa-coins"></i> <span class="rescan-cost">0</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    $('#rescanModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget); // Button that triggered the modal
+        var cost = button.data('cost'); // Extract info from data-* attributes
+        var scan_id = button.data('scan-id');
+        var scan_type = button.data('scan-type');
+        var scan_label = button.data('scan-label');
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this);
+        modal.find('.scan_label').text(scan_label);
+        modal.find('.rescan-cost').text(cost);
+        modal.find('.scan_id').text(scan_id);
+        document.getElementById('very-ok-button').dataset.scan_type = scan_type;
+        document.getElementById('very-ok-button').dataset.scan_id = scan_id;
+    })
+    </script>
 {% endblock %}

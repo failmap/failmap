@@ -4,12 +4,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Failmap - THE GAME</title>
+    <title>Failmap Pro</title>
     <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/bootstrap.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/fontawesome.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/fontawesome-all.js' %}"></script>
+
 
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fa-svg-with-js.css' %}">
 
     {{ form.media }}
 
@@ -61,6 +65,12 @@
 
     </style>
 
+    <script>
+        function spendCredits(number){
+            document.getElementById('credits').innerHTML = parseInt(document.getElementById('credits').innerHTML) - parseInt(number)
+        }
+    </script>
+
     {% block head %}
     {% endblock %}
 </head>
@@ -68,7 +78,7 @@
 
 <nav class="navbar navbar-expand-md navbar-light fixed-top navbar-custom" style="background-color: whitesmoke !important;">
     <div class="container">
-        <a class="navbar-brand" href="/pro/"><i class="fas fa-map-marker-alt"></i> {% trans "Pro" %}</a>
+        <a class="navbar-brand" href="/pro/"><i class="fas fa-star"></i> {% trans "Pro" %}</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="{% trans "Toggle navigation" %}">
         <span class="navbar-toggler-icon"></span>
         </button>
@@ -77,16 +87,19 @@
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item"><a class="nav-link" href="/pro/urls/">My Urls</a></li>
                 <li class="nav-item"><a class="nav-link" href="/pro/scans/">Scans</a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="/pro/todo/" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Todo<span class="caret"></span></a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/pro/todo1/">todo 1</a>
-                    </div>
-                </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item"><a class="nav-link" href="/pro/help/">💡️ Help</a></li>
-                <li class="nav-item"><a class="nav-link" href="/pro/logout/">😭 Log Out</a></li>
+                {% if credits %}
+                    <li class="nav-item"><a class="nav-link" href="/pro/account/"><i class="fas fa-coins"></i> <span id="credits">{{ credits }}</span></a></li>
+                {% endif %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="/pro/account/" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i> Account<span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/pro/account/"><i class="fas fa-user-circle"></i> Account info</a>
+                        <a class="dropdown-item" href="/pro/help/"><i class="fas fa-lightbulb"></i> Support</a>
+                        <a class="dropdown-item" href="/pro/logout/"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
@@ -97,16 +110,18 @@
 
 <div id="wrap">
     <div class="container">
-
-        {% block content %}
-        {% endblock %}
-
+        <div class="row">
+            <div class="col-md-12">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="footer">
     <div class="container">
-        Data can be downloaded from the Failmap Website of your country. For a list, see <a href="https://failmap.org">failmap.org</a>.
+        Contact...
     </div>
 </div>
 </body>

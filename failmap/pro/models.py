@@ -1,8 +1,12 @@
+from datetime import datetime
+
+import pytz
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import models, transaction
 
 from failmap.map.models import SeriesOfUrlsReportMixin
 from failmap.organizations.models import Organization, Url
+from failmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 
 """
@@ -42,8 +46,108 @@ class Account(models.Model):
         help_text="Inactive accounts cannot be logged-in to."
     )
 
+    credits = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=0,
+        help_text='Credits limit the amount of scans an account can make. Otherwise they might scan-flood.'
+    )
+
+    # Since this is not in the same transaction as spend, it might be possible this is outdated. Yet, in most
+    # cases it will be fine.
+    def can_spend(self, amount):
+        return (self.credits - amount) > 0
+
+    @transaction.atomic
+    def spend_credits(self, amount, goal):
+        try:
+            # make sure you check that you can spend. If not you might get a nice error.
+            if not self.can_spend(amount):
+                raise ValueError('Not possible to spend credits, balance would go below zero.')
+
+            mutation = CreditMutation(
+                account=self,
+                credits_spent=int(amount),
+                credits_received=0,
+                credit_mutation=-int(amount),
+                when=datetime.now(pytz.utc),
+                goal=goal,
+            )
+            mutation.save()
+            self.credits -= int(amount)
+            self.save(update_fields=['credits'])
+        except BaseException as e:
+            raise e
+
+    @transaction.atomic
+    def receive_credits(self, amount, goal):
+        try:
+            mutation = CreditMutation(
+                account=self,
+                credits_spent=0,
+                credits_received=int(amount),
+                credit_mutation=int(amount),
+                when=datetime.now(pytz.utc),
+                goal=goal,
+            )
+            mutation.save()
+            self.credits += int(amount)
+            self.save(update_fields=['credits'])
+        except BaseException as e:
+            raise e
+
     def __str__(self):
         return 'Account %s' % self.name
+
+
+class CreditMutation(models.Model):
+    """
+    Transactionlog of all credits spent and received. It's total should be the current number of credits in the account.
+    """
+
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+    )
+
+    credits_received = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=0,
+        help_text='A positive number of amount of credits received.'
+    )
+
+    credits_spent = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=0,
+        help_text='A positive number of the amount of credits spent.'
+    )
+
+    credit_mutation = models.IntegerField(
+        blank=True,
+        null=True,
+        default=0,
+        help_text='The amount of credits received is positive, amount spent is negative.'
+    )
+
+    goal = models.TextField(
+        max_length=1024,
+        blank=True,
+        help_text="Description on how the mutation came to be. For example: deposit, scan on XYZ, etc. Be as "
+                  "complete as possible so it's obvious why credits where received and spent.",
+        null=True,
+    )
+
+    when = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When the transaction was made."
+    )
+
+    class Meta:
+        get_latest_by = "when"
+        ordering = ('-when', )
 
 
 class ProUser(models.Model):
@@ -178,4 +282,82 @@ class FailmapOrganizationDataFeed(models.Model):
 
     urllist = models.ManyToManyField(
         UrlList
+    )
+
+
+class RescanRequest(models.Model):
+
+    account = models.ForeignKey(
+        Account,
+        on_delete=models.CASCADE,
+        help_text="Who owns and manages this urllist."
+    )
+
+    cost = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        default=0,
+        help_text='A positive number of the amount of credits spent for this re-scan.'
+    )
+
+    scan_type = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    scan_id = models.IntegerField(
+        default=0,
+        help_text='Makes it easy to find if a rescan is already requested.'
+    )
+
+    endpoint_scan = models.ForeignKey(
+        EndpointGenericScan,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    url_scan = models.ForeignKey(
+        UrlGenericScan,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    endpoint = models.ForeignKey(
+        Endpoint,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    url = models.ForeignKey(
+        Url,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    added_on = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    started = models.BooleanField(
+        default=False
+    )
+
+    started_on = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
+    status = models.CharField(
+        max_length=20
+    )
+
+    finished = models.BooleanField(
+        default=False
+    )
+
+    finished_on = models.DateTimeField(
+        blank=True,
+        null=True,
     )

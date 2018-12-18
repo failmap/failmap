@@ -9,6 +9,8 @@ urlpatterns = [
     path('', views.home),
     path('urls/', views.urls),
     path('scans/', views.scans),
+    path('account/', views.account),
     path('mail/', views.mail),
+    path('rescan_request/<str:scan_type>/<int:scan_id>/', views.rescan_request),
     url(r'^login/$', auth_views.LoginView.as_view(template_name='pro/registration/login.html'), name='login'),
 ]
