@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from datetime import datetime, timedelta
 from typing import List
 
@@ -1112,59 +1113,16 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
     if OrganizationRating.objects.all().filter(organization=organization, when=when).exists():
         log.info("Rating already exists for %s on %s. Not overwriting." % (organization, when))
 
-    total_high, total_medium, total_low = 0, 0, 0
-
     # Done: closing off urls, after no relevant endpoints, but still resolvable. Done.
     # if so, we don't need to check for existing endpoints anymore at a certain time...
     # It seems we don't need the url object, only a flat list of pk's for urlratigns.
     # urls = relevant_urls_at_timepoint(organizations=[organization], when=when)
-    urls = relevant_urls_at_timepoint_allinone(organization=organization, when=when)
+    urls = relevant_urls_at_timepoint_organization(organization=organization, when=when)
 
     # Here used to be a lost of nested queries: getting the "last" one per url. This has been replaced with a
     # custom query that is many many times faster.
     all_url_ratings = get_latest_urlratings_fast(urls, when)
-
-    total_urls, high_urls, medium_urls, low_urls = 0, 0, 0, 0
-    total_endpoints, high_endpoints, medium_endpoints, low_endpoints = 0, 0, 0, 0
-
-    # todo: both endpoints and urls are rated.
-    url_calculations = []
-    total_url_issues, total_endpoint_issues, url_issues_high, url_issues_medium = 0, 0, 0, 0
-    url_issues_low, endpoint_issues_high, endpoint_issues_medium, endpoint_issues_low, = 0, 0, 0, 0
-
-    for urlrating in all_url_ratings:
-        total_high += urlrating.high
-        total_medium += urlrating.medium
-        total_low += urlrating.low
-
-        total_endpoints += urlrating.total_endpoints
-        high_endpoints += urlrating.high_endpoints
-        medium_endpoints += urlrating.medium_endpoints
-        low_endpoints += urlrating.low_endpoints
-
-        total_url_issues += urlrating.total_url_issues
-        total_endpoint_issues += urlrating.total_endpoint_issues
-        url_issues_high += urlrating.url_issues_high
-        url_issues_medium += urlrating.url_issues_medium
-        url_issues_low += urlrating.url_issues_low
-        endpoint_issues_high += urlrating.endpoint_issues_high
-        endpoint_issues_medium += urlrating.endpoint_issues_medium
-        endpoint_issues_low += urlrating.endpoint_issues_low
-
-        total_urls += 1
-
-        # url can only be in one category (otherwise there are urls in multiple categories which makes it
-        # hard to display)
-        if urlrating.high_endpoints:
-            high_urls += 1
-        elif urlrating.medium_endpoints:
-            medium_urls += 1
-        elif urlrating.low_endpoints:
-            low_urls += 1
-
-        url_calculations.append(urlrating.calculation)
-
-    total_issues = total_high + total_medium + total_low
+    scores = aggegrate_url_rating_scores(all_url_ratings)
 
     # Still do deepdiff to prevent double reports.
     try:
@@ -1174,70 +1132,131 @@ def rate_organization_on_moment(organization: Organization, when: datetime = Non
         log.debug("Could not find the last organization rating, creating a dummy one.")
         last = OrganizationRating()  # create an empty one
 
-    calculation = {
-        "organization": {
-            "name": organization.name,
-            "high": total_high,
-            "medium": total_medium,
-            "low": total_low,
-            "total_issues": total_issues,
-            "urls": url_calculations,
-            "total_urls": total_urls,
-            "high_urls": high_urls,
-            "medium_urls": medium_urls,
-            "low_urls": low_urls,
-            "total_endpoints": total_endpoints,
-            "high_endpoints": high_endpoints,
-            "medium_endpoints": medium_endpoints,
-            "low_endpoints": low_endpoints,
-            "total_url_issues": total_url_issues,
-            "total_endpoint_issues": total_endpoint_issues,
-            "url_issues_high": url_issues_high,
-            "url_issues_medium": url_issues_medium,
-            "url_issues_low": url_issues_low,
-            "endpoint_issues_high": endpoint_issues_high,
-            "endpoint_issues_medium": endpoint_issues_medium,
-            "endpoint_issues_low": endpoint_issues_low
-        }
-    }
+    scores['name'] = organization.name
+    calculation = {"organization": scores}
 
     # this is 10% faster without deepdiff, the major pain is elsewhere.
     if DeepDiff(last.calculation, calculation, ignore_order=True, report_repetition=True):
+        log.info("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
 
-        log.debug("The calculation for %s on %s has changed, so we're saving this rating." % (organization, when))
-        organizationrating = OrganizationRating()
+        # remove urls and name from scores object, so it can be used as initialization parameters (saves lines)
+        # this is by reference, meaning that the calculation will be affected if we don't work on a clone.
+        init_scores = deepcopy(scores)
+        del(init_scores['name'])
+        del(init_scores['urls'])
+
+        organizationrating = OrganizationRating(**init_scores)
         organizationrating.organization = organization
-        organizationrating.high = total_high
-        organizationrating.medium = total_medium
-        organizationrating.low = total_low
         organizationrating.when = when
         organizationrating.calculation = calculation
-
-        organizationrating.total_issues = total_issues
-        organizationrating.total_urls = total_urls
-        organizationrating.high_urls = high_urls
-        organizationrating.medium_urls = medium_urls
-        organizationrating.low_urls = low_urls
-
-        organizationrating.total_endpoints = total_endpoints
-        organizationrating.high_endpoints = high_endpoints
-        organizationrating.medium_endpoints = medium_endpoints
-        organizationrating.low_endpoints = low_endpoints
-
-        organizationrating.total_url_issues = total_url_issues
-        organizationrating.total_endpoint_issues = total_endpoint_issues
-        organizationrating.url_issues_high = url_issues_high
-        organizationrating.url_issues_medium = url_issues_medium
-        organizationrating.url_issues_low = url_issues_low
-        organizationrating.endpoint_issues_high = endpoint_issues_high
-        organizationrating.endpoint_issues_medium = endpoint_issues_medium
-        organizationrating.endpoint_issues_low = endpoint_issues_low
 
         organizationrating.save()
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
         log.warning("The calculation for %s on %s is the same as the previous one. Not saving." % (organization, when))
+
+
+def aggegrate_url_rating_scores(url_ratings: List):
+    scores = {
+        'high': 0,
+        'medium': 0,
+        'low': 0,
+        'total_urls': 0,
+        'high_urls': 0,
+        'medium_urls': 0,
+        'low_urls': 0,
+        'explained_high': 0,
+        'explained_medium': 0,
+        'explained_low': 0,
+        'explained_high_endpoints': 0,
+        'explained_medium_endpoints': 0,
+        'explained_low_endpoints': 0,
+        'explained_high_urls': 0,
+        'explained_medium_urls': 0,
+        'explained_low_urls': 0,
+
+        # number of issues can be higher than the number of urls or endpoints of course.
+        'explained_total_url_issues': 0,
+        'explained_url_issues_high': 0,
+        'explained_url_issues_medium': 0,
+        'explained_url_issues_low': 0,
+        'explained_total_endpoint_issues': 0,
+        'explained_endpoint_issues_high': 0,
+        'explained_endpoint_issues_medium': 0,
+        'explained_endpoint_issues_low': 0,
+        'total_endpoints': 0,
+        'high_endpoints': 0,
+        'medium_endpoints': 0,
+        'low_endpoints': 0,
+
+        'total_url_issues': 0,
+        'total_endpoint_issues': 0,
+        'url_issues_high': 0,
+        'url_issues_medium': 0,
+        'url_issues_low': 0,
+        'endpoint_issues_high': 0,
+        'endpoint_issues_medium': 0,
+        'endpoint_issues_low': 0,
+
+        # todo: both endpoints and urls are rated.
+        'urls': []
+    }
+
+    for urlrating in url_ratings:
+
+        scores['high'] += urlrating.high
+        scores['medium'] += urlrating.medium
+        scores['low'] += urlrating.low
+
+        scores['total_endpoints'] += urlrating.total_endpoints
+        scores['high_endpoints'] += urlrating.high_endpoints
+        scores['medium_endpoints'] += urlrating.medium_endpoints
+        scores['low_endpoints'] += urlrating.low_endpoints
+
+        scores['total_url_issues'] += urlrating.total_url_issues
+        scores['total_endpoint_issues'] += urlrating.total_endpoint_issues
+        scores['url_issues_high'] += urlrating.url_issues_high
+        scores['url_issues_medium'] += urlrating.url_issues_medium
+        scores['url_issues_low'] += urlrating.url_issues_low
+        scores['endpoint_issues_high'] += urlrating.endpoint_issues_high
+        scores['endpoint_issues_medium'] += urlrating.endpoint_issues_medium
+        scores['endpoint_issues_low'] += urlrating.endpoint_issues_low
+
+        scores['explained_total_endpoint_issues'] += urlrating.explained_total_endpoint_issues
+        scores['explained_endpoint_issues_high'] += urlrating.explained_endpoint_issues_high
+        scores['explained_endpoint_issues_medium'] += urlrating.explained_endpoint_issues_medium
+        scores['explained_endpoint_issues_low'] += urlrating.explained_endpoint_issues_low
+        scores['explained_total_url_issues'] += urlrating.explained_total_url_issues
+        scores['explained_url_issues_high'] += urlrating.explained_url_issues_high
+        scores['explained_url_issues_medium'] += urlrating.explained_url_issues_medium
+        scores['explained_url_issues_low'] += urlrating.explained_url_issues_low
+        scores['explained_high_urls'] += 1 if urlrating.explained_url_issues_high else 0
+        scores['explained_medium_urls'] += 1 if urlrating.explained_url_issues_medium else 0
+        scores['explained_low_urls'] += 1 if urlrating.explained_url_issues_low else 0
+        scores['explained_high_endpoints'] += urlrating.explained_high_endpoints
+        scores['explained_medium_endpoints'] += urlrating.explained_medium_endpoints
+        scores['explained_low_endpoints'] += urlrating.explained_low_endpoints
+        scores['explained_high'] += urlrating.explained_high
+        scores['explained_medium'] += urlrating.explained_medium
+        scores['explained_low'] += urlrating.explained_low
+
+        scores['total_urls'] += 1
+
+        # url can only be in one category (otherwise there are urls in multiple categories which makes it
+        # hard to display)
+        if urlrating.high_endpoints:
+            scores['high_urls'] += 1
+        elif urlrating.medium_endpoints:
+            scores['medium_urls'] += 1
+        elif urlrating.low_endpoints:
+            scores['low_urls'] += 1
+
+        scores['urls'].append(urlrating.calculation)
+
+    scores['total_issues'] = scores['high'] + scores['medium'] + scores['low']
+
+    return scores
 
 
 def get_latest_urlratings_fast(urls: List[Url], when):
@@ -1271,13 +1290,21 @@ def get_latest_urlratings_fast(urls: List[Url], when):
     return UrlRating.objects.raw(sql)
 
 
-def relevant_urls_at_timepoint_allinone(organization: Organization, when: datetime):
+def relevant_urls_at_timepoint_organization(organization: Organization, when: datetime):
     # doing this, without the flat list results in about 40% faster execution, most notabily on large organizations
     # if you want to see what's going on, see relevant_urls_at_timepoint
     # removed the IN query to gain some extra speed
     # returned a flat list of pk's, since we don't do anything else with these urls. It's not particulary faster.
-    both = Url.objects.filter(
-        organization=organization).filter(
+    queryset = Url.objects.filter(organization=organization)
+    return relevant_urls_at_timepoint(queryset, when)
+
+
+def relevant_urls_at_timepoint(queryset, when: datetime):
+    # doing this, without the flat list results in about 40% faster execution, most notabily on large organizations
+    # if you want to see what's going on, see relevant_urls_at_timepoint
+    # removed the IN query to gain some extra speed
+    # returned a flat list of pk's, since we don't do anything else with these urls. It's not particulary faster.
+    both = queryset.filter(
         # resolvable_in_the_past
         Q(created_on__lte=when, not_resolvable=True, not_resolvable_since__gte=when)
         |

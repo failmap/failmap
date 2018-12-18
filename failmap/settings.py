@@ -950,6 +950,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'app_label': 'pro', 'label': _('⭐ Pro'), 'items': [
         {'name': 'account'},
         {'name': 'urllist'},
+        {'name': 'urllistreport'},
         {'name': 'failmaporganizationdatafeed'},
     ], 'permissions': ['admin']},
 

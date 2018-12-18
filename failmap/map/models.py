@@ -8,30 +8,7 @@ from jsonfield import JSONField
 from failmap.organizations.models import Organization, OrganizationType, Url
 
 
-class OrganizationRating(models.Model):
-    """
-    This is basically an aggregation of UrlRating
-
-    Contains aggregated ratings over time. Why?
-
-    - Reduces complexity to get ratings
-        You don't need to know about dead(urls, endpoints), scanner-results.
-        For convenience purposes a calculation field also contains some hints why the rating is
-        the way it is.
-
-    -   It increases speed
-        Instead of continuously calculating the score, it is done on a more regular interval: for
-        example once every 10 minutes and only for the last 10 minutes.
-
-    A time dimension is kept, since it's important to see what the rating was over time. This is
-    now very simple to get (you don't need a complex join which is hard in django).
-
-    The client software does a drill down on domains and shows why things are the way they are.
-    Also this should not know too much about different scanners. In OO fashion, it should ask a
-    scanner to explain why something is the way it is (over time).
-    """
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-
+class SeriesOfUrlsReportMixin(models.Model):
     total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.", default=0)
     high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
     medium = models.IntegerField(help_text="The number of medium risk vulnerabilities and failures.", default=0)
@@ -99,17 +76,47 @@ class OrganizationRating(models.Model):
                   "of this organization. This can be a lot."
     )  # calculations of the independent urls... and perhaps others?
 
+    def __str__(self):
+        if any([self.high, self.medium, self.low]):
+            return '🔴%s 🔶%s 🍋%s | %s' % (self.high, self.medium, self.low, self.when.date(),)
+        else:
+            return '✅ perfect | %s' % self.when.date()
+
     class Meta:
-        managed = True
+        abstract = True
+
+
+class OrganizationRating(SeriesOfUrlsReportMixin):
+    """
+    This is basically an aggregation of UrlRating
+
+    Contains aggregated ratings over time. Why?
+
+    - Reduces complexity to get ratings
+        You don't need to know about dead(urls, endpoints), scanner-results.
+        For convenience purposes a calculation field also contains some hints why the rating is
+        the way it is.
+
+    -   It increases speed
+        Instead of continuously calculating the score, it is done on a more regular interval: for
+        example once every 10 minutes and only for the last 10 minutes.
+
+    A time dimension is kept, since it's important to see what the rating was over time. This is
+    now very simple to get (you don't need a complex join which is hard in django).
+
+    The client software does a drill down on domains and shows why things are the way they are.
+    Also this should not know too much about different scanners. In OO fashion, it should ask a
+    scanner to explain why something is the way it is (over time).
+    """
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    class Meta:
         get_latest_by = "when"
         index_together = [
             ["when", "id"],
         ]
         verbose_name = _('Organization Rating')
         verbose_name_plural = _('Organization Ratings')
-
-    def __str__(self):
-        return '🔴%s 🔶%s 🍋%s | %s' % (self.high, self.medium, self.low, self.when.date(),)
 
 
 class UrlRating(models.Model):

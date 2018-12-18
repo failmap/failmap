@@ -19,9 +19,12 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             '<a href="../../organizations/organization/{id}/change">inspect organization</a>',
             id=format(obj.organization_id))
 
-    list_display = ('organization', 'high', 'medium', 'low', 'when', 'inspect_organization')
+    list_display = ('organization', 'total_urls', 'total_endpoints', 'report', 'explained_high', 'explained_medium',
+                    'explained_low', 'when', 'inspect_organization')
     search_fields = (['organization__name', 'when'])
     list_filter = ['organization', 'organization__country', 'organization__type__name', 'when'][::-1]
+    # fields = [field.name for field in OrganizationRating._meta.get_fields() if field.name != "id"][::-1]
+
     fields = ('organization', 'total_urls', 'total_endpoints',
               'high',
               'medium',
@@ -40,7 +43,6 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
               'endpoint_issues_high',
               'endpoint_issues_medium',
               'endpoint_issues_low',
-
               'explained_high',
               'explained_medium',
               'explained_low',
@@ -58,9 +60,11 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
               'explained_endpoint_issues_high',
               'explained_endpoint_issues_medium',
               'explained_endpoint_issues_low',
-
               'when',
               'calculation')
+
+    def report(self, obj):
+        return obj
 
     ordering = ["-when"]
 
