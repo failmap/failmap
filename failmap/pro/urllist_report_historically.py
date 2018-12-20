@@ -6,7 +6,7 @@ import pytz
 from celery import group
 
 from failmap.celery import Task, app
-from failmap.pro.models import UrlList
+from failmap.pro.models import UrlList, UrlListReport
 from failmap.pro.urllist_report import rate_urllist_on_moment
 
 log = logging.getLogger(__package__)
@@ -21,6 +21,10 @@ def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict()
 
 @app.task(queue='storage')
 def rate_urllists_historically(urllists: List[UrlList]):
+
+    # take into account it's possible urls have been added that influence the history of this rating.
+    UrlListReport.objects.all().filter(urllist__in=urllists).delete()
+
     # weekly, and for the last 14 days daily. 64 calculations
     # maybe this is not precise enough...
     weeks = [datetime.now(pytz.utc) - timedelta(days=t) for t in range(365, 0, -7)]

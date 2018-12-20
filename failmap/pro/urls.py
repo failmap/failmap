@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.home),
     path('portfolio/', views.portfolio),
     path('issues/', views.issues),
+    path('issues/<str:list_name>/', views.issues),
     path('account/', views.account),
     path('mail/', views.mail),
     path('rescan_request/<str:scan_type>/<int:scan_id>/', views.rescan_request),

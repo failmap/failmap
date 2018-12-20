@@ -60,6 +60,7 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
 
     if UrlListReport.objects.all().filter(urllist=urllist, when=when).exists():
         log.debug("UrllistReport already exists for %s on %s. Not overwriting." % (urllist, when))
+        return
 
     urls = relevant_urls_at_timepoint_urllist(urllist=urllist, when=when)
     all_url_ratings = get_latest_urlratings_fast(urls, when)

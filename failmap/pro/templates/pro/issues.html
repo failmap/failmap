@@ -1,13 +1,12 @@
 {% extends 'pro/base.html' %}{% load humanize %}{% load i18n %}
 {% block content %}
     <h1>Issues</h1>
-    <p>Overview of all scans performed on your urls.</p>
 
-    <h2>Current issues</h2>
+
     <div class="row">
     {% for scan in latest_scans %}
         <div class="col-md-4" style="margin-bottom: 30px;">
-        <table class="table table-sm table-striped table-bordered table-hover" style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75);">
+        <table class="table table-sm table-striped table-bordered table-hover rounded-top" style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); border-radius: 10px;">
             <tbody style="background-color: {{ scan.color }};">
                 <tr>
                     <td colspan="2" style="height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center">{{ scan.url }} {% if scan.url != scan.service %}<br>{{ scan.service }}{% endif %}</td>

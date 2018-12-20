@@ -188,7 +188,8 @@ class UrlList(models.Model):
     )
 
     urls = models.ManyToManyField(
-        Url
+        Url,
+        blank=True
     )
 
     # Was a separate class, should the mail settings be a mixin?
@@ -234,7 +235,7 @@ class UrlList(models.Model):
     )
 
     def __str__(self):
-        return 'Urllist %s' % self.name
+        return 'Urllist %s (acc %s)' % (self.name, self.account_id)
 
 
 class UrlListReport(SeriesOfUrlsReportMixin):
@@ -281,7 +282,24 @@ class FailmapOrganizationDataFeed(models.Model):
     )
 
     urllist = models.ManyToManyField(
-        UrlList
+        UrlList,
+    )
+
+
+class SubdomainDataFeed(models.Model):
+
+    # products are usually attached to a certain subdomain. This is for those cases.
+    # basically all subdomains in the whole dataset...
+    # maybe we should be able to filter on organization type or country, although it's unusual still. :)
+    # when the need arises it's easy to build. So we do it then.
+    subdomain = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    urllist = models.ManyToManyField(
+        UrlList,
     )
 
 

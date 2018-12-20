@@ -36,7 +36,7 @@ def rescan_costs(scan):
     return cost
 
 
-def issues(request):
+def issues(request, list_name: str = ""):
     all_scans_view = []
 
     account = getAccount(request)
@@ -45,17 +45,26 @@ def issues(request):
     endpoint_rescanned_ids = [x.scan_id for x in rescan_requests if x.scan_type in ENDPOINT_SCAN_TYPES]
     url_rescanned_ids = [x.scan_id for x in rescan_requests if x.scan_type in URL_SCAN_TYPES]
 
-    latest_scans = list(EndpointGenericScan.objects.filter(
+    if list_name:
+        latest_endpoint_scans = EndpointGenericScan.objects.all().filter(endpoint__url__urllist__name__iexact=list_name)
+        latest_url_scans = UrlGenericScan.objects.all().filter(url__urllist__name__iexact=list_name)
+    else:
+        latest_endpoint_scans = EndpointGenericScan.objects.all()
+        latest_url_scans = UrlGenericScan.objects.all()
+
+    latest_endpoint_scans = latest_endpoint_scans.filter(
         endpoint__url__urllist__account=account,
         type__in=ENDPOINT_SCAN_TYPES,
         is_the_latest_scan=True
-    ).order_by('-rating_determined_on').select_related('endpoint', 'endpoint__url'))
+    ).order_by('-rating_determined_on').select_related('endpoint', 'endpoint__url')
 
-    latest_scans += list(UrlGenericScan.objects.filter(
+    latest_url_scans = latest_url_scans.filter(
         url__urllist__account=account,
         type__in=URL_SCAN_TYPES,
         is_the_latest_scan=True
-    ).order_by('-rating_determined_on').select_related('url'))
+    ).order_by('-rating_determined_on').select_related('url')
+
+    latest_scans = list(latest_url_scans) + list(latest_endpoint_scans)
 
     for scan in latest_scans:
         calculation = get_calculation(scan)
@@ -167,7 +176,8 @@ def portfolio_data(request):
     for urllist in urllists:
 
         # getting the latest report manually, which is unacceptable. i mean wtf!
-        latest_report = UrlListReport.objects.all().filter(urllist=urllist).only('calculation').latest('when')
+        # latest_report = UrlListReport.objects.all().filter(urllist=urllist).only('calculation').latest('when')
+        # not displaying this yet...
 
         stats = []
         urls = []
@@ -194,7 +204,7 @@ def portfolio_data(request):
             'name': urllist.name,
             'stats': stats,
             'urls': urls,
-            'report': latest_report.calculation
+            # 'report': latest_report.calculation
             # todo: add mail options.
         })
 

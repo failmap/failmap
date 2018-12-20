@@ -7,15 +7,19 @@
     <title>Failmap Pro</title>
     <script type="text/javascript" src="{% static '/js/vendor/jquery-3.2.1.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/bootstrap.js' %}"></script>
-    <script type="text/javascript" src="{% static '/js/vendor/fontawesome.js' %}"></script>
-    <script type="text/javascript" src="{% static '/js/vendor/fontawesome-all.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/fontawesome/fontawesome.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/fontawesome/regular.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/fontawesome/solid.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/vue.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
     <script type="text/javascript" src="{% static '/js/vendor/Chart.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fa-svg-with-js.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/fa-svg-with-js.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/fontawesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/solid.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/regular.css' %}">
 
     {{ form.media }}
 
@@ -27,7 +31,12 @@
         html,
         body {
             height: 100%;
+            margin-top: 10px;
             /* The html and body elements cannot have any padding or margin. */
+        }
+
+        h1 {
+            width: 100%; background-color: rgba(225, 225, 225, 0.42); border-radius: 10px; padding: 20px; margin-bottom: 20px;
         }
 
         /* Wrapper for page content to push down footer */
@@ -87,8 +96,8 @@
 
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="/pro/portfolio/">Portfolio</a></li>
-                <li class="nav-item"><a class="nav-link" href="/pro/issues/">Issues</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/portfolio/"><i class="fas fa-atlas"></i> Portfolio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/issues/"><i class="fas fa-dumpster-fire"></i> Issues</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if credits %}

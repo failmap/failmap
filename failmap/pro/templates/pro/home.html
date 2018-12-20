@@ -1,4 +1,21 @@
 {% extends 'pro/base.html' %}{% load humanize %}
 {% block content %}
-    <h1>Home</h1>
+<h1>Welcome to Failmap pro</h1>
+
+<div style="margin: 20px; padding: 20px;">
+<div>
+    <a role="button" class="btn btn-primary btn-lg" href="/pro/portfolio/">
+        <span style="font-size: 3em;"><i class="fas fa-atlas"></i></span>
+        <br>
+        View portfolio
+    </a>
+    <a role="button" class="btn btn-primary btn-lg" href="/pro/issues/">
+        <span style="font-size: 3em;"><i class="fas fa-dumpster-fire"></i></span>
+        <br>
+        Manage Issues
+    </a>
+</div>
+</div>
+
+<h2>Feature overview</h2>
 {% endblock %}

@@ -1,18 +1,23 @@
 {% extends 'pro/base.html' %}
 {% block content %}
-    <h1>Urls</h1>
-
-<div id="urllists">
-
-</div>
-
+<h1>Portfolio</h1>
+<div id="urllists"></div>
 
 {% verbatim %}
 <script type="x-template" id="urllist_tables">
 <div>
     <div style="margin-bottom: 60px;" v-for="urllist in urllists">
     <h2>{{ urllist.name }}</h2>
-        <div style="padding: 10px;">
+
+        <div style="margin: 20px; padding: 20px; background-color: rgba(225, 225, 225, 0.42); border-radius: 10px;">
+            <h3>Quick actions</h3>
+            <div>
+                <a role="button" class="btn btn-danger btn-lg" :href="'/pro/issues/' + urllist.name + '/'">Manage Issues</a>
+                <a role="button" class="btn btn-success btn-lg" :href="'/pro/issues/' + urllist.name + '/'">Add Urls</a>
+            </div>
+
+            <br><br>
+
             <h3>Timelines</h3>
             <div class="chart-container" style="position: relative; height:300px; width:100%">
                 <vulnerability-chart :data="urllist.stats"></vulnerability-chart>
@@ -47,9 +52,6 @@
                 </tr>
             </tbody>
             </table>
-
-            <h3>Vulnerability overview</h3>
-            <p>This is the latest vulnerability overview.</p>
         </div>
     </div>
 </div>
@@ -308,8 +310,4 @@ vueUrlList = new Vue({
     }
 })
 </script>
-
-    <h2>How to add urls</h2>
-    <p>You can add urls to your account using ... todo: determine.</p>
-
 {% endblock %}
