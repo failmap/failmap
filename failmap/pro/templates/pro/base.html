@@ -9,7 +9,9 @@
     <script type="text/javascript" src="{% static '/js/vendor/bootstrap.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/fontawesome.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/fontawesome-all.js' %}"></script>
-
+    <script type="text/javascript" src="{% static '/js/vendor/vue.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/Chart.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
@@ -85,8 +87,8 @@
 
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="/pro/urls/">My Urls</a></li>
-                <li class="nav-item"><a class="nav-link" href="/pro/scans/">Scans</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/portfolio/">Portfolio</a></li>
+                <li class="nav-item"><a class="nav-link" href="/pro/issues/">Issues</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if credits %}

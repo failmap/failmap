@@ -1,44 +1,58 @@
-{% extends 'pro/base.html' %}{% load humanize %}
+{% extends 'pro/base.html' %}{% load humanize %}{% load i18n %}
 {% block content %}
-    <h1>Scans</h1>
+    <h1>Issues</h1>
     <p>Overview of all scans performed on your urls.</p>
 
-    <h2>Latest scans</h2>
-    <table class="table table-sm table-striped table-bordered table-hover">
-    <thead>
-    <tr>
-        <th>Action</th>
-        <th>Scan moment</th>
-        <th>Url / Endpoint</th>
-        <th>Scan type</th>
-        <th>Result</th>
-        <th>Impact</th>
-    </tr>
-    </thead>
-    <tbody>
+    <h2>Current issues</h2>
+    <div class="row">
     {% for scan in latest_scans %}
-        <tr class="table-{{ scan.bootstrap_impact }}">
-            <td>
+        <div class="col-md-4" style="margin-bottom: 30px;">
+        <table class="table table-sm table-striped table-bordered table-hover" style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75);">
+            <tbody style="background-color: {{ scan.color }};">
+                <tr>
+                    <td colspan="2" style="height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center">{{ scan.url }} {% if scan.url != scan.service %}<br>{{ scan.service }}{% endif %}</td>
+                </tr>
+
+                <tr><td>Scan</td><td style="height: 4em;">{% trans scan.header %}</td></tr>
+                <tr><td>Details</td><td style="height: 5em;">{{ scan.explanation }} </td></tr>
+                <tr><td>Impact</td><td>{{ scan.impact }}</td></tr>
+                <tr><td>When</td><td><span title="{{ scan.last_scan_moment_python }}">{{ scan.last_scan_humanized }}</span></td></tr>
                 {% if scan.impact != "ok" %}
-                    <button type="button" id="{{ scan.type }}{{ scan.id }}" class="btn btn-primary" {% if scan.being_rescanned %}disabled{% endif %} data-toggle="modal" data-target="#rescanModal"
+                    <tr><td colspan="2">
+                    {% if scan.being_rescanned %}
+                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
+                            class="btn btn-secondary btn-block" disabled data-toggle="modal" data-target="#rescanModal"><i class="fas fa-spinner fa-pulse"></i> Rescanning</button>
+                    {% else %}
+                        <button type="button" id="{{ scan.type }}{{ scan.id }}"
+                            class="btn btn-primary btn-block" data-toggle="modal" data-target="#rescanModal"
                         data-cost="{{ scan.rescan_cost }}"
                         data-scan-id="{{ scan.id }}"
                         data-scan-type="{{ scan.type }}"
-                        data-scan-label="{{ scan.url }} {{ scan.service }}">Rescan</button>
+                        data-scan-label="{{ scan.url }} {{ scan.service }}">Rescan now</button>
+                    {% endif %}
+                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
+                            class="btn btn-info btn-block" data-toggle="modal" data-target="#rescanModal"
+                        data-cost="{{ scan.rescan_cost }}"
+                        data-scan-id="{{ scan.id }}"
+                        data-scan-type="{{ scan.type }}"
+                        data-scan-label="{{ scan.url }} {{ scan.service }}">Explain</button>
+                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
+                            class="btn btn-warning btn-block" data-toggle="modal" data-target="#rescanModal"
+                        data-cost="{{ scan.rescan_cost }}"
+                        data-scan-id="{{ scan.id }}"
+                        data-scan-type="{{ scan.type }}"
+                        data-scan-label="{{ scan.url }} {{ scan.service }}">Report error with scan</button>
+                    </td></tr>
                 {% endif %}
-            </td>
-            <td><span title="{{ scan.last_scan_moment_python }}">{{ scan.last_scan_humanized }}</span></td>
-            <td>{{ scan.url }} {{ scan.service }}</td>
-            <td>{{ scan.type }}</td>
-            <td>{{ scan.explanation }} </td>
-            <td>{{ scan.impact }}</td>
-        </tr>
+            </tbody>
+        </table>
 
+        </div>
         {% empty %}
-        <tr><td colspan="6">No scans found.</td></tr>
+        <div style="width: 100%; font-size: 2em; text-align: center">No issues found! 🎉</div>
+
     {% endfor %}
-    </tbody>
-    </table>
+    </div>
 
     <script>
     function rescan(button, scan_type, scan_id) {

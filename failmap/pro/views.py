@@ -1,15 +1,16 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from django.contrib.auth.decorators import login_required
 from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from failmap.app.common import JSEncoder
 from failmap.map.calculate import get_calculation
-from failmap.pro.models import CreditMutation, ProUser, RescanRequest, UrlList
+from failmap.pro.models import CreditMutation, ProUser, RescanRequest, UrlList, UrlListReport
 from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from failmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
@@ -35,7 +36,7 @@ def rescan_costs(scan):
     return cost
 
 
-def scans(request):
+def issues(request):
     all_scans_view = []
 
     account = getAccount(request)
@@ -61,8 +62,8 @@ def scans(request):
 
         impact = "high" if calculation.get("high", 0) else "medium" if calculation.get("medium", 0) else "low" \
             if calculation.get("low", 0) else "ok"
-        bootstrap_impact = "danger" if calculation.get("high", 0) else "warning" if calculation.get("medium", 0) \
-            else "info" if calculation.get("low", 0) else "success"
+        color = "#ff455833" if calculation.get("high", 0) else "#ff9a4533" if calculation.get("medium", 0) \
+            else "#fffc4533" if calculation.get("low", 0) else "#a2f59633"
 
         sort_impact = 3 if calculation.get("high", 0) else 2 if calculation.get("medium", 0) \
             else 1 if calculation.get("low", 0) else 0
@@ -78,6 +79,7 @@ def scans(request):
                 "service": "%s" % scan.url.url,
                 "protocol": scan.type,
                 "type": scan.type,
+                "header": "report_header_%s" % scan.type,
                 "port": "-",
                 "ip_version": "-",
                 "explanation": calculation.get("explanation", ""),
@@ -85,13 +87,13 @@ def scans(request):
                 "medium": calculation.get("medium", 0),
                 "low": calculation.get("low", 0),
                 "impact": impact,
-                "bootstrap_impact": bootstrap_impact,
+                "color": color,
                 "sort_impact": sort_impact,
                 "rescan_cost": rescan_cost,
                 "last_scan_humanized": naturaltime(scan.last_scan_moment),
                 "last_scan_moment": scan.last_scan_moment.isoformat(),
                 "last_scan_moment_python": scan.last_scan_moment,
-                "being_rescanned": scan.id in url_rescanned_ids
+                "being_rescanned": scan.id in url_rescanned_ids,
             })
         else:
             # endpoint scans
@@ -102,28 +104,29 @@ def scans(request):
                 "protocol": scan.endpoint.protocol,
                 "port": scan.endpoint.port,
                 "type": scan.type,
+                "header": "report_header_%s" % scan.type,
                 "ip_version": scan.endpoint.ip_version,
                 "explanation": calculation.get("explanation", ""),
                 "high": calculation.get("high", 0),
                 "medium": calculation.get("medium", 0),
                 "low": calculation.get("low", 0),
                 "impact": impact,
-                "bootstrap_impact": bootstrap_impact,
+                "color": color,
                 "sort_impact": sort_impact,
                 "rescan_cost": rescan_cost,
                 "last_scan_humanized": naturaltime(scan.last_scan_moment),
                 "last_scan_moment": scan.last_scan_moment.isoformat(),
                 "last_scan_moment_python": scan.last_scan_moment,
-                "being_rescanned": scan.id in endpoint_rescanned_ids
+                "being_rescanned": scan.id in endpoint_rescanned_ids,
             })
 
     # sort the scans, so url and endpointscans mingle correctly
     all_scans_view = sorted(all_scans_view, key=lambda k: (k['sort_impact'], k['url'], k['last_scan_moment_python']),
                             reverse=True)
 
-    return render(request, 'pro/scans.html', {'latest_scans': all_scans_view,
-                                              'credits': account.credits,
-                                              'rescan_requests': rescan_requests})
+    return render(request, 'pro/issues.html', {'latest_scans': all_scans_view,
+                                               'credits': account.credits,
+                                               'rescan_requests': rescan_requests})
 
 
 @login_required(login_url='/pro/login/?next=/pro/')
@@ -137,17 +140,69 @@ def account(request):
 
 
 @login_required(login_url='/pro/login/?next=/pro/')
-def urls(request):
+def portfolio(request):
+    return render(request, 'pro/portfolio.html')
 
-    lists = UrlList.objects.all().filter(account=getAccount(request)).prefetch_related('urls')
 
-    return render(request, 'pro/urls.html', {'lists': lists})
+def portfolio_data(request):
+    pass
+
+    one_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
+
+    report_statistics = UrlListReport.objects.filter(when__gte=one_year_ago).only(
+        'when', 'total_endpoints', 'total_urls', 'high', 'medium', 'low').order_by('when')
+    urllists = UrlList.objects.all().filter(
+        account=getAccount(request)
+    ).prefetch_related(
+        'urls',
+        Prefetch('urllistreport_set', queryset=report_statistics),
+        # it's NOT POSSIBLE to get the latest report in a select related statement. Latest doens't return a queryset,
+        # aggegrate doesn't return a queryset. Slicing is not allowed, and getting all reports is nonsense.
+        # latest_report = UrlListReport.objects.annotate(max_id=Max('id')).filter(id=F('max_id')).only('calculation')
+        # Prefetch('urllistreport_set', queryset=latest_report, to_attr='report')
+    )
+
+    data = []
+
+    for urllist in urllists:
+
+        # getting the latest report manually, which is unacceptable. i mean wtf!
+        latest_report = UrlListReport.objects.all().filter(urllist=urllist).only('calculation').latest('when')
+
+        stats = []
+        urls = []
+
+        for url in urllist.urls.all():
+            urls.append({
+                'url': url.url,
+                'created_on': url.created_on,
+                'resolves': not url.not_resolvable,
+                'is_dead': url.is_dead
+            })
+
+        for report in urllist.urllistreport_set.all():
+            stats.append({
+                'date': report.when.date().isoformat(),
+                'urls': report.total_urls,
+                'endpoints': report.total_endpoints,
+                'high': report.high,
+                'medium': report.medium,
+                'low': report.low
+            })
+
+        data.append({
+            'name': urllist.name,
+            'stats': stats,
+            'urls': urls,
+            'report': latest_report.calculation
+            # todo: add mail options.
+        })
+
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def mail(request):
-    # mail settings
-
     return render(request, 'pro/urls.html', {})
 
 
