@@ -6,6 +6,10 @@
 {% verbatim %}
 <script type="x-template" id="urllist_tables">
 <div>
+    <!-- todo: loading indicator -->
+    <!-- try: https://scotch.io/tutorials/add-loading-indicators-to-your-vuejs-application -->
+    <!-- <div v-if="!urllists">Loading... <i class="fas fa-spinner fa-pulse"></i></div> -->
+
     <div style="margin-bottom: 60px;" v-for="urllist in urllists">
     <h2>{{ urllist.name }}</h2>
 
