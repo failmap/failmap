@@ -286,13 +286,25 @@ class FailmapOrganizationDataFeed(models.Model):
     )
 
 
-class SubdomainDataFeed(models.Model):
+class UrlDataFeed(models.Model):
 
     # products are usually attached to a certain subdomain. This is for those cases.
     # basically all subdomains in the whole dataset...
     # maybe we should be able to filter on organization type or country, although it's unusual still. :)
     # when the need arises it's easy to build. So we do it then.
     subdomain = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    domain = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+
+    topleveldomain = models.CharField(
         max_length=255,
         blank=True,
         null=True,

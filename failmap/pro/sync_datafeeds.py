@@ -8,7 +8,7 @@ from celery import group
 
 from failmap.celery import Task, app
 from failmap.organizations.models import Url
-from failmap.pro.models import FailmapOrganizationDataFeed, SubdomainDataFeed
+from failmap.pro.models import FailmapOrganizationDataFeed, UrlDataFeed
 
 log = logging.getLogger(__package__)
 
@@ -18,7 +18,7 @@ def compose_task(organizations_filter: dict = dict(), urls_filter: dict = dict()
     feeds = FailmapOrganizationDataFeed.objects.all()
     tasks = [sync_failmap_datafeed.si(feed) for feed in feeds]
 
-    feeds = SubdomainDataFeed.objects.all()
+    feeds = UrlDataFeed.objects.all()
     tasks += [sync_subdomain_datafeed.si(feed) for feed in feeds]
 
     return group(tasks)
@@ -40,13 +40,22 @@ def sync_failmap_datafeed(failmapOrganizationDataFeed: FailmapOrganizationDataFe
 
 
 @app.task(queue='storage')
-def sync_subdomain_datafeed(subdomainDataFeed: SubdomainDataFeed):
+def sync_subdomain_datafeed(urlDataFeed: UrlDataFeed):
     # we cannot use _in queries as the resultset may be too large. So we have to use a stupid and simple approach that
     # is slower but works.
 
-    urls = Url.objects.all().filter(computed_subdomain=subdomainDataFeed.subdomain)
-    urllists = subdomainDataFeed.urllist.all()
+    urls = Url.objects.all()
 
+    if urlDataFeed.subdomain:
+        urls = urls.filter(computed_subdomain__iexact=urlDataFeed.subdomain)
+
+    if urlDataFeed.domain:
+        urls = urls.filter(computed_domain__iexact=urlDataFeed.domain)
+
+    if urlDataFeed.topleveldomain:
+        urls = urls.filter(computed_suffix__iexact=urlDataFeed.topleveldomain)
+
+    urllists = urlDataFeed.urllist.all()
     for url in urls:
         for urllist in urllists:
             if not urllist.urls.all().filter(url=url).exists():

@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
 from failmap.pro.models import (Account, CreditMutation, FailmapOrganizationDataFeed, RescanRequest,
-                                SubdomainDataFeed, UrlList, UrlListReport)
+                                UrlDataFeed, UrlList, UrlListReport)
 
 # Register your models here.
 
@@ -62,12 +62,12 @@ class FailmapOrganizationDataFeedAdmin(ImportExportModelAdmin, admin.ModelAdmin)
     fields = ('organization', 'urllist')
 
 
-@admin.register(SubdomainDataFeed)
-class SubdomainDataFeedAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+@admin.register(UrlDataFeed)
+class UrlDataFeedAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('subdomain',)
-    search_fields = ('subdomain', )
-    fields = ('subdomain', 'urllist')
+    list_display = ('subdomain', 'domain', 'topleveldomain')
+    search_fields = ('subdomain', 'domain', 'topleveldomain')
+    fields = ('subdomain', 'domain', 'topleveldomain', 'urllist')
 
 
 @admin.register(UrlListReport)
