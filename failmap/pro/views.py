@@ -9,6 +9,7 @@ from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.text import slugify
 
 from failmap.app.common import JSEncoder
 from failmap.map.calculate import get_calculation
@@ -29,6 +30,7 @@ def dummy(request):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def home(request):
+    account = getAccount(request)
 
     user = User.objects.all().filter(pk=request.user.id).first()
     prouser = ProUser.objects.all().filter(user=request.user).first()
@@ -51,6 +53,7 @@ def home(request):
                   {
                       'admin': settings.ADMIN,
                       'debug': settings.DEBUG,
+                      'account': account,
                       'user_is_staff': user_is_staff,
                       'accounts': accounts,
                       'selected_account': prouser.account.id
@@ -92,8 +95,8 @@ def issues(request, list_name: str = ""):
     url_rescanned_ids = [x.scan_id for x in rescan_requests if x.scan_type in URL_SCAN_TYPES]
 
     if list_name:
-        latest_endpoint_scans = EndpointGenericScan.objects.all().filter(endpoint__url__urllist__name__iexact=list_name)
-        latest_url_scans = UrlGenericScan.objects.all().filter(url__urllist__name__iexact=list_name)
+        latest_endpoint_scans = EndpointGenericScan.objects.all().filter(endpoint__url__urllist__name=list_name)
+        latest_url_scans = UrlGenericScan.objects.all().filter(url__urllist__name=list_name)
     else:
         latest_endpoint_scans = EndpointGenericScan.objects.all()
         latest_url_scans = UrlGenericScan.objects.all()
@@ -117,11 +120,16 @@ def issues(request, list_name: str = ""):
 
         impact = "high" if calculation.get("high", 0) else "medium" if calculation.get("medium", 0) else "low" \
             if calculation.get("low", 0) else "ok"
+
+        # don't show things that are fine.
+        if impact == "ok":
+            continue
+
         color = "#ff455833" if calculation.get("high", 0) else "#ff9a4533" if calculation.get("medium", 0) \
             else "#fffc4533" if calculation.get("low", 0) else "#a2f59633"
 
-        sort_impact = 3 if calculation.get("high", 0) else 2 if calculation.get("medium", 0) \
-            else 1 if calculation.get("low", 0) else 0
+        sort_impact = 0 if calculation.get("high", 0) else 1 if calculation.get("medium", 0) \
+            else 2 if calculation.get("low", 0) else 3
 
         # todo: this should be standardized somewhere.
         rescan_cost = rescan_costs(scan)
@@ -131,7 +139,9 @@ def issues(request, list_name: str = ""):
             all_scans_view.append({
                 "id": scan.id,
                 "url": scan.url.url,
-                "service": "%s" % scan.url.url,
+                "service": scan.url.url,
+                "domain": scan.url.computed_domain,
+                "domain_and_impact": "%s_%s" % (scan.url.computed_domain, impact),
                 "protocol": scan.type,
                 "type": scan.type,
                 "header": "report_header_%s" % scan.type,
@@ -156,6 +166,8 @@ def issues(request, list_name: str = ""):
                 "id": scan.id,
                 "url": scan.endpoint.url.url,
                 "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                "domain": scan.endpoint.url.computed_domain,
+                "domain_and_impact": "%s_%s" % (scan.endpoint.url.computed_domain, impact),
                 "protocol": scan.endpoint.protocol,
                 "port": scan.endpoint.port,
                 "type": scan.type,
@@ -176,12 +188,12 @@ def issues(request, list_name: str = ""):
             })
 
     # sort the scans, so url and endpointscans mingle correctly
-    all_scans_view = sorted(all_scans_view, key=lambda k: (k['sort_impact'], k['url'], k['last_scan_moment_python']),
-                            reverse=True)
+    all_scans_view = sorted(all_scans_view, key=lambda k: (k['domain'], k['sort_impact']))
 
     return render(request, 'pro/issues.html', {'latest_scans': all_scans_view,
                                                'credits': account.credits,
-                                               'rescan_requests': rescan_requests})
+                                               'rescan_requests': rescan_requests,
+                                               'account': account})
 
 
 @login_required(login_url='/pro/login/?next=/pro/')
@@ -196,11 +208,11 @@ def account(request):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def portfolio(request):
-    return render(request, 'pro/portfolio.html')
+    account = getAccount(request)
+    return render(request, 'pro/portfolio.html', {'account': account})
 
 
 def portfolio_data(request):
-    pass
 
     one_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
 
@@ -248,6 +260,7 @@ def portfolio_data(request):
 
         data.append({
             'name': urllist.name,
+            'name_slug': slugify(urllist.name),
             'stats': stats,
             'urls': urls,
             # 'report': latest_report.calculation

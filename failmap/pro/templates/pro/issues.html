@@ -1,15 +1,28 @@
 {% extends 'pro/base.html' %}{% load humanize %}{% load i18n %}
 {% block content %}
-    <h1>Issues</h1>
+    <h1 id="Issues">Issues</h1>
 
 
     <div class="row">
     {% for scan in latest_scans %}
+
+        {% ifchanged scan.domain %}
+            </div>
+            <h2 id="{{ scan.domain }}">{{ scan.domain }}</h2>
+            <div class="row">
+        {% endifchanged %}
+
+        {% ifchanged scan.domain_and_impact %}
+            </div>
+            <h3 id="{{ scan.domain_and_impact }}">{{ scan.impact }}</h3>
+            <div class="row">
+        {% endifchanged %}
+
         <div class="col-md-4" style="margin-bottom: 30px;">
         <table class="table table-sm table-striped table-bordered table-hover rounded-top" style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); border-radius: 10px;">
             <tbody style="background-color: {{ scan.color }};">
                 <tr>
-                    <td colspan="2" style="height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center"><h3>{{ scan.url }}</h3> {% if scan.url != scan.service %}<br>{{ scan.service }}{% endif %}</td>
+                    <td colspan="2" style="height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center"><h4 id="{{ scan.url | slugify}}{{ scan.service | slugify }}">{{ scan.url }}</h4> {% if scan.url != scan.service %}<br>{{ scan.service }}{% endif %}</td>
                 </tr>
 
                 <tr><td>Scan</td><td style="height: 4em;">{% trans scan.header %}</td></tr>

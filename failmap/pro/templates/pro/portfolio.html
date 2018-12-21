@@ -21,8 +21,8 @@
 
             <h3>Quick actions</h3>
             <div>
-                <a role="button" class="btn btn-danger btn-lg" :href="'/pro/issues/' + urllist.name + '/'">Manage Issues</a>
-                <a role="button" class="btn btn-success btn-lg" :href="'/pro/issues/' + urllist.name + '/'">Add Urls</a>
+                <a role="button" class="btn btn-danger btn-lg" :href="'/pro/issues/' + urllist.name_slug + '/'">Manage Issues</a>
+                <a role="button" class="btn btn-success btn-lg" :href="'/pro/issues/' + urllist.name_slug + '/'">Add Urls</a>
             </div>
 
             <br><br>
@@ -302,7 +302,13 @@ vueUrlList = new Vue({
     el: '#urllists',
     template: '#urllist_tables',
     mounted: function () {
-        this.load()
+        this.load();
+        this.$nextTick(function () {
+
+            tocbot.refresh();
+            // Code that will run only after the
+            // entire view has been rendered
+          })
     },
     data: {
         urllists: []

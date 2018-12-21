@@ -13,6 +13,7 @@
     <script type="text/javascript" src="{% static '/js/vendor/vue.js' %}"></script>
     <script type="text/javascript" src="{% static '/js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
     <script type="text/javascript" src="{% static '/js/vendor/Chart.js' %}"></script>
+    <script type="text/javascript" src="{% static '/js/vendor/tocbot/tocbot.min.js' %}"></script>
 
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/bootstrap.min.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/overrides.css' %}">
@@ -20,7 +21,7 @@
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/fontawesome.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/solid.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/regular.css' %}">
-
+    <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/tocbot/tocbot.css' %}">
 
     {{ form.media }}
 
@@ -86,6 +87,18 @@
                 margin-right: auto;
             }
 
+            .js-toc {
+                position: fixed;
+                width: 400px;
+                height: 100%;
+                z-index: 100;
+                visibility: visible !important;
+                display: block !important;
+                margin-left: calc(50vw + 578px);
+                margin-right: auto;
+                top: 80px;
+            }
+
             #pagemap_container{
                 width: 100%;
                 height: 88vh;
@@ -99,6 +112,8 @@
         function spendCredits(number){
             document.getElementById('credits').innerHTML = parseInt(document.getElementById('credits').innerHTML) - parseInt(number)
         }
+
+
     </script>
 
     {% block head %}
@@ -134,7 +149,7 @@
                     <li class="nav-item"><a class="nav-link" href="/pro/account/"><i class="fas fa-coins"></i> <span id="credits">{{ credits }}</span></a></li>
                 {% endif %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="/pro/account/" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i> Account<span class="caret"></span></a>
+                    <a class="nav-link dropdown-toggle" href="/pro/account/" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-user-circle"></i> {% if account.name %}{{ account.name }}{% else %} Account {% endif %}<span class="caret"></span></a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/pro/account/"><i class="fas fa-user-circle"></i> Account info</a>
                         <a class="dropdown-item" href="/pro/help/"><i class="fas fa-lightbulb"></i> Support</a>
@@ -148,7 +163,13 @@
 
 <div id="pagemap_container">
     <canvas id='pagemap' style="visibility: hidden; display: none;"></canvas>
+
+    <div class="js-toc">
+
+    </div>
 </div>
+
+
 
 {% block fullwidth %}
 {% endblock %}
@@ -183,6 +204,15 @@ pagemap(document.querySelector('#pagemap'), {
     view: 'rgba(0,0,0,0.05)',
     drag: 'rgba(0,0,0,0.10)',
     interval: null
+});
+
+tocbot.init({
+  // Where to render the table of contents.
+  tocSelector: '.js-toc',
+  // Where to grab the headings to build the table of contents.
+  contentSelector: 'body',
+  // Which headings to grab inside of the contentSelector element.
+  headingSelector: 'h1, h2, h3',
 });
 </script>
 </body>
