@@ -2,7 +2,9 @@ import logging
 from datetime import datetime, timedelta
 
 import pytz
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db.models import Prefetch
 from django.http import JsonResponse
@@ -10,12 +12,11 @@ from django.shortcuts import render
 
 from failmap.app.common import JSEncoder
 from failmap.map.calculate import get_calculation
-from failmap.pro.models import CreditMutation, ProUser, RescanRequest, UrlList, UrlListReport, Account
+from failmap.pro.forms import MailSignupForm
+from failmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
+                                UrlListReport)
 from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from failmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
-from failmap.pro.forms import MailSignupForm
-from django.conf import settings
-from django.contrib.auth.models import User
 
 log = logging.getLogger(__package__)
 
@@ -29,25 +30,30 @@ def dummy(request):
 @login_required(login_url='/pro/login/?next=/pro/')
 def home(request):
 
-    try:
-        user_is_staff = User.objects.all().filter(pk=request.user.id).first().is_staff
-    except BaseException:
-        user_is_staff = False
+    user = User.objects.all().filter(pk=request.user.id).first()
+    prouser = ProUser.objects.all().filter(user=request.user).first()
 
     accounts = []
-    if user_is_staff:
+    user_is_staff = False
+
+    # some real hot classic old school programming right here
+    if user.is_staff:
+        user_is_staff = True
         accounts = list(Account.objects.all().values('id', 'name'))
 
-    log.debug(accounts)
-
-    log.debug(request.POST)
+        # you'll get the first entry in the querydict
+        if request.POST.get('change_account', None):
+            # don't know how inheritance works with user, i think it's ugly.
+            prouser.account = Account.objects.get(id=request.POST.get('change_account'))
+            prouser.save()
 
     return render(request, 'pro/home.html',
                   {
                       'admin': settings.ADMIN,
                       'debug': settings.DEBUG,
-                      'user_is_staff': User.objects.all().filter(pk=request.user.id).first().is_staff,
-                      'accounts': accounts
+                      'user_is_staff': user_is_staff,
+                      'accounts': accounts,
+                      'selected_account': prouser.account.id
                   }
                   )
 

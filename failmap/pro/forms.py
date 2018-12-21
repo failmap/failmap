@@ -1,21 +1,19 @@
 import logging
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
+from random import choice
 
 import pytz
 import tldextract
+from constance import config
 from django import forms
+from django.contrib.auth.models import User
 from django.db import transaction
 from django.forms import ValidationError
-from failmap.pro.urllist_report_historically import rate_urllist_on_moment
-
+from django.utils.text import slugify
 
 from failmap.organizations.models import Url
-from failmap.pro.models import Account, UrlList, ProUser
-from random import choice
-from django.contrib.auth.models import User
-from django.utils.text import slugify
-from constance import config
-
+from failmap.pro.models import Account, ProUser, UrlList
+from failmap.pro.urllist_report_historically import rate_urllist_on_moment
 
 log = logging.getLogger(__package__)
 
@@ -47,7 +45,7 @@ class MailSignupForm(forms.Form):
         else:
             # what should we do otherwise? Call to verify and attach to an account? Try to match to an existing account?
             # create and empty account in worst case, and let the user add some urls they want?
-            raise NotImplemented
+            raise NotImplementedError
 
 
 def account_by_mail_exists(email):
