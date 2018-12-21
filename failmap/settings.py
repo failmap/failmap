@@ -790,10 +790,18 @@ CONSTANCE_CONFIG = {
     'GITTER_CHAT_ENABLE': (False, 'Show the Gitter Chat option on the website (using gitter sidecar).', bool),
     'GITTER_CHAT_CHANNEL': ('internet-cleanup-foundation/support', 'Name of the channel chat takes place.', str),
 
-    #
-    # 'USE_CUSTOM_INTRO': (False, 'If you want to use an (untranslated) custom intro, enable this. Enabling this'
-    #                             'will remove the standard intro and has several fields that can be filled with '
-    #                             'custom HTML.', bool),
+    'ENABLE_PRO': (False, 'Todo: implement.', bool),
+    'PRO_REPLY_TO_MAIL_ADDRESS': ('', 'Reply mail address used when sending PRO mails.', str),
+
+    # django mail settings, but managed dynamically
+    'PRO_EMAIL_HOST': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_PORT': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_USERNAME': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_PASSWORD': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_USE_TLS': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_USE_SSL': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_SSL_KEYFILE': ('', 'See django mail settings.', str),
+    'PRO_EMAIL_SSL_CERTFILE': ('', 'See django mail settings.', str),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
@@ -846,7 +854,13 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
 
     ('Ticker', ('SHOW_TICKER', 'TICKER_SLOGAN', 'TICKER_VISIBLE_VIA_JS_COMMAND')),
 
-    ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL'))
+    ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL')),
+
+    ('Pro', ('ENABLE_PRO', 'PRO_REPLY_TO_MAIL_ADDRESS')),
+
+    ('Pro Mail Settings', ('PRO_EMAIL_HOST', 'PRO_EMAIL_PORT', 'PRO_EMAIL_USERNAME', 'PRO_EMAIL_PASSWORD',
+                           'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
+
 ])
 
 # Check for constance configuration issues:
@@ -1046,3 +1060,11 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 # }
 # End cacheops
 ########
+
+####
+# PRO settings
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Mail settings are managed in constance for easier mainteneance.
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

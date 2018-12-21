@@ -10,9 +10,12 @@ from django.shortcuts import render
 
 from failmap.app.common import JSEncoder
 from failmap.map.calculate import get_calculation
-from failmap.pro.models import CreditMutation, ProUser, RescanRequest, UrlList, UrlListReport
+from failmap.pro.models import CreditMutation, ProUser, RescanRequest, UrlList, UrlListReport, Account
 from failmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from failmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from failmap.pro.forms import MailSignupForm
+from django.conf import settings
+from django.contrib.auth.models import User
 
 log = logging.getLogger(__package__)
 
@@ -23,8 +26,45 @@ def dummy(request):
     return JsonResponse({'hello': 'world'}, encoder=JSEncoder)
 
 
+@login_required(login_url='/pro/login/?next=/pro/')
 def home(request):
-    return render(request, 'pro/home.html', {})
+
+    try:
+        user_is_staff = User.objects.all().filter(pk=request.user.id).first().is_staff
+    except BaseException:
+        user_is_staff = False
+
+    accounts = []
+    if user_is_staff:
+        accounts = list(Account.objects.all().values('id', 'name'))
+
+    log.debug(accounts)
+
+    log.debug(request.POST)
+
+    return render(request, 'pro/home.html',
+                  {
+                      'admin': settings.ADMIN,
+                      'debug': settings.DEBUG,
+                      'user_is_staff': User.objects.all().filter(pk=request.user.id).first().is_staff,
+                      'accounts': accounts
+                  }
+                  )
+
+
+def signup(request):
+
+    if request.POST:
+        form = MailSignupForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return render(request, 'pro/registration/signup_success.html')
+
+    else:
+        form = MailSignupForm()
+
+    return render(request, 'pro/registration/signup.html', {'form': form})
 
 
 def rescan_costs(scan):

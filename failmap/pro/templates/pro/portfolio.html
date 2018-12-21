@@ -6,14 +6,19 @@
 {% verbatim %}
 <script type="x-template" id="urllist_tables">
 <div>
+    <main><section>
     <!-- todo: loading indicator -->
     <!-- try: https://scotch.io/tutorials/add-loading-indicators-to-your-vuejs-application -->
     <!-- <div v-if="!urllists">Loading... <i class="fas fa-spinner fa-pulse"></i></div> -->
 
     <div style="margin-bottom: 60px;" v-for="urllist in urllists">
-    <h2>{{ urllist.name }}</h2>
 
-        <div style="margin: 20px; padding: 20px; background-color: rgba(225, 225, 225, 0.42); border-radius: 10px;">
+
+        <div style="padding: 20px; background-color: rgba(225, 225, 225, 0.42); border-radius: 10px;">
+            <h2>{{ urllist.name }}</h2>
+
+            <br><br>
+
             <h3>Quick actions</h3>
             <div>
                 <a role="button" class="btn btn-danger btn-lg" :href="'/pro/issues/' + urllist.name + '/'">Manage Issues</a>
@@ -50,7 +55,7 @@
                 <!-- todo: this will be the summary table -->
                 <tr v-for="url in urllist.urls">
                     <td>{{ url.url }}</td>
-                    <td>{{ url.created_on | humanize }} </td>
+                    <td>{{ url.created_on }} </td>
                     <td>{{ url.resolves }}</td>
                     <td>{{ url.is_dead }}</td>
                 </tr>
@@ -58,6 +63,7 @@
             </table>
         </div>
     </div>
+    </section></main>
 </div>
 </script>
 {% endverbatim %}
@@ -82,7 +88,6 @@ Vue.component('vulnerability-chart', {
     },
     methods: {
         renderChart: function(){
-            console.log(this.data);
             let data = this.data;
 
             let labels = Array();
@@ -198,7 +203,6 @@ Vue.component('connectivity-chart', {
     },
     methods: {
         renderChart: function(){
-            console.log(this.data);
             let data = this.data;
 
             let labels = Array();

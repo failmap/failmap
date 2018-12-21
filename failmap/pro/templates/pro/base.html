@@ -21,6 +21,7 @@
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/solid.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/vendor/fontawesome/regular.css' %}">
 
+
     {{ form.media }}
 
     <style>
@@ -74,6 +75,24 @@
             }
         }
 
+        @media screen and (min-width: 1500px) {
+            #pagemap {
+                width: 100px;
+                height: 100%;
+                z-index: 100;
+                visibility: visible !important;
+                display: block !important;
+                margin-left: calc(50vw - 675px);
+                margin-right: auto;
+            }
+
+            #pagemap_container{
+                width: 100%;
+                height: 100vh;
+                position: fixed;
+            }
+        }
+
     </style>
 
     <script>
@@ -100,6 +119,17 @@
                 <li class="nav-item"><a class="nav-link" href="/pro/issues/"><i class="fas fa-dumpster-fire"></i> Issues</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
+                {% if user_is_staff %}
+                    {% comment %} Only admin users can switch accounts, which makes it possible to see the contents of other accounts for debugging purposes. {% endcomment %}
+                    <li class="nav-item"><form class="nav-link" method="POST">
+                        {% csrf_token %}
+                        <select onChange="this.form.submit()" name="change_account">
+                            {% for account in accounts %}
+                            <option value="{{ account.id }}">{{ account.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </form></li>
+                {% endif %}
                 {% if credits %}
                     <li class="nav-item"><a class="nav-link" href="/pro/account/"><i class="fas fa-coins"></i> <span id="credits">{{ credits }}</span></a></li>
                 {% endif %}
@@ -108,13 +138,17 @@
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/pro/account/"><i class="fas fa-user-circle"></i> Account info</a>
                         <a class="dropdown-item" href="/pro/help/"><i class="fas fa-lightbulb"></i> Support</a>
-                        <a class="dropdown-item" href="/pro/logout/"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+                        <a class="dropdown-item" href="/pro/logout/?next=/pro/"><i class="fas fa-sign-out-alt"></i> Log Out</a>
                     </div>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<div id="pagemap_container">
+    <canvas id='pagemap' style="visibility: hidden; display: none;"></canvas>
+</div>
 
 {% block fullwidth %}
 {% endblock %}
@@ -135,5 +169,21 @@
         Contact...
     </div>
 </div>
+
+<script type="text/javascript" src="{% static '/js/vendor/pagemap/pagemap.min.js' %}"></script>
+<script>
+pagemap(document.querySelector('#pagemap'), {
+    viewport: null,
+    styles: {
+        'header,footer,section,article': 'rgba(0,0,0,0.08)',
+        'h1,a': 'rgba(0,0,0,0.10)',
+        'h2,h3,h4': 'rgba(0,0,0,0.08)'
+    },
+    back: 'rgba(0,0,0,0.02)',
+    view: 'rgba(0,0,0,0.05)',
+    drag: 'rgba(0,0,0,0.10)',
+    interval: null
+});
+</script>
 </body>
 </html>

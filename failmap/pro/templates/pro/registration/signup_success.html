@@ -20,12 +20,12 @@
 <body style="background-color: #ccc;">
 
 <div style="width: 600px; margin: auto; border: 1px solid #9ab090; border-radius: 10px; padding: 20px; background-color: #f8f8f8; border-top: 43px solid #3b3b3b;">
-<h2 style="margin-bottom: 30px;">Pro Login</h2>
-<form method="post" action="/pro/login/?next=/pro/">
-  {% csrf_token %}
-  {{ form | crispy }}
+<h2 style="margin-bottom: 30px;">Pro Signup Success!</h2>
+<form method="post">
+  You've signed up successfully. An e-mail with your username and password will arrive shortly at the address you
+    supplied. If you've received the mail, please go to <a href="/pro/login/">the login page, here</a>.<br>
     <div width="100%" style="text-align: right">
-        <a role="button" class="save btn btn-lg btn-secondary" href="/pro/signup/">Sign up</a> <button type="submit" class="save btn btn-lg btn-primary">Login</button>
+        <a role="button" class="save btn btn-lg btn-primary" href="/pro/login/">Go to login</a>
     </div>
 </form>
 </div>

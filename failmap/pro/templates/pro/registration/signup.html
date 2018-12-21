@@ -20,12 +20,12 @@
 <body style="background-color: #ccc;">
 
 <div style="width: 600px; margin: auto; border: 1px solid #9ab090; border-radius: 10px; padding: 20px; background-color: #f8f8f8; border-top: 43px solid #3b3b3b;">
-<h2 style="margin-bottom: 30px;">Pro Login</h2>
-<form method="post" action="/pro/login/?next=/pro/">
+<h2 style="margin-bottom: 30px;">Pro Signup</h2>
+<form method="post">
   {% csrf_token %}
   {{ form | crispy }}
     <div width="100%" style="text-align: right">
-        <a role="button" class="save btn btn-lg btn-secondary" href="/pro/signup/">Sign up</a> <button type="submit" class="save btn btn-lg btn-primary">Login</button>
+        <button type="submit" class="save btn btn-lg btn-primary">Let's do this!</button>
     </div>
 </form>
 </div>
