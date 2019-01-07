@@ -1,0 +1,98 @@
+<!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %}
+<html lang="{{ language }}">
+<head>
+    <meta name="mailto" content="{{ config.PROJECT_MAIL }}">
+    <meta name="issue_mailto" content="{{ config.PROJECT_ISSUE_MAIL }}">
+    <meta name="sentry_token" content="{{ sentry_token }}">
+    <meta name="version" content="{{ version }}">
+    <meta name="country" content="{{ country }}">
+    <meta name="debug" content="{{ debug }}">
+    <meta name="mapbox_token" content="{{ config.MAPBOX_ACCESS_TOKEN }}">
+    <meta name="initial_map_data_url" content="{{ initial_map_data_url }}">
+    <meta name="TICKER_VISIBLE_VIA_JS_COMMAND" content="{{ config.TICKER_VISIBLE_VIA_JS_COMMAND | lower }}">
+
+    <!-- This stylesheet is changed on the fly using themes. -->
+    <link rel="stylesheet" type="text/css" id="active_theme" href="{% static 'css/vendor/bootstrap.min.css' %}"/>
+
+    {% compress css %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.Failmap.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
+    {% endcompress %}
+
+    <!-- remove all controls, remove all margins, so the map is 100% covering the screen. -->
+    <style>
+        .leaflet-control {
+            visibility: hidden !important;
+        }
+        body {
+            padding-top: 0 !important;
+        }
+        #map {
+            height: 100vh !important;
+        }
+        section {
+            padding-bottom: 0 !important;
+        }
+    </style>
+
+    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
+    {% if debug %}
+        <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/bootstrap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet-src.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster-src.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+    {% else %}{% compress js %}
+        <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+    {% endcompress %}{% endif %}
+
+</head>
+
+<body role="document" onload="document_ready();">
+
+<section>
+    <div id='map'></div>
+</section>
+</body>
+
+<script type="x-template" id="fullscreenreport">
+    <div class="page-header" id="fullscreenreport" v-if="visible">
+    </div>
+</script>
+
+<script type="x-template" id="historycontrol_template">
+    <div id="historycontrol">
+    </div>
+</script>
+<script type="x-template" id="domainlist_template">
+    <div id="domainlist">
+    </div>
+</script>
+{% verbatim %}
+<script type="x-template" id="map_item_hover">
+    <div id="map_hover_info_contents">
+    </div>
+</script>
+{% endverbatim %}
+
+</html>
+<!--
+This page was generated with CALC.EXE on {{ timestamp }} in over 9000 seconds, version: {{ version }}.
+-->

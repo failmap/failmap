@@ -1622,8 +1622,13 @@ function views(autoload_default_map_data=true) {
 
                 // the first time the map defaults are loaded, this saves a trip to the server of what the defaults are
                 // it's possible that this is slower than the rest of the code, and thus a normal map is loaded.
+                // it is possible to override the default using the initial_map_data_url parameter.
                 if (!this.country || !this.layer) {
-                    this.show_data(`/data/map_default/${week * 7}/${this.displayed_issue}/`);
+                    if (initial_map_data_url !== undefined && initial_map_data_url !== '') {
+                        this.show_data(initial_map_data_url);
+                    } else {
+                        this.show_data(`/data/map_default/${week * 7}/${this.displayed_issue}/`);
+                    }
                     return;
                 }
 
@@ -1631,7 +1636,7 @@ function views(autoload_default_map_data=true) {
 
             },
             show_data: function(url) {
-                console.log(url);
+                console.log(`Loading map data from: ${url}`);
                 fetch(url).then(response => response.json()).then(data => {
                     this.loading = true;
 

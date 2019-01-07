@@ -309,7 +309,29 @@ def index(request):
         'country': config.PROJECT_COUNTRY,
         'debug': settings.DEBUG,
         'language': request.LANGUAGE_CODE,
-        'timestamp': datetime.now(pytz.UTC).isoformat()
+        'timestamp': datetime.now(pytz.UTC).isoformat(),
+        'initial_map_data_url': ''
+    })
+
+
+def map_only(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
+             displayed_issue: str = None):
+
+    # build an initial data URL, which overrides the standard default data url for the map.
+
+    country = "NL" if country not in iso3166.countries_by_alpha2 else country
+
+    initial_map_data_url = "/data/map/%s/%s/%s/%s/" % (country, organization_type, days_back, displayed_issue)
+
+    return render(request, 'map/map_only.html', {
+        'version': __version__,
+        'admin': settings.ADMIN,
+        'sentry_token': settings.SENTRY_TOKEN,
+        'country': config.PROJECT_COUNTRY,
+        'debug': settings.DEBUG,
+        'language': request.LANGUAGE_CODE,
+        'timestamp': datetime.now(pytz.UTC).isoformat(),
+        'initial_map_data_url': initial_map_data_url
     })
 
 

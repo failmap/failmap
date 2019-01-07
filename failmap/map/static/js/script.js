@@ -4,6 +4,7 @@ let version = document.head.querySelector("[name=version]").getAttribute('conten
 let country = document.head.querySelector("[name=country]").getAttribute('content');
 let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
 let debug = document.head.querySelector("[name=debug]").getAttribute('content');
+let initial_map_data_url = document.head.querySelector("[name=initial_map_data_url]").getAttribute('content');
 let TICKER_VISIBLE_VIA_JS_COMMAND = document.head.querySelector("[name=TICKER_VISIBLE_VIA_JS_COMMAND]").getAttribute('content');
 if (sentry_token) {
     Raven.config(sentry_token, {release: version}).install();
