@@ -28,7 +28,7 @@ class Command(BaseCommand):
         filters = ["ftp", "DNSSEC", "http_security_header_x_xss_protection",
                    "http_security_header_x_content_type_options", "http_security_header_x_frame_options",
                    "tls_qualys_certificate_trusted", "tls_qualys_encryption_quality",
-                   "http_security_header_strict_transport_security", "plain_https"]
+                   "http_security_header_strict_transport_security", "plain_https", '']
 
         moments_in_time = range(0, 500, 7)
 
@@ -59,6 +59,7 @@ def screenshot_firefox(url, filename):
 
 
 def screenshot_chrome(url, filename):
-    command = [chrome, '--disable-gpu', '--headless', '--screenshot=%s' % filename, '--window-size=800,600', url]
+    command = [chrome, '--disable-gpu', '--headless', '--screenshot=%s' % filename, '--window-size=1600,1200',
+               '--virtual-time-budget=5000', url]
     log.debug("Called command: %s" % " ".join(command))
     subprocess.call(command)
