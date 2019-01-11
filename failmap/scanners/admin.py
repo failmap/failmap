@@ -263,3 +263,21 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, "Proxies reset.")
     reset_proxy.short_description = "Reset proxy"
     actions.append('reset_proxy')
+
+    def disable_proxy(self, request, queryset):
+        for proxy in queryset:
+            proxy.manually_disabled = True
+            proxy.save()
+
+        self.message_user(request, "Proxies disabled.")
+    disable_proxy.short_description = "Disable proxy"
+    actions.append('disable_proxy')
+
+    def enable_proxy(self, request, queryset):
+        for proxy in queryset:
+            proxy.manually_disabled = False
+            proxy.save()
+
+        self.message_user(request, "Proxies enabled.")
+    enable_proxy.short_description = "Enable proxy"
+    actions.append('enable_proxy')
