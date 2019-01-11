@@ -25,16 +25,18 @@ import logging
 from datetime import datetime, timedelta
 from multiprocessing.pool import ThreadPool
 from time import sleep
+from typing import List
 
 import pytz
 import requests
 from celery import Task, group
 from django.conf import settings
-from tenacity import before_log, retry, wait_fixed
+from requests.exceptions import ProxyError
+from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
-from failmap.scanners.models import Endpoint, TlsQualysScratchpad
+from failmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.http import store_url_ips
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
@@ -126,10 +128,117 @@ def compose_task(
 
     log.info('Creating qualys scan task for %s urls for %s organizations.', len(urls), len(organizations))
 
-    # Split the urls up in chunks:
+    # Instead of hyper.sh, we're using a proxy to connect to Qualys to run a scan. A list of proxies is maintained in
+    # ScanProxy. We'll try to get a valid proxy first, this might take a few minutes. Then at most once every 5 minutes
+    # an new set of scans (of 25 urls) is run on the proxy. While not very elegant, we had just a few days to migrate.
+
+    # todo: it's unsure the network is still available via a proxy, proxies shut down often.
     chunks = list(chunks(urls, 25))
-    task = group(qualys_scan_bulk.s(chunk) for chunk in chunks)
-    return task
+
+    # a bulk scan of 25 urls takes about 45 minutes.
+    tasks = []
+    for chunk in chunks:
+        tasks.append(get_proxy.s() | qualys_scan_bulk.s(chunk) | release_proxy.s())
+    return group(tasks)
+
+
+@app.task(queue='storage')
+def get_proxy():
+
+    # try to get the first available proxy, which can take a long time...
+    while True:
+
+        # proxies can die if they are limited too often.
+        proxy = ScanProxy.objects.all().filter(
+            is_dead=False,
+            out_of_resource_counter__lte=10,
+            currently_used_in_tls_qualys_scan=False,
+            manually_disabled=False
+        ).first()
+
+        if proxy and check_proxy(proxy):
+
+            proxy.currently_used_in_tls_qualys_scan = True
+            proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+
+            log.debug('Using proxy %s for scan.' % proxy)
+
+            return proxy
+
+        # no valid proxy found
+        log.error('No usable proxy available for TLS Qualys scan. Add more proxys or check the existing ones. '
+                  'Waiting 60 seconds for an available proxy.')
+        sleep(60)
+
+
+@app.task(queue='storage')
+def release_proxy(proxy):
+    proxy.currently_used_in_tls_qualys_scan = False
+    proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+
+
+def check_proxies():
+
+    proxies = ScanProxy.objects.all().filter(
+        is_dead=False,
+        out_of_resource_counter__lte=10,
+        currently_used_in_tls_qualys_scan=False
+    )
+
+    for proxy in proxies:
+        check_proxy(proxy)
+
+
+@app.task(queue='internet')
+def check_proxy(proxy):
+    # todo: service_provider_status should stop after a certain amount of requests.
+
+    log.debug("Testing proxy %s" % proxy)
+
+    try:
+        api_results = service_provider_status(proxy)
+    except RetryError:
+        proxy.is_dead = True
+        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
+        proxy.check_result = "Retry error. Could not connect."
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
+
+    # tried a few times, no result. Proxy is dead.
+    if not api_results:
+        proxy.is_dead = True
+        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
+        proxy.check_result = "No result, proxy not reachable?"
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
+
+    if api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+        log.debug("Out of capacity %s." % proxy)
+        proxy.is_dead = True
+        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.check_result = "Out of capacity."
+        proxy.save()
+        return False
+    else:
+        # todo: Request time via the proxy. Just getting google.com might take a lot of time...
+        try:
+            speed = requests.get('https://apple.com', proxies={proxy.protocol: proxy.address}).elapsed.total_seconds()
+        except ProxyError:
+            proxy.is_dead = True
+            proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
+            proxy.check_result = "Could not retrieve website"
+            proxy.check_result_date = datetime.now(pytz.utc)
+            proxy.save()
+            return False
+
+        proxy.check_result = "Capacity available. Speed: %s" % speed
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        log.debug("Capacity available at proxy %s." % proxy)
+        return True
 
 
 # It's possible a lot of scans start at the same time. In that case the API does not have a notion of how many scans
@@ -138,8 +247,9 @@ def compose_task(
 
 # Note that this is a per worker instance rate limit, and not a global rate limit.
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
-@app.task(queue='qualys', rate_limit='1/m', acks_late=True)
-def qualys_scan_bulk(urls):
+@app.task(queue='qualys', rate_limit='10/h', acks_late=True)
+def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
+
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
     # capacity severely.
     # Using this solution still uses parallel scans, while not having to rely on the black-box of redis and celery
@@ -151,32 +261,39 @@ def qualys_scan_bulk(urls):
     # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
     # every 30 seconds. So they may be even down for a day and it will continue.
     for url in urls:
-        api_results = service_provider_status()
+        api_results = service_provider_status(proxy)
         while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
             log.debug("Running out of capacity, waiting to start new scan.")
             sleep(70)
-            api_results = service_provider_status()
+            api_results = service_provider_status(proxy)
 
-        pool.apply_async(qualys_scan_thread, [url])
+        pool.apply_async(qualys_scan_thread, [proxy, url])
         sleep(70)
 
     pool.close()
     pool.join()
 
-    return
+    # return the proxy so it can be closed.
+    # The scan results are created as separate tasks in the scan thread.
+    return proxy
 
 
 # keeps scanning in a loop until it has the data to fire a
-def qualys_scan_thread(url):
+def qualys_scan_thread(proxy, url):
 
     scan_completed = False
     data = {}
     waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
     max_waiting_time = 180
 
+    if proxy:
+        proxy_info = {proxy.protocol: proxy.address}
+    else:
+        proxy_info = {}
+
     while not scan_completed:
         try:
-            api_result = service_provider_scan_via_api_with_limits(url.url)
+            api_result = service_provider_scan_via_api_with_limits(proxy_info, url.url)
             data = api_result['data']
         except requests.RequestException:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
@@ -294,7 +411,7 @@ def report_to_console(domain, data):
 # Qualys is a service that is constantly attacked / ddossed and very unreliable. So try a couple of times before
 # giving up. It can even be down for half a day. Waiting a little between retries.
 @retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
-def service_provider_scan_via_api_with_limits(domain):
+def service_provider_scan_via_api_with_limits(proxy_info, domain):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     payload = {
         'host': domain,  # host that will be scanned for tls
@@ -311,7 +428,8 @@ def service_provider_scan_via_api_with_limits(domain):
         params=payload,
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
+                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
+        proxies=proxy_info
     )
 
     # log.debug(vars(response))  # extreme debugging
@@ -328,15 +446,22 @@ def service_provider_scan_via_api_with_limits(domain):
             'data': response.json()}
 
 
-@retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
-def service_provider_status():
+@retry(wait=wait_fixed(30), stop=stop_after_attempt(6), before=before_log(log, logging.INFO))
+def service_provider_status(proxy):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
+
+    if proxy:
+        proxies = {proxy.protocol: proxy.address}
+    else:
+        proxies = {}
+
     response = requests.get(
         "https://api.ssllabs.com/api/v2/getStatusCodes",
         params={},
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", }
+                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
+        proxies=proxies
     )
 
     """

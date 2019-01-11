@@ -5,6 +5,7 @@ from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
 from failmap.scanners import models
+from failmap.scanners.scanner.tls_qualys import check_proxy
 
 
 class TlsQualysScanAdminInline(CompactInline):
@@ -232,3 +233,33 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ('message', 'status_url')
     list_filter = ('started_on', 'finished_on', 'success', 'message', )
     fields = ('started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'status_url')
+
+
+@admin.register(models.ScanProxy)
+class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'protocol', 'address', 'check_result', 'check_result_date', 'manually_disabled', 'is_dead',
+                    'out_of_resource_counter')
+    search_fields = ('address', )
+    list_filter = ('protocol',  'is_dead', 'out_of_resource_counter', 'is_dead_since')
+    fields = ('protocol', 'address', 'currently_used_in_tls_qualys_scan', 'is_dead', 'is_dead_since', 'is_dead_reason',
+              'out_of_resource_counter', 'manually_disabled', 'check_result', 'check_result_date',)
+
+    actions = []
+
+    def check_qualys_proxy(self, request, queryset):
+        for proxy in queryset:
+            check_proxy.apply_async([proxy])
+        self.message_user(request, "Proxing checked asynchronously. May take some time before results come in.")
+    check_qualys_proxy.short_description = "Check proxy"
+    actions.append('check_qualys_proxy')
+
+    def reset_proxy(self, request, queryset):
+        for proxy in queryset:
+            proxy.is_dead = False
+            proxy.out_of_resource_counter = 0
+            proxy.currently_used_in_tls_qualys_scan = False
+            proxy.save()
+
+        self.message_user(request, "Proxies reset.")
+    reset_proxy.short_description = "Reset proxy"
+    actions.append('reset_proxy')

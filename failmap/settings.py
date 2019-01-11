@@ -955,6 +955,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'tlsqualysscan', 'permissions': ['scanners.change_tlsqualysscan']},
         {'name': 'urlgenericscan', 'permissions': ['scanners.change_urlgenericscan']},
         {'name': 'internetnlscan', 'permissions': ['scanners.change_internetnlscan']},
+        {'name': 'scanproxy', 'permissions': ['scanners.scanproxy']},
         {'name': 'screenshot', 'permissions': ['admin']},
         {'name': 'urlip', 'permissions': ['admin']},
         {'name': 'tlsqualysscratchpad', 'permissions': ['admin']},

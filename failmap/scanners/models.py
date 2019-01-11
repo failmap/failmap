@@ -146,6 +146,79 @@ class Endpoint(models.Model):
         verbose_name_plural = _('endpoint')
 
 
+class ScanProxy(models.Model):
+
+    # todo: do we have to support socks proxies? It's possible and allows name resolution.
+
+    protocol = models.CharField(
+        max_length=10,
+        help_text="Whether to see this as a http or https proxy",
+        default='https'
+    )
+
+    address = models.CharField(
+        max_length=255,
+        help_text="An internet address, including the http/https scheme. Works only on IP. Username / pass can be"
+                  "added in the address. For example: https://username:password@192.168.1.1:1337/"
+    )
+
+    currently_used_in_tls_qualys_scan = models.BooleanField(
+        default=False,
+        help_text="Set's the proxy as in use, so that another scanner knows that this proxy is being used at this "
+                  "moment. After a scan is completed, the flag has to be disabled. This of course goes wrong with "
+                  "crashes. So once in a while, if things fail or whatever, this might have to be resetted."
+    )
+
+    is_dead = models.BooleanField(
+        default=False,
+        help_text="Use the 'declare dead' button to autofill the date. "
+                  "If the port is closed, or the endpoint is otherwise"
+                  "not reachable over the specified protocol, then mark"
+                  "it as dead. A scanner for this port/protocol can also"
+                  "declare it dead. This port is closed on this protocol."
+                  ""
+    )
+
+    manually_disabled = models.BooleanField(
+        default=False,
+        help_text="Proxy will not be used if manually disabled."
+    )
+
+    is_dead_since = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    is_dead_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    check_result = models.CharField(
+        max_length=60,
+        help_text="The result of the latest 'check proxy' call.",
+        default='Unchecked.'
+    )
+
+    check_result_date = models.DateField(
+        blank=True,
+        null=True
+    )
+
+    out_of_resource_counter = models.IntegerField(
+        default=0,
+        help_text="Every time the proxy has not enough resources, this number will increase with one. A too high "
+                  "number makes it easy not to use this proxy anymore."
+    )
+
+    def __str__(self):
+        if self.is_dead:
+            return "✝ %s %s" % (self.pk, self.address)
+        else:
+            return "%s %s" % (self.pk, self.address)
+
+
 class UrlIp(models.Model):
     """
     IP addresses of endpoints change constantly. They are more like metadata. The IP metadata can
