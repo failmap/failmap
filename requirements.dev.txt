@@ -44,3 +44,4 @@ git+https://github.com/gorakhargosh/watchdog.git@d33bee0290e00ecb3570dd938db72a2
 
 ipython  # failmap shell -i ipython
 django-cprofile-middleware
+moviepy
