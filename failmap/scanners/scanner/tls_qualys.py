@@ -23,6 +23,7 @@ import ipaddress
 import json
 import logging
 from datetime import datetime, timedelta
+from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
 from typing import List
@@ -35,6 +36,7 @@ from django.conf import settings
 from django.db import transaction
 from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
+from urllib3.exceptions import ProtocolError
 
 from failmap.celery import app
 from failmap.organizations.models import Organization, Url
@@ -239,6 +241,18 @@ def check_proxy(proxy):
         return False
     except ConnectionError:
         proxy.check_result = "Connection error."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
+    except ProtocolError:
+        proxy.check_result = "Protocol error."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
+    except BadStatusLine:
+        proxy.check_result = "Bad status line."
         proxy.is_dead = True
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.save()
