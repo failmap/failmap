@@ -30,9 +30,10 @@ from typing import List
 import pytz
 import requests
 from celery import Task, group
+from constance import config
 from django.conf import settings
 from django.db import transaction
-from requests.exceptions import ProxyError, SSLError
+from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 
 from failmap.celery import app
@@ -44,8 +45,8 @@ from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_t
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
-API_NETWORK_TIMEOUT = 120
-API_SERVER_TIMEOUT = 120
+API_NETWORK_TIMEOUT = 20
+API_SERVER_TIMEOUT = 20
 
 log = logging.getLogger(__name__)
 
@@ -191,7 +192,7 @@ def release_proxy(proxy):
 
 
 @app.task(queue='storage')
-def check_proxies():
+def check_existing_alive_proxies():
 
     proxies = ScanProxy.objects.all().filter(
         is_dead=False,
@@ -199,7 +200,7 @@ def check_proxies():
     )
 
     for proxy in proxies:
-        check_proxy(proxy)
+        check_proxy.apply_async([proxy])
 
 
 @app.task(queue='storage')
@@ -212,7 +213,7 @@ def check_proxy(proxy):
     # send requests to a known domain to inspect the headers the proxies attach. There has to be something
     # that links various scans to each other.
     try:
-        requests.get('https://5717.ch',
+        requests.get(config.SCAN_PROXY_TESTING_URL,
                      proxies={proxy.protocol: proxy.address},
                      timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
                      headers={'User-Agent': "Request through proxy %s" % proxy, },
@@ -223,11 +224,25 @@ def check_proxy(proxy):
         proxy.is_dead = True
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.save()
+        return False
     except SSLError:
         proxy.check_result = "SSL error received."
         proxy.is_dead = True
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.save()
+        return False
+    except ConnectTimeout:
+        proxy.check_result = "Connection timeout."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
+    except ConnectionError:
+        proxy.check_result = "Connection error."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+        return False
 
     try:
         api_results = service_provider_status(proxy)
@@ -272,12 +287,21 @@ def check_proxy(proxy):
             proxy.qualys_capacity_this_client = api_results['this-client-max']
             proxy.save()
             return False
+        except ConnectTimeout:
+            proxy.is_dead = True
+            proxy.check_result = "Proxy too slow for standard site."
+            proxy.check_result_date = datetime.now(pytz.utc)
+            proxy.qualys_capacity_current = api_results['current']
+            proxy.qualys_capacity_max = api_results['max']
+            proxy.qualys_capacity_this_client = api_results['this-client-max']
+            proxy.save()
+            return False
 
         # todo: how to check the headers the proxy sends to the client? That requires a server to receive
         # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
         # otherwise the data will be coupled to a single client.
 
-        proxy.check_result = "Capacity available. Speed: %s" % speed
+        proxy.check_result = "Proxy accessible. Capacity available."
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.qualys_capacity_current = api_results['current']
         proxy.qualys_capacity_max = api_results['max']
@@ -495,7 +519,7 @@ def service_provider_scan_via_api_with_limits(proxy, domain):
             'data': response.json()}
 
 
-@retry(wait=wait_fixed(30), stop=stop_after_attempt(6), before=before_log(log, logging.INFO))
+@retry(wait=wait_fixed(30), stop=stop_after_attempt(3), before=before_log(log, logging.INFO))
 def service_provider_status(proxy):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 

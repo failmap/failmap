@@ -750,6 +750,7 @@ CONSTANCE_CONFIG = {
     'DISCOVER_HTTP_ENDPOINTS': (True, 'Do you want to discover HTTP endpoints?', bool),
 
     'SCAN_AT_ALL': (True, 'Do you want to scan at all?', bool),
+    'SCAN_PROXY_TESTING_URL': ('https://5717.ch', 'Server where you can see scans through a proxy.', str),
     'SCAN_DNS_DNSSEC': (True, 'Do you want to scan for DNSSEC issues?', bool),
     'SCAN_HTTP_TLS_QUALYS': (True, 'Do you want to scan for TLS issues through Qualys? This is about 1 scan per '
                                    'two minutes. Cloud scanning can improve this a bit.', bool),
@@ -824,7 +825,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
                    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')),
 
-    ('Scanning', ('SCAN_AT_ALL', )),
+    ('Scanning', ('SCAN_AT_ALL', 'SCAN_PROXY_TESTING_URL')),
 
     ('Scanner Capabilities', ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN')),
 
