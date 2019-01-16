@@ -25,10 +25,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        filters = ["ftp", "DNSSEC", "http_security_header_x_xss_protection",
+        filters = ['', "ftp", "DNSSEC", "http_security_header_x_xss_protection",
                    "http_security_header_x_content_type_options", "http_security_header_x_frame_options",
                    "tls_qualys_certificate_trusted", "tls_qualys_encryption_quality",
-                   "http_security_header_strict_transport_security", "plain_https", '']
+                   "http_security_header_strict_transport_security", "plain_https"]
 
         moments_in_time = range(0, 500, 7)
 
