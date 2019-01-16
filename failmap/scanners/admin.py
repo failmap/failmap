@@ -238,11 +238,14 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.ScanProxy)
 class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('id', 'protocol', 'address', 'check_result', 'check_result_date', 'manually_disabled', 'is_dead',
-                    'out_of_resource_counter')
+                    'request_speed_in_ms', 'qualys_capacity_current', 'qualys_capacity_max',
+                    'qualys_capacity_this_client', 'currently_used_in_tls_qualys_scan')
     search_fields = ('address', )
-    list_filter = ('protocol',  'is_dead', 'out_of_resource_counter', 'is_dead_since')
+    list_filter = ('protocol',  'is_dead', 'is_dead_since', 'check_result',
+                   'manually_disabled', 'qualys_capacity_current')
     fields = ('protocol', 'address', 'currently_used_in_tls_qualys_scan', 'is_dead', 'is_dead_since', 'is_dead_reason',
-              'out_of_resource_counter', 'manually_disabled', 'check_result', 'check_result_date',)
+              'manually_disabled', 'check_result', 'check_result_date',
+              'request_speed_in_ms', 'qualys_capacity_current', 'qualys_capacity_max', 'qualys_capacity_this_client')
 
     actions = []
 

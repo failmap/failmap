@@ -31,7 +31,8 @@ import pytz
 import requests
 from celery import Task, group
 from django.conf import settings
-from requests.exceptions import ProxyError
+from django.db import transaction
+from requests.exceptions import ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
 
 from failmap.celery import app
@@ -41,8 +42,10 @@ from failmap.scanners.scanmanager import store_endpoint_scan_result
 from failmap.scanners.scanner.http import store_url_ips
 from failmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
-API_NETWORK_TIMEOUT = 30
-API_SERVER_TIMEOUT = 30
+# There is a balance between network timeout and qualys result cache.
+# This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
+API_NETWORK_TIMEOUT = 120
+API_SERVER_TIMEOUT = 120
 
 log = logging.getLogger(__name__)
 
@@ -138,36 +141,46 @@ def compose_task(
     # a bulk scan of 25 urls takes about 45 minutes.
     tasks = []
     for chunk in chunks:
-        tasks.append(get_proxy.s() | qualys_scan_bulk.s(chunk) | release_proxy.s())
+        tasks.append(claim_proxy.s() | qualys_scan_bulk.s(chunk) | release_proxy.s())
     return group(tasks)
 
 
-@app.task(queue='storage')
-def get_proxy():
+# Use the same rate limiting as qualys_scan_bulk, otherwise all proxies are claimed before scans are made.
+# which would mean a lot of proxies could be claimed days in advance of the scan. That's not correct.
+@app.task(queue='storage', rate_limit='30/h',)
+def claim_proxy():
+    """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
+    crash. """
 
-    # try to get the first available proxy, which can take a long time...
+    # try to get the first available, fastest, proxy
     while True:
 
-        # proxies can die if they are limited too often.
-        proxy = ScanProxy.objects.all().filter(
-            is_dead=False,
-            out_of_resource_counter__lte=10,
-            currently_used_in_tls_qualys_scan=False,
-            manually_disabled=False
-        ).first()
+        with transaction.atomic():
 
-        if proxy and check_proxy(proxy):
+            # proxies can die if they are limited too often.
+            proxy = ScanProxy.objects.all().filter(
+                is_dead=False,
+                currently_used_in_tls_qualys_scan=False,
+                manually_disabled=False,
+                request_speed_in_ms__gte=1,
+                qualys_capacity_current=0
+            ).order_by('request_speed_in_ms').first()
 
+        if proxy:
+
+            # first claim to prevent duplicate claims
             proxy.currently_used_in_tls_qualys_scan = True
             proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
 
-            log.debug('Using proxy %s for scan.' % proxy)
+            if check_proxy(proxy):
+                log.debug('Using proxy %s for scan.' % proxy)
+                return proxy
+            else:
+                log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
-            return proxy
+        else:
+            log.debug('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
 
-        # no valid proxy found
-        log.error('No usable proxy available for TLS Qualys scan. Add more proxys or check the existing ones. '
-                  'Waiting 60 seconds for an available proxy.')
         sleep(60)
 
 
@@ -177,29 +190,49 @@ def release_proxy(proxy):
     proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
 
 
+@app.task(queue='storage')
 def check_proxies():
 
     proxies = ScanProxy.objects.all().filter(
         is_dead=False,
-        out_of_resource_counter__lte=10,
-        currently_used_in_tls_qualys_scan=False
+        manually_disabled=False,
     )
 
     for proxy in proxies:
         check_proxy(proxy)
 
 
-@app.task(queue='internet')
+@app.task(queue='storage')
 def check_proxy(proxy):
     # todo: service_provider_status should stop after a certain amount of requests.
+    # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
 
     log.debug("Testing proxy %s" % proxy)
+
+    # send requests to a known domain to inspect the headers the proxies attach. There has to be something
+    # that links various scans to each other.
+    try:
+        requests.get('https://5717.ch',
+                     proxies={proxy.protocol: proxy.address},
+                     timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
+                     headers={'User-Agent': "Request through proxy %s" % proxy, },
+                     cookies={}
+                     )
+    except ProxyError:
+        proxy.check_result = "Proxy does not support https."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
+    except SSLError:
+        proxy.check_result = "SSL error received."
+        proxy.is_dead = True
+        proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.save()
 
     try:
         api_results = service_provider_status(proxy)
     except RetryError:
         proxy.is_dead = True
-        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
         proxy.check_result = "Retry error. Could not connect."
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.save()
@@ -208,7 +241,6 @@ def check_proxy(proxy):
     # tried a few times, no result. Proxy is dead.
     if not api_results:
         proxy.is_dead = True
-        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
         proxy.check_result = "No result, proxy not reachable?"
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.save()
@@ -216,26 +248,41 @@ def check_proxy(proxy):
 
     if api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
         log.debug("Out of capacity %s." % proxy)
-        proxy.is_dead = True
-        proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
+        proxy.is_dead = False
         proxy.check_result_date = datetime.now(pytz.utc)
         proxy.check_result = "Out of capacity."
+        proxy.qualys_capacity_current = api_results['current']
+        proxy.qualys_capacity_max = api_results['max']
+        proxy.qualys_capacity_this_client = api_results['this-client-max']
         proxy.save()
         return False
     else:
         # todo: Request time via the proxy. Just getting google.com might take a lot of time...
         try:
-            speed = requests.get('https://apple.com', proxies={proxy.protocol: proxy.address}).elapsed.total_seconds()
+            speed = requests.get('https://apple.com',
+                                 proxies={proxy.protocol: proxy.address},
+                                 timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT)
+                                 ).elapsed.total_seconds()
         except ProxyError:
             proxy.is_dead = True
-            proxy.out_of_resource_counter = proxy.out_of_resource_counter + 1
             proxy.check_result = "Could not retrieve website"
             proxy.check_result_date = datetime.now(pytz.utc)
+            proxy.qualys_capacity_current = api_results['current']
+            proxy.qualys_capacity_max = api_results['max']
+            proxy.qualys_capacity_this_client = api_results['this-client-max']
             proxy.save()
             return False
 
+        # todo: how to check the headers the proxy sends to the client? That requires a server to receive
+        # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
+        # otherwise the data will be coupled to a single client.
+
         proxy.check_result = "Capacity available. Speed: %s" % speed
         proxy.check_result_date = datetime.now(pytz.utc)
+        proxy.qualys_capacity_current = api_results['current']
+        proxy.qualys_capacity_max = api_results['max']
+        proxy.qualys_capacity_this_client = api_results['this-client-max']
+        proxy.request_speed_in_ms = int(speed * 1000)
         proxy.save()
         log.debug("Capacity available at proxy %s." % proxy)
         return True
@@ -247,7 +294,12 @@ def check_proxy(proxy):
 
 # Note that this is a per worker instance rate limit, and not a global rate limit.
 # http://docs.celeryproject.org/en/latest/userguide/tasks.html
-@app.task(queue='qualys', rate_limit='10/h', acks_late=True)
+
+# scan takes about 30 minutes.
+# 12 / hour = 1 every 5 minutes. In 30 minutes 6 scans will run at the same time. We used to have 10.
+# 20 / hour = 1 every 3 minutes. In 30 minutes 10 scans will run at the same time.
+# 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
+@app.task(queue='qualys', rate_limit='30/h', acks_late=True)
 def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
@@ -286,14 +338,9 @@ def qualys_scan_thread(proxy, url):
     waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
     max_waiting_time = 180
 
-    if proxy:
-        proxy_info = {proxy.protocol: proxy.address}
-    else:
-        proxy_info = {}
-
     while not scan_completed:
         try:
-            api_result = service_provider_scan_via_api_with_limits(proxy_info, url.url)
+            api_result = service_provider_scan_via_api_with_limits(proxy, url.url)
             data = api_result['data']
         except requests.RequestException:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
@@ -354,8 +401,8 @@ def qualys_scan_thread(proxy, url):
 def process_qualys_result(data, url):
     """Receive the JSON response from Qualys API, processes this result and stores it in database."""
 
-    log.info(data)
-    log.info(dir(data))
+    # log.info(data)
+    # log.info(dir(data))
 
     # a normal completed scan.
     if data['status'] == "READY" and 'endpoints' in data.keys():
@@ -411,7 +458,7 @@ def report_to_console(domain, data):
 # Qualys is a service that is constantly attacked / ddossed and very unreliable. So try a couple of times before
 # giving up. It can even be down for half a day. Waiting a little between retries.
 @retry(wait=wait_fixed(30), before=before_log(log, logging.INFO))
-def service_provider_scan_via_api_with_limits(proxy_info, domain):
+def service_provider_scan_via_api_with_limits(proxy, domain):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
     payload = {
         'host': domain,  # host that will be scanned for tls
@@ -429,15 +476,17 @@ def service_provider_scan_via_api_with_limits(proxy_info, domain):
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
                                "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
-        proxies=proxy_info
+        proxies={proxy.protocol: proxy.address},
+        cookies={}
     )
 
     # log.debug(vars(response))  # extreme debugging
-    log.info("Assessments: max: %s, current: %s, this client: %s, this: %s",
+    log.info("Assessments: max: %s, current: %s, this client: %s, this: %s, proxy: %s",
              response.headers['X-Max-Assessments'],
              response.headers['X-Current-Assessments'],
              response.headers['X-ClientMaxAssessments'],
-             domain
+             domain,
+             proxy
              )
 
     return {'max': int(response.headers['X-Max-Assessments']),
@@ -450,19 +499,18 @@ def service_provider_scan_via_api_with_limits(proxy_info, domain):
 def service_provider_status(proxy):
     # API Docs: https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 
-    if proxy:
-        proxies = {proxy.protocol: proxy.address}
-    else:
-        proxies = {}
-
     response = requests.get(
         "https://api.ssllabs.com/api/v2/getStatusCodes",
         params={},
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
         headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
                                "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
-        proxies=proxies
+        proxies={proxy.protocol: proxy.address},
+        cookies={}
     )
+
+    # inspect to see if there are cookies or other tracking variables.
+    log.debug("Cookies: %s Proxy: %s" % (proxy, response.cookies))
 
     """
     Always the same response. This is just used to get a correct response and the available capacity.
@@ -504,10 +552,11 @@ def service_provider_status(proxy):
     # log.debug(response)
 
     # log.debug(vars(response))  # extreme debugging
-    log.info("Status: max: %s, current: %s, this client: %s",
-             response.headers['X-Max-Assessments'],
-             response.headers['X-Current-Assessments'],
-             response.headers['X-ClientMaxAssessments'])
+    log.debug("Status: max: %s, current: %s, this client: %s, proxy: %s",
+              response.headers['X-Max-Assessments'],
+              response.headers['X-Current-Assessments'],
+              response.headers['X-ClientMaxAssessments'],
+              proxy)
 
     return {'max': int(response.headers['X-Max-Assessments']),
             'current': int(response.headers['X-Current-Assessments']),

@@ -147,6 +147,18 @@ class Endpoint(models.Model):
 
 
 class ScanProxy(models.Model):
+    """
+    A transparent proxy sends your real IP address in the HTTP_X_FORWARDED_FOR header,
+    this means a website that does not only determine your REMOTE_ADDR but also check for specific proxy headers
+    will still know your real IP address. The HTTP_VIA header is also sent, revealing that you are using a proxy server.
+
+    An anonymous proxy does not send your real IP address in the HTTP_X_FORWARDED_FOR header, instead it submits the IP
+    address of the proxy or is just blank. The HTTP_VIA header is sent like with a transparent proxy, also revealing
+    that you are using a proxy server.
+
+    An elite proxy only sends REMOTE_ADDR header, the other headers are blank/empty, hence making you seem like a
+    regular internet user who is not using a proxy at all.
+    """
 
     # todo: do we have to support socks proxies? It's possible and allows name resolution.
 
@@ -206,11 +218,35 @@ class ScanProxy(models.Model):
         null=True
     )
 
+    request_speed_in_ms = models.IntegerField(
+        default=-1,
+    )
+
+    qualys_capacity_current = models.IntegerField(
+        default=-1,
+    )
+
+    qualys_capacity_max = models.IntegerField(
+        default=-1,
+    )
+
+    qualys_capacity_this_client = models.IntegerField(
+        default=-1,
+    )
+
     out_of_resource_counter = models.IntegerField(
         default=0,
         help_text="Every time the proxy has not enough resources, this number will increase with one. A too high "
                   "number makes it easy not to use this proxy anymore."
     )
+
+    @staticmethod
+    def add_address(address):
+        if not ScanProxy.objects.all().filter(address=address).exists():
+            proxy = ScanProxy()
+            proxy.address = address
+            proxy.protocol = 'https'
+            proxy.save()
 
     def __str__(self):
         if self.is_dead:
