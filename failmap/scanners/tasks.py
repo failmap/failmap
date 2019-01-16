@@ -127,3 +127,15 @@ def import_proxies_by_country(countries: List = [], amount=100, **kwargs):
 
         # also kick off a test for the proxy to see if it still functions
         check_proxy.apply_async([new_proxy])
+
+
+@app.task(queue='storage')
+def check_existing_alive_proxies():
+
+    proxies = ScanProxy.objects.all().filter(
+        is_dead=False,
+        manually_disabled=False,
+    )
+
+    for proxy in proxies:
+        check_proxy.apply_async([proxy])

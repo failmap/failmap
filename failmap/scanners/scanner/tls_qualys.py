@@ -194,18 +194,6 @@ def release_proxy(proxy):
 
 
 @app.task(queue='storage')
-def check_existing_alive_proxies():
-
-    proxies = ScanProxy.objects.all().filter(
-        is_dead=False,
-        manually_disabled=False,
-    )
-
-    for proxy in proxies:
-        check_proxy.apply_async([proxy])
-
-
-@app.task(queue='storage')
 def check_proxy(proxy):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
