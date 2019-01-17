@@ -150,7 +150,12 @@ def compose_task(
 
 # Use the same rate limiting as qualys_scan_bulk, otherwise all proxies are claimed before scans are made.
 # which would mean a lot of proxies could be claimed days in advance of the scan. That's not correct.
-@app.task(queue='storage', rate_limit='30/h',)
+# this task floods and blocks the storage queue completely. The low prio seems to remedy this somewhat,
+# as more important tasks are then handled as soon as one of these is finished.
+# the storage queue should never be filled with this type of junk...
+# removed rate limiting and such. If a proxy died it will stay claimed and it will fail the next verification
+# the scan tasks will be added again and that's that.
+@app.task(queue='storage')
 def claim_proxy():
     """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash. """
@@ -184,7 +189,7 @@ def claim_proxy():
             #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
         else:
-            log.debug('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
+            log.error('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
 
         sleep(60)
 
