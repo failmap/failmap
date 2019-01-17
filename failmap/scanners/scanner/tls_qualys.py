@@ -175,11 +175,13 @@ def claim_proxy():
             proxy.currently_used_in_tls_qualys_scan = True
             proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
 
-            if check_proxy(proxy):
-                log.debug('Using proxy %s for scan.' % proxy)
-                return proxy
-            else:
-                log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
+            # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
+            # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
+            # if check_proxy(proxy):
+            #    log.debug('Using proxy %s for scan.' % proxy)
+            return proxy
+            # else:
+            #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
         else:
             log.debug('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
@@ -193,7 +195,7 @@ def release_proxy(proxy):
     proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
 
 
-@app.task(queue='storage')
+@app.task(queue='internet')
 def check_proxy(proxy):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
@@ -210,68 +212,39 @@ def check_proxy(proxy):
                      cookies={}
                      )
     except ProxyError:
-        proxy.check_result = "Proxy does not support https."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Proxy does not support https.", True, datetime.now(pytz.utc)])
         return False
     except SSLError:
-        proxy.check_result = "SSL error received."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "SSL error received.", True, datetime.now(pytz.utc)])
         return False
     except ConnectTimeout:
-        proxy.check_result = "Connection timeout."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Connection timeout.", True, datetime.now(pytz.utc)])
         return False
     except ConnectionError:
-        proxy.check_result = "Connection error."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Connection error.", True, datetime.now(pytz.utc)])
         return False
     except ProtocolError:
-        proxy.check_result = "Protocol error."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Protocol error.", True, datetime.now(pytz.utc)])
         return False
     except BadStatusLine:
-        proxy.check_result = "Bad status line."
-        proxy.is_dead = True
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(pytz.utc)])
         return False
 
     try:
         api_results = service_provider_status(proxy)
     except RetryError:
-        proxy.is_dead = True
-        proxy.check_result = "Retry error. Could not connect."
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Retry error. Could not connect.", True, datetime.now(pytz.utc)])
         return False
 
     # tried a few times, no result. Proxy is dead.
     if not api_results:
-        proxy.is_dead = True
-        proxy.check_result = "No result, proxy not reachable?"
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.save()
+        store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(pytz.utc)])
         return False
 
     if api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
         log.debug("Out of capacity %s." % proxy)
-        proxy.is_dead = False
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.check_result = "Out of capacity."
-        proxy.qualys_capacity_current = api_results['current']
-        proxy.qualys_capacity_max = api_results['max']
-        proxy.qualys_capacity_this_client = api_results['this-client-max']
-        proxy.save()
+        store_check_result.apply_async([proxy, "Out of capacity.", True, datetime.now(pytz.utc),
+                                        api_results['current'], api_results['max'], api_results['this-client-max']])
         return False
     else:
         # todo: Request time via the proxy. Just getting google.com might take a lot of time...
@@ -281,37 +254,39 @@ def check_proxy(proxy):
                                  timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT)
                                  ).elapsed.total_seconds()
         except ProxyError:
-            proxy.is_dead = True
-            proxy.check_result = "Could not retrieve website"
-            proxy.check_result_date = datetime.now(pytz.utc)
-            proxy.qualys_capacity_current = api_results['current']
-            proxy.qualys_capacity_max = api_results['max']
-            proxy.qualys_capacity_this_client = api_results['this-client-max']
-            proxy.save()
+            store_check_result.apply_async([proxy, "Could not retrieve website.", True, datetime.now(pytz.utc),
+                                            api_results['current'], api_results['max'], api_results['this-client-max']])
             return False
         except ConnectTimeout:
-            proxy.is_dead = True
-            proxy.check_result = "Proxy too slow for standard site."
-            proxy.check_result_date = datetime.now(pytz.utc)
-            proxy.qualys_capacity_current = api_results['current']
-            proxy.qualys_capacity_max = api_results['max']
-            proxy.qualys_capacity_this_client = api_results['this-client-max']
-            proxy.save()
+            store_check_result.apply_async([proxy, "Proxy too slow for standard site.", True, datetime.now(pytz.utc),
+                                            api_results['current'], api_results['max'], api_results['this-client-max']])
             return False
 
         # todo: how to check the headers the proxy sends to the client? That requires a server to receive
         # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
         # otherwise the data will be coupled to a single client.
 
-        proxy.check_result = "Proxy accessible. Capacity available."
-        proxy.check_result_date = datetime.now(pytz.utc)
-        proxy.qualys_capacity_current = api_results['current']
-        proxy.qualys_capacity_max = api_results['max']
-        proxy.qualys_capacity_this_client = api_results['this-client-max']
-        proxy.request_speed_in_ms = int(speed * 1000)
-        proxy.save()
+        store_check_result.apply_async([proxy, "Proxy accessible. Capacity available.", False, datetime.now(pytz.utc),
+                                        api_results['current'], api_results['max'], api_results['this-client-max'],
+                                        int(speed * 1000)])
         log.debug("Capacity available at proxy %s." % proxy)
         return True
+
+
+@app.task(queue="storage")
+def store_check_result(proxy: ScanProxy, check_result, is_dead: bool, check_result_date,
+                       qualys_capacity_current=-1, qualys_capacity_max=-1,
+                       qualys_capacity_this_client=-1, request_speed_in_ms=-1):
+    """Separates this to storage, so that capacity scans can be performed on another worker."""
+
+    proxy.is_dead = is_dead
+    proxy.check_result = check_result
+    proxy.check_result_date = check_result_date
+    proxy.qualys_capacity_max = qualys_capacity_max
+    proxy.qualys_capacity_current = qualys_capacity_current
+    proxy.qualys_capacity_this_client = qualys_capacity_this_client
+    proxy.request_speed_in_ms = request_speed_in_ms
+    proxy.save()
 
 
 # It's possible a lot of scans start at the same time. In that case the API does not have a notion of how many scans
@@ -327,6 +302,10 @@ def check_proxy(proxy):
 # 30 / hours = 1 every 2 minutes. In 30 minutes 15 scans will run at the same time.
 @app.task(queue='qualys', rate_limit='30/h', acks_late=True)
 def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
+
+    log.debug('Initiating bulk scan')
+    log.debug('Received proxy: %s' % proxy)
+    log.debug('Received urls: %s' % urls)
 
     # Using this all scans stay on the same server (so no ip-hopping between scans, which limits the available
     # capacity severely.
