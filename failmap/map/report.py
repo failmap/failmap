@@ -153,15 +153,22 @@ def rebuild_organization_ratings(organizations: List):
         # Given yuou're rebuilding, you have to delete all previous ratings:
         OrganizationRating.objects.all().filter(organization=organization).delete()
 
-        # Make sure the organization has the default rating
-        default_organization_rating(organizations=[organization])
-
         # and then rebuild the ratings per moment. This is not really fast.
         # done: reduce the number of significants moments to be weekly in the past, which will safe a lot of time
         # not needed: the rebuild already takes a lot of time, so why bother with that extra hour or so.
         moments, happenings = significant_moments(organizations=[organization])
         for moment in moments:
             rate_organization_on_moment(organization, moment)
+
+        # If there is nothing to show, use a fallback value to display "something" on the map.
+        # We cannot add default ratings per organizations per-se, as they would intefear with the timeline.
+        # for example: if an organization in 2018 is a merge of organizations in 2017, it will mean that on
+        # january first 2018, there would be an empty and perfect rating. That would show up on the map as
+        # empty which does not make sense. Therefore we only add a default rating if there is really nothing else.
+        if not moments:
+            # Make sure the organization has the default rating
+
+            default_organization_rating(organizations=[organization])
 
 
 constance_cache = {}
