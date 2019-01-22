@@ -293,14 +293,25 @@ def export_urls(request, country: str = "NL", organization_type="municipality", 
 
 @cache_page(one_hour)
 def index(request):
-    # todo: move to vue translations on client side. There are many javascript components that
-    # also need to be translated some way.
     """
         The map is simply a few files that are merged by javascript on the client side.
         Django templating is avoided as much as possible.
     :param request:
     :return:
     """
+
+    # save a query and a bunch of translation issues (django countries contains all countries in every language
+    # so we don't have to find a javascript library to properly render...
+    # the downside is that we have to run a query every load, and do less with javascript. Upside is that
+    # it renders faster and easier.
+
+    confs = Configuration.objects.all().filter(
+        is_displayed=True).order_by('display_order').values_list('country', flat=True)
+
+    inital_countries = []
+    for conf in confs:
+        if conf not in inital_countries:
+            inital_countries.append(conf)
 
     return render(request, 'map/index.html', {
         'version': __version__,
@@ -310,7 +321,9 @@ def index(request):
         'debug': settings.DEBUG,
         'language': request.LANGUAGE_CODE,
         'timestamp': datetime.now(pytz.UTC).isoformat(),
-        'initial_map_data_url': ''
+        'initial_map_data_url': '',
+        'initial_countries': inital_countries,
+        'number_of_countries': len(inital_countries)
     })
 
 

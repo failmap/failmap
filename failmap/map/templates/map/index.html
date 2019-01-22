@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %}
+<!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %} {% load countries %}
 <html lang="{{ language }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -153,19 +153,27 @@
 
 <div id="map_state_bar">
 
-    <nav class="navbar navbar-expand-md navbar-light" id="countrynavbar" v-if="countries.length > 1" v-cloak style="background-color: ghostwhite">
+    {% if number_of_countries > 1 %}
+    <nav class="navbar navbar-expand-md navbar-light" id="countrynavbar">
         <div class="container">
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item" v-for="(x, key) in countries" v-bind:class="[selected_country == x ? 'selected_country' : '']">
-                        <a  class="nav-link" v-on:click="set_country(x)">
-                            <img :src="'static/flags/' + x + '.gif'" width="16" height="10">
-                            {% verbatim %}{{ translate("country_" + x) }}{% endverbatim %}</a>
+
+                    {% for country in initial_countries %}
+                        {% get_country country as country_details %}
+                    <li class="nav-item" v-bind:class="[selected_country == '{{ country_details.name }}' ? 'selected_country' : '']">
+                        <a  class="nav-link" v-on:click="set_country('{{ country_details.code }}')">
+                            <img src="{{ country_details.flag }}" width="16" height="10">
+                            {{ country_details.name }}</a>
                     </li>
+
+                    {% endfor %}
+
                 </ul>
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <nav class="navbar navbar-expand-md navbar-light" id="layernavbar" v-if="layers.length > 1" v-cloak>
         <div class="container">
