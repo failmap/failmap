@@ -135,7 +135,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(import_from_scratch.s([region.country], [region.organization_type])
+            tasks.append(import_from_scratch.s([str(region.country)], [region.organization_type.name])
                          | add_configuration.si(region.country, region.organization_type))
 
         task_name = "%s (%s) " % ("Import region", ','.join(map(str, list(queryset))))
@@ -154,7 +154,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(update_coordinates.s([region.country], [region.organization_type]))
+            tasks.append(update_coordinates.s([str(region.country)], [region.organization_type.name]))
 
         task_name = "%s (%s) " % ("Update region", ','.join(map(str, list(queryset))))
         task = group(tasks)
