@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-13 13:03+0000\n"
+"POT-Creation-Date: 2019-01-22 15:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -210,6 +210,10 @@ msgstr ""
 msgid "legend_basic_security"
 msgstr ""
 
+#: static/js/failmap.js
+msgid "Zoom to show all data on this map."
+msgstr ""
+
 #: static/js/graphs.js
 msgid "Jan"
 msgstr ""
@@ -319,30 +323,6 @@ msgid "Certificate not valid for domain name."
 msgstr ""
 
 #: static/js/script.js
-msgid ""
-"Could not establish trust.  For the certificate installation: Less than "
-"optimal Transport Security, rated C."
-msgstr ""
-
-#: static/js/script.js
-msgid ""
-"Could not establish trust.  For the certificate installation: Less than "
-"optimal Transport Security, rated B."
-msgstr ""
-
-#: static/js/script.js
-msgid ""
-"Could not establish trust.  For the certificate installation: Good Transport "
-"Security, rated A-."
-msgstr ""
-
-#: static/js/script.js
-msgid ""
-"Could not establish trust.  For the certificate installation: Good Transport "
-"Security, rated A."
-msgstr ""
-
-#: static/js/script.js
 msgid "Less than optimal Transport Security, rated C."
 msgstr ""
 
@@ -431,6 +411,34 @@ msgid ""
 msgstr ""
 
 #: static/js/script.js
+msgid "not trusted"
+msgstr ""
+
+#: static/js/script.js
+msgid "trusted"
+msgstr ""
+
+#: static/js/script.js
+msgid "Certificate is not trusted."
+msgstr ""
+
+#: static/js/script.js
+msgid "Certificate is trusted."
+msgstr ""
+
+#: static/js/script.js
+msgid ""
+"Content-Security-Policy header found, which covers the security aspect of "
+"the X-Frame-Options header."
+msgstr ""
+
+#: static/js/script.js
+msgid ""
+"Content-Security-Policy header found, which covers the security aspect of "
+"the X-XSS-Protection header."
+msgstr ""
+
+#: static/js/script.js
 msgid "report_header_tls_qualys"
 msgstr ""
 
@@ -460,6 +468,14 @@ msgstr ""
 
 #: static/js/script.js
 msgid "report_header_ftp"
+msgstr ""
+
+#: static/js/script.js
+msgid "report_header_tls_qualys_certificate_trusted"
+msgstr ""
+
+#: static/js/script.js
+msgid "report_header_tls_qualys_encryption_quality"
 msgstr ""
 
 #: static/js/script.js
@@ -500,6 +516,58 @@ msgstr ""
 
 #: static/js/script.js
 msgid "category_menu_district"
+msgstr ""
+
+#: static/js/script.js
+msgid "category_menu_government"
+msgstr ""
+
+#: static/js/script.js
+msgid "category_menu_healthcare"
+msgstr ""
+
+#: static/js/script.js
+msgid "category_menu_finance"
+msgstr ""
+
+#: static/js/script.js
+msgid "Strict-Transport-Security"
+msgstr ""
+
+#: static/js/script.js
+msgid "X-Content-Type-Options"
+msgstr ""
+
+#: static/js/script.js
+msgid "X-Frame-Options"
+msgstr ""
+
+#: static/js/script.js
+msgid "X-XSS-Protection"
+msgstr ""
+
+#: static/js/script.js
+msgid "plain_https"
+msgstr ""
+
+#: static/js/script.js
+msgid "tls_qualys"
+msgstr ""
+
+#: static/js/script.js
+msgid "DNSSEC"
+msgstr ""
+
+#: static/js/script.js
+msgid "ftp"
+msgstr ""
+
+#: static/js/script.js
+msgid "tls_qualys_encryption_quality"
+msgstr ""
+
+#: static/js/script.js
+msgid "tls_qualys_certificate_trusted"
 msgstr ""
 
 #: static/js/script.js
@@ -1496,6 +1564,33 @@ msgstr ""
 
 #: static/js/views.js
 msgid "Documentation"
+msgstr ""
+
+#: static/js/views.js
+msgid "Explanation of finding"
+msgstr ""
+
+#: static/js/views.js
+msgid ""
+"Hi!,\n"
+"\n"
+"I would like to explain the below finding.\n"
+"\n"
+"Address: {{ url }}\n"
+"Scan Type: {{ scan_type }}\n"
+"Scan ID: {{ scan_id }}\n"
+"Impact: High: {{ high }}, Medium {{ medium }}, Low: {{ low }}.\n"
+"\n"
+"I believe the finding to be incorrect. This is why:\n"
+"[... please enter your explanation for review here ...]\n"
+"\n"
+"I acknowledge that this finding will be published together with my "
+"organizations name.\n"
+"\n"
+"tip: please refer to documentation or standards where possible. Be aware "
+"that an explanation is valid for one year by default.\n"
+"\n"
+"Kind regards,\n"
 msgstr ""
 
 #: static/js/views.js

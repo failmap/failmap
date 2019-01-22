@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-12-13 13:03+0000\n"
+"POT-Creation-Date: 2019-01-22 15:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -70,6 +70,14 @@ msgstr ""
 msgid "Applications"
 msgstr ""
 
+#: failmap/pro/templates/pro/base.html
+msgid "Pro"
+msgstr ""
+
+#: failmap/pro/templates/pro/base.html
+msgid "Toggle navigation"
+msgstr ""
+
 #: failmap/scanners/models.py
 msgid "endpoint"
 msgstr ""
@@ -100,6 +108,10 @@ msgstr ""
 
 #: failmap/settings.py
 msgid "🔬 scanners"
+msgstr ""
+
+#: failmap/settings.py
+msgid "⭐ Pro"
 msgstr ""
 
 #: failmap/settings.py

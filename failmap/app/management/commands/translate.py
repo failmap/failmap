@@ -54,6 +54,7 @@ class Command(BaseCommand):
             # This command is not feature complete and WILL also compile messages in the .tox directory which is a
             # waste of time and obfuscates output.
             # https://code.djangoproject.com/ticket/29973#ticket
+            # Ready for checkin :) Awesome features, saves a lot of time
             call_command('compilemessages', '-l', language[0])
 
         log.info('You can find the locale files in ./locale/(language code)/LC_MESSAGES/django(js).po')
