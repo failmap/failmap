@@ -194,24 +194,22 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     Coordinates: [[[x,y], [a,b]]]
     """
 
+    log.debug("Trying to store a new organization")
     log.debug(properties)
 
+    # Prefer the official_name, as it usually looks nicer.
+    name = properties["official_name"] if "official_name" in properties and properties["official_name"] else properties["name"]
+
+    if not name:
+        log.debug("Organization has no name or official_name properties, skipping.")
+
     # Verify that this doesn't exist yet to prevent double imports (when mistakes are made).
-    if Organization.objects.all().filter(name=properties["name"],
+    if Organization.objects.all().filter(name=name,
                                          country=country,
                                          type__name=organization_type,
                                          is_dead=False).exists():
+        log.debug("Organization %s exists in country %s and type %s, skipping." % (name, country, organization_type))
         return
-
-    if "official_name" in properties:
-        if Organization.objects.all().filter(name=properties["official_name"],
-                                             country=country,
-                                             type__name=organization_type,
-                                             is_dead=False).exists():
-            return
-
-    # Prefer the official_name, as it usually looks nicer.
-    name = properties["official_name"] if "official_name" in properties else properties["name"]
 
     new_organization = Organization(
         name=name,

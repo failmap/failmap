@@ -8,11 +8,13 @@ from import_export.admin import ImportExportModelAdmin
 from failmap.app.models import Job
 from failmap.celery import PRIO_HIGH, app
 from failmap.map.geojson import import_from_scratch, update_coordinates
-from failmap.map.models import (AdministrativeRegion, Configuration, MapDataCache,
-                                OrganizationRating, UrlRating, VulnerabilityStatistic)
+from failmap.map import models
+import logging
+
+log = logging.getLogger(__package__)
 
 
-@admin.register(OrganizationRating)
+@admin.register(models.OrganizationRating)
 class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_organization(self, obj):
         return format_html(
@@ -71,7 +73,7 @@ class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
 
 
-@admin.register(UrlRating)
+@admin.register(models.UrlRating)
 class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_url(self, obj):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
@@ -120,14 +122,13 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     save_as = True
 
 
-# todo: set is_imported flag after importing
-@admin.register(AdministrativeRegion)
+@admin.register(models.AdministrativeRegion)
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'admin_level', 'imported')
+    list_display = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
     search_fields = (['country', 'organization_type', 'admin_level'])
     list_filter = ['country', 'organization_type', 'admin_level', 'imported'][::-1]
-    fields = ('country', 'organization_type', 'admin_level', 'imported')
+    fields = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
 
     actions = []
 
@@ -136,7 +137,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
         for region in queryset:
             tasks.append(import_from_scratch.s([str(region.country)], [region.organization_type.name])
-                         | add_configuration.si(region.country, region.organization_type))
+                         | add_configuration.si(region.country, region.organization_type)
+                         | set_imported.si(region))
 
         task_name = "%s (%s) " % ("Import region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -167,8 +169,19 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @app.task(queue='storage')
+def set_imported(region: models.AdministrativeRegion):
+    region.imported = True
+    region.save()
+
+
+@app.task(queue='storage')
 def add_configuration(country, organization_type):
-    a = Configuration(
+
+    if models.Configuration.objects.all().filter(country=country, organization_type=organization_type).exists():
+        log.debug("This configuration already exists, skipping.")
+        return
+
+    a = models.Configuration(
         country=country,
         organization_type=organization_type,
         is_the_default_option=False,
@@ -178,7 +191,7 @@ def add_configuration(country, organization_type):
     a.save()
 
 
-@admin.register(Configuration)
+@admin.register(models.Configuration)
 class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',
@@ -244,6 +257,23 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
     stop_reporting.short_description = '📄  Stop Reporting'
     actions.append(stop_reporting)
 
+    def create_report(self, request, queryset):
+
+        for configuration in queryset:
+
+            from failmap.map.report import compose_task
+
+            organization_filter = {'country': configuration.country,
+                                   'type': configuration.organization_type}
+
+            task = compose_task(organizations_filter=organization_filter)
+            task.apply_async()
+
+        self.message_user(request, 'Reports are being generated in the background.')
+
+    create_report.short_description = '📄  Report'
+    actions.append(create_report)
+
     def set_default(self, request, queryset):
 
         for configuration in queryset:
@@ -263,14 +293,14 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
     actions.append(remove_default)
 
 
-@admin.register(VulnerabilityStatistic)
+@admin.register(models.VulnerabilityStatistic)
 class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low', 'urls', 'endpoints')
     list_filter = ['country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low'][::-1]
     search_fields = (['country', 'organization_type', 'scan_type'])
 
 
-@admin.register(MapDataCache)
+@admin.register(models.MapDataCache)
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('pk', 'country', 'organization_type', 'filters', 'when')
     list_filter = ['country', 'organization_type', 'filters', 'when'][::-1]
