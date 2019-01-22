@@ -1607,10 +1607,13 @@ def calculate_map_data(days: int = 366):
         is_displayed=True
     ).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
 
+    # the "all" filter will retrieve all layers at once
+    scan_types = ALL_SCAN_TYPES + ["all"]
+
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
-            for scan_type in ALL_SCAN_TYPES:
+            for scan_type in scan_types:
 
                 # You can expect something to change each day. Therefore just store the map data each day.
                 MapDataCache.objects.all().filter(

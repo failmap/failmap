@@ -1324,7 +1324,7 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
     return JsonResponse(data, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
 
-def map_default(request, days_back: int = 0, displayed_issue: str = None):
+def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
     defaults = Configuration.objects.all().filter(
         is_displayed=True,
         is_the_default_option=True
@@ -1337,9 +1337,9 @@ def map_default(request, days_back: int = 0, displayed_issue: str = None):
     return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
 
 
-# @cache_page(four_hours)
+@cache_page(four_hours)
 def map_data(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
-             displayed_issue: str = None):
+             displayed_issue: str = "all"):
 
     data = get_map_data(country, organization_type, days_back, displayed_issue)
 
@@ -1515,7 +1515,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     if displayed_issue in ENDPOINT_SCAN_TYPES:
         desired_endpoint_scans += [displayed_issue]
 
-    # fallback if no data, which is the default.
+    # fallback if no data is "all", which is the default.
     if not desired_url_scans and not desired_endpoint_scans:
         desired_url_scans = URL_SCAN_TYPES
         desired_endpoint_scans = ENDPOINT_SCAN_TYPES
@@ -1524,7 +1524,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         cached = MapDataCache.objects.all().filter(country=country,
                                                    organization_type=get_organization_type(organization_type),
                                                    when=when,
-                                                   filters=['']).first()
+                                                   filters=['all']).first()
     else:
         # look if we have data in the cache, which will save some calculations and a slower query
         cached = MapDataCache.objects.all().filter(country=country,
