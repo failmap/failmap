@@ -198,7 +198,8 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     log.debug(properties)
 
     # Prefer the official_name, as it usually looks nicer.
-    name = properties["official_name"] if "official_name" in properties and properties["official_name"] else properties["name"]
+    name = properties["official_name"] if "official_name" in properties and properties["official_name"] else \
+        properties["name"]
 
     if not name:
         log.debug("Organization has no name or official_name properties, skipping.")

@@ -1683,7 +1683,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # #162, only make things red if there is a critical issue.
         # removed json parsing of the calculation. This saves time.
         # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
-        if "endpoints" not in i[6]:
+        if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
             color = "gray"
         else:
             color = "red" if high else "orange" if medium else "yellow" if low else "green"

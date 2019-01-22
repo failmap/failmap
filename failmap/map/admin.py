@@ -1,3 +1,5 @@
+import logging
+
 from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
@@ -7,9 +9,8 @@ from import_export.admin import ImportExportModelAdmin
 
 from failmap.app.models import Job
 from failmap.celery import PRIO_HIGH, app
-from failmap.map.geojson import import_from_scratch, update_coordinates
 from failmap.map import models
-import logging
+from failmap.map.geojson import import_from_scratch, update_coordinates
 
 log = logging.getLogger(__package__)
 
