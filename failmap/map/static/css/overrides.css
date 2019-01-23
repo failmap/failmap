@@ -381,7 +381,7 @@ path {
     color: black;
 }
 
-.selected_category {
+.selected_layer {
     background-color: #e8e8e8;
     border-bottom: 4px solid blue;
     color: black;

@@ -161,7 +161,7 @@
 
                     {% for country in initial_countries %}
                         {% get_country country as country_details %}
-                    <li class="nav-item" v-bind:class="[selected_country == '{{ country_details.name }}' ? 'selected_country' : '']">
+                    <li class="nav-item" v-bind:class="[selected_country == '{{ country_details.code }}' ? 'selected_country' : '']">
                         <a  class="nav-link" v-on:click="set_country('{{ country_details.code }}')">
                             <img src="{{ country_details.flag }}" width="16" height="10">
                             {{ country_details.name }}</a>
