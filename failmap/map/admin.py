@@ -197,8 +197,8 @@ def add_configuration(country, organization_type):
 @admin.register(models.Configuration)
 class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned',
-                    'is_reported')
+    list_display = ('display_order', 'country', 'organization_type', 'is_displayed', 'is_the_default_option',
+                    'is_scanned', 'is_reported')
     search_fields = (['country', 'organization_type', ])
     list_filter = ['country', 'organization_type', 'is_displayed', 'is_the_default_option',
                    'is_scanned', 'is_reported'][::-1]

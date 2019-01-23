@@ -62,6 +62,9 @@ def compose_task(
     for organization in organizations:
         urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter)
         if not urls:
+            # can still add an empty organization rating even though there is nothing to show. Will create an
+            # empty gray region.
+            tasks.append(default_organization_rating.si([organization]))
             continue
 
         # make sure default organization rating is in place
