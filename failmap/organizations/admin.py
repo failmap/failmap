@@ -63,6 +63,16 @@ class UrlAdminInline(CompactInline):
     exclude = []
 
 
+class OrganizationAdminInline(CompactInline):
+    model = Organization
+    extra = 0
+    show_change_link = False
+    can_delete = False
+    readonly_fields = [f.name for f in Organization._meta.fields if f.name != 'id']
+
+    exclude = []
+
+
 # A highly limiting feature of the django admin interface is that inlines only
 # go one level deep. Instead of N levels, and that nested inlines are not supported
 # by default and all other support is experimental (or provides a severely reduced interface.
@@ -556,6 +566,8 @@ class OrganizationTypeAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     search_fields = ('name', )
     list_filter = ('name', )
     fields = ('name', )
+
+    inlines = [OrganizationAdminInline]
 
 
 @admin.register(Coordinate)

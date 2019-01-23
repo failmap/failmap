@@ -11,6 +11,7 @@ from failmap.app.models import Job
 from failmap.celery import PRIO_HIGH, app
 from failmap.map import models
 from failmap.map.geojson import import_from_scratch, update_coordinates
+from failmap.map.report import compose_task
 
 log = logging.getLogger(__package__)
 
@@ -127,7 +128,7 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
-    search_fields = (['country', 'organization_type', 'admin_level'])
+    search_fields = (['country', 'organization_type__name', 'admin_level'])
     list_filter = ['country', 'organization_type', 'admin_level', 'imported'][::-1]
     fields = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
 
@@ -262,11 +263,9 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
         for configuration in queryset:
 
-            from failmap.map.report import compose_task
+            organization_filter = {'country': configuration.country, 'type': configuration.organization_type}
 
-            organization_filter = {'country': configuration.country,
-                                   'type': configuration.organization_type}
-
+            log.debug(organization_filter)
             task = compose_task(organizations_filter=organization_filter)
             task.apply_async()
 
