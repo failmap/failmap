@@ -127,10 +127,11 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.AdministrativeRegion)
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
+    list_display = ('country', 'organization_type', 'admin_level', 'imported', 'import_message',
+                    'resampling_resolution')
     search_fields = (['country', 'organization_type__name', 'admin_level'])
     list_filter = ['country', 'organization_type', 'admin_level', 'imported'][::-1]
-    fields = ('country', 'organization_type', 'admin_level', 'imported', 'resampling_resolution')
+    fields = ('country', 'organization_type', 'admin_level', 'imported', 'import_message', 'resampling_resolution')
 
     actions = []
 
@@ -138,7 +139,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(import_from_scratch.s([str(region.country)], [region.organization_type.name])
+            tasks.append(import_from_scratch.si([str(region.country)], [region.organization_type.name])
                          | add_configuration.si(region.country, region.organization_type)
                          | set_imported.si(region))
 
@@ -158,7 +159,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(update_coordinates.s([str(region.country)], [region.organization_type.name]))
+            tasks.append(update_coordinates.si([str(region.country)], [region.organization_type.name]))
 
         task_name = "%s (%s) " % ("Update region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -173,7 +174,7 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @app.task(queue='storage')
 def set_imported(region: models.AdministrativeRegion):
     region.imported = True
-    region.save()
+    region.save(update_fields=['imported'])
 
 
 @app.task(queue='storage')

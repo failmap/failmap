@@ -212,10 +212,12 @@ class AdministrativeRegion(models.Model):
 
     country = CountryField(db_index=True)
 
-    organization_type = models.ForeignKey(OrganizationType, on_delete=models.CASCADE,
-                                          help_text="The organization type desired to import. Not all organization "
-                                                    "types might be present in this list by default. Create new ones"
-                                                    "accordingly.")
+    organization_type = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        help_text="The organization type desired to import. Not all organization types might be present in this list"
+                  " by default. Create new ones accordingly."
+    )
 
     admin_level = models.IntegerField(
         help_text=mark_safe(
@@ -238,6 +240,12 @@ class AdministrativeRegion(models.Model):
     imported = models.BooleanField(
         help_text="When imported, this is checked. Helps with importing a larger number of regions manually.",
         default=False
+    )
+
+    import_message = models.CharField(
+        max_length=255,
+        default="",
+        help_text="Information returned from the import features."
     )
 
     class Meta:

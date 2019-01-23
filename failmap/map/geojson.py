@@ -87,10 +87,15 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
                 continue
 
-            if config.WAMBACHERS_OSM_CLIKEY:
-                data = get_osm_data_wambachers(country, organization_type)
-            else:
-                data = get_osm_data(country, organization_type)
+            try:
+                if config.WAMBACHERS_OSM_CLIKEY:
+                    data = get_osm_data_wambachers(country, organization_type)
+                else:
+                    data = get_osm_data(country, organization_type)
+            except requests.exceptions.HTTPError as ex:
+                store_import_message.apply_async([country, organization_type, ex])
+                continue
+
             for feature in data["features"]:
 
                 if "properties" not in feature:
@@ -108,6 +113,21 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
     log.info("Import finished.")
 
 
+@app.task(queue="storage")
+def store_import_message(country, organization_type, message):
+    # Note, that AdministrativeRegion is written to an old copy of this object in the task chain
+    # after import is performed. Therefore explicitly set the update field, so not to lose other data.
+
+    log.debug("Update message received: %s" % message)
+
+    region = AdministrativeRegion.objects.get(
+        country=country,
+        organization_type__name=organization_type)
+
+    region.import_message = str(message)[0:240]
+    region.save(update_fields=['import_message'])
+
+
 # @transaction.atomic
 @app.task(queue="storage")
 def update_coordinates(country: str = "NL", organization_type: str = "municipality", when=None):
@@ -119,10 +139,14 @@ def update_coordinates(country: str = "NL", organization_type: str = "municipali
     log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
     # you are about to load 50 megabyte of data. Or MORE! :)
-    if config.WAMBACHERS_OSM_CLIKEY:
-        data = get_osm_data_wambachers(country, organization_type)
-    else:
-        data = get_osm_data(country, organization_type)
+    try:
+        if config.WAMBACHERS_OSM_CLIKEY:
+            data = get_osm_data_wambachers(country, organization_type)
+        else:
+            data = get_osm_data(country, organization_type)
+    except requests.exceptions.HTTPError as ex:
+        store_import_message.apply_async([country, organization_type, ex])
+        return
 
     log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
 
