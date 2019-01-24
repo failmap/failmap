@@ -94,10 +94,13 @@ def compose_task(
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
-    tasks.append(calculate_vulnerability_statistics.si(days))
 
-    # also try to speed up the map view
-    tasks.append(calculate_map_data.si(days))
+    if organizations_filter.get('country', None):
+        tasks.append(calculate_vulnerability_statistics.si(days, organizations_filter['country']))
+        tasks.append(calculate_map_data.si(days, organizations_filter['country']))
+    else:
+        tasks.append(calculate_vulnerability_statistics.si(days))
+        tasks.append(calculate_map_data.si(days))
 
     task = group(tasks)
 
@@ -1368,12 +1371,15 @@ def default_organization_rating(organizations: List[Organization]):
 
 
 @app.task(queue='storage')
-def calculate_vulnerability_statistics(days: int = 366):
+def calculate_vulnerability_statistics(days: int = 366, country: List[str] = []):
     log.info("Calculation vulnerability graphs")
 
     # for everything that is displayed on the site:
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True).order_by('display_order').values('country', 'organization_type')
+
+    if country:
+        map_configurations = map_configurations.filter(country__in=country)
 
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
@@ -1601,7 +1607,7 @@ def calculate_map_data_today():
 
 
 @app.task(queue='storage')
-def calculate_map_data(days: int = 366):
+def calculate_map_data(days: int = 366, country: List[str] = []):
     from django.db import OperationalError
 
     log.info("calculate_map_data")
@@ -1609,6 +1615,9 @@ def calculate_map_data(days: int = 366):
     map_configurations = Configuration.objects.all().filter(
         is_displayed=True
     ).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
+
+    if country:
+        map_configurations = map_configurations.filter(country__in=country)
 
     # the "all" filter will retrieve all layers at once
     scan_types = ALL_SCAN_TYPES + ["all"]

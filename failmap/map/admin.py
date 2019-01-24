@@ -141,9 +141,13 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
+            organization_filter = {'country': region.country, 'type': region.organization_type}
+
+            # you can't add tasks for reporting, as the data is not in the database to create the tasks yet.
             tasks.append(import_from_scratch.si([str(region.country)], [region.organization_type.name])
                          | add_configuration.si(region.country, region.organization_type)
-                         | set_imported.si(region))
+                         | set_imported.si(region)
+                         | report_country.si(organization_filter))
 
         task_name = "%s (%s) " % ("Import region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -180,18 +184,44 @@ def set_imported(region: models.AdministrativeRegion):
 
 
 @app.task(queue='storage')
+def report_country(organization_filter):
+    tasks = compose_task(organizations_filter=organization_filter)
+    tasks.apply_async()
+
+
+@app.task(queue='storage')
 def add_configuration(country, organization_type):
 
     if models.Configuration.objects.all().filter(country=country, organization_type=organization_type).exists():
         log.debug("This configuration already exists, skipping.")
         return
 
+    # has earlier configuration of this country? Then add it after that country.
+    tmp = models.Configuration.objects.all().filter(country=country).order_by('-display_order').first()
+    if tmp:
+        new_number = tmp.display_order + 1
+
+        moveup = models.Configuration.objects.all().filter(display_order__gte=new_number).order_by('-display_order')
+        for config in moveup:
+            config.display_order += 1
+            config.save()
+    else:
+        # otherwise add it to the end of the list.
+        tmp = models.Configuration.objects.all().order_by('-display_order').first()
+
+        if tmp:
+            new_number = tmp.display_order + 1
+        else:
+            new_number = 1
+
     a = models.Configuration(
         country=country,
         organization_type=organization_type,
         is_the_default_option=False,
         is_displayed=False,
-        is_scanned=False
+        is_scanned=False,
+        is_reported=True,
+        display_order=new_number
     )
     a.save()
 
@@ -284,6 +314,9 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
     def set_default(self, request, queryset):
 
         for configuration in queryset:
+
+            models.Configuration.objects.all().update(is_the_default_option=False)
+
             configuration.is_the_default_option = True
             configuration.save()
 

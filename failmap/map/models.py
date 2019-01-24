@@ -264,6 +264,7 @@ class Configuration(models.Model):
     organization_type = models.ForeignKey(
         OrganizationType,
         on_delete=models.CASCADE,
+        verbose_name="Layer",
         help_text="Part of the combination shown on the map.")
 
     is_displayed = models.BooleanField(

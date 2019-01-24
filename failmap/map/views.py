@@ -1350,7 +1350,7 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
     return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
 
 
-@cache_page(four_hours)
+# @cache_page(four_hours)
 def map_data(request, country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
              displayed_issue: str = "all"):
 
