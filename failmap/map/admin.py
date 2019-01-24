@@ -1,8 +1,10 @@
 import logging
+from copy import deepcopy
 
 from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
+from django.db import transaction
 from django.urls import reverse
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
@@ -320,38 +322,44 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
     reorder.short_description = 'Reorder'
     actions.append(reorder)
 
+    @transaction.atomic
     def move_up(self, request, queryset):
 
         for configuration in queryset:
             next_config = models.Configuration.objects.all().order_by(
                 '-display_order').filter(display_order__lt=configuration.display_order).first()
             if not next_config:
+                log.debug("No next one")
                 continue
 
-            tmp = next_config.display_order
+            log.debug("Moving up: %s to %s" % (configuration.display_order, next_config.display_order))
+            tmp = deepcopy(next_config.display_order)
             next_config.display_order = configuration.display_order
             configuration.display_order = tmp
 
-            next_config.save()
-            configuration.save()
+            next_config.save(update_fields=['display_order'])
+            configuration.save(update_fields=['display_order'])
 
     move_up.short_description = 'Move Up'
     actions.append(move_up)
 
+    @transaction.atomic
     def move_down(self, request, queryset):
 
-        for configuration in queryset:
+        for configuration in reversed(queryset):
             previous_config = models.Configuration.objects.all().order_by(
                 'display_order').filter(display_order__gt=configuration.display_order).first()
             if not previous_config:
+                log.debug("No previous one")
                 continue
 
-            tmp = previous_config.display_order
+            log.debug("Moving down: %s to %s" % (configuration.display_order, previous_config.display_order))
+            tmp = deepcopy(previous_config.display_order)
             previous_config.display_order = configuration.display_order
             configuration.display_order = tmp
 
-            previous_config.save()
-            configuration.save()
+            previous_config.save(update_fields=['display_order'])
+            configuration.save(update_fields=['display_order'])
 
     move_down.short_description = 'Move Down'
     actions.append(move_down)
