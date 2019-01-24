@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     'dal',
     'dal_select2',
     'failmap.app',
-    'failmap.hypersh',
     'django_fsm_log',
     'adminsortable2',
     # Jet admin dashboard
@@ -984,13 +983,6 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     #     {'name': 'kbcategory'},
     #     {'name': 'kbitem'},
     # ], 'permissions': ['admin']},
-
-    {'app_label': 'hypersh', 'label': _('☁️ hypersh cloud scans'), 'items': [
-        {'name': 'containerenvironment', 'label': _('Environment variables'), },
-        {'name': 'containerconfiguration', 'label': _('Container configuration'), },
-        {'name': 'containergroup', 'label': _('Container instances'), },
-        {'name': 'credential'},
-    ], 'permissions': ['admin']},
 
     {'app_label': 'game', 'label': _('👾️ the game'), 'items': [
         {'name': 'contest'},

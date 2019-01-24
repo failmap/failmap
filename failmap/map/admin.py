@@ -195,14 +195,18 @@ def add_configuration(country, organization_type):
 
 
 @admin.register(models.Configuration)
-class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.ModelAdmin):
+# ImportExportModelAdmin and SortableAdminMixin don't work together.
+# as sortableadmin contains a bug causing double ID's, we're prefering importexportmodeladmin. Makes ordering
+# awful to handle. But we can manage by changing that to buttons that sort of work.
+class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdminMixin, ):
 
     list_display = ('display_order', 'country', 'organization_type', 'is_displayed', 'is_the_default_option',
                     'is_scanned', 'is_reported')
     search_fields = (['country', 'organization_type', ])
     list_filter = ['country', 'organization_type', 'is_displayed', 'is_the_default_option',
                    'is_scanned', 'is_reported'][::-1]
-    fields = ('country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', 'is_reported')
+    fields = ('display_order',
+              'country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', 'is_reported')
 
     actions = []
 
@@ -292,6 +296,65 @@ class ConfigurationAdmin(SortableAdminMixin, ImportExportModelAdmin, admin.Model
 
     remove_default.short_description = '😭  Remove default'
     actions.append(remove_default)
+
+    def reorder(self, request, queryset):
+
+        first_order = None
+
+        for configuration in queryset:
+
+            # set the first order, and keep counting from that.
+            if not first_order:
+                if not int(configuration.display_order):
+                    first_order = 0
+                    configuration.display_order = 0
+                else:
+                    first_order = configuration.display_order
+            else:
+                # second and more
+                first_order += 1
+                configuration.display_order = first_order
+
+            configuration.save()
+
+    reorder.short_description = 'Reorder'
+    actions.append(reorder)
+
+    def move_down(self, request, queryset):
+
+        for configuration in queryset:
+            next_config = models.Configuration.objects.all().order_by(
+                '-display_order').filter(display_order__lt=configuration.display_order).first()
+            if not next_config:
+                continue
+
+            tmp = next_config.display_order
+            next_config.display_order = configuration.display_order
+            configuration.display_order = tmp
+
+            next_config.save()
+            configuration.save()
+
+    move_down.short_description = 'Move Down'
+    actions.append(move_down)
+
+    def move_up(self, request, queryset):
+
+        for configuration in queryset:
+            previous_config = models.Configuration.objects.all().order_by(
+                'display_order').filter(display_order__gt=configuration.display_order).first()
+            if not previous_config:
+                continue
+
+            tmp = previous_config.display_order
+            previous_config.display_order = configuration.display_order
+            configuration.display_order = tmp
+
+            previous_config.save()
+            configuration.save()
+
+    move_up.short_description = 'Move Up'
+    actions.append(move_up)
 
 
 @admin.register(models.VulnerabilityStatistic)

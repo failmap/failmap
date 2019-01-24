@@ -13,3 +13,315 @@
     date_joined: 2017-10-30 14:32:44.614938+00:00
     groups: []
     user_permissions: []
+- model: django_celery_beat.crontabschedule
+  pk: 3
+  fields: {minute: '0', hour: '4', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 4
+  fields: {minute: '0', hour: '0', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 5
+  fields: {minute: '0', hour: '2', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 6
+  fields: {minute: '0', hour: '3', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 7
+  fields: {minute: '0', hour: '0', day_of_week: '*/5', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 8
+  fields: {minute: '0', hour: '5', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 9
+  fields: {minute: '*/5', hour: '*', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 10
+  fields: {minute: '0', hour: '0', day_of_week: '*/7', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 11
+  fields: {minute: '0', hour: '0', day_of_week: '*/3', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 12
+  fields: {minute: '0', hour: '20', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 13
+  fields: {minute: '0', hour: '21', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 14
+  fields: {minute: '0', hour: '23', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 15
+  fields: {minute: '0', hour: '22', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 16
+  fields: {minute: '0', hour: '19', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 17
+  fields: {minute: '0', hour: '1', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 18
+  fields: {minute: '0', hour: '6', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 19
+  fields: {minute: '0', hour: '7', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 20
+  fields: {minute: '0', hour: '8', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 21
+  fields: {minute: '0', hour: '9', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 22
+  fields: {minute: '0', hour: '10', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 23
+  fields: {minute: '0', hour: '11', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 24
+  fields: {minute: '0', hour: '12', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 25
+  fields: {minute: '0', hour: '13', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 26
+  fields: {minute: '0', hour: '14', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 27
+  fields: {minute: '0', hour: '15', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 28
+  fields: {minute: '0', hour: '16', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 29
+  fields: {minute: '0', hour: '17', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 30
+  fields: {minute: '0', hour: '18', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 31
+  fields: {minute: '*/1', hour: '*', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 32
+  fields: {minute: '*/10', hour: '*', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 33
+  fields: {minute: '*/30', hour: '*', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 34
+  fields: {minute: '*/15', hour: '*', day_of_week: '*', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.crontabschedule
+  pk: 35
+  fields: {minute: '0', hour: '0', day_of_week: '*/2', day_of_month: '*', month_of_year: '*',
+    timezone: UTC}
+- model: django_celery_beat.periodictasks
+  pk: 1
+  fields: {last_update: !!timestamp '2019-01-24 15:43:53+00:00'}
+- model: django_celery_beat.periodictask
+  pk: 1
+  fields: {name: '&#x1F4C4; Create reports based on the latest findings', task: failmap.app.models.create_job,
+    interval: null, crontab: 13, solar: null, args: '["failmap.map.report"]', kwargs: '{}',
+    queue: storage, exchange: null, routing_key: null, priority: null, expires: null,
+    one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
+      21:00:00+00:00', total_run_count: 279, date_changed: !!timestamp '2019-01-23
+      21:00:40+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 2
+  fields: {name: '&#x1F52C; Scan HTTPS encryption quality using Qualys', task: failmap.app.models.create_job,
+    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.tls_qualys"]',
+    kwargs: "{\r\n\"exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\"\
+      : {\"endpoint__tlsqualysscan__is_the_latest_scan\": true, \"endpoint__tlsqualysscan__qualys_rating__in\"\
+      : [\"A\", \"A+\", \"A-\"]}\r\n}", queue: storage, exchange: null, routing_key: null,
+    priority: null, expires: null, one_off: false, start_time: null, enabled: true,
+    last_run_at: !!timestamp '2019-01-20 00:00:00+00:00', total_run_count: 57, date_changed: !!timestamp '2019-01-20
+      00:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 3
+  fields: {name: '&#x1F52C; Scan for HTTP servers missing an encrypted counterpart',
+    task: failmap.app.models.create_job, interval: null, crontab: 5, solar: null,
+    args: '["failmap.scanners.scanner.plain_http"]', kwargs: '{}', queue: storage,
+    exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
+    start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 02:00:00+00:00',
+    total_run_count: 279, date_changed: !!timestamp '2019-01-24 02:01:20+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 4
+  fields: {name: celery.backend_cleanup (hidden), task: celery.backend_cleanup, interval: null,
+    crontab: 3, solar: null, args: '[]', kwargs: '{}', queue: null, exchange: null,
+    routing_key: null, priority: null, expires: null, one_off: false, start_time: null,
+    enabled: true, last_run_at: !!timestamp '2019-01-24 04:00:00+00:00', total_run_count: 354,
+    date_changed: !!timestamp '2019-01-24 04:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 5
+  fields: {name: '&#x1F52C; Scan HTTP/HTTPS security headers', task: failmap.app.models.create_job,
+    interval: null, crontab: 12, solar: null, args: '["failmap.scanners.scanner.security_headers"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
+      20:00:00+00:00', total_run_count: 279, date_changed: !!timestamp '2019-01-23
+      20:02:30+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 6
+  fields: {name: "\u2795 Discover new HTTP/HTTPS servers", task: failmap.app.models.create_discover_job,
+    interval: null, crontab: 7, solar: null, args: '["failmap.scanners.scanner.http"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
+      00:00:00+00:00', total_run_count: 76, date_changed: !!timestamp '2019-01-20
+      00:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 7
+  fields: {name: '&#x1F52C; Scan the quality of DNSSEC implementations', task: failmap.app.models.create_job,
+    interval: null, crontab: 4, solar: null, args: '["failmap.scanners.scanner.dnssec"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
+      00:00:00+00:00', total_run_count: 230, date_changed: !!timestamp '2019-01-24
+      00:01:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 8
+  fields: {name: '&#x1F52C; Scan whether FTP servers are capable of encrypted transport',
+    task: failmap.app.models.create_job, interval: null, crontab: 4, solar: null,
+    args: '["failmap.scanners.scanner.ftp"]', kwargs: '{}', queue: storage, exchange: null,
+    routing_key: null, priority: null, expires: null, one_off: false, start_time: null,
+    enabled: true, last_run_at: !!timestamp '2019-01-24 00:00:00+00:00', total_run_count: 107,
+    date_changed: !!timestamp '2019-01-24 00:01:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 9
+  fields: {name: '&#x1F501; Onboard (perform initial scans the first time)', task: failmap.app.models.create_job,
+    interval: null, crontab: 31, solar: null, args: '["failmap.scanners.scanner.onboard"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
+      15:52:00+00:00', total_run_count: 96038, date_changed: !!timestamp '2019-01-24
+      15:52:30+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 10
+  fields: {name: "\u2795 Discover new FTP servers", task: failmap.app.models.create_discover_job,
+    interval: null, crontab: 11, solar: null, args: '["failmap.scanners.scanner.ftp"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
+      00:00:00+00:00', total_run_count: 31, date_changed: !!timestamp '2019-01-23
+      00:03:00+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 11
+  fields: {name: "\u2795 Discover new subdomains", task: failmap.app.models.create_discover_job,
+    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.dns"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
+      00:00:00+00:00', total_run_count: 10, date_changed: !!timestamp '2019-01-20
+      00:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 12
+  fields: {name: "\u2705 Verify that FTP servers still exist", task: failmap.app.models.create_verify_job,
+    interval: null, crontab: 4, solar: null, args: '["failmap.scanners.scanner.ftp"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
+      00:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-24
+      00:01:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 13
+  fields: {name: "\u2705 Verify that HTTP/HTTPS servers still exist", task: failmap.app.models.create_verify_job,
+    interval: null, crontab: 6, solar: null, args: '["failmap.scanners.scanner.http"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
+      03:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-24
+      03:02:35+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 14
+  fields: {name: "\u2705 Verify that internet adresses still resolve (DNS)", task: failmap.app.models.create_verify_job,
+    interval: null, crontab: 16, solar: null, args: '["failmap.scanners.scanner.dns"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
+      19:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-23
+      19:01:10+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 15
+  fields: {name: '&#x1F5FA;&#xFE0F; Update the map cache for faster browsing', task: failmap.map.report.calculate_map_data_today,
+    interval: null, crontab: 8, solar: null, args: '[]', kwargs: '{}', queue: storage,
+    exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
+    start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 05:00:00+00:00',
+    total_run_count: 73, date_changed: !!timestamp '2019-01-24 05:02:10+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 18
+  fields: {name: celery.backend_cleanup, task: celery.backend_cleanup, interval: null,
+    crontab: 3, solar: null, args: '[]', kwargs: '{}', queue: null, exchange: null,
+    routing_key: null, priority: null, expires: null, one_off: false, start_time: null,
+    enabled: true, last_run_at: !!timestamp '2019-01-24 04:00:00+00:00', total_run_count: 73,
+    date_changed: !!timestamp '2019-01-24 04:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 19
+  fields: {name: '&#x1F52C; Scan HTTPS encryption quality using Qualys on insecure
+      adresses only', task: failmap.app.models.create_job, interval: null, crontab: 35,
+    solar: null, args: '["failmap.scanners.scanner.tls_qualys"]', kwargs: "{\r\n\"\
+      exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\": {\"endpoint__tlsqualysscan__is_the_latest_scan\"\
+      : true, \"endpoint__tlsqualysscan__qualys_rating__in\": [\"F\", \"C\", \"B\"\
+      , \"T\"]}\r\n}", queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
+      00:00:00+00:00', total_run_count: 42, date_changed: !!timestamp '2019-01-24
+      00:01:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 20
+  fields: {name: '&#x1F501; Check running mail scans (hidden)', task: failmap.scanners.scanner.mail.check_running_scans,
+    interval: null, crontab: 33, solar: null, args: '[]', kwargs: '{}', queue: storage,
+    exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
+    start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 15:30:00+00:00',
+    total_run_count: 2983, date_changed: !!timestamp '2019-01-24 15:31:05+00:00',
+    description: ''}
+- model: django_celery_beat.periodictask
+  pk: 21
+  fields: {name: "\u2795  Discover Urls with MX records (hidden)", task: failmap.app.models.create_discover_job,
+    interval: null, crontab: 7, solar: null, args: '["failmap.scanners.scanner.mail"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
+      00:00:00+00:00', total_run_count: 16, date_changed: !!timestamp '2019-01-20
+      00:00:45+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 22
+  fields: {name: '&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)', task: failmap.app.models.create_job,
+    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.mail"]',
+    kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
+    expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
+      00:00:00+00:00', total_run_count: 8, date_changed: !!timestamp '2019-01-20 00:00:45+00:00',
+    description: ''}
+- model: django_celery_beat.periodictask
+  pk: 23
+  fields: {name: Import New Proxies (hidden), task: failmap.scanners.tasks.import_proxies_by_country,
+    interval: null, crontab: 23, solar: null, args: '[]', kwargs: "{\r\n\"countries\"\
+      : [\"NL\", \"BE\", \"DE\", \"FR\", \"SE\"],\r\n\"amount\": 150\r\n}", queue: storage,
+    exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
+    start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 11:00:00+00:00',
+    total_run_count: 7, date_changed: !!timestamp '2019-01-24 11:00:55+00:00', description: ''}
+- model: django_celery_beat.periodictask
+  pk: 24
+  fields: {name: Update working proxies (hidden), task: failmap.scanners.tasks.check_existing_alive_proxies,
+    interval: null, crontab: 12, solar: null, args: '[]', kwargs: '{}', queue: storage,
+    exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
+    start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23 20:00:00+00:00',
+    total_run_count: 7, date_changed: !!timestamp '2019-01-23 20:02:30+00:00', description: ''}

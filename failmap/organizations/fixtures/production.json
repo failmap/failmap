@@ -1,0 +1,3818 @@
+[
+  {
+    "model": "organizations.organizationtype",
+    "pk": 1,
+    "fields": {
+      "name": "municipality"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 2,
+    "fields": {
+      "name": "cyber"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 4,
+    "fields": {
+      "name": "water board"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 5,
+    "fields": {
+      "name": "province"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 6,
+    "fields": {
+      "name": "county"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 7,
+    "fields": {
+      "name": "bundesland"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 8,
+    "fields": {
+      "name": "regierungsbezirk"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 9,
+    "fields": {
+      "name": "landkreis_kreis_kreisfreie_stadt"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 10,
+    "fields": {
+      "name": "samtgemeinde verwaltungsgemeinschaft"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 12,
+    "fields": {
+      "name": "agency"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 15,
+    "fields": {
+      "name": "ministry"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 32,
+    "fields": {
+      "name": "government"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 33,
+    "fields": {
+      "name": "district"
+    }
+  },
+  {
+    "model": "organizations.organizationtype",
+    "pk": 34,
+    "fields": {
+      "name": "state"
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 1,
+    "fields": {
+      "country": "NL",
+      "organization_type": 1,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": true,
+      "display_order": 19,
+      "is_scanned": true
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 2,
+    "fields": {
+      "country": "NL",
+      "organization_type": 5,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 20,
+      "is_scanned": true
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 4,
+    "fields": {
+      "country": "NL",
+      "organization_type": 32,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 18,
+      "is_scanned": true
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 5,
+    "fields": {
+      "country": "BE",
+      "organization_type": 1,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 25,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 6,
+    "fields": {
+      "country": "KP",
+      "organization_type": 5,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 22,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 7,
+    "fields": {
+      "country": "KP",
+      "organization_type": 6,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 21,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 9,
+    "fields": {
+      "country": "LU",
+      "organization_type": 33,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 23,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 10,
+    "fields": {
+      "country": "LU",
+      "organization_type": 6,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 24,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 11,
+    "fields": {
+      "country": "NO",
+      "organization_type": 6,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 27,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.configuration",
+    "pk": 12,
+    "fields": {
+      "country": "NO",
+      "organization_type": 1,
+      "is_displayed": true,
+      "is_reported": true,
+      "is_the_default_option": false,
+      "display_order": 26,
+      "is_scanned": false
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 1,
+    "fields": {
+      "country": "NL",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 3,
+    "fields": {
+      "country": "NL",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 73,
+    "fields": {
+      "country": "BE",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 74,
+    "fields": {
+      "country": "AF",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 75,
+    "fields": {
+      "country": "AF",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 76,
+    "fields": {
+      "country": "AL",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 77,
+    "fields": {
+      "country": "AL",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 78,
+    "fields": {
+      "country": "AL",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 79,
+    "fields": {
+      "country": "DZ",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 80,
+    "fields": {
+      "country": "DZ",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 81,
+    "fields": {
+      "country": "AD",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 82,
+    "fields": {
+      "country": "AR",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 83,
+    "fields": {
+      "country": "AR",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 84,
+    "fields": {
+      "country": "AR",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 85,
+    "fields": {
+      "country": "AW",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 86,
+    "fields": {
+      "country": "AU",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 87,
+    "fields": {
+      "country": "AU",
+      "organization_type": 32,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 88,
+    "fields": {
+      "country": "AU",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 89,
+    "fields": {
+      "country": "AT",
+      "organization_type": 7,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 90,
+    "fields": {
+      "country": "AT",
+      "organization_type": 7,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 91,
+    "fields": {
+      "country": "AZ",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 92,
+    "fields": {
+      "country": "AZ",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 93,
+    "fields": {
+      "country": "BS",
+      "organization_type": 32,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 94,
+    "fields": {
+      "country": "BS",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 95,
+    "fields": {
+      "country": "BS",
+      "organization_type": 32,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 96,
+    "fields": {
+      "country": "BS",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 97,
+    "fields": {
+      "country": "BH",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 98,
+    "fields": {
+      "country": "BD",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 99,
+    "fields": {
+      "country": "BD",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 100,
+    "fields": {
+      "country": "BY",
+      "organization_type": 1,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 101,
+    "fields": {
+      "country": "BE",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 102,
+    "fields": {
+      "country": "BZ",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 103,
+    "fields": {
+      "country": "BZ",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 104,
+    "fields": {
+      "country": "BA",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 105,
+    "fields": {
+      "country": "BR",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 106,
+    "fields": {
+      "country": "BR",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 107,
+    "fields": {
+      "country": "BR",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 108,
+    "fields": {
+      "country": "BR",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 109,
+    "fields": {
+      "country": "BR",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 110,
+    "fields": {
+      "country": "BR",
+      "organization_type": 33,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 111,
+    "fields": {
+      "country": "BN",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 112,
+    "fields": {
+      "country": "BN",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 113,
+    "fields": {
+      "country": "BG",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 114,
+    "fields": {
+      "country": "BF",
+      "organization_type": 5,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 115,
+    "fields": {
+      "country": "BF",
+      "organization_type": 1,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 116,
+    "fields": {
+      "country": "BI",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 117,
+    "fields": {
+      "country": "CA",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 118,
+    "fields": {
+      "country": "CA",
+      "organization_type": 5,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 119,
+    "fields": {
+      "country": "CA",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 120,
+    "fields": {
+      "country": "CA",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 121,
+    "fields": {
+      "country": "CR",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 122,
+    "fields": {
+      "country": "HR",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 123,
+    "fields": {
+      "country": "HR",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 124,
+    "fields": {
+      "country": "CN",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 125,
+    "fields": {
+      "country": "CN",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 126,
+    "fields": {
+      "country": "CN",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 127,
+    "fields": {
+      "country": "HK",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 128,
+    "fields": {
+      "country": "CY",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 129,
+    "fields": {
+      "country": "CY",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 130,
+    "fields": {
+      "country": "CZ",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 131,
+    "fields": {
+      "country": "CG",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 132,
+    "fields": {
+      "country": "CG",
+      "organization_type": 5,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 133,
+    "fields": {
+      "country": "DK",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 134,
+    "fields": {
+      "country": "DO",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 135,
+    "fields": {
+      "country": "DO",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 136,
+    "fields": {
+      "country": "DO",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 137,
+    "fields": {
+      "country": "SV",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 138,
+    "fields": {
+      "country": "GQ",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 139,
+    "fields": {
+      "country": "EE",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 140,
+    "fields": {
+      "country": "EE",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 141,
+    "fields": {
+      "country": "EE",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 142,
+    "fields": {
+      "country": "EE",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 143,
+    "fields": {
+      "country": "ET",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 144,
+    "fields": {
+      "country": "FI",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 145,
+    "fields": {
+      "country": "FI",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 146,
+    "fields": {
+      "country": "PF",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 147,
+    "fields": {
+      "country": "GA",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 148,
+    "fields": {
+      "country": "GM",
+      "organization_type": 32,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 149,
+    "fields": {
+      "country": "GM",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 150,
+    "fields": {
+      "country": "GE",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 151,
+    "fields": {
+      "country": "GE",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 152,
+    "fields": {
+      "country": "DE",
+      "organization_type": 7,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 153,
+    "fields": {
+      "country": "DE",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 154,
+    "fields": {
+      "country": "DE",
+      "organization_type": 8,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 155,
+    "fields": {
+      "country": "DE",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 156,
+    "fields": {
+      "country": "DE",
+      "organization_type": 34,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 157,
+    "fields": {
+      "country": "DE",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 158,
+    "fields": {
+      "country": "DE",
+      "organization_type": 9,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 159,
+    "fields": {
+      "country": "DE",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 160,
+    "fields": {
+      "country": "DE",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 161,
+    "fields": {
+      "country": "DE",
+      "organization_type": 1,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 162,
+    "fields": {
+      "country": "DE",
+      "organization_type": 32,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 163,
+    "fields": {
+      "country": "DE",
+      "organization_type": 1,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 164,
+    "fields": {
+      "country": "GH",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 165,
+    "fields": {
+      "country": "GT",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 166,
+    "fields": {
+      "country": "GT",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 167,
+    "fields": {
+      "country": "HT",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 168,
+    "fields": {
+      "country": "HT",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 169,
+    "fields": {
+      "country": "HN",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 170,
+    "fields": {
+      "country": "HN",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 171,
+    "fields": {
+      "country": "HU",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 172,
+    "fields": {
+      "country": "IS",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 173,
+    "fields": {
+      "country": "IN",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 174,
+    "fields": {
+      "country": "IN",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 175,
+    "fields": {
+      "country": "IN",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 176,
+    "fields": {
+      "country": "IN",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 177,
+    "fields": {
+      "country": "ID",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 178,
+    "fields": {
+      "country": "ID",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 179,
+    "fields": {
+      "country": "IQ",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 180,
+    "fields": {
+      "country": "IQ",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 181,
+    "fields": {
+      "country": "IR",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 182,
+    "fields": {
+      "country": "IR",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 183,
+    "fields": {
+      "country": "IR",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 184,
+    "fields": {
+      "country": "IE",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 185,
+    "fields": {
+      "country": "IE",
+      "organization_type": 5,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 186,
+    "fields": {
+      "country": "IE",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 187,
+    "fields": {
+      "country": "IE",
+      "organization_type": 6,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 188,
+    "fields": {
+      "country": "IE",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 189,
+    "fields": {
+      "country": "IL",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 190,
+    "fields": {
+      "country": "IL",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 191,
+    "fields": {
+      "country": "IT",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 192,
+    "fields": {
+      "country": "IT",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 193,
+    "fields": {
+      "country": "IT",
+      "organization_type": 33,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 194,
+    "fields": {
+      "country": "CI",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 195,
+    "fields": {
+      "country": "CI",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 196,
+    "fields": {
+      "country": "CI",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 197,
+    "fields": {
+      "country": "CI",
+      "organization_type": 6,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 198,
+    "fields": {
+      "country": "JP",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 199,
+    "fields": {
+      "country": "JP",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 200,
+    "fields": {
+      "country": "JP",
+      "organization_type": 32,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 201,
+    "fields": {
+      "country": "JO",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 202,
+    "fields": {
+      "country": "JO",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 203,
+    "fields": {
+      "country": "LB",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 204,
+    "fields": {
+      "country": "LS",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 205,
+    "fields": {
+      "country": "LR",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 206,
+    "fields": {
+      "country": "LY",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 207,
+    "fields": {
+      "country": "LT",
+      "organization_type": 1,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 208,
+    "fields": {
+      "country": "LU",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 209,
+    "fields": {
+      "country": "LU",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 210,
+    "fields": {
+      "country": "LU",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 211,
+    "fields": {
+      "country": "MK",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 212,
+    "fields": {
+      "country": "MG",
+      "organization_type": 5,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 213,
+    "fields": {
+      "country": "MG",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 214,
+    "fields": {
+      "country": "MY",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 215,
+    "fields": {
+      "country": "MY",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 216,
+    "fields": {
+      "country": "MY",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 217,
+    "fields": {
+      "country": "MY",
+      "organization_type": 1,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 218,
+    "fields": {
+      "country": "MW",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 219,
+    "fields": {
+      "country": "MX",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 220,
+    "fields": {
+      "country": "MX",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 221,
+    "fields": {
+      "country": "MX",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 222,
+    "fields": {
+      "country": "MD",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 223,
+    "fields": {
+      "country": "MA",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 224,
+    "fields": {
+      "country": "MA",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 225,
+    "fields": {
+      "country": "MA",
+      "organization_type": 1,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 226,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 227,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 5,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 228,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 229,
+    "fields": {
+      "country": "MM",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 230,
+    "fields": {
+      "country": "MM",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 231,
+    "fields": {
+      "country": "MM",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 232,
+    "fields": {
+      "country": "MM",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 233,
+    "fields": {
+      "country": "NP",
+      "organization_type": 5,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 234,
+    "fields": {
+      "country": "NP",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 235,
+    "fields": {
+      "country": "NP",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 236,
+    "fields": {
+      "country": "NZ",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 237,
+    "fields": {
+      "country": "NI",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 238,
+    "fields": {
+      "country": "NI",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 239,
+    "fields": {
+      "country": "NG",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 240,
+    "fields": {
+      "country": "NG",
+      "organization_type": 32,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 241,
+    "fields": {
+      "country": "KP",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 242,
+    "fields": {
+      "country": "KP",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 243,
+    "fields": {
+      "country": "KP",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 244,
+    "fields": {
+      "country": "NO",
+      "organization_type": 6,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 245,
+    "fields": {
+      "country": "NO",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": true,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 246,
+    "fields": {
+      "country": "PY",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 247,
+    "fields": {
+      "country": "PY",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 248,
+    "fields": {
+      "country": "PE",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 249,
+    "fields": {
+      "country": "PE",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 250,
+    "fields": {
+      "country": "PE",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 251,
+    "fields": {
+      "country": "PH",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 252,
+    "fields": {
+      "country": "PH",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 253,
+    "fields": {
+      "country": "PH",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 254,
+    "fields": {
+      "country": "PH",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 255,
+    "fields": {
+      "country": "PH",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 256,
+    "fields": {
+      "country": "PH",
+      "organization_type": 32,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 257,
+    "fields": {
+      "country": "PH",
+      "organization_type": 33,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 258,
+    "fields": {
+      "country": "PT",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 259,
+    "fields": {
+      "country": "PT",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 260,
+    "fields": {
+      "country": "RO",
+      "organization_type": 5,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 261,
+    "fields": {
+      "country": "RO",
+      "organization_type": 6,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 262,
+    "fields": {
+      "country": "RO",
+      "organization_type": 32,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 263,
+    "fields": {
+      "country": "RO",
+      "organization_type": 1,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 264,
+    "fields": {
+      "country": "RO",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 265,
+    "fields": {
+      "country": "RU",
+      "organization_type": 33,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 266,
+    "fields": {
+      "country": "RU",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 267,
+    "fields": {
+      "country": "RU",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 268,
+    "fields": {
+      "country": "RU",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 269,
+    "fields": {
+      "country": "RU",
+      "organization_type": 1,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 270,
+    "fields": {
+      "country": "RU",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 271,
+    "fields": {
+      "country": "RU",
+      "organization_type": 32,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 272,
+    "fields": {
+      "country": "RS",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 273,
+    "fields": {
+      "country": "RS",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 274,
+    "fields": {
+      "country": "RS",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 275,
+    "fields": {
+      "country": "SL",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 276,
+    "fields": {
+      "country": "SL",
+      "organization_type": 1,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 277,
+    "fields": {
+      "country": "SL",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 278,
+    "fields": {
+      "country": "SL",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 279,
+    "fields": {
+      "country": "SK",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 280,
+    "fields": {
+      "country": "ZA",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 281,
+    "fields": {
+      "country": "ZA",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 282,
+    "fields": {
+      "country": "ZA",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 283,
+    "fields": {
+      "country": "ZA",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 284,
+    "fields": {
+      "country": "KR",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 285,
+    "fields": {
+      "country": "KR",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 286,
+    "fields": {
+      "country": "KR",
+      "organization_type": 5,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 287,
+    "fields": {
+      "country": "KR",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 288,
+    "fields": {
+      "country": "KR",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 289,
+    "fields": {
+      "country": "SS",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 290,
+    "fields": {
+      "country": "SS",
+      "organization_type": 34,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 291,
+    "fields": {
+      "country": "SS",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 292,
+    "fields": {
+      "country": "ES",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 293,
+    "fields": {
+      "country": "ES",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 294,
+    "fields": {
+      "country": "ES",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 295,
+    "fields": {
+      "country": "SR",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 296,
+    "fields": {
+      "country": "SR",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 297,
+    "fields": {
+      "country": "SR",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 298,
+    "fields": {
+      "country": "CH",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 299,
+    "fields": {
+      "country": "CH",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 300,
+    "fields": {
+      "country": "CH",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 301,
+    "fields": {
+      "country": "CH",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 302,
+    "fields": {
+      "country": "CH",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 303,
+    "fields": {
+      "country": "SE",
+      "organization_type": 6,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 304,
+    "fields": {
+      "country": "SE",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 305,
+    "fields": {
+      "country": "SY",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 306,
+    "fields": {
+      "country": "SY",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 307,
+    "fields": {
+      "country": "SY",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 308,
+    "fields": {
+      "country": "SY",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 309,
+    "fields": {
+      "country": "TW",
+      "organization_type": 1,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 310,
+    "fields": {
+      "country": "TW",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 311,
+    "fields": {
+      "country": "TW",
+      "organization_type": 1,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 312,
+    "fields": {
+      "country": "TW",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 313,
+    "fields": {
+      "country": "TW",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 314,
+    "fields": {
+      "country": "TW",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 315,
+    "fields": {
+      "country": "TW",
+      "organization_type": 33,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 316,
+    "fields": {
+      "country": "TW",
+      "organization_type": 6,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 317,
+    "fields": {
+      "country": "TJ",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 318,
+    "fields": {
+      "country": "TJ",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 319,
+    "fields": {
+      "country": "TZ",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 320,
+    "fields": {
+      "country": "TH",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 321,
+    "fields": {
+      "country": "TH",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 322,
+    "fields": {
+      "country": "TH",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 323,
+    "fields": {
+      "country": "TN",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 324,
+    "fields": {
+      "country": "TR",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 325,
+    "fields": {
+      "country": "TR",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 326,
+    "fields": {
+      "country": "UG",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 327,
+    "fields": {
+      "country": "GB",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 328,
+    "fields": {
+      "country": "GB",
+      "organization_type": 33,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 329,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 330,
+    "fields": {
+      "country": "US",
+      "organization_type": 33,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 331,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 332,
+    "fields": {
+      "country": "US",
+      "organization_type": 6,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 333,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 334,
+    "fields": {
+      "country": "US",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 335,
+    "fields": {
+      "country": "US",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 336,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 337,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 338,
+    "fields": {
+      "country": "US",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 339,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 340,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 341,
+    "fields": {
+      "country": "US",
+      "organization_type": 34,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 342,
+    "fields": {
+      "country": "UY",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 343,
+    "fields": {
+      "country": "VU",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 344,
+    "fields": {
+      "country": "VU",
+      "organization_type": 1,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 345,
+    "fields": {
+      "country": "VU",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 346,
+    "fields": {
+      "country": "VU",
+      "organization_type": 32,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 347,
+    "fields": {
+      "country": "VN",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 348,
+    "fields": {
+      "country": "VN",
+      "organization_type": 33,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 349,
+    "fields": {
+      "country": "BO",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 350,
+    "fields": {
+      "country": "BO",
+      "organization_type": 5,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 351,
+    "fields": {
+      "country": "BO",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 352,
+    "fields": {
+      "country": "BO",
+      "organization_type": 1,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 353,
+    "fields": {
+      "country": "BO",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 354,
+    "fields": {
+      "country": "BO",
+      "organization_type": 1,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 355,
+    "fields": {
+      "country": "DE",
+      "organization_type": 10,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 356,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 34,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 357,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 1,
+      "admin_level": 8,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 358,
+    "fields": {
+      "country": "MZ",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 359,
+    "fields": {
+      "country": "NL",
+      "organization_type": 34,
+      "admin_level": 3,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 360,
+    "fields": {
+      "country": "NL",
+      "organization_type": 4,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 361,
+    "fields": {
+      "country": "NL",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 362,
+    "fields": {
+      "country": "PL",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 363,
+    "fields": {
+      "country": "PL",
+      "organization_type": 6,
+      "admin_level": 6,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 364,
+    "fields": {
+      "country": "PL",
+      "organization_type": 1,
+      "admin_level": 7,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 365,
+    "fields": {
+      "country": "PL",
+      "organization_type": 33,
+      "admin_level": 9,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 366,
+    "fields": {
+      "country": "TM",
+      "organization_type": 5,
+      "admin_level": 4,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 367,
+    "fields": {
+      "country": "TM",
+      "organization_type": 33,
+      "admin_level": 5,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 368,
+    "fields": {
+      "country": "TM",
+      "organization_type": 33,
+      "admin_level": 10,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  },
+  {
+    "model": "map.administrativeregion",
+    "pk": 369,
+    "fields": {
+      "country": "TM",
+      "organization_type": 33,
+      "admin_level": 11,
+      "resampling_resolution": 0.001,
+      "imported": false,
+      "import_message": ""
+    }
+  }
+]
