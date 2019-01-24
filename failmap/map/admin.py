@@ -320,7 +320,7 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
     reorder.short_description = 'Reorder'
     actions.append(reorder)
 
-    def move_down(self, request, queryset):
+    def move_up(self, request, queryset):
 
         for configuration in queryset:
             next_config = models.Configuration.objects.all().order_by(
@@ -335,10 +335,10 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
             next_config.save()
             configuration.save()
 
-    move_down.short_description = 'Move Down'
-    actions.append(move_down)
+    move_up.short_description = 'Move Up'
+    actions.append(move_up)
 
-    def move_up(self, request, queryset):
+    def move_down(self, request, queryset):
 
         for configuration in queryset:
             previous_config = models.Configuration.objects.all().order_by(
@@ -353,8 +353,8 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
             previous_config.save()
             configuration.save()
 
-    move_up.short_description = 'Move Up'
-    actions.append(move_up)
+    move_down.short_description = 'Move Down'
+    actions.append(move_down)
 
 
 @admin.register(models.VulnerabilityStatistic)
