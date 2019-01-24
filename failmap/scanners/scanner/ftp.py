@@ -144,7 +144,7 @@ def store(result: dict, endpoint: Endpoint):
         level = "insecure"
         message = "FTP Server does not support encrypted transport or has protocol issues."
 
-    if result['supports_tls'] is 'Unknown' and result['supports_ssl'] is 'Unknown':
+    if result['supports_tls'] == 'Unknown' and result['supports_ssl'] == 'Unknown':
         level = 'unknown'
         message = "An FTP connection could not be established properly. Not possible to verify encryption."
 
