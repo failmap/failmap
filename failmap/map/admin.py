@@ -1,6 +1,8 @@
 import logging
 from copy import deepcopy
+from datetime import datetime
 
+import pytz
 from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
@@ -129,11 +131,12 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.AdministrativeRegion)
 class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'admin_level', 'imported', 'import_message',
+    list_display = ('country', 'organization_type', 'admin_level', 'import_start_date', 'imported', 'import_message',
                     'resampling_resolution')
     search_fields = (['country', 'organization_type__name', 'admin_level'])
     list_filter = ['country', 'organization_type', 'admin_level', 'imported'][::-1]
-    fields = ('country', 'organization_type', 'admin_level', 'imported', 'import_message', 'resampling_resolution')
+    fields = ('country', 'organization_type', 'admin_level', 'import_start_date',
+              'imported', 'import_message', 'resampling_resolution')
 
     actions = []
 
@@ -144,7 +147,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             organization_filter = {'country': region.country, 'type': region.organization_type}
 
             # you can't add tasks for reporting, as the data is not in the database to create the tasks yet.
-            tasks.append(import_from_scratch.si([str(region.country)], [region.organization_type.name])
+            tasks.append(start_import.si(region)
+                         | import_from_scratch.si([str(region.country)], [region.organization_type.name])
                          | add_configuration.si(region.country, region.organization_type)
                          | set_imported.si(region)
                          | report_country.si(organization_filter))
@@ -165,7 +169,11 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         tasks = []
 
         for region in queryset:
-            tasks.append(update_coordinates.si([str(region.country)], [region.organization_type.name]))
+            organization_filter = {'country': region.country, 'type': region.organization_type}
+            tasks.append(start_import.si(region)
+                         | update_coordinates.si([str(region.country)], [region.organization_type.name])
+                         | set_imported.si(region)
+                         | report_country.si(organization_filter))
 
         task_name = "%s (%s) " % ("Update region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -175,6 +183,12 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         self.message_user(request, 'Job created, <a href="%s">%s</a>' % (link, task_name))
     update_coordinates.short_description = '🛂  Update region'
     actions.append(update_coordinates)
+
+
+@app.task(queue='storage')
+def start_import(region: models.AdministrativeRegion):
+    region.import_start_date = datetime.now(pytz.utc)
+    region.save(update_fields=['import_start_date'])
 
 
 @app.task(queue='storage')

@@ -95,10 +95,14 @@ def compose_task(
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
     # mainly as we're trying to get away from canvas and it's buggyness.
 
-    if organizations_filter.get('country', None):
-        tasks.append(calculate_vulnerability_statistics.si(days, organizations_filter['country']))
-        tasks.append(calculate_map_data.si(days, organizations_filter['country']))
+    if organizations_filter.get('country__in', None):
+        tasks.append(calculate_vulnerability_statistics.si(1, organizations_filter['country__in']))
+        tasks.append(calculate_map_data.si(1, organizations_filter['country__in']))
+    elif organizations_filter.get('country', None):
+        tasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter['country']]))
+        tasks.append(calculate_map_data.si(1, [organizations_filter['country']]))
     else:
+        # 2 days if you have altered stuff a day before etc...
         tasks.append(calculate_vulnerability_statistics.si(days))
         tasks.append(calculate_map_data.si(days))
 
@@ -1375,11 +1379,13 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
     log.info("Calculation vulnerability graphs")
 
     # for everything that is displayed on the site:
-    map_configurations = Configuration.objects.all().filter(
-        is_displayed=True).order_by('display_order').values('country', 'organization_type')
-
     if country:
-        map_configurations = map_configurations.filter(country__in=country)
+        # if you have a country, (or other filter) you don't care about the default filter.
+        map_configurations = Configuration.objects.all().filter(country__in=country)
+    else:
+        map_configurations = Configuration.objects.all().filter(is_displayed=True)
+
+    map_configurations = map_configurations.order_by('display_order').values('country', 'organization_type')
 
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
@@ -1612,12 +1618,14 @@ def calculate_map_data(days: int = 366, country: List[str] = []):
 
     log.info("calculate_map_data")
 
-    map_configurations = Configuration.objects.all().filter(
-        is_displayed=True
-    ).order_by('display_order').values('country', 'organization_type__name', 'organization_type')
-
     if country:
-        map_configurations = map_configurations.filter(country__in=country)
+        # if you have a country, (or other filter) you don't care about the default filter.
+        map_configurations = Configuration.objects.all().filter(country__in=country)
+    else:
+        map_configurations = Configuration.objects.all().filter(is_displayed=True)
+
+    map_configurations = map_configurations.order_by('display_order').values(
+        'country', 'organization_type__name', 'organization_type')
 
     # the "all" filter will retrieve all layers at once
     scan_types = ALL_SCAN_TYPES + ["all"]

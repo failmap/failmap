@@ -242,6 +242,11 @@ class AdministrativeRegion(models.Model):
         default=False
     )
 
+    import_start_date = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
     import_message = models.CharField(
         max_length=255,
         default="",
