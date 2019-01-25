@@ -92,6 +92,7 @@ QUEUES_MATCHING_ROLES = {
         Queue('internet'),
         Queue('qualys'),
         Queue('isolated'),
+        Queue('claim_proxy')
     ],
 
     'default_ipv4': [
