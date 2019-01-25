@@ -83,6 +83,8 @@ var dynamic_translations = function(){
     gettext('category_menu_government');
     gettext('category_menu_healthcare');
     gettext('category_menu_finance');
+    gettext('category_menu_state');
+    gettext('category_menu_school');
 
     // scan types
     gettext('Strict-Transport-Security');

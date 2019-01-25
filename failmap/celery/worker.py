@@ -52,7 +52,8 @@ ROLES_REQUIRING_IPV4 = [
 
 ROLES_REQUIRING_NO_NETWORK = [
     'storage',
-    'calculator'
+    'calculator',
+    'claim_proxy'
 ]
 
 # define roles for workers
@@ -117,6 +118,11 @@ QUEUES_MATCHING_ROLES = {
     ],
     'storage': [
         Queue('storage'),
+        # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
+        # Given there is only one storage worker, blocking it doesn't help it's work.
+    ],
+    'claim_proxy': [
+        Queue('claim_proxy'),
         # Queue('isolated'),  # Do NOT perform isolated (slow) tasks, which might block the worker.
         # Given there is only one storage worker, blocking it doesn't help it's work.
     ],

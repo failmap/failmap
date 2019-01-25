@@ -155,7 +155,9 @@ def compose_task(
 # the storage queue should never be filled with this type of junk...
 # removed rate limiting and such. If a proxy died it will stay claimed and it will fail the next verification
 # the scan tasks will be added again and that's that.
-@app.task(queue='storage')
+# Moved this to a dedicated worker that can deadlock / block whatever it wants to block. We can add rate
+# limiting again so not everything gets claimed in advance.
+@app.task(queue='claim_proxy', rate_limit='30/h')
 def claim_proxy():
     """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash. """

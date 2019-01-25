@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-22 15:52+0000\n"
+"POT-Creation-Date: 2019-01-25 09:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -327,6 +327,14 @@ msgstr "Gezondheidszorg"
 #: failmap/map/static/js/script.js
 msgid "category_menu_finance"
 msgstr "Financiën"
+
+#: failmap/map/static/js/script.js
+msgid "category_menu_state"
+msgstr "Staten"
+
+#: failmap/map/static/js/script.js
+msgid "category_menu_school"
+msgstr "Scholen"
 
 #: failmap/map/static/js/script.js
 msgid "Strict-Transport-Security"

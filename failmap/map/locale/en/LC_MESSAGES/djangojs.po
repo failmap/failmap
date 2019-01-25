@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-22 15:52+0000\n"
+"POT-Creation-Date: 2019-01-25 09:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -209,10 +209,8 @@ msgid "Certificate is not trusted."
 msgstr ""
 
 #: failmap/map/static/js/script.js
-#, fuzzy
-#| msgid "tls_qualys_certificate_trusted"
 msgid "Certificate is trusted."
-msgstr "Trust in certificate"
+msgstr "Certificate is trusted"
 
 #: failmap/map/static/js/script.js
 msgid ""
@@ -317,6 +315,14 @@ msgstr "Healthcare"
 #: failmap/map/static/js/script.js
 msgid "category_menu_finance"
 msgstr "Finance"
+
+#: failmap/map/static/js/script.js
+msgid "category_menu_state"
+msgstr "State"
+
+#: failmap/map/static/js/script.js
+msgid "category_menu_school"
+msgstr "Schools"
 
 #: failmap/map/static/js/script.js
 msgid "Strict-Transport-Security"
