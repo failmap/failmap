@@ -669,12 +669,19 @@ CONSTANCE_CONFIG = {
 
 
     'GOOGLE_MAPS_API_KEY': ('AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo',
-                            'API Key of google maps that can be used in the game / adding section.', str),
+                            'API Key of google maps that can be used in the game / adding section.'
+                            'You can get these API keys '
+                            'at https://developers.google.com/maps/documentation/javascript/get-api-key', str),
 
     'MAPBOX_ACCESS_TOKEN': ('pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
-                            'Access token for Mapbox', str),
+                            'Access token for Mapbox. Read more about it '
+                            'at https://docs.mapbox.com/help/how-mapbox-works/access-tokens/.', str),
 
-    'WAMBACHERS_OSM_CLIKEY': ('', 'CLI key for Wambachers OSM export feature', str),
+    'WAMBACHERS_OSM_CLIKEY': ('', 'CLI key for Wambachers OSM import feature. Imports nicer looking regions from'
+                                  ' openstreetmaps. You can get a key at'
+                                  'https://wambachers-osm.website/boundaries/. First create an '
+                                  'account, then after logging in via oauth hit the download button on the'
+                                  ' website with CLI checked. You\'ll get a link with the key included.', str),
 
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
@@ -747,7 +754,8 @@ CONSTANCE_CONFIG = {
     'SCAN_FTP': (True, 'Do you want to scan for FTP servers that are missing encryption?', bool),
     # todo username and password for internetnl, make separate category
     'SCAN_MAIL_INTERNET_NL': (True, 'Do you want to scan for email security configuration using internet.nl?', bool),
-    'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API', str),
+    'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API. You can request one via the contact '
+                                     'options on their site, https://internet.nl.', str),
     'INTERNET_NL_API_PASSWORD': ('', 'Password for the internet.nl API', str),
 
     'CREATE_HTTP_SCREENSHOT': (True, 'Todo: Does not work yet! Do you want to create screenshots for HTTP endpoints?',
