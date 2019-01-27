@@ -207,6 +207,7 @@
             {% if admin %}
                 <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                <li class="nav-item"><a class="nav-link" href="/grafana/">{% trans "Monitoring" %}</a></li>
                 <li class="nav-item"><a class="nav-link" onclick="failmap.loadTiles()">{% trans "Load Tiles" %}</a></li>
                 <!-- This allows testing different themes -->
                 <li class="nav-item dropdown">
