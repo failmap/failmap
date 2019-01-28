@@ -582,7 +582,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
         'DEFAULT_ZOOM': 4
     }
 
-    list_display = ('organization', 'geojsontype', 'created_on', 'is_dead', 'is_dead_since')
+    list_display = ('id', 'organization', 'geojsontype', 'created_on', 'is_dead', 'area')
     search_fields = ('organization__name', 'geojsontype')
     list_filter = ['organization__type', 'organization__country', 'organization', 'geojsontype', 'created_on',
                    'is_dead', 'is_dead_since'][::-1]
@@ -604,6 +604,27 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
             'fields': ('created_on', 'is_dead', 'is_dead_since', 'is_dead_reason'),
         }),
     )
+
+    actions = []
+
+    def switch_lnglat(self, request, queryset):
+        for coordinate in queryset:
+
+            if coordinate.geojsontype != "Point":
+                continue
+
+            a = coordinate.area
+            coordinate.area = [a[1], a[0]]
+
+            coordinate.edit_area = {
+                "type": "Point",
+                "coordinates": [a[1], a[0]]
+            }
+
+            coordinate.save()
+        self.message_user(request, "Lng Lat switched. Order should be: Lng, Lat.")
+    switch_lnglat.short_description = "Switch Lng Lat"
+    actions.append('switch_lnglat')
 
     def save_model(self, request, obj, form, change):
 

@@ -275,7 +275,7 @@ def save_coordinate(organization, lat, lng, address):
             # order of coordinates in geojson is lng, lat
             # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
             area=[lng, lat],
-            edit_area={"type": "Point", "coordinates": [lat, lng]},
+            edit_area={"type": "Point", "coordinates": [lng, lat]},
             is_dead=False
         )
 
@@ -285,7 +285,7 @@ def save_coordinate(organization, lat, lng, address):
             coordinate.save(update_fields=['created_on', 'creation_metadata'])
 
     except Coordinate.MultipleObjectsReturned:
-        log.debug('Coordinate %s is multiple times in the database.' % [lat, lng])
+        log.debug('Coordinate %s is multiple times in the database.' % [lng, lat])
 
         # should we reduce the amount of coordinates?
 

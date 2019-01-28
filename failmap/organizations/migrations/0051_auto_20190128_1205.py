@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dataset',
             name='type',
-            field=models.CharField(blank=True, choices=[('excel', 'Excel'), ('dutch_government', 'Dutch Government')], default='excel', help_text='To determine what importer is needed.', max_length=255, null=True),
+            field=models.CharField(blank=True, choices=[('excel', 'Excel'), ('dutch_government', 'Dutch Government')],
+                                   default='excel', help_text='To determine what importer is needed.', max_length=255, null=True),
         ),
     ]

@@ -1,14 +1,8 @@
 import logging
-from datetime import datetime
-from typing import List
 
-import pytz
 from django.core.management.base import BaseCommand
 
-from failmap.organizations.models import Organization, Url, Coordinate
-from failmap.scanners.scanner.dns import discover_wildcard
-from failmap.scanners.scanner.http import resolves
-import json
+from failmap.organizations.models import Coordinate
 
 log = logging.getLogger(__package__)
 
@@ -28,4 +22,5 @@ class Command(BaseCommand):
                 "coordinates": [a[1], a[0]]
             }
 
+            log.debug("Switched %s" % coordinate.organization)
             coordinate.save()

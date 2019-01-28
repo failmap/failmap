@@ -648,7 +648,7 @@ const failmap = {
         points.forEach(function(point){
             // points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
             // https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
-            let pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates));
+            let pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
             pointlayer.on({
                 mouseover: failmap.highlightFeature,

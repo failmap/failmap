@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='configuration',
             name='display_order',
-            field=models.PositiveIntegerField(default=0, help_text='Setting this to 0 will automatically set the country at a guessed position. For example: near thesame country or at the end of the list.', verbose_name='order'),
+            field=models.PositiveIntegerField(
+                default=0, help_text='Setting this to 0 will automatically set the country at a guessed position. For example: near thesame country or at the end of the list.', verbose_name='order'),
         ),
     ]

@@ -7,7 +7,6 @@ from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
 from django.db import transaction
-from django import forms
 from django.urls import reverse
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
