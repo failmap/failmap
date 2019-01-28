@@ -449,15 +449,36 @@ class Dataset(models.Model):
     Allows you to define URL datasources to download and import into the system. This acts as a memory of what you
     have imported. You can even re-import the things listed here. It will use the generic/excel importer.
     """
-    source = models.URLField()
+    url_source = models.URLField(
+        null=True,
+        blank=True,
+        help_text="Fill out either the URL or File source. - A url source hosts the data you wish to process, this "
+                  "can be an excel file. You can also upload the excel file below. This works great with online data "
+                  "sources that are published regularly. Make sure the parser exists as you cannot process any "
+                  "arbritrary download."
+    )
+
+    file_source = models.FileField(
+        null=True,
+        blank=True,
+        help_text="Fill out either the URL or File source. - "
+                  "A file upload has to be in a specific Excel format. You can download this format here: "
+                  "<a href='/static/empty_organizations_import_file.xlsx'>empty file</a>. You can also download "
+                  "an example that shows how to enter the data correctly. You can download the example here: "
+                  "<a href='/static/example_organizations_import_file.xlsx'>example file</a>"
+    )
+
     is_imported = models.BooleanField(default=False,)
     imported_on = models.DateTimeField(blank=True, null=True)
     type = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="To determine what importer is needed: xls, xlsx, json, dutch_government."
+        choices=[("excel", "Excel"), ("dutch_government", "Dutch Government")],
+        help_text="To determine what importer is needed.",
+        default='excel'
     )
+
     kwargs = models.TextField(
         max_length=5000,
         blank=True,

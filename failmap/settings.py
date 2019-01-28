@@ -899,8 +899,6 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 # EMAIL_HOST_USER = 'YYYYYY@ZZZZ.PPP'
 # EMAIL_HOST_PASSWORD = '123456'
 # Make sure the MEDIA_ROOT is NOT readable from the webserver directly. So no https://bla/media.
-# MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/../')
-
 # End of helpdesk settings
 #######
 
@@ -1053,3 +1051,7 @@ if DEBUG:
 else:
     # Mail settings are managed in constance for easier mainteneance.
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+# Allow file uploads in datasets:
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/uploads/')

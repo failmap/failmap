@@ -41,17 +41,26 @@ SKIP_GEO = False
 
 
 def get_data(dataset, download_function):
-    filename = url_to_filename(dataset['url'])
-    log.debug("Data will be stored in: %s" % filename)
 
-    if is_cached(filename):
-        log.debug('Getting cached file for: %s' % dataset['url'])
+    # support downloads:
+    if dataset['url']:
+
+        filename = url_to_filename(dataset['url'])
+        log.debug("Data will be stored in: %s" % filename)
+
+        if is_cached(filename):
+            log.debug('Getting cached file for: %s' % dataset['url'])
+            return filename
+
+        download_function(dataset['url'], filename_to_save=filename)
+
+        log.debug('Filename with data: %s' % filename)
         return filename
 
-    download_function(dataset['url'], filename_to_save=filename)
-
-    # simply reads and returns the raw data
-    return filename
+    # support file uploads
+    if dataset['file']:
+        log.debug('Filename with data: %s' % dataset['file'].name)
+        return settings.MEDIA_ROOT + dataset['file'].name
 
 
 def generic_dataset_import(dataset, parser_function, download_function):
@@ -101,7 +110,19 @@ def check_environment():
     # we may ignore, and geolocate_organizations afterwards the organizations that don't have a geolocation yet?
     # is there are more generic library?
     if not config.GOOGLE_MAPS_API_KEY:
-        raise ValueError('The google maps API key is not set, but is required for this feature.')
+        raise ValueError('The google maps API key is not set, but is required for this feature. Set the '
+                         'API key in your configuration, '
+                         '<a target="_blank"  href="/admin/constance/config/">here</a>.')
+
+    # See if the API is usable, it might be restricted (aka, wrong IP etc).
+    try:
+        gmaps = googlemaps.Client(key=config.GOOGLE_MAPS_API_KEY)
+        gmaps.geocode("Rijksmuseum, Amsterdam, The Netherlands")
+    except googlemaps.exceptions.ApiError as e:
+        raise ValueError("The google API returned an error with a test geolocation query. The error received was:"
+                         "%s. You can configure the google API "
+                         "<a target='_blank' href='https://console.cloud.google.com/google/maps-apis/"
+                         "apis/geocoding-backend.googleapis.com/credentials'>here</a>." % str(e))
 
 
 def find_suggested_site(search_string):
@@ -137,6 +158,7 @@ def geolocate_organizations(organizations: List):
         # you can only get the geometry with a lot of data attached, so it cannot be done cheaper :(
         # setup the API restrictions here:
         # https://console.cloud.google.com/google/maps-apis/apis/geocoding-backend.googleapis.com/credentials
+        # todo: country code to apply restrictions?
         try:
             geocode_result = gmaps.geocode("%s, %s" % (organization['address'], organization['geocoding_hint']))
 

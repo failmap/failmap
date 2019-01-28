@@ -6,7 +6,7 @@ import nested_admin
 import pytz
 import tldextract
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.core.exceptions import ValidationError
 from django.urls import reverse
@@ -21,6 +21,7 @@ from failmap import types
 from failmap.app.models import Job
 from failmap.celery import PRIO_HIGH, app
 from failmap.map.report import OrganizationRating, UrlRating
+from failmap.organizations import datasources
 from failmap.organizations.datasources import dutch_government, excel
 from failmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
                                           Promise, Url)
@@ -671,10 +672,10 @@ class DatasetForm(forms.ModelForm):
 @admin.register(Dataset)
 # todo: how to show a form / allowing uploads?
 class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('source', 'type', 'is_imported', 'imported_on')
-    search_fields = ('source', )
+    list_display = ('id', 'url_source', 'file_source', 'type', 'is_imported', 'imported_on')
+    search_fields = ('url_source', )
     list_filter = ('is_imported', 'imported_on')
-    fields = ('source', 'type', 'kwargs', 'is_imported', 'imported_on')
+    fields = ('url_source', 'file_source', 'type', 'kwargs', 'is_imported', 'imported_on')
 
     actions = []
 
@@ -682,8 +683,16 @@ class DatasetAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     # Then we also need the options to be expanded with options from the database.
 
     def import_(self, request, queryset):
+
+        # check if the environment is sane, if not, return a user message with the error
+        try:
+            datasources.check_environment()
+        except BaseException as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return
+
         for dataset in queryset:
-            kwargs = {'url': dataset.source}
+            kwargs = {'url': dataset.url_source, 'file': dataset.file_source}
 
             extra_kwargs = loads(dataset.kwargs)
             kwargs = {**kwargs, **extra_kwargs}
