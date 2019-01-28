@@ -144,6 +144,8 @@ class Coordinate(models.Model):
         null=True,
         choices=GEOJSON_TYPES)
 
+    # Note that points are stored in lng, lat format
+    # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
     area = JSONField(
         max_length=10000,
         blank=True,

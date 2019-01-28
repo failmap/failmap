@@ -272,7 +272,9 @@ def save_coordinate(organization, lat, lng, address):
         coordinate, created = Coordinate.objects.all().get_or_create(
             geojsontype="Point",
             organization=organization,
-            area=[lat, lng],  # we store the order incorrectly it seems?
+            # order of coordinates in geojson is lng, lat
+            # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
+            area=[lng, lat],
             edit_area={"type": "Point", "coordinates": [lat, lng]},
             is_dead=False
         )
