@@ -288,7 +288,14 @@ class Configuration(models.Model):
         default=False
     )
 
-    display_order = models.PositiveIntegerField(_('order'), default=0, blank=False, null=False)
+    display_order = models.PositiveIntegerField(
+        _('order'),
+        default=0,
+        blank=False,
+        null=False,
+        help_text="Setting this to 0 will automatically set the country at a guessed position. For example: near the"
+                  "same country or at the end of the list."
+    )
 
     is_scanned = models.BooleanField(
         help_text="Whether this combination will be scanned by the scanners.",

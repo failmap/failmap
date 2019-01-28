@@ -7,6 +7,7 @@ from adminsortable2.admin import SortableAdminMixin
 from celery import group
 from django.contrib import admin
 from django.db import transaction
+from django import forms
 from django.urls import reverse
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
@@ -253,6 +254,41 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
                    'is_scanned', 'is_reported'][::-1]
     fields = ('display_order',
               'country', 'organization_type', 'is_displayed', 'is_the_default_option', 'is_scanned', 'is_reported')
+
+    def save_model(self, request, obj, form, change):
+        # allows to place a new item at the right position, moving certain items up.
+        # if the display_order is zero, autoplace the item.
+
+        if obj.display_order:
+            super().save_model(request, obj, form, change)
+
+        else:
+            country_exists = models.Configuration.objects.all().filter(
+                country=obj.country).order_by('-display_order').first()
+
+            if country_exists:
+                # if there is something form this country, place it where it belongs and move the rest +=1
+                new_number = country_exists.display_order + 1
+
+                moveup = models.Configuration.objects.all().filter(display_order__gte=new_number).order_by(
+                    '-display_order')
+                for config in moveup:
+                    config.display_order += 1
+                    config.save()
+
+                obj.display_order = country_exists.display_order + 1
+                super().save_model(request, obj, form, change)
+
+            else:
+                # if there is nothing from this country, then add it at the end.
+                tmp = models.Configuration.objects.all().order_by('-display_order').first()
+
+                if tmp:
+                    obj.display_order = tmp.display_order + 1
+                else:
+                    obj.display_order = 1
+
+                super().save_model(request, obj, form, change)
 
     actions = []
 

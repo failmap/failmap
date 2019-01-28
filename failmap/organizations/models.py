@@ -17,12 +17,12 @@ log = logging.getLogger(__package__)
 
 
 class OrganizationType(models.Model):
-    name = models.CharField(max_length=255, verbose_name=_("organization type"))
+    name = models.CharField(max_length=255, verbose_name=_("layer"))
 
     class Meta:
         managed = True
-        verbose_name = _('organization_type')
-        verbose_name_plural = _('organization_types')
+        verbose_name = _('layer')
+        verbose_name_plural = _('layers')
 
     def __str__(self):
         return self.name
