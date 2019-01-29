@@ -138,6 +138,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fields = ('country', 'organization_type', 'admin_level', 'import_start_date',
               'imported', 'import_message', 'resampling_resolution')
 
+    readonly_fields = ['import_start_date', 'imported', 'import_message']
+
     actions = []
 
     def import_region(self, request, queryset):
