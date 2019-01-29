@@ -250,6 +250,8 @@ class AdministrativeRegion(models.Model):
     import_message = models.CharField(
         max_length=255,
         default="",
+        blank=True,
+        null=True,
         help_text="Information returned from the import features."
     )
 
