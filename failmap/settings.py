@@ -788,9 +788,20 @@ CONSTANCE_CONFIG = {
     'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (
         False,
         'Shows a link to the comply or explain discussion forum. The url of this forum can be edited below.', bool),
-    'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
-    'TICKER_SLOGAN': ('FAILMAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
-    'TICKER_VISIBLE_VIA_JS_COMMAND': (False, 'Only show the ticker using the Javascript command "show_ticker()"', bool),
+
+    'SHOW_TICKER': (
+        False,
+        'Shows stock-ticker with updates in the past month. This is a very distracting feature that works '
+        'really well at fairs as an eye catcher. Use this in combination with the command below to not'
+        ' show the ticker to every visitor, but only when clicking a specific link.', bool),
+
+    'TICKER_SLOGAN': (
+        'FAILMAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
+
+    'TICKER_VISIBLE_VIA_JS_COMMAND':
+        (False, 'Adds a Show/Hide ticker link at the bottom of the page. It will start scrolling after a second'
+                ' or two.', bool),
+
     'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),

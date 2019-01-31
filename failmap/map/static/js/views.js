@@ -1184,15 +1184,23 @@ function views(autoload_default_map_data=true) {
         methods: {
             toggleVisibility: function (){
               this.visible = !this.visible;
-              this.setMarqueeSpeed();
+              // evil fix.
+              setTimeout(function(){ vueTicker.setMarqueeSpeed()}, 2000);
             },
             setMarqueeSpeed: function (){
                 // Time = Distance/Speed
                 // https://stackoverflow.com/questions/38118002/css-marquee-speed
                 // todo: use the virtual dom instead of real dom...
-                var spanSelector = document.getElementById("marquee").querySelector("span");
-                var timeTaken = this.tickertext.length / 20;  // about N characters per second.
-                spanSelector.style.animationDuration = timeTaken + "s";
+                try {
+                    var spanSelector = document.getElementById("marquee").querySelector("span");
+                    var timeTaken = this.tickertext.length / 20;  // about N characters per second.
+                    spanSelector.style.animationDuration = timeTaken + "s";
+                    console.log("Set to " + timeTaken)
+                } catch(err) {
+                    console.log("Marquee was not visible in the DOM.")
+                    // Weird is that when the property is set when hiding... it isn't stored. probably
+                    // because it affects the real dom only, not the virtual dom.
+                }
             },
             colorize: function (value, rank) {
                 if (value === 0)
