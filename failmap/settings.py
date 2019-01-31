@@ -930,7 +930,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
       )),
 
     ('Project information: how you call this installation publicly',
-     ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
+     ('PROJECT_NAME', 'PROJECT_TAGLINE', 'PROJECT_COUNTRY', 'PROJECT_MAIL',
       'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
 
     ('Contact information of your organization',

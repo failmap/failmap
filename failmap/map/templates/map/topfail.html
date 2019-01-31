@@ -7,10 +7,6 @@
         <p v-if="metadata">{% trans "This is the top fail from" %} {% verbatim %}{{
             humanize(metadata.data_from_time) }}{% endverbatim %}</p>
 
-        {% if not filteredData %}
-            <p>{% trans "This list is empty." %}</p>
-        {% else %}
-
         <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()">
             <i class='fas fa-plus-square'></i> {% trans "Expand/shorten list" %}
         </span><br/><br/>
@@ -61,6 +57,5 @@
             </tbody>
         </table>
 
-        {% endif %}
     </div>
 </div>
