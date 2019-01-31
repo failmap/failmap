@@ -1346,8 +1346,6 @@
                     </li>
                 </ul>
 
-
-
             </div>
 
             <div class="col-md-3">
@@ -1356,6 +1354,11 @@
                     <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank" rel="noopener">{% trans "Get the sourcecode" %}</a></li>
                     <li>📖 <a href="https://docs.failmap.org" target="_blank" rel="noopener">{% trans "Documentation" %}</a></li>
                 </ul>
+                {% if config.SHOW_TICKER %}
+                <ul>
+                    <li><a onclick="vueTicker.toggleVisibility();">{% trans "Show / Hide Ticker" %}</a></li>
+                </ul>
+                {% endif %}
             </div>
 
             <div class="col-md-3">
@@ -1365,6 +1368,7 @@
                     <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank" rel="noopener">SIDN fonds</a></li>
                 </ul>
             </div>
+
             <div class="col-md-3">
                 {% if config.RESPONSIBLE_ORGANIZATION_NAME %}
                 <b>{% trans "This website is run by" %}</b>
@@ -1409,14 +1413,16 @@
 {% if config.SHOW_TICKER %}
 <div id="ticker" v-cloak>
     <div id="ticker_bar" v-if="visible">
-        <p class="marquee very-huge"><span><span v-html="get_tickertext()"></span></span></p>
+        <p id="marquee" class="marquee very-huge"><span v-html="get_tickertext()"></span></p>
     </div>
 </div>
 {% endif %}
 
+<!--
 <div id="viewmore">
     <span><a href="#info"><i class="fas fa-chevron-circle-down"></i> {% trans "Review many more details below!" %} <i class="fas fa-chevron-circle-down"></i></a></span>
 </div>
+-->
 
 </body>
 

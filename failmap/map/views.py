@@ -1301,36 +1301,51 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
 
     oldest_urlratings = list(OrganizationRating.objects.raw(sql))
 
+    # create a dict, where the keys are pointing to the ratings. This makes it easy to match the
+    # correct ones. And handle missing oldest ratings for example.
+    oldest_urlratings_dict = {}
+    for oldest_urlrating in oldest_urlratings:
+        oldest_urlratings_dict[oldest_urlrating.name] = oldest_urlrating
+
     # insuccesful rebuild? Or not enough organizations?
-    if not oldest_urlratings:
+    if not newest_urlratings:
         data = {'changes': {}, 'slogan': config.TICKER_SLOGAN}
         return JsonResponse(data, encoder=JSEncoder, json_dumps_params={'indent': 2}, safe=False)
 
     changes = []
-    # stats for the newest, should be made a function:
-
-    # silently implying that both querysets have the same length and so on. Which might not be the case(?!)
-    i = 0
     for newest_urlrating in newest_urlratings:
-        if i > len(oldest_urlratings):
-            # probably a failed rebuild ratings caused this situation to happen,
-            # just return what we have... would that be out of sync?
-            break
+
+        try:
+            matching_oldest = oldest_urlratings_dict[newest_urlrating.name]
+        except KeyError:
+            matching_oldest = None
+
+        if not matching_oldest:
+            high_then = medium_then = low_then = "-"
+            high_changes = newest_urlrating.high
+            medium_changes = newest_urlrating.medium
+            low_changes = newest_urlrating.low
+
+        else:
+            high_then = matching_oldest.high
+            medium_then = matching_oldest.medium
+            low_then = matching_oldest.low
+            high_changes = newest_urlrating.high - matching_oldest.high
+            medium_changes = newest_urlrating.medium - matching_oldest.medium
+            low_changes = newest_urlrating.low - matching_oldest.low
 
         change = {
             'organization': newest_urlrating.name,
             'high_now': newest_urlrating.high,
             'medium_now': newest_urlrating.medium,
             'low_now': newest_urlrating.low,
-            'high_then': oldest_urlratings[i].high,
-            'medium_then': oldest_urlratings[i].medium,
-            'low_then': oldest_urlratings[i].low,
-            'high_changes': newest_urlrating.high - oldest_urlratings[i].high,
-            'medium_changes': newest_urlrating.medium - oldest_urlratings[i].medium,
-            'low_changes': newest_urlrating.low - oldest_urlratings[i].low,
+            'high_then': high_then,
+            'medium_then': medium_then,
+            'low_then': low_then,
+            'high_changes': high_changes,
+            'medium_changes': medium_changes,
+            'low_changes': int(low_changes),
         }
-
-        i += 1
 
         changes.append(change)
 

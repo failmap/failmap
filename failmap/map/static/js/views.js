@@ -756,12 +756,6 @@ const top_mixin = {
 };
 
 
-// This is for demo purposes only
-function show_ticker() {
-    vueTicker.visible = true;
-}
-
-
 // This helps showing some regions that might not be set to 'displayed' and is for demo purposes
 function germany() {
     vueMapStateBar.countries = ["NL", "DE"];
@@ -1179,7 +1173,7 @@ function views(autoload_default_map_data=true) {
         el: '#ticker',
         data: {
             tickertext: "",
-            visible: true,
+            visible: false,
             changes: Array(),
             slogan: ""
         },
@@ -1188,6 +1182,18 @@ function views(autoload_default_map_data=true) {
             this.visible = !(TICKER_VISIBLE_VIA_JS_COMMAND === 'true');
         },
         methods: {
+            toggleVisibility: function (){
+              this.visible = !this.visible;
+              this.setMarqueeSpeed();
+            },
+            setMarqueeSpeed: function (){
+                // Time = Distance/Speed
+                // https://stackoverflow.com/questions/38118002/css-marquee-speed
+                // todo: use the virtual dom instead of real dom...
+                var spanSelector = document.getElementById("marquee").querySelector("span");
+                var timeTaken = this.tickertext.length / 20;  // about N characters per second.
+                spanSelector.style.animationDuration = timeTaken + "s";
+            },
             colorize: function (value, rank) {
                 if (value === 0)
                     return "black";
@@ -1225,6 +1231,9 @@ function views(autoload_default_map_data=true) {
 
                 fetch('/data/ticker/' + this.country + '/' + this.layer + '/0/0').then(response => response.json()).then(data => {
 
+                    // reset the text for the new data.
+                    this.tickertext = "";
+
                     this.changes = data.changes;
                     this.slogan = data.slogan;
 
@@ -1235,7 +1244,8 @@ function views(autoload_default_map_data=true) {
 
                         if (!change['high_now'] && !change['medium_now'] && !change['low_now']){
 
-                            this.tickertext += "<a style='color: green'>PERFECT</a>  ";
+                            this.tickertext += "<a style='color: green' title='---------------------------------------" +
+                                "------'>PERFECT</a>  ";
 
                         } else {
 
@@ -1260,6 +1270,9 @@ function views(autoload_default_map_data=true) {
                             this.tickertext += " &nbsp; ";
                         }
                     }
+
+                    if (this.visible)
+                        this.setMarqueeSpeed()
 
                 }).catch((fail) => {console.log('A Ticker error occurred: ' + fail)});
             }

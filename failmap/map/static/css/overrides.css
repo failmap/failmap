@@ -508,7 +508,7 @@ path {
 
 
 /* Make it a marquee */
-.marquee {
+#marquee {
     width: 100%;
     margin: 0 auto;
     white-space: nowrap;
@@ -516,13 +516,13 @@ path {
     box-sizing: border-box;
 }
 
-.marquee span {
+#marquee span {
     display: inline-block;
     padding-left: 1vw;
     text-indent: 0;
-    animation: marquee 8000s linear infinite;
+    animation: marquee linear infinite;
 }
-.marquee span:hover {
+#marquee span:hover {
     animation-play-state: paused
 }
 
