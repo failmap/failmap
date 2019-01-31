@@ -630,6 +630,7 @@ def top_fail(request, country: str = "NL", organization_type="municipality", wee
               ON x.id2 = map_organizationrating.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
+            AND total_urls > 0
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
@@ -719,6 +720,7 @@ def top_win(request, country: str = "NL", organization_type="municipality", week
               ON x.id2 = map_organizationrating.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
+            AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC

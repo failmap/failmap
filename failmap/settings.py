@@ -65,6 +65,8 @@ INSTALLED_APPS = [
     # needs to be before jet and admin to extend admin/base.html template
     'dal',
     'dal_select2',
+    'constance',
+    'constance.backends.database',
     'failmap.app',
     'django_fsm_log',
     'adminsortable2',
@@ -92,8 +94,6 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'proxy',
     'django_statsd',
-    'constance',
-    'constance.backends.database',
     'leaflet',
     'djgeojson',
     'crispy_forms',  # for the game
@@ -650,38 +650,101 @@ CONSTANCE_ADDITIONAL_FIELDS = {
 
 
 CONSTANCE_CONFIG = {
-    'COMMENTS': ('', 'Some comments by you that say a little bit about why below settings are the way they are.', str),
+    'COMMENTS': (
+        '',
+        'Here you can explain why some settings are set to a specific value. This can help when there is a '
+        'sudden change. For example: a scanner stops working, there are issues with certain features and etcetera. '
+        '<br /><br />If you manage these options with multiple people, make sure to contact everyone and leave '
+        'contact information in this field. The value of this field will not be published on the website. ', str
+    ),
 
-    'SHOW_ANNOUNCEMENT': (False, 'Shows the announcement bar. Announcements do not show when empty anyway.', bool),
-    'ANNOUNCEMENT': ('', 'Text / HTML message that should appear on the top of the site / app. For example with '
-                         'important news / features or current issues. You can enter any HTML, JS, CSS.', str),
+    'SHOW_ANNOUNCEMENT': (
+        False,
+        'Shows an announcement bar at the top of the website. This allows you to communicate about new features or '
+        'upcoming fairs / meetings and etcetera.', bool
+    ),
 
-    'PROJECT_NAME': ('', 'The name of this mapping project, used for branding and promotion.', str),
-    'PROJECT_COUNTRY': ('NL', 'Two letter ISO code of the country that should be shown.', str),
-    'PROJECT_TAGLINE': ('', 'Tagline for this project.', str),
-    'PROJECT_WEBSITE': ('', 'The url where this site is located. Without trailing slash. Eg: https://example.com', str),
-    'PROJECT_MAIL': ('', 'The address where people can contact for more info about this project.', str),
-    'PROJECT_ISSUE_MAIL': ('', 'The address where people can mail when they encounter issues, for example when they '
-                               'are using the incorrect findings button.', str),
-    'PROJECT_TWITTER': ('', 'The twitter address where people can follow this project. Include the @!', str),
-    'PROJECT_FACEBOOK': ('', 'The facebook address where people can follow this project. Has to be a complete url.',
-                         str),
+    'ANNOUNCEMENT': (
+        '',
+        'The text that you want to announce. You can make use of HTML, Javascript and CSS to include anything you '
+        'want. For example a link to a meeting, a new feature or a news message.', str
+    ),
 
+    'PROJECT_WEBSITE': (
+        '',
+        'The url where this site is located. Without trailing slash. Eg: https://example.com.'
+        '<br><br> This is used in a couple of places on the website, in RSS feeds and other locations that need to '
+        'point to the url of this site. The URL of this website cannot be determined automatically, unfortunately,'
+        'so please set it yourself.', str
+    ),
 
-    'GOOGLE_MAPS_API_KEY': ('AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo',
-                            'API Key of google maps that can be used in the game / adding section.'
-                            'You can get these API keys '
-                            'at https://developers.google.com/maps/documentation/javascript/get-api-key', str),
+    'PROJECT_NAME': (
+        '',
+        'The name of this mapping project, used for branding and promotion.'
+        '<br><br>For example: in the Netherlands the title Faalkaart is used. This has changed over time to '
+        'Basis Beveiliging. The name will be shown at the bottom of the website.', str
+    ),
 
-    'MAPBOX_ACCESS_TOKEN': ('pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
-                            'Access token for Mapbox. Read more about it '
-                            'at https://docs.mapbox.com/help/how-mapbox-works/access-tokens/.', str),
+    'PROJECT_COUNTRY': (
+        'NL',
+        'Two letter ISO3316-2 code of the country that should be shown when there is absolutely no information '
+        'to show on the map. This is overridden by the default Map Configuration.', str
+    ),
 
-    'WAMBACHERS_OSM_CLIKEY': ('', 'CLI key for Wambachers OSM import feature. Imports nicer looking regions from'
-                                  ' openstreetmaps. You can get a key at'
-                                  'https://wambachers-osm.website/boundaries/. First create an '
-                                  'account, then after logging in via oauth hit the download button on the'
-                                  ' website with CLI checked. You\'ll get a link with the key included.', str),
+    'PROJECT_TAGLINE': (
+        '',
+        'Tagline for this project.', str
+    ),
+
+    'PROJECT_MAIL': (
+        '',
+        'The address where people can contact for more info about this project.', str),
+
+    'PROJECT_ISSUE_MAIL': (
+        '',
+        'The address where people can mail when they encounter issues, for example when they '
+        'are using the incorrect findings button.', str),
+
+    'PROJECT_TWITTER': (
+        '',
+        'The twitter address where people can follow this project. Include the @!', str),
+
+    'PROJECT_FACEBOOK': (
+        '',
+        'The facebook address where people can follow this project. Has to be a complete url.', str),
+
+    'GOOGLE_MAPS_API_KEY': (
+        'AIzaSyBXJbEUxGW1dAB4hJOlmKdYelfoRY6_fjo',
+        'This API key is used for geocoding services. Geocoding converts an address to a point on the map. <br><br>'
+        'This is done in the DataSet import feature, as well as the game. If plan to use either, enter this key.'
+        '<br><br> You can request a Key at the Google Developer console, '
+        '<a href="https://developers.google.com/maps/documentation/javascript/get-api-key"  target="_blank">here</a>.'
+        '<br><br>'
+        'Using geocoding services is not free. The first year a credit is given of 400 euro, which is enough to '
+        'geocode thousands of addresses.', str),
+
+    'MAPBOX_ACCESS_TOKEN': (
+        'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
+        'Mapbox provides the tiles shown on failmap. This makes the map look like a map. Mapbox provides a number of'
+        ' tilesets and one is preconfigured to look well. Using mapbox tiles isn\'t free. Yet it requires a serious '
+        'amount of visitors before it starts to cost money.<br><br>'
+        'You can request a new mapbox key '
+        '<a href="https://docs.mapbox.com/help/how-mapbox-works/access-tokens/" target="_blank">here</a>.', str),
+
+    'WAMBACHERS_OSM_CLIKEY': (
+        '',
+        'Using this key replaces import from Open Street Maps with a specialized service. Using this serivce you will '
+        'have nicer looking maps. The big difference is that all major waters and seas have been cut out, so only '
+        'land mass is visible. This will make your country more recognizable if your country is near a sea or contains '
+        'a large water body. Sea boarders usually span a few dozen kilometers outside of the land mass. <br /><br />'
+        'Obtaining this key can be a bit tricky. First, go here: '
+        '<a href="https://wambachers-osm.website/boundaries/"  target="_blank">wambachers-osm.website</a>. '
+        'Then sign into Open Street '
+        'Maps using the bottom at the top right of the page. After signing in, return to the wambacher site and '
+        'use the form at the bottom of the page. Make sure the CLI checkmarked is set. When hitting the "download" '
+        'button, a link will appear containing your unique key. Paste this key here.<br /><br />'
+        'When using this service, please donate, as every query you do costs server and hosting capacity. A suitable'
+        'amount of money is &euro;13.37 or &euro;42.', str),
 
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
@@ -696,9 +759,13 @@ CONSTANCE_CONFIG = {
     'RESPONSIBLE_ORGANIZATION_WHATSAPP': ('', 'Whatsapp number.', str),
     'RESPONSIBLE_ORGANIZATION_PHONE': ('', 'Phone number, displayed as a sip:// addres.', str),
 
-    'SHOW_INTRO': (True, 'Shows the standard introduction.', bool),
-    'SHOW_GOOD_BAD': (True, 'Shows the good / bad lists.', bool),
-    'SHOW_EXTENSIVE_STATISTICS': (True, 'Shows extended statistics.', bool),
+    'SHOW_INTRO': (True, 'Shows an introduction text that explains what this site is and what it does. This text '
+                         'might not have been translated to your language yet, which means an English text is shown.'
+                         '', bool),
+    'SHOW_CHARTS': (True, 'Shows the list of charts. Those are the lists of all good / bad organizations ordered '
+                          'by how good or bad they are doing.', bool),
+    'SHOW_EXTENSIVE_STATISTICS': (True, 'Shows extended statistics: these are bars of how well things are going '
+                                        'now and in the past months.', bool),
     'SHOW_STATS_GRAPHS': (True, 'Shows graphs in extended statistics. '
                                 'Extended statistics needs to be enabled for this to have effect.', bool),
     'SHOW_STATS_IMPROVEMENTS': (True, 'Shows improvements in extended statistics. '
@@ -709,37 +776,75 @@ CONSTANCE_CONFIG = {
                                  'Extended statistics needs to be enabled for this to have effect.', bool),
     'SHOW_DATASETS': (True, 'Shows dataset downloads. Note: dataset downloads are always available, even if they '
                             'are not shown on the website.', bool),
-    'SHOW_COMPLY_OR_EXPLAIN': (False, 'Shows comply or explain sections and the explain link in findings.', bool),
-    'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (False, 'Shows a link to the comply or explain discussion forum. The url of this'
-                                              'forum can be edited below.', bool),
+    'SHOW_COMPLY_OR_EXPLAIN': (
+        False,
+        'Comply or explain allows organizations to explain findings publicly. This is shown on the website and in '
+        'reports. The explanation is shown next to the crossed-out original finding. This helps organizations '
+        'to explain why things aren\'t optimal yet. <br><br>'
+        'Note that using this adds a significant amount of administrative work. This will be eased with the '
+        'upcoming PRO features. Yet, if your organization or group is up for some administrative work '
+        'it will be fine. It isn\'t hard, it just has to be done.', bool),
+
+    'SHOW_COMPLY_OR_EXPLAIN_DISCUSS': (
+        False,
+        'Shows a link to the comply or explain discussion forum. The url of this forum can be edited below.', bool),
     'SHOW_TICKER': (False, 'Shows stock-ticker with updates in the past month.', bool),
     'TICKER_SLOGAN': ('FAILMAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
     'TICKER_VISIBLE_VIA_JS_COMMAND': (False, 'Only show the ticker using the Javascript command "show_ticker()"', bool),
     'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
-    'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_TLS_QUALYS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_MISSING_TLS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_HEADERS_HSTS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_HEADERS_XFO': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
-    'SHOW_FTP': (True, 'Show graphs/stats of this? May cause empty spots on the site.', bool),
+    'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_TLS_QUALYS': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_MISSING_TLS': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_HEADERS_HSTS': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_HEADERS_XFO': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this?', bool),
+    'SHOW_FTP': (True, 'Show graphs/stats of this?', bool),
     'SHOW_DONATION': (True, 'Show donation buttons and links on the site.', bool),
 
-    'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK': ('', 'Link to the comply or explain discussion forum.', str),
+    'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK': (
+        '',
+        'A link where comply or explain items can be discussed. This might prevent a number of duplicate entries.',
+        str),
+
     'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS': ('', 'E-mail where to receive explanations.', str),
 
-    # todo: schedule this once per week by default.
-    'DISCOVER_URLS_USING_NSEC': (True, 'Discover new domains using DNSSEC NSEC1 hashes? (See docs)', bool),
-    'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS': (True, 'Discover new domains using known subdomains? (See docs)', bool),
-    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY': (True, 'Discover new domains using crt.sh '
-                                                           'certificate transperancy database? (See docs)', bool),
-    'DISCOVER_HTTP_ENDPOINTS': (True, 'Do you want to discover HTTP endpoints?', bool),
+    'DISCOVER_URLS_USING_NSEC': (
+        True,
+        'Discover new domains using DNSSEC NSEC1 enumeration. This is a powerful but not frequently used feature '
+        'that allows you to sometimes discover all subdomains of a domain. This check is very fast and results '
+        'in a complete set of domains. Might not be used by the owner of the domain, in that case it will '
+        'return no subdomains.', bool),
 
-    'SCAN_AT_ALL': (True, 'Do you want to scan at all?', bool),
-    'SCAN_PROXY_TESTING_URL': ('https://5717.ch', 'Server where you can see scans through a proxy.', str),
+    'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS': (
+        True,
+        'Uses the list of known subdomains in your installation to discover the same subdomains on other domains. '
+        '<br><br>For example: it will search "test" on every domain, if that is present in an existing url: '
+        '"text.example.com".', bool),
+
+    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY': (
+        True,
+        'This discovery method searches for certificates published on a domain. When a website uses https, the request '
+        'for a new certificate is published publicly as part of the Certiificate Transparency program. Using the '
+        'public database of all requests, it\'s possible to find hundreds of subdomains for a domain.'
+        '<br><br>The service used is crt.sh.', bool),
+
+    'DISCOVER_HTTP_ENDPOINTS': (
+        True,
+        'An internet address can have multiple services. Each of these services can be run on multiple ports. '
+        'To simplify this, the word Endpoint is used. A normal website has an average of two to four endpoints.'
+        '<br><br>By selecting this, endpoints will be discovered and scans can be performed. If you do not '
+        'select this, no endpoints will be discovered (anymore) but scans may still be performed on existing '
+        'endpoints.', bool),
+
+    'SCAN_AT_ALL': (
+        True,
+        'This quickly enables or disabled all scans. Note that scans in the scan queue will still be processed.', bool),
+
+
+    'SCAN_PROXY_TESTING_URL': ('', 'Server where you can see scans through a proxy.', str),
     'SCAN_DNS_DNSSEC': (True, 'Do you want to scan for DNSSEC issues?', bool),
     'SCAN_HTTP_TLS_QUALYS': (True, 'Do you want to scan for TLS issues through Qualys? This is about 1 scan per '
                                    'two minutes. Cloud scanning can improve this a bit.', bool),
@@ -752,7 +857,7 @@ CONSTANCE_CONFIG = {
     'SCAN_HTTP_HEADERS_X_XSS': (True, 'Do you want to scan for missing X-XSS headers?', bool),
     'SCAN_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to scan for missing X-Content-Type issues?', bool),
     'SCAN_FTP': (True, 'Do you want to scan for FTP servers that are missing encryption?', bool),
-    # todo username and password for internetnl, make separate category
+
     'SCAN_MAIL_INTERNET_NL': (True, 'Do you want to scan for email security configuration using internet.nl?', bool),
     'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API. You can request one via the contact '
                                      'options on their site, https://internet.nl.', str),
@@ -772,14 +877,24 @@ CONSTANCE_CONFIG = {
     'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to show X-Content-Type headers in the report?', bool),
 
     # scanning pre-requisites
-    'CONNECTIVITY_TEST_DOMAIN': ('faalkaart.nl', 'A server that is reachable over IPv4. This is used by a worker '
-                                                 'to determine what kind of scans it can do. Enter an '
-                                                 'address that you own or manage.', str),
-    'IPV6_TEST_DOMAIN': ('faalkaart.nl', 'A server that is reachable over IPv6. This is used by a worker to determine '
-                                         'what kind of scans it can do. Enter an address that you own or manage.', str),
+    'CONNECTIVITY_TEST_DOMAIN': (
+        'faalkaart.nl',
+        'A server that is reachable over IPv4. This is used by a worker to determine what kind of scans it can do. '
+        'Enter an address that you own or manage.', str),
 
-    'GITTER_CHAT_ENABLE': (False, 'Show the Gitter Chat option on the website (using gitter sidecar).', bool),
-    'GITTER_CHAT_CHANNEL': ('internet-cleanup-foundation/support', 'Name of the channel chat takes place.', str),
+    'IPV6_TEST_DOMAIN': (
+        'ip6.nl',
+        'A server that is reachable over IPv6. This is used by a worker to determine '
+        'what kind of scans it can do. Enter an address that you own or manage.', str),
+
+    'GITTER_CHAT_ENABLE': (
+        False,
+        'Show a chat button on the bottom-right of the website. This chat uses Gitter Chat.', bool),
+
+    'GITTER_CHAT_CHANNEL': (
+        'internet-cleanup-foundation/support',
+        'Name of the channel chat takes place. You might need to create a channel on gitter.'
+        'You can do so, <a href="https://gitter.im" target="_blank">here</a>.', str),
 
     'ENABLE_PRO': (False, 'Todo: implement.', bool),
     'PRO_REPLY_TO_MAIL_ADDRESS': ('', 'Reply mail address used when sending PRO mails.', str),
@@ -796,61 +911,93 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
-    ('General', ('COMMENTS', 'SHOW_ANNOUNCEMENT', 'ANNOUNCEMENT', 'MAPBOX_ACCESS_TOKEN', 'WAMBACHERS_OSM_CLIKEY')),
+    ('General',
+     ('COMMENTS', 'PROJECT_WEBSITE', 'SHOW_ANNOUNCEMENT', 'ANNOUNCEMENT')),
 
-    ('Project', ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
-                 'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
+    ('Keys to External Services',
+     ('MAPBOX_ACCESS_TOKEN', 'WAMBACHERS_OSM_CLIKEY', 'GOOGLE_MAPS_API_KEY',
+      )),
 
-    ('Responsible', ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT',
-                     'RESPONSIBLE_ORGANIZATION_WEBSITE', 'RESPONSIBLE_ORGANIZATION_MAIL',
-                     'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK',
-                     'RESPONSIBLE_ORGANIZATION_LINKEDIN', 'RESPONSIBLE_ORGANIZATION_WHATSAPP',
-                     'RESPONSIBLE_ORGANIZATION_PHONE')),
+    ('Project information: how you call this installation publicly',
+     ('PROJECT_NAME', 'PROJECT_COUNTRY', 'PROJECT_TAGLINE', 'PROJECT_WEBSITE', 'PROJECT_MAIL',
+      'PROJECT_ISSUE_MAIL', 'PROJECT_TWITTER', 'PROJECT_FACEBOOK')),
 
-    ('Website', ('SHOW_INTRO', 'SHOW_GOOD_BAD', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
-                 'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
-                 'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
-                 )),
+    ('Contact information of your organization',
+     ('RESPONSIBLE_ORGANIZATION_NAME', 'RESPONSIBLE_ORGANIZATION_PROMO_TEXT', 'RESPONSIBLE_ORGANIZATION_WEBSITE',
+      'RESPONSIBLE_ORGANIZATION_MAIL', 'RESPONSIBLE_ORGANIZATION_TWITTER', 'RESPONSIBLE_ORGANIZATION_FACEBOOK',
+      'RESPONSIBLE_ORGANIZATION_LINKEDIN', 'RESPONSIBLE_ORGANIZATION_WHATSAPP', 'RESPONSIBLE_ORGANIZATION_PHONE')),
 
-    ('Discovery', ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
-                   'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS')),
+    ('Chat and support options (using gitter)',
+     ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL')),
 
-    ('Scanning', ('SCAN_AT_ALL', 'SCAN_PROXY_TESTING_URL')),
+    ('Comply or Explain',
+     ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
+      'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK', 'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS')),
 
-    ('Scanner Capabilities', ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN')),
+    ('What to show on the website',
+     ('SHOW_INTRO', 'SHOW_CHARTS', 'SHOW_EXTENSIVE_STATISTICS', 'SHOW_DATASETS', 'SHOW_STATS_GRAPHS',
+      'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
+      'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
+      )),
 
-    ('Scanning (beta)', ('SCAN_HTTP_TLS_OSAFT', 'CREATE_HTTP_SCREENSHOT')),
+    ('Discovery of new urls, endpoints and scanning',
+     ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
+      'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS', 'SCAN_AT_ALL')),
 
-    ('TLS Scans (Qualys)', ('SCAN_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'SHOW_HTTP_TLS_QUALYS', )),
+    ('Encryption Quality Scans (TLS, tested with Qualys)',
+     ('SCAN_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'SHOW_HTTP_TLS_QUALYS', )),
 
-    ('Missing TLS Scans', ('SCAN_HTTP_MISSING_TLS', 'REPORT_INCLUDE_HTTP_MISSING_TLS', 'SHOW_HTTP_MISSING_TLS', )),
+    ('Missing Encryption',
+     ('SCAN_HTTP_MISSING_TLS', 'REPORT_INCLUDE_HTTP_MISSING_TLS', 'SHOW_HTTP_MISSING_TLS', )),
 
-    ('DNSSEC Scans', ('SCAN_DNS_DNSSEC', 'REPORT_INCLUDE_DNS_DNSSEC', 'SHOW_DNS_DNSSEC')),
+    ('Domain Name Security (DNSSEC)',
+     ('SCAN_DNS_DNSSEC', 'REPORT_INCLUDE_DNS_DNSSEC', 'SHOW_DNS_DNSSEC')),
 
-    ('FTP Scans', ('SCAN_FTP', 'REPORT_INCLUDE_FTP', 'SHOW_FTP', )),
+    ('File Transfer Protocol (FTP)',
+     ('SCAN_FTP', 'REPORT_INCLUDE_FTP', 'SHOW_FTP', )),
 
-    ('Internet.nl Scans', ('SCAN_MAIL_INTERNET_NL', 'INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
+    ('Website security settings: HSTS, Hypertext Strict Transport Security',
+     ('SCAN_HTTP_HEADERS_HSTS',
+      'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
+      'SHOW_HTTP_HEADERS_HSTS',
+      )),
 
-    ('Security Headers Scans', ('SCAN_HTTP_HEADERS_HSTS', 'SCAN_HTTP_HEADERS_XFO', 'SCAN_HTTP_HEADERS_X_XSS',
-                                'SCAN_HTTP_HEADERS_X_CONTENT', 'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
-                                'REPORT_INCLUDE_HTTP_HEADERS_XFO', 'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-                                'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT',  'SHOW_HTTP_HEADERS_HSTS',
-                                'SHOW_HTTP_HEADERS_XFO',
-                                'SHOW_HTTP_HEADERS_X_XSS', 'SHOW_HTTP_HEADERS_X_CONTENT', )),
+    ('Website security settings: Clickjacking, X-Frame-Options', (
+        'SCAN_HTTP_HEADERS_XFO',
+        'REPORT_INCLUDE_HTTP_HEADERS_XFO',
+        'SHOW_HTTP_HEADERS_XFO',
+    )),
 
-    ('Comply or Explain', ('SHOW_COMPLY_OR_EXPLAIN', 'SHOW_COMPLY_OR_EXPLAIN_DISCUSS',
-                           'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK', 'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS')),
+    ('Website security settings: X_XSS_OPTIONS, Cross Site Scripting prevention header', (
+        'SCAN_HTTP_HEADERS_X_XSS',
+        'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
+        'SHOW_HTTP_HEADERS_X_XSS',
+    )),
 
-    ('Game', ('GOOGLE_MAPS_API_KEY',)),
+    ('Website security settings: Content Parsing, X-Content-Type-Options', (
+        'SCAN_HTTP_HEADERS_X_CONTENT',
+        'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT',
+        'SHOW_HTTP_HEADERS_X_CONTENT',
+    )),
 
-    ('Ticker', ('SHOW_TICKER', 'TICKER_SLOGAN', 'TICKER_VISIBLE_VIA_JS_COMMAND')),
+    ('Fair / Stand options',
+     ('SHOW_TICKER', 'TICKER_SLOGAN', 'TICKER_VISIBLE_VIA_JS_COMMAND')),
 
-    ('Chat (using gitter)', ('GITTER_CHAT_ENABLE', 'GITTER_CHAT_CHANNEL')),
+    ('Developer configuration. For debugging and verification',
+     ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN', 'SCAN_PROXY_TESTING_URL',)),
 
-    ('Pro', ('ENABLE_PRO', 'PRO_REPLY_TO_MAIL_ADDRESS')),
+    ('<span class="beta">beta</span> Internet.nl Scans (in development)',
+     ('SCAN_MAIL_INTERNET_NL', 'INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
 
-    ('Pro Mail Settings', ('PRO_EMAIL_HOST', 'PRO_EMAIL_PORT', 'PRO_EMAIL_USERNAME', 'PRO_EMAIL_PASSWORD',
-                           'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
+    ('<span class="beta">beta</span> Scanning (in development)',
+     ('SCAN_HTTP_TLS_OSAFT', 'CREATE_HTTP_SCREENSHOT')),
+
+    ('<span class="beta">beta</span> Pro (in development)',
+     ('ENABLE_PRO', 'PRO_REPLY_TO_MAIL_ADDRESS')),
+
+    ('<span class="beta">beta</span> Pro Mail Settings (in development)',
+     ('PRO_EMAIL_HOST', 'PRO_EMAIL_PORT', 'PRO_EMAIL_USERNAME', 'PRO_EMAIL_PASSWORD',
+      'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
 
 ])
 

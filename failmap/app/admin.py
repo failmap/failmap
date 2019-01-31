@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from random import choice
 
 import pytz
+from constance.admin import Config, ConstanceAdmin, ConstanceForm
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -278,3 +279,21 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.register(Group, GroupAdmin)
+
+
+# Overwrite the ugly Constance forms with something nicer
+
+
+class CustomConfigForm(ConstanceForm):
+    def __init__(self, *args, **kwargs):
+        super(CustomConfigForm, self).__init__(*args, **kwargs)
+        # ... do stuff to make your settings form nice ...
+
+
+class ConfigAdmin(ConstanceAdmin):
+    change_list_form = CustomConfigForm
+    change_list_template = 'admin/config/settings.html'
+
+
+admin.site.unregister([Config])
+admin.site.register([Config], ConfigAdmin)
