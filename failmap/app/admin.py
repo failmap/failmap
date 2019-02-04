@@ -179,12 +179,64 @@ class GroupResource(resources.ModelResource):
         model = Group
 
 
+def generate_password():
+    password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
+    return "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
+
+
+def generate_username():
+    # generate nice names like docker container names
+    # https://github.com/moby/moby/blob/master/pkg/namesgenerator/names-generator.go
+
+    # slightly redacted list to make all names always positive.
+    traits = [
+        "admiring", "adoring", "affectionate", "amazing", "awesome", "blissful", "bold", "brave", "charming", "clever",
+        "cool", "compassionate", "competent", "confident", "crazy", "dazzling", "determined", "dreamy", "eager",
+        "ecstatic", "elastic", "elated", "elegant", "eloquent", "epic", "fervent", "festive", "flamboyant", "focused",
+        "friendly", "gallant", "gifted", "goofy", "gracious", "happy", "hardcore", "heuristic", "hopeful", "infallible",
+        "inspiring", "jolly", "jovial", "keen", "kind", "laughing", "loving", "lucid", "magical", "mystifying",
+        "modest", "musing", "naughty", "nifty", "nostalgic", "objective", "optimistic", "peaceful", "pensive",
+        "practical", "priceless", "quizzical", "recursing", "relaxed", "reverent", "romantic", "serene", "sharp",
+        "silly", "sleepy", "sweet", "tender", "trusting", "unruffled", "upbeat", "vibrant", "vigilant", "vigorous",
+        "wizardly", "wonderful", "youthful", "zealous", "zen",
+    ]
+
+    # See the elaborate explanations of all these names in the original file.
+    names = [
+        "albattani", "allen", "almeida", "antonelli", "agnesi", "archimedes", "ardinghelli", "aryabhata", "austin",
+        "babbage", "banach", "banzai", "bardeen", "bartik", "bassi", "beaver", "bell", "benz", "bhabha", "bhaskara",
+        "black", "blackburn", "blackwell", "bohr", "booth", "borg", "bose", "boyd", "brahmagupta", "brattain", "brown",
+        "burnell", "buck", "burnell", "cannon", "carson", "cartwright", "chandrasekhar", "chaplygin", "chatelet",
+        "chatterjee", "chebyshev", "cocks", "cohen", "chaum", "clarke", "colden", "cori", "cray", "curran", "curie",
+        "darwin", "davinci", "dewdney", "dhawan", "diffie", "dijkstra", "dirac", "driscoll", "dubinsky", "easley",
+        "edison", "einstein", "elbakyan", "elgamal", "elion", "ellis", "engelbart", "euclid", "euler", "faraday",
+        "feistel", "fermat", "fermi", "feynman", "franklin", "gagarin", "galileo", "galois", "ganguly", "gates",
+        "gauss", "germain", "goldberg", "goldstine", "goldwasser", "golick", "goodall", "gould", "greider",
+        "grothendieck", "haibt", "hamilton", "haslett", "hawking", "hellman", "heisenberg", "hermann", "herschel",
+        "hertz", "heyrovsky", "hodgkin", "hofstadter", "hoover", "hopper", "hugle", "hypatia", "ishizaka", "jackson",
+        "jang", "jennings", "jepsen", "johnson", "joliot", "jones", "kalam", "kapitsa", "kare", "keldysh", "keller",
+        "kepler", "khayyam", "khorana", "kilby", "kirch", "knuth", "kowalevski", "lalande", "lamarr", "lamport",
+        "leakey", "leavitt", "lederberg", "lehmann", "lewin", "lichterman", "liskov", "lovelace", "lumiere", "mahavira",
+        "margulis", "matsumoto", "maxwell", "mayer", "mccarthy", "mcclintock", "mclaren", "mclean", "mcnulty", "mendel",
+        "mendeleev", "meitner", "meninsky", "merkle", "mestorf", "minsky", "mirzakhani", "moore", "morse", "murdock",
+        "moser", "napier", "nash", "neumann", "newton", "nightingale", "nobel", "noether", "northcutt", "noyce",
+        "panini", "pare", "pascal", "pasteur", "payne", "perlman", "pike", "poincare", "poitras", "proskuriakova",
+        "ptolemy", "raman", "ramanujan", "ride", "montalcini", "ritchie", "rhodes", "robinson", "roentgen", "rosalind",
+        "rubin", "saha", "sammet", "sanderson", "shannon", "shaw", "shirley", "shockley", "shtern", "sinoussi",
+        "snyder", "solomon", "spence", "sutherland", "stallman", "stonebraker", "swanson", "swartz", "swirles",
+        "taussig", "tereshkova", "tesla", "tharp", "thompson", "torvalds", "tu", "turing", "varahamihira", "vaughan",
+        "visvesvaraya", "volhard", "villani", "wescoff", "wiles", "williams", "williamson", "wilson", "wing", "wozniak",
+        "wright", "wu", "yalow", "yonath", "zhukovsky"
+    ]
+
+    return "%s %s" % (choice(traits).capitalize(), choice(names).capitalize())
+
+
 def generate_game_user():
     game_user_number = User.objects.all().filter(username__contains="game_user_").count()
     game_user_number += 1
 
-    password = ''.join(choice("ACDEFGHKLMNPRSTUVWXZ234567") for i in range(20))
-    password = "%s-%s-%s-%s-%s" % (password[0:4], password[4:8], password[8:12], password[12:16], password[16:20])
+    password = generate_password()
 
     user = User.objects.create_user(username="game_user_%s" % game_user_number,
                                     # can log into other things
