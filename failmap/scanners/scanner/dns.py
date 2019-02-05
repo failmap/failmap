@@ -303,17 +303,17 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
     # globals()['pool'] = pool
     builtins.pool = pool
 
-    # overwrite readline to always return "n", to handle any UI calls from dnsrecon.
-    # So even if our wildcard check fails, which happens sometimes, there is still the fallback in DNSRecon.
-    sys.stdin.readline = always_no
-
     log.debug("Performing wordlist scan on %s urls, with the wordlist of %s words" % (len(urls), len(wordlist)))
 
     # any organization can determine at any points that there are now wildcards in effect
     # would we not check this, all urls below the current url will be seen as valid, which
     # results in database polution and a lot of extra useless scans.
     # You can't run remove_and_save_wildcards here as it needs access to storage.
-    urls_without_wildcards = remove_wildcards(urls)
+    # urls_without_wildcards = remove_wildcards(urls)
+
+    # Not checking for wildcards anymore, we're using a feature in dnsrecon to discern between the wildcard IP
+    # and the rest of the IPs'. That works pretty well (not found a deviating case yet).
+    urls_without_wildcards = urls
 
     if not urls_without_wildcards:
         log.debug("No urls found without wildcards.")
@@ -335,9 +335,16 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
             resolver_ip = get_random_dns_resolver_ip()
             log.debug("Using the DNS service from %s" % resolver_ip)
             resolver = DnsHelper(url.url, resolver_ip, 3)
-            found_hosts = brute_domain(resolver, tmp_wordlist.name, url.url, None, verbose=False)
+            # Using the filter option, only adds the addresses that don't go to the wildcard record.
+            # In the logfile all dns responses are shown, but in the list of really resolving urls only the ones
+            # that deviate from the wildcard IP are stored.
+            found_hosts = brute_domain(resolver, tmp_wordlist.name, url.url,
+                                       filter=True, verbose=False, ignore_wildcard=True)
 
+            # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
+            # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
             log.debug("Found %s hosts" % len(found_hosts))
+            found_hosts = remove_wildcards_using_statistics(found_hosts, url)
 
             # You cant' know how many where added, since you don't have access to storage.
             dnsrecon_parse_report_contents.apply_async([url, found_hosts], queue="storage")
@@ -347,8 +354,63 @@ def wordlist_scan(urls: List[Url], wordlist: List[str]):
     return imported_urls
 
 
-def always_no(message=""):
-    return "n"
+def remove_wildcards_using_statistics(found_hosts, url):
+    # some hosts rotate a set of IP's when providing wildcards. This is an annoying practice.
+    # We can filter those out with some statistics. We cut off everything that resolve to the top IP's.
+    ip_stats = {}
+
+    # if no wildcards are used, then well... just return everything as being fine
+    if not discover_wildcard(url.url):
+        return found_hosts
+
+    # Create a list of how many IP's are used
+    # dnsrecon filters out the first IP, so if there is only one wildcard IP, then that's that.
+    for host in found_hosts:
+
+        # Points to a A / AAAA record
+        if 'address' in host:
+            if host['address'] not in ip_stats:
+                ip_stats[host['address']] = 1
+            else:
+                ip_stats[host['address']] += 1
+
+        # points to a certain CNAME
+        if 'target' in host:
+            if host['target'] not in ip_stats:
+                ip_stats[host['target']] = 1
+            else:
+                ip_stats[host['target']] += 1
+
+    log.debug("Ip Stats")
+    log.debug(ip_stats)
+    # block IP's that are being used more than 10 times. 10, because i like the number. More than 10 sites on
+    # the same server? perfectly possible. With a firewall it might be infinite.
+
+    # does this work with amsterdam?
+    banned_ips = []
+    for key in ip_stats.keys():
+        if ip_stats[key] > 10:
+            banned_ips.append(key)
+
+    log.debug("Banned IPS")
+    log.debug(banned_ips)
+
+    interesting_found_hosts = []
+    # remove all found hosts that are on the banned IP list:
+    for host in found_hosts:
+
+        if 'address' in host:
+            if host['address'] not in banned_ips:
+                interesting_found_hosts.append(host)
+
+        if 'target' in host:
+            if host['target'] not in banned_ips:
+                interesting_found_hosts.append(host)
+
+    log.debug("Interesting hosts")
+    log.debug(interesting_found_hosts)
+
+    return interesting_found_hosts
 
 
 def remove_wildcards(urls: List[Url]):
