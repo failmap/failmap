@@ -259,7 +259,15 @@ class Url(models.Model):
     uses_dns_wildcard = models.BooleanField(
         default=False,
         help_text="When true, this domain uses a DNS wildcard and any subdomain will resolve to "
-                  "something on this host.")
+                  "something on this host."
+    )
+
+    do_not_find_subdomains = models.BooleanField(
+        default=False,
+        help_text="If you do not want to automatically find subdomains, check this. This might be useful when "
+                  "a very, very large number of subdomains will be added for an organization and you only want to "
+                  "monitor a few urls that are relevant."
+    )
 
     dns_supports_mx = models.BooleanField(
         default=False,

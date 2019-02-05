@@ -40,6 +40,9 @@ def compose_discover_task(organizations_filter: dict = dict(),
         log.info("Did not get any urls to discover known subdomains.")
         return group()
 
+    # Remove all urls that should not have
+    urls = [url for url in urls if not url.do_not_find_subdomains]
+
     log.debug("Going to scan subdomains for the following %s urls." % len(urls))
 
     first_url = urls[0]

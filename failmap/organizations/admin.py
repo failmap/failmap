@@ -444,7 +444,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             'fields': ('url', 'organization', 'internal_notes', 'created_on', 'onboarded', 'onboarding_stage')
         }),
         ('DNS', {
-            'fields': ('uses_dns_wildcard', 'dns_supports_mx', ),
+            'fields': ('do_not_find_subdomains', 'uses_dns_wildcard', 'dns_supports_mx', ),
         }),
         ('Resolvability', {
             'description': 'Non resolving urls cannot be reached anymore.',
