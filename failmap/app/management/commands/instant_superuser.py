@@ -16,9 +16,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        username = generate_username()
-        first_name = username.split(" ")[0]
-        last_name = username.split(" ")[1]
+        username = generate_username().replace(" ", "-")
+        first_name = username.split("-")[0]
+        last_name = username.split("-")[1]
 
         password = generate_password()
 
@@ -27,9 +27,9 @@ class Command(BaseCommand):
         user.last_name = last_name
         user.save()
 
-        output = "Username: '%s', Password: '%s'" % (username, password)
-        print(output)
+        # simplest output only for command line parsing.
+        # print("Username: '%s', Password: '%s'" % (username, password))
 
         # linux compatible only.
-        sys.stdout.write(output)
+        sys.stdout.write("%s %s" % (username, password))
         sys.exit(0)
