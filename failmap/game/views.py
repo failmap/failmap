@@ -104,7 +104,16 @@ def submit_organisation(request):
         if form.is_valid():
             # manually saving the form, this is not your normal 1 to 1 save.
             form.save(team=request.session.get('team'))
-            form = OrganisationSubmissionForm(team=request.session.get('team'), contest=contest)
+
+            # Reset some values
+            log.debug(request.POST)
+
+            form = OrganisationSubmissionForm(
+                # reuse the form values, is this really the way this should be done?
+                {'organization_type_name': [request.POST.get('organization_type_name', None)]},
+                team=request.session.get('team'),
+                contest=contest,
+            )
             return render(request, 'game/submit_organisation.html',
                           {'form': form,
                            'success': True,

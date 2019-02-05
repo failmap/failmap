@@ -143,7 +143,7 @@ class OrganisationSubmissionForm(forms.Form):
 
     organization_address = forms.CharField(
         widget=forms.Textarea,
-        required=True
+        required=True,
     )
 
     organization_wikipedia = forms.URLField(
@@ -165,7 +165,8 @@ class OrganisationSubmissionForm(forms.Form):
         queryset=OrganizationType.objects.all(),
         widget=autocomplete.ModelSelect2(url='/game/autocomplete/organization-type-autocomplete/'),
         label="Map Layer",
-        help_text="On what layer this organization should be shown."
+        help_text="On what layer this organization should be shown.",
+        initial=2
     )
 
     organization_evidence = forms.CharField(

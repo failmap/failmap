@@ -68,26 +68,31 @@
 
     <h1>Suggest a new organisation</h1>
 
-    {% if contest.url_organization_discovery_help %}
-        <div class="alert alert-info" role="alert">
-            {{ contest.url_organization_discovery_help | markdown | safe }}
-        </div>
-    {% endif %}
+    <button type="button" class="btn btn-info"  data-toggle="collapse" data-target="#show_help">Show help</button>
+    <div id="show_help" class="collapse">
 
-    <p>
-    <b>Tips for suggesting organizations: </b>
-        <ol>
-            <li>Search for the organization in your native language.</li>
-            <li>Verify the organization currently still exists. Eg: look at the present/past tense in the snippets.</li>
-            <li>You can only see results for organizations in: {{ target_country }}.</li>
-            <li>If an organization has multiple locations, try to find the most important one.</li>
-            <li>Some organizations do not have an exact physical location: try adding something in it's general direction such as a zipcode.</li>
-        </ol>
-    </p>
+        {% if contest.url_organization_discovery_help %}
+            <div class="alert alert-info" role="alert">
+                {{ contest.url_organization_discovery_help | markdown | safe }}
+            </div>
+        {% endif %}
 
-    <h2>Autofill section</h2>
-    <p>This part of the form can massively help you finding the right location, address and wiki pages. Just search
-    and let the magic happen.</p>
+        <p>
+        <b>Tips for suggesting organizations: </b>
+            <ol>
+                <li>Search for the organization in your native language.</li>
+                <li>Verify the organization currently still exists. Eg: look at the present/past tense in the snippets.</li>
+                <li>You can only see results for organizations in: {{ target_country }}.</li>
+                <li>If an organization has multiple locations, try to find the most important one.</li>
+                <li>Some organizations do not have an exact physical location: try adding something in it's general direction such as a zipcode.</li>
+            </ol>
+        </p>
+
+        <h2>Autofill section</h2>
+        <p>This part of the form can massively help you finding the right location, address and wiki pages. Just search
+        and let the magic happen.</p>
+    </div>
+
     <div class="pac-card" id="pac-card">
         <div>
             <div id="title">
@@ -123,7 +128,7 @@
         <span id="place-address"></span>
     </div>
 
-    <div style="width: 100%; margin-top: 10px;">
+    <div style="width: 100%; margin-top: 10px; font-size: 0.7em;">
         <b style="padding-bottom: 3px;">Wikipedia Page*</b>
         <section class="wikipediaSearchResults"></section>
         <div class="resultItem" style="margin-bottom: 16px">
@@ -133,7 +138,7 @@
         </div>
     </div>
 
-    <div style="width: 100%; margin-top: 10px;">
+    <div style="width: 100%; margin-top: 10px; font-size: 0.7em;">
         <b style="padding-bottom: 3px;">Wikidata Code*</b>
         <section class="wikidataSearchResults"></section>
         <div class="resultItem" style="margin-bottom: 16px">
