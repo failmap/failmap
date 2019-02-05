@@ -146,6 +146,8 @@
     <h2>The submission form</h2>
     <p>This form contains the actual data that will be sent to the failmap system. Make sure this information is correct.</p>
     <form method="POST" class="uniForm">{% csrf_token %}
+        <button type="submit" class="save btn btn-lg btn-primary">SAVE THIS THING NOW!</button>
+        <br />
         {{ form | crispy }}
         <br/>
         <button type="submit" class="save btn btn-lg btn-primary">SAVE THIS THING NOW!</button>

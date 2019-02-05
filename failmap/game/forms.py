@@ -114,6 +114,15 @@ class OrganisationSubmissionForm(forms.Form):
 
         super(OrganisationSubmissionForm, self).__init__(*args, **kwargs)
 
+    field_order = (
+        # Fields to enter manually
+        'suggested_urls', 'organization_type_name',
+
+        # Fields entered automatically
+        'organization_name', 'latitude', 'longitude', 'organization_address', 'organization_wikipedia',
+        'organization_wikidata', 'organization_evidence',
+    )
+
     organization_name = forms.CharField(
         label="Name"
     )
