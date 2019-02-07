@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -183,9 +183,9 @@ msgstr ""
 msgid "Missing Strict-Transport-Security header."
 msgstr ""
 
-#: failmap/map/templates/map/index.html
+#: failmap/map/templates/map/index.html failmap/map/views.py
 msgid "Site Title"
-msgstr "Failmap - Security on a Map"
+msgstr "Web Security Map"
 
 #: failmap/map/templates/map/index.html
 msgid "Map"
@@ -225,6 +225,10 @@ msgstr "Debug"
 
 #: failmap/map/templates/map/index.html
 msgid "Admin"
+msgstr ""
+
+#: failmap/map/templates/map/index.html
+msgid "Monitoring"
 msgstr ""
 
 #: failmap/map/templates/map/index.html
@@ -870,7 +874,9 @@ msgid "Explanations"
 msgstr "Explanations"
 
 #: failmap/map/templates/map/index.html
-msgid "export_failmap_compatible_explained"
+#, fuzzy
+#| msgid "export_failmap_compatible_explained"
+msgid "export_map_compatible_explained"
 msgstr "These datasets are optimized to import in sites like this one."
 
 #: failmap/map/templates/map/index.html
@@ -899,6 +905,10 @@ msgstr ""
 
 #: failmap/map/templates/map/index.html
 msgid "Documentation"
+msgstr ""
+
+#: failmap/map/templates/map/index.html
+msgid "Show / Hide Ticker"
 msgstr ""
 
 #: failmap/map/templates/map/index.html
@@ -1037,11 +1047,7 @@ msgid "This is the top win from"
 msgstr ""
 
 #: failmap/map/views.py
-msgid "Fail Map"
-msgstr ""
-
-#: failmap/map/views.py
-msgid "Fail Map Introduction"
+msgid "Introduction"
 msgstr ""
 
 #: failmap/map/views.py

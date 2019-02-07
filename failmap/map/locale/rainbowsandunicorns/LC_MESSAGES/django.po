@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Fail Map <info@faalkaart.nl>\n"
 "Language-Team: LANGUAGE <info@faalkaart.nl>\n"
@@ -191,7 +191,7 @@ msgstr "🌈"
 msgid "Missing Strict-Transport-Security header."
 msgstr "🌈"
 
-#: failmap/map/templates/map/index.html
+#: failmap/map/templates/map/index.html failmap/map/views.py
 msgid "Site Title"
 msgstr "🌈"
 
@@ -240,6 +240,10 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html
 msgid "Admin"
 msgstr "🌈"
+
+#: failmap/map/templates/map/index.html
+msgid "Monitoring"
+msgstr ""
 
 #: failmap/map/templates/map/index.html
 msgid "Load Tiles"
@@ -897,7 +901,9 @@ msgid "Explanations"
 msgstr "🌈"
 
 #: failmap/map/templates/map/index.html
-msgid "export_failmap_compatible_explained"
+#, fuzzy
+#| msgid "export_failmap_compatible_explained"
+msgid "export_map_compatible_explained"
 msgstr "🌈"
 
 #: failmap/map/templates/map/index.html
@@ -927,6 +933,10 @@ msgstr "🌈"
 #: failmap/map/templates/map/index.html
 msgid "Documentation"
 msgstr "🌈"
+
+#: failmap/map/templates/map/index.html
+msgid "Show / Hide Ticker"
+msgstr ""
 
 #: failmap/map/templates/map/index.html
 msgid "Made possible by"
@@ -1074,16 +1084,20 @@ msgid "This is the top win from"
 msgstr "🌈"
 
 #: failmap/map/views.py
-msgid "Fail Map"
-msgstr "🌈"
-
-#: failmap/map/views.py
-msgid "Fail Map Introduction"
+#, fuzzy
+#| msgid "Chart introduction"
+msgid "Introduction"
 msgstr "🌈"
 
 #: failmap/map/views.py
 msgid "Perfect"
 msgstr "🌈"
+
+#~ msgid "Fail Map"
+#~ msgstr "🌈"
+
+#~ msgid "Fail Map Introduction"
+#~ msgstr "🌈"
 
 #~ msgid "Encryption updates"
 #~ msgstr "🌈"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,16 +54,12 @@ msgid "Unable to parse JSON: %s"
 msgstr ""
 
 #: failmap/organizations/models.py
-msgid "organization type"
-msgstr "organisatie type"
+msgid "layer"
+msgstr ""
 
 #: failmap/organizations/models.py
-msgid "organization_type"
-msgstr "organisatie type"
-
-#: failmap/organizations/models.py
-msgid "organization_types"
-msgstr "organisatie typen"
+msgid "layers"
+msgstr ""
 
 #: failmap/organizations/models.py
 msgid "organization"
@@ -96,3 +92,12 @@ msgstr "belofte"
 #: failmap/organizations/models.py
 msgid "promises"
 msgstr "beloften"
+
+#~ msgid "organization type"
+#~ msgstr "organisatie type"
+
+#~ msgid "organization_type"
+#~ msgstr "organisatie type"
+
+#~ msgid "organization_types"
+#~ msgstr "organisatie typen"

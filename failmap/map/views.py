@@ -365,9 +365,9 @@ def manifest_json(request):
     # https://developer.chrome.com/apps/manifest
     # https://developer.mozilla.org/en-US/docs/Web/Manifest
     manifest = {
-        "name": _("Fail Map"),
-        "short_name": _("Fail Map"),
-        "description": _("Fail Map Introduction"),
+        "name": _("Site Title"),
+        "short_name": _("Site Title"),
+        "description": _("Introduction"),
         "version": __version__,
         "manifest_version": 3,
         "start_url": ".",

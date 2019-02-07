@@ -8,10 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Fail Map <info@faalkaart.nl>\n"
-"Language-Team: LANGUAGE <info@faalkaart.nl>\n"
+"Last-Translator: Internet Cleanup Foundation <info@internetcleanup."
+"foundation>\n"
+"Language-Team: LANGUAGE <info@internetcleanup.foundation>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -192,9 +193,9 @@ msgstr "Strict-Transport-Security header is aanwezig."
 msgid "Missing Strict-Transport-Security header."
 msgstr "De Strict-Transport-Security header ontbreekt."
 
-#: failmap/map/templates/map/index.html
+#: failmap/map/templates/map/index.html failmap/map/views.py
 msgid "Site Title"
-msgstr "Faalkaart - Geeft inzicht in beveiliging."
+msgstr "Web Security Map"
 
 #: failmap/map/templates/map/index.html
 msgid "Map"
@@ -235,6 +236,10 @@ msgstr "ONGEDIERTEBESTRIJDINGSMODUS"
 #: failmap/map/templates/map/index.html
 msgid "Admin"
 msgstr "Beheer"
+
+#: failmap/map/templates/map/index.html
+msgid "Monitoring"
+msgstr ""
 
 #: failmap/map/templates/map/index.html
 msgid "Load Tiles"
@@ -887,7 +892,9 @@ msgid "Explanations"
 msgstr "Verklaringen"
 
 #: failmap/map/templates/map/index.html
-msgid "export_failmap_compatible_explained"
+#, fuzzy
+#| msgid "export_failmap_compatible_explained"
+msgid "export_map_compatible_explained"
 msgstr ""
 "Deze gegevens zijn geoptimaliseerd om in websites als deze te importeren."
 
@@ -918,6 +925,10 @@ msgstr "Download de broncode"
 #: failmap/map/templates/map/index.html
 msgid "Documentation"
 msgstr "Documentatie"
+
+#: failmap/map/templates/map/index.html
+msgid "Show / Hide Ticker"
+msgstr ""
 
 #: failmap/map/templates/map/index.html
 msgid "Made possible by"
@@ -1056,13 +1067,9 @@ msgid "This is the top win from"
 msgstr "Dit zijn op dit moment de organisaties met de beste basisveiligheid."
 
 #: failmap/map/views.py
-msgid "Fail Map"
-msgstr "Faalkaart"
-
-#: failmap/map/views.py
-msgid "Fail Map Introduction"
+msgid "Introduction"
 msgstr ""
-"Faalkaart geeft inzicht in hoe veilig de overheid en verwante organisaties "
+"Deze site geeft inzicht in hoe veilig de overheid en verwante organisaties "
 "zijn richting het internet. Er wordt gekeken naar basis "
 "beveiligingskenmerken zoals beveiligde verbindingen en bescherming tegen "
 "misbruik. Hieruit ontstaat een beeld hoe (de rest van de) beveiliging is "
@@ -1071,213 +1078,3 @@ msgstr ""
 #: failmap/map/views.py
 msgid "Perfect"
 msgstr "Perfect"
-
-#~ msgid "Encryption updates"
-#~ msgstr "Versleuteling Updates"
-
-#~ msgid "Encryption failure"
-#~ msgstr "Versleuteling (https)"
-
-#~ msgid "No trust, C"
-#~ msgstr "Geen vertrouwen, C"
-
-#~ msgid "No trust, B"
-#~ msgstr "Geen vertrouwen, B"
-
-#~ msgid "No trust, A-"
-#~ msgstr "Geen vertrouwen, A-"
-
-#~ msgid "No trust, A"
-#~ msgstr "Geen vertrouwen, A"
-
-#~ msgid "For citizens"
-#~ msgstr "Voor burgers"
-
-#~ msgid "For citizens content"
-#~ msgstr ""
-#~ "<p>Met faalkaart kan iedereen in een oogopslag zien hoe goed informatie "
-#~ "wordt beveiligd.</p><p>Faalkaart biedt een radicaal transparant en "
-#~ "bijgewerkt overzicht van de kwaliteit waaroporganisaties diensten "
-#~ "verlenen op het internet.</p><p>Faalkaart is <a href='https://gitlab.com/"
-#~ "failmap/failmap/'>vrije software</a>. Dit geeft de kans om zelf de "
-#~ "resultaten te controleren.</p><p>Kijk op <a href='https://failmap."
-#~ "org'>https://failmap.org</a> voor meer informatie, of om mee te doen.</p>"
-
-#~ msgid "For organizations"
-#~ msgstr "Voor organisaties"
-
-#~ msgid "For organizations content"
-#~ msgstr ""
-#~ "<p>Faalkaart neemt zo veel mogelijk obscuriteit weg.</p><p>Organisaties "
-#~ "hebben vaak onvoldoende zicht op welke diensten ze aanbieden op het "
-#~ "internet. Om allerlei redenen worden diensten vergeten en langzaam "
-#~ "ontstaat een IT landschap met een toenemend aantal kwetsbaarheden.</"
-#~ "p><p>Faalkaart brengt zo veel mogelijk diensten die worden door "
-#~ "organisaties in beeld en voert hieropeen aantal beveiligingstests uit.</"
-#~ "p><p>Niet alleen zorgt Faalkaart dat publiek geld wordt bespaard, het "
-#~ "maakt het beschermen van gevoelige informatie en systemen verder tastbaar."
-#~ "</p>"
-
-#~ msgid "Category"
-#~ msgstr "Categorie"
-
-#~ msgid "Copy of organization_types"
-#~ msgstr "Kopie van organisatie typen"
-
-#~ msgid "Copy of organizations"
-#~ msgstr "Kopie van organisaties"
-
-#~ msgid "Copy of coordinates"
-#~ msgstr "Kopie van kaartgegevens"
-
-#~ msgid "Copy of urls"
-#~ msgstr "Kopie van urls"
-
-#, fuzzy
-#~| msgid "Report for"
-#~ msgid "Report from"
-#~ msgstr "Verslag voor"
-
-#~ msgid "Risks"
-#~ msgstr "Risico's"
-
-#~ msgid "High risk"
-#~ msgstr "Hoog risico"
-
-#~ msgid "Low risk"
-#~ msgstr "Laag risico"
-
-#~ msgid "Report share result question"
-#~ msgstr "Dit resultaat delen?"
-
-#~ msgid "Toggle navigation"
-#~ msgstr "Navigatie in of uitklappen"
-
-#~ msgid "Score"
-#~ msgstr "Score"
-
-#~ msgid "congratulations"
-#~ msgstr "gefeliciteerd"
-
-#~ msgid "Report ask pentest leader"
-#~ msgstr "Gaat faalkaart niet ver genoeg?"
-
-#~ msgid "Report ask pentest subject"
-#~ msgstr "Pentest%20aanvraag%20voor%20"
-
-#~ msgid "Report ask pentest body"
-#~ msgstr ""
-#~ "Beste Faalkaart,%0D%0A%0D%0AWij hebben interesse in een pentest op de "
-#~ "outward-facing IT van onze organisatie. Kunnen jullie daar bij helpen?%0D"
-#~ "%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
-
-#~ msgid "Report ask request pentest"
-#~ msgstr "Vraag hier een echte pentest aan."
-
-#~ msgid "Improvements Details"
-#~ msgstr "Verbeteringen per waardering en onderdeel"
-
-#~ msgid "Loading"
-#~ msgstr "Laden"
-
-#~ msgid "Tweet"
-#~ msgstr "Tweet!"
-
-#~ msgid "Send in subdomain adresses"
-#~ msgstr ""
-#~ "Stuur nieuwe subdomeinen in via twitter:<a href=\"https://twitter.com/"
-#~ "faalkaart\" target=\"_blank\">@faalkaart</a> of mail <a href=\"mailto:"
-#~ "info@faalkaart.nl?subject=subdomeinen\">info@faalkaart.nl</a>"
-
-#~ msgid "this website is run by"
-#~ msgstr ""
-#~ "Deze website wordt onderhouden door %(organization)s. Stuur nieuwe "
-#~ "domeinen in via %(new_domain_email)s."
-
-#~ msgid "The Numbers"
-#~ msgstr "De Cijfers"
-
-#~ msgid "Numbers"
-#~ msgstr "Cijfers"
-
-#~ msgid "About"
-#~ msgstr "Over"
-
-#~ msgid "About Failmap"
-#~ msgstr "Over Faalkaart"
-
-#~ msgid "Intro"
-#~ msgstr "Introductie"
-
-#~ msgid "Services faq"
-#~ msgstr "Meer over Diensten"
-
-#~ msgid "Services faq content"
-#~ msgstr ""
-#~ "<p>Het versturen van informatie over het internet kan op allerlei "
-#~ "manieren:via verschillende adressen, protocollen en poorten. Sommige "
-#~ "combinaties hiervan zijnzo gebruikelijk dat niemand er nog over nadenkt. "
-#~ "Maar door de grote flexibiliteit zijnook ongebruikelijke combinaties "
-#~ "mogelijk.</p><p>Faalkaart kijkt niet alleen naar de meest gebruikelijke "
-#~ "diensten maar neemt ook bekendealternatieven hier van mee.</"
-#~ "p><p>Bijvoorbeeld: De meest gebruikelijke diensten op het internet zijn "
-#~ "websites. Deze worden aangebodenop poort 80 (onversleuteld) en 443 "
-#~ "(versleuteld). Het is niet nodig om dit aan te geven:door www.example.com "
-#~ "in te tikken wordt http://www.example.com:80 bedoeld. Door explicieteen "
-#~ "poort op te geven, zoals :8080, is het mogelijk om eem extra dienst aan "
-#~ "een adres te koppelen.</p><p>Lees meer over:</p><ul><li><a href=\"https://"
-#~ "en.wikipedia.org/wiki/IPv4\" target=\"_blank\">IPv4</a> en <a href="
-#~ "\"https://en.wikipedia.org/wiki/IPv6\">IPv6</a></li><li><a href=\"https://"
-#~ "en.wikipedia.org/wiki/Port_(computer_networking)\" target=\"_blank"
-#~ "\">Poorten</a></li><li><a href=\"https://en.wikipedia.org/wiki/"
-#~ "Application_layer\" target=\"_blank\">Protocollen</a></li></ul>"
-
-#~ msgid "Visit service"
-#~ msgstr "Bezoek deze dienst."
-
-#~ msgid "Report ask domains"
-#~ msgstr ""
-#~ "Ontbreken er domeinen?<a v-bind:href=\"'mailto:%s?subject=Nieuwe"
-#~ "%20domeinen%20voor%20'%s&body=Beste Faalkaart,%0D%0A%0D%0AGraag de "
-#~ "volgende domeinen toevoegen aan de kaart:%0D%0A%0D%0A%0D%0A%0D%0A%0D%0A%0D"
-#~ "%0ATip: stuur een zonefile mee met alle domeinen.%0D%0A%0D%0AMet "
-#~ "vriendelijke groet,%0D%0A%0D%0A'\">Stuur hier domeinen in.</a>"
-
-#~ msgid "Voor burgers"
-#~ msgstr "Voor burgers"
-
-#~ msgid "Voor organisaties"
-#~ msgstr "Voor organisaties"
-
-#~ msgid "Voor ontwikkelaars"
-#~ msgstr "Voor ontwikkelaars"
-
-#, fuzzy
-#~| msgid "Organization"
-#~ msgid "Select an organization"
-#~ msgstr "Selecteer een organisatie"
-
-#~ msgid "Points"
-#~ msgstr "Punten"
-
-#~ msgid "Address"
-#~ msgstr "Adres"
-
-#~| msgid "Services explained"
-#~ msgid "Services explained faq"
-#~ msgstr "Een adres kan allerlei diensten aanbieden, waaronder websites."
-
-#~ msgid "Veiligheid van verbindindingen"
-#~ msgstr "Technische statistieken"
-
-#~ msgid "Bar"
-#~ msgstr "Balk"
-
-#~ msgid "The Map"
-#~ msgstr "De Kaart"
-
-#~ msgid "Domains"
-#~ msgstr "Internet Adressen"
-
-#~ msgid "The Bar"
-#~ msgstr "De Balk"

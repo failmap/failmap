@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -69,6 +69,38 @@ msgstr ""
 
 #: failmap/app/dashboard.py
 msgid "Applications"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Name"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Value"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Is modified"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Default"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Current file"
+msgstr ""
+
+#: failmap/app/templates/admin/config/results_list.html
+msgid "Reset to default"
+msgstr ""
+
+#: failmap/app/templates/admin/config/settings.html
+msgid "Save (all)"
+msgstr ""
+
+#: failmap/app/templates/admin/config/settings.html
+msgid "Home"
 msgstr ""
 
 #: failmap/pro/templates/pro/base.html

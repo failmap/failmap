@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-01-25 09:45+0000\n"
+"POT-Creation-Date: 2019-02-07 15:28+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,39 +18,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/failmap.js failmap/map/static/js/views.js
+#: failmap/map/static/js/map.js failmap/map/static/js/views.js
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Search organization"
 msgstr "Zoek organisatie..."
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Perfect"
 msgstr "Perfect"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Mediocre"
 msgstr "Matig"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
 
-#: failmap/map/static/js/failmap.js
+#: failmap/map/static/js/map.js
 msgid "Zoom to show all data on this map."
 msgstr ""
 

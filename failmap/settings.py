@@ -735,7 +735,7 @@ CONSTANCE_CONFIG = {
 
     'MAPBOX_ACCESS_TOKEN': (
         'pk.eyJ1IjoibXJmYWlsIiwiYSI6ImNqMHRlNXloczAwMWQyd3FxY3JkMnUxb3EifQ.9nJBaedxrry91O1d90wfuw',
-        'Mapbox provides the tiles shown on failmap. This makes the map look like a map. Mapbox provides a number of'
+        'Mapbox provides the tiles shown on the map. This makes the map look like a map. Mapbox provides a number of'
         ' tilesets and one is preconfigured to look well. Using mapbox tiles isn\'t free. Yet it requires a serious '
         'amount of visitors before it starts to cost money.<br><br>'
         'You can request a new mapbox key '
@@ -806,7 +806,7 @@ CONSTANCE_CONFIG = {
         ' show the ticker to every visitor, but only when clicking a specific link.', bool),
 
     'TICKER_SLOGAN': (
-        'FAILMAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
+        'WEB SECURITY MAP - MONITOR YOUR GOVERNMENT', 'Text to show between every 10 changes.', str),
 
     'TICKER_VISIBLE_VIA_JS_COMMAND':
         (False, 'Adds a Show/Hide ticker link at the bottom of the page. It will start scrolling after a second'
