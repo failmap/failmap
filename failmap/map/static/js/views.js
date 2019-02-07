@@ -765,8 +765,8 @@ function germany() {
 
 // meant to be called from console: vueMap.preview('NL', 'municipality');
 function preview(country, layer){
-    // also show tiles on failmap.
-    failmap.loadTiles();
+    // also show tiles on map.
+    map.loadTiles();
     vueMap.country = country;
     vueMap.layer = layer;
     vueMap.load();
@@ -1316,7 +1316,7 @@ function views(autoload_default_map_data=true) {
         },
         methods: {
             toggleFullScreen: function () {
-                failmap.map.toggleFullscreen(failmap.map.options);
+                map.map.toggleFullscreen(map.map.options);
                 if (vueFullscreen.fullscreen === gettext("View Full Screen")) {
                     vueFullscreen.fullscreen = gettext("Exit Full Screen")
                 } else {
@@ -1629,7 +1629,7 @@ function views(autoload_default_map_data=true) {
                 vueReport.set_state(this.country, this.layer);
                 vueFullScreenReport.set_state(this.country, this.layer);
             },
-            // slowly moving the failmap into a vue. NOPE. denied.
+            // slowly moving the map into a vue. NOPE. denied.
             load: function (week) {
                 if (week === undefined)
                     week = 0;
@@ -1666,7 +1666,7 @@ function views(autoload_default_map_data=true) {
                     if (this.previously_loaded_country !== this.country || this.previously_loaded_layer !== this.layer)
                         fitBounds = true;
 
-                    failmap.plotdata(data, fitBounds);
+                    map.plotdata(data, fitBounds);
                     this.previously_loaded_country = this.country;
                     this.previously_loaded_layer = this.layer;
 

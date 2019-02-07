@@ -115,7 +115,7 @@ var dynamic_translations = function(){
 };
 
 let document_ready = function() {
-    failmap.initialize(mapbox_token, country, debug);
+    map.initialize(mapbox_token, country, debug);
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 
@@ -147,10 +147,10 @@ let document_ready = function() {
            $(thing).attr('href', themeurl);
 
            if (selected_theme === 'darkly')
-               failmap.set_theme('dark');
+               map.set_theme('dark');
 
            if (selected_theme === 'default')
-                failmap.set_theme('light');
+                map.set_theme('light');
         });
     });
 };

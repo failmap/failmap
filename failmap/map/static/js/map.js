@@ -1,4 +1,4 @@
-const failmap = {
+const map = {
 
     map: null, // map showing geographical regions + markers
     mapbox_token: '',
@@ -26,8 +26,8 @@ const failmap = {
 
 
                     // upgrade colors until you find the highest risk issue.
-                    if (failmap.possibleIconColors.indexOf(point.feature.properties.color) > selected_color){
-                        selected_color = failmap.possibleIconColors.indexOf(point.feature.properties.color);
+                    if (map.possibleIconColors.indexOf(point.feature.properties.color) > selected_color){
+                        selected_color = map.possibleIconColors.indexOf(point.feature.properties.color);
                         css_class = point.feature.properties.color;
                     }
                 }
@@ -54,7 +54,7 @@ const failmap = {
         this.map.scrollWheelZoom.disable();
 
         this.map.on('fullscreenchange', function () {
-            if (failmap.map.isFullscreen()) {
+            if (map.map.isFullscreen()) {
                 console.log('entered fullscreen');
             } else {
                 vueFullScreenReport.hide();
@@ -93,14 +93,14 @@ const failmap = {
         if (show_filters)
             this.add_div('<div id="historycontrol"></div>', "info table-light", true);
 
-        this.add_div("<input id='searchbar' type='text' onkeyup='failmap.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
+        this.add_div("<input id='searchbar' type='text' onkeyup='map.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
         this.add_div("<div style='max-width: 300px;'><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
         let labels=[];
-        labels.push('<i style="background:' + failmap.getColorCode('green') + '"></i> '+ gettext('Perfect'));
-        labels.push('<i style="background:' + failmap.getColorCode('yellow') + '"></i> '+ gettext('Good'));
-        labels.push('<i style="background:' + failmap.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
-        labels.push('<i style="background:' + failmap.getColorCode('red') + '"></i> '+ gettext('Bad'));
-        labels.push('<i style="background:' + failmap.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
+        labels.push('<i style="background:' + map.getColorCode('green') + '"></i> '+ gettext('Perfect'));
+        labels.push('<i style="background:' + map.getColorCode('yellow') + '"></i> '+ gettext('Good'));
+        labels.push('<i style="background:' + map.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
+        labels.push('<i style="background:' + map.getColorCode('red') + '"></i> '+ gettext('Bad'));
+        labels.push('<i style="background:' + map.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
         this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
 
@@ -123,8 +123,8 @@ const failmap = {
                             if (document.documentElement.clientWidth > 768)
                                 paddingToLeft=320;
 
-                            let bounds = failmap.polygons.getBounds();
-                            bounds.extend(failmap.markers.getBounds());
+                            let bounds = map.polygons.getBounds();
+                            bounds.extend(map.markers.getBounds());
 
                             map.fitBounds(bounds,
                                 {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
@@ -140,7 +140,7 @@ const failmap = {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
-            'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            'Data &copy; <a href="http://map.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
             id: 'mapbox.light',
             accessToken: this.mapbox_token,
             style: 'light-v9',
@@ -153,7 +153,7 @@ const failmap = {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
             '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="http://mapbox.com">Mapbox</a>, ' +
-            'Data &copy; <a href="http://failmap.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
+            'Data &copy; <a href="http://map.org/">Fail Map</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-NC-BY-SA</a>',
             id: 'mapbox.light',
             accessToken: this.mapbox_token,
             style: 'dark-v9',
@@ -476,7 +476,7 @@ const failmap = {
 
     style: function (feature) {
         return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.7,
-            fillColor: failmap.getColorCode(feature.properties.color)
+            fillColor: map.getColorCode(feature.properties.color)
         };
     },
 
@@ -486,12 +486,12 @@ const failmap = {
 
     pointToLayer: function (geoJsonPoint, latlng) {
         switch (geoJsonPoint.properties.color){
-            case "red": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
-            case "orange": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
-            case "green": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
-            case "yellow": return L.circleMarker(latlng, failmap.style(geoJsonPoint));
+            case "red": return L.circleMarker(latlng, map.style(geoJsonPoint));
+            case "orange": return L.circleMarker(latlng, map.style(geoJsonPoint));
+            case "green": return L.circleMarker(latlng, map.style(geoJsonPoint));
+            case "yellow": return L.circleMarker(latlng, map.style(geoJsonPoint));
         }
-        return L.circleMarker(latlng, failmap.style(geoJsonPoint));
+        return L.circleMarker(latlng, map.style(geoJsonPoint));
     },
 
     highlightFeature: function (e) {
@@ -508,17 +508,17 @@ const failmap = {
 
     onEachFeature: function (feature, layer) {
         layer.on({
-            mouseover: failmap.highlightFeature,
-            mouseout: failmap.resetHighlight,
-            click: failmap.showreport
+            mouseover: map.highlightFeature,
+            mouseout: map.resetHighlight,
+            click: map.showreport
         });
     },
 
     resetHighlight: function (e) {
-        if (failmap.isSearchedFor(e.target.feature))
-            e.target.setStyle(failmap.searchResultStyle(e.target.feature));
+        if (map.isSearchedFor(e.target.feature))
+            e.target.setStyle(map.searchResultStyle(e.target.feature));
         else
-            e.target.setStyle(failmap.style(e.target.feature));
+            e.target.setStyle(map.style(e.target.feature));
     },
 
     isSearchedFor: function (feature) {
@@ -533,62 +533,62 @@ const failmap = {
         query = query.toLowerCase();
         if ((query === "") || (!query)) {
             // reset
-            failmap.polygons.eachLayer(function (layer) {
-                layer.setStyle(failmap.style(layer.feature));
+            map.polygons.eachLayer(function (layer) {
+                layer.setStyle(map.style(layer.feature));
             });
-            failmap.markers.eachLayer(function (layer) {
-                layer.setStyle(failmap.style(layer.feature));
+            map.markers.eachLayer(function (layer) {
+                layer.setStyle(map.style(layer.feature));
             });
-            failmap.markers.refreshClusters();
+            map.markers.refreshClusters();
         } else {
             // text match
             // todo: is there a faster, native search option?
-            failmap.polygons.eachLayer(function (layer) {
+            map.polygons.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
-                    layer.setStyle(failmap.searchResultStyle(layer.feature));
+                    layer.setStyle(map.searchResultStyle(layer.feature));
                 } else {
-                    layer.setStyle(failmap.style(layer.feature));
+                    layer.setStyle(map.style(layer.feature));
                 }
             });
-            failmap.markers.eachLayer(function (layer) {
+            map.markers.eachLayer(function (layer) {
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
-                    layer.setStyle(failmap.searchResultStyle(layer.feature));
+                    layer.setStyle(map.searchResultStyle(layer.feature));
                 } else {
-                    layer.setStyle(failmap.style(layer.feature));
+                    layer.setStyle(map.style(layer.feature));
                 }
             });
 
             // check in the clusters if there are any searched for. Is done based on style.
-            failmap.markers.refreshClusters();
+            map.markers.refreshClusters();
         }
     },
 
     plotdata: function (mapdata, fitbounds=true) {
-        let geodata = failmap.split_point_and_polygons(mapdata);
+        let geodata = map.split_point_and_polygons(mapdata);
 
         // if there is one already, overwrite the attributes...
-        if (failmap.polygons.getLayers().length || failmap.markers.getLayers().length) {
+        if (map.polygons.getLayers().length || map.markers.getLayers().length) {
             // add all features that are not part of the current map at all
             // and delete the ones that are not in the current set
             // the brutal way would be like this, which would not allow transitions:
-            // failmap.markers.clearLayers();
-            // failmap.add_points(points);
-            failmap.add_new_layers_remove_non_used(geodata.points, failmap.markers, "markers");
-            failmap.add_new_layers_remove_non_used(geodata.polygons, failmap.polygons, "polygons");
+            // map.markers.clearLayers();
+            // map.add_points(points);
+            map.add_new_layers_remove_non_used(geodata.points, map.markers, "markers");
+            map.add_new_layers_remove_non_used(geodata.polygons, map.polygons, "polygons");
 
             // update existing layers (and add ones with the same name)
-            failmap.polygons.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
-            failmap.markers.eachLayer(function (layer) {failmap.recolormap(mapdata.features, layer)});
+            map.polygons.eachLayer(function (layer) {map.recolormap(mapdata.features, layer)});
+            map.markers.eachLayer(function (layer) {map.recolormap(mapdata.features, layer)});
 
             // colors could have changed
-            failmap.markers.refreshClusters();
+            map.markers.refreshClusters();
         } else {
-            failmap.add_polygons_to_map(geodata.polygons);
-            failmap.add_points_to_map(geodata.points);
+            map.add_polygons_to_map(geodata.polygons);
+            map.add_points_to_map(geodata.points);
         }
 
         if (fitbounds)
-            failmap.show_everything_on_map();
+            map.show_everything_on_map();
     },
 
     show_everything_on_map: function(){
@@ -598,9 +598,9 @@ const failmap = {
         if (document.documentElement.clientWidth > 768)
             paddingToLeft=320;
 
-        let bounds = failmap.polygons.getBounds();
-        bounds.extend(failmap.markers.getBounds());
-        failmap.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+        let bounds = map.polygons.getBounds();
+        bounds.extend(map.markers.getBounds());
+        map.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
     },
 
     split_point_and_polygons: function(mapdata){
@@ -629,39 +629,39 @@ const failmap = {
 
 
     add_polygons_to_map: function(polygons){
-        failmap.polygons = L.geoJson(polygons, {
-            style: failmap.style,
-            pointToLayer: failmap.pointToLayer,
-            onEachFeature: failmap.onEachFeature
-        }).addTo(failmap.map);
+        map.polygons = L.geoJson(polygons, {
+            style: map.style,
+            pointToLayer: map.pointToLayer,
+            onEachFeature: map.onEachFeature
+        }).addTo(map.map);
     },
 
     add_points_to_map: function(points) {
         // Geojson causes confetti to appear, which is great, but doesn't work with multiple organization on the same
         // location. You need something that can show multiple things at once place, such as MarkerCluster.
-        // failmap.markers = L.geoJson(points, {
-        //     style: failmap.style,
-        //     pointToLayer: failmap.pointToLayer,
-        //     onEachFeature: failmap.onEachFeature
-        // }).addTo(failmap.map);
+        // map.markers = L.geoJson(points, {
+        //     style: map.style,
+        //     pointToLayer: map.pointToLayer,
+        //     onEachFeature: map.onEachFeature
+        // }).addTo(map.map);
 
         points.forEach(function(point){
             // points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
             // https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
-            let pointlayer = failmap.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
+            let pointlayer = map.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
             pointlayer.on({
-                mouseover: failmap.highlightFeature,
-                mouseout: failmap.resetHighlight,
-                click: failmap.showreport
+                mouseover: map.highlightFeature,
+                mouseout: map.resetHighlight,
+                click: map.showreport
             });
 
             // allow opening of reports and such in the old way.
             pointlayer.feature = {"properties": point.properties, "geometry": point.geometry};
 
-            failmap.markers.addLayer(pointlayer);
+            map.markers.addLayer(pointlayer);
         });
-        failmap.map.addLayer(failmap.markers);
+        map.map.addLayer(map.markers);
     },
 
     add_new_layers_remove_non_used: function(shapeset, target, layer_type){
@@ -689,7 +689,7 @@ const failmap = {
                 if (layer_type === "polygons") {
                     target.addData(shape);
                 } else {
-                    failmap.add_points_to_map([shape]);
+                    map.add_points_to_map([shape]);
                 }
             }
 
@@ -712,25 +712,25 @@ const failmap = {
                 return;
             }
             //if (JSON.stringify(new_feature.geometry.coordinates) !== JSON.stringify(existing_feature.geometry.coordinates)) {
-            //if (failmap.evil_json_compare(new_feature.geometry.coordinates, existing_feature.geometry.coordinates)) {
+            //if (map.evil_json_compare(new_feature.geometry.coordinates, existing_feature.geometry.coordinates)) {
             if (new_feature.geometry.coordinate_id !== existing_feature.geometry.coordinate_id) {
                 // Geometry changed, updating shape. Will not fade.
                 // It seems not possible to update the geometry of a shape, too bad.
-                failmap.polygons.removeLayer(layer);
-                failmap.polygons.addData(new_feature);
+                map.polygons.removeLayer(layer);
+                map.polygons.addData(new_feature);
             } else {
                 // colors changed, shapes / points on the map stay the same.
                 existing_feature.properties.Overall = new_feature.properties.Overall;
                 existing_feature.properties.color = new_feature.properties.color;
                 // make the transition
-                layer.setStyle(failmap.style(layer.feature));
+                layer.setStyle(map.style(layer.feature));
             }
         });
     },
 
     showreport: function (e) {
         let organization_id = e.target.feature.properties['organization_id'];
-        if (failmap.map.isFullscreen()) {
+        if (map.map.isFullscreen()) {
             // var layer = e.target;
             vueFullScreenReport.load(organization_id, vueMap.week);
             vueFullScreenReport.show();

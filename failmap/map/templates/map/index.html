@@ -50,7 +50,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.Failmap.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/MarkerCluster.map.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
 
@@ -68,7 +68,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
     {% else %}{% compress js %}
@@ -84,7 +84,7 @@
         <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/failmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
     {% endcompress %}{% endif %}
@@ -141,10 +141,10 @@
         {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
         <ul class="navbar-nav navbar-right ml-auto">
             <li class="nav-item nav-link" style="padding-right:20px;">
-                <a href="https://failmap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a>
+                <a href="https://websecuritymap.org"><img src="{% static 'images/fail_logo.png' %}" alt="logo" width="24px" class="d-inline-block align-top"/></a>
             </li>
             <li class="nav-item nav-link" style="padding-right:20px;">
-                <a href="https://gitlab.com/failmap/failmap/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
+                <a href="https://gitlab.com/internet-cleanup-foundation/web-security-map/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
             </li>
         </ul>
     </div>
@@ -208,7 +208,7 @@
                 <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                 <li class="nav-item"><a class="nav-link" href="/grafana/">{% trans "Monitoring" %}</a></li>
-                <li class="nav-item"><a class="nav-link" onclick="failmap.loadTiles()">{% trans "Load Tiles" %}</a></li>
+                <li class="nav-item"><a class="nav-link" onclick="map.loadTiles()">{% trans "Load Tiles" %}</a></li>
                 <!-- This allows testing different themes -->
                 <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Theme<span class="caret"></span></a>
@@ -1296,7 +1296,7 @@
                         </tbody>
                     </table>
                     <br /><br />
-                    <p>* = {% trans "export_failmap_compatible_explained" %}</p>
+                    <p>* = {% trans "export_map_compatible_explained" %}</p>
                 </div>
             </div>
         </div>
@@ -1351,7 +1351,7 @@
             <div class="col-md-3">
                 <b>{% trans "About this website" %}</b>
                 <ul>
-                    <li>⬇️ <a href="https://gitlab.com/failmap/" target="_blank" rel="noopener">{% trans "Get the sourcecode" %}</a></li>
+                    <li>⬇️ <a href="https://gitlab.com/internet-cleanup-foundation/" target="_blank" rel="noopener">{% trans "Get the sourcecode" %}</a></li>
                     <li>📖 <a href="https://docs.failmap.org" target="_blank" rel="noopener">{% trans "Documentation" %}</a></li>
                 </ul>
                 {% if config.SHOW_TICKER %}
