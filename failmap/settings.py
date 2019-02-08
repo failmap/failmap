@@ -367,10 +367,10 @@ LOGGING = {
     'loggers': {
         # Used when there is no log defined or loaded. Disabled given we always use __package__ to log.
         # Would you enable it, all logging messages will be logged twice.
-        '': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
-        },
+        # '': {
+        #     'handlers': ['console'],
+        #     'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        # },
 
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
         # It can be smart to sometimes want to see what's going on here, but not all the time.
