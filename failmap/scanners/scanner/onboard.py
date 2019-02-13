@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from typing import List
 
 import pytz
 from celery import group
@@ -43,6 +44,14 @@ def compose_task(
     Todo: run this every minute.
     """
 
+    def chunks(l, n):
+        # Example: chunks = list(chunks(urls, 25))
+        # creates list of lists containing N items.
+        # For item i in a range that is a length of l,
+        for i in range(0, len(l), n):
+            # Create an index range for l of n items:
+            yield l[i:i + n]
+
     # Resetting the outdated onboarding has a risk: if the queue takes longer than the onboarding tasks to finish the
     # tasks will be performed multiple time. This can grow fast and large. Therefore a very large time has been taken
     # to reset onboarding of tasks. Normally onboarding should be one within 5 minutes. We'll reset after 7 days.
@@ -61,6 +70,14 @@ def compose_task(
     # stage and not to re-submit the url for onboarding (again and again and again) the first stage is set in
     # this routine for each of the steps.
 
+    # some urls can be returned a number of times if they are shared amongs organizations, this reduces that:
+    # note that mysql and sqlite dont support DISTINCT ON.
+    urls = list(set(urls))
+
+    endpoint_discovery_urls = []
+    scans_running_urls = []
+    crawling_urls = []
+
     tasks = []
     for url in urls:
         log.info("Url %s is at onboarding_stage: %s", url, url.onboarding_stage)
@@ -68,26 +85,32 @@ def compose_task(
         # you will see this happen per worker-size (so for example per 20 things)
         if not url.onboarding_stage:  # While developing: or url.onboarding_stage == "endpoint_discovery":
             log.info("Exploring on: %s", url)
-            # Of course this will still fail as the bug aforementioned was not fixed. have to rewrite that.
-            update_stage(url, "endpoint_discovery")
-            tasks.append(explore_tasks(url)
-                         | update_stage.si(url, "endpoint_finished"))
+            update_stage([url], "endpoint_discovery")
+            endpoint_discovery_urls.append(url)
 
         elif url.onboarding_stage in ["endpoint_finished"]:  # dev: , "scans_running"
             log.info("Scanning on: %s", url)
-            update_stage(url, "scans_running")
-            tasks.append(scan_tasks(url)
-                         | update_report_tasks(url)
-                         | update_stage.si(url, "scans_finished"))
+            update_stage([url], "scans_running")
+            scans_running_urls.append(url)
 
         elif url.onboarding_stage == "scans_finished":
             log.info("Crawling on: %s", url)
-            update_stage(url, "crawling")
-            tasks.append(crawl_tasks(url)
-                         | finish_onboarding.si(url))
+            update_stage([url], "crawling")
+            crawling_urls.append(url)
+
         else:
             # Do nothing when wheels are set in motion or an unknown state is encountered.
             pass
+
+    for url in endpoint_discovery_urls:
+        tasks.append(explore_tasks(url) | update_stage.si([url], "endpoint_finished"))
+
+    chunks = chunks(scans_running_urls, 25)
+    for chunk in chunks:
+        tasks.append(scan_tasks(chunk) | update_report_tasks(chunk) | update_stage.si(chunk, "scans_finished"))
+
+    for url in crawling_urls:
+        tasks.append(crawl_tasks(url) | finish_onboarding.si(url))
 
     log.info("Created %s tasks to be performed." % len(tasks))
     task = group(tasks)
@@ -154,8 +177,11 @@ def finish_onboarding(url):
 
 
 @app.task(queue='storage')
-def update_stage(url, stage=""):
-    log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
-    url.onboarding_stage = stage
-    url.save(update_fields=['onboarding_stage'])
+def update_stage(urls: List[Url], stage=""):
+
+    for url in urls:
+        log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
+        url.onboarding_stage = stage
+        url.save(update_fields=['onboarding_stage'])
+
     return True

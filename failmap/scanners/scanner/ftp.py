@@ -79,11 +79,21 @@ def compose_task(
 def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
                           endpoints_filter: dict = dict(), **kwargs) -> Task:
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
+
+    log.debug("discovery")
+    log.debug("o: %s, u: %s, e: %s" % (organizations_filter, urls_filter, endpoints_filter))
+
     ports = [21]
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
+
+    # This can deliver 300+ urls if the url is shared over 300+ organizations
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
-    log.info('Creating ftp discover task for %s urls.', len(urls))
+    # to reduce the amount of organizations returned... which doesn't work as the amount of urls can be enormous
+    # which is not supported in an __in command.
+    urls = list(set(urls))
+
+    log.info('Creating ftp discover task for %s urls. %s' % (len(urls), urls))
 
     tasks = []
     for ip_version in [4, 6]:

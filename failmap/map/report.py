@@ -112,26 +112,28 @@ def compose_task(
 
 
 @app.task(queue='storage')
-def update_report_tasks(url: Url):
+def update_report_tasks(url_chunk: List[Url]):
     """
     A small update function that only rebuilds a single url and the organization report for a single day. Using this
     during onboarding, it's possible to show changes much faster than a complete rebuild.
 
-    :param url:
+    :param url_chunk: List of urls
     :return:
     """
     tasks = []
 
-    organizations = list(url.organization.all())
+    for url in url_chunk:
 
-    # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
-    # the moment to rerate organizations is when the url_ratings has finished.
+        organizations = list(url.organization.all())
 
-    tasks.append(rebuild_url_ratings.si([url]) | rate_organizations_now.si(organizations))
+        # Note that you cannot determine the moment to be "now" as the urls have to be re-reated.
+        # the moment to rerate organizations is when the url_ratings has finished.
 
-    # Calculating statistics is _extremely slow_ so we're not doing that in this method to keep the pace.
-    # Otherwise you'd have a 1000 statistic rebuilds pending, all doing a marginal job.
-    # calculate_vulnerability_statistics.si(1) | calculate_map_data.si(1)
+        tasks.append(rebuild_url_ratings.si([url]) | rate_organizations_now.si(organizations))
+
+        # Calculating statistics is _extremely slow_ so we're not doing that in this method to keep the pace.
+        # Otherwise you'd have a 1000 statistic rebuilds pending, all doing a marginal job.
+        # calculate_vulnerability_statistics.si(1) | calculate_map_data.si(1)
 
     return group(tasks)
 

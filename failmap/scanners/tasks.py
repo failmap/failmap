@@ -60,8 +60,21 @@ def crawl_tasks(url):
     return get_tasks(url, DEFAULT_CRAWLERS, TLD_DEFAULT_CRAWLERS)
 
 
-def scan_tasks(url):
-    return get_tasks(url, DEFAULT_SCANNERS, TLD_DEFAULT_SCANNERS)
+def scan_tasks(url_chunk):
+
+    tasks = []
+
+    for scanner in DEFAULT_SCANNERS:
+        # Tls qualys scans are inserted per 25. This is due to behaviour of the qualys service.
+        tasks.append(scanner(urls_filter={"url__in": url_chunk}))
+
+    # and add the top level urls.
+    for url in url_chunk:
+        if url.is_top_level():
+            for tld_scanner in TLD_DEFAULT_SCANNERS:
+                tasks.append(tld_scanner(urls_filter={"url": url}))
+
+    return group(tasks)
 
 
 @app.task(queue='storage')

@@ -138,7 +138,6 @@ def compose_task(
     # ScanProxy. We'll try to get a valid proxy first, this might take a few minutes. Then at most once every 5 minutes
     # an new set of scans (of 25 urls) is run on the proxy. While not very elegant, we had just a few days to migrate.
 
-    # todo: it's unsure the network is still available via a proxy, proxies shut down often.
     chunks = list(chunks(urls, 25))
 
     # a bulk scan of 25 urls takes about 45 minutes.
