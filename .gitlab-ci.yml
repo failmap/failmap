@@ -124,19 +124,19 @@ build:
     # required for quering python package version
     - apk add --no-cache python3
     # cache previous docker image if available
-    - docker pull failmap/failmap:latest || true
+    - docker pull websecmap/websecmap:latest || true
 
   script:
     # store current version as artifact to copy into docker container
     - python3 setup.py --version > version
 
     # build docker image and push to registry
-    - time docker build . --tag failmap/failmap:build
-    - docker push failmap/failmap:build
+    - time docker build . --tag websecmap/websecmap:build
+    - docker push websecmap/websecmap:build
 
     # push version tag to docker registry
-    - docker tag failmap/failmap:build failmap/failmap:$(cat version|tr + _)
-    - docker push failmap/failmap:$(cat version|tr + _)
+    - docker tag websecmap/websecmap:build websecmap/websecmap:$(cat version|tr + _)
+    - docker push websecmap/websecmap:$(cat version|tr + _)
 
   only:
     - master
@@ -156,7 +156,7 @@ image_test:
     # for quicker docker builds
     key: "test"
     # don't update the cache after run as it will not be updated
-    # by this job 
+    # by this job
     policy: pull
 
   services:
@@ -169,11 +169,11 @@ image_test:
 
   before_script:
     # cache previous build image if available for quicker build
-    - docker pull failmap/failmap:latest || true
+    - docker pull websecmap/websecmap:latest || true
 
   script:
     # build docker image to test building
-    - time docker build . --tag failmap/failmap:latest
+    - time docker build . --tag websecmap/websecmap:latest
 
     # run simple smoketests to verify Docker image is sane
     - time tests/docker.sh docker
@@ -194,7 +194,7 @@ test_system:
 
   variables:
     SYSTEM_TEST_TIMEOUT: 120
-    IMAGE: failmap/failmap:build
+    IMAGE: websecmap/websecmap:build
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
@@ -221,17 +221,17 @@ staging:
     - export tag=$(cat version|tr + _)
 
     # pull latest version and tag as staging
-    - docker pull failmap/failmap:$tag
-    - docker tag failmap/failmap:$tag failmap/failmap:staging
+    - docker pull websecmap/websecmap:$tag
+    - docker tag websecmap/websecmap:$tag websecmap/websecmap:staging
 
     # here is where I would put my staging integration tests, if I had one!!!
 
     # promote to staging after tests have succeeded
-    - docker push failmap/failmap:staging
+    - docker push websecmap/websecmap:staging
 
     # until there is a CD staging environment
-    - docker tag failmap/failmap:$tag failmap/failmap:latest
-    - docker push failmap/failmap:latest
+    - docker tag websecmap/websecmap:$tag websecmap/websecmap:latest
+    - docker push websecmap/websecmap:latest
 
   only: [master]
   retry: 1
@@ -249,9 +249,9 @@ production:
   script:
     - export tag=$(git describe --exact-match --tags --abbrev=0)
     # build docker image and push to registry
-    - docker pull failmap/failmap:$tag
-    - docker tag failmap/failmap:$tag failmap/failmap:latest
-    - docker push failmap/failmap:latest
+    - docker pull websecmap/websecmap:$tag
+    - docker tag websecmap/websecmap:$tag websecmap/websecmap:latest
+    - docker push websecmap/websecmap:latest
 
     # insert deploy magic here
 
