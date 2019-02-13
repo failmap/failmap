@@ -8,7 +8,7 @@ stages:
 test: &test_template
   stage: test
 
-  image: failmap/ci:latest
+  image: websecmap/ci:latest
 
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
@@ -117,7 +117,7 @@ build:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
-  image: failmap/ci:docker-git
+  image: websecmap/ci:docker-git
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
@@ -162,7 +162,7 @@ image_test:
   services:
     - docker:dind
 
-  image: failmap/ci:docker-git
+  image: websecmap/ci:docker-git
   variables:
     SYSTEM_TEST_TIMEOUT: 120
     GIT_SUBMODULE_STRATEGY: recursive
@@ -188,7 +188,7 @@ image_test:
 test_system:
   stage: staging
 
-  image: failmap/ci:docker-git
+  image: websecmap/ci:docker-git
   services:
   - docker:dind
 
@@ -208,7 +208,7 @@ test_system:
 staging:
   stage: staging
 
-  image: failmap/ci:docker-git
+  image: websecmap/ci:docker-git
   services:
   - docker:dind
 
@@ -239,7 +239,7 @@ staging:
 production:
   stage: production
 
-  image: failmap/ci:docker-git
+  image: websecmap/ci:docker-git
   services:
   - docker:dind
 
