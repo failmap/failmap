@@ -4,8 +4,8 @@ set -x
 
 # output a sorted list of all urls/organizations and their respective rating
 
-failmap shell <<EOF | sort
-from failmap.map.models import UrlRating, OrganizationRating
+websecmap shell <<EOF | sort
+from websecmap.map.models import UrlRating, OrganizationRating
 
 # output url and ratings for urls
 for urlrating in UrlRating.objects.all().values('url__url', 'rating'):

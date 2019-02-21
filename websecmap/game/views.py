@@ -18,7 +18,8 @@ from django.utils.text import slugify
 from django.views.decorators.cache import cache_page
 
 from websecmap.app.common import JSEncoder
-from websecmap.game.forms import ContestForm, OrganisationSubmissionForm, TeamForm, UrlSubmissionForm
+from websecmap.game.forms import (ContestForm, OrganisationSubmissionForm, TeamForm,
+                                  UrlSubmissionForm)
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.map.calculate import get_calculation
 from websecmap.organizations.models import Organization, OrganizationType, Url

@@ -11,8 +11,8 @@ set -x
 tail -f $logfile 1>&3 &
 
 faalgastnaam="$(hostname -f)"
-faalcontainernaamvoorvoegsel=failmap-worker
-faalcontainerfaalimagenaam=failmap/failmap:latest
+faalcontainernaamvoorvoegsel=websecmap-worker
+faalcontainerfaalimagenaam=websecmap/websecmap:latest
 faalredis=redis://faalkaart.nl:1337/0
 faalp12bestand="$(realpath client.p12)"
 faallogfaallevel=info

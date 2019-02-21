@@ -62,7 +62,8 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import InternetNLScan, UrlGenericScan
 from websecmap.scanners.scanmanager import store_url_scan_result
-from websecmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan, url_filters
+from websecmap.scanners.scanner.scanner import (allowed_to_scan, q_configurations_to_scan,
+                                                url_filters)
 
 log = logging.getLogger(__name__)
 

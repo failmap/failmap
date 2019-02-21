@@ -4,8 +4,8 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
-from websecmap.pro.models import (Account, CreditMutation, FailmapOrganizationDataFeed, RescanRequest,
-                                  UrlDataFeed, UrlList, UrlListReport)
+from websecmap.pro.models import (Account, CreditMutation, FailmapOrganizationDataFeed,
+                                  RescanRequest, UrlDataFeed, UrlList, UrlListReport)
 
 # Register your models here.
 

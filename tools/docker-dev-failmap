@@ -2,6 +2,6 @@
 
 set -e -o pipefail
 
-# run failmap in a docker container with current source
+# run websecmap in a docker container with current source
 
-docker run -ti -v "$PWD:/source/" failmap/failmap:latest "$@"
+docker run -ti -v "$PWD:/source/" websecmap/websecmap:latest "$@"

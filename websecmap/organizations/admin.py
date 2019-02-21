@@ -27,7 +27,8 @@ from websecmap.organizations.models import (Coordinate, Dataset, Organization, O
                                             Promise, Url)
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan,
                                        UrlIp)
-from websecmap.scanners.scanner import dns, dnssec, onboard, plain_http, security_headers, tls_qualys
+from websecmap.scanners.scanner import (dns, dnssec, onboard, plain_http, security_headers,
+                                        tls_qualys)
 
 log = logging.getLogger(__name__)
 

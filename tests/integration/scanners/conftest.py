@@ -16,8 +16,8 @@ TIMEOUT = 30
 def faalonië():
     """Load test organization fixtures."""
 
-    subprocess.call(['failmap', 'migrate'])
-    subprocess.call(['failmap', 'load_dataset', 'faalonie'])
+    subprocess.call(['websecmap', 'migrate'])
+    subprocess.call(['websecmap', 'load_dataset', 'faalonie'])
 
 
 @pytest.fixture(scope='session', params=['prefork', 'eventlet'])
@@ -26,7 +26,7 @@ def worker(request):
 
     pool = request.param
 
-    worker_command = ['failmap', 'celery', 'worker', '-l', 'info', '--pool', pool]
+    worker_command = ['websecmap', 'celery', 'worker', '-l', 'info', '--pool', pool]
     worker_env = dict(os.environ, WORKER_ROLE='default_ipv4')
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,

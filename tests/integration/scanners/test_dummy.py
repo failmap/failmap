@@ -11,7 +11,7 @@ def test_scan_method(method, worker, faalonië):
     """Runs the scanner using each of the three methods."""
 
     output_json = check_output(
-        'failmap scan dummy -m {method} -o faalonië'.format(method=method).split(' '), encoding='utf8')
+        'websecmap scan dummy -m {method} -o faalonië'.format(method=method).split(' '), encoding='utf8')
     output = json.loads(output_json)
 
     # async required extra command to wait for and retrieve result
@@ -19,7 +19,7 @@ def test_scan_method(method, worker, faalonië):
         task_id = output[0]
 
         output_json = check_output(
-            'failmap scan dummy -t {task_id}'.format(task_id=task_id).split(' '), encoding='utf8')
+            'websecmap scan dummy -t {task_id}'.format(task_id=task_id).split(' '), encoding='utf8')
         output = json.loads(output_json)
 
     assert len(output) == 1, "Only one result is expected from fixture."

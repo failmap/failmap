@@ -1,6 +1,7 @@
 import logging
 
-from websecmap.organizations.management.commands.create_dataset import Command as CreateDatasetCommand
+from websecmap.organizations.management.commands.create_dataset import \
+    Command as CreateDatasetCommand
 
 log = logging.getLogger(__package__)
 

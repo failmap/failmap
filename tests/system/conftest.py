@@ -15,8 +15,8 @@ INTERVAL = timedelta(seconds=5)
 
 
 @pytest.fixture(scope='session')
-def failmap(docker_ip, docker_services):
-    class Failmap:
+def websecmap(docker_ip, docker_services):
+    class Websecmap:
         admin_url = 'http://%s:%d' % (
             docker_ip, int(docker_services('port admin 8000').split(':')[-1]),
         )
@@ -32,7 +32,7 @@ def failmap(docker_ip, docker_services):
             with urllib.request.urlopen(self.frontend_url + path) as f:
                 return (f, f.read().decode('utf-8'))
 
-    return Failmap()
+    return Websecmap()
 
 
 @pytest.fixture(scope='session')

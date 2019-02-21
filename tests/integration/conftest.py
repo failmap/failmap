@@ -36,7 +36,7 @@ def celery_worker(queues, request):
     pool = request.param
 
     worker_command = [
-        'failmap',
+        'websecmap',
         'celery',
         'worker',
         '-l', 'info',
