@@ -92,39 +92,39 @@ This requires the node package [osmtogeojson](https://github.com/tyrasd/osmtogeo
 polygon detection and is being well maintained. There is no python alternative.
 
 ```
-# DEVELOPMENT ONLY: failmap create_dataset -o -> dataset_12mar2018.json
+# DEVELOPMENT ONLY: websecmap create_dataset -o -> dataset_12mar2018.json
 ```
 
 Place the dataset in the fixture folder.
 
 Then flush the database:
 ```
-# DEVELOPMENT ONLY: failmap clear_database
+# DEVELOPMENT ONLY: websecmap clear_database
 ```
 
 Load the data into the application
 ```
-# DEVELOPMENT ONLY: failmap load_dataset dataset_12mar2018.json
+# DEVELOPMENT ONLY: websecmap load_dataset dataset_12mar2018.json
 ```
 
 First make sure the organizations have been created and merged.
 ```
-failmap merge_organizations_2018
+websecmap merge_organizations_2018
 ```
 
 Then import the new regions for these organizations:
 ```
-failmap update_coordinates --date=2018-01-01
+websecmap update_coordinates --date=2018-01-01
 ```
 
 The new organizations (of course) do not have a rating, the rating needs to be rebuilt:
 ```
-failmap rebuild_ratings -m async
+websecmap rebuild_ratings -m async
 ```
 
 Development command, all in one for the fish shell (only works in 2018, due to upcoming changes in 2019:
 ```
-# DEVELOPMENT ONLY: failmap clear_database; and failmap load_dataset dataset_12mar2018.json; and failmap merge_organizations_2018; and failmap update_coordinates --date=2018-01-01; and failmap rebuild_ratings -m async
+# DEVELOPMENT ONLY: websecmap clear_database; and websecmap load_dataset dataset_12mar2018.json; and websecmap merge_organizations_2018; and websecmap update_coordinates --date=2018-01-01; and websecmap rebuild_ratings -m async
 ```
 
 ### Other things

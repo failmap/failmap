@@ -7,7 +7,7 @@ import time
 
 import pytest
 
-from failmap.celery import app, waitsome
+from websecmap.celery import app, waitsome
 
 log = logging.getLogger(__name__)
 

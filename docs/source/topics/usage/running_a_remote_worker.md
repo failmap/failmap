@@ -23,7 +23,7 @@ sending a mail to info@faalkaart.nl
 
 6: Start the worker:
 ```bash
-curl -s https://gitlab.com/failmap/failmap/raw/master/tools/faalwerker.sh | /bin/bash
+curl -s https://gitlab.com/internet-cleanup-foundation/web-security-map/raw/master/tools/faalwerker.sh | /bin/bash
 ```
 
 This starts a worker in the background. It will generate a lot of output.
@@ -33,7 +33,7 @@ Do note that you're piping to bash whatever we send you. So better check the cod
 ## How to verify your worker is running
 You'll probably see a lot of output: the container starting, celery running, the task being performed and such.
 
-If you want to see that failmap is processing the result, there are two ways:
+If you want to see that web security map is processing the result, there are two ways:
 1: You can see your computer name pop up in the workers on https://admin.faalkaart.nl/admin/
 2: You can see the amount of tasks processed increase on https://grafana.faalkaart.nl
 
@@ -43,7 +43,7 @@ https://sentry.io/internet-cleanup-foundation/remote-workers/
 ## How to stop the worker
 Run this command:
 ```
-pkill -f "docker logs -f failmap-worker"
+pkill -f "docker logs -f websecmap-worker"
 ```
 
 ## What does the worker do?
@@ -79,5 +79,5 @@ todo: docker as user, aka, pl0x don't run it as root.
 
 Like this:
 ```bash
-curl -s https://gitlab.com/failmap/failmap/raw/master/tools/faalwerker.sh | /bin/bash &> /dev/null
+curl -s https://gitlab.com/internet-cleanup-foundation/web-security-map/raw/master/tools/faalwerker.sh | /bin/bash &> /dev/null
 ```

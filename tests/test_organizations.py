@@ -1,4 +1,4 @@
-from failmap.organizations.models import Organization, OrganizationType
+from websecmap.organizations.models import Organization, OrganizationType
 
 
 def test_create_organization(db):

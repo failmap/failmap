@@ -1,4 +1,4 @@
-# This file contains all requirements for a release build of failmap.
+# This file contains all requirements for a release build of websecmap.
 # Any testing/debug only requirements should to into requirements.dev.txt.
 # Requirements only needed for release should go in requirements.deploy.txt.
 

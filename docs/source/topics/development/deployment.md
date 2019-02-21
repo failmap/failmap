@@ -1,6 +1,6 @@
 # Deployment
-For deployment installations of Failmap please refer to:
+For deployment installations of Web Security Ma[] please refer to:
 
-https://gitlab.com/failmap/server
+https://gitlab.com/internet-cleanup-foundation/server
 
-Or contact us at: info@faalkaart.nl
+Or contact us at: info@internetcleanupfoundation.org

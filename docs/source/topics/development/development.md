@@ -1,5 +1,5 @@
 # Development
-Please follow the [quickstart](getting_started.md) to get failmap on your system.
+Please follow the [quickstart](getting_started.md) to get Web Security Map on your system.
 
 Additionally the [Docker](docker.md) page could be very helpful.
 
@@ -8,7 +8,7 @@ This is an illustration to show a normal development practices.
 
 We use git, which comes with many pitfalls. Just search your answer on stack exchange first and ask in the group later.
 
-Make sure failmap is up and running, by following the [getting started](getting_started.md) instructions. Then make a
+Make sure Web Security Map is up and running, by following the [getting started](getting_started.md) instructions. Then make a
 branch that describes what you are doing. For example:
 
 ```
@@ -61,7 +61,7 @@ git push
 The push command will give you a link to file a merge request. Meanwhile the build servers are checking your code
 before merging.
 
-Follow the merge request link to create the actual merge request. Share it on the chat.failmap.org channel for review
+Follow the merge request link to create the actual merge request. Share it on the chat.websecuritymap.org channel for review
 and feedback.
 
 Once the feedback is processed (if needed at all) you can merge the code. If you can't, other members of the project can.
@@ -69,7 +69,7 @@ So ask.
 
 ## FAQ
 
-### The failmap command won't start and i get some weird errors...?
+### The web security map command won't start and i get some weird errors...?
 Make sure you've got an up to date development environment. You can do so by running the following commands:
 
 Rebuild the environment:
@@ -106,7 +106,7 @@ To run only a specific test use:
 
 To only run a specific test suite use for example:
 
-    .tox/default/bin/failmap test tests/scanners/test_dummy.py
+    .tox/default/bin/websecmap test tests/scanners/test_dummy.py
 
 A coverage report is generated after running tests, on OSX it can be viewed using:
 

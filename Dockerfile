@@ -51,7 +51,7 @@ COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
 RUN cd /gopath/src/github.com/hyperhq/hypercli; GOPATH=/gopath HYPER_GITCOMMIT=0 ./build.sh
 
 # restart with a clean image
-FROM failmap/o-saft:latest
+FROM websecmap/o-saft:latest
 
 USER root
 
@@ -92,7 +92,7 @@ RUN apk --no-cache add \
   nodejs-npm
 
 # expose relevant executable(s)
-RUN ln -s /pyenv/bin/failmap /usr/local/bin/
+RUN ln -s /pyenv/bin/websecmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
 RUN ln -s /pyenv/bin/celery /usr/local/bin/
 RUN ln -s /pyenv/bin/dnssec.pl /usr/local/bin/
@@ -113,7 +113,7 @@ RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
 COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local/bin/hyper
 
 # copy all relevant files for python installation
-COPY ./failmap/ /source/failmap/
+COPY websecmap /source/failmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
@@ -131,7 +131,7 @@ WORKDIR /
 # configuration for django-uwsgi to work correct in Docker environment
 ENV UWSGI_GID root
 ENV UWSGI_UID root
-ENV UWSGI_MODULE failmap.wsgi
+ENV UWSGI_MODULE websecmap.wsgi
 # serve static files (to caching proxy) from collected/generated static files
 ENV UWSGI_STATIC_MAP /static=/srv/failmap/static
 # set proxy and browser caching for static files to 1 month
@@ -140,15 +140,15 @@ ENV TOOLS_DIR /usr/local/bin/
 ENV VENDOR_DIR /source/vendor/
 
 # collect all static files form all django applications into static files directory
-RUN /pyenv/bin/failmap collectstatic
+RUN /pyenv/bin/websecmap collectstatic
 
 # Compress JS/CSS before serving, using django-compressor, run after collectstatic
 # COMPRESS=1 is a hack to disable django_uwsgi app as it currently conflicts with compressor
 # https://github.com/django-compressor/django-compressor/issues/881
-RUN env COMPRESS=1 /pyenv/bin/failmap compress
+RUN env COMPRESS=1 /pyenv/bin/websecmap compress
 
 EXPOSE 8000
 
-ENTRYPOINT [ "/usr/local/bin/failmap" ]
+ENTRYPOINT [ "/usr/local/bin/websecmap" ]
 
 CMD [ "help" ]

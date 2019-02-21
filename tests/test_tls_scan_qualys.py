@@ -16,8 +16,8 @@ from colorama import Fore, Style, init
 from freezegun import freeze_time
 from httmock import HTTMock, response
 
-from failmap.scanners.models import Endpoint, TlsQualysScan
-from failmap.scanners.scanner import tls_qualys
+from websecmap.scanners.models import Endpoint, TlsQualysScan
+from websecmap.scanners.scanner import tls_qualys
 
 try:
     # Python 3

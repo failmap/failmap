@@ -16,12 +16,12 @@ Thanks to the following volunteers:
 - knicklighter
 - Mozart Failenschmidt
 
-Join: chat.failmap.org
+Join: chat.websecuritymap.org
 
 
 ## Tech, Open Source
 
-Failmap depends on tons of services and open source projects.
+Web Security Map depends on tons of services and open source projects.
 
 *   Polygons, map data: [Openstreetmap](https://www.openstreetmap.org),
 [QGIS](http://www.qgis.org/), [MapBox](https://www.mapbox.com/), osmtogeojson (+node)
@@ -84,7 +84,6 @@ Failmap depends on tons of services and open source projects.
 [autoflake](https://github.com/myint/autoflake),
 [isort](https://github.com/timothycrosley/isort),
 [pylama](https://github.com/klen/pylama),
-[codeclimate](https://codeclimate.com/github/failmap/failmap)
 
 *   Database: [MariaDB](https://mariadb.org/), [sqlite](https://sqlite.org/)
 
@@ -99,7 +98,7 @@ Failmap depends on tons of services and open source projects.
 [vagrant-vbguest](https://github.com/dotless-de/vagrant-vbguest)
 [landrush](https://github.com/vagrant-landrush/landrush)
 
-*   Development: [Gitlab](https://gitlab.com/failmap/)
+*   Development: [Gitlab](https://gitlab.com/internet-cleanup-foundation/)
 [PyCharm](https://www.jetbrains.com/pycharm/)
 
 *   TLS checks (beta): [cert-chain-resolver](https://github.com/zakjan/cert-chain-resolver),

@@ -53,7 +53,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = 'failmap'
+project = 'websecmap'
 copyright = 'Internet Cleanup Foundation'
 author = 'Elger Jonker, Johan Bloemberg'
 
@@ -119,7 +119,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'failmapdoc'
+htmlhelp_basename = 'websecmapdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -146,7 +146,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'failmap.tex', 'failmap Documentation',
+    (master_doc, 'websecmap.tex', 'Web Security Map Documentation',
      'Elger Jonker, Johan Bloemberg', 'manual'),
 ]
 
@@ -156,7 +156,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'failmap', 'failmap Documentation',
+    (master_doc, 'websecmap', 'Web Security Map Documentation',
      [author], 1)
 ]
 
@@ -167,8 +167,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'failmap', 'failmap Documentation',
-     author, 'failmap', 'One line description of project.',
+    (master_doc, 'websecmap', 'Web Security Map Documentation',
+     author, 'websecmap', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -178,8 +178,8 @@ texinfo_documents = [
 # Doesn't work on readthedocs yet...
 # import sys, os
 #
-# sys.path.insert(0, os.path.join(os.path.abspath('.'), '../../../failmap'))
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'failmap.settings'
+# sys.path.insert(0, os.path.join(os.path.abspath('.'), '../../../websecmap'))
+# os.environ['DJANGO_SETTINGS_MODULE'] = 'websecmap.settings'
 # # from django.conf import settings
 # # settings.configure()  # missing things... such as TOOLS. This is a default config file which is useless.
 #

@@ -7,7 +7,7 @@ import time
 
 import pytest
 
-from failmap.celery import waitsome
+from websecmap.celery import waitsome
 
 TIMEOUT = 30
 

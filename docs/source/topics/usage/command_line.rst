@@ -4,7 +4,7 @@
 Command Line Interface
 ======================
 
-When failmap is installed, the failmap command is available to perform all kinds of scans and other (more developer oriented)
+When Web Security Map is installed, the Web Security Map command is available to perform all kinds of scans and other (more developer oriented)
 tasks on the command line.
 
 Note that in general you don't need to use the command line as scans and configurations are all available in the admin interface. But
@@ -12,9 +12,9 @@ for those who want to dig deeper this guide might be of use.
 
 .. code-block:: bash
 
-    elger@stitchbook /A/X/x/h/f/a/docs> failmap
+    elger@stitchbook /A/X/x/h/f/a/docs> websecmap
 
-    Type 'failmap help <subcommand>' for help on a specific subcommand.
+    Type 'Web Security Map help <subcommand>' for help on a specific subcommand.
 
     Available subcommands:
     ...
@@ -39,7 +39,7 @@ before trying.
 
 Scanning
 --------
-Performing scans with failmap is pretty easy. I'll explain the following command, so you can play with it yourself.
+Performing scans with Web Security Map is pretty easy. I'll explain the following command, so you can play with it yourself.
 
 Examples:
 
@@ -48,7 +48,7 @@ Distributed dnssec scan on a specific url:
 .. code-block:: bash
    
 
-   failmap scan dnssec -u arnhem.nl -m async
+   websecmap scan dnssec -u arnhem.nl -m async
 
 
 Local header scan on a specific organization:
@@ -56,7 +56,7 @@ Local header scan on a specific organization:
 .. code-block:: bash
    
 
-   failmap scan headers -o Arnhem
+   websecmap scan headers -o Arnhem
 
 
 Local ftp scan on all organizations:
@@ -64,14 +64,14 @@ Local ftp scan on all organizations:
 .. code-block:: bash
    
 
-   failmap scan ftp
+   websecmap scan ftp
 
 If you need to debug scan permissions and configurations, you can do so using:
 
 .. code-block:: bash
    
 
-   failmap scan debug -u arnhem.nl
+   websecmap scan debug -u arnhem.nl
 
 Which results in a report showing what endpoints / urls will be scanned. This might be helpful when debugging:
 
@@ -118,20 +118,20 @@ To find the complete syntax of the scan command:
 .. code-block:: bash
    
 
-   failmap help scan
+   websecmap help scan
 
 Which results in:
 
 .. code-block:: bash
 
-    usage: failmap scan [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS]
+    usage: websecmap scan [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS]
                         [--pythonpath PYTHONPATH] [--traceback] [--no-color]
                         [-m {direct,sync,async}] [-i INTERVAL]
                         [-t TASK_ID | -o [ORGANIZATION_NAMES [ORGANIZATION_NAMES ...]]
                         | -u [URL_ADDRESSES [URL_ADDRESSES ...]]]
                         {dnssec,headers,plain,endpoints,tls,tlsq,ftp,screenshot,onboard,dummy,debug}
 
-    Can perform a host of scans. Run like: failmap scan [scanner_name] and then
+    Can perform a host of scans. Run like: Web Security Map scan [scanner_name] and then
     options.
 
     positional arguments:
@@ -172,7 +172,7 @@ Reports can be updated with the following command:
 
 .. code-block:: bash
 
-   failmap report
+   websecmap report
 
 This command also takes in the organization and url filters. Filtering always updates the entire organization over the entire
 timespan. This means it can take a while before the command has finished.
@@ -180,9 +180,9 @@ timespan. This means it can take a while before the command has finished.
 
 .. code-block:: bash
 
-   failmap report -o Arnhem
+   websecmap report -o Arnhem
 
-See failmap help report for more info.
+See Web Security Map help report for more info.
 
 
 Endpoint discovery and verification
@@ -190,11 +190,11 @@ Endpoint discovery and verification
 
 .. code-block:: bash
 
-    failmap discover http -o Texel
-    failmap verify http -u www.texel.nl
-    failmap verify ftp -o Apeldoorn
+    websecmap discover http -o Texel
+    websecmap verify http -u www.texel.nl
+    websecmap verify ftp -o Apeldoorn
 
-See failmap help verify
+See Web Security Map help verify
 
 Subdomain discovery
 -------------------
@@ -202,7 +202,7 @@ Subdomain discovery
 
 .. code-block:: bash
 
-    failmap discover subdomains -o Texel
+    websecmap discover subdomains -o Texel
 
 
 Running a development server
@@ -213,7 +213,7 @@ filtered by settings.py), run:
 
 .. code-block:: bash
 
-   failmap devserver --no-backend --no-data 0.0.0.0:8000
+   websecmap devserver --no-backend --no-data 0.0.0.0:8000
 
 
 Importing coordinates
@@ -230,7 +230,7 @@ To import Dutch municipalities, you'll run the following command:
 .. code-block:: bash
    
 
-   failmap import_coordinates --country=NL --region=municipality
+   websecmap import_coordinates --country=NL --region=municipality
 
 
 This translates to admin_level 8, and all imported data is added to the database a being in NL and the OrganizationType
@@ -239,19 +239,19 @@ municipality. The list of regions that can be requested with the --list command,
 .. code-block:: bash
    
 
-   failmap import_coordinates --list
+   websecmap import_coordinates --list
 
 
 
 .. code-block:: bash
 
-    usage: failmap import_coordinates [-h] [--version] [-v {0,1,2,3}]
+    usage: websecmap import_coordinates [-h] [--version] [-v {0,1,2,3}]
                                       [--settings SETTINGS]
                                       [--pythonpath PYTHONPATH] [--traceback]
                                       [--no-color] [--country COUNTRY]
                                       [--region REGION] [--date DATE]
 
-    Connects to OSM and gets a set of coordinates. Example:failmap
+    Connects to OSM and gets a set of coordinates. Example:Web Security Map
     import_coordinates --country=SE --region=municipality --date=2018-01-01
 
     optional arguments:
@@ -283,7 +283,7 @@ You can load a fixture with the following command:
 .. code-block:: bash
    
 
-    failmap load_dataset dataset_24_juli_2018.json
+    websecmap load_dataset dataset_24_juli_2018.json
 
 A list of possible fixtures is in the fixtures directory of each django app. For example: /organizations/fixtures/
 
@@ -303,7 +303,7 @@ you can run the following command to retrieve data from the database:
 .. code-block:: bash
    
 
-   failmap create_dataset -o -> dataset_24_juli_2018.json
+   websecmap create_dataset -o -> dataset_24_juli_2018.json
 
 
 As with django, create dataset allows all kinds of options. Some defaults are chosen when running create_dataset over
@@ -313,7 +313,7 @@ using the django command.
 .. code-block:: bash
    
 
-    usage: failmap create_dataset [-h] [--version] [-v {0,1,2,3}]
+    usage: websecmap create_dataset [-h] [--version] [-v {0,1,2,3}]
                                   [--settings SETTINGS] [--pythonpath PYTHONPATH]
                                   [--traceback] [--no-color] [--format FORMAT]
                                   [--indent INDENT] [--database DATABASE]

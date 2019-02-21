@@ -15,13 +15,13 @@ do publish header scans, but do not publish SQL injections.
 Document clearly why you are doing things. This is hard.
 
 ## Get Coding
-Failmap is written in Python and uses (wraps) scanners that mostly already exist. See: scanners_scanning_and_ratings.
+Web Security Map is written in Python and uses (wraps) scanners that mostly already exist. See: scanners_scanning_and_ratings.
 
 To get you started a dummy scanner is created and various implementations exist. The scanners, including the dummy, are
 visible here:
 
 ```
-/failmap/scanners/scanner_*.py
+/websecmap/scanners/scanner_*.py
 ```
 
 Several scanners have been implemented using this pattern. For example the DNSSEC scanner. Just copy and start
@@ -35,13 +35,13 @@ Translation instructions are shown in the dummy scanner.
 ### Add command line feature
 Add your scanner to the following file:
 ```python
-/failmap/scanners/management/commands/scan.py
+/websecmap/scanners/management/commands/scan.py
 ```
 
 ### Create ratings/points
 Add your points algorithm here. Document very well why certain points are given.
 ```
-/failmap/map/calculate.py
+/websecmap/map/calculate.py
 ```
 
 ### Add the scanner to rating.py
@@ -61,21 +61,21 @@ Data deduplication is very important and it's sometimes wise to only add records
 the pattern of EndpointGenericScan and UrlGenericScan to do so.
 
 ### Make sure it's used on the map
-Failmap uses a process of "building ratings". This is a cache of all discovered findings, so the map can
+Web Security Map uses a process of "building ratings". This is a cache of all discovered findings, so the map can
 quickly query the current state. Ratings are in sequential order and built frequently.
 
 To get a rating on the map, add your scanner type to the below file at lines X, Y and Z. This is very
 easy if you use EndpointGenericScan.
 
 ```
-/failmap/map/rating.py
+/websecmap/map/rating.py
 ```
 
 Then you have to determine the severity of your discovery. The choice is yours if it counts for high,
 medium and low. Add your scanner to the below file:
 
 ```
-/failmap/map/calculation.py
+/websecmap/map/calculation.py
 ```
 
 and implement the routine that returns a result. Note that we're phasing out the "points" field.

@@ -20,7 +20,7 @@ pytest-mock
 pytest-docker
 
 # # dashboard for celery introspection
-# # run failmap celery flower
+# # run websecmap celery flower
 # # go to http://localhost:5555/
 # celery-flower
 
@@ -42,6 +42,6 @@ pydotplus  # generating graphs with the docs command...
 # use current (03-2018) master as it includes a fix for macOS: https://github.com/gorakhargosh/watchdog/pull/329
 git+https://github.com/gorakhargosh/watchdog.git@d33bee0290e00ecb3570dd938db72a2550933586#egg=watchdog
 
-ipython  # failmap shell -i ipython
+ipython  # websecmap shell -i ipython
 django-cprofile-middleware
 moviepy

@@ -76,13 +76,13 @@ In a directory of your choosing:
 download the software
 
 ```bash
-git clone --recursive https://gitlab.com/failmap/failmap/
+git clone --recursive https://gitlab.com/internet-cleanup-foundation/web-security-map/
 ```
 
 enter the directory of the downloaded software
 
 ```bash
-cd failmap/
+cd websecmap/
 ```
 
 This prepares the shell environment for local development.
@@ -97,15 +97,15 @@ Running Tox once creates a development Virtualenv in .tox/default/ which is auto
 tox
 ```
 
-After completing succesfully Failmap is available to run. For example, to show a list of commands:
+After completing succesfully Web Security Map is available to run. For example, to show a list of commands:
 
 ```bash
-failmap help
+websecmap help
 ```
 Now run the following command to start a full development server.
 
 ```bash
-failmap devserver
+websecmap devserver
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
@@ -115,13 +115,13 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 This shows the current data on the map:
 
 ```bash
-failmap rebuild_ratings
+websecmap rebuild_ratings
 ```
 
 It is possible to start the server without redis and without (re)loading data:
 
 ```bash
-failmap devserver --no-backend --no-data
+websecmap devserver --no-backend --no-data
 ```
 
 
@@ -158,13 +158,13 @@ Version for the project is losely semver with no specific release schedule or me
 
 Formal releases are created by creating a Git tag with the desired version number. These tags will trigger automated
 builds which will release the specified code under that version. Tags can be pushed from a local repository or created
-through the Gitlab interface: https://gitlab.com/failmap/failmap/tags/new
+through the Gitlab interface: https://gitlab.com/internet-cleanup-foundation/web-security-map/tags/new
 
 Informal releases are created by new commits pushed/merged to the master. The version number of the last formal release
 will be suffixed with the current short Git SHA.
 
 For all releases artifacts will be created. Currently only Docker containers are pushed into the
-[registry](https://gitlab.com/failmap/failmap/container_registry). Each artifact will be tagged with the appropriate
+[registry](https://gitlab.com/internet-cleanup-foundation/web-security-map/container_registry). Each artifact will be tagged with the appropriate
 version (formal or informal). Where needed abstract tags will also be created/updated for these artifacts (eg: Docker
 build/staging/latest tags).
 
@@ -176,7 +176,7 @@ from the formal releases.
 
 ### Docker installation
 
-#### ERROR: for failmap_database_1  Cannot start service database: Mounts denied:
+#### ERROR: for websecmap_database_1  Cannot start service database: Mounts denied:
 As the error suggests, you're running the installation from a directory that is not shared with Docker. Change the
 docker configuration or run the installation from your user directory. You might receive this error if you run
 `docker-composer up` from /var/www/ or /srv/www/ as docker by default only has access to your user directory.

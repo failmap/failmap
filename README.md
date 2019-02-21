@@ -1,26 +1,26 @@
-[![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap) [![pipeline status](https://gitlab.com/failmap/failmap/badges/master/pipeline.svg)](https://gitlab.com/failmap/failmap/commits/master) [![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/failmap/failmap/coverage)
+[![Code Climate](https://codeclimate.com/github/Web Security Map/Web Security Map/badges/gpa.svg)](https://codeclimate.com/github/Web Security Map/Web Security Map) [![pipeline status](https://gitlab.com/Web Security Map/Web Security Map/badges/master/pipeline.svg)](https://gitlab.com/Web Security Map/Web Security Map/commits/master) [![Test Coverage](https://codeclimate.com/github/Web Security Map/Web Security Map/badges/coverage.svg)](https://codeclimate.com/github/Web Security Map/Web Security Map/coverage)
 [![Badges](https://img.shields.io/badge/badges-6-yellowgreen.svg)](https://shields.io) [![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl) [![Join the chat at https://gitter.im/internet-cleanup-foundation/Lobby](https://badges.gitter.im/internet-cleanup-foundation/Lobby.svg)](https://gitter.im/internet-cleanup-foundation/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Why Failmap
+Why Web Security Map
 ===========
 We believe privacy and information integrity are the basics of a resilient information society.
 
 By providing unprecedented transparency on the most basic levels of information security, insight in
 the quality and capability of organizations regarding their responsibilities is displayed.
 
-Failmap uses the complexity of a traffic light anyone is able to determine if organizations that are responsible
+Web Security Map uses the complexity of a traffic light anyone is able to determine if organizations that are responsible
 for safeguarding information are doing what they are supposed to do.
 
-It is perfectly possible to run Failmap software for yourself, allowing you to independently verify the
+It is perfectly possible to run Web Security Map software for yourself, allowing you to independently verify the
 state of information security basics. All our products are open source.
 
 
 What is it
 ----------
-Failmap is an open source web application that continuously evaluates the implementation of security standards and
+Web Security Map is an open source web application that continuously evaluates the implementation of security standards and
 best practices at (governmental) organizations.
 
-This repository contains the mapping application fo Failmap: the public frontend, an administrative interface and scanners.
+This repository contains the mapping application fo Web Security Map: the public frontend, an administrative interface and scanners.
 
 ![screenshot](docs/screenshot.png)
 
@@ -34,7 +34,7 @@ Keywords: quickstart, installation
 ## 0: If you want a complete production setup
 Then read the installation tutorial, which is significantly easier than the below development setup!
 
-For full installation with everything and anything, check: https://gitlab.com/failmap/server/
+For full installation with everything and anything, check: https://gitlab.com/Web Security Map/server/
 
 
 ## 1: Install dependencies on your system
@@ -107,13 +107,13 @@ In a directory of your choosing:
 download the software
 
 ```bash
-git clone --recursive https://gitlab.com/failmap/failmap/
+git clone --recursive https://gitlab.com/Web Security Map/Web Security Map/
 ```
 
 enter the directory of the downloaded software
 
 ```bash
-cd failmap/
+cd Web Security Map/
 ```
 
 This prepares the shell environment for local development.
@@ -128,15 +128,15 @@ Running Tox once creates a development Virtualenv in .tox/default/ which is auto
 tox
 ```
 
-After completing successfully Failmap is available to run. For example, to show a list of commands:
+After completing successfully Web Security Map is available to run. For example, to show a list of commands:
 
 ```bash
-failmap help
+Web Security Map help
 ```
 Now run the following command to start a full development server.
 
 ```bash
-failmap devserver
+Web Security Map devserver
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
@@ -146,13 +146,13 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 This shows the current data on the map:
 
 ```bash
-failmap rebuild_ratings
+Web Security Map rebuild_ratings
 ```
 
 It is possible to start the server without redis and without (re)loading data:
 
 ```bash
-failmap devserver --no-backend --no-data
+Web Security Map devserver --no-backend --no-data
 ```
 
 
@@ -169,17 +169,17 @@ https://www.youtube.com/watch?v=eAwq2QV7f1k
 
 Documentation
 =============
-Documentation is provided at [ReadTheDocs](http://failmap.readthedocs.io/).
+Documentation is provided at [ReadTheDocs](http://Web Security Map.readthedocs.io/).
 
 Get involved
 ============
 
-Failmap is open organisation run by volunteers.
+Web Security Map is open organisation run by volunteers.
 
 - Talk to us via [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#).
 - Or using IRC: #internet-cleanup-foundation/Lobby @ irc.gitter.im (see https://irc.gitter.im for information)
 - E-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl),
-- Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/failmap/failmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/failmap/failmap.org/merge_requests/new).
+- Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/Web Security Map/Web Security Map/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/Web Security Map/Web Security Map.org/merge_requests/new).
 
 Thanks to
 =========

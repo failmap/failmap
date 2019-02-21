@@ -1,8 +1,8 @@
 """Shared fixtures used by different tests."""
 import pytest
 
-from failmap.organizations.models import Organization, Url
-from failmap.scanners.models import Endpoint
+from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.models import Endpoint
 
 
 @pytest.fixture

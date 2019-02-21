@@ -1,4 +1,4 @@
 Task processing system
 ======================
 
-.. autofunction:: failmap.types.compose_discover_task
+.. autofunction:: websecmap.types.compose_discover_task

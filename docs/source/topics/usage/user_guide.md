@@ -1,5 +1,5 @@
 # User Guide
-Failmap is split up into two user interfaces and several supporting administrative interfaces.
+Web Security Map is split up into two user interfaces and several supporting administrative interfaces.
 
 ## The map website
 The website is the site intended for humans. There are some controls on the website, such as the
@@ -9,7 +9,7 @@ Using the map website should be straightforward.
 
 ## The admin website
 Use the admin website to perform standard [data-operations](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete),
-run a series of actions on the data and read documentation of the internal workings of the failmap software.
+run a series of actions on the data and read documentation of the internal workings of the Web Security Map software.
 
 The admin website is split up in four key parts:
 1. Authentication and Authorization
@@ -41,7 +41,7 @@ All of this is done in the admin interface under:
 
 > Map > Configurations
 
-Below is a sample configuration that can help you getting started. Loading failmap for the first time, this sample
+Below is a sample configuration that can help you getting started. Loading Web Security Map for the first time, this sample
 configuration is included as a fixture. You can show any number of countries and organization types.
 
 ![Configurations](user_guide/configurations.png)

@@ -1,10 +1,10 @@
 # Scanning policy
 
-Failmap tries to scan with all scanners every day. This means the map shows new results on a daily basis.
+Web Security Map tries to scan with all scanners every day. This means the map shows new results on a daily basis.
 
-## What does failmap scan?
+## What does Web Security Map scan?
 
-Failmap scans the following:
+Web Security Map scans the following:
 
 Daily scans:
 
@@ -33,14 +33,14 @@ The DNS scanner tries to find hostnames using various strategies:
 
 **Endpoint discovery**
 
-Failmap tries to auto-discover endpoints for urls. A normal website today has about four endpoints:
+Web Security Map tries to auto-discover endpoints for urls. A normal website today has about four endpoints:
 
 - One on IPv4, port 80 that redirects to port 443. Example: http://example.com
 - One on IPv4, port 443 that contains the website. Example: https://example.com
 - One on IPv6, port 80 that redirects to port 443. Example: http://example.com
 - One on IPv6, port 443 that contains the website. Example: https://example.com
 
-Since it's possible to host a website on any port, failmap also scans for the existence of websites on well known
+Since it's possible to host a website on any port, Web Security Map also scans for the existence of websites on well known
 (official) alternative ports such as 8080.
 
 The existence of an endpoint in itself is not rated. This is implicit: the more endpoints, the more risk.
@@ -102,7 +102,7 @@ Maximum severity: high / red
 
 ## Special cases / Edge cases
 
-Since failmap is completely automated, there are some special cases that could help improving the result.
+Since Web Security Map is completely automated, there are some special cases that could help improving the result.
 
 These are:
 
@@ -163,13 +163,13 @@ We recommend the automation in managing domains, certificates and IT in general.
 
 
 ## Decency
-Failmap scans a lot of domains, subdomains and ulitmately endpoints. It tries to do so with minimum contact, as to
+Web Security Map scans a lot of domains, subdomains and ulitmately endpoints. It tries to do so with minimum contact, as to
 never interfere with operations.
 
-Failmap does not publish issues that can lead to additional risk for either organizations
+Web Security Map does not publish issues that can lead to additional risk for either organizations
 as for users of those websites. Any more severe issues are handled on a case by case base using responsible disclosure.
 
 
 ## Extra scans
-Admins of failmap may choose to run any scan at any moment. For example when handling tickets or on request by the
+Admins of Web Security Map may choose to run any scan at any moment. For example when handling tickets or on request by the
 organization (a re-scan). This doesn't happen too often.

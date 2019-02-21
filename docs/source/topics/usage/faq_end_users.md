@@ -1,15 +1,15 @@
-# FAQ for those on listed on failmap
+# FAQ for those on listed on Web Security Map
 
 
-## Why Failmap?
+## Why Web Security Map?
 
 Many organizations (have to) transfer sensitive information over the internet. Sometimes they ask to share sensitive
 information with them via forms, mail and etcetera. Anyone should be able to use internet services without worrying
 their information is being altered or changed, whether unintentionally or malicious. Many responsible organizations
 boast about their capability (so called "cyber") to protect.
 
-Failmap adds an enormous amount of transparency. This is the driving force for many organizations to change / clean up
-their online presence. With the launch of failmap, thousands of issues have been fixed in the Netherlands,
+Web Security Map adds an enormous amount of transparency. This is the driving force for many organizations to change / clean up
+their online presence. With the launch of Web Security Map, thousands of issues have been fixed in the Netherlands,
 just because they have been made understandable and publicly accessible (naming and shaming).
 
 We display the "base level" of security, which can be illustrative of the the quality and capability of organizations
@@ -26,7 +26,7 @@ improve their services.
 
 ## What do the scores mean?
 
-Failmap knows five colors:
+Web Security Map knows five colors:
 
 - Green / Yellow: nothing that we scan is wrong
 - Orange: there are some slicht issues, that need addressing
@@ -50,10 +50,10 @@ Unfortunately scanning only holds up for creating a baseline. The organization m
 cannot (or will not) verify automatically. Such as outdated software, logic flaws and so on.
 
 
-## How complete is failmap?
+## How complete is Web Security Map?
 
-Failmap automatically scans the internet for subdomains of domains. This creates an enormous catalog of URL's that are
-associated with organizations. However, failmap does only scan the "base level" of security and there might be many
+Web Security Map automatically scans the internet for subdomains of domains. This creates an enormous catalog of URL's that are
+associated with organizations. However, Web Security Map does only scan the "base level" of security and there might be many
 domains of subdomains of organization we miss.
 
 In the Netherlands, just for municipalities, we scan about 8000 endpoints daily or weekly.
@@ -97,11 +97,11 @@ sheets and support.
 The website Cipher List also shows a lot of config defaults for many services: https://cipherli.st/
 
 
-## Since when did failmap start to annoy people?
+## Since when did Web Security Map start to annoy people?
 
 March 2016 the first beta was written in PHP in a single days, for the "in het hoofd van de hacker" conference.
 
 
-## Can i run my own failmap?
+## Can i run my own Web Security Map?
 
-Yes, the source of failmap is open and can be used non-commercially.
+Yes, the source of Web Security Map is open and can be used non-commercially.

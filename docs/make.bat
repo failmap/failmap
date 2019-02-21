@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=source
 set BUILDDIR=build
-set SPHINXPROJ=failmap
+set SPHINXPROJ=websecmap
 
 if "%1" == "" goto help
 

@@ -5,7 +5,7 @@ import time
 import pytest
 from django.conf import settings
 
-from failmap.celery import rate_limited, waitsome
+from websecmap.celery import rate_limited, waitsome
 
 SAMPLES = settings.CELERY_WORKER_CONCURRENCY * settings.CELERY_WORKER_CONCURRENCY
 SLEEP = 5

@@ -57,7 +57,7 @@ def requirements(extra=None):
 
 
 setup(
-    name='failmap',
+    name='websecmap',
     version=get_version(),
     packages=find_packages(),
     install_requires=requirements(),
@@ -68,7 +68,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'failmap = failmap.manage:main',
+            'websecmap = websecmap.manage:main',
         ],
     },
     scripts=[

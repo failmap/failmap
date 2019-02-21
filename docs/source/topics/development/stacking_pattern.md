@@ -1,10 +1,10 @@
 # Stacking pattern
 
-The stacking pattern is the mechanic that Failmap uses to store
+The stacking pattern is the mechanic that Web Security Map uses to store
 historical data. It allows for similar data to exist with gaps and very
 fast results to queries that ask "what items exist on this moment".
 
-Properly managing or developing Failmap requires understanding of this
+Properly managing or developing Web Security Map requires understanding of this
 pattern. It's not that hard, but doing it wrong might cause inconsistent
 data.
 

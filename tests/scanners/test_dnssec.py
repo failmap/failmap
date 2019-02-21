@@ -1,6 +1,6 @@
 """Testing parsing of dnssec scanner output."""
 
-from failmap.scanners.scanner.dnssec import analyze_result
+from websecmap.scanners.scanner.dnssec import analyze_result
 
 
 def test_analyze_result():

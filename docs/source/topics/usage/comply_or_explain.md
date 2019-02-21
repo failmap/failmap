@@ -12,7 +12,7 @@ All explanations are published on the website and can also be downloaded for ana
 Some common reasons why an explanation is used:
 
 - A scanner gave a wrong rating, or the rating can be explained without compromising security.
-- A scanner could not connect to the scanned service because of incorrect implementation in failmap.
+- A scanner could not connect to the scanned service because of incorrect implementation in Web Security Map.
 - A scanner was not behaving according to modern security practices or RFC's.
 - The result contains a glitch, for example: two conflicting results are shown instead of one.
 
@@ -73,7 +73,7 @@ trusts this certificate setup. The finding has been explained.
 ![Example explanation by Groningen](comply_or_explain/example_explain_groningen.png)
 
 If you do not agree with the explanation or the type of explanation, it's possible to open an issue at our gitlab page.
-This page is located at: https://gitlab.com/failmap/tickets/issues
+This page is located at: https://gitlab.com/Web Security Map/tickets/issues
 
 
 ## Becoming an comply or explain volunteer
@@ -85,17 +85,17 @@ This gives a unique position to help your and other organizations to handle edge
 
 As a volunteer you will be given:
 
-- Access to the issue list, with confidential issues: https://gitlab.com/failmap/tickets/issues
+- Access to the issue list, with confidential issues: https://gitlab.com/Web Security Map/tickets/issues
 - Access to the admin interface using a personal client-certificate.
 - A personal account on the admin interface.
-- Access to the scans in failmap, with the possibility to alter explanations.
+- Access to the scans in Web Security Map, with the possibility to alter explanations.
 - Access to the chat group: https://gitter.im/internet-cleanup-foundation/comply_or_explain?source=orgpage
 
 ## Explanation code of conduct
 
 Be excellent to each other.
 
-When handling explain-requests, or any issue in failmap, you're working with partially confidential information. For example:
+When handling explain-requests, or any issue in Web Security Map, you're working with partially confidential information. For example:
 who is doing the explanation is secret because of privacy reasons (but not the organization explaining it).
 
 When handling explain request we expect a professional attitude which is constructive.
@@ -104,7 +104,7 @@ When handling explain request we expect a professional attitude which is constru
 ## How to view the latest issues
 We don't have a helpdesk system set up yet, and instead are using a gitlab repository to receive issues.
 
-The address for this site is: https://gitlab.com/failmap/tickets/issues
+The address for this site is: https://gitlab.com/Web Security Map/tickets/issues
 
 This list will look empty when you're not logged in. But if you are logged in, and with the right permissions, you'll
 see a list like this:
@@ -114,9 +114,9 @@ see a list like this:
 
 To access this list of issues, you need a gitlab account. You can create one here: https://gitlab.com/users/sign_in
 
-After creating an account, share your account name with a volunteer that's already in gitlab. A list is displayed here: https://gitlab.com/failmap/tickets/project_members
+After creating an account, share your account name with a volunteer that's already in gitlab. A list is displayed here: https://gitlab.com/Web Security Map/tickets/project_members
 
-You'll be grated access and then will be able to see the content of the service desk and able to reply: https://gitlab.com/failmap/tickets/issues/service_desk
+You'll be grated access and then will be able to see the content of the service desk and able to reply: https://gitlab.com/Web Security Map/tickets/issues/service_desk
 
 
 ## How to explain a scan
@@ -130,13 +130,13 @@ Here are some guides that explain how to install the certificate:
 - https://knowledge.digicert.com/solution/SO5437.html
 - https://www.binarytides.com/client-side-ssl-certificates-firefox-chrome/
 
-Once installed it's possible to visit the failmap admin interface.
+Once installed it's possible to visit the Web Security Map admin interface.
 
 
 ### Log into the admin interface
-After certificate installation you can visit the failmap admin interface. This interface is usally listed at the following domain:
+After certificate installation you can visit the Web Security Map admin interface. This interface is usally listed at the following domain:
 
-https://admin.failmap-website/admin/
+https://admin.Web Security Map-website/admin/
 
 For the Netherlands this is: https://admin.faalkaart.nl/admin/
 
