@@ -1,5 +1,4 @@
 # https://realpython.com/blog/python/asynchronous-tasks-with-django-and-celery/
-# https://github.com/failmap/failmap/pull/2/files
 # http://oddbird.net/2017/03/20/serializing-things/
 # http://docs.celeryproject.org/en/latest/userguide/security.html
 
@@ -15,16 +14,16 @@ import logging
 
 log = logging.getLogger(__package__)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "failmap.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "websecmap.settings")
 
 app = Celery(__name__)
 app.config_from_object('django.conf:settings', namespace='CELERY')
 # use same result backend as we use for broker url
-# If broker_url is None, you  might not have started failmap correctly. See docs/source/conf.py for a correct example.
+# If broker_url is None, you  might not have started websecmap correctly. See docs/source/conf.py for a correct example.
 app.conf.result_backend = app.conf.broker_url.replace('amqp://', 'rpc://')
 
 
-# autodiscover all celery tasks in tasks.py files inside failmap modules
+# autodiscover all celery tasks in tasks.py files inside websecmap modules
 appname = __name__.split('.', 1)[0]
 app.autodiscover_tasks([app for app in settings.INSTALLED_APPS if app.startswith(appname)])
 
@@ -54,7 +53,7 @@ IP_VERSION_QUEUE = {
 
 
 class DefaultTask(Task):
-    """Default settings for all failmap tasks."""
+    """Default settings for all websecmap tasks."""
 
     priority = PRIO_NORMAL
 

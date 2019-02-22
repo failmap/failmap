@@ -10,10 +10,6 @@
 htmlcov
 error.log
 db_backup_*.sqlite3
-failmap/map/static/CACHE/*
-failmap/map/static/images/screenshots/*
-failmap/scanners/resources/wordlists/knownsubdomains.txt
-failmap/scanners/resources/wordlists/nonsense.txt
 websecmap/map/static/CACHE/*
 websecmap/map/static/images/screenshots/*
 websecmap/scanners/resources/wordlists/knownsubdomains.txt
@@ -23,19 +19,14 @@ build/
 code.json
 codeclimate.json
 static/
-!failmap/*/static/
 !websecmap/*/static/
 .direnv
 version
 vendor/Google Chrome.app/
-failmap_dataset*
-failmap_test_dataset*
-failmap_organization_export*
 websecmap_dataset*
 websecmap_test_dataset*
 websecmap_organization_export*
 dev_db/
-failmap_debug_dataset*
 websecmap_debug_dataset*
 temp/*
 *.out

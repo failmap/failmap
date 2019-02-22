@@ -90,5 +90,5 @@ urlpatterns = [
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
     # cache_page(86400, key_prefix='js18n')
-    url(r'^jsi18n/map/$', JavaScriptCatalog.as_view(packages=['failmap.map']), name='javascript-catalog'),
+    url(r'^jsi18n/map/$', JavaScriptCatalog.as_view(packages=['websecmap.map']), name='javascript-catalog'),
 ]

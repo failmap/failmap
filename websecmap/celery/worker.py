@@ -3,7 +3,7 @@ A worker gets a role from it's configuration. This role determines which queue's
 The role also specifies what network connectivity is required (ipv4, ipv6 or both).
 
 Note that hyper.sh workers only offer IPv4. (No sign of changing)
-A normal Failmap server should have both IPv4 and IPv6 access.
+A normal websecmap server should have both IPv4 and IPv6 access.
 
 On tricky issue:
 The ROLE scanner requires both access to IPv4 and IPv6 networks.

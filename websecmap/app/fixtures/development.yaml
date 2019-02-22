@@ -150,16 +150,16 @@
   fields: {last_update: !!timestamp '2019-01-24 15:43:53+00:00'}
 - model: django_celery_beat.periodictask
   pk: 1
-  fields: {name: '&#x1F4C4; Create reports based on the latest findings', task: failmap.app.models.create_job,
-    interval: null, crontab: 13, solar: null, args: '["failmap.map.report"]', kwargs: '{}',
+  fields: {name: '&#x1F4C4; Create reports based on the latest findings', task: websecmap.app.models.create_job,
+    interval: null, crontab: 13, solar: null, args: '["websecmap.map.report"]', kwargs: '{}',
     queue: storage, exchange: null, routing_key: null, priority: null, expires: null,
     one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
       21:00:00+00:00', total_run_count: 279, date_changed: !!timestamp '2019-01-23
       21:00:40+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 2
-  fields: {name: '&#x1F52C; Scan HTTPS encryption quality using Qualys', task: failmap.app.models.create_job,
-    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.tls_qualys"]',
+  fields: {name: '&#x1F52C; Scan HTTPS encryption quality using Qualys', task: websecmap.app.models.create_job,
+    interval: null, crontab: 10, solar: null, args: '["websecmap.scanners.scanner.tls_qualys"]',
     kwargs: "{\r\n\"exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\"\
       : {\"endpoint__tlsqualysscan__is_the_latest_scan\": true, \"endpoint__tlsqualysscan__qualys_rating__in\"\
       : [\"A\", \"A+\", \"A-\"]}\r\n}", queue: storage, exchange: null, routing_key: null,
@@ -169,8 +169,8 @@
 - model: django_celery_beat.periodictask
   pk: 3
   fields: {name: '&#x1F52C; Scan for HTTP servers missing an encrypted counterpart',
-    task: failmap.app.models.create_job, interval: null, crontab: 5, solar: null,
-    args: '["failmap.scanners.scanner.plain_http"]', kwargs: '{}', queue: storage,
+    task: websecmap.app.models.create_job, interval: null, crontab: 5, solar: null,
+    args: '["websecmap.scanners.scanner.plain_http"]', kwargs: '{}', queue: storage,
     exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
     start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 02:00:00+00:00',
     total_run_count: 279, date_changed: !!timestamp '2019-01-24 02:01:20+00:00', description: ''}
@@ -183,24 +183,24 @@
     date_changed: !!timestamp '2019-01-24 04:00:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 5
-  fields: {name: '&#x1F52C; Scan HTTP/HTTPS security headers', task: failmap.app.models.create_job,
-    interval: null, crontab: 12, solar: null, args: '["failmap.scanners.scanner.security_headers"]',
+  fields: {name: '&#x1F52C; Scan HTTP/HTTPS security headers', task: websecmap.app.models.create_job,
+    interval: null, crontab: 12, solar: null, args: '["websecmap.scanners.scanner.security_headers"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
       20:00:00+00:00', total_run_count: 279, date_changed: !!timestamp '2019-01-23
       20:02:30+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 6
-  fields: {name: "\u2795 Discover new HTTP/HTTPS servers", task: failmap.app.models.create_discover_job,
-    interval: null, crontab: 7, solar: null, args: '["failmap.scanners.scanner.http"]',
+  fields: {name: "\u2795 Discover new HTTP/HTTPS servers", task: websecmap.app.models.create_discover_job,
+    interval: null, crontab: 7, solar: null, args: '["websecmap.scanners.scanner.http"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
       00:00:00+00:00', total_run_count: 76, date_changed: !!timestamp '2019-01-20
       00:00:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 7
-  fields: {name: '&#x1F52C; Scan the quality of DNSSEC implementations', task: failmap.app.models.create_job,
-    interval: null, crontab: 4, solar: null, args: '["failmap.scanners.scanner.dnssec"]',
+  fields: {name: '&#x1F52C; Scan the quality of DNSSEC implementations', task: websecmap.app.models.create_job,
+    interval: null, crontab: 4, solar: null, args: '["websecmap.scanners.scanner.dnssec"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
       00:00:00+00:00', total_run_count: 230, date_changed: !!timestamp '2019-01-24
@@ -208,62 +208,62 @@
 - model: django_celery_beat.periodictask
   pk: 8
   fields: {name: '&#x1F52C; Scan whether FTP servers are capable of encrypted transport',
-    task: failmap.app.models.create_job, interval: null, crontab: 4, solar: null,
-    args: '["failmap.scanners.scanner.ftp"]', kwargs: '{}', queue: storage, exchange: null,
+    task: websecmap.app.models.create_job, interval: null, crontab: 4, solar: null,
+    args: '["websecmap.scanners.scanner.ftp"]', kwargs: '{}', queue: storage, exchange: null,
     routing_key: null, priority: null, expires: null, one_off: false, start_time: null,
     enabled: true, last_run_at: !!timestamp '2019-01-24 00:00:00+00:00', total_run_count: 107,
     date_changed: !!timestamp '2019-01-24 00:01:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 9
-  fields: {name: '&#x1F501; Onboard (perform initial scans the first time)', task: failmap.app.models.create_job,
-    interval: null, crontab: 31, solar: null, args: '["failmap.scanners.scanner.onboard"]',
+  fields: {name: '&#x1F501; Onboard (perform initial scans the first time)', task: websecmap.app.models.create_job,
+    interval: null, crontab: 31, solar: null, args: '["websecmap.scanners.scanner.onboard"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
       15:52:00+00:00', total_run_count: 96038, date_changed: !!timestamp '2019-01-24
       15:52:30+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 10
-  fields: {name: "\u2795 Discover new FTP servers", task: failmap.app.models.create_discover_job,
-    interval: null, crontab: 11, solar: null, args: '["failmap.scanners.scanner.ftp"]',
+  fields: {name: "\u2795 Discover new FTP servers", task: websecmap.app.models.create_discover_job,
+    interval: null, crontab: 11, solar: null, args: '["websecmap.scanners.scanner.ftp"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
       00:00:00+00:00', total_run_count: 31, date_changed: !!timestamp '2019-01-23
       00:03:00+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 11
-  fields: {name: "\u2795 Discover new subdomains", task: failmap.app.models.create_discover_job,
-    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.dns"]',
+  fields: {name: "\u2795 Discover new subdomains", task: websecmap.app.models.create_discover_job,
+    interval: null, crontab: 10, solar: null, args: '["websecmap.scanners.scanner.dns"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
       00:00:00+00:00', total_run_count: 10, date_changed: !!timestamp '2019-01-20
       00:00:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 12
-  fields: {name: "\u2705 Verify that FTP servers still exist", task: failmap.app.models.create_verify_job,
-    interval: null, crontab: 4, solar: null, args: '["failmap.scanners.scanner.ftp"]',
+  fields: {name: "\u2705 Verify that FTP servers still exist", task: websecmap.app.models.create_verify_job,
+    interval: null, crontab: 4, solar: null, args: '["websecmap.scanners.scanner.ftp"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
       00:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-24
       00:01:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 13
-  fields: {name: "\u2705 Verify that HTTP/HTTPS servers still exist", task: failmap.app.models.create_verify_job,
-    interval: null, crontab: 6, solar: null, args: '["failmap.scanners.scanner.http"]',
+  fields: {name: "\u2705 Verify that HTTP/HTTPS servers still exist", task: websecmap.app.models.create_verify_job,
+    interval: null, crontab: 6, solar: null, args: '["websecmap.scanners.scanner.http"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24
       03:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-24
       03:02:35+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 14
-  fields: {name: "\u2705 Verify that internet adresses still resolve (DNS)", task: failmap.app.models.create_verify_job,
-    interval: null, crontab: 16, solar: null, args: '["failmap.scanners.scanner.dns"]',
+  fields: {name: "\u2705 Verify that internet adresses still resolve (DNS)", task: websecmap.app.models.create_verify_job,
+    interval: null, crontab: 16, solar: null, args: '["websecmap.scanners.scanner.dns"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23
       19:00:00+00:00', total_run_count: 73, date_changed: !!timestamp '2019-01-23
       19:01:10+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 15
-  fields: {name: '&#x1F5FA;&#xFE0F; Update the map cache for faster browsing', task: failmap.map.report.calculate_map_data_today,
+  fields: {name: '&#x1F5FA;&#xFE0F; Update the map cache for faster browsing', task: websecmap.map.report.calculate_map_data_today,
     interval: null, crontab: 8, solar: null, args: '[]', kwargs: '{}', queue: storage,
     exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
     start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 05:00:00+00:00',
@@ -278,8 +278,8 @@
 - model: django_celery_beat.periodictask
   pk: 19
   fields: {name: '&#x1F52C; Scan HTTPS encryption quality using Qualys on insecure
-      adresses only', task: failmap.app.models.create_job, interval: null, crontab: 35,
-    solar: null, args: '["failmap.scanners.scanner.tls_qualys"]', kwargs: "{\r\n\"\
+      adresses only', task: websecmap.app.models.create_job, interval: null, crontab: 35,
+    solar: null, args: '["websecmap.scanners.scanner.tls_qualys"]', kwargs: "{\r\n\"\
       exclude_urls_scanned_in_the_last_n_days\": 3,\r\n\"urls_filter\": {\"endpoint__tlsqualysscan__is_the_latest_scan\"\
       : true, \"endpoint__tlsqualysscan__qualys_rating__in\": [\"F\", \"C\", \"B\"\
       , \"T\"]}\r\n}", queue: storage, exchange: null, routing_key: null, priority: null,
@@ -288,7 +288,7 @@
       00:01:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 20
-  fields: {name: '&#x1F501; Check running mail scans (hidden)', task: failmap.scanners.scanner.mail.check_running_scans,
+  fields: {name: '&#x1F501; Check running mail scans (hidden)', task: websecmap.scanners.scanner.mail.check_running_scans,
     interval: null, crontab: 33, solar: null, args: '[]', kwargs: '{}', queue: storage,
     exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
     start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-24 15:30:00+00:00',
@@ -296,23 +296,23 @@
     description: ''}
 - model: django_celery_beat.periodictask
   pk: 21
-  fields: {name: "\u2795  Discover Urls with MX records (hidden)", task: failmap.app.models.create_discover_job,
-    interval: null, crontab: 7, solar: null, args: '["failmap.scanners.scanner.mail"]',
+  fields: {name: "\u2795  Discover Urls with MX records (hidden)", task: websecmap.app.models.create_discover_job,
+    interval: null, crontab: 7, solar: null, args: '["websecmap.scanners.scanner.mail"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
       00:00:00+00:00', total_run_count: 16, date_changed: !!timestamp '2019-01-20
       00:00:45+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 22
-  fields: {name: '&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)', task: failmap.app.models.create_job,
-    interval: null, crontab: 10, solar: null, args: '["failmap.scanners.scanner.mail"]',
+  fields: {name: '&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)', task: websecmap.app.models.create_job,
+    interval: null, crontab: 10, solar: null, args: '["websecmap.scanners.scanner.mail"]',
     kwargs: '{}', queue: storage, exchange: null, routing_key: null, priority: null,
     expires: null, one_off: false, start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-20
       00:00:00+00:00', total_run_count: 8, date_changed: !!timestamp '2019-01-20 00:00:45+00:00',
     description: ''}
 - model: django_celery_beat.periodictask
   pk: 23
-  fields: {name: Import New Proxies (hidden), task: failmap.scanners.tasks.import_proxies_by_country,
+  fields: {name: Import New Proxies (hidden), task: websecmap.scanners.tasks.import_proxies_by_country,
     interval: null, crontab: 23, solar: null, args: '[]', kwargs: "{\r\n\"countries\"\
       : [\"NL\", \"BE\", \"DE\", \"FR\", \"SE\"],\r\n\"amount\": 150\r\n}", queue: storage,
     exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
@@ -320,7 +320,7 @@
     total_run_count: 7, date_changed: !!timestamp '2019-01-24 11:00:55+00:00', description: ''}
 - model: django_celery_beat.periodictask
   pk: 24
-  fields: {name: Update working proxies (hidden), task: failmap.scanners.tasks.check_existing_alive_proxies,
+  fields: {name: Update working proxies (hidden), task: websecmap.scanners.tasks.check_existing_alive_proxies,
     interval: null, crontab: 12, solar: null, args: '[]', kwargs: '{}', queue: storage,
     exchange: null, routing_key: null, priority: null, expires: null, one_off: false,
     start_time: null, enabled: true, last_run_at: !!timestamp '2019-01-23 20:00:00+00:00',
