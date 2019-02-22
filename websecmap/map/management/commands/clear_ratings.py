@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.map.models import OrganizationRating, UrlRating
+from websecmap.map.models import OrganizationReport, UrlReport
 
 log = logging.getLogger(__package__)
 
@@ -12,5 +12,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         log.info("Ratings can be rebuilt from the available scans in the database.")
-        OrganizationRating.objects.all().delete()
-        UrlRating.objects.all().delete()
+        OrganizationReport.objects.all().delete()
+        UrlReport.objects.all().delete()

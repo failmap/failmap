@@ -7,8 +7,8 @@ from celery import group
 from django.utils import timezone
 
 from websecmap.celery import Task, app
-from websecmap.map.report import update_report_tasks
 from websecmap.organizations.models import Url
+from websecmap.reporting.report import update_report_tasks
 from websecmap.scanners.scanner.scanner import q_configurations_to_scan, url_filters
 from websecmap.scanners.tasks import crawl_tasks, explore_tasks, scan_tasks
 

@@ -20,11 +20,11 @@ import websecmap.scanners.scanner.http as scanner_http
 from websecmap import types
 from websecmap.app.models import Job
 from websecmap.celery import PRIO_HIGH, app
-from websecmap.map.report import OrganizationRating, UrlRating
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
                                             Promise, Url)
+from websecmap.reporting.models import OrganizationReport, UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan,
                                        UrlIp)
 from websecmap.scanners.scanner import (dns, dnssec, onboard, plain_http, security_headers,
@@ -168,7 +168,7 @@ class CoordinateAdminInline(CompactInline):
 
 
 class OrganizationRatingAdminInline(CompactInline):
-    model = OrganizationRating
+    model = OrganizationReport
     extra = 0
     readonly_fields = ('organization', 'high', 'medium', 'low', 'when', 'calculation')
     can_delete = False
@@ -176,7 +176,7 @@ class OrganizationRatingAdminInline(CompactInline):
 
 
 class UrlRatingAdminInline(CompactInline):
-    model = UrlRating
+    model = UrlReport
     extra = 0
     readonly_fields = ('url', 'high', 'medium', 'low', 'when', 'calculation')
     can_delete = False
@@ -515,7 +515,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def current_rating(obj):
-        x = UrlRating.objects.filter(url=obj).latest('when')
+        x = UrlReport.objects.filter(url=obj).latest('when')
 
         if not any([x.high, x.medium, x.low]):
             return "✅ Perfect"
@@ -548,7 +548,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
     actions.append('declare_dead')
 
     def timeline_debug(self, request, queryset):
-        from websecmap.map.report import create_timeline, inspect_timeline
+        from websecmap.reporting.report import create_timeline, inspect_timeline
         from django.http import HttpResponse
 
         content = "<pre>"

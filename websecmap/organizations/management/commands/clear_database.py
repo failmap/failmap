@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
-from websecmap.map.models import OrganizationRating, UrlRating
+from websecmap.map.models import OrganizationReport, UrlReport
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
                                        Screenshot, TlsQualysScratchpad, TlsScan, UrlGenericScan,
@@ -54,8 +54,8 @@ def and_its_gone():
     """
 
     # map
-    OrganizationRating.objects.all().delete()
-    UrlRating.objects.all().delete()
+    OrganizationReport.objects.all().delete()
+    UrlReport.objects.all().delete()
 
     # scanners
     EndpointGenericScanScratchpad.objects.all().delete()

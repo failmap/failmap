@@ -12,10 +12,10 @@ from django.shortcuts import render
 from django.utils.text import slugify
 
 from websecmap.app.common import JSEncoder
-from websecmap.map.calculate import get_calculation
 from websecmap.pro.forms import MailSignupForm
 from websecmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
                                   UrlListReport)
+from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
@@ -77,7 +77,7 @@ def signup(request):
 
 
 def rescan_costs(scan):
-    calculation = get_calculation(scan)
+    calculation = get_severity(scan)
 
     cost = 100 if calculation.get("high", 0) else 50 if calculation.get("medium", 0) \
         else 20 if calculation.get("low", 0) else 10
@@ -116,7 +116,7 @@ def issues(request, list_name: str = ""):
     latest_scans = list(latest_url_scans) + list(latest_endpoint_scans)
 
     for scan in latest_scans:
-        calculation = get_calculation(scan)
+        calculation = get_severity(scan)
 
         impact = "high" if calculation.get("high", 0) else "medium" if calculation.get("medium", 0) else "low" \
             if calculation.get("low", 0) else "ok"

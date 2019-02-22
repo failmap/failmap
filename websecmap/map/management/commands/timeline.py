@@ -2,8 +2,8 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.map.report import create_timeline, inspect_timeline
 from websecmap.organizations.models import Url
+from websecmap.reporting.report import create_timeline, inspect_timeline
 
 log = logging.getLogger(__package__)
 

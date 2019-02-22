@@ -8,10 +8,10 @@ from celery import group
 from deepdiff import DeepDiff
 
 from websecmap.celery import Task, app
-from websecmap.map.report import (aggegrate_url_rating_scores, get_latest_urlratings_fast,
-                                  relevant_urls_at_timepoint)
 from websecmap.organizations.models import Url
 from websecmap.pro.models import UrlList, UrlListReport
+from websecmap.reporting.report import (aggegrate_url_rating_scores, get_latest_urlratings_fast,
+                                        relevant_urls_at_timepoint)
 
 log = logging.getLogger(__package__)
 

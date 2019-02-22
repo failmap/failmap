@@ -3,8 +3,8 @@ import logging
 from celery import group
 
 from websecmap.celery import Task
-from websecmap.map.report import rebuild_organization_ratings, rebuild_url_ratings
 from websecmap.organizations.models import Organization, Url
+from websecmap.reporting.report import recreate_organization_reports, recreate_url_reports
 from websecmap.scanners.scanner.scanner import q_configurations_to_report
 
 log = logging.getLogger(__package__)
@@ -45,8 +45,8 @@ def compose_task(
         if not urls:
             continue
 
-        tasks.append(rebuild_url_ratings.si(urls)
-                     | rebuild_organization_ratings.si([organization]))
+        tasks.append(recreate_url_reports.si(urls)
+                     | recreate_organization_reports.si([organization]))
 
     if not tasks:
         log.error("Could not rebuild reports, filters resulted in no tasks created.")

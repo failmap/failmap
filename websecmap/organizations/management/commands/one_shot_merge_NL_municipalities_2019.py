@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from websecmap.map.geojson import update_coordinates
-from websecmap.map.report import rebuild_organization_ratings
 from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge
 from websecmap.organizations.models import Organization
+from websecmap.reporting.report import recreate_organization_reports
 
 log = logging.getLogger(__package__)
 
@@ -157,7 +157,7 @@ class Command(BaseCommand):
             "Noordwijk"
         ], is_dead=False, country="NL", type__name="municipality")
 
-        rebuild_organization_ratings(organizations)
+        recreate_organization_reports(organizations)
 
         # Add the urls for the new organizations, will be onboarded automatically.
         add_url_to_new_organization("NL", "municipality", "Noardeast-Fryslân", "noardeast-fryslan.nl", merge_date)

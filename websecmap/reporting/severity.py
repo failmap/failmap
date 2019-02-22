@@ -237,7 +237,7 @@ calculation_methods = {
 }
 
 
-def get_calculation(scan):
+def get_severity(scan):
     # Can be probably more efficient by adding some methods to scan.
     if not calculation_methods.get(scan.type, None):
         raise ValueError("No calculation available for this scan type: %s" % scan.type)

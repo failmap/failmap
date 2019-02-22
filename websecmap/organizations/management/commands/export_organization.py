@@ -5,7 +5,7 @@ import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
-from websecmap.map.models import OrganizationRating, UrlRating
+from websecmap.map.models import OrganizationReport, UrlReport
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, Screenshot, UrlIp
 
@@ -54,13 +54,13 @@ class Command(DumpDataCommand):
             objects += Promise.objects.all().filter(organization__in=organizations)
             objects += Coordinate.objects.all().filter(organization__in=organizations)
             if options['include_generated']:
-                objects += OrganizationRating.objects.all().filter(organization__in=organizations)
+                objects += OrganizationReport.objects.all().filter(organization__in=organizations)
 
             urls = Url.objects.all().filter(organization__in=organizations)
             objects += urls
             objects += UrlIp.objects.all().filter(url__in=urls)
             if options['include_generated']:
-                objects += UrlRating.objects.all().filter(url__in=urls)
+                objects += UrlReport.objects.all().filter(url__in=urls)
 
             endpoints = Endpoint.objects.all().filter(url__in=urls)
             objects += endpoints

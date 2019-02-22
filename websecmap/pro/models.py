@@ -4,8 +4,8 @@ import pytz
 from django.contrib.auth.models import User
 from django.db import models, transaction
 
-from websecmap.map.models import SeriesOfUrlsReportMixin
 from websecmap.organizations.models import Organization, Url
+from websecmap.reporting.models import SeriesOfUrlsReportMixin
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 

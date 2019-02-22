@@ -28,10 +28,10 @@ from import_export.resources import modelresource_factory
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
-from websecmap.map.calculate import get_calculation
-from websecmap.map.models import (Configuration, MapDataCache, OrganizationRating, UrlRating,
-                                  VulnerabilityStatistic)
+from websecmap.map.models import Configuration, MapDataCache, VulnerabilityStatistic
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
+from websecmap.reporting.models import OrganizationReport, UrlReport
+from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
@@ -533,9 +533,9 @@ def terrible_urls(request, country: str = "NL", organization_type="municipality"
                 high,
                 medium,
                 low
-            FROM map_urlrating
+            FROM reporting_urlreport
             INNER JOIN
-              url on url.id = map_urlrating.url_id
+              url on url.id = reporting_urlreport.url_id
             LEFT OUTER JOIN
               url_organization on url_organization.url_id = url.id
             LEFT OUTER JOIN
@@ -543,9 +543,9 @@ def terrible_urls(request, country: str = "NL", organization_type="municipality"
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_urlrating or2
+              (SELECT MAX(id) as id2 FROM reporting_urlreport or2
               WHERE `when` <= '%(when)s' GROUP BY url_id) as x
-              ON x.id2 = map_urlrating.id
+              ON x.id2 = reporting_urlreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             GROUP BY url.url
@@ -617,17 +617,17 @@ def top_fail(request, country: str = "NL", organization_type="municipality", wee
                 low,
                 total_urls,
                 total_endpoints
-            FROM map_organizationrating
+            FROM reporting_organizationreport
             INNER JOIN
-              organization on organization.id = map_organizationrating.organization_id
+              organization on organization.id = reporting_organizationreport.organization_id
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2
+              (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = map_organizationrating.id
+              ON x.id2 = reporting_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
@@ -707,17 +707,17 @@ def top_win(request, country: str = "NL", organization_type="municipality", week
                 low,
                 total_urls,
                 total_endpoints
-            FROM map_organizationrating
+            FROM reporting_organizationreport
             INNER JOIN
-              organization on organization.id = map_organizationrating.organization_id
+              organization on organization.id = reporting_organizationreport.organization_id
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationrating or2
+              (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = map_organizationrating.id
+              ON x.id2 = reporting_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
@@ -790,12 +790,12 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
 
         # todo: filter out dead organizations and make sure it's the correct layer.
         sql = """SELECT * FROM
-                   map_organizationrating
+                   reporting_organizationreport
                INNER JOIN
-               (SELECT MAX(id) as id2 FROM map_organizationrating or2
+               (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
                WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-               ON x.id2 = map_organizationrating.id
-               INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+               ON x.id2 = reporting_organizationreport.id
+               INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
                WHERE organization.type_id = '%(OrganizationTypeId)s'
                AND organization.country = '%(country)s'
                """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
@@ -814,7 +814,7 @@ def stats(request, country: str = "NL", organization_type="municipality", weeks_
         cache_key = pattern.sub('', "stats sql %s %s %s" % (country, organization_type, weeks_back))
         ratings = cache.get(cache_key)
         if not ratings:
-            ratings = OrganizationRating.objects.raw(sql)
+            ratings = OrganizationReport.objects.raw(sql)
             cache.set(cache_key, ratings, 1800)
 
         noduplicates = []
@@ -951,7 +951,7 @@ def organization_vulnerability_timeline(request, organization_id: int, organizat
     # and easier to code.
     one_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
 
-    ratings = OrganizationRating.objects.all().filter(organization=organization_id,
+    ratings = OrganizationReport.objects.all().filter(organization=organization_id,
                                                       when__gte=one_year_ago).order_by('when')
 
     stats = []
@@ -1109,13 +1109,13 @@ def improvements(request, country: str = "NL", organization_type: str = "municip
     # compare the first urlrating to the last urlrating
     # but do not include urls that don't exist.
 
-    sql = """SELECT map_urlrating.id as id, calculation FROM
-               map_urlrating
+    sql = """SELECT reporting_urlreport.id as id, calculation FROM
+               reporting_urlreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_urlrating or2
+           (SELECT MAX(id) as id2 FROM reporting_urlreport or2
            WHERE `when` <= '%(when)s' GROUP BY url_id) as x
-           ON x.id2 = map_urlrating.id
-           INNER JOIN url ON map_urlrating.url_id = url.id
+           ON x.id2 = reporting_urlreport.id
+           INNER JOIN url ON reporting_urlreport.url_id = url.id
            INNER JOIN url_organization on url.id = url_organization.url_id
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
@@ -1123,17 +1123,17 @@ def improvements(request, country: str = "NL", organization_type: str = "municip
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    newest_urlratings = UrlRating.objects.raw(sql)
+    newest_urlratings = UrlReport.objects.raw(sql)
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """SELECT map_urlrating.id as id, calculation FROM
-               map_urlrating
+    sql = """SELECT reporting_urlreport.id as id, calculation FROM
+               reporting_urlreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_urlrating or2
+           (SELECT MAX(id) as id2 FROM reporting_urlreport or2
            WHERE `when` <= '%(when)s' GROUP BY url_id) as x
-           ON x.id2 = map_urlrating.id
-           INNER JOIN url ON map_urlrating.url_id = url.id
+           ON x.id2 = reporting_urlreport.id
+           INNER JOIN url ON reporting_urlreport.url_id = url.id
            INNER JOIN url_organization on url.id = url_organization.url_id
            INNER JOIN organization ON url_organization.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
@@ -1142,7 +1142,7 @@ def improvements(request, country: str = "NL", organization_type: str = "municip
                "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    oldest_urlratings = UrlRating.objects.raw(sql)
+    oldest_urlratings = UrlReport.objects.raw(sql)
 
     old_measurement = {}
     new_measurement = {}
@@ -1270,36 +1270,36 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
     # but do not include urls that don't exist.
 
     # the query is INSTANT!
-    sql = """SELECT map_organizationrating.id as id, name, high, medium, low FROM
-               map_organizationrating
+    sql = """SELECT reporting_organizationreport.id as id, name, high, medium, low FROM
+               reporting_organizationreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_organizationrating or2
+           (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
            WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = map_organizationrating.id
-           INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+           ON x.id2 = reporting_organizationreport.id
+           INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    newest_urlratings = list(OrganizationRating.objects.raw(sql))
+    newest_urlratings = list(OrganizationReport.objects.raw(sql))
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """SELECT map_organizationrating.id as id, name, high, medium, low FROM
-               map_organizationrating
+    sql = """SELECT reporting_organizationreport.id as id, name, high, medium, low FROM
+               reporting_organizationreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_organizationrating or2
+           (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
            WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = map_organizationrating.id
-           INNER JOIN organization ON map_organizationrating.organization_id = organization.id
+           ON x.id2 = reporting_organizationreport.id
+           INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
         """ % {"when": when - timedelta(days=(weeks_duration * 7)),
                "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    oldest_urlratings = list(OrganizationRating.objects.raw(sql))
+    oldest_urlratings = list(OrganizationReport.objects.raw(sql))
 
     # create a dict, where the keys are pointing to the ratings. This makes it easy to match the
     # correct ones. And handle missing oldest ratings for example.
@@ -1607,23 +1607,23 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     # a bit slower it seems, but still well within acceptable levels.
     sql = """
         SELECT
-            map_organizationrating.low,
+            reporting_organizationreport.low,
             organization.name,
             organizations_organizationtype.name,
             coordinate_stack.area,
             coordinate_stack.geoJsonType,
             organization.id,
             or3.calculation,
-            map_organizationrating.high,
-            map_organizationrating.medium,
-            map_organizationrating.low,
-            map_organizationrating.total_issues,
-            map_organizationrating.total_urls,
-            map_organizationrating.high_urls,
-            map_organizationrating.medium_urls,
-            map_organizationrating.low_urls,
+            reporting_organizationreport.high,
+            reporting_organizationreport.medium,
+            reporting_organizationreport.low,
+            reporting_organizationreport.total_issues,
+            reporting_organizationreport.total_urls,
+            reporting_organizationreport.high_urls,
+            reporting_organizationreport.medium_urls,
+            reporting_organizationreport.low_urls,
             coordinate_stack.stacked_coordinate_id
-        FROM map_organizationrating
+        FROM reporting_organizationreport
         INNER JOIN
           (SELECT id as stacked_organization_id
           FROM organization stacked_organization
@@ -1631,7 +1631,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           OR (
           '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
           AND stacked_organization.is_dead = 1)) as organization_stack
-          ON organization_stack.stacked_organization_id = map_organizationrating.organization_id
+          ON organization_stack.stacked_organization_id = reporting_organizationreport.organization_id
         INNER JOIN
           organization on organization.id = stacked_organization_id
         INNER JOIN
@@ -1643,15 +1643,15 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           OR
           ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
           AND stacked_coordinate.is_dead = 1) GROUP BY organization_id) as coordinate_stack
-          ON coordinate_stack.organization_id = map_organizationrating.organization_id
+          ON coordinate_stack.organization_id = reporting_organizationreport.organization_id
         INNER JOIN
-          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationrating
+          (SELECT MAX(id) as stacked_organizationrating_id FROM reporting_organizationreport
           WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
-          ON stacked_organizationrating.stacked_organizationrating_id = map_organizationrating.id
-        INNER JOIN map_organizationrating as or3 ON or3.id = map_organizationrating.id
+          ON stacked_organizationrating.stacked_organizationrating_id = reporting_organizationreport.id
+        INNER JOIN reporting_organizationreport as or3 ON or3.id = reporting_organizationreport.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
-        ORDER BY map_organizationrating.`when` ASC
+        ORDER BY reporting_organizationreport.`when` ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
@@ -1857,7 +1857,7 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
         ).order_by('-rating_determined_on')[0:6])
 
     for scan in scans:
-        calculation = get_calculation(scan)
+        calculation = get_severity(scan)
 
         if scan_type in URL_SCAN_TYPES:
             # url scans
@@ -1933,7 +1933,7 @@ def latest_updates(organization_id):
 
     for scan in scans:
         scan_type = scan.type
-        calculation = get_calculation(scan)
+        calculation = get_severity(scan)
         if scan_type in ['DNSSEC']:
             # url scans
             dataset["scans"].append({
@@ -2053,7 +2053,7 @@ def export_explains(request, country, organization_type):
 
 
 def get_explanation(type, scan):
-    calculation = get_calculation(scan)
+    calculation = get_severity(scan)
 
     explain = {
         'organizations': scan.url.organization.name if type == "url" else list(
@@ -2170,7 +2170,7 @@ class LatestScanFeed(Feed):
         return UrlGenericScan.objects.filter(type='DNSSEC').order_by('-last_scan_moment')[0:30]
 
     def item_title(self, item):
-        calculation = get_calculation(item)
+        calculation = get_severity(item)
         if not calculation:
             return ""
 
@@ -2188,7 +2188,7 @@ class LatestScanFeed(Feed):
             return "%s %s - %s" % (badge, rating, item.endpoint.url.url)
 
     def item_description(self, item):
-        calculation = get_calculation(item)
+        calculation = get_severity(item)
         return _(calculation.get("explanation", ""))
 
     def item_pubdate(self, item):

@@ -21,8 +21,8 @@ from websecmap.app.common import JSEncoder
 from websecmap.game.forms import (ContestForm, OrganisationSubmissionForm, TeamForm,
                                   UrlSubmissionForm)
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
-from websecmap.map.calculate import get_calculation
 from websecmap.organizations.models import Organization, OrganizationType, Url
+from websecmap.reporting.severity import get_severity
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 from websecmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
@@ -208,7 +208,7 @@ def scores(request):
         }
 
         for scan in scans:
-            temp_calculation = get_calculation(scan)
+            temp_calculation = get_severity(scan)
             final_calculation['high'] += temp_calculation['high']
             final_calculation['medium'] += temp_calculation['medium']
             final_calculation['low'] += temp_calculation['low']
@@ -655,7 +655,7 @@ def add_or_update_features(features, scan):
 
 def update_feature(feature, scan):
     # log.debug('Updating feature %s, with scan %s' % (feature['properties']['organization_id'], scan))
-    calculation = get_calculation(scan)
+    calculation = get_severity(scan)
 
     feature['properties']['high'] += calculation['high']
     feature['properties']['medium'] += calculation['medium']
@@ -770,7 +770,7 @@ def organization_in_features(organization, features):
 def make_new_feature(organization, scan):
     # log.debug('Making new feature %s, with scan %s' % (organization, scan))
 
-    calculation = get_calculation(scan)
+    calculation = get_severity(scan)
     color = "red" if calculation['high'] else "orange" if calculation['medium'] else "yellow" if calculation[
         'low'] else "green"
 

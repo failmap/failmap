@@ -133,11 +133,11 @@ Here is the magic:
 
 ```sql
 SELECT ... some data and joins ...
-FROM map_organizationrating
+FROM report_organizationreport
 INNER JOIN
-    (SELECT MAX(id) as id2 FROM map_organizationrating or2
+    (SELECT MAX(id) as id2 FROM report_organizationreport or2
     WHERE `when` <= '%s' GROUP BY organization_id) as x
-    ON x.id2 = map_organizationrating.id
+    ON x.id2 = report_organizationreport.id
 ```
 
 It simply is a subquery on the "what are the newest on this moment", allowing you to filter on the
@@ -172,9 +172,9 @@ sql = '''
         coordinate.area,
         coordinate.geoJsonType,
         organization.id
-    FROM map_organizationrating
+    FROM report_organizationreport
     INNER JOIN
-      organization on organization.id = map_organizationrating.organization_id
+      organization on organization.id = report_organizationreport.organization_id
     INNER JOIN
       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
     INNER JOIN
@@ -198,15 +198,15 @@ sql = '''
         coordinate.area,
         coordinate.geoJsonType,
         organization.id
-    FROM map_organizationrating
+    FROM report_organizationreport
     INNER JOIN
-      organization on organization.id = map_organizationrating.organization_id
+      organization on organization.id = report_organizationreport.organization_id
     INNER JOIN
       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
     INNER JOIN
       coordinate ON coordinate.organization_id = organization.id
-    WHERE `when` = (select MAX(`when`) FROM map_organizationrating or2
-          WHERE or2.organization_id = map_organizationrating.organization_id AND
+    WHERE `when` = (select MAX(`when`) FROM report_organizationreport or2
+          WHERE or2.organization_id = report_organizationreport.organization_id AND
           `when` <= '2017-08-14 18:21:36.984601+00:00')
     GROUP BY coordinate.area
     ORDER BY `when` ASC
@@ -226,15 +226,15 @@ sql = '''
         coordinate.area,
         coordinate.geoJsonType,
         organization.id
-    FROM map_organizationrating
+    FROM report_organizationreport
     INNER JOIN
-      organization on organization.id = map_organizationrating.organization_id
+      organization on organization.id = report_organizationreport.organization_id
     INNER JOIN
       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
     INNER JOIN
       coordinate ON coordinate.organization_id = organization.id
-    WHERE map_organizationrating.id IN (
-      SELECT DISTINCT MAX(id) FROM failmap.map_organizationrating
+    WHERE report_organizationreport.id IN (
+      SELECT DISTINCT MAX(id) FROM failmap.report_organizationreport
       WHERE `when` <= '%s' GROUP BY organization_id)
     GROUP BY coordinate.area
     ORDER BY `when` ASC
@@ -260,17 +260,17 @@ sql = '''
         high,
         medium,
         low
-    FROM map_organizationrating
+    FROM report_organizationreport
     INNER JOIN
-      organization on organization.id = map_organizationrating.organization_id
+      organization on organization.id = report_organizationreport.organization_id
     INNER JOIN
       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
     INNER JOIN
       coordinate ON coordinate.organization_id = organization.id
     INNER JOIN
-      (SELECT MAX(id) as id2 FROM map_organizationrating or2
+      (SELECT MAX(id) as id2 FROM report_organizationreport or2
       WHERE `when` <= '%s' GROUP BY organization_id) as x
-      ON x.id2 = map_organizationrating.id
+      ON x.id2 = report_organizationreport.id
     GROUP BY coordinate.area, organization.name
     ORDER BY `when` ASC
     ''' % (when, )
