@@ -446,15 +446,15 @@ def organization_report(request, country: str = "NL", organization_type="municip
             organization = Organization.objects.filter(name__iexact=organization_name,
                                                        country=get_country(country),
                                                        type=get_organization_type(organization_type))
-        ratings = organization.filter(organizationrating__when__lte=when)
-        values = ratings.values('organizationrating__calculation',
-                                'organizationrating__when',
+        ratings = organization.filter(organizationreport__when__lte=when)
+        values = ratings.values('organizationreport__calculation',
+                                'organizationreport__when',
                                 'name',
                                 'pk',
                                 'twitter_handle',
-                                'organizationrating__high',
-                                'organizationrating__medium',
-                                'organizationrating__low').latest('organizationrating__when')
+                                'organizationreport__high',
+                                'organizationreport__medium',
+                                'organizationreport__low').latest('organizationreport__when')
     except Organization.DoesNotExist:
         report = {}
     else:
@@ -469,15 +469,15 @@ def organization_report(request, country: str = "NL", organization_type="municip
             "slug": slugify(values['name']),
             "id": values['pk'],
             "twitter_handle": values['twitter_handle'],
-            "when": values['organizationrating__when'].isoformat(),
+            "when": values['organizationreport__when'].isoformat(),
 
             # fixing json being presented and escaped as a string, this makes it a lot slowr
             # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
-            "calculation": json.loads(values['organizationrating__calculation']),
+            "calculation": json.loads(values['organizationreport__calculation']),
             "promise": promise,
-            "high": values['organizationrating__high'],
-            "medium": values['organizationrating__medium'],
-            "low": values['organizationrating__low'],
+            "high": values['organizationreport__high'],
+            "medium": values['organizationreport__medium'],
+            "low": values['organizationreport__low'],
         }
 
     return JsonResponse(report, safe=False, encoder=JSEncoder)

@@ -12,7 +12,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='organizationreport',
-            options={'get_latest_by': 'when', 'verbose_name': 'Organization Report', 'verbose_name_plural': 'Organization Reports'},
+            options={'get_latest_by': 'when', 'verbose_name': 'Organization Report',
+                     'verbose_name_plural': 'Organization Reports'},
         ),
         migrations.AlterModelOptions(
             name='urlreport',

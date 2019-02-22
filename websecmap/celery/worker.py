@@ -56,6 +56,10 @@ ROLES_REQUIRING_NO_NETWORK = [
     'claim_proxy'
 ]
 
+ROLES_REQUIRING_GUI_AND_NETWORK = [
+    'desktop'
+]
+
 # define roles for workers
 QUEUES_MATCHING_ROLES = {
     # Select between roles.
@@ -133,6 +137,9 @@ QUEUES_MATCHING_ROLES = {
     ],
     'calculator': [
         Queue('isolated')
+    ],
+    'desktop': [
+        Queue('desktop')
     ],
     # universal scanner worker that has internet access for either IPv4 and IPv6 or both (you don't know)
     'any_internet': [
