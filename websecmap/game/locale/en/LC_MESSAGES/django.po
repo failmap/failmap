@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 15:54+0000\n"
+"POT-Creation-Date: 2019-02-22 13:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,70 +18,70 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/game/forms.py
+#: websecmap/game/forms.py
 msgid "This contest does not exist."
 msgstr ""
 
-#: failmap/game/forms.py
+#: websecmap/game/forms.py
 msgid "Incorrect secret or team. Try again!"
 msgstr ""
 
-#: failmap/game/forms.py
+#: websecmap/game/forms.py
 #, python-format
 msgid ""
 "This organization %(organization)s already exists in the database for this "
 "type / layer."
 msgstr ""
 
-#: failmap/game/forms.py
+#: websecmap/game/forms.py
 #, python-format
 msgid "This organization %(organization)s has been suggested already."
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "Contest name"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "contest"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "contests"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "Team name"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "team"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "teams"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "organisation submission"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "organisation submissions"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "url submission"
 msgstr ""
 
-#: failmap/game/models.py
+#: websecmap/game/models.py
 msgid "url submissions"
 msgstr ""
 
-#: failmap/game/templates/game/base.html
+#: websecmap/game/templates/game/base.html
 msgid "Game"
 msgstr ""
 
-#: failmap/game/templates/game/base.html
+#: websecmap/game/templates/game/base.html
 msgid "Toggle navigation"
 msgstr ""

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 15:54+0000\n"
+"POT-Creation-Date: 2019-02-22 13:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 #, python-format
 msgid ""
 "Url %(url)s is already matched to \"%(organization)s\", and is alive. Please "
@@ -25,7 +25,7 @@ msgid ""
 "for <a href=\"../?url=%(url)s&is_dead=False\">🔍 %(url)s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 #, python-format
 msgid ""
 "This url %(url)s already exists and is alive. Please add the desired "
@@ -35,59 +35,59 @@ msgid ""
 "Search for <a href=\"../?url=%(url)s&is_dead=False\">🔍 %(url)s</a>."
 msgstr ""
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 msgid "Has endpoint scans (todo)"
 msgstr ""
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 msgid "Yes"
 msgstr ""
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 msgid "No"
 msgstr ""
 
-#: failmap/organizations/admin.py
+#: websecmap/organizations/admin.py
 #, python-format
 msgid "Unable to parse JSON: %s"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "layer"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "layers"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "organization"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "organizations"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "coordinate"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "coordinates"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "When telling this is dead, also enter the date and reason for it."
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "Url already exists, existing url is alive and resolvable."
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "promise"
 msgstr ""
 
-#: failmap/organizations/models.py
+#: websecmap/organizations/models.py
 msgid "promises"
 msgstr ""

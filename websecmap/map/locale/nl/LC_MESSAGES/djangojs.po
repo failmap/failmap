@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 15:54+0000\n"
+"POT-Creation-Date: 2019-02-22 13:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,75 +18,75 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/map.js failmap/map/static/js/views.js
+#: websecmap/map/static/js/map.js websecmap/map/static/js/views.js
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Search organization"
 msgstr "Zoek organisatie..."
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Perfect"
 msgstr "Perfect"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Good"
 msgstr "Goed"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Mediocre"
 msgstr "Matig"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Bad"
 msgstr "Slecht"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "legend_basic_security"
 msgstr "De basisbeveiliging is:"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Zoom to show all data on this map."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "2 weeks ago"
 msgstr "2 weken geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "3 weeks ago"
 msgstr "3 weken geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "1 month ago"
 msgstr "1 maand geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "2 months ago"
 msgstr "2 maanden geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "3 months ago"
 msgstr "3 maanden geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "7 days ago"
 msgstr "7 dagen geleden"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "now"
 msgstr "Op dit moment"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Has a secure equivalent, which wasn't so in the past."
 msgstr "Biedt nu een beveiligd alternative, wat vroeger niet zo was."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Site does not redirect to secure url, and has no secure alternative on a "
 "standard port."
@@ -94,7 +94,7 @@ msgstr ""
 "Een beveiligd alternatief op het standaard poortnummer ontbreekt. De "
 "onbeveiligde website wijst niet door naar een beveiligde site."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Redirects to a secure site, while a secure counterpart on the standard port "
 "is missing."
@@ -102,67 +102,67 @@ msgstr ""
 "De onbeveiligde site wijst door naar een beveiligde site, maar niet op een "
 "standaard poort."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Broken Transport Security, rated F"
 msgstr "Onvoldoende versleuteld (F)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate not valid for domain name."
 msgstr "Certificaat niet geldig voor domeinnaam."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Less than optimal Transport Security, rated C."
 msgstr "Matige versleuteling (C)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Less than optimal Transport Security, rated B."
 msgstr "Redeijke versleuteling (B)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Good Transport Security, rated A-."
 msgstr "Goede versleuteling (A-)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Good Transport Security, rated A."
 msgstr "Perfecte versleuteling (A)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Perfect Transport Security, rated A+."
 msgstr "Perfecte versleuteling (met extra's) (A+)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Content-Type-Options header present."
 msgstr "De X-Content-Type-Options header is aanwezig."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-Content-Type-Options header."
 msgstr "De X-Content-Type-Options header ontbreekt."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-XSS-Protection header present."
 msgstr "De X-XSS-Protection header is aanwezig."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-XSS-Protection header."
 msgstr "De X-XSS-Protection header ontbreekt."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Frame-Options header present."
 msgstr "De X-Frame-Options header is aanwezig."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-Frame-Options header."
 msgstr "De X-Frame-Options header ontbreekt."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Strict-Transport-Security header present."
 msgstr "Strict-Transport-Security header is aanwezig."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing Strict-Transport-Security header."
 msgstr "De Strict-Transport-Security header ontbreekt."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Missing Strict-Transport-Security header. Offers no insecure alternative "
 "service."
@@ -170,33 +170,33 @@ msgstr ""
 "De Strict-Transport-Security header ontbreekt, maar er wordt geen "
 "alternatieve onbeveiligde http dienst aangeboden op dit adres."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC is incorrectly or not configured (errors found)."
 msgstr "DNS beveiliging is niet of onjuist toegepast."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC seems to be implemented sufficiently."
 msgstr "DNS beveiliging wordt toegepast."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server only supports insecure SSL protocol."
 msgstr "FTP Server ondersteund alleen verouderd en onveilig SSL protocol."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server does not configured to show if encryption is available."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server supports TLS encryption protocol."
 msgstr "FTP Server ondersteund TLS versleuteling."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr ""
 "FTP Server heeft geen ondersteuning voor versleuteling of de server geeft "
 "protocol fouten."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "An FTP connection could not be established properly. Not possible to verify "
 "encryption."
@@ -204,23 +204,23 @@ msgstr ""
 "Er kon geen volledige verbinding worden gemaakt met de server. Het is daarom "
 "onduidelijk of er versleuteling wordt gebruikt."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "not trusted"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "trusted"
 msgstr "Certificaat wordt vertrouwd."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate is not trusted."
 msgstr "Certificaat wordt niet vertrouwd."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate is trusted."
 msgstr "Certificaat wordt vertrouwd."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Content-Security-Policy header found, which covers the security aspect of "
 "the X-Frame-Options header."
@@ -228,7 +228,7 @@ msgstr ""
 "Content-Security-Policy header gevonden, deze header bevat ook de "
 "beveiligingsaspecten van de X-Frame-Options header."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Content-Security-Policy header found, which covers the security aspect of "
 "the X-XSS-Protection header."
@@ -236,207 +236,207 @@ msgstr ""
 "Content-Security-Policy header gevonden, deze header bevat ook de "
 "beveiligingsaspecten van de X-XSS-Protection header."
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_http_security_header_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_http_security_header_x_frame_options"
 msgstr "X-Frame-Options Header (clickjacking)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_http_security_header_x_content_type_options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_http_security_header_strict_transport_security"
 msgstr "Strict-Transport-Security Header (HSTS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_DNSSEC"
 msgstr "DNS beveiliging (DNSSEC)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_ftp"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_tls_qualys_certificate_trusted"
 msgstr "Vertrouwen in certificaat"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_municipality"
 msgstr "Gemeenten"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_cyber"
 msgstr "Cyber"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_unknown"
 msgstr "Onbekend"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_water_board"
 msgstr "Waterschappen"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_province"
 msgstr "Provincies"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_hacking"
 msgstr "Hackers"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_country"
 msgstr "Land"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_region"
 msgstr "Regio"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_county"
 msgstr "County"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_district"
 msgstr "District"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_government"
 msgstr "Overheid"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_healthcare"
 msgstr "Gezondheidszorg"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_finance"
 msgstr "Financiën"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_state"
 msgstr "Staten"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_school"
 msgstr "Scholen"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Strict-Transport-Security"
 msgstr "Strict-Transport-Security (HSTS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Content-Type-Options"
 msgstr "X-Content-Type-Options"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Frame-Options"
 msgstr "X-Frame-Options header"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-XSS-Protection"
 msgstr "X-XSS-Protection header"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "plain_https"
 msgstr "Ontbrekende Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys"
 msgstr "Transport Layer Security (TLS)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC"
 msgstr "DNS beveiliging"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "ftp"
 msgstr "Bestandsoverdracht (FTP)"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys_encryption_quality"
 msgstr "Kwaliteit van versleuteling"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys_certificate_trusted"
 msgstr "Vertrouwen in certificaat"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_bundesland"
 msgstr "Bundesland"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_regierungsbezirk"
 msgstr "Regierungsbezirk"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "Landkreis / Kreis / kreisfreie Stadt"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "Samtgemeinde, Verwaltungsgemeinschaft"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadt_gemeinde"
 msgstr "Stadt, Gemeinde"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "Stadtbezirk / Gemeindeteil mit Selbstverwaltung"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "Stadtteil / Gemeindeteil ohne Selbstverwaltung"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "One week earlier"
 msgstr "Een week eerder"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "One week later"
 msgstr "Een week later"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Moment"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Risks"
 msgstr "Risico's"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "week"
 msgstr "week"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Second opinion"
 msgstr "Second opinion"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Documentation"
 msgstr "Documentatie"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Explanation of finding"
 msgstr "Verklaring van een bevinding (pas toe of leg uit)"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid ""
 "Hi!,\n"
 "\n"
@@ -459,22 +459,22 @@ msgid ""
 "Kind regards,\n"
 msgstr ""
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score perfect"
 msgstr "perfect"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score high"
 msgstr "hoog"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score medium"
 msgstr "midden"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score low"
 msgstr "laag"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"

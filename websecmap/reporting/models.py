@@ -5,6 +5,7 @@ from jsonfield import JSONField
 from websecmap.organizations.models import Organization, Url
 
 
+# todo: store amount of OK and the percentage.
 class SeriesOfUrlsReportMixin(models.Model):
     total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.", default=0)
     high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
@@ -112,8 +113,8 @@ class OrganizationReport(SeriesOfUrlsReportMixin):
         index_together = [
             ["when", "id"],
         ]
-        verbose_name = _('Organization Rating')
-        verbose_name_plural = _('Organization Ratings')
+        verbose_name = _('Organization Report')
+        verbose_name_plural = _('Organization Reports')
 
 
 class UrlReport(models.Model):
@@ -187,8 +188,8 @@ class UrlReport(models.Model):
 
     class Meta:
         managed = True
-        verbose_name = _('Url Rating')
-        verbose_name_plural = _('Url Ratings')
+        verbose_name = _('Url Report')
+        verbose_name_plural = _('Url Reports')
 
     def __str__(self):
         return '%s,%s,%s  - %s' % (self.high, self.medium, self.low, self.when.date(),)

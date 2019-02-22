@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e -o pipefail
+
+# run websecmap in a docker container
+
+docker run -ti websecmap/websecmap:latest "$@"

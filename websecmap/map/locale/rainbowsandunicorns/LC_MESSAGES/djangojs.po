@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-07 15:54+0000\n"
+"POT-Creation-Date: 2019-02-22 13:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,453 +18,453 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: failmap/map/static/js/map.js failmap/map/static/js/views.js
+#: websecmap/map/static/js/map.js websecmap/map/static/js/views.js
 msgid "View Full Screen"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Search organization"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 #, fuzzy
 #| msgid "score perfect"
 msgid "Perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Good"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Mediocre"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Bad"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Unknown"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "legend_basic_security"
 msgstr "🌈"
 
-#: failmap/map/static/js/map.js
+#: websecmap/map/static/js/map.js
 msgid "Zoom to show all data on this map."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "2 weeks ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "3 weeks ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "1 month ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "2 months ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "3 months ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "7 days ago"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "now"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Has a secure equivalent, which wasn't so in the past."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Site does not redirect to secure url, and has no secure alternative on a "
 "standard port."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Redirects to a secure site, while a secure counterpart on the standard port "
 "is missing."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Broken Transport Security, rated F"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate not valid for domain name."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Less than optimal Transport Security, rated C."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Less than optimal Transport Security, rated B."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Good Transport Security, rated A-."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Good Transport Security, rated A."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Perfect Transport Security, rated A+."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Content-Type-Options header present."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-Content-Type-Options header."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-XSS-Protection header present."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-XSS-Protection header."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "X-Frame-Options header present."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing X-Frame-Options header."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Strict-Transport-Security header present."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Missing Strict-Transport-Security header."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Missing Strict-Transport-Security header. Offers no insecure alternative "
 "service."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC is incorrectly or not configured (errors found)."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC seems to be implemented sufficiently."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server only supports insecure SSL protocol."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server does not configured to show if encryption is available."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server supports TLS encryption protocol."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "FTP Server does not support encrypted transport or has protocol issues."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "An FTP connection could not be established properly. Not possible to verify "
 "encryption."
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "not trusted"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "trusted"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate is not trusted."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Certificate is trusted."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Content-Security-Policy header found, which covers the security aspect of "
 "the X-Frame-Options header."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid ""
 "Content-Security-Policy header found, which covers the security aspect of "
 "the X-XSS-Protection header."
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_tls_qualys"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_plain_https"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_https_security_header_x_xss_protection"
 msgid "report_header_http_security_header_x_xss_protection"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_https_security_header_x_frame_options"
 msgid "report_header_http_security_header_x_frame_options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_https_security_header_x_content_type_options"
 msgid "report_header_http_security_header_x_content_type_options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_https_security_header_strict_transport_security"
 msgid "report_header_http_security_header_strict_transport_security"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_DNSSEC"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "report_header_ftp"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_tls_qualys"
 msgid "report_header_tls_qualys_certificate_trusted"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_tls_qualys"
 msgid "report_header_tls_qualys_encryption_quality"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_municipality"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_cyber"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_unknown"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_water_board"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_province"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_hacking"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_cyber"
 msgid "category_menu_country"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_region"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_cyber"
 msgid "category_menu_county"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_district"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_government"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_hacking"
 msgid "category_menu_healthcare"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_finance"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_province"
 msgid "category_menu_state"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "category_menu_cyber"
 msgid "category_menu_school"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "Strict-Transport-Security header present."
 msgid "Strict-Transport-Security"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "X-Content-Type-Options header present."
 msgid "X-Content-Type-Options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "X-Frame-Options header present."
 msgid "X-Frame-Options"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "X-XSS-Protection header present."
 msgid "X-XSS-Protection"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 #, fuzzy
 #| msgid "report_header_plain_https"
 msgid "plain_https"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "DNSSEC"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "ftp"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys_encryption_quality"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "tls_qualys_certificate_trusted"
 msgstr ""
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_bundesland"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_regierungsbezirk"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_landkreis_kreis_kreisfreie_stadt"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_samtgemeinde_verwaltungsgemeinschaft"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadt_gemeinde"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "One week earlier"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "One week later"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Moment"
 msgstr "🌈"
 
-#: failmap/map/static/js/script.js
+#: websecmap/map/static/js/script.js
 msgid "Risks"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "week"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Second opinion"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Documentation"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Explanation of finding"
 msgstr ""
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid ""
 "Hi!,\n"
 "\n"
@@ -487,22 +487,22 @@ msgid ""
 "Kind regards,\n"
 msgstr ""
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score perfect"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score high"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score medium"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "score low"
 msgstr "🌈"
 
-#: failmap/map/static/js/views.js
+#: websecmap/map/static/js/views.js
 msgid "Exit Full Screen"
 msgstr "🌈"
