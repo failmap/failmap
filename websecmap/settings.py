@@ -288,7 +288,7 @@ STATIC_URL = '/static/'
 if DEBUG:
     STATIC_ROOT = 'static'
 else:
-    STATIC_ROOT = '/srv/failmap/static/'
+    STATIC_ROOT = '/srv/websecmap/static/'
 
 TEST_RUNNER = 'websecmap.testrunner.PytestTestRunner'
 

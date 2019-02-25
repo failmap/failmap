@@ -9,7 +9,7 @@ source_parsers = {
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# failmap documentation build configuration file, created by
+# websecmap documentation build configuration file, created by
 # sphinx-quickstart on Wed Jan 10 10:12:08 2018.
 #
 # This file is execfile()d with the current directory set to its

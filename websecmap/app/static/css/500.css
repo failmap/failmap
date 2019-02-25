@@ -7,7 +7,7 @@
 /*
 https://masterofallscience.com/
 npm install -g datauri-cli
-ls *.jpg | xargs -I% basename % .jpg |xargs -n1 -I% datauri --css failmap/app/static/css/500.css --class=image_% %.jpg
+ls *.jpg | xargs -I% basename % .jpg |xargs -n1 -I% datauri --css websecmap/app/static/css/500.css --class=image_% %.jpg
 */
 
 .image_1082039 {

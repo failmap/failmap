@@ -3,7 +3,7 @@
 
 # install isort, experience it might have things different in tox :+
 # pkg_resources.DistributionNotFound? -> tox -r (rebuild)
-# running this test? env DJANGO_SETTINGS_MODULE=failmap.settings
+# running this test? env DJANGO_SETTINGS_MODULE=websecmap.settings
 #   .tox/default/bin/pytest tests -k test_tls_scan_qualys
 #
 

@@ -139,39 +139,39 @@ msgstr ""
 msgid "'"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js static/js/views.js
+#: static/js/websecmap.js static/js/map.js static/js/views.js
 msgid "View Full Screen"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Search organization"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Perfect"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Good"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Mediocre"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Bad"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Unknown"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "legend_basic_security"
 msgstr ""
 
-#: static/js/failmap.js static/js/map.js
+#: static/js/websecmap.js static/js/map.js
 msgid "Zoom to show all data on this map."
 msgstr ""
 

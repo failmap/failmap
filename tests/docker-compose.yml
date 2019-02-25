@@ -68,7 +68,7 @@ services:
     ports:
       - "8000"
     volumes:
-      - ../failmap:/source/failmap
+      - ../websecmap:/source/websecmap
     command: production --migrate --loaddata development
 
   frontend:

@@ -1,4 +1,4 @@
-# Perform different types of dummy scanner runs from a user level (using failmap command)
+# Perform different types of dummy scanner runs from a user level (using websecmap command)
 
 import json
 from subprocess import check_output

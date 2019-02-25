@@ -113,7 +113,7 @@ RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
 COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local/bin/hyper
 
 # copy all relevant files for python installation
-COPY websecmap /source/failmap/
+COPY websecmap /source/websecmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
@@ -133,7 +133,7 @@ ENV UWSGI_GID root
 ENV UWSGI_UID root
 ENV UWSGI_MODULE websecmap.wsgi
 # serve static files (to caching proxy) from collected/generated static files
-ENV UWSGI_STATIC_MAP /static=/srv/failmap/static
+ENV UWSGI_STATIC_MAP /static=/srv/websecmap/static
 # set proxy and browser caching for static files to 1 month
 ENV UWSGI_STATIC_EXPIRES /* 2678400
 ENV TOOLS_DIR /usr/local/bin/

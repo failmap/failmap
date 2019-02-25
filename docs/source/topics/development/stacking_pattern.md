@@ -234,7 +234,7 @@ sql = '''
     INNER JOIN
       coordinate ON coordinate.organization_id = organization.id
     WHERE report_organizationreport.id IN (
-      SELECT DISTINCT MAX(id) FROM failmap.report_organizationreport
+      SELECT DISTINCT MAX(id) FROM websecmap.report_organizationreport
       WHERE `when` <= '%s' GROUP BY organization_id)
     GROUP BY coordinate.area
     ORDER BY `when` ASC
