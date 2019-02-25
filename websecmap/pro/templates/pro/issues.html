@@ -1,70 +1,84 @@
 {% extends 'pro/base.html' %}{% load humanize %}{% load i18n %}
 {% block content %}
     <h1 id="Issues">Issues</h1>
+    <div id="issue_view"></div>
+
+    <style>
+    .issue_title{
+        height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center
+    }
+
+    .issue_table {
+        box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); border-radius: 10px;
+    }
+
+    </style>
+
+{% verbatim %}
+<script type="x-template" id="issue_list">
+<div>
+    <div class="loading" v-if="loading"><svg class="svg_icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path></svg></div>
+
+        <!-- Todo: font awesome slows down the results significantly as it scans the entire tree. For large results this can take seconds. x-->
+    <input class="search_input" v-if="!loading" type="text" v-model="query" placeholder="🔍 Search for an issue" v-on:change="find">
+        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_high" v-on:change="find">High</label>
+        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_medium" v-on:change="find">Medium</label>
+        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_low" v-on:change="find">Low</label>
+        <label v-if="!loading">Is Explained: <select v-model="is_explained"><option selected>---</option><option>Yes</option><option>No</option></select></label>
+        <label v-if="!loading">Is Rescanned: <select v-model="is_rescanned"><option selected>---</option><option>Yes</option><option>No</option></select></label>
 
 
-    <div class="row">
-    {% for scan in latest_scans %}
 
-        {% ifchanged scan.domain %}
-            </div>
-            <h2 id="{{ scan.domain }}">{{ scan.domain }}</h2>
-            <div class="row">
-        {% endifchanged %}
+        <div class="row">
 
-        {% ifchanged scan.domain_and_impact %}
-            </div>
-            <h3 id="{{ scan.domain_and_impact }}">{{ scan.impact }}</h3>
-            <div class="row">
-        {% endifchanged %}
+            <!-- todo: how to add headers that are not extremely slow etc? -->
+        <!-- <h2 v-if="header_changed(issue.domain)" :id="issue.domain">{{ issue.domain }}</h2>
+        <h3 v-if="sub_header_changed(issue.domain_and_impact)" :id="issue.domain_and_impact">{{ issue.impact }}</h3> -->
 
-        <div class="col-md-4" style="margin-bottom: 30px;">
-        <table class="table table-sm table-striped table-bordered table-hover rounded-top" style="box-shadow: 0px 13px 82px -47px rgba(0,0,0,0.75); border-radius: 10px;">
-            <tbody style="background-color: {{ scan.color }};">
-                <tr>
-                    <td colspan="2" style="height: 5em; padding-top: 1em; padding-bottom: 1em; font-weight: bolder; font-size: 1.4em; text-align: center"><h4 id="{{ scan.url | slugify}}{{ scan.service | slugify }}">{{ scan.url }}</h4> {% if scan.url != scan.service %}<br>{{ scan.service }}{% endif %}</td>
-                </tr>
+        <div class="col-md-4" style="margin-bottom: 30px;" v-for="issue in relevant_issues">
+            <table class="table table-sm table-striped table-bordered table-hover rounded-top issue_table">
+                <tbody :style="'background-color:'+issue.color">
+                    <tr>
+                        <td colspan="2" class="issue_title">
+                            <h4 :id="slugify(issue.url)+slugify(issue.service)">{{ issue.url }}</h4>
+                            <span v-if="issue.url != issue.service"><br>{{ issue.service }}</span></td>
+                    </tr>
 
-                <tr><td>Scan</td><td style="height: 4em;">{% trans scan.header %}</td></tr>
-                <tr><td>Details</td><td style="height: 5em;">{{ scan.explanation }} </td></tr>
-                <tr><td>Impact</td><td>{{ scan.impact }}</td></tr>
-                <tr><td>When</td><td><span title="{{ scan.last_scan_moment_python }}">{{ scan.last_scan_humanized }}</span></td></tr>
-                {% if scan.impact != "ok" %}
-                    <tr><td colspan="2">
-                    {% if scan.being_rescanned %}
-                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
-                            class="btn btn-secondary btn-block" disabled data-toggle="modal" data-target="#rescanModal"><i class="fas fa-spinner fa-pulse"></i> Rescanning</button>
-                    {% else %}
-                        <button type="button" id="{{ scan.type }}{{ scan.id }}"
-                            class="btn btn-primary btn-block" data-toggle="modal" data-target="#rescanModal"
-                        data-cost="{{ scan.rescan_cost }}"
-                        data-scan-id="{{ scan.id }}"
-                        data-scan-type="{{ scan.type }}"
-                        data-scan-label="{{ scan.url }} {{ scan.service }}">Rescan now</button>
-                    {% endif %}
-                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
-                            class="btn btn-info btn-block" data-toggle="modal" data-target="#rescanModal"
-                        data-cost="{{ scan.rescan_cost }}"
-                        data-scan-id="{{ scan.id }}"
-                        data-scan-type="{{ scan.type }}"
-                        data-scan-label="{{ scan.url }} {{ scan.service }}">Explain</button>
-                    <button type="button" id="{{ scan.type }}{{ scan.id }}"
-                            class="btn btn-warning btn-block" data-toggle="modal" data-target="#rescanModal"
-                        data-cost="{{ scan.rescan_cost }}"
-                        data-scan-id="{{ scan.id }}"
-                        data-scan-type="{{ scan.type }}"
-                        data-scan-label="{{ scan.url }} {{ scan.service }}">Report error with scan</button>
-                    </td></tr>
-                {% endif %}
-            </tbody>
-        </table>
-
+                    <tr><td>Scan</td><td style="height: 4em;">{{ issue.header }}</td></tr>
+                    <tr><td>Details</td><td style="height: 5em;">{{ issue.explanation }}</td></tr>
+                    <tr><td>Impact</td><td>{{ issue.impact }}</td></tr>
+                    <tr><td>When</td><td><span :title="issue.last_scan_moment_python">{{ issue.last_scan_humanized }}</span></td></tr>
+                        <tr><td colspan="2">
+                        <button v-if='issue.being_rescanned' type="button" id="issue.unique_id"
+                            class="btn btn-secondary btn-block" disabled data-toggle="modal" data-target="#rescanModal">
+                            [spinner] Rescanning</button>
+                            <button v-if='!issue.being_rescanned' type="button" id="issue.unique_id"
+                                class="btn btn-primary btn-block" data-toggle="modal" data-target="#rescanModal"
+                            :data-cost="issue.rescan_cost"
+                            :data-scan-id="issue.id"
+                            :data-scan-type="issue.type"
+                            :data-scan-label="issue.url +' '+issue.service">Rescan now</button>
+                        <button type="button" id="unique_id"
+                                class="btn btn-info btn-block" data-toggle="modal" data-target="#rescanModal"
+                            :data-cost="issue.rescan_cost"
+                            :data-scan-id="issue.id"
+                            :data-scan-type="issue.type"
+                            :data-scan-label="issue.url +' '+ issue.service">Explain</button>
+                        <button type="button" id="issue.unique_id"
+                                class="btn btn-warning btn-block" data-toggle="modal" data-target="#rescanModal"
+                            :data-cost="issue.rescan_cost"
+                            :data-scan-id="issue.id"
+                            :data-scan-type="issue.type"
+                            :data-scan-label="issue.url + ' ' +issue.service">Report error with scan</button>
+                        </td></tr>
+                </tbody>
+            </table>
         </div>
-        {% empty %}
-        <div style="width: 100%; font-size: 2em; text-align: center">No issues found! 🎉</div>
-
-    {% endfor %}
     </div>
+    <div style="width: 100%; font-size: 2em; text-align: center" v-if="!loading && !relevant_issues.length">No issues found!</div>
+</div>
+</script>
+{% endverbatim %}
 
     <script>
     function rescan(button, scan_type, scan_id) {
@@ -94,7 +108,9 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" id="very-ok-button" class="btn btn-primary" data-scan_type="0" data-scan_id="0" onclick="rescan(this, this.dataset.scan_type, this.dataset.scan_id); " data-dismiss="modal"><i class="fas fa-coins"></i> <span class="rescan-cost">0</span></button>
+            <button type="button" id="very-ok-button" class="btn btn-primary" data-scan_type="0"
+                    data-scan_id="0" onclick="rescan(this, this.dataset.scan_type, this.dataset.scan_id); " data-dismiss="modal">
+                <i class="fas fa-coins"></i> <span class="rescan-cost">0</span></button>
           </div>
         </div>
       </div>
@@ -117,4 +133,103 @@
         document.getElementById('very-ok-button').dataset.scan_id = scan_id;
     })
     </script>
+<script>
+
+vueIssues = new Vue({
+    name: 'issues',
+    el: '#issue_view',
+    template: '#issue_list',
+    mounted: function () {
+        this.load();
+        this.$nextTick(function () {
+
+            tocbot.refresh();
+            // Code that will run only after the
+            // entire view has been rendered
+          });
+    },
+    data: {
+        // database to search through
+        all_issues: [],
+
+        // search results, or all if no search
+        relevant_issues: [],
+        query: "",
+        show_high: false,
+        show_medium: false,
+        show_low: false,
+        is_explained: false,
+        is_rescanned: false,
+
+        loading: true,
+
+        header_value: "",
+        sub_header_value: "",
+
+    },
+    methods:{
+        find: function(){
+            let query = this.query.toLowerCase();
+
+            let impact = [];
+            if (this.show_high)
+                impact.push("high");
+            if (this.show_medium)
+                impact.push("medium");
+            if (this.show_low)
+                impact.push("low");
+            if (!this.show_high && !this.show_medium && !this.show_low)
+                impact=["high", "medium", "low"];
+
+            this.relevant_issues=[];
+            for(let i=0; i < this.all_issues.length; i++){
+                if (this.all_issues[i].url.includes(query) && (impact.indexOf(this.all_issues[i].impact) > -1)) {
+                    this.relevant_issues.push(this.all_issues[i]);
+                }
+            }
+            return "true";
+        },
+        load: function(){
+            this.loading = true;
+            fetch(`/pro/data/issues/`).then(response => response.json()).then(data => {
+                this.all_issues = data['issues'];
+                this.relevant_issues = data['issues'];
+                this.loading = false;
+                // tocbot.refresh();
+            }).catch((fail) => {
+                console.log('A loading error occurred: ' + fail);
+            });
+        },
+        slugify: function(text){
+            // https://github.com/KABBOUCHI/vue-slugify/blob/master/vue-slugify.js
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-') // Replace spaces with -
+                .replace(/&/g, '-and-') // Replace & with 'and'
+                .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+                .replace(/--+/g, '-'); // Replace multiple - with single -
+        },
+        translate: function(text){
+            // todo
+            return text;
+        },
+        header_changed: function(value){
+            if (this.header_value === value){
+                return false;
+            } else {
+                this.header_value = value;
+                return true;
+            }
+        },
+        sub_header_changed: function(value){
+            if (this.sub_header_value === value){
+                return false;
+            } else {
+                this.sub_header_value = value;
+                return true;
+            }
+        }
+    }
+})
+
+</script>
 {% endblock %}

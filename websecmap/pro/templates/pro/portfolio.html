@@ -10,6 +10,7 @@
     <!-- todo: loading indicator -->
     <!-- try: https://scotch.io/tutorials/add-loading-indicators-to-your-vuejs-application -->
     <!-- <div v-if="!urllists">Loading... <i class="fas fa-spinner fa-pulse"></i></div> -->
+    <div class="loading" v-if="loading"><i class="fas fa-spinner fa-pulse"></i></div>
 
     <div style="margin-bottom: 60px;" v-for="urllist in urllists">
 
@@ -308,15 +309,19 @@ vueUrlList = new Vue({
             tocbot.refresh();
             // Code that will run only after the
             // entire view has been rendered
-          })
+          });
     },
     data: {
-        urllists: []
+        urllists: [],
+        loading: true,
     },
     methods:{
         load: function(){
+            this.loading = true;
             fetch(`/pro/data/portfolio/`).then(response => response.json()).then(data => {
                 this.urllists = data;
+                this.loading = false;
+                // tocbot.refresh();
             }).catch((fail) => {
                 console.log('A loading error occurred: ' + fail);
             });

@@ -85,7 +85,7 @@ def rescan_costs(scan):
     return cost
 
 
-def issues(request, list_name: str = ""):
+def issue_data(request, list_name: str = ""):
     all_scans_view = []
 
     account = getAccount(request)
@@ -144,7 +144,7 @@ def issues(request, list_name: str = ""):
                 "domain_and_impact": "%s_%s" % (scan.url.computed_domain, impact),
                 "protocol": scan.type,
                 "type": scan.type,
-                "header": "report_header_%s" % scan.type,
+                "header": scan.type.replace("_", " ").title(),
                 "port": "-",
                 "ip_version": "-",
                 "explanation": calculation.get("explanation", ""),
@@ -159,6 +159,7 @@ def issues(request, list_name: str = ""):
                 "last_scan_moment": scan.last_scan_moment.isoformat(),
                 "last_scan_moment_python": scan.last_scan_moment,
                 "being_rescanned": scan.id in url_rescanned_ids,
+                "unique_id": "%s%s" % (scan.type, scan.id),
             })
         else:
             # endpoint scans
@@ -171,7 +172,7 @@ def issues(request, list_name: str = ""):
                 "protocol": scan.endpoint.protocol,
                 "port": scan.endpoint.port,
                 "type": scan.type,
-                "header": "report_header_%s" % scan.type,
+                "header": scan.type.replace("_", " ").title(),
                 "ip_version": scan.endpoint.ip_version,
                 "explanation": calculation.get("explanation", ""),
                 "high": calculation.get("high", 0),
@@ -185,15 +186,21 @@ def issues(request, list_name: str = ""):
                 "last_scan_moment": scan.last_scan_moment.isoformat(),
                 "last_scan_moment_python": scan.last_scan_moment,
                 "being_rescanned": scan.id in endpoint_rescanned_ids,
+                "unique_id": "%s%s" % (scan.type, scan.id),
             })
 
     # sort the scans, so url and endpointscans mingle correctly
     all_scans_view = sorted(all_scans_view, key=lambda k: (k['domain'], k['sort_impact']))
 
-    return render(request, 'pro/issues.html', {'latest_scans': all_scans_view,
-                                               'credits': account.credits,
-                                               'rescan_requests': rescan_requests,
-                                               'account': account})
+    return JsonResponse({'issues': all_scans_view}, encoder=JSEncoder, safe=False)
+
+
+@login_required(login_url='/pro/login/?next=/pro/')
+def issues(request):
+    this_account = getAccount(request)
+
+    return render(request, 'pro/issues.html', {'account': this_account,
+                                               'credits': this_account.credits})
 
 
 @login_required(login_url='/pro/login/?next=/pro/')
@@ -383,5 +390,5 @@ def getAccount(request):
     try:
         return ProUser.objects.all().filter(user=request.user).first().account
     except AttributeError:
-        raise AttributeError('Logged in user does not have a pro user account associated. Please associate one or login'
-                             'as another user.')
+        raise AttributeError('Logged in user does not have a pro user account associated. '
+                             'Please associate one or login as another user.')
