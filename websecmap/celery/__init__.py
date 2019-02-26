@@ -2,6 +2,7 @@
 # http://oddbird.net/2017/03/20/serializing-things/
 # http://docs.celeryproject.org/en/latest/userguide/security.html
 
+import logging
 import os
 import time
 
@@ -10,7 +11,6 @@ from celery import Celery, Task
 from django.conf import settings
 
 from websecmap.celery.worker import QUEUES_MATCHING_ROLES
-import logging
 
 log = logging.getLogger(__package__)
 

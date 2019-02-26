@@ -17,23 +17,22 @@ Note: organizations that are imported have the following format:
 
 """
 
-import logging
 import hashlib
-from time import time
-from os import path, makedirs
-from django.conf import settings
-from typing import List
-from constance import config
-import googlemaps
+import logging
 from datetime import datetime
-import tldextract
-import requests
-import pytz
-from time import sleep
-from os import rename
-from websecmap.scanners.scanner.http import resolves
+from os import makedirs, path, rename
+from time import sleep, time
+from typing import List
 
-from websecmap.organizations.models import Organization, OrganizationType, Coordinate, Url
+import googlemaps
+import pytz
+import requests
+import tldextract
+from constance import config
+from django.conf import settings
+
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from websecmap.scanners.scanner.http import resolves
 
 log = logging.getLogger(__package__)
 DOWNLOAD_DIRECTORY = settings.TOOLS['organizations']['import_data_dir']
