@@ -225,7 +225,7 @@ def get_ipv4(url: str):
         log.debug("%s has IPv4 address: %s" % (url, ipv4))
     except Exception as ex:
         # when not known: [Errno 8] nodename nor servname provided, or not known
-        log.debug("Get IPv4 error: %s" % ex)
+        log.debug("Get IPv4 error on %s: %s" % (url, ex))
 
     # the contents of the DNS record can be utter garbage, there is absolutely no guarantee that this is an IP
     # it could be an entire novel, or images
@@ -235,7 +235,7 @@ def get_ipv4(url: str):
             if not address.is_global:
                 ipv4 = ""
     except (AddressValueError, ValueError):
-        log.debug("IPv4 address was not recognized: %s" % ipv4)
+        log.debug("IPv4 address was not recognized on %s: %s" % (url, ipv4))
         ipv4 = ""
 
     return ipv4
@@ -263,7 +263,7 @@ def get_ipv6(url: str):
             log.debug("%s has IPv6 address: %s" % (url, ipv6))
     except Exception as ex:
         # when not known: [Errno 8nodename nor servname provided, or not known
-        log.debug("Get IPv6 error: %s" % ex)
+        log.debug("Get IPv6 error on %s: %s" % (url, ex))
 
     try:
         if ipv6:
@@ -271,7 +271,7 @@ def get_ipv6(url: str):
             if not address.is_global:
                 ipv6 = ""
     except (AddressValueError, ValueError):
-        log.debug("IPv6 address was not recognized: %s" % ipv6)
+        log.debug("IPv6 address was not recognized on %s: %s" % (url, ipv6))
         ipv6 = ""
 
     return ipv6
