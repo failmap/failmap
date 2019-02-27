@@ -28,7 +28,7 @@ from websecmap.reporting.models import OrganizationReport, UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, TlsQualysScan, UrlGenericScan,
                                        UrlIp)
 from websecmap.scanners.scanner import (dns, dnssec, onboard, plain_http, security_headers,
-                                        tls_qualys)
+                                        tls_qualys, verify_unresolvable, dns_known_subdomains)
 
 log = logging.getLogger(__name__)
 
@@ -241,6 +241,11 @@ class ActionMixin:
     dnssec.short_description = "🔬 DNSSEC"
     actions.append(dnssec)
 
+    def verify_unresolvable(self, *args, **kwargs):
+        return self.generic_action(verify_unresolvable.compose_verify_task, 'Verify Unresolvable', *args, **kwargs)
+    verify_unresolvable.short_description = "🔬 Verify Unresolvable"
+    actions.append(verify_unresolvable)
+
     def dns_certificate_transparency(self, *args, **kwargs):
         return self.generic_action(dns.certificate_transparency_compose_task,
                                    'DNS Certificate transparency', *args, **kwargs)
@@ -253,7 +258,7 @@ class ActionMixin:
     actions.append(dns_nsec)
 
     def dns_known_subdomains(self, *args, **kwargs):
-        return self.generic_action(dns.brute_known_subdomains_compose_task, 'DNS Nsec', *args, **kwargs)
+        return self.generic_action(dns_known_subdomains, 'DNS Nsec', *args, **kwargs)
     dns_known_subdomains.short_description = "🗺  + DNS (known subdomains)"
     actions.append(dns_known_subdomains)
 

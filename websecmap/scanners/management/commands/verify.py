@@ -1,7 +1,7 @@
 import logging
 
 from websecmap.app.management.commands._private import VerifyTaskCommand
-from websecmap.scanners.scanner import dns, ftp, http, try_to_resolve_urls
+from websecmap.scanners.scanner import dns, ftp, http, verify_unresolvable
 
 log = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ scanners = {
     'http': http,
     'subdomains': dns,
     'dns': dns,
-    'unresolvable': try_to_resolve_urls
+    'unresolvable': verify_unresolvable
 }
 
 
