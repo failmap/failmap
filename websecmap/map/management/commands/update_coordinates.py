@@ -20,16 +20,16 @@ class Command(BaseCommand):
 
         parser.add_argument("--country",
                             help="Country code. Eg: NL, DE, EN",
-                            required=False)
+                            required=True)
 
         parser.add_argument("--region",
                             help="Region: municipality, province, water\ board ...",
-                            required=False)
+                            required=True)
 
     # https://nl.wikipedia.org/wiki/Gemeentelijke_herindelingen_in_Nederland#Komende_herindelingen
     def handle(self, *app_labels, **options):
 
-        update_coordinates(when=options["date"], country=options["country"], organization_type=options["region"])
+        update_coordinates(when=options["date"], countries=[options["country"]], organization_types=[options["region"]])
 
 
 def valid_date(s):

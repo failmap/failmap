@@ -80,14 +80,15 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
         log.info("Going to get all existing organization types, and try to import them all.")
         organization_types = list(OrganizationType.objects.all().values_list('name', flat=True))
 
-    for country in countries:
-        for organization_type in organization_types:
+    for country in sorted(countries):
+        for organization_type in sorted(organization_types):
 
             if not get_region(country, organization_type):
                 log.info("The combination of %s and %s does not exist in OSM. Skipping." % (country, organization_type))
                 continue
 
             try:
+                store_import_message(country, organization_type, "Downloading data")
                 if config.WAMBACHERS_OSM_CLIKEY:
                     data = get_osm_data_wambachers(country, organization_type)
                 else:
@@ -96,7 +97,7 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 store_import_message.apply_async([country, organization_type, ex])
                 continue
 
-            for feature in data["features"]:
+            for index, feature in enumerate(data["features"]):
 
                 if "properties" not in feature:
                     continue
@@ -107,8 +108,15 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 resolution = get_resampling_resolution(country, organization_type)
                 resampled = resample(feature, resolution)
                 store_new(resampled, country, organization_type, when)
+                message = "Imported %s of %s. %s%% (Currently: %s)" % (
+                    index+1,
+                    len(data["features"]),
+                    round(((index+1)/len(data["features"]))*100, 2),
+                    feature["properties"]["name"])
+                store_import_message(country, organization_type, message)
 
                 # can't do multiprocessing.pool, given non global functions.
+            store_import_message(country, organization_type, "Import complete")
 
     log.info("Import finished.")
 
@@ -118,7 +126,7 @@ def store_import_message(country, organization_type, message):
     # Note, that AdministrativeRegion is written to an old copy of this object in the task chain
     # after import is performed. Therefore explicitly set the update field, so not to lose other data.
 
-    log.debug("Update message received: %s" % message)
+    log.debug("Update message received for (%s/%s): %s" % (country, organization_type, message))
 
     region = AdministrativeRegion.objects.get(
         country=country,
@@ -130,40 +138,52 @@ def store_import_message(country, organization_type, message):
 
 # @transaction.atomic
 @app.task(queue="storage")
-def update_coordinates(country: str = "NL", organization_type: str = "municipality", when=None):
+def update_coordinates(countries: List[str] = None, organization_types: List[str] = None, when=None):
 
     if not osmtogeojson_available():
         raise FileNotFoundError("osmtogeojson was not found. Please install it and make sure python can access it. "
                                 "Cannot continue.")
 
-    log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
+    for country in sorted(countries):
+        for organization_type in sorted(organization_types):
 
-    # you are about to load 50 megabyte of data. Or MORE! :)
-    try:
-        if config.WAMBACHERS_OSM_CLIKEY:
-            data = get_osm_data_wambachers(country, organization_type)
-        else:
-            data = get_osm_data(country, organization_type)
-    except requests.exceptions.HTTPError as ex:
-        store_import_message.apply_async([country, organization_type, ex])
-        return
+            log.info("Attempting to update coordinates for: %s %s " % (country, organization_type))
 
-    log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
+            # you are about to load 50 megabyte of data. Or MORE! :)
+            try:
+                store_import_message(country, organization_type, "Downloading data")
+                if config.WAMBACHERS_OSM_CLIKEY:
+                    data = get_osm_data_wambachers(country, organization_type)
+                else:
+                    data = get_osm_data(country, organization_type)
+            except requests.exceptions.HTTPError as ex:
+                store_import_message.apply_async([country, organization_type, ex])
+                return
 
-    log.info("Parsing features:")
-    for feature in data["features"]:
+            log.info("Received coordinate data. Starting with: %s" % json.dumps(data)[0:200])
 
-        if "properties" not in feature:
-            log.debug("Feature misses 'properties' property :)")
-            continue
+            log.info("Parsing features:")
+            for index, feature in enumerate(data["features"]):
 
-        if "name" not in feature["properties"]:
-            log.debug("This feature does not contain a name: it might be metadata or something else.")
-            continue
+                if "properties" not in feature:
+                    log.debug("Feature misses 'properties' property :)")
+                    continue
 
-        # slower, but in a task. Still atomic this way.
-        resolution = get_resampling_resolution(country, organization_type)
-        store_updates(resample(feature, resolution), country, organization_type, when)
+                if "name" not in feature["properties"]:
+                    log.debug("This feature does not contain a name: it might be metadata or something else.")
+                    continue
+
+                # slower, but in a task. Still atomic this way.
+                resolution = get_resampling_resolution(country, organization_type)
+                store_updates(resample(feature, resolution), country, organization_type, when)
+                message = "Updated %s of %s. %s%% (Currently: %s)" % (
+                    index + 1,
+                    len(data["features"]),
+                    round(((index + 1) / len(data["features"])) * 100, 2),
+                    feature["properties"]["name"])
+                store_import_message(country, organization_type, message)
+
+            store_import_message(country, organization_type, "Update complete")
 
     log.info("Resampling and update tasks have been created.")
 

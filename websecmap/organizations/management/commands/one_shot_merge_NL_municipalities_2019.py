@@ -140,7 +140,7 @@ class Command(BaseCommand):
             when=merge_date, organization_type="municipality", country="NL"
         )
 
-        update_coordinates(country="NL", organization_type="municipality", when=merge_date)
+        update_coordinates(countries=["NL"], organization_types=["municipality"], when=merge_date)
 
         organizations = Organization.objects.all().filter(name__in=[
             "Noardeast-Fryslân",
