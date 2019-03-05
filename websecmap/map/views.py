@@ -1151,6 +1151,19 @@ def improvements(request, country: str = "NL", organization_type: str = "municip
     # stats for the newest, should be made a function:
     for urlrating in newest_urlratings:
 
+        # url level, why are there reports without url ratings / empty url ratings like
+        if 'ratings' in urlrating.calculation:
+            for rating in urlrating.calculation['ratings']:
+                if rating['type'] not in new_measurement:
+                    new_measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                if rating['type'] not in scan_types:
+                    scan_types.append(rating['type'])
+
+                new_measurement[rating['type']]['high'] += rating['high']
+                new_measurement[rating['type']]['medium'] += rating['medium']
+                new_measurement[rating['type']]['low'] += rating['low']
+
         if "endpoints" not in urlrating.calculation:
             continue
 
@@ -1168,6 +1181,18 @@ def improvements(request, country: str = "NL", organization_type: str = "municip
 
     # and the oldest stats, which should be the same function
     for urlrating in oldest_urlratings:
+
+        if 'ratings' in urlrating.calculation:
+            for rating in urlrating.calculation['ratings']:
+                if rating['type'] not in old_measurement:
+                    old_measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+
+                if rating['type'] not in scan_types:
+                    scan_types.append(rating['type'])
+
+                old_measurement[rating['type']]['high'] += rating['high']
+                old_measurement[rating['type']]['medium'] += rating['medium']
+                old_measurement[rating['type']]['low'] += rating['low']
 
         if "endpoints" not in urlrating.calculation:
             continue

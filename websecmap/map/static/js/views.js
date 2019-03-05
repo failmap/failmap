@@ -4,6 +4,255 @@
 // oh, and the react anti-patent clause is a big no.
 // // https://hackernoon.com/angular-vs-react-the-deal-breaker-7d76c04496bc
 
+// also contains the correct / consistent display order
+
+// todo: {% if config.SHOW_HTTP_TLS_QUALYS %} {% if config.SHOW_HTTP_MISSING_TLS %} {% if config.SHOW_FTP %}
+// {% if config.SHOW_DNS_DNSSEC %} {% if config.SHOW_HTTP_HEADERS_HSTS %} {% if config.SHOW_HTTP_HEADERS_XFO %}
+// {% if config.SHOW_HTTP_HEADERS_X_CONTENT %} {% if config.SHOW_HTTP_HEADERS_X_XSS %}
+// if it's not in here, it won't be shown. As simple as that. So these conditions have to be evaluated here,
+// so there are a lot less IF's in the front end.
+// also translations move to JS: {% trans "Encryption quality updates" %} {% trans "Certificate trust updates" %}
+// {% trans "Lack of encryption updates" %} {% trans "FTP updates" %} {% trans "DNSSEC updates" %}
+// {% trans "Forcing encryption updates" %} {% trans "X-Frame-Options updates" %} {% trans "X-Content-Type-Option updates" %}
+// {% trans "X-XSS-Protection updates" %}
+// DNS Security (DNSSEC)
+// File transfer (FTP)
+// Application of encryption (HTTPS)
+// Encryption quality (TLS)
+// Certificate trust (TLS)
+// Enforcing encryption (HSTS)
+// Clickjacking prevention (X-Frame-Options)
+// X-XSS Protection
+// X-Content Type Options
+let issues = {
+
+    "DNSSEC": {
+        "name": "DNSSEC",
+        "second opinion links": [{
+            "url": "https://zonemaster.iis.se/",
+            "language": "EN",
+            "provider": "Zonemaster"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions",
+            "language": "EN",
+            "provider": "Wikipedia",
+        }],
+        "relevant impacts": ["high"],
+        "statistics": {
+            "good": [
+                {
+                    'label': 'DNSSEC correct', 'explanation': 'DNSSEC seems to be implemented sufficiently.'
+                }],
+            "medium": [],
+            "bad": [{'label': 'DNSSEC incorrect', 'explanation': 'DNSSEC is incorrectly or not configured (errors found).'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "tls_qualys_certificate_trusted": {
+        "name": "tls_qualys_certificate_trusted",
+        "second opinion links": [{
+            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+            "language": "EN",
+            "provider": "Qualys"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high"],
+        "statistics": {
+            "good": [{'label': "Trust", 'explanation': 'Certificate is trusted.'}],
+            "medium": [],
+            "bad": [{'label': "No trust", 'explanation': 'Certificate is not trusted.'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "tls_qualys_encryption_quality": {
+        "name": "tls_qualys_encryption_quality",
+        "second opinion links": [{
+            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+            "language": "EN",
+            "provider": "Qualys"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high", "low"],
+        "statistics": {
+            "good": [{'label': "TLS rated A-", 'explanation': 'Good Transport Security, rated A-.'},
+                {'label': "TLS rated A", 'explanation': 'Good Transport Security, rated A.'},
+                {'label': "TLS rated A+", 'explanation': 'Perfect Transport Security, rated A+.'}],
+            "medium": [{'label': "TLS rated C", 'explanation': 'Less than optimal Transport Security, rated C.'},
+            {'label': "TLS rated B", 'explanation': 'Less than optimal Transport Security, rated B.'}],
+            "bad": [{'label': "Broken", 'explanation': 'Broken Transport Security, rated F'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "plain_https": {
+        "name": "plain_https",
+        "second opinion links": [{
+            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+            "language": "EN",
+            "provider": "Qualys"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high", "medium"],
+        "statistics": {
+            "good": [],
+            "medium": [{'label': "Redirect from unsafe address", 'explanation': 'Redirects to a secure site, while a secure counterpart on the standard port is missing.'}],
+            "bad": [{'label': "Not at all", 'explanation': 'Site does not redirect to secure url, and has nosecure alternative on a standard port.'},
+            {'label': "Not at all", 'explanation': 'Site does not redirect to secure url, and has no secure alternative on a standard port.'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "ftp": {
+        "name": "ftp",
+        "second opinion links": [{
+            "url": "https://ftptest.net/",
+            "language": "EN",
+            "provider": "ftptest.net"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/FTPS",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high", "medium"],
+        "statistics": {
+            "good": [{'label': "FTP secure", 'explanation': 'FTP Server supports TLS encryption protocol.'}],
+            "medium": [],
+            "bad": [{'label': "FTP insecure", 'explanation': 'FTP Server does not support encrypted transport or has protocol issues.'},
+            {'label': "FTP outdated", 'explanation': 'FTP Server only supports insecure SSL protocol.'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "http_security_header_strict_transport_security": {
+        "name": "http_security_header_strict_transport_security",
+        "second opinion links": [{
+            "url": "https://securityheaders.io/?q=${url.url}",
+            "language": "EN",
+            "provider": "Securityheaders.io"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high", "medium"],
+        "statistics": {
+            "good": [{'label': "Stats has", 'explanation': 'Strict-Transport-Security header present.'}],
+            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing Strict-Transport-Security header.'}],
+            "bad": []
+        },
+        "category": ['website']
+    },
+
+    "http_security_header_x_frame_options": {
+        "name": "http_security_header_x_frame_options",
+        "second opinion links": [{
+            "url": "https://securityheaders.io/?q=${url.url}",
+            "language": "EN",
+            "provider": "Securityheaders.io"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Clickjacking",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["medium"],
+        "statistics": {
+            "good": [{'label': "Stats has", 'explanation': 'X-Frame-Options header present.'}],
+            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Frame-Options header.'}],
+            "bad": []
+        },
+        "category": ['website']
+    },
+
+    "http_security_header_x_content_type_options": {
+        "name": "http_security_header_x_content_type_options",
+        "second opinion links": [{
+            "url": "https://securityheaders.io/?q=${url.url}",
+            "language": "EN",
+            "provider": "Securityheaders.io"
+        }],
+        "documentation links": [{
+            "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto",
+            "language": "EN",
+            "provider": "OWASP"
+        }],
+        "relevant impacts": ["low"],
+        "statistics": {
+            "good": [{'label': "Stats has", 'explanation': 'X-Content-Type-Options header present.'}],
+            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Content-Type-Options header.'}],
+            "bad": []
+        },
+        "category": ['website']
+    },
+
+    "http_security_header_x_xss_protection": {
+        "name": "http_security_header_x_xss_protection",
+        "second opinion links": [{
+            "url": "https://securityheaders.io/?q=${url.url}",
+            "language": "EN",
+            "provider": "Securityheaders.io"
+        }],
+        "documentation links": [{
+            "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp",
+            "language": "EN",
+            "provider": "OWASP"
+        }],
+        "relevant impacts": ["low"],
+        "statistics": {
+            "good": [{'label': "Stats has", 'explanation': 'X-XSS-Protection header present.'}],
+            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-XSS-Protection header.'}],
+            "bad": []
+        },
+        "category": ['website']
+    },
+};
+
+let ordered_issues = [
+    issues['DNSSEC'],
+    issues["tls_qualys_certificate_trusted"],
+    issues["tls_qualys_encryption_quality"],
+    issues["plain_https"],
+    issues["ftp"],
+    issues["http_security_header_strict_transport_security"],
+    issues["http_security_header_x_frame_options"],
+    issues["http_security_header_x_content_type_options"],
+    issues["http_security_header_x_xss_protection"],
+];
+
+// what issues are at url level
+let url_issue_names = [
+    //issues['DNSSEC']['name']
+];
+
+// what issues are at endpoint level
+let endpoint_issue_names = [
+    issues["tls_qualys_certificate_trusted"]['name'],
+    issues["tls_qualys_encryption_quality"]['name'],
+    issues["plain_https"]['name'],
+    issues["ftp"]['name'],
+    issues["http_security_header_strict_transport_security"]['name'],
+    issues["http_security_header_x_frame_options"]['name'],
+    issues["http_security_header_x_content_type_options"]['name'],
+    issues["http_security_header_x_xss_protection"]['name'],
+];
+
 function debounce(func, wait, immediate) {
     let timeout;
     return function () {
@@ -96,6 +345,8 @@ const report_mixin = {
         // so they can be destroyed and re-initialized
         myChart: null,
         myChart2: null,
+
+        issues: ordered_issues
     },
     // https://vuejs.org/v2/api/#updated
     updated: function () {
@@ -106,28 +357,22 @@ const report_mixin = {
     methods: {
         total_summary_row: function(url){
 
-            let ftp = this.worstof("ftp", url.endpoints);
-            let dnssec = this.worstof("DNSSEC", [url]);
-            let xxss = this.worstof("http_security_header_x_xss_protection", url.endpoints);
-            let xcto = this.worstof("http_security_header_x_content_type_options", url.endpoints);
-            let xfo = this.worstof("http_security_header_x_frame_options", url.endpoints);
-            let https_trust = this.worstof("tls_qualys_certificate_trusted", url.endpoints);
-            let https_quality = this.worstof("tls_qualys_encryption_quality", url.endpoints);
-            let hsts = this.worstof("http_security_header_strict_transport_security", url.endpoints);
-            let plain_https = this.worstof("plain_https", url.endpoints);
+            let worst = {};
 
-            text = `<td><b>${url.url}</b></td>`;
+            ordered_issues.forEach(function (item) {
+                if (url_issue_names.includes(item['name']))
+                    worst[item['name']] = vueReport.worstof(item['name'], [url]);
+                else
+                    worst[item['name']] = vueReport.worstof(item['name'], url.endpoints);
+            });
 
-            let findings =
-                `<td class='text-center' style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
-                `<td class='text-center' style='background-color: ${https_trust.bgcolor}'>${https_trust.text}</td>` +
-                `<td class='text-center' style='background-color: ${https_quality.bgcolor}'>${https_quality.text}</td>` +
-                `<td class='text-center' style='background-color: ${plain_https.bgcolor}'>${plain_https.text}</td>` +
-                `<td class='text-center' style='background-color: ${hsts.bgcolor}'>${hsts.text}</td>` +
-                `<td class='text-center' style='background-color: ${xfo.bgcolor}'>${xfo.text}</td>` +
-                `<td class='text-center' style='background-color: ${xcto.bgcolor}'>${xcto.text}</td>` +
-                `<td class='text-center' style='background-color: ${xxss.bgcolor}'>${xxss.text}</td>` +
-                `<td class='text-center' style='background-color: ${ftp.bgcolor}'>${ftp.text}</td>`;
+            text = `<td><b><a href="#report_url_${url.url}">${url.url}</a></b></td>`;
+
+            let findings = "";
+
+            ordered_issues.forEach(function (item) {
+                findings += `<td class='text-center' style='background-color: ${worst[item['name']].bgcolor}'>${worst[item['name']].text}</td>`;
+            });
 
             return text + findings;
         },
@@ -177,84 +422,6 @@ const report_mixin = {
             }
 
             return {'bgcolor': bgcolor, 'text': text}
-
-        },
-
-        endpoint_summary_row: function(endpoint, is_endpoint=false){
-
-            let ftp = {"bgcolor": '', "text": '-'};
-            let dnssec = {"bgcolor": '', "text": '-'};
-            let xxss = {"bgcolor": '', "text": '-'};
-            let xcto = {"bgcolor": '', "text": '-'};
-            let xfo = {"bgcolor": '', "text": '-'};
-            let https = {"bgcolor": '', "text": '-'};
-            let hsts = {"bgcolor": '', "text": '-'};
-            let plain_https = {"bgcolor": '', "text": '-'};
-
-            let text = '';
-            if (is_endpoint) {
-                text = `<td>${endpoint.protocol}/${endpoint.port} IPv${endpoint.ip_version}</td>`;
-            } else {
-                text = `<td>${endpoint.url}</td>`;
-            }
-
-            console.log(endpoint);
-
-            for(let i=0; i<endpoint.ratings.length; i++){
-                let rating = endpoint.ratings[i];
-
-                console.log(rating.type);
-
-                if (rating.type === "http_security_header_strict_transport_security"){
-                    hsts.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    hsts.text = this.rating_text(rating);
-                }
-                if (rating.type === "tls_qualys_certificate_trusted"){
-                    https_trust.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    https_trust.text = this.rating_text(rating);
-                }
-                if (rating.type === "tls_qualys_encryption_quality"){
-                    https_quality.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    https_quality.text = this.rating_text(rating);
-                }
-                if (rating.type === "plain_https"){
-                    plain_https.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    plain_https.text = this.rating_text(rating);
-                }
-                if (rating.type === "http_security_header_x_xss_protection"){
-                    xxss.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    xxss.text = this.rating_text(rating);
-                }
-                if (rating.type === "http_security_header_x_frame_options"){
-                    xfo.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    xfo.text = this.rating_text(rating);
-                }
-                if (rating.type === "http_security_header_x_content_type_options"){
-                    xcto.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    xcto.text = this.rating_text(rating);
-                }
-                if (rating.type === "DNSSEC"){
-                    dnssec.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    dnssec.text = this.rating_text(rating);
-                }
-                if (rating.type === "ftp"){
-                    ftp.bgcolor = this.colorizebg(rating.high, rating.medium, rating.low);
-                    ftp.text = this.rating_text(rating);
-                }
-            }
-
-
-            let findings =
-                `<td style='background-color: ${dnssec.bgcolor}'>${dnssec.text}</td>` +
-                `<td style='background-color: ${https.bgcolor}'>${https.text}</td>` +
-                `<td style='background-color: ${plain_https.bgcolor}'>${plain_https.text}</td>` +
-                `<td style='background-color: ${hsts.bgcolor}'>${hsts.text}</td>` +
-                `<td style='background-color: ${xfo.bgcolor}'>${xfo.text}</td>` +
-                `<td style='background-color: ${xcto.bgcolor}'>${xcto.text}</td>` +
-                `<td style='background-color: ${xxss.bgcolor}'>${xxss.text}</td>` +
-                `<td style='background-color: ${ftp.bgcolor}'>${ftp.text}</td>`;
-
-            return text + findings;
 
         },
 
@@ -469,27 +636,24 @@ const report_mixin = {
         },
         // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
         second_opinion_links: function (rating, url) {
-            if (rating.type === "http_security_header_strict_transport_security")
-                return  '<a href="https://securityheaders.io/?q=' + url.url + '" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (securityheaders.io)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "tls_qualys_certificate_trusted")
-                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "tls_qualys_encryption_quality")
-                return  '<a href="https://www.ssllabs.com/ssltest/analyze.html?d=' + url.url + '&hideResults=on&latest" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (qualys)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "http_security_header_x_xss_protection")
-                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
-            if (rating.type === "http_security_header_x_frame_options")
-                return  '<a href="https://en.wikipedia.org/wiki/Clickjacking" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
-            if (rating.type === "http_security_header_x_content_type_options")
-                return  '<a href="https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (owasp)</a>';
-            if (rating.type === "DNSSEC")
-                return  '<a href="https://zonemaster.iis.se/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (zonemaster)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a> ';
-            if (rating.type === "ftp")
-                return  '<a href="https://ftptest.net/" target="_blank" class="btn-sm ,"><i class="fas fa-clipboard-check"></i> ' + gettext('Second opinion') + ' (ftptest.net)</a> ' +
-                        '<a href="https://en.wikipedia.org/wiki/FTPS" target="_blank" class="btn-sm ,"><i class="fas fa-book"></i> ' + gettext('Documentation') + ' (wikipedia)</a>';
+
+            let selected_issue = issues[rating.type];
+
+            let links = "";
+
+            // todo: take in account language.
+            selected_issue['second opinion links'].forEach(function (item){
+                let filled_url = item.url;
+                filled_url = filled_url.replace("${url.url}", url.url);
+                links += `<a href="${filled_url}" target="_blank" class="btn-sm"><i class="fas fa-clipboard-check"></i> ` + gettext('Second opinion') + ` (${item.provider}) </a> `;
+            });
+
+            selected_issue['documentation links'].forEach(function (item){
+                links += `<a href="${item.url}" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ` + gettext('Documentation') + ` (${item.provider})</a> `;
+            });
+
+            return links;
+
         },
         explain_link: function(address, rating, url) {
             subject = gettext("Explanation of finding");
@@ -629,42 +793,6 @@ const report_mixin = {
 };
 
 
-// 6 requests is expensive. Could be one with increased complexity.
-const latest_mixin = {
-    template: '#latest_table',
-    methods: {
-        load: function(){
-
-            if (!this.country || !this.layer) {
-                return;
-            }
-
-            fetch(this.data_url + this.country + '/' + this.layer + '/' + this.scan)
-                .then(response => response.json()).then(data => {
-                    this.scans = data.scans;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
-        },
-        rowcolor: function (scan) {
-            if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
-                return "greenrow";
-            else if (scan.high > 0)
-                return "redrow";
-            else if (scan.medium > 0)
-                return "orangerow";
-            else
-                return "yellowrow";
-        },
-        translate: function(string){
-            return gettext(string);
-        }
-    },
-    data: {
-        scans: Array,
-        data_url: "/data/latest_scans/"
-    }
-};
-
-
 const translation_mixin = {
     methods: {
         translate: function (string) {
@@ -773,23 +901,236 @@ function preview(country, layer){
 }
 
 
+Vue.component('vulnerability-chart', {
+    props: {
+        data: {type: Array, required: true},
+        axis: {type: Array, required: false}
+    },
+    render: function(createElement) {
+        return createElement(
+            'canvas',
+            {
+                ref: 'canvas'
+            },
+        )
+    },
+    mounted: function () {
+        this.renderChart();
+    },
+    methods: {
+        renderChart: function(){
+            let data = this.data;
+
+            let labels = Array();
+            let high = Array();
+            let medium = Array();
+            let low = Array();
+
+            for(let i=0; i<data.length; i++){
+                labels.push(data[i].date);
+                high.push(data[i].high);
+                medium.push(data[i].medium);
+                low.push(data[i].low);
+            }
+
+
+            let context = this.$refs.canvas.getContext('2d');
+            new Chart(context, {
+                type: 'line',
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: '# High risk',
+                        data: high,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255,99,132,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('high')
+                    },
+                    {
+                        label: '# Medium risk',
+                        data: medium,
+                        backgroundColor: 'rgba(255, 102, 0, 0.2)',
+                        borderColor: 'rgba(255,102,0,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('medium')
+                    },
+                    {
+                        label: '# Low risk',
+                        data: low,
+                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                        borderColor: 'rgba(255,255,0,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('low')
+                    },
+                    ]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: 'Vulnerabilities over time'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            type: 'time',
+                            distribution: 'linear',
+                            time: {
+                                unit: 'month'
+                            },
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Month'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            stacked: true,
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Value'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    }
+});
+
+Vue.component('connectivity-chart', {
+    props: {
+        data: {type: Array, required: true},
+        axis: {type: Array, required: false}
+    },
+    render: function(createElement) {
+        return createElement(
+            'canvas',
+            {
+                ref: 'canvas'
+            },
+        )
+    },
+    mounted: function () {
+        this.renderChart();
+    },
+    methods: {
+        renderChart: function(){
+            let data = this.data;
+
+            let labels = Array();
+
+            let urls = Array();
+            let endpoints = Array();
+
+            for(let i=0; i<data.length; i++){
+                labels.push(data[i].date);
+                urls.push(data[i].urls);
+                endpoints.push(data[i].endpoints);
+            }
+
+
+            let context = this.$refs.canvas.getContext('2d');
+            new Chart(context, {
+                type: 'line',
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: '# Internet Adresses',
+                        data: urls,
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                        borderColor: 'rgba(0,0,0,1)',
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    {
+                        label: '# Services',
+                        data: endpoints,
+                        backgroundColor: 'rgba(0, 40, 255, 0.2)',
+                        borderColor: 'rgba(0,40,255,1)',
+                        borderWidth: 1,
+                        lineTension: 0
+                    },
+                    ]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: 'Internet connectivity'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            type: 'time',
+                            distribution: 'linear',
+                            time: {
+                                unit: 'month'
+                            },
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Month'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            stacked: false,
+                            scaleLabel: {
+                                display: false,
+                                labelString: 'Value'
+                            },
+                            ticks: {
+                                min: 0,
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    }
+});
+
 function views(autoload_default_map_data=true) {
 
     window.vueGraphs = new Vue({
+        el: '#graphs',
         name: "graphs",
-        mixins: [state_mixin],
+        mixins: [state_mixin, translation_mixin],
 
         // the mixin requires data to exist, otherwise massive warnings.
         data: {
-            nothing: "",
-            // hold references to existing charts, so they can be deleted / updated.
-            charts: []
-        },
-
-        el: '#graphs',
-
-        mounted: function() {
-            // this.load(0)
+            issues: ordered_issues,
+            chart_data: []
         },
 
         methods: {
@@ -798,215 +1139,12 @@ function views(autoload_default_map_data=true) {
                 if (!this.country || !this.layer)
                     return;
 
-                // data.total
-                // http_security_header_strict_transport_security
-
-                var urls = Array();
-                var endpoints = Array();
-                var labels = Array();
-
                 fetch('/data/vulnstats/' + this.country + '/' + this.layer + '/0')
                     .then(response => response.json()).then(data => {
-
-                        // no data returned.
-                        if(jQuery.isEmptyObject(data)){
-                            return;
-                        }
-
-                        this.vulnerability_graph('timeline_all_vulnerabilities', data.total, 'hml');
-
-                        for(let i=0; i<data.total.length; i++){
-                            labels.push(data.total[i].date);
-                            urls.push(data.total[i].urls);
-                            endpoints.push(data.total[i].endpoints);
-                        }
-
-                         // and a single endpoint/url graph:
-                        let context = document.getElementById("timeline_available_urls_and_endpoints").getContext('2d');
-                        if (this.charts['internet'] !== undefined)
-                            this.charts['internet'].destroy();
-
-                        this.charts['internet'] = new Chart(context, {
-                            type: 'line',
-                            data: {
-                                labels: labels,
-
-                                datasets: [{
-                                    label: '# Internet Adresses',
-                                    data: urls,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                                    borderColor: 'rgba(0,0,0,1)',
-                                    borderWidth: 1,
-                                    lineTension: 0
-                                },
-                                {
-                                    label: '# Services',
-                                    data: endpoints,
-                                    backgroundColor: 'rgba(0, 40, 255, 0.2)',
-                                    borderColor: 'rgba(0,40,255,1)',
-                                    borderWidth: 1,
-                                    lineTension: 0
-                                },
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                title: {
-                                    display: true,
-                                    text: 'Internet connectivity overview'
-                                },
-                                tooltips: {
-                                    mode: 'index',
-                                    intersect: false,
-                                },
-                                hover: {
-                                    mode: 'nearest',
-                                    intersect: true
-                                },
-                                scales: {
-                                    xAxes: [{
-                                        display: true,
-                                        type: 'time',
-                                        distribution: 'linear',
-                                        time: {
-                                            unit: 'month'
-                                        },
-                                        scaleLabel: {
-                                            display: false,
-                                            labelString: 'Month'
-                                        }
-                                    }],
-                                    yAxes: [{
-                                        display: true,
-                                        stacked: false,
-                                        scaleLabel: {
-                                            display: false,
-                                            labelString: 'Value'
-                                        },
-                                        ticks: {
-                                            min: 0,
-                                        }
-                                    }]
-                                }
-                            }
-                        });
-
-                        this.vulnerability_graph('timeline_tls_qualys_certificate_trusted_vulnerabilities', data.tls_qualys_certificate_trusted, 'h');
-                        this.vulnerability_graph('timeline_tls_qualys_encryption_quality_vulnerabilities', data.tls_qualys_encryption_quality, 'hl');
-                        this.vulnerability_graph('timeline_missing_https_encryption_vulnerabilities', data.plain_https, 'hm');
-                        this.vulnerability_graph('timeline_hsts_vulnerabilities', data.http_security_header_strict_transport_security, 'm');
-                        this.vulnerability_graph('timeline_xfo_vulnerabilities', data.http_security_header_x_frame_options, 'm');
-                        this.vulnerability_graph('timeline_xcto_vulnerabilities', data.http_security_header_x_content_type_options, 'l');
-                        this.vulnerability_graph('timeline_xxss_vulnerabilities', data.http_security_header_x_xss_protection, 'l');
-                        this.vulnerability_graph('timeline_dnssec_vulnerabilities', data.DNSSEC, 'h');
-                        this.vulnerability_graph('timeline_unencrypted_ftp_vulnerabilities', data.ftp, 'hm');
+                        this.chart_data = data;
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
 
             },
-            vulnerability_graph: function(element, data, axis){
-
-                // always try to clean up the previous graph: also when data is undefined etc.
-                // updating the data might be nicer, but since it's so far away from the layer switch you wont notice
-                // if a stat is missing, it will have an empty spot now, which is good enough.
-                if (this.charts[element] !== undefined)
-                        this.charts[element].destroy();
-
-                if (data === undefined)
-                    return;
-
-                let labels = Array();
-                let high = Array();
-                let medium = Array();
-                let low = Array();
-
-                for(let i=0; i<data.length; i++){
-                    labels.push(new Date(data[i].date));
-                    high.push(data[i].high);
-                    medium.push(data[i].medium);
-                    low.push(data[i].low);
-                }
-
-                let datasets = Array();
-
-                if (axis.indexOf('h') !== -1)
-                    datasets.push({
-                            label: '# High risk',
-                            data: high,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255,99,132,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        });
-
-                if (axis.indexOf('m') !== -1)
-                    datasets.push({
-                            label: '# Medium risk',
-                            data: medium,
-                            backgroundColor: 'rgba(255, 102, 0, 0.2)',
-                            borderColor: 'rgba(255,102,0,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        });
-
-
-                if (axis.indexOf('l') !== -1)
-                    datasets.push({
-                            label: '# Low risk',
-                            data: low,
-                            backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                            borderColor: 'rgba(255,255,0,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        });
-
-                let ctx = document.getElementById(element).getContext('2d');
-                this.charts[element] = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: datasets,
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        title: {
-                            display: false,
-                            text: ''
-                        },
-                        tooltips: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        hover: {
-                            mode: 'nearest',
-                            intersect: true
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                type: 'time',
-                                distribution: 'linear',
-                                time: {
-                                    unit: 'month'
-                                },
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Month'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                stacked: true,
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Value'
-                                }
-                            }]
-                        }
-                    }
-                });
-            }
         }
     });
 
@@ -1026,7 +1164,9 @@ function views(autoload_default_map_data=true) {
             // sorting
             columns: ['ip_version', 'protocol', 'port', 'amount'],
             sortKey: 'amount',
-            sortOrders: {'ip_version': 1, 'protocol': 1, 'port': 1, 'amount': -1}
+            sortOrders: {'ip_version': 1, 'protocol': 1, 'port': 1, 'amount': -1},
+
+            issues: ordered_issues
         },
         computed: {
             greenpercentage: function () {
@@ -1347,69 +1487,51 @@ function views(autoload_default_map_data=true) {
         mixins: [top_mixin, state_mixin]
     });
 
-    // todo: https://css-tricks.com/intro-to-vue-5-animations/
-    // can these all be reduced to the same thing?
-    window.vueLatestTlsQualysCertificateTrust = new Vue({
-        name: "latest_tls_qualys_certificate_trusted",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_tls_qualys_certificate_trusted',
-        data: {scan: "tls_qualys_certificate_trusted", element_id: "latest_tls_qualys_certificate_trusted"}
-    });
+    window.vueLatest = new Vue({
+        mixins: [state_mixin],
+        el: '#latest_scans',
+        name: "latest",
+        methods: {
+            load: function(){
 
-    window.vueLatestTlsQualysEncryptionQuality = new Vue({
-        name: "latest_tls_qualys_encryption_quality",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_tls_qualys_encryption_quality',
-        data: {scan: "tls_qualys_encryption_quality", element_id: "latest_tls_qualys_encryption_quality"}
-    });
+                if (!this.country || !this.layer) {
+                    return;
+                }
 
-    window.vueLatestPlainHttps = new Vue({
-        name: "latest_plain_https",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_plain_https',
-        data: {scan: "plain_https", element_id: "latest_plain_https"}
-    });
+                ordered_issues.forEach(function (item)
+                {
+                    let data_url = vueLatest.data_url + vueLatest.country + '/' + vueLatest.layer + '/' + item['name'];
+                    console.log(data_url);
+                    fetch(data_url)
+                        .then(response => response.json()).then(data => {
+                        vueLatest.scans[item['name']] = data.scans;
 
-    window.vueLatestFtp = new Vue({
-        name: "latest_ftp",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_ftp',
-        data: {scan: "ftp", element_id: "latest_ftp"}
-    });
-
-    window.vueLatestHSTS = new Vue({
-        name: "latest_http_security_header_strict_transport_security",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_http_security_header_strict_transport_security',
-        data: {scan: "http_security_header_strict_transport_security", element_id: "latest_http_security_header_strict_transport_security"}
-    });
-
-    window.vueLatestXContentTypeOptions = new Vue({
-        name: "latest_http_security_header_x_content_type_options",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_http_security_header_x_content_type_options',
-        data: {scan: "http_security_header_x_content_type_options", element_id: "latest_http_security_header_x_content_type_options"}
-    });
-
-    window.vueLatestXFrameOptions = new Vue({
-        name: "latest_http_security_header_x_frame_options",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_http_security_header_x_frame_options',
-        data: {scan: "http_security_header_x_frame_options", element_id: "latest_http_security_header_x_frame_options"}
-    });
-
-    window.vueLatestXXSSProtection = new Vue({
-        name: "latest_http_security_header_x_xss_protection",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_http_security_header_x_xss_protection',
-        data: {scan: "http_security_header_x_xss_protection", element_id: "latest_http_security_header_x_xss_protection"}
-    });
-
-    window.vueLatestDNSSEC = new Vue({
-        name: "latest_DNSSEC",
-        mixins: [latest_mixin, state_mixin],
-        el: '#latest_DNSSEC',
-        data: {scan: "DNSSEC", element_id: "latest_DNSSEC"}
+                        // because some nested keys are used (results[x['bla']), updates are not handled correclty.
+                        vueLatest.$forceUpdate();
+                    }).catch((fail) => {
+                        console.log('An error occurred: ' + fail)
+                    });
+                })
+            },
+            rowcolor: function (scan) {
+                if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
+                    return "greenrow";
+                else if (scan.high > 0)
+                    return "redrow";
+                else if (scan.medium > 0)
+                    return "orangerow";
+                else
+                    return "yellowrow";
+            },
+            translate: function(string){
+                return gettext(string);
+            }
+        },
+        data: {
+            issues: ordered_issues,
+            scans: {},
+            data_url: "/data/latest_scans/"
+        }
     });
 
     /*
@@ -1440,23 +1562,15 @@ function views(autoload_default_map_data=true) {
     window.vueImprovements = new Vue({
         name: "issue_improvements",
         el: '#issue_improvements',
-        mixins: [state_mixin],
+        mixins: [state_mixin, translation_mixin],
 
         mounted: function () {
             this.load(0)
         },
 
         data: {
-            data: null,
-            tls_qualys_certificate_trusted: {high: 0, medium:0, low: 0},
-            tls_qualys_encryption_quality: {high: 0, medium:0, low: 0},
-            http_security_header_strict_transport_security: {high: 0, medium:0, low: 0},
-            http_security_header_x_content_type_options: {high: 0, medium:0, low: 0},
-            http_security_header_x_xss_protection: {high: 0, medium:0, low: 0},
-            http_security_header_x_frame_options: {high: 0, medium:0, low: 0},
-            plain_https: {high: 0, medium:0, low: 0},
-            ftp: {high: 0, medium:0, low: 0},
-            overall: {high: 0, medium:0, low: 0}
+            issues: ordered_issues,
+            results: {'overall': {high: 0, medium:0, low: 0}}
         },
 
         methods: {
@@ -1472,38 +1586,25 @@ function views(autoload_default_map_data=true) {
                 let self = this;
                 $.getJSON('/data/improvements/' + this.country + '/' + this.layer + '/' + weeks_ago + '/0', function (data) {
                     if ($.isEmptyObject(data)) {
-                        self.data = null;
-                        self.tls_qualys_certificate_trusted = {high: 0, medium:0, low: 0};
-                        self.tls_qualys_encryption_quality = {high: 0, medium:0, low: 0};
-                        self.http_security_header_strict_transport_security = {high: 0, medium:0, low: 0};
-                        self.http_security_header_x_content_type_options = {high: 0, medium:0, low: 0};
-                        self.http_security_header_x_xss_protection = {high: 0, medium:0, low: 0};
-                        self.http_security_header_x_frame_options = {high: 0, medium:0, low: 0};
-                        self.plain_https = {high: 0, medium:0, low: 0};
-                        self.ftp = {high: 0, medium:0, low: 0};
-                        self.overall = {high: 0, medium:0, low: 0}
+                        self.issues.forEach(function (issue){
+                           self.results[issue['name']] = {high: 0, medium:0, low: 0}
+                        });
+
+                        self.results.overall = {high: 0, medium:0, low: 0}
                     } else {
-                        self.data = data;
-                        if (data.tls_qualys_certificate_trusted !== undefined)
-                            self.tls_qualys_certificate_trusted = data.tls_qualys_certificate_trusted.improvements;
-                        if (data.tls_qualys_encryption_quality !== undefined)
-                            self.tls_qualys_encryption_quality = data.tls_qualys_encryption_quality.improvements;
-                        if (data.http_security_header_strict_transport_security !== undefined)
-                            self.http_security_header_strict_transport_security = data.http_security_header_strict_transport_security.improvements;
-                        if (data.http_security_header_x_content_type_options !== undefined)
-                            self.http_security_header_x_content_type_options = data.http_security_header_x_content_type_options.improvements;
-                        if (data.http_security_header_x_xss_protection !== undefined)
-                            self.http_security_header_x_xss_protection = data.http_security_header_x_xss_protection.improvements;
-                        if (data.http_security_header_x_frame_options !== undefined)
-                            self.http_security_header_x_frame_options = data.http_security_header_x_frame_options.improvements;
-                        if (data.plain_https !== undefined)
-                            self.plain_https = data.plain_https.improvements;
-                        if (data.ftp !== undefined)
-                            self.ftp = data.ftp.improvements;
+                        self.issues.forEach(function (issue){
+                            if (data[issue['name']] !== undefined)
+                                self.results[issue['name']] = data[issue['name']].improvements;
+                        });
+
                         if (data.overall !== undefined)
                             self.overall = data.overall.improvements;
                     }
+
+                    // because some nested keys are used (results[x['bla']), updates are not handled correclty.
+                    vueImprovements.$forceUpdate();
                 });
+
             },
             goodbad: function (value) {
                 if (value === 0)
@@ -1522,7 +1623,7 @@ function views(autoload_default_map_data=true) {
     window.vueFullScreenReport = new Vue({
         name: "fullscreenreport",
         el: '#fullscreenreport',
-        mixins: [state_mixin, report_mixin],
+        mixins: [state_mixin, report_mixin, translation_mixin],
     });
 
     // there are some issues with having the map in a Vue. Somehow the map doesn't
@@ -1547,7 +1648,7 @@ function views(autoload_default_map_data=true) {
             }
             this.load(0)
         },
-        mixins: [state_mixin],
+        mixins: [state_mixin, translation_mixin],
 
         el: '#historycontrol',
         template: '#historycontrol_template',
@@ -1562,7 +1663,9 @@ function views(autoload_default_map_data=true) {
             previously_loaded_country: null,
             previously_loaded_layer: null,
 
-            displayed_issue: ""
+            displayed_issue: "",
+
+            issues: ordered_issues
         },
         computed: {
             visibleweek: function () {
@@ -1609,15 +1712,7 @@ function views(autoload_default_map_data=true) {
                 vueTopfail.set_state(this.country, this.layer);
                 vueTopwin.set_state(this.country, this.layer);
                 vueStatistics.set_state(this.country, this.layer);
-                vueLatestPlainHttps.set_state(this.country, this.layer);
-                vueLatestFtp.set_state(this.country, this.layer);
-                vueLatestTlsQualysCertificateTrust.set_state(this.country, this.layer);
-                vueLatestTlsQualysEncryptionQuality.set_state(this.country, this.layer);
-                vueLatestXContentTypeOptions.set_state(this.country, this.layer);
-                vueLatestHSTS.set_state(this.country, this.layer);
-                vueLatestXFrameOptions.set_state(this.country, this.layer);
-                vueLatestXXSSProtection.set_state(this.country, this.layer);
-                vueLatestDNSSEC.set_state(this.country, this.layer);
+                vueLatest.set_state(this.country, this.layer);
                 vueGraphs.set_state(this.country, this.layer);
                 vueImprovements.set_state(this.country, this.layer);
                 vueExport.set_state(this.country, this.layer);
@@ -1791,7 +1886,7 @@ function views(autoload_default_map_data=true) {
     window.vueReport = new Vue({
         name: "report",
         el: '#report',
-        mixins: [state_mixin, report_mixin],
+        mixins: [state_mixin, report_mixin, translation_mixin],
 
         computed: {
             // load list of organizations from map features
