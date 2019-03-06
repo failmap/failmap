@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-22 13:09+0000\n"
+"POT-Creation-Date: 2019-03-06 08:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Internet Cleanup Foundation <info@internetcleanup."
 "foundation>\n"
@@ -44,27 +44,22 @@ msgid "tls_qualys"
 msgstr "Toepassing van versleuteling"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "plain_https"
 msgstr "Ontbreken van versleuteling"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-XSS-Protection"
 msgstr "X-XSS-Protection"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-Frame-Options"
 msgstr "Voorkomen van Clickjacking aanvallen (X-Frame-Options)"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-Content-Type-Options"
 msgstr "X-Content-Type-Options"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "Strict-Transport-Security"
 msgstr "Strict-Transport-Security (HSTS)"
 
@@ -317,102 +312,6 @@ msgid "Report ask sendin domains"
 msgstr "Stuur hier domeinen in."
 
 #: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "High"
-msgstr "Hoog risico"
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "Medium"
-msgstr "Midden risico"
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "Low"
-msgstr "Laag risico"
-
-#: websecmap/map/templates/map/index.html
-msgid "Risks and internet connectivity over time"
-msgstr "Tijdslijn van risico's en dienstverlening"
-
-#: websecmap/map/templates/map/index.html
-msgid "Risk summary overview"
-msgstr "Overzichtstabel"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC"
-msgstr "DNS beveiliging (DNSSEC)"
-
-#: websecmap/map/templates/map/index.html
-msgid "tls_qualys_encryption_quality"
-msgstr "Kwaliteit van versleuteling (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "tls_qualys_certificate_trusted"
-msgstr "Vertrouwen in certificaat (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP"
-msgstr "Bestandsoverdracht (FTP)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Full report"
-msgstr "Volledig rapport"
-
-#: websecmap/map/templates/map/index.html
-msgid "Incorrect finding on mail subject"
-msgstr "verkeerde%20bevinding%20op%20"
-
-#: websecmap/map/templates/map/index.html
-msgid "Incorrect finding on mail body"
-msgstr ""
-"Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een "
-"week afhankelijk van de test. Functionaliteit om snel een her-scan uit te "
-"voeren volgt. %0D%0A%0D%0A%0D%0ABeste, %0D%0A%0D%0AHet lijkt erop dat er een "
-"verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: "
-"%0D%0A1: ... %0D%0A2: ... %0D%0A3: ... %0D%0A%0D%0ATip: Stuur ook een "
-"verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A"
-"%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
-
-#: websecmap/map/templates/map/index.html
-msgid "Report incorrect finding"
-msgstr "Meld onjuiste verbinding"
-
-#: websecmap/map/templates/map/index.html
-msgid "Url level findings"
-msgstr "Algemene bevindingen"
-
-#: websecmap/map/templates/map/index.html
-msgid "Since"
-msgstr "Sinds"
-
-#: websecmap/map/templates/map/index.html
-msgid "Last check"
-msgstr "meest recente controle"
-
-#: websecmap/map/templates/map/index.html
-msgid "Service"
-msgstr "Dienst"
-
-#: websecmap/map/templates/map/index.html
-msgid "Explained"
-msgstr "Verklaring"
-
-#: websecmap/map/templates/map/index.html
-msgid "Explained on"
-msgstr "Verklaard op"
-
-#: websecmap/map/templates/map/index.html
-msgid "explanation expires"
-msgstr "verloopt"
-
-#: websecmap/map/templates/map/index.html
 msgid "Extensive statistics"
 msgstr "Uitgebreide statistieken"
 
@@ -503,102 +402,6 @@ msgid "Total"
 msgstr "Aantal"
 
 #: websecmap/map/templates/map/index.html
-msgid "DNSSEC incorrect"
-msgstr "Niet of onjuist geïmplementeerd"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC correct"
-msgstr "Correct toegepast"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP insecure"
-msgstr "Onversleuteld"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP outdated"
-msgstr "Verouderde versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP secure"
-msgstr "Versleuteld"
-
-#: websecmap/map/templates/map/index.html
-msgid "Application of encryption"
-msgstr "Toepassing van versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "Not at all"
-msgstr "Helemaal niet"
-
-#: websecmap/map/templates/map/index.html
-msgid "Redirect from unsafe address"
-msgstr "Doorverwijzing vanaf onveilig adres"
-
-#: websecmap/map/templates/map/index.html
-msgid "Encryption quality"
-msgstr "Kwaliteit van versleuteling (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Broken"
-msgstr "Onvoldoende"
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated C"
-msgstr "Matig"
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated B"
-msgstr "Redelijk"
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A-"
-msgstr "Goed"
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A"
-msgstr "Perfect"
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A+"
-msgstr "Perfect en meer+"
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate trust"
-msgstr "Vertrouwen in certificaat (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "No trust"
-msgstr "Geen vertrouwen"
-
-#: websecmap/map/templates/map/index.html
-msgid "Trust"
-msgstr "Vertrouwen"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats HSTS"
-msgstr "Afdwingen van versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats hasn't"
-msgstr "Niet"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats has"
-msgstr "Wel"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-Frame-Options"
-msgstr "Voorkomen van Clickjacking aanvallen"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-XSS Protection"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-Content Type Options"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
 #: websecmap/map/templates/map/topfail.html
 #: websecmap/map/templates/map/topwin.html
 msgid "Services"
@@ -648,52 +451,12 @@ msgid "High risk improvements"
 msgstr "Hoog risico verbeteringen"
 
 #: websecmap/map/templates/map/index.html
-msgid "Encryption Quality"
-msgstr "Kwaliteit van versleuteling (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate Trust"
-msgstr "Vertrouwen in certificaat (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Missing encryption"
-msgstr "Aanwezigheid van versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "Missing FTP encryption"
-msgstr "Aanwezigheid van FTP versleuteling"
-
-#: websecmap/map/templates/map/index.html
 msgid "Medium risk improvements"
 msgstr "Midden risico verbeteringen"
 
 #: websecmap/map/templates/map/index.html
-msgid "Encryption"
-msgstr "Kwaliteit Versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "HSTS Header"
-msgstr "HSTS Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "XFO Header"
-msgstr "XFO Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP connection issue (security unknown)"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
 msgid "Low risk improvements"
 msgstr "Laag risico verbeteringen"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS"
-msgstr "X-XSS Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content"
-msgstr "X-Content header"
 
 #: websecmap/map/templates/map/index.html
 msgid "Graphs"
@@ -702,42 +465,6 @@ msgstr "Grafieken"
 #: websecmap/map/templates/map/index.html
 msgid "Overall"
 msgstr "Alles bij elkaar"
-
-#: websecmap/map/templates/map/index.html
-msgid "Encryption quality issues (TLS)"
-msgstr "Kwaliteit van versleuteling (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate trust issues (TLS)"
-msgstr "Vertrouwen in certificaat (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Lack of encryption failure"
-msgstr "Gebrek aan versleuteling (alleen http)"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP failure"
-msgstr "Bestandsoverdracht (FTP) historie"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC failure"
-msgstr "DNSSEC historie"
-
-#: websecmap/map/templates/map/index.html
-msgid "Forcing of encryption failure"
-msgstr "Forceren van versleuteling (HSTS header)"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Frame Options failure"
-msgstr "X-Frame Options (clickjack bescherming) historie"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content-Type-Options failure"
-msgstr "X-Content-Type-Options historie"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS-Protection failure"
-msgstr "X-XSS-Protection historie"
 
 #: websecmap/map/templates/map/index.html
 msgid "Latest changes"
@@ -752,44 +479,17 @@ msgstr ""
 "niets veranderd. Scans worden dagelijks uitgevoerd."
 
 #: websecmap/map/templates/map/index.html
-msgid "Encryption quality updates"
-msgstr "Versleutelingskwaliteit updates (TLS)"
-
-#: websecmap/map/templates/map/index.html
 msgid "RSS feed teaser"
 msgstr "Volg de laatste bevinden via deze"
 
 #: websecmap/map/templates/map/index.html
-msgid "Certificate trust updates"
-msgstr "Certificaatvertrouwen updates (TLS)"
+msgid "Scan moment"
+msgstr "Scantijd"
 
 #: websecmap/map/templates/map/index.html
-msgid "Lack of encryption updates"
-msgstr "Gebrek aan versleuteling Updates"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP updates"
-msgstr "Bestandsoverdracht (FTP) wijzigingen"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC updates"
-msgstr "DNSSEC updates"
-
-#: websecmap/map/templates/map/index.html
-msgid "Forcing encryption updates"
-msgstr "Forceren van versleuteling Updates"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Frame-Options updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content-Type-Option updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS-Protection updates"
-msgstr ""
+#: websecmap/map/templates/map/terrible_urls.html
+msgid "Url"
+msgstr "Internet Adres"
 
 #: websecmap/map/templates/map/index.html
 msgid "Comply or explain introduction"
@@ -933,15 +633,6 @@ msgid "Review many more details below!"
 msgstr "Bekijk de details hieronder!"
 
 #: websecmap/map/templates/map/index.html
-msgid "Scan moment"
-msgstr "Scantijd"
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-msgid "Url"
-msgstr "Internet Adres"
-
-#: websecmap/map/templates/map/index.html
 msgid "Moment"
 msgstr "Moment"
 
@@ -958,42 +649,6 @@ msgid "Risk filter"
 msgstr "Risico filter"
 
 #: websecmap/map/templates/map/index.html
-msgid "report_header_DNSSEC"
-msgstr "DNS beveiliging (DNSSEC)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_tls_qualys_encryption_quality"
-msgstr "Kwaliteit van versleuteling (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_tls_qualys_certificate_trusted"
-msgstr "Vertrouwen in het certificaat (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_plain_https"
-msgstr "Ontbreken van versleuteling"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_ftp"
-msgstr "Bestandsoverdracht (FTP)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_strict_transport_security"
-msgstr "Strict-Transport-Security Header (HSTS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_frame_options"
-msgstr "X-Frame-Options Header (clickjacking)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_xss_protection"
-msgstr "X-XSS-Protection Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_content_type_options"
-msgstr "X-Content-Type-Options Header"
-
-#: websecmap/map/templates/map/index.html
 msgid "Clear Filter"
 msgstr "Wis filter"
 
@@ -1008,6 +663,86 @@ msgstr ""
 #: websecmap/map/templates/map/index.html
 msgid "L"
 msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "High"
+msgstr "Hoog risico"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "Medium"
+msgstr "Midden risico"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "Low"
+msgstr "Laag risico"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Risks and internet connectivity over time"
+msgstr "Tijdslijn van risico's en dienstverlening"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Risk summary overview"
+msgstr "Overzichtstabel"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Full report"
+msgstr "Volledig rapport"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Incorrect finding on mail subject"
+msgstr "verkeerde%20bevinding%20op%20"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Incorrect finding on mail body"
+msgstr ""
+"Let op: sites worden automatisch opnieuw gescand, dat duurt tot ongeveer een "
+"week afhankelijk van de test. Functionaliteit om snel een her-scan uit te "
+"voeren volgt. %0D%0A%0D%0A%0D%0ABeste, %0D%0A%0D%0AHet lijkt erop dat er een "
+"verkeerde bevinding op de kaart staat.%0D%0A%0D%0A Het volgende is onjuist: "
+"%0D%0A1: ... %0D%0A2: ... %0D%0A3: ... %0D%0A%0D%0ATip: Stuur ook een "
+"verklaring mee waarom het onjuist is, zo kunnen we sneller reageren. %0D%0A"
+"%0D%0A%0D%0AMet vriendelijke groet,%0D%0A%0D%0A"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Report incorrect finding"
+msgstr "Meld onjuiste verbinding"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Url level findings"
+msgstr "Algemene bevindingen"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Since"
+msgstr "Sinds"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Last check"
+msgstr "meest recente controle"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Service"
+msgstr "Dienst"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Explained"
+msgstr "Verklaring"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Explained on"
+msgstr "Verklaard op"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "explanation expires"
+msgstr "verloopt"
 
 #: websecmap/map/templates/map/terrible_urls.html
 msgid "Terrible Addresses"
@@ -1067,6 +802,183 @@ msgstr ""
 #: websecmap/map/views.py
 msgid "Perfect"
 msgstr "Perfect"
+
+#~ msgid "DNSSEC"
+#~ msgstr "DNS beveiliging (DNSSEC)"
+
+#~ msgid "tls_qualys_encryption_quality"
+#~ msgstr "Kwaliteit van versleuteling (TLS)"
+
+#~ msgid "tls_qualys_certificate_trusted"
+#~ msgstr "Vertrouwen in certificaat (TLS)"
+
+#~ msgid "FTP"
+#~ msgstr "Bestandsoverdracht (FTP)"
+
+#~ msgid "DNSSEC incorrect"
+#~ msgstr "Niet of onjuist geïmplementeerd"
+
+#~ msgid "DNSSEC correct"
+#~ msgstr "Correct toegepast"
+
+#~ msgid "FTP insecure"
+#~ msgstr "Onversleuteld"
+
+#~ msgid "FTP outdated"
+#~ msgstr "Verouderde versleuteling"
+
+#~ msgid "FTP secure"
+#~ msgstr "Versleuteld"
+
+#~ msgid "Application of encryption"
+#~ msgstr "Toepassing van versleuteling"
+
+#~ msgid "Not at all"
+#~ msgstr "Helemaal niet"
+
+#~ msgid "Redirect from unsafe address"
+#~ msgstr "Doorverwijzing vanaf onveilig adres"
+
+#~ msgid "Encryption quality"
+#~ msgstr "Kwaliteit van versleuteling (TLS)"
+
+#~ msgid "Broken"
+#~ msgstr "Onvoldoende"
+
+#~ msgid "TLS rated C"
+#~ msgstr "Matig"
+
+#~ msgid "TLS rated B"
+#~ msgstr "Redelijk"
+
+#~ msgid "TLS rated A-"
+#~ msgstr "Goed"
+
+#~ msgid "TLS rated A"
+#~ msgstr "Perfect"
+
+#~ msgid "TLS rated A+"
+#~ msgstr "Perfect en meer+"
+
+#~ msgid "Certificate trust"
+#~ msgstr "Vertrouwen in certificaat (TLS)"
+
+#~ msgid "No trust"
+#~ msgstr "Geen vertrouwen"
+
+#~ msgid "Trust"
+#~ msgstr "Vertrouwen"
+
+#~ msgid "Stats HSTS"
+#~ msgstr "Afdwingen van versleuteling"
+
+#~ msgid "Stats hasn't"
+#~ msgstr "Niet"
+
+#~ msgid "Stats has"
+#~ msgstr "Wel"
+
+#~ msgid "Stats X-Frame-Options"
+#~ msgstr "Voorkomen van Clickjacking aanvallen"
+
+#~ msgid "Encryption Quality"
+#~ msgstr "Kwaliteit van versleuteling (TLS)"
+
+#~ msgid "Certificate Trust"
+#~ msgstr "Vertrouwen in certificaat (TLS)"
+
+#~ msgid "Missing encryption"
+#~ msgstr "Aanwezigheid van versleuteling"
+
+#~ msgid "Missing FTP encryption"
+#~ msgstr "Aanwezigheid van FTP versleuteling"
+
+#~ msgid "Encryption"
+#~ msgstr "Kwaliteit Versleuteling"
+
+#~ msgid "HSTS Header"
+#~ msgstr "HSTS Header"
+
+#~ msgid "XFO Header"
+#~ msgstr "XFO Header"
+
+#~ msgid "X-XSS"
+#~ msgstr "X-XSS Header"
+
+#~ msgid "X-Content"
+#~ msgstr "X-Content header"
+
+#~ msgid "Encryption quality issues (TLS)"
+#~ msgstr "Kwaliteit van versleuteling (TLS)"
+
+#~ msgid "Certificate trust issues (TLS)"
+#~ msgstr "Vertrouwen in certificaat (TLS)"
+
+#~ msgid "Lack of encryption failure"
+#~ msgstr "Gebrek aan versleuteling (alleen http)"
+
+#~ msgid "FTP failure"
+#~ msgstr "Bestandsoverdracht (FTP) historie"
+
+#~ msgid "DNSSEC failure"
+#~ msgstr "DNSSEC historie"
+
+#~ msgid "Forcing of encryption failure"
+#~ msgstr "Forceren van versleuteling (HSTS header)"
+
+#~ msgid "X-Frame Options failure"
+#~ msgstr "X-Frame Options (clickjack bescherming) historie"
+
+#~ msgid "X-Content-Type-Options failure"
+#~ msgstr "X-Content-Type-Options historie"
+
+#~ msgid "X-XSS-Protection failure"
+#~ msgstr "X-XSS-Protection historie"
+
+#~ msgid "Encryption quality updates"
+#~ msgstr "Versleutelingskwaliteit updates (TLS)"
+
+#~ msgid "Certificate trust updates"
+#~ msgstr "Certificaatvertrouwen updates (TLS)"
+
+#~ msgid "Lack of encryption updates"
+#~ msgstr "Gebrek aan versleuteling Updates"
+
+#~ msgid "FTP updates"
+#~ msgstr "Bestandsoverdracht (FTP) wijzigingen"
+
+#~ msgid "DNSSEC updates"
+#~ msgstr "DNSSEC updates"
+
+#~ msgid "Forcing encryption updates"
+#~ msgstr "Forceren van versleuteling Updates"
+
+#~ msgid "report_header_DNSSEC"
+#~ msgstr "DNS beveiliging (DNSSEC)"
+
+#~ msgid "report_header_tls_qualys_encryption_quality"
+#~ msgstr "Kwaliteit van versleuteling (TLS)"
+
+#~ msgid "report_header_tls_qualys_certificate_trusted"
+#~ msgstr "Vertrouwen in het certificaat (TLS)"
+
+#~ msgid "report_header_plain_https"
+#~ msgstr "Ontbreken van versleuteling"
+
+#~ msgid "report_header_ftp"
+#~ msgstr "Bestandsoverdracht (FTP)"
+
+#~ msgid "report_header_http_security_header_strict_transport_security"
+#~ msgstr "Strict-Transport-Security Header (HSTS)"
+
+#~ msgid "report_header_http_security_header_x_frame_options"
+#~ msgstr "X-Frame-Options Header (clickjacking)"
+
+#~ msgid "report_header_http_security_header_x_xss_protection"
+#~ msgstr "X-XSS-Protection Header"
+
+#~ msgid "report_header_http_security_header_x_content_type_options"
+#~ msgstr "X-Content-Type-Options Header"
 
 #~ msgid "Organization Rating"
 #~ msgstr "Organisatie beoordeling"

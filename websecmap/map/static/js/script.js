@@ -97,6 +97,25 @@ var dynamic_translations = function(){
     gettext('ftp');
     gettext('tls_qualys_encryption_quality');
     gettext('tls_qualys_certificate_trusted');
+    gettext('http_security_header_strict_transport_security');
+    gettext('http_security_header_x_frame_options');
+    gettext('http_security_header_x_content_type_options');
+    gettext('http_security_header_x_xss_protection');
+
+    gettext('Stats hasn\'t');
+    gettext('Stats has');
+    gettext('Broken');
+    gettext('TLS rated C');
+    gettext('TLS rated B');
+    gettext('TLS rated A');
+    gettext('TLS rated A-');
+    gettext('TLS rated A+');
+    gettext('Not at all');
+    gettext('Redirect from unsafe address');
+    gettext('FTP Insecure');
+    gettext('FTP');
+    gettext('Redirect from unsafe address');
+
 
     // and germany
     gettext('category_menu_bundesland');

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-22 13:09+0000\n"
+"POT-Creation-Date: 2019-03-06 08:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,27 +43,22 @@ msgid "tls_qualys"
 msgstr "Application of encryption"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "plain_https"
 msgstr "Absense of encryption"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-XSS-Protection"
 msgstr ""
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-Frame-Options"
 msgstr "Clickjacking prevention (X-Frame-Options)"
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "X-Content-Type-Options"
 msgstr ""
 
 #: websecmap/map/templates/map/dynamic_translations.html
-#: websecmap/map/templates/map/index.html
 msgid "Strict-Transport-Security"
 msgstr "Strict-Transport-Security (HSTS)"
 
@@ -305,101 +300,6 @@ msgid "Report ask sendin domains"
 msgstr "Send in new domains."
 
 #: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "High"
-msgstr "High risk"
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "Medium"
-msgstr "Medium risk"
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-#: websecmap/map/templates/map/topfail.html
-#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
-msgid "Low"
-msgstr "Low risk"
-
-#: websecmap/map/templates/map/index.html
-msgid "Risks and internet connectivity over time"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Risk summary overview"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC"
-msgstr "DNS Security (DNSSEC)"
-
-#: websecmap/map/templates/map/index.html
-msgid "tls_qualys_encryption_quality"
-msgstr "Encryption quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "tls_qualys_certificate_trusted"
-msgstr "Trust in certifcate (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP"
-msgstr "File transfer (FTP)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Full report"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Incorrect finding on mail subject"
-msgstr "incorrect%20finding%20on%20"
-
-#: websecmap/map/templates/map/index.html
-msgid "Incorrect finding on mail body"
-msgstr ""
-"Please note: sites are scanned on a daily basis. An update takes as much a "
-"single week. %0D%0A%0D%0A%0D%0ADear,%0D%0A%0D%0AIt seems there is an "
-"incorrect finding on the map.%0D%0A%0D%0AThe following is incorrect: %0D"
-"%0A1: ... %0D%0A2: ... %0D%0A3: ... %0D%0A%0D%0ATip: Please also explain why "
-"the finding is incorrect, which makes it easier for us to update the "
-"systems. %0D%0A%0D%0A%0D%0AKind regards,%0D%0A%0D%0A"
-
-#: websecmap/map/templates/map/index.html
-msgid "Report incorrect finding"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Url level findings"
-msgstr "Common findings"
-
-#: websecmap/map/templates/map/index.html
-msgid "Since"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Last check"
-msgstr "latest check"
-
-#: websecmap/map/templates/map/index.html
-msgid "Service"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Explained"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Explained on"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "explanation expires"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
 msgid "Extensive statistics"
 msgstr ""
 
@@ -489,102 +389,6 @@ msgid "Total"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "DNSSEC incorrect"
-msgstr "Not or incorrectly configured"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC correct"
-msgstr "Correctly applied"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP insecure"
-msgstr "Encryption not available"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP outdated"
-msgstr "Outdated security"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP secure"
-msgstr "Encryption available"
-
-#: websecmap/map/templates/map/index.html
-msgid "Application of encryption"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Not at all"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Redirect from unsafe address"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Encryption quality"
-msgstr "Encryption quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Broken"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated C"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated B"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A-"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "TLS rated A+"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate trust"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "No trust"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Trust"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats HSTS"
-msgstr "Enforcing encryption"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats hasn't"
-msgstr "Not"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats has"
-msgstr "Does"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-Frame-Options"
-msgstr "Clickjacking prevention (X-Frame-Options)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-XSS Protection"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Stats X-Content Type Options"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
 #: websecmap/map/templates/map/topfail.html
 #: websecmap/map/templates/map/topwin.html
 msgid "Services"
@@ -633,52 +437,12 @@ msgid "High risk improvements"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "Encryption Quality"
-msgstr "Encryption Quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate Trust"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Missing encryption"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Missing FTP encryption"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
 msgid "Medium risk improvements"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Encryption"
-msgstr "Encryption"
-
-#: websecmap/map/templates/map/index.html
-msgid "HSTS Header"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "XFO Header"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP connection issue (security unknown)"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
 msgid "Low risk improvements"
 msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS"
-msgstr "X-XSS Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content"
-msgstr "X-Content header"
 
 #: websecmap/map/templates/map/index.html
 msgid "Graphs"
@@ -687,44 +451,6 @@ msgstr ""
 #: websecmap/map/templates/map/index.html
 msgid "Overall"
 msgstr "Summed up"
-
-#: websecmap/map/templates/map/index.html
-#, fuzzy
-#| msgid "Encryption quality"
-msgid "Encryption quality issues (TLS)"
-msgstr "Encryption quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "Certificate trust issues (TLS)"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "Lack of encryption failure"
-msgstr "Lack of encryption (only http)"
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP failure"
-msgstr "File transfer (FTP) history"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC failure"
-msgstr "DNSSEC history"
-
-#: websecmap/map/templates/map/index.html
-msgid "Forcing of encryption failure"
-msgstr "Forcing encryption (HSTS header)"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Frame Options failure"
-msgstr "X-Frame Options (clickjacking prevention) history"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content-Type-Options failure"
-msgstr "X-Content-Type-Options history"
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS-Protection failure"
-msgstr "X-XSS-Protection history"
 
 #: websecmap/map/templates/map/index.html
 msgid "Latest changes"
@@ -738,46 +464,17 @@ msgstr ""
 "new information. Scans are being performed daily."
 
 #: websecmap/map/templates/map/index.html
-#, fuzzy
-#| msgid "Encryption quality"
-msgid "Encryption quality updates"
-msgstr "Encryption quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
 msgid "RSS feed teaser"
 msgstr "Stay updated of the latest findings using this"
 
 #: websecmap/map/templates/map/index.html
-msgid "Certificate trust updates"
+msgid "Scan moment"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "Lack of encryption updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "FTP updates"
-msgstr "File transfer (FTP) updates"
-
-#: websecmap/map/templates/map/index.html
-msgid "DNSSEC updates"
-msgstr "DNSSEC updates"
-
-#: websecmap/map/templates/map/index.html
-msgid "Forcing encryption updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Frame-Options updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-Content-Type-Option updates"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-msgid "X-XSS-Protection updates"
-msgstr ""
+#: websecmap/map/templates/map/terrible_urls.html
+msgid "Url"
+msgstr "Internet address"
 
 #: websecmap/map/templates/map/index.html
 msgid "Comply or explain introduction"
@@ -914,15 +611,6 @@ msgid "Review many more details below!"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "Scan moment"
-msgstr ""
-
-#: websecmap/map/templates/map/index.html
-#: websecmap/map/templates/map/terrible_urls.html
-msgid "Url"
-msgstr "Internet address"
-
-#: websecmap/map/templates/map/index.html
 msgid "Moment"
 msgstr ""
 
@@ -939,42 +627,6 @@ msgid "Risk filter"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "report_header_DNSSEC"
-msgstr "DNS Security (DNSSEC)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_tls_qualys_encryption_quality"
-msgstr "Encryption quality (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_tls_qualys_certificate_trusted"
-msgstr "Trust in certificate (TLS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_plain_https"
-msgstr "Missing Encryption (http only)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_ftp"
-msgstr "File Transfer (FTP)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_strict_transport_security"
-msgstr "Strict-Transport-Security Header (HSTS)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_frame_options"
-msgstr "X-Frame-Options Header (clickjacking)"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_xss_protection"
-msgstr "X-XSS-Protection Header"
-
-#: websecmap/map/templates/map/index.html
-msgid "report_header_http_security_header_x_content_type_options"
-msgstr "X-Content-Type-Options Header"
-
-#: websecmap/map/templates/map/index.html
 msgid "Clear Filter"
 msgstr ""
 
@@ -988,6 +640,85 @@ msgstr ""
 
 #: websecmap/map/templates/map/index.html
 msgid "L"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "High"
+msgstr "High risk"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "Medium"
+msgstr "Medium risk"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+#: websecmap/map/templates/map/terrible_urls.html
+#: websecmap/map/templates/map/topfail.html
+#: websecmap/map/templates/map/topwin.html websecmap/map/views.py
+msgid "Low"
+msgstr "Low risk"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Risks and internet connectivity over time"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Risk summary overview"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Full report"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Incorrect finding on mail subject"
+msgstr "incorrect%20finding%20on%20"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Incorrect finding on mail body"
+msgstr ""
+"Please note: sites are scanned on a daily basis. An update takes as much a "
+"single week. %0D%0A%0D%0A%0D%0ADear,%0D%0A%0D%0AIt seems there is an "
+"incorrect finding on the map.%0D%0A%0D%0AThe following is incorrect: %0D"
+"%0A1: ... %0D%0A2: ... %0D%0A3: ... %0D%0A%0D%0ATip: Please also explain why "
+"the finding is incorrect, which makes it easier for us to update the "
+"systems. %0D%0A%0D%0A%0D%0AKind regards,%0D%0A%0D%0A"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Report incorrect finding"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Url level findings"
+msgstr "Common findings"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Since"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Last check"
+msgstr "latest check"
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Service"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Explained"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "Explained on"
+msgstr ""
+
+#: websecmap/map/templates/map/shared_report_contents.html
+msgid "explanation expires"
 msgstr ""
 
 #: websecmap/map/templates/map/terrible_urls.html
@@ -1042,6 +773,124 @@ msgstr ""
 #: websecmap/map/views.py
 msgid "Perfect"
 msgstr ""
+
+#~ msgid "DNSSEC"
+#~ msgstr "DNS Security (DNSSEC)"
+
+#~ msgid "tls_qualys_encryption_quality"
+#~ msgstr "Encryption quality (TLS)"
+
+#~ msgid "tls_qualys_certificate_trusted"
+#~ msgstr "Trust in certifcate (TLS)"
+
+#~ msgid "FTP"
+#~ msgstr "File transfer (FTP)"
+
+#~ msgid "DNSSEC incorrect"
+#~ msgstr "Not or incorrectly configured"
+
+#~ msgid "DNSSEC correct"
+#~ msgstr "Correctly applied"
+
+#~ msgid "FTP insecure"
+#~ msgstr "Encryption not available"
+
+#~ msgid "FTP outdated"
+#~ msgstr "Outdated security"
+
+#~ msgid "FTP secure"
+#~ msgstr "Encryption available"
+
+#~ msgid "Encryption quality"
+#~ msgstr "Encryption quality (TLS)"
+
+#~ msgid "Stats HSTS"
+#~ msgstr "Enforcing encryption"
+
+#~ msgid "Stats hasn't"
+#~ msgstr "Not"
+
+#~ msgid "Stats has"
+#~ msgstr "Does"
+
+#~ msgid "Stats X-Frame-Options"
+#~ msgstr "Clickjacking prevention (X-Frame-Options)"
+
+#~ msgid "Encryption Quality"
+#~ msgstr "Encryption Quality (TLS)"
+
+#~ msgid "Encryption"
+#~ msgstr "Encryption"
+
+#~ msgid "X-XSS"
+#~ msgstr "X-XSS Header"
+
+#~ msgid "X-Content"
+#~ msgstr "X-Content header"
+
+#, fuzzy
+#~| msgid "Encryption quality"
+#~ msgid "Encryption quality issues (TLS)"
+#~ msgstr "Encryption quality (TLS)"
+
+#~ msgid "Lack of encryption failure"
+#~ msgstr "Lack of encryption (only http)"
+
+#~ msgid "FTP failure"
+#~ msgstr "File transfer (FTP) history"
+
+#~ msgid "DNSSEC failure"
+#~ msgstr "DNSSEC history"
+
+#~ msgid "Forcing of encryption failure"
+#~ msgstr "Forcing encryption (HSTS header)"
+
+#~ msgid "X-Frame Options failure"
+#~ msgstr "X-Frame Options (clickjacking prevention) history"
+
+#~ msgid "X-Content-Type-Options failure"
+#~ msgstr "X-Content-Type-Options history"
+
+#~ msgid "X-XSS-Protection failure"
+#~ msgstr "X-XSS-Protection history"
+
+#, fuzzy
+#~| msgid "Encryption quality"
+#~ msgid "Encryption quality updates"
+#~ msgstr "Encryption quality (TLS)"
+
+#~ msgid "FTP updates"
+#~ msgstr "File transfer (FTP) updates"
+
+#~ msgid "DNSSEC updates"
+#~ msgstr "DNSSEC updates"
+
+#~ msgid "report_header_DNSSEC"
+#~ msgstr "DNS Security (DNSSEC)"
+
+#~ msgid "report_header_tls_qualys_encryption_quality"
+#~ msgstr "Encryption quality (TLS)"
+
+#~ msgid "report_header_tls_qualys_certificate_trusted"
+#~ msgstr "Trust in certificate (TLS)"
+
+#~ msgid "report_header_plain_https"
+#~ msgstr "Missing Encryption (http only)"
+
+#~ msgid "report_header_ftp"
+#~ msgstr "File Transfer (FTP)"
+
+#~ msgid "report_header_http_security_header_strict_transport_security"
+#~ msgstr "Strict-Transport-Security Header (HSTS)"
+
+#~ msgid "report_header_http_security_header_x_frame_options"
+#~ msgstr "X-Frame-Options Header (clickjacking)"
+
+#~ msgid "report_header_http_security_header_x_xss_protection"
+#~ msgstr "X-XSS-Protection Header"
+
+#~ msgid "report_header_http_security_header_x_content_type_options"
+#~ msgstr "X-Content-Type-Options Header"
 
 #~ msgid "Encryption failure"
 #~ msgstr "Encryption (https)"

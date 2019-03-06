@@ -1166,9 +1166,19 @@ function views(autoload_default_map_data=true) {
             sortKey: 'amount',
             sortOrders: {'ip_version': 1, 'protocol': 1, 'port': 1, 'amount': -1},
 
-            issues: ordered_issues
+            issues: ordered_issues,
         },
         computed: {
+            issue_categories: function() {
+                // this delivers duplicates, but given the number of issues is low, it's fine.
+                // otherway: arrayx = [array1, array2]
+                let _categories = [];
+                this.issues.forEach(function(issue){
+                    console.log(_categories);
+                    _categories = _categories.concat(issue['category'])
+                });
+                return _categories;
+            },
             greenpercentage: function () {
                 return this.perc(this.data.data, "green", "total_organizations");
             },

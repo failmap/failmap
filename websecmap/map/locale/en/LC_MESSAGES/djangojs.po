@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-22 13:09+0000\n"
+"POT-Creation-Date: 2019-03-06 08:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -342,7 +342,7 @@ msgstr "X-XSS-Protection Header"
 
 #: websecmap/map/static/js/script.js
 msgid "plain_https"
-msgstr "Missing transport encryption"
+msgstr "Missing transport encryption (HTTP only)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys"
@@ -350,7 +350,7 @@ msgstr "Encrypted transport (https)"
 
 #: websecmap/map/static/js/script.js
 msgid "DNSSEC"
-msgstr "DNS Security"
+msgstr "Domain Name Security (DNSSEC)"
 
 #: websecmap/map/static/js/script.js
 msgid "ftp"
@@ -358,11 +358,27 @@ msgstr "File transfer (FTP)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys_encryption_quality"
-msgstr "Encryption quality"
+msgstr "Encryption quality (TLS)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys_certificate_trusted"
-msgstr "Trust in certificate"
+msgstr "Trust in certificate (TLS)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_strict_transport_security"
+msgstr "Strict-Transport-Security Header (HSTS)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_frame_options"
+msgstr "X-Frame-Options Header (clickjacking)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_content_type_options"
+msgstr "X-Content-Type-Options header"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_xss_protection"
+msgstr "X-XSS-Protection Header"
 
 #: websecmap/map/static/js/script.js
 msgid "category_menu_bundesland"
@@ -410,14 +426,6 @@ msgstr ""
 
 #: websecmap/map/static/js/views.js
 msgid "week"
-msgstr ""
-
-#: websecmap/map/static/js/views.js
-msgid "Second opinion"
-msgstr ""
-
-#: websecmap/map/static/js/views.js
-msgid "Documentation"
 msgstr ""
 
 #: websecmap/map/static/js/views.js

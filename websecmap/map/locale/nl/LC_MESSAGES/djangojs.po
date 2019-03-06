@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-22 13:09+0000\n"
+"POT-Creation-Date: 2019-03-06 08:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -354,7 +354,7 @@ msgstr "X-XSS-Protection header"
 
 #: websecmap/map/static/js/script.js
 msgid "plain_https"
-msgstr "Ontbrekende Transport Layer Security (TLS)"
+msgstr "Ontbrekende Transport Layer Security (alleen HTTP)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys"
@@ -362,7 +362,7 @@ msgstr "Transport Layer Security (TLS)"
 
 #: websecmap/map/static/js/script.js
 msgid "DNSSEC"
-msgstr "DNS beveiliging"
+msgstr "Domeinnaam beveiliging (DNSSEC)"
 
 #: websecmap/map/static/js/script.js
 msgid "ftp"
@@ -370,11 +370,27 @@ msgstr "Bestandsoverdracht (FTP)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys_encryption_quality"
-msgstr "Kwaliteit van versleuteling"
+msgstr "Kwaliteit van versleuteling (TLS)"
 
 #: websecmap/map/static/js/script.js
 msgid "tls_qualys_certificate_trusted"
-msgstr "Vertrouwen in certificaat"
+msgstr "Vertrouwen in certificaat (TLS)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_strict_transport_security"
+msgstr "Strict-Transport-Security Header (HSTS)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_frame_options"
+msgstr "X-Frame-Options Header (clickjacking)"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_content_type_options"
+msgstr "X-Content-Type-Options Header"
+
+#: websecmap/map/static/js/script.js
+msgid "http_security_header_x_xss_protection"
+msgstr "X-XSS-Protection Header"
 
 #: websecmap/map/static/js/script.js
 msgid "category_menu_bundesland"
@@ -425,14 +441,6 @@ msgid "week"
 msgstr "week"
 
 #: websecmap/map/static/js/views.js
-msgid "Second opinion"
-msgstr "Second opinion"
-
-#: websecmap/map/static/js/views.js
-msgid "Documentation"
-msgstr "Documentatie"
-
-#: websecmap/map/static/js/views.js
 msgid "Explanation of finding"
 msgstr "Verklaring van een bevinding (pas toe of leg uit)"
 
@@ -478,3 +486,9 @@ msgstr "laag"
 #: websecmap/map/static/js/views.js
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
+
+#~ msgid "Second opinion"
+#~ msgstr "Second opinion"
+
+#~ msgid "Documentation"
+#~ msgstr "Documentatie"
