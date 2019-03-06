@@ -898,6 +898,11 @@ CONSTANCE_CONFIG = {
     'REPORT_INCLUDE_HTTP_HEADERS_X_XSS': (True, 'Do you want to show X-XSS protection headers in the report?', bool),
     'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to show X-Content-Type headers in the report?', bool),
 
+    # 'REPORT_INCLUDE_internet_nl_mail_starttls_tls_available'
+    # 'REPORT_INCLUDE_internet_nl_mail_spf'
+    # 'REPORT_INCLUDE_internet_nl_mail_auth_dkim_exist'
+    # 'REPORT_INCLUDE_internet_nl_mail_auth_dmarc_exist'
+
     # scanning pre-requisites
     'CONNECTIVITY_TEST_DOMAIN': (
         'faalkaart.nl',

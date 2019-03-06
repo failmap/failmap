@@ -13,8 +13,8 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import OrganizationReport, UrlReport
 from websecmap.reporting.severity import get_severity
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
-from websecmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 

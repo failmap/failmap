@@ -12,8 +12,8 @@ from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.models import OrganizationReport
 from websecmap.reporting.report import (create_organization_reports_now,
                                         default_organization_rating, recreate_url_reports)
+from websecmap.scanners import ALL_SCAN_TYPES
 from websecmap.scanners.scanner.scanner import q_configurations_to_report
-from websecmap.scanners.types import ALL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 

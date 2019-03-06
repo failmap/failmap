@@ -204,6 +204,35 @@ def tls_qualys_encryption_quality_rating_based_on_scan(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
+def internet_nl_mail_starttls_tls_available(scan):
+    if not scan.rating:
+        return standard_calculation(scan=scan, explanation="STARTTLS Missing", high=1, medium=0, low=0)
+    else:
+        return standard_calculation(scan=scan, explanation="STARTTLS Available", high=0, medium=0, low=0)
+
+
+def internet_nl_mail_spf(scan):
+    # https://blog.returnpath.com/how-to-explain-spf-in-plain-english/
+    if not scan.rating:
+        return standard_calculation(scan=scan, explanation="SPF Missing", high=0, medium=1, low=0)
+    else:
+        return standard_calculation(scan=scan, explanation="SPF Available", high=0, medium=0, low=0)
+
+
+def internet_nl_mail_auth_dkim_exist(scan):
+    if not scan.rating:
+        return standard_calculation(scan=scan, explanation="DKIM Missing", high=0, medium=1, low=0)
+    else:
+        return standard_calculation(scan=scan, explanation="DKIM Available", high=0, medium=0, low=0)
+
+
+def internet_nl_mail_auth_dmarc_exist(scan):
+    if not scan.rating:
+        return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
+    else:
+        return standard_calculation(scan=scan, explanation="DMARC Available", high=0, medium=0, low=0)
+
+
 def dummy_calculated_values(scan):
     explanation = "This is a dummy scan."
     high, medium, low = 0, 0, 0
@@ -233,7 +262,11 @@ calculation_methods = {
     'ftp': ftp_rating_based_on_scan,
     'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted_rating_based_on_scan,
     'tls_qualys_encryption_quality': tls_qualys_encryption_quality_rating_based_on_scan,
-    'Dummy': dummy_calculated_values
+    'Dummy': dummy_calculated_values,
+    'internet_nl_mail_starttls_tls_available': internet_nl_mail_starttls_tls_available,
+    'internet_nl_mail_spf': internet_nl_mail_spf,
+    'internet_nl_mail_auth_dkim_exist': internet_nl_mail_auth_dkim_exist,
+    'internet_nl_mail_auth_dmarc_exist': internet_nl_mail_auth_dmarc_exist,
 }
 
 

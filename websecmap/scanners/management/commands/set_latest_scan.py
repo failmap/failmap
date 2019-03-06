@@ -4,8 +4,8 @@ from datetime import datetime
 import pytz
 from django.core.management.base import BaseCommand
 
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
-from websecmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__name__)
 

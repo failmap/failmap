@@ -16,8 +16,8 @@ from websecmap.pro.forms import MailSignupForm
 from websecmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
                                   UrlListReport)
 from websecmap.reporting.severity import get_severity
+from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
-from websecmap.scanners.types import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 

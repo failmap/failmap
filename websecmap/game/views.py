@@ -23,8 +23,8 @@ from websecmap.game.forms import (ContestForm, OrganisationSubmissionForm, TeamF
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.severity import get_severity
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
-from websecmap.scanners.types import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 log = logging.getLogger(__package__)
 
