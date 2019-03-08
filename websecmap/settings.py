@@ -21,6 +21,8 @@ import raven.contrib.celery
 from django.utils.translation import gettext_lazy as _
 from pkg_resources import get_distribution
 
+from websecmap.scanners import SCANNERS
+
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
 
 # this application can run in 3 modes: admin, interactive and frontend
@@ -816,14 +818,7 @@ CONSTANCE_CONFIG = {
     'SHOW_SCAN_SCHEDULE': (False, 'Shows list of upcoming scans, so everyone knows what scan is due next.', bool),
 
     'SHOW_SERVICES': (True, 'Show table with how many services are scanned. Requires SHOW_STATS_NUMBERS.', bool),
-    'SHOW_DNS_DNSSEC': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_TLS_QUALYS': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_MISSING_TLS': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_HEADERS_HSTS': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_HEADERS_XFO': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_HEADERS_X_XSS': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_HTTP_HEADERS_X_CONTENT': (True, 'Show graphs/stats of this?', bool),
-    'SHOW_FTP': (True, 'Show graphs/stats of this?', bool),
+
     'SHOW_DONATION': (True, 'Show donation buttons and links on the site.', bool),
 
     'COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK': (
@@ -833,75 +828,16 @@ CONSTANCE_CONFIG = {
 
     'COMPLY_OR_EXPLAIN_EMAIL_ADDRESS': ('', 'E-mail where to receive explanations.', str),
 
-    'DISCOVER_URLS_USING_NSEC': (
-        True,
-        'Discover new domains using DNSSEC NSEC1 enumeration. This is a powerful but not frequently used feature '
-        'that allows you to sometimes discover all subdomains of a domain. This check is very fast and results '
-        'in a complete set of domains. Might not be used by the owner of the domain, in that case it will '
-        'return no subdomains.', bool),
-
-    'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS': (
-        True,
-        'Uses the list of known subdomains in your installation to discover the same subdomains on other domains. '
-        '<br><br>For example: it will search "test" on every domain, if that is present in an existing url: '
-        '"text.example.com".', bool),
-
-    'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY': (
-        True,
-        'This discovery method searches for certificates published on a domain. When a website uses https, the request '
-        'for a new certificate is published publicly as part of the Certiificate Transparency program. Using the '
-        'public database of all requests, it\'s possible to find hundreds of subdomains for a domain.'
-        '<br><br>The service used is crt.sh.', bool),
-
-    'DISCOVER_HTTP_ENDPOINTS': (
-        True,
-        'An internet address can have multiple services. Each of these services can be run on multiple ports. '
-        'To simplify this, the word Endpoint is used. A normal website has an average of two to four endpoints.'
-        '<br><br>By selecting this, endpoints will be discovered and scans can be performed. If you do not '
-        'select this, no endpoints will be discovered (anymore) but scans may still be performed on existing '
-        'endpoints.', bool),
-
     'SCAN_AT_ALL': (
         True,
         'This quickly enables or disabled all scans. Note that scans in the scan queue will still be processed.', bool),
 
 
     'SCAN_PROXY_TESTING_URL': ('', 'Server where you can see scans through a proxy.', str),
-    'SCAN_DNS_DNSSEC': (True, 'Do you want to scan for DNSSEC issues?', bool),
-    'SCAN_HTTP_TLS_QUALYS': (True, 'Do you want to scan for TLS issues through Qualys? This is about 1 scan per '
-                                   'two minutes. Cloud scanning can improve this a bit.', bool),
-    'SCAN_HTTP_TLS_OSAFT': (True, 'Experimental: Do you want to scan for TLS issues through OSaft? This is about '
-                                  '3 scans per minute. Cloud scanning can improve this a bit.', bool),
-    'SCAN_HTTP_MISSING_TLS': (True, 'Do you want to scan for endpoints that don\'t have a secure counterpart?', bool),
-    'SCAN_HTTP_HEADERS_HSTS': (True, 'Do you want to scan for missing '
-                                     'Hypertext Strict Transport Security headers?', bool),
-    'SCAN_HTTP_HEADERS_XFO': (True, 'Do you want to scan for missing X-Frame-Options headers?', bool),
-    'SCAN_HTTP_HEADERS_X_XSS': (True, 'Do you want to scan for missing X-XSS headers?', bool),
-    'SCAN_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to scan for missing X-Content-Type issues?', bool),
-    'SCAN_FTP': (True, 'Do you want to scan for FTP servers that are missing encryption?', bool),
 
-    'SCAN_MAIL_INTERNET_NL': (True, 'Do you want to scan for email security configuration using internet.nl?', bool),
     'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API. You can request one via the contact '
                                      'options on their site, https://internet.nl.', str),
     'INTERNET_NL_API_PASSWORD': ('', 'Password for the internet.nl API', str),
-
-    'CREATE_HTTP_SCREENSHOT': (True, 'Todo: Does not work yet! Do you want to create screenshots for HTTP endpoints?',
-                               bool),
-
-    # future: FTP, TLS_QUICK (way less robust and complete, much faster)
-    'REPORT_INCLUDE_FTP': (True, 'Do you want to add FTP encryption issues to the report?', bool),
-    'REPORT_INCLUDE_DNS_DNSSEC': (True, 'Do you want to add DNSSEC issues to the report?', bool),
-    'REPORT_INCLUDE_HTTP_TLS_QUALYS': (True, 'Do you want to show TLS results in the report?', bool),
-    'REPORT_INCLUDE_HTTP_MISSING_TLS': (True, 'Do you want to show missing TLS in the report?', bool),
-    'REPORT_INCLUDE_HTTP_HEADERS_HSTS': (True, 'Do you want to HSTS in the report?', bool),
-    'REPORT_INCLUDE_HTTP_HEADERS_XFO': (True, 'Do you want to show XFO in the report?', bool),
-    'REPORT_INCLUDE_HTTP_HEADERS_X_XSS': (True, 'Do you want to show X-XSS protection headers in the report?', bool),
-    'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT': (True, 'Do you want to show X-Content-Type headers in the report?', bool),
-
-    # 'REPORT_INCLUDE_internet_nl_mail_starttls_tls_available'
-    # 'REPORT_INCLUDE_internet_nl_mail_spf'
-    # 'REPORT_INCLUDE_internet_nl_mail_auth_dkim_exist'
-    # 'REPORT_INCLUDE_internet_nl_mail_auth_dmarc_exist'
 
     # scanning pre-requisites
     'CONNECTIVITY_TEST_DOMAIN': (
@@ -937,6 +873,48 @@ CONSTANCE_CONFIG = {
     'PRO_EMAIL_SSL_CERTFILE': ('', 'See django mail settings.', str),
 }
 
+# Generate Scanner Settings:
+for scanner in SCANNERS:
+
+    scan_types = scanner['creates endpoint scan types'] + scanner['creates url scan types']
+
+    if scan_types:
+        # No scanner options when there are no scan types, those are usually discovery scanners.
+        scanner_config = {
+            'USE_SCANNER_%s' % scanner['name'].upper():
+                (True, 'Do you want to use the %s scanner?' % scanner['name'], bool),
+        }
+        CONSTANCE_CONFIG = {**CONSTANCE_CONFIG, **scanner_config}
+
+    if scanner['can discover endpoints']:
+        scanner_config = {
+            'DISCOVER_ENDPOINTS_USING_%s' % scanner['name'].upper(): (
+                True, 'Do you want to discover endpoints using the %s scanner?' % scanner['name'], bool),
+        }
+        CONSTANCE_CONFIG = {**CONSTANCE_CONFIG, **scanner_config}
+
+    if scanner['can discover urls']:
+        scanner_config = {
+            'DISCOVER_URLS_USING_%s' % scanner['name'].upper(): (
+                True, 'Do you want to discover urls using the %s scanner?' % scanner['name'], bool),
+        }
+        CONSTANCE_CONFIG = {**CONSTANCE_CONFIG, **scanner_config}
+
+    for scan_type in scanner['creates endpoint scan types'] + scanner['creates url scan types']:
+        scanner_config = {
+            'REPORT_INCLUDE_%s' % scan_type.upper():
+                (True, 'Do you want to add %s issues to the report?' % scan_type, bool),
+        }
+        CONSTANCE_CONFIG = {**CONSTANCE_CONFIG, **scanner_config}
+
+    for scan_type in scanner['creates endpoint scan types'] + scanner['creates url scan types']:
+        scanner_config = {
+            'SHOW_%s' % scan_type.upper():
+                (True, 'Do you want to show %s issues on the website?' % scan_type, bool),
+        }
+        CONSTANCE_CONFIG = {**CONSTANCE_CONFIG, **scanner_config}
+
+
 CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('General',
      ('COMMENTS', 'PROJECT_WEBSITE', 'SHOW_ANNOUNCEMENT', 'ANNOUNCEMENT')),
@@ -966,47 +944,43 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
       'SHOW_STATS_IMPROVEMENTS', 'SHOW_STATS_NUMBERS', 'SHOW_SERVICES', 'SHOW_STATS_CHANGES',
       'SHOW_SCAN_SCHEDULE', 'SHOW_DONATION'
       )),
+])
 
-    ('Discovery of new urls, endpoints and scanning',
-     ('DISCOVER_URLS_USING_NSEC', 'DISCOVER_URLS_USING_KNOWN_SUBDOMAINS',
-      'DISCOVER_URLS_USING_CERTIFICATE_TRANSPARENCY', 'DISCOVER_HTTP_ENDPOINTS', 'SCAN_AT_ALL')),
+# now create the menus for these scanners.
+discover_set = ('SCAN_AT_ALL', )
+for scanner in SCANNERS:
+    if scanner['can discover urls']:
+        discover_set += ('DISCOVER_URLS_USING_%s' % scanner['name'].upper(), )
 
-    ('Encryption Quality Scans (TLS, tested with Qualys)',
-     ('SCAN_HTTP_TLS_QUALYS', 'REPORT_INCLUDE_HTTP_TLS_QUALYS', 'SHOW_HTTP_TLS_QUALYS', )),
+for scanner in SCANNERS:
+    if scanner['can discover endpoints']:
+        discover_set += ('DISCOVER_ENDPOINTS_USING_%s' % scanner['name'].upper(), )
 
-    ('Missing Encryption',
-     ('SCAN_HTTP_MISSING_TLS', 'REPORT_INCLUDE_HTTP_MISSING_TLS', 'SHOW_HTTP_MISSING_TLS', )),
+scanner_config_set = []
+for scanner in SCANNERS:
 
-    ('Domain Name Security (DNSSEC)',
-     ('SCAN_DNS_DNSSEC', 'REPORT_INCLUDE_DNS_DNSSEC', 'SHOW_DNS_DNSSEC')),
+    scan_types = scanner['creates endpoint scan types'] + scanner['creates url scan types']
+    if not scan_types:
+        continue
 
-    ('File Transfer Protocol (FTP)',
-     ('SCAN_FTP', 'REPORT_INCLUDE_FTP', 'SHOW_FTP', )),
+    options = ('USE_SCANNER_%s' % scanner['name'].upper(), )
 
-    ('Website security settings: HSTS, Hypertext Strict Transport Security',
-     ('SCAN_HTTP_HEADERS_HSTS',
-      'REPORT_INCLUDE_HTTP_HEADERS_HSTS',
-      'SHOW_HTTP_HEADERS_HSTS',
-      )),
+    for scan_type in scanner['creates endpoint scan types'] + scanner['creates url scan types']:
+        options += ('REPORT_INCLUDE_%s' % scan_type.upper(), )
 
-    ('Website security settings: Clickjacking, X-Frame-Options', (
-        'SCAN_HTTP_HEADERS_XFO',
-        'REPORT_INCLUDE_HTTP_HEADERS_XFO',
-        'SHOW_HTTP_HEADERS_XFO',
-    )),
+    for scan_type in scanner['creates endpoint scan types'] + scanner['creates url scan types']:
+        options += ('SHOW_%s' % scan_type.upper(), )
 
-    ('Website security settings: X_XSS_OPTIONS, Cross Site Scripting prevention header', (
-        'SCAN_HTTP_HEADERS_X_XSS',
-        'REPORT_INCLUDE_HTTP_HEADERS_X_XSS',
-        'SHOW_HTTP_HEADERS_X_XSS',
-    )),
+    scanner_config_per_scanner = (scanner['verbose name'], options)
+    scanner_config_set += (scanner_config_per_scanner, )
 
-    ('Website security settings: Content Parsing, X-Content-Type-Options', (
-        'SCAN_HTTP_HEADERS_X_CONTENT',
-        'REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT',
-        'SHOW_HTTP_HEADERS_X_CONTENT',
-    )),
+CONSTANCE_CONFIG_FIELDSETS.update([
+    ('Discovery of new urls, endpoints and scanning', discover_set),
+])
 
+CONSTANCE_CONFIG_FIELDSETS.update(scanner_config_set)
+
+CONSTANCE_CONFIG_FIELDSETS.update([
     ('Fair / Stand options',
      ('SHOW_TICKER', 'TICKER_SLOGAN', 'TICKER_VISIBLE_VIA_JS_COMMAND')),
 
@@ -1014,10 +988,7 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
      ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN', 'SCAN_PROXY_TESTING_URL',)),
 
     ('<span class="beta">beta</span> Internet.nl Scans (in development)',
-     ('SCAN_MAIL_INTERNET_NL', 'INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
-
-    ('<span class="beta">beta</span> Scanning (in development)',
-     ('SCAN_HTTP_TLS_OSAFT', 'CREATE_HTTP_SCREENSHOT')),
+     ('INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
 
     ('<span class="beta">beta</span> Pro (in development)',
      ('ENABLE_PRO', 'PRO_REPLY_TO_MAIL_ADDRESS')),
@@ -1025,16 +996,23 @@ CONSTANCE_CONFIG_FIELDSETS = OrderedDict([
     ('<span class="beta">beta</span> Pro Mail Settings (in development)',
      ('PRO_EMAIL_HOST', 'PRO_EMAIL_PORT', 'PRO_EMAIL_USERNAME', 'PRO_EMAIL_PASSWORD',
       'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
-
 ])
 
+
 # Check for constance configuration issues:
+# All Fields defined above must be in the fieldsets.
 # See also: https://github.com/jazzband/django-constance/issues/293
 variables_in_fieldsets = [i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in sub]
 variables_in_config = [x for x in CONSTANCE_CONFIG]
 missing = set(variables_in_config) - set(variables_in_fieldsets)
 if missing:
     raise EnvironmentError("Constance config variables %s are missing in constance config fieldsets." % missing)
+
+# All fieldsets fields must be defined:
+missing = set(variables_in_fieldsets) - set(variables_in_config)
+if missing:
+    raise EnvironmentError("Constance Fieldsets refer to missing fields: %s." % missing)
+
 
 # End constance settings
 ########

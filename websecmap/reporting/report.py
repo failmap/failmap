@@ -13,7 +13,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import OrganizationReport, UrlReport
 from websecmap.reporting.severity import get_severity
-from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
@@ -37,23 +37,10 @@ def get_allowed_to_report():
     """
 
     allowed_to_report = []
-    if constance_cached_value('REPORT_INCLUDE_HTTP_MISSING_TLS'):
-        allowed_to_report.append("plain_https")
-    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_HSTS'):
-        allowed_to_report.append("http_security_header_strict_transport_security")
-    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_XFO'):
-        allowed_to_report.append("http_security_header_x_frame_options")
-    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_XSS'):
-        allowed_to_report.append("http_security_header_x_xss_protection")
-    if constance_cached_value('REPORT_INCLUDE_HTTP_HEADERS_X_CONTENT'):
-        allowed_to_report.append("http_security_header_x_content_type_options")
-    if constance_cached_value('REPORT_INCLUDE_DNS_DNSSEC'):
-        allowed_to_report.append("DNSSEC")
-    if constance_cached_value('REPORT_INCLUDE_FTP'):
-        allowed_to_report.append("ftp")
-    if constance_cached_value('REPORT_INCLUDE_HTTP_TLS_QUALYS'):
-        allowed_to_report.append("tls_qualys_certificate_trusted")
-        allowed_to_report.append("tls_qualys_encryption_quality")
+
+    for scan_type in ALL_SCAN_TYPES:
+        if constance_cached_value('REPORT_INCLUDE_' + scan_type.upper()):
+            allowed_to_report.append(scan_type)
 
     return allowed_to_report
 
@@ -573,18 +560,22 @@ def create_url_report(timeline, url: Url):
                     "high": 0,
                     "medium": 0,
                     "low": 0,
+                    'ok': 0,
                     "total_endpoints": 0,
                     "high_endpoints": 0,
                     "medium_endpoints": 0,
                     "low_endpoints": 0,
+                    "ok_endpoints": 0,
                     "total_url_issues": 0,
                     "url_issues_high": 0,
                     "url_issues_medium": 0,
                     "url_issues_low": 0,
+                    "url_ok": 0,
                     "total_endpoint_issues": 0,
                     "endpoint_issues_high": 0,
                     "endpoint_issues_medium": 0,
                     "endpoint_issues_low": 0,
+                    "endpoint_ok": 0,
 
                     "explained_total_issues:": 0,
                     "explained_high": 0,
@@ -637,7 +628,7 @@ def create_url_report(timeline, url: Url):
                 while dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
-        total_endpoints, high_endpoints, medium_endpoints, low_endpoints = 0, 0, 0, 0
+        total_endpoints, high_endpoints, medium_endpoints, low_endpoints, ok_endpoints = 0, 0, 0, 0, 0
         explained_high_endpoints, explained_medium_endpoints, explained_low_endpoints = 0, 0, 0
 
         # Some sums that will be saved as stats:
@@ -723,6 +714,7 @@ def create_url_report(timeline, url: Url):
                             "high": 0,
                             "medium": 0,
                             "low": 0,
+                            "ok": 0,
                             "since": these_endpoint_scans[endpoint_scan_type].rating_determined_on.isoformat(),
                             "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat(),
 
@@ -734,6 +726,8 @@ def create_url_report(timeline, url: Url):
                             'comply_or_explain_valid_at_time_of_report': False
                         })
 
+            endpoint_ok = 0 if endpoint_high or endpoint_medium or endpoint_low else 1
+
             # give an idea how many endpoint issues there are compared to the total # of endpoints
             if endpoint_high:
                 high_endpoints += 1
@@ -741,6 +735,9 @@ def create_url_report(timeline, url: Url):
                 medium_endpoints += 1
             if endpoint_low:
                 low_endpoints += 1
+            if endpoint_ok:
+                ok_endpoints += 1
+
             if explained_endpoint_high:
                 explained_high_endpoints += 1
             if explained_endpoint_medium:
@@ -762,6 +759,7 @@ def create_url_report(timeline, url: Url):
                 "high": endpoint_high,
                 "medium": endpoint_medium,
                 "low": endpoint_low,
+                "ok": endpoint_ok,
                 "explained_high": explained_endpoint_high,
                 "explained_medium":  explained_endpoint_medium,
                 "explained_low":  explained_endpoint_low,
@@ -783,11 +781,11 @@ def create_url_report(timeline, url: Url):
 
         url_calculations = []
         these_url_scans = {}
-        url_scan_types = ["DNSSEC"]
+        url_scan_types = URL_SCAN_TYPES
 
         if url.id in url_scans:
             for scan in url_scans[url.id]:
-                if scan.type in ['DNSSEC']:
+                if scan.type in URL_SCAN_TYPES:
                     these_url_scans[scan.type] = scan
 
         # enrich the ratings with previous ratings, which saves queries.
@@ -829,12 +827,15 @@ def create_url_report(timeline, url: Url):
         if not endpoint_reports and not url_was_once_rated and not url_calculations:
             continue
 
+        url_issues_ok = 0 if url_issues_high or url_issues_medium or url_issues_low else 1
+
         total_url_issues = url_issues_high + url_issues_medium + url_issues_low
         explained_total_url_issues = explained_url_issues_high + explained_url_issues_medium + explained_url_issues_low
         total_endpoint_issues = endpoint_issues_high + endpoint_issues_medium + endpoint_issues_low
         explained_total_endpoint_issues = \
             explained_endpoint_issues_high + explained_endpoint_issues_medium + explained_endpoint_issues_low
 
+        url_and_endpoints_ok = 0 if total_endpoint_issues or total_url_issues else 1
         sorted_url_reports = sorted(url_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
         sorted_endpoints_reports = sorted(
@@ -851,14 +852,17 @@ def create_url_report(timeline, url: Url):
             "high": total_high,
             "medium": total_medium,
             "low": total_low,
+            "ok": url_and_endpoints_ok,
             "total_endpoints": total_endpoints,
             "high_endpoints": high_endpoints,
             "medium_endpoints": medium_endpoints,
             "low_endpoints": low_endpoints,
+            "ok_endpoints": ok_endpoints,
             "total_url_issues": total_url_issues,
             "url_issues_high": url_issues_high,
             "url_issues_medium": url_issues_medium,
             "url_issues_low": url_issues_low,
+            "url_ok": url_issues_ok,
             "total_endpoint_issues": total_endpoint_issues,
             "endpoint_issues_high": endpoint_issues_high,
             "endpoint_issues_medium": endpoint_issues_medium,
@@ -907,7 +911,8 @@ def create_url_report(timeline, url: Url):
                         explained_url_issues_low=explained_url_issues_low,
                         explained_endpoint_issues_high=explained_endpoint_issues_high,
                         explained_endpoint_issues_medium=explained_endpoint_issues_medium,
-                        explained_endpoint_issues_low=explained_endpoint_issues_low
+                        explained_endpoint_issues_low=explained_endpoint_issues_low,
+                        ok=url_and_endpoints_ok, ok_endpoints=ok_endpoints, url_ok=url_issues_ok,
                         )
 
 
@@ -924,7 +929,8 @@ def save_url_report(url: Url, date: datetime, high: int, medium: int, low: int, 
                     explained_total_url_issues: int = 0, explained_total_endpoint_issues: int = 0,
                     explained_url_issues_high: int = 0, explained_url_issues_medium: int = 0,
                     explained_url_issues_low: int = 0, explained_endpoint_issues_high: int = 0,
-                    explained_endpoint_issues_medium: int = 0, explained_endpoint_issues_low: int = 0
+                    explained_endpoint_issues_medium: int = 0, explained_endpoint_issues_low: int = 0,
+                    ok: int = 0, ok_endpoints: int = 0, url_ok: int = 0, endpoint_ok: int = 0
                     ):
     u = UrlReport()
     u.url = url
@@ -944,18 +950,24 @@ def save_url_report(url: Url, date: datetime, high: int, medium: int, low: int, 
     u.high = high
     u.medium = medium
     u.low = low
+    u.ok = ok
+
     u.total_issues = total_issues
     u.high_endpoints = high_endpoints
     u.medium_endpoints = medium_endpoints
     u.low_endpoints = low_endpoints
+    u.ok_endpoints = ok_endpoints
     u.total_url_issues = total_url_issues
     u.total_endpoint_issues = total_endpoint_issues
     u.url_issues_high = url_issues_high
     u.url_issues_medium = url_issues_medium
     u.url_issues_low = url_issues_low
+    # probably the same as OK, as you can only be OK once.
+    u.url_ok = url_ok
     u.endpoint_issues_high = endpoint_issues_high
     u.endpoint_issues_medium = endpoint_issues_medium
     u.endpoint_issues_low = endpoint_issues_low
+    u.endpoint_ok = endpoint_ok
 
     u.explained_high = explained_high
     u.explained_medium = explained_medium
@@ -1101,6 +1113,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
         organizationrating.calculation = calculation
 
         organizationrating.save()
+        log.info("Saved report for %s on %s." % (organization, when))
     else:
         # This happens because some urls are dead etc: our filtering already removes this from the relevant information
         # at this point in time. But since it's still a significant moment, it will just show that nothing has changed.
@@ -1112,10 +1125,14 @@ def aggegrate_url_rating_scores(url_ratings: List):
         'high': 0,
         'medium': 0,
         'low': 0,
+        'ok': 0,
+
         'total_urls': 0,
         'high_urls': 0,
         'medium_urls': 0,
         'low_urls': 0,
+        'ok_urls': 0,
+
         'explained_high': 0,
         'explained_medium': 0,
         'explained_low': 0,
@@ -1139,6 +1156,7 @@ def aggegrate_url_rating_scores(url_ratings: List):
         'high_endpoints': 0,
         'medium_endpoints': 0,
         'low_endpoints': 0,
+        'ok_endpoints': 0,
 
         'total_url_issues': 0,
         'total_endpoint_issues': 0,
@@ -1158,11 +1176,13 @@ def aggegrate_url_rating_scores(url_ratings: List):
         scores['high'] += urlrating.high
         scores['medium'] += urlrating.medium
         scores['low'] += urlrating.low
+        scores['ok_urls'] += urlrating.url_ok
 
         scores['total_endpoints'] += urlrating.total_endpoints
         scores['high_endpoints'] += urlrating.high_endpoints
         scores['medium_endpoints'] += urlrating.medium_endpoints
         scores['low_endpoints'] += urlrating.low_endpoints
+        scores['ok_endpoints'] += urlrating.ok_endpoints
 
         scores['total_url_issues'] += urlrating.total_url_issues
         scores['total_endpoint_issues'] += urlrating.total_endpoint_issues
@@ -1205,6 +1225,9 @@ def aggegrate_url_rating_scores(url_ratings: List):
         scores['urls'].append(urlrating.calculation)
 
     scores['total_issues'] = scores['high'] + scores['medium'] + scores['low']
+
+    # the score cannot be OK if there are no urls.
+    scores['ok'] = 0 if scores['total_issues'] else 1 if scores['total_urls'] else 0
 
     return scores
 
@@ -1298,9 +1321,10 @@ def default_organization_rating(organizations: List[Organization]):
         r.calculation = {
             "organization": {
                 "name": organization.name,
-                "high": "0",
-                "medium": "0",
-                "low": "0",
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "ok": 0,
                 "urls": []
             }
         }

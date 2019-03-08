@@ -48,7 +48,7 @@ def compose_task(
     [X] Created translations
     """
 
-    if not allowed_to_scan("scanner_ftp"):
+    if not allowed_to_scan("ftp"):
         return group()
 
     default_filter = {"protocol": "ftp", "is_dead": False}

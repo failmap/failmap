@@ -42,7 +42,7 @@ def compose_task(
     examples of usage refer to `compose_task` in `types.py`.*
     """
 
-    if not allowed_to_scan("scanner_dummy"):
+    if not allowed_to_scan("dummy"):
         log.warning("Dummy scanner is not allowed to scan.")
         return group()
 

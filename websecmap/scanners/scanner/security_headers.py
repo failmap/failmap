@@ -31,7 +31,7 @@ def compose_task(
     """Compose taskset to scan specified endpoints.
     """
 
-    if not allowed_to_scan("scanner_security_headers"):
+    if not allowed_to_scan("security_headers"):
         return group()
 
     # apply filter to organizations (or if no filter, all organizations)

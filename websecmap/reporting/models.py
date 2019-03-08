@@ -11,27 +11,32 @@ class SeriesOfUrlsReportMixin(models.Model):
     high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
     medium = models.IntegerField(help_text="The number of medium risk vulnerabilities and failures.", default=0)
     low = models.IntegerField(help_text="The number of low risk vulnerabilities and failures.", default=0)
+    ok = models.IntegerField(help_text="No issues found at all.", default=0)
 
     total_urls = models.IntegerField(help_text="Amount of urls for this organization.", default=0)
     high_urls = models.IntegerField(help_text="Amount of urls with (1 or more) high risk issues.", default=0)
     medium_urls = models.IntegerField(help_text="Amount of urls with (1 or more) medium risk issues.", default=0)
     low_urls = models.IntegerField(help_text="Amount of urls with (1 or more) low risk issues.", default=0)
+    ok_urls = models.IntegerField(help_text="Amount of urls with zero issues.", default=0)
 
     total_endpoints = models.IntegerField(help_text="Amount of endpoints for this url.", default=0)
     high_endpoints = models.IntegerField(help_text="Amount of endpoints with (1 or more) high risk issues.", default=0)
     medium_endpoints = models.IntegerField(help_text="Amount of endpoints with (1 or more) medium risk issues.",
                                            default=0)
     low_endpoints = models.IntegerField(help_text="Amount of endpoints with (1 or more) low risk issues.", default=0)
+    ok_endpoints = models.IntegerField(help_text="Amount of endpoints with zero issues.", default=0)
 
     total_url_issues = models.IntegerField(help_text="Total amount of issues on url level.", default=0)
     url_issues_high = models.IntegerField(help_text="Number of high issues on url level.", default=0)
     url_issues_medium = models.IntegerField(help_text="Number of medium issues on url level.", default=0)
     url_issues_low = models.IntegerField(help_text="Number of low issues on url level.", default=0)
+    url_ok = models.IntegerField(help_text="Zero issues on these urls.", default=0)
 
     total_endpoint_issues = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_high = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_medium = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_low = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
+    endpoint_ok = models.IntegerField(help_text="Zero issues on these endpoints.", default=0)
 
     explained_total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.",
                                                  default=0)
@@ -128,6 +133,7 @@ class UrlReport(models.Model):
     high = models.IntegerField(help_text="The number of high risk vulnerabilities and failures.", default=0)
     medium = models.IntegerField(help_text="The number of medium risk vulnerabilities and failures.", default=0)
     low = models.IntegerField(help_text="The number of low risk vulnerabilities and failures.", default=0)
+    ok = models.IntegerField(help_text="Url with zero issues.", default=0)
 
     # How much % of endpoints has issues per level
     total_endpoints = models.IntegerField(help_text="Amount of endpoints for this url.", default=0)
@@ -135,16 +141,19 @@ class UrlReport(models.Model):
     medium_endpoints = models.IntegerField(help_text="Amount of endpoints with (1 or more) medium risk issues.",
                                            default=0)
     low_endpoints = models.IntegerField(help_text="Amount of endpoints with (1 or more) low risk issues.", default=0)
+    ok_endpoints = models.IntegerField(help_text="Endpoints with zero issues.", default=0)
 
     total_url_issues = models.IntegerField(help_text="Total amount of issues on url level.", default=0)
     url_issues_high = models.IntegerField(help_text="Number of high issues on url level.", default=0)
     url_issues_medium = models.IntegerField(help_text="Number of medium issues on url level.", default=0)
     url_issues_low = models.IntegerField(help_text="Number of low issues on url level.", default=0)
+    url_ok = models.IntegerField(help_text="Zero issues.", default=0)
 
     total_endpoint_issues = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_high = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_medium = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
     endpoint_issues_low = models.IntegerField(help_text="Total amount of issues on endpoint level.", default=0)
+    endpoint_ok = models.IntegerField(help_text="Zero issues.", default=0)
 
     # Complay or explain
     explained_total_issues = models.IntegerField(help_text="The summed number of all vulnerabilities and failures.",

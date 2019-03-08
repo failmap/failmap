@@ -57,18 +57,6 @@ var dynamic_translations = function(){
     gettext('Content-Security-Policy header found, which covers the security aspect of the X-Frame-Options header.');
     gettext('Content-Security-Policy header found, which covers the security aspect of the X-XSS-Protection header.');
 
-    // vulnerabilities:
-    gettext('report_header_tls_qualys');
-    gettext('report_header_plain_https');
-    gettext('report_header_http_security_header_x_xss_protection');
-    gettext('report_header_http_security_header_x_frame_options');
-    gettext('report_header_http_security_header_x_content_type_options');
-    gettext('report_header_http_security_header_strict_transport_security');
-    gettext('report_header_DNSSEC');
-    gettext('report_header_ftp');
-    gettext('report_header_tls_qualys_certificate_trusted');
-    gettext('report_header_tls_qualys_encryption_quality');
-
     // some categories:
     gettext('category_menu_municipality');
     gettext('category_menu_cyber');
@@ -101,6 +89,10 @@ var dynamic_translations = function(){
     gettext('http_security_header_x_frame_options');
     gettext('http_security_header_x_content_type_options');
     gettext('http_security_header_x_xss_protection');
+    gettext('internet_nl_mail_starttls_tls_available');
+    gettext('internet_nl_mail_auth_spf_exist');
+    gettext('internet_nl_mail_auth_dkim_exist');
+    gettext('internet_nl_mail_auth_dmarc_exist');
 
     gettext('Stats hasn\'t');
     gettext('Stats has');

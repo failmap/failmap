@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-06 08:08+0000\n"
+"POT-Creation-Date: 2019-03-08 16:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -237,46 +237,6 @@ msgstr ""
 "beveiligingsaspecten van de X-XSS-Protection header."
 
 #: websecmap/map/static/js/script.js
-msgid "report_header_tls_qualys"
-msgstr "Transport Layer Security (TLS)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_plain_https"
-msgstr "Ontbrekende Transport Layer Security (TLS)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_http_security_header_x_xss_protection"
-msgstr "X-XSS-Protection Header"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_http_security_header_x_frame_options"
-msgstr "X-Frame-Options Header (clickjacking)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_http_security_header_x_content_type_options"
-msgstr "X-Content-Type-Options"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_http_security_header_strict_transport_security"
-msgstr "Strict-Transport-Security Header (HSTS)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_DNSSEC"
-msgstr "DNS beveiliging (DNSSEC)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_ftp"
-msgstr "Bestandsoverdracht (FTP)"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_tls_qualys_certificate_trusted"
-msgstr "Vertrouwen in certificaat"
-
-#: websecmap/map/static/js/script.js
-msgid "report_header_tls_qualys_encryption_quality"
-msgstr "Kwaliteit van versleuteling"
-
-#: websecmap/map/static/js/script.js
 msgid "category_menu_municipality"
 msgstr "Gemeenten"
 
@@ -393,6 +353,70 @@ msgid "http_security_header_x_xss_protection"
 msgstr "X-XSS-Protection Header"
 
 #: websecmap/map/static/js/script.js
+msgid "internet_nl_mail_starttls_tls_available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "internet_nl_mail_auth_spf_exist"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "internet_nl_mail_auth_dkim_exist"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "internet_nl_mail_auth_dmarc_exist"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "Stats hasn't"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "Stats has"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "Broken"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "TLS rated C"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "TLS rated B"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "TLS rated A"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "TLS rated A-"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "TLS rated A+"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "Not at all"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "Redirect from unsafe address"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "FTP Insecure"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "FTP"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
 msgid "category_menu_bundesland"
 msgstr "Bundesland"
 
@@ -486,6 +510,36 @@ msgstr "laag"
 #: websecmap/map/static/js/views.js
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
+
+#~ msgid "report_header_tls_qualys"
+#~ msgstr "Transport Layer Security (TLS)"
+
+#~ msgid "report_header_plain_https"
+#~ msgstr "Ontbrekende Transport Layer Security (TLS)"
+
+#~ msgid "report_header_http_security_header_x_xss_protection"
+#~ msgstr "X-XSS-Protection Header"
+
+#~ msgid "report_header_http_security_header_x_frame_options"
+#~ msgstr "X-Frame-Options Header (clickjacking)"
+
+#~ msgid "report_header_http_security_header_x_content_type_options"
+#~ msgstr "X-Content-Type-Options"
+
+#~ msgid "report_header_http_security_header_strict_transport_security"
+#~ msgstr "Strict-Transport-Security Header (HSTS)"
+
+#~ msgid "report_header_DNSSEC"
+#~ msgstr "DNS beveiliging (DNSSEC)"
+
+#~ msgid "report_header_ftp"
+#~ msgstr "Bestandsoverdracht (FTP)"
+
+#~ msgid "report_header_tls_qualys_certificate_trusted"
+#~ msgstr "Vertrouwen in certificaat"
+
+#~ msgid "report_header_tls_qualys_encryption_quality"
+#~ msgstr "Kwaliteit van versleuteling"
 
 #~ msgid "Second opinion"
 #~ msgstr "Second opinion"

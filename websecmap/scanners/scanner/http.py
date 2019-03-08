@@ -43,7 +43,7 @@ from requests.exceptions import ConnectionError
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, UrlIp
-from websecmap.scanners.scanner.scanner import (allowed_to_discover, endpoint_filters,
+from websecmap.scanners.scanner.scanner import (allowed_to_discover_endpoints, endpoint_filters,
                                                 q_configurations_to_scan)
 from websecmap.scanners.timeout import timeout
 
@@ -74,7 +74,7 @@ def compose_discover_task(
 
     """
 
-    if not allowed_to_discover("scanner_http"):
+    if not allowed_to_discover_endpoints("http"):
         return group()
 
     if organizations_filter:
@@ -140,7 +140,7 @@ def compose_verify_task(
     as much.
     """
 
-    if not allowed_to_discover("scanner_http"):
+    if not allowed_to_discover_endpoints("http"):
         return group()
 
     # todo: do we need a generic resurrect task and also check for , 'is_dead': False here?

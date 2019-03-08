@@ -79,7 +79,7 @@ def compose_task(
             # Create an index range for l of n items:
             yield l[i:i + n]
 
-    if not allowed_to_scan("scanner_tls_qualys"):
+    if not allowed_to_scan("tls_qualys"):
         return group()
 
     # apply filter to organizations (or if no filter, all organizations)

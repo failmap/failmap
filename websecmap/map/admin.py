@@ -14,6 +14,7 @@ from websecmap.app.models import Job
 from websecmap.celery import PRIO_HIGH, app
 from websecmap.map import models
 from websecmap.map.geojson import import_from_scratch, update_coordinates
+from websecmap.map.models import MapDataCache, VulnerabilityStatistic
 from websecmap.map.report import compose_task
 
 log = logging.getLogger(__package__)
@@ -348,6 +349,14 @@ class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     readonly_fields = ['cached_on']
 
+    actions = []
+
+    def instant_cache_clear(self, request, queryset):
+        MapDataCache.objects.all().delete()
+
+    instant_cache_clear.short_description = 'Clear all caches (select 1)'
+    actions.append(instant_cache_clear)
+
     @staticmethod
     def length(obj):
         # retrieving this causes a massive slowdown on getting the dataset
@@ -360,3 +369,11 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         'country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low', 'urls', 'endpoints')
     list_filter = ['country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low'][::-1]
     search_fields = (['country', 'organization_type', 'scan_type'])
+
+    actions = []
+
+    def instant_cache_clear(self, request, queryset):
+        VulnerabilityStatistic.objects.all().delete()
+
+    instant_cache_clear.short_description = 'Clear all caches (select 1)'
+    actions.append(instant_cache_clear)

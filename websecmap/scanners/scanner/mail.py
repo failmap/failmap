@@ -31,6 +31,8 @@ Todo:
 [X] Add MX records every 5 days
 [X] Schedule the update task every 30 minutes
 [ ] Create reports and relationships of findings. Also determine severity etc.
+[ ] Handle NO MX return messages, do not save those scans and remove the capability... what happens with the last
+    scan result....????
 
 Commands:
 # Search for MX records
@@ -79,7 +81,7 @@ def compose_task(
     **kwargs
 ) -> Task:
 
-    if not allowed_to_scan("scanner_mail_internet_nl"):
+    if not allowed_to_scan("mail"):
         return group()
 
     default_filter = {"is_dead": False, "not_resolvable": False, "dns_supports_mx": True}
@@ -125,7 +127,7 @@ def compose_discover_task(
     :return:
     """
 
-    if not allowed_to_scan("scanner_mail_internet_nl"):
+    if not allowed_to_scan("mail"):
         return group()
 
     default_filter = {"is_dead": False, "not_resolvable": False}
@@ -201,6 +203,10 @@ def clean_urls_without_mx(urls: List[Url]):
     # We're not still doing IN queries with chunked urls, because that's ugly and complex.
 
     for url in urls:
+        # do not attempt to scan anymore, as there is no MX:
+        url.dns_supports_mx = True
+        url.save(update_fields=['dns_supports_mx'])
+
         obsolete_scans = UrlGenericScan.objects.all().filter(
             is_the_latest_scan=True,
             type__startswith='internet_nl_mail_',

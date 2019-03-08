@@ -111,7 +111,7 @@ def get_security_header_calculation(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def http_plain_rating_based_on_scan(scan):
+def plain_https(scan):
     high, medium, low = 0, 0, 0
 
     # changed the ratings in the database. They are not really correct.
@@ -130,7 +130,7 @@ def http_plain_rating_based_on_scan(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def ftp_rating_based_on_scan(scan):
+def ftp(scan):
     # outdated, insecure
     high, medium, low = 0, 0, 0
 
@@ -151,7 +151,7 @@ def ftp_rating_based_on_scan(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def dnssec_rating_based_on_scan(scan):
+def DNSSEC(scan):
     """
         See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
 
@@ -165,7 +165,7 @@ def dnssec_rating_based_on_scan(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def tls_qualys_certificate_trusted_rating_based_on_scan(scan):
+def tls_qualys_certificate_trusted(scan):
     high, medium, low = 0, 0, 0
 
     explanations = {
@@ -181,7 +181,7 @@ def tls_qualys_certificate_trusted_rating_based_on_scan(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def tls_qualys_encryption_quality_rating_based_on_scan(scan):
+def tls_qualys_encryption_quality(scan):
     high, medium, low = 0, 0, 0
 
     explanations = {
@@ -205,32 +205,48 @@ def tls_qualys_encryption_quality_rating_based_on_scan(scan):
 
 
 def internet_nl_mail_starttls_tls_available(scan):
-    if not scan.rating:
-        return standard_calculation(scan=scan, explanation="STARTTLS Missing", high=1, medium=0, low=0)
-    else:
+    if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="STARTTLS Available", high=0, medium=0, low=0)
+    elif scan.rating == "mx removed":
+        # can we just ignore these types of scans / give no severity etc?
+        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
+                                    high=0, medium=0, low=0)
+    elif scan.rating == "False":
+        return standard_calculation(scan=scan, explanation="STARTTLS Missing", high=1, medium=0, low=0)
 
 
-def internet_nl_mail_spf(scan):
+def internet_nl_mail_auth_spf_exist(scan):
     # https://blog.returnpath.com/how-to-explain-spf-in-plain-english/
-    if not scan.rating:
-        return standard_calculation(scan=scan, explanation="SPF Missing", high=0, medium=1, low=0)
-    else:
+    if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="SPF Available", high=0, medium=0, low=0)
+    elif scan.rating == "mx removed":
+        # can we just ignore these types of scans / give no severity etc?
+        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
+                                    high=0, medium=0, low=0)
+    elif scan.rating == "False":
+        return standard_calculation(scan=scan, explanation="SPF Missing", high=0, medium=1, low=0)
 
 
 def internet_nl_mail_auth_dkim_exist(scan):
-    if not scan.rating:
-        return standard_calculation(scan=scan, explanation="DKIM Missing", high=0, medium=1, low=0)
-    else:
+    if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="DKIM Available", high=0, medium=0, low=0)
+    elif scan.rating == "mx removed":
+        # can we just ignore these types of scans / give no severity etc?
+        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
+                                    high=0, medium=0, low=0)
+    elif scan.rating == "False":
+        return standard_calculation(scan=scan, explanation="DKIM Missing", high=0, medium=1, low=0)
 
 
 def internet_nl_mail_auth_dmarc_exist(scan):
-    if not scan.rating:
-        return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
-    else:
+    if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="DMARC Available", high=0, medium=0, low=0)
+    elif scan.rating == "mx removed":
+        # can we just ignore these types of scans / give no severity etc?
+        return standard_calculation(scan=scan, explanation="Not relevant. This address does not receive mail anymore.",
+                                    high=0, medium=0, low=0)
+    elif scan.rating == "False":
+        return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
 
 
 def dummy_calculated_values(scan):
@@ -240,6 +256,9 @@ def dummy_calculated_values(scan):
 
 
 def standard_calculation(scan, explanation, high, medium, low):
+
+    ok = 0 if high or medium or low else 1
+
     return {
         "type": scan.type,
         "explanation": explanation,
@@ -248,6 +267,7 @@ def standard_calculation(scan, explanation, high, medium, low):
         "high": high,
         "medium": medium,
         "low": low,
+        "ok": ok
     }
 
 
@@ -257,14 +277,14 @@ calculation_methods = {
     'http_security_header_x_content_type_options': get_security_header_calculation,
     'http_security_header_x_frame_options': get_security_header_calculation,
     'http_security_header_x_xss_protection': get_security_header_calculation,
-    'plain_https': http_plain_rating_based_on_scan,
-    'DNSSEC': dnssec_rating_based_on_scan,
-    'ftp': ftp_rating_based_on_scan,
-    'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted_rating_based_on_scan,
-    'tls_qualys_encryption_quality': tls_qualys_encryption_quality_rating_based_on_scan,
+    'plain_https': plain_https,
+    'DNSSEC': DNSSEC,
+    'ftp': ftp,
+    'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted,
+    'tls_qualys_encryption_quality': tls_qualys_encryption_quality,
     'Dummy': dummy_calculated_values,
     'internet_nl_mail_starttls_tls_available': internet_nl_mail_starttls_tls_available,
-    'internet_nl_mail_spf': internet_nl_mail_spf,
+    'internet_nl_mail_auth_spf_exist': internet_nl_mail_auth_spf_exist,
     'internet_nl_mail_auth_dkim_exist': internet_nl_mail_auth_dkim_exist,
     'internet_nl_mail_auth_dmarc_exist': internet_nl_mail_auth_dmarc_exist,
 }

@@ -145,7 +145,7 @@ def compose_task(
     **kwargs
 ) -> Task:
 
-    if not allowed_to_scan("scanner_tls_osaft"):
+    if not allowed_to_scan("tls_osaft"):
         return group()
 
     # apply filter to organizations (or if no filter, all organizations)

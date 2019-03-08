@@ -56,7 +56,7 @@ def compose_task(
     endpoint variant.
     """
 
-    if not allowed_to_scan("scanner_dnssec"):
+    if not allowed_to_scan("dnssec"):
         return group()
 
     # DNSSEC only works on top level urls

@@ -1713,7 +1713,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # filtering with javascript, which is error prone (todo: this will be done in the future, as it responds faster
         # but it will also mean an enormous increase of data sent to the client.)
         # It's actually reasonably fast.
-        high, medium, low = 0, 0, 0
+        high, medium, low, ok = 0, 0, 0, 0
 
         calculation = json.loads(i[6])
 
@@ -1724,6 +1724,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     high += url_rating['high']
                     medium += url_rating['medium']
                     low += url_rating['low']
+                    ok += url_rating['ok']
 
             # it's possible the url doesn't have ratings.
             for endpoint in url['endpoints']:
@@ -1733,6 +1734,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                         high += endpoint_rating['high']
                         medium += endpoint_rating['medium']
                         low += endpoint_rating['low']
+                        ok += endpoint_rating['ok']
 
         # figure out if red, orange or green:
         # #162, only make things red if there is a critical issue.
@@ -1741,7 +1743,8 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
             color = "gray"
         else:
-            color = "red" if high else "orange" if medium else "yellow" if low else "green"
+            # things have to be OK in order to be colored. If it's all empty... then it's not OK.
+            color = "red" if high else "orange" if medium else "yellow" if low else "green" if ok else "gray"
 
         dataset = {
             "type": "Feature",

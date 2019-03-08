@@ -69,7 +69,7 @@ def compose_task(
     **kwargs
 ) -> Task:
     # We might not be allowed to scan for this at all.
-    if not allowed_to_scan("scanner_screenshot"):
+    if not allowed_to_scan("screenshot"):
         return group()  # An empty group fits this callable's signature and does not impede celery.
 
     one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)

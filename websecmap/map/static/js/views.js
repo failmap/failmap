@@ -222,14 +222,108 @@ let issues = {
         },
         "category": ['website']
     },
+
+    "internet_nl_mail_starttls_tls_available": {
+        "name": "internet_nl_mail_starttls_tls_available",
+        "second opinion links": [{
+            "url": "https://internet.nl/mail/${url.url}/",
+            "language": "EN",
+            "provider": "Internet.nl"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Opportunistic_TLS",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["high"],
+        "statistics": {
+            "good": [{'label': "STARTTLS Available", 'explanation': 'STARTTLS Available'},
+            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+            "medium": [],
+            "bad": [{'label': "STARTTLS Missing", 'explanation': 'STARTTLS Missing'}]
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "internet_nl_mail_auth_spf_exist": {
+        "name": "internet_nl_mail_auth_spf_exist",
+        "second opinion links": [{
+            "url": "https://internet.nl/mail/${url.url}/",
+            "language": "EN",
+            "provider": "Internet.nl"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/Sender_Policy_Framework",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["medium"],
+        "statistics": {
+            "good": [{'label': "SPF Available", 'explanation': 'SPF Available'},
+            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+            "medium": [{'label': "SPF Missing", 'explanation': 'SPF Missing'}],
+            "bad": []
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "internet_nl_mail_auth_dkim_exist": {
+        "name": "internet_nl_mail_auth_dkim_exist",
+        "second opinion links": [{
+            "url": "https://internet.nl/mail/${url.url}/",
+            "language": "EN",
+            "provider": "Internet.nl"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["medium"],
+        "statistics": {
+            "good": [{'label': "DKIM Available", 'explanation': 'DKIM Available'},
+            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+            "medium": [{'label': "DKIM Missing", 'explanation': 'DKIM Missing'}],
+            "bad": []
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
+    "internet_nl_mail_auth_dmarc_exist": {
+        "name": "internet_nl_mail_auth_dmarc_exist",
+        "second opinion links": [{
+            "url": "https://internet.nl/mail/${url.url}/",
+            "language": "EN",
+            "provider": "Internet.nl"
+        }],
+        "documentation links": [{
+            "url": "https://en.wikipedia.org/wiki/DMARC",
+            "language": "EN",
+            "provider": "Wikipedia"
+        }],
+        "relevant impacts": ["medium"],
+        "statistics": {
+            "good": [{'label': "DMARC Available", 'explanation': 'DMARC Available'},
+            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+            "medium": [{'label': "DMARC Missing", 'explanation': 'DMARC Missing'}],
+            "bad": []
+        },
+        "category": ['confidentiality', 'integrity']
+    },
+
 };
 
+// todo: define this order somewhere else. Config option or something.
 let ordered_issues = [
     issues['DNSSEC'],
     issues["tls_qualys_certificate_trusted"],
     issues["tls_qualys_encryption_quality"],
     issues["plain_https"],
     issues["ftp"],
+    issues["internet_nl_mail_starttls_tls_available"],
+    issues["internet_nl_mail_auth_spf_exist"],
+    issues["internet_nl_mail_auth_dkim_exist"],
+    issues["internet_nl_mail_auth_dmarc_exist"],
     issues["http_security_header_strict_transport_security"],
     issues["http_security_header_x_frame_options"],
     issues["http_security_header_x_content_type_options"],
@@ -238,7 +332,11 @@ let ordered_issues = [
 
 // what issues are at url level
 let url_issue_names = [
-    //issues['DNSSEC']['name']
+    issues['DNSSEC']['name'],
+    issues['internet_nl_mail_starttls_tls_available']['name'],
+    issues['internet_nl_mail_auth_spf_exist']['name'],
+    issues['internet_nl_mail_auth_dkim_exist']['name'],
+    issues['internet_nl_mail_auth_dmarc_exist']['name'],
 ];
 
 // what issues are at endpoint level
@@ -632,7 +730,7 @@ const report_mixin = {
             return gettext(string);
         },
         create_header: function (rating) {
-            return this.translate("report_header_" + rating.type);
+            return this.translate(rating.type);
         },
         // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
         second_opinion_links: function (rating, url) {
