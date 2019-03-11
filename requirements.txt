@@ -25,6 +25,7 @@ kombu<4.4.0  # Kombu 4.4.0 requires redis 3.2.0 or higher
 celery[redis,eventlet]
 django-celery-beat
 flower  # used for queue statistics
+tornado<6 # dependency of flower, breaks on 6+ until resolved: https://github.com/mher/flower/issues/878
 
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla
@@ -144,3 +145,4 @@ django-excel
 pyexcel-xls
 pyexcel-xlsx
 pyexcel-ods
+
