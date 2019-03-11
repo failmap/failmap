@@ -1018,19 +1018,19 @@
 </script>
 
 <script type="x-template" id="historycontrol_template">
-    <div id="historycontrol">
+    <div id="historycontrol" style="max-width: 300px; overflow:hidden;">
         <h4>{% trans "Moment" %}</h4>
         <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
         <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
-        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt;&lt;&lt; {% trans "One week earlier" %}'/>
-        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;&gt;&gt;'/>
+        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt; {% trans "One week earlier" %}'/>
+        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;'/>
         <br /><br />
 
         <h4>{% trans "Risk filter" %}</h4>
 
-        <div v-for="issue in issues">
-            <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
-            <label :for="issue.name" v-html="translate(issue.name)"></label>
+        <div v-for="issue in issues" style="white-space: nowrap;">
+                <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
+                <label :for="issue.name" v-html="translate(issue.name)"></label>
         </div>
 
         <button type="button" class="btn btn-success btn-sm" @click="clear_filter()" v-show="displayed_issue">{% trans "Clear Filter" %}</button><br />
@@ -1067,7 +1067,7 @@
 <script type="x-template" id="map_item_hover">
     <div id="map_hover_info_contents">
         <div v-if="properties.organization_name" v-cloak>
-            <h4>{{ properties.organization_name }}</h4>
+            <h4><a @click="showreport(properties.organization_id)">{{ properties.organization_name }}</a></h4>
             <div class="progress">
                 <div class="progress-bar bg-danger" :style="{width:high}"></div>
                 <div class="progress-bar bg-warning" :style="{width:medium}"></div>

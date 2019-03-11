@@ -89,18 +89,19 @@ const map = {
             "</div>";
 
         this.add_div(html, "info_nobackground", false);
+        this.add_div("<input id='searchbar' type='text' onkeyup='map.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
 
         if (show_filters)
             this.add_div('<div id="historycontrol"></div>', "info table-light", true);
 
-        this.add_div("<input id='searchbar' type='text' onkeyup='map.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
         this.add_div("<div style='max-width: 300px;'><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
+
         let labels=[];
         labels.push('<i style="background:' + map.getColorCode('green') + '"></i> '+ gettext('Perfect'));
         labels.push('<i style="background:' + map.getColorCode('yellow') + '"></i> '+ gettext('Good'));
         labels.push('<i style="background:' + map.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
         labels.push('<i style="background:' + map.getColorCode('red') + '"></i> '+ gettext('Bad'));
-        labels.push('<i style="background:' + map.getColorCode('unknown') + '"></i> '+ gettext('Unknown'));
+        labels.push('<i style="background:' + map.getColorCode('unknown') + '"></i> '+ gettext('No data available'));
         this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
 
@@ -494,16 +495,21 @@ const map = {
         return L.circleMarker(latlng, map.style(geoJsonPoint));
     },
 
+    // only show information when the mouse is more than 0.1 second.
+    timer: 0,
+
     highlightFeature: function (e) {
-        let layer = e.target;
+        map.timer = setTimeout(function(){
+            let layer = e.target;
 
-        layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        }
+            layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
+            if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                layer.bringToFront();
+            }
 
-        vueInfo.properties = layer.feature.properties;
-        vueDomainlist.load(layer.feature.properties.organization_id, vueMap.week);
+            vueInfo.properties = layer.feature.properties;
+            vueDomainlist.load(layer.feature.properties.organization_id, vueMap.week);
+        }, 300);
     },
 
     onEachFeature: function (feature, layer) {
@@ -515,6 +521,8 @@ const map = {
     },
 
     resetHighlight: function (e) {
+        clearTimeout(map.timer);
+
         if (map.isSearchedFor(e.target.feature))
             e.target.setStyle(map.searchResultStyle(e.target.feature));
         else
@@ -730,6 +738,10 @@ const map = {
 
     showreport: function (e) {
         let organization_id = e.target.feature.properties['organization_id'];
+        map.showreport_direct(organization_id);
+    },
+
+    showreport_direct: function (organization_id) {
         if (map.map.isFullscreen()) {
             // var layer = e.target;
             vueFullScreenReport.load(organization_id, vueMap.week);
@@ -743,5 +755,7 @@ const map = {
             location.href = '#report';
             vueReport.selected = organization_id;
         }
-    }
+    },
+
+
 };

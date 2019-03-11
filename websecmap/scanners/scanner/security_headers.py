@@ -9,7 +9,6 @@ import pytz
 import requests
 import urllib3
 from celery import Task, group
-from constance import config
 from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Timeout
 
 from websecmap.celery import ParentFailed, app
@@ -106,14 +105,12 @@ def analyze_headers(result: requests.Response, endpoint):
     X-Content-Type-Options is not affected.
     """
 
-    if config.SCAN_HTTP_HEADERS_X_XSS:
-        generic_check_using_csp_fallback(endpoint, response.headers, 'X-XSS-Protection')
+    # We've removed conditional scans in scannerss, as more scan data is better.
+    # you can cohose not to display or report it. Below used to be conditional scans.
 
-    if config.SCAN_HTTP_HEADERS_XFO:
-        generic_check_using_csp_fallback(endpoint, response.headers, 'X-Frame-Options')
-
-    if config.SCAN_HTTP_HEADERS_X_CONTENT:
-        generic_check(endpoint, response.headers, 'X-Content-Type-Options')
+    generic_check_using_csp_fallback(endpoint, response.headers, 'X-XSS-Protection')
+    generic_check_using_csp_fallback(endpoint, response.headers, 'X-Frame-Options')
+    generic_check(endpoint, response.headers, 'X-Content-Type-Options')
 
     """
     https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
@@ -139,7 +136,7 @@ def analyze_headers(result: requests.Response, endpoint):
 
     If you think it works differently, just file an issue or make a pull request. We want to get it right.
     """
-    if endpoint.protocol == "https" and config.SCAN_HTTP_HEADERS_HSTS:
+    if endpoint.protocol == "https":
 
         # runs any unsecured http service? (on ANY port).
         unsecure_services = Endpoint.objects.all().filter(url=endpoint.url, protocol="http", is_dead=False).exists()

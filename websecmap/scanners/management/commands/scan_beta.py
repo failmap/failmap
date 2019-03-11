@@ -1,13 +1,14 @@
 import logging
 
 from websecmap.app.management.commands._private import ScannerTaskCommand
-from websecmap.scanners.scanner import screenshot, tls_osaft
+from websecmap.scanners.scanner_beta import debug, screenshot, tls_osaft
 
 log = logging.getLogger(__name__)
 
 scanners = {
     'tls': tls_osaft,
     'screenshot': screenshot,
+    'debug': debug
 }
 
 

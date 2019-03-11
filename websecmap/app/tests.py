@@ -19,10 +19,10 @@ def dummy(result=True):
         return 'result'
 
 
-def test_job(db, mock, celery):
+def test_job(db, mocker, celery):
     """Test creating task wrapped in a job."""
 
-    request = mock.Mock()
+    request = mocker.Mock()
     user = User(username='testuser')
     user.save()
     request.user = user

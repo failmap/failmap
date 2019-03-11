@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from websecmap.map.models import OrganizationReport, UrlReport
+from websecmap.reporting.models import OrganizationReport, UrlReport
 
 log = logging.getLogger(__package__)
 

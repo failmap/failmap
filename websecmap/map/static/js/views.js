@@ -2146,6 +2146,9 @@ function views(autoload_default_map_data=true) {
             perc: function (amount, total) {
                 return (!amount || !total) ? "0%" : roundTo(amount / total * 100, 2) + "%";
             },
+            showreport: function(organization_id) {
+                map.showreport_direct(organization_id);
+            }
         }
 
     });

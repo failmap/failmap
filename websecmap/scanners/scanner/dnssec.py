@@ -101,9 +101,7 @@ def compose_task(
 def store_dnssec(result: List[str], url: Url):
     """
 
-    :param result: param endpoint:
-    :param endpoint:
-
+    :param result:
     """
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):

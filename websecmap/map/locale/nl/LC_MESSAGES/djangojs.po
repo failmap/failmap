@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-08 16:05+0000\n"
+"POT-Creation-Date: 2019-03-11 08:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,8 +43,8 @@ msgid "Bad"
 msgstr "Slecht"
 
 #: websecmap/map/static/js/map.js
-msgid "Unknown"
-msgstr "Onbekend"
+msgid "No data available"
+msgstr "Geen gegevens beschikbaar"
 
 #: websecmap/map/static/js/map.js
 msgid "legend_basic_security"
@@ -354,27 +354,27 @@ msgstr "X-XSS-Protection Header"
 
 #: websecmap/map/static/js/script.js
 msgid "internet_nl_mail_starttls_tls_available"
-msgstr ""
+msgstr "E-Mail: Versleuteld transport (STARTTLS)"
 
 #: websecmap/map/static/js/script.js
 msgid "internet_nl_mail_auth_spf_exist"
-msgstr ""
+msgstr "E-Mail: Sender Policy Framework (SPF)"
 
 #: websecmap/map/static/js/script.js
 msgid "internet_nl_mail_auth_dkim_exist"
-msgstr ""
+msgstr "E-Mail: DomainKeys Identified Mail (DKIM)"
 
 #: websecmap/map/static/js/script.js
 msgid "internet_nl_mail_auth_dmarc_exist"
-msgstr ""
+msgstr "E-Mail: Domain-based Message Auth (DMARC)"
 
 #: websecmap/map/static/js/script.js
 msgid "Stats hasn't"
-msgstr ""
+msgstr "Voldoet niet"
 
 #: websecmap/map/static/js/script.js
 msgid "Stats has"
-msgstr ""
+msgstr "Voldoet"
 
 #: websecmap/map/static/js/script.js
 msgid "Broken"
@@ -446,11 +446,11 @@ msgstr "Stadtteil / Gemeindeteil ohne Selbstverwaltung"
 
 #: websecmap/map/static/js/script.js
 msgid "One week earlier"
-msgstr "Een week eerder"
+msgstr "-1 week"
 
 #: websecmap/map/static/js/script.js
 msgid "One week later"
-msgstr "Een week later"
+msgstr "+1 week"
 
 #: websecmap/map/static/js/script.js
 msgid "Moment"
@@ -510,6 +510,9 @@ msgstr "laag"
 #: websecmap/map/static/js/views.js
 msgid "Exit Full Screen"
 msgstr "Sluit volledig scherm"
+
+#~ msgid "Unknown"
+#~ msgstr "Onbekend"
 
 #~ msgid "report_header_tls_qualys"
 #~ msgstr "Transport Layer Security (TLS)"
