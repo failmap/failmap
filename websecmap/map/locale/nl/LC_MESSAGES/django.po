@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-11 08:43+0000\n"
+"POT-Creation-Date: 2019-03-12 12:55+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Internet Cleanup Foundation <info@internetcleanup."
 "foundation>\n"
@@ -714,7 +714,7 @@ msgstr ""
 
 #: websecmap/map/templates/map/shared_report_contents.html
 msgid "Report incorrect finding"
-msgstr "Meld onjuiste verbinding"
+msgstr "Meld onjuiste bevinding"
 
 #: websecmap/map/templates/map/shared_report_contents.html
 msgid "Url level findings"
