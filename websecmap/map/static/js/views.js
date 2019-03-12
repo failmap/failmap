@@ -1272,7 +1272,7 @@ function views(autoload_default_map_data=true) {
                 // otherway: arrayx = [array1, array2]
                 let _categories = [];
                 this.issues.forEach(function(issue){
-                    console.log(_categories);
+                    // console.log(_categories);
                     _categories = _categories.concat(issue['category'])
                 });
                 return _categories;
@@ -1426,7 +1426,6 @@ function views(autoload_default_map_data=true) {
             slogan: ""
         },
         mounted: function () {
-            console.log("Ticker");
             this.visible = !(TICKER_VISIBLE_VIA_JS_COMMAND === 'true');
         },
         methods: {
@@ -1443,7 +1442,6 @@ function views(autoload_default_map_data=true) {
                     var spanSelector = document.getElementById("marquee").querySelector("span");
                     var timeTaken = this.tickertext.length / 20;  // about N characters per second.
                     spanSelector.style.animationDuration = timeTaken + "s";
-                    console.log("Set to " + timeTaken)
                 } catch(err) {
                     console.log("Marquee was not visible in the DOM.")
                     // Weird is that when the property is set when hiding... it isn't stored. probably
@@ -1609,7 +1607,6 @@ function views(autoload_default_map_data=true) {
                 ordered_issues.forEach(function (item)
                 {
                     let data_url = vueLatest.data_url + vueLatest.country + '/' + vueLatest.layer + '/' + item['name'];
-                    console.log(data_url);
                     fetch(data_url)
                         .then(response => response.json()).then(data => {
                         vueLatest.scans[item['name']] = data.scans;
