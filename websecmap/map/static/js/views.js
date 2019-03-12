@@ -743,11 +743,11 @@ const report_mixin = {
             selected_issue['second opinion links'].forEach(function (item){
                 let filled_url = item.url;
                 filled_url = filled_url.replace("${url.url}", url.url);
-                links += `<a href="${filled_url}" target="_blank" class="btn-sm"><i class="fas fa-clipboard-check"></i> ` + gettext('Second opinion') + ` (${item.provider}) </a> `;
+                links += `<a href="${filled_url}" target="_blank" class="btn-sm"><i class="fas fa-clipboard-check"></i> &nbsp;` + gettext('Second opinion') + ` (${item.provider}) </a> `;
             });
 
             selected_issue['documentation links'].forEach(function (item){
-                links += `<a href="${item.url}" target="_blank" class="btn-sm"><i class="fas fa-book"></i> ` + gettext('Documentation') + ` (${item.provider})</a> `;
+                links += `<a href="${item.url}" target="_blank" class="btn-sm"><i class="fas fa-book"></i> &nbsp;` + gettext('Documentation') + ` (${item.provider})</a> `;
             });
 
             return links;
