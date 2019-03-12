@@ -1,0 +1,211 @@
+[tool.poetry]
+name = "websecmap"
+version = "0.0.0"
+description = ""
+
+licence = "AGPLv3"
+
+authors = [
+    "Elger Jonker <elger.jonker@gmail.com>",
+    "Johan Bloemberg <github@ijohan.nl>"
+]
+
+readme = "README.md"
+
+repository = "https://gitlab.com/internet-cleanup-foundation/web-security-map"
+homepage = "https://websecuritymap.org/"
+
+keywords = ["security", "scanner", "web"]
+
+packages = [
+    { include = "websecmap" }
+]
+
+[tool.poetry.scripts]
+websecmap = 'websecmap.manage:main'
+
+# Below we define dependencies of websecmap.
+# In general it is advised to pin to a certain version to prevent updates breaking builds. But since poetry uses a lockfile this allows us to keep developing on a known list of working version while debugging update issues seperate. We only pin packages when a problem cannot immediately be solved (eg: waiting for upstream release). The benefit is that we keep up better with new (security) releases without having to manually go through the list of all packages to check for updates.
+
+# For information about package version syntax:
+# https://github.com/sdispater/poetry/blob/master/docs/docs/versions.md
+
+[tool.poetry.dependencies]
+python = "~3.6"
+
+django = "*"
+django-jet = "*"
+django-countries = "*"
+django-leaflet = "*"  # geojson editor in admin
+django-geojson = {version = "*", extras = ["field"]}  # geojson editor in admin
+jsonfield = "*"
+django-import-export = "*"
+django-constance = {version = "*", extras = ["database"]}
+
+pyyaml = "*"
+typing = "*"
+
+# use mozzila certificate bundle by default
+certifi = "*"
+pytz = "*"
+
+# task processing framework
+redis = "<3"  # forcing a specific version of redis, 3.0.1 gives timeout errors during build.
+kombu = "<4.4.0"  # Kombu 4.4.0 requires redis 3.2.0 or higher
+django-celery-beat = "*"
+tornado = "<6" # dependency of flower, breaks on 6+ until resolved: https://github.com/mher/flower/issues/878
+
+# https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
+django-statsd-mozilla = "*"
+
+# scanner deps
+requests = "*"
+
+# dnsrecon / DNS scanning dependencies
+dnspython = "*"
+netaddr = "*"
+
+# screenshots
+Pillow = "*"
+python-resize-image = "*"
+
+# url parsing in the database, and several other locations
+tldextract = "*"
+
+# logging
+colorlog = "*"
+
+# for proxying external requests (mapbox)
+django-proxy = "*"
+
+# sentry client
+raven = "*"
+
+# allow recursive comparison of dictionaries
+deepdiff = "*"
+
+influxdb = "*"
+urllib3 = "*"
+
+# loading json is faster in simplejson
+# https://stackoverflow.com/questions/712791/what-are-the-differences-between-json-and-simplejson-python-modules
+# needed for mapping reasons.
+simplejson = "*"
+
+
+# Remote worker TLS
+pyopenssl = "*"
+
+# static file collection/generation
+django_compressor = "*"  # bundle javascript and css
+csscompressor = "*"  # css compression
+
+retry = "*"
+
+# docs / readthedocs.io
+recommonmark = "*"
+
+# map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)
+rdp = "*"
+
+clint = "*"  # downloading stuff from overpass
+wikidata = "*"  # downloading data from wikidata
+
+django-nested-admin = "*"  # going deeper underground
+sphinx_rtd_theme = "*"
+
+django-fsm = "*"
+django-fsm-log = "*"
+
+flower = "*"
+
+# game requirements
+django-crispy-forms = "*"
+django-autocomplete-light = "*"
+
+django-admin-sortable2 = "*"  # nice sorting in the admin, used in map configurations.
+
+hyper_sh = "^1.0"
+celery = {version = "^4.2",extras = ["redis", "eventlet"]}
+# game team colors
+django-colorful = "*"
+
+# game, add multiple urls in one go.
+django-select2 = "*"
+
+# ISO country code conversion
+iso3166 = "*"
+
+# hyper scaling
+docker = "*"
+
+# generic retry library
+tenacity = "*"
+
+# game
+spectra = "*"  # fancy colors for teams
+markdown = "*" # explanations for urls and organizations from the admin
+
+# geocoding organizations from python
+googlemaps = "*"
+
+# allowing generic import of these types of files:
+django-excel = "*"
+pyexcel-xls = "*"
+pyexcel-xlsx = "*"
+pyexcel-ods = "*"
+
+# database clients
+mysqlclient = {version = "*", optional = true}
+psycopg2 = {version = "*", optional = true}
+django-uwsgi = {version = "*"}
+
+# wsgi server
+uwsgi = {version = "*", optional = true}
+
+# Tools/dependencies required for development or running tests.
+[tool.poetry.dev-dependencies]
+autopep8 = "*"
+autoflake = "*"
+isort = {version = "*", extras = ["pyproject"]}
+pylama = "*"
+coverage = "*"
+# waiting for https://github.com/getsentry/pytest-responses/pull/7
+pytest = "<4.1.0"
+pytest-cov = "*"
+pytest-django = "*"
+# counterpart of requests for mock responses
+pytest-responses = "*"
+# output logging when test fails
+pytest-logging = "*"
+django-coverage = "*"
+django-extensions = "*"
+django-debug-toolbar = "*"
+django-debug-toolbar-request-history = "*"
+pytest-mock = "*"
+pytest-docker = "*"
+
+# docs / readthedocs.io
+sphinx = "*"
+sphinx-autobuild = "*"
+recommonmark = "*"
+
+# tests (of scanners)
+httmock = "*"
+freezegun = "*"
+colorama = "*"
+pydotplus = "*"  # generating graphs with the docs command...
+
+# used to restart celery worker on file changes
+watchdog = "~0.9.0"
+
+ipython = "*"  # websecmap shell -i ipython
+django-cprofile-middleware = "*"
+moviepy = "*"
+
+[tool.poetry.extras]
+deploy = ["mysqlclient","psycopg2","uwsgi"]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

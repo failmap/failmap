@@ -1,6 +1,0 @@
-include version
-include requirements.txt
-recursive-include websecmap/*/templates *
-recursive-include websecmap/*/static *
-recursive-include websecmap/*/fixtures *.yaml *.json
-recursive-include websecmap/*/locale *.mo *.po

@@ -27,16 +27,21 @@ RUN apk --no-cache add \
   bash
 
 # install app and dependencies in a artifact-able directory
-RUN /usr/bin/pip3 install virtualenv
+RUN /usr/bin/pip3 install poetry virtualenv
 RUN virtualenv /pyenv
+ENV VIRTUAL_ENV = /pyenv
+ENV PATH=/pyenv/bin:$PATH
 
 # install requirements seperately as they change less often then source, improved caching
-COPY requirements.txt /source/
+COPY pyproject.toml poetry.lock README.md /source/
+COPY websecmap/ /source/websecmap/
 # copy pip cache to improve build speeds
 COPY ./.pip-cache/ /root/.cache/pip/
-RUN /pyenv/bin/pip3 install -r /source/requirements.txt
-COPY requirements.deploy.txt /source/
-RUN /pyenv/bin/pip3 install -r /source/requirements.deploy.txt
+WORKDIR /source
+# Install app by linking source into virtualenv. This is against convention
+# but allows the source to be overwritten by a volume during development.
+RUN poetry install -v --no-dev --extras deploy --develop websecmap
+WORKDIR /
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -91,6 +96,10 @@ RUN apk --no-cache add \
   nodejs \
   nodejs-npm
 
+RUN /usr/bin/pip3 install poetry
+ENV VIRTUAL_ENV = /pyenv
+ENV PATH=/pyenv/bin:$PATH
+
 # expose relevant executable(s)
 RUN ln -s /pyenv/bin/websecmap /usr/local/bin/
 RUN ln -s /pyenv/bin/uwsgi /usr/local/bin/
@@ -112,19 +121,15 @@ RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
 # copy hypercli binary
 COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local/bin/hyper
 
-# copy all relevant files for python installation
-COPY websecmap /source/websecmap/
 COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
 
+# copy all relevant files for python installation
+COPY websecmap/ /source/websecmap
 # add wildcard to version file as it may not exists (eg: local development)
-COPY setup.py setup.cfg MANIFEST.in requirements.dev.txt version* /source/
-
-# Install app by linking source into virtualenv. This is against convention
-# but allows the source to be overwritten by a volume during development.
-RUN /pyenv/bin/pip3 install -e /source/ --no-deps
+COPY README.md version* /source/
 
 WORKDIR /
 

@@ -37,3 +37,4 @@ db.sqlite3-journal
 .pip-cache/*
 *.p12
 config.json
+pip-wheel-metadata/

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -xe
 
@@ -6,20 +6,20 @@ set -xe
 
 host=${1:-localhost}
 
-if test -f /bin/busybox;then
+if /bin/ls --help 2>&1 | grep BusyBox; then
+  # Busybox shell, use different argument for timeout
   timeout="timeout -t ${TIMEOUT:-60}"
 else
   timeout="timeout ${TIMEOUT:-60}"
 fi
 
-if test "$(uname -s)" == Darwin && ! command -v timeout;then
+if [ "$(uname -s)" == Darwin ] && ! command -v timeout;then
   timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
 fi
 
-
 exit_cleanup(){
   kill -15 "$logs_pid"
-  docker stop websecmap-$$ >/dev/null &
+  docker rm -f websecmap-$$ >/dev/null &
 }
 
 # start docker container
@@ -28,8 +28,8 @@ docker run --rm --name websecmap-$$ -e "ALLOWED_HOSTS=$host" -p 8000 -d \
   production --migrate --loaddata development
 docker logs websecmap-$$ -f 2>&1 | awk '$0="docker: "$0' &
 logs_pid=$!
-port="$(docker port websecmap-$$ 8000/tcp | cut -d: -f2)"
 trap "exit_cleanup" EXIT
+port="$(docker port websecmap-$$ 8000/tcp | cut -d: -f2)"
 
 # wait for server to be ready
 sleep 3
