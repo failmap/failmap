@@ -1706,7 +1706,7 @@ function views(autoload_default_map_data=true) {
                         });
 
                         if (data.overall !== undefined)
-                            self.overall = data.overall.improvements;
+                            self.results.overall = data.overall.improvements;
                     }
 
                     // because some nested keys are used (results[x['bla']), updates are not handled correclty.
