@@ -149,6 +149,8 @@ image_test:
 
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+    SYSTEM_TEST_TIMEOUT: "120"
+    GIT_SUBMODULE_STRATEGY: recursive
   cache:
     paths:
       - "$CI_PROJECT_DIR/.pip-cache"
@@ -163,9 +165,6 @@ image_test:
     - docker:dind
 
   image: websecmap/ci:docker-git
-  variables:
-    SYSTEM_TEST_TIMEOUT: 120
-    GIT_SUBMODULE_STRATEGY: recursive
 
   before_script:
     # cache previous build image if available for quicker build
