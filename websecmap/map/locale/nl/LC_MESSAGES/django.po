@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-12 12:55+0000\n"
+"POT-Creation-Date: 2019-03-13 12:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Internet Cleanup Foundation <info@internetcleanup."
 "foundation>\n"
@@ -209,6 +209,14 @@ msgid "Datasets"
 msgstr "Datasets"
 
 #: websecmap/map/templates/map/index.html
+msgid "Countries"
+msgstr "Landen"
+
+#: websecmap/map/templates/map/index.html
+msgid "Layers"
+msgstr "Lagen"
+
+#: websecmap/map/templates/map/index.html
 msgid "DEBUG"
 msgstr "ONGEDIERTEBESTRIJDINGSMODUS"
 
@@ -269,14 +277,6 @@ msgid "Report for"
 msgstr "Rapport van"
 
 #: websecmap/map/templates/map/index.html
-msgid "close report"
-msgstr "Sluiten"
-
-#: websecmap/map/templates/map/index.html
-msgid "print report"
-msgstr "Afdrukken"
-
-#: websecmap/map/templates/map/index.html
 msgid "Data from"
 msgstr "Gegevens van"
 
@@ -285,16 +285,16 @@ msgid "Promise message"
 msgstr ""
 
 #: websecmap/map/templates/map/index.html
-msgid "RSS change feed teaser"
-msgstr "Volg de laatste wijzigingen van deze organisatie via deze"
+msgid "close report"
+msgstr "Sluiten"
+
+#: websecmap/map/templates/map/index.html
+msgid "print report"
+msgstr "Afdrukken"
 
 #: websecmap/map/templates/map/index.html
 msgid "rss feed"
 msgstr "RSS feed"
-
-#: websecmap/map/templates/map/index.html
-msgid "Report ask domains leader"
-msgstr "Ontbreken er domeinen?"
 
 #: websecmap/map/templates/map/index.html
 msgid "Report ask domains subject"
@@ -629,10 +629,6 @@ msgid "Contact"
 msgstr "Contact"
 
 #: websecmap/map/templates/map/index.html
-msgid "Review many more details below!"
-msgstr "Bekijk de details hieronder!"
-
-#: websecmap/map/templates/map/index.html
 msgid "Moment"
 msgstr "Moment"
 
@@ -802,6 +798,15 @@ msgstr ""
 #: websecmap/map/views.py
 msgid "Perfect"
 msgstr "Perfect"
+
+#~ msgid "RSS change feed teaser"
+#~ msgstr "Volg de laatste wijzigingen van deze organisatie via deze"
+
+#~ msgid "Report ask domains leader"
+#~ msgstr "Ontbreken er domeinen?"
+
+#~ msgid "Review many more details below!"
+#~ msgstr "Bekijk de details hieronder!"
 
 #~ msgid "DNSSEC"
 #~ msgstr "DNS beveiliging (DNSSEC)"

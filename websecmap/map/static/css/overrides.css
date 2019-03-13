@@ -128,6 +128,7 @@ div#report {
 
     /* alternating rows, taking in account images. */
     padding-top: 15px;
+
     padding-left: 15px;
     padding-bottom: 15px;
     margin-bottom: 30px;
@@ -146,8 +147,6 @@ div#report {
 }
 
 .clippedimage {
-    margin-top: 14px;
-    margin-left: 17px;
     min-width: 320px; /* placeholder */
     min-height: 200px; /* placeholder */
     position: absolute;
@@ -460,11 +459,7 @@ path {
 
 
 .score {
-    float: left;
-    width: 10em;
-    height: 13em;
     border-radius: 6px;
-    margin-right: 20px;
     text-align: center;
     padding: 13px;
 }
@@ -668,6 +663,7 @@ th.active .arrow {
     .leaflet-top.leaflet-right {
         height: calc(100vh - 235px);
         overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
 
         /*background-color: rgba(255, 255, 255, 1.8);
         padding-left: 10px;
@@ -788,4 +784,25 @@ th.active .arrow {
 /* Menu hover menu is just a few pixels below the item. So it disappears if you're not moving too fast which is evil*/
 .dropdown-menu {
     top: 86% !important;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 12px;
+  height: 12px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

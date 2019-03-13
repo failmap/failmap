@@ -8,54 +8,57 @@
             humanize(metadata.data_from_time) }}{% endverbatim %}</p>
 
         <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()">
-            <i class='fas fa-plus-square'></i> {% trans "Expand/shorten list" %}
+            <svg aria-hidden="true" data-prefix="fas" data-icon="plus-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-plus-square fa-w-14"><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-32 252c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92H92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"></path></svg>
+            {% trans "Expand/shorten list" %}
         </span><br/><br/>
 
-        <table class="table table-striped" id="topfail_table">
-            <thead>
-            <tr>
-                <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
-                    <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
-              </span></th>
-                <th @click="sortBy('organization_id')"
-                    :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
-                    <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'"></span>
-                </th>
-                <th @click="sortBy('total_urls')" :class="{ active: sortKey == 'total_urls' }">{% trans "Urls" %}
-                    <span class="arrow" :class="sortOrders['total_urls'] > 0 ? 'asc' : 'dsc'"></span>
-                </th>
-                <th @click="sortBy('total_endpoints')" :class="{ active: sortKey == 'total_endpoints' }">{% trans "Services" %}
-                    <span class="arrow" :class="sortOrders['total_endpoints'] > 0 ? 'asc' : 'dsc'"></span>
-                </th>
-                <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
-                    <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'"></span>
-                </th>
-                <th @click="sortBy('medium')" :class="{ active: sortKey == 'medium' }">{% trans "Medium" %}
-                    <span class="arrow" :class="sortOrders['medium'] > 0 ? 'asc' : 'dsc'"></span>
-                </th>
-                <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
-                    <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
-              </span></th>
-                <th @click="sortBy('relative')" :class="{ active: sortKey == 'relative' }">{% trans "Relative" %}
-                    <span class="arrow" :class="sortOrders['relative'] > 0 ? 'asc' : 'dsc'">
-              </span></th>
-            </tr>
-            </thead>
-            <tbody>
-            {% verbatim %}
-            <tr v-for='rank in filteredData'>
-                <td>{{ rank['rank'] }}</td>
-                <td><a v-on:click="showReport(rank.organization_id)">🔍 {{ rank['organization_name'] }}</a></td>
-                <td>{{ rank['total_urls'] }}</td>
-                <td>{{ rank['total_endpoints'] }}</td>
-                <td>{{ rank['high'] }}</td>
-                <td>{{ rank['medium'] }}</td>
-                <td>{{ rank['low'] }}</td>
-                <td>{{ rank['relative'] }}</td>
-                {% endverbatim %}
-            </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="topfail_table">
+                <thead>
+                <tr>
+                    <th @click="sortBy('rank')" :class="{ active: sortKey == 'rank' }">{% trans "Rank" %}
+                        <span class="arrow" :class="sortOrders['rank'] > 0 ? 'asc' : 'dsc'">
+                  </span></th>
+                    <th @click="sortBy('organization_id')"
+                        :class="{ active: sortKey == 'organization_id' }">{% trans "Organization" %}
+                        <span class="arrow" :class="sortOrders['organization_id'] > 0 ? 'asc' : 'dsc'"></span>
+                    </th>
+                    <th @click="sortBy('total_urls')" :class="{ active: sortKey == 'total_urls' }">{% trans "Urls" %}
+                        <span class="arrow" :class="sortOrders['total_urls'] > 0 ? 'asc' : 'dsc'"></span>
+                    </th>
+                    <th @click="sortBy('total_endpoints')" :class="{ active: sortKey == 'total_endpoints' }">{% trans "Services" %}
+                        <span class="arrow" :class="sortOrders['total_endpoints'] > 0 ? 'asc' : 'dsc'"></span>
+                    </th>
+                    <th @click="sortBy('high')" :class="{ active: sortKey == 'high' }">{% trans "High" %}
+                        <span class="arrow" :class="sortOrders['high'] > 0 ? 'asc' : 'dsc'"></span>
+                    </th>
+                    <th @click="sortBy('medium')" :class="{ active: sortKey == 'medium' }">{% trans "Medium" %}
+                        <span class="arrow" :class="sortOrders['medium'] > 0 ? 'asc' : 'dsc'"></span>
+                    </th>
+                    <th @click="sortBy('low')" :class="{ active: sortKey == 'low' }">{% trans "Low" %}
+                        <span class="arrow" :class="sortOrders['low'] > 0 ? 'asc' : 'dsc'">
+                  </span></th>
+                    <th @click="sortBy('relative')" :class="{ active: sortKey == 'relative' }">{% trans "Relative" %}
+                        <span class="arrow" :class="sortOrders['relative'] > 0 ? 'asc' : 'dsc'">
+                  </span></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% verbatim %}
+                <tr v-for='rank in filteredData'>
+                    <td>{{ rank['rank'] }}</td>
+                    <td><a v-on:click="showReport(rank.organization_id)">🔍 {{ rank['organization_name'] }}</a></td>
+                    <td>{{ rank['total_urls'] }}</td>
+                    <td>{{ rank['total_endpoints'] }}</td>
+                    <td>{{ rank['high'] }}</td>
+                    <td>{{ rank['medium'] }}</td>
+                    <td>{{ rank['low'] }}</td>
+                    <td>{{ rank['relative'] }}</td>
+                    {% endverbatim %}
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
     </div>
 </div>

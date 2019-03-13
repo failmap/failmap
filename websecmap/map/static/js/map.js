@@ -48,7 +48,7 @@ const map = {
         // don't name this variable location, because that redirects the browser.
         loc = this.initial_location(country_code);
         this.map = L.map('map',
-            { dragging: !L.Browser.mobile, touchZoom: true, tap: false, zoomSnap: 0.2}
+            { dragging: !L.Browser.mobile, touchZoom: true, tap: true, zoomSnap: 0.2}
             ).setView(loc.coordinates, loc.zoomlevel);
 
         this.map.scrollWheelZoom.disable();
@@ -83,12 +83,6 @@ const map = {
             }
         });
 
-        // controls in sidepanels
-        let html = "<div id=\"fullscreen\">" +
-            "<span class='btn btn-success btn-lg btn-block' v-on:click='toggleFullScreen()'>{{fullscreen}}</span>" +
-            "</div>";
-
-        this.add_div(html, "info_nobackground", false);
         this.add_div("<input id='searchbar' type='text' onkeyup='map.search(this.value)' placeholder=\"" + gettext('Search organization') + "\"/>", "info table-light", true);
 
         if (show_filters)
@@ -108,11 +102,14 @@ const map = {
         // scale
         L.control.scale().addTo(this.map);
 
+
+        this.map.addControl(new L.Control.Fullscreen());
+
         // show whole map:
         // https://gist.github.com/stefanocudini/a5cde3c11c9b1f277368
         (function() {
             var control = new L.Control({position:'topleft'});
-            control.onAdd = function(map) {
+            control.onAdd = function() {
                     var azoom = L.DomUtil.create('a','resetzoom');
                     azoom.innerHTML = "<span title='" + gettext("Zoom to show all data on this map.") + "' style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>";
                     L.DomEvent
@@ -127,7 +124,7 @@ const map = {
                             let bounds = map.polygons.getBounds();
                             bounds.extend(map.markers.getBounds());
 
-                            map.fitBounds(bounds,
+                            map.map.fitBounds(bounds,
                                 {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
                         }, azoom);
                     return azoom;
@@ -559,6 +556,7 @@ const map = {
                 }
             });
             map.markers.eachLayer(function (layer) {
+
                 if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                     layer.setStyle(map.searchResultStyle(layer.feature));
                 } else {
@@ -753,7 +751,7 @@ const map = {
         } else {
             // trigger load of organization data and jump to Report view.
             location.href = '#report';
-            vueReport.selected = organization_id;
+            vueReport.selected = {'id': organization_id};
         }
     },
 

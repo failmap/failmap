@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="description" content="Security issues of organizations in {{ country }} displayed a map">
 
-    <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=5, user-scalable=yes, minimal-ui">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, minimal-ui">
     <meta name="theme-color" content="Tomato"/>
 
     <!-- export variables to javascript from server configuration -->
@@ -58,6 +58,7 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/bootstrap-select-1.13.7/bootstrap-select.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/MarkerCluster.map.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
@@ -65,6 +66,7 @@
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% if debug %}
         <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue-select-2.6.0.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/bootstrap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/leaflet-src.js' %}"></script>
@@ -72,8 +74,6 @@
         <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster-src.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/fontawesome.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
@@ -81,6 +81,7 @@
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
     {% else %}{% compress js %}
         <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue-select-2.6.0.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
@@ -88,8 +89,6 @@
         <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/fontawesome.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/fontawesome-all.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
@@ -113,7 +112,9 @@
 
 <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
     <div class="container">
-    <a class="navbar-brand" href="#"><i class="fas fa-map-marker-alt"></i> {% trans "Map" %}</a>
+    <a class="navbar-brand" href="#">
+        <svg class="svg-inline--fa fa-map-marker-alt fa-w-12" aria-hidden="true" data-prefix="fas" data-icon="map-marker-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path></svg>
+        {% trans "Map" %}</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -121,29 +122,43 @@
         <ul class="navbar-nav mr-auto">
 
             {% if config.SHOW_INTRO %}
-            <li class="nav-item"><a class="nav-link" href="#info"><i class="fas fa-info-circle"></i> {% trans "Info" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#info">
+                <svg class="svg-inline--fa fa-info-circle fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg>
+                {% trans "Info" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_CHARTS %}
-            <li class="nav-item"><a class="nav-link" href="#charts"><i class="fas fa-list-ol"></i> {% trans "Charts" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#charts">
+                <svg class="svg-inline--fa fa-list-ol fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="list-ol" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
+                {% trans "Charts" %}</a></li>
             {% endif %}
 
-            <li class="nav-item"><a class="nav-link" href="#reports"><i class="far fa-file-alt"></i> {% trans "Reports" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#reports">
+                <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
+                {% trans "Reports" %}</a></li>
 
             {% if config.SHOW_EXTENSIVE_STATISTICS %}
-            <li class="nav-item"><a class="nav-link" href="#extensive_statistics"><i class="fas fa-chart-area"></i> {% trans "Statistics" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#extensive_statistics">
+                <svg class="svg-inline--fa fa-chart-area fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="chart-area" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M500 384c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v308h436zM372.7 159.5L288 216l-85.3-113.7c-5.1-6.8-15.5-6.3-19.9 1L96 248v104h384l-89.9-187.8c-3.2-6.5-11.4-8.7-17.4-4.7z"></path></svg>
+                {% trans "Statistics" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info"><i class='fas fa-comments'></i> {% trans "Comply or explain" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info">
+                <svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg>
+                {% trans "Comply or explain" %}</a></li>
             {% endif %}
 
             {% if config.SHOW_SCAN_SCHEDULE %}
-            <li class="nav-item"><a class="nav-link" href="#schedule"><i class="far fa-clock"></i> {% trans "Scan schedule" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#schedule">
+                <svg class="svg-inline--fa fa-clock fa-w-16" aria-hidden="true" data-prefix="far" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
+                {% trans "Scan schedule" %}</a></li>
             {%  endif %}
 
             {% if config.SHOW_DATASETS %}
-            <li class="nav-item"><a class="nav-link" href="#datasets"><i class="fas fa-download"></i> {% trans "Datasets" %}</a></li>
+            <li class="nav-item"><a class="nav-link" href="#datasets">
+                <svg class="svg-inline--fa fa-download fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="download" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg>
+                {% trans "Datasets" %}</a></li>
             {% endif %}
         </ul>
         {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
@@ -164,7 +179,14 @@
     {% if number_of_countries > 1 %}
     <nav class="navbar navbar-expand-md navbar-light" id="countrynavbar">
         <div class="container">
-            <div class="collapse navbar-collapse">
+            <a class="navbar-brand" href="#">
+            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="globe" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="svg-inline--fa fa-globe fa-w-16"><path fill="currentColor" d="M336.5 160C322 70.7 287.8 8 248 8s-74 62.7-88.5 152h177zM152 256c0 22.2 1.2 43.5 3.3 64h185.3c2.1-20.5 3.3-41.8 3.3-64s-1.2-43.5-3.3-64H155.3c-2.1 20.5-3.3 41.8-3.3 64zm324.7-96c-28.6-67.9-86.5-120.4-158-141.6 24.4 33.8 41.2 84.7 50 141.6h108zM177.2 18.4C105.8 39.6 47.8 92.1 19.3 160h108c8.7-56.9 25.5-107.8 49.9-141.6zM487.4 192H372.7c2.1 21 3.3 42.5 3.3 64s-1.2 43-3.3 64h114.6c5.5-20.5 8.6-41.8 8.6-64s-3.1-43.5-8.5-64zM120 256c0-21.5 1.2-43 3.3-64H8.6C3.2 212.5 0 233.8 0 256s3.2 43.5 8.6 64h114.6c-2-21-3.2-42.5-3.2-64zm39.5 96c14.5 89.3 48.7 152 88.5 152s74-62.7 88.5-152h-177zm159.3 141.6c71.4-21.2 129.4-73.7 158-141.6h-108c-8.8 56.9-25.6 107.8-50 141.6zM19.3 352c28.6 67.9 86.5 120.4 158 141.6-24.4-33.8-41.2-84.7-50-141.6h-108z" class=""></path></svg>
+            {% trans "Countries" %}
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#countrycollapse" aria-controls="countrycollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="countrycollapse">
                 <ul class="navbar-nav mr-auto">
 
                     {% for country in initial_countries %}
@@ -185,11 +207,20 @@
 
     <nav class="navbar navbar-expand-md navbar-light" id="layernavbar" v-if="layers.length > 1" v-cloak>
         <div class="container">
-            <div class="collapse navbar-collapse">
+            <a class="navbar-brand" href="#">
+            <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="layer-group" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-layer-group fa-w-16"><path fill="currentColor" d="M12.41 148.02l232.94 105.67c6.8 3.09 14.49 3.09 21.29 0l232.94-105.67c16.55-7.51 16.55-32.52 0-40.03L266.65 2.31a25.607 25.607 0 0 0-21.29 0L12.41 107.98c-16.55 7.51-16.55 32.53 0 40.04zm487.18 88.28l-58.09-26.33-161.64 73.27c-7.56 3.43-15.59 5.17-23.86 5.17s-16.29-1.74-23.86-5.17L70.51 209.97l-58.1 26.33c-16.55 7.5-16.55 32.5 0 40l232.94 105.59c6.8 3.08 14.49 3.08 21.29 0L499.59 276.3c16.55-7.5 16.55-32.5 0-40zm0 127.8l-57.87-26.23-161.86 73.37c-7.56 3.43-15.59 5.17-23.86 5.17s-16.29-1.74-23.86-5.17L70.29 337.87 12.41 364.1c-16.55 7.5-16.55 32.5 0 40l232.94 105.59c6.8 3.08 14.49 3.08 21.29 0L499.59 404.1c16.55-7.5 16.55-32.5 0-40z" class=""></path></svg>
+            {% trans "Layers" %}
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#layercollapse" aria-controls="layercollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="layercollapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item" v-for="(x, key) in layers" v-bind:class="[selected_layer == x ? 'selected_layer' : '']">
                         <a class="nav-link" v-on:click="set_layer(x)">
-                            {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}</a>
+                            {% verbatim %}{{ translate("category_menu_" + x) }}{% endverbatim %}
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -199,14 +230,15 @@
     {% if debug or admin %}
     <nav class="navbar navbar-expand-md navbar-light">
         <div class="container">
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
+            Debug
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         <div class="collapse navbar-collapse" id="adminbarcollapse">
             <ul class="navbar-nav mr-auto">
 
                 {% if debug %}
-                <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'><i class="fas fa-bug"></i> {% trans "DEBUG" %}</span></li>
+                <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'>{% trans "DEBUG" %}</span></li>
                 {% endif %}
 
             </ul>
@@ -238,7 +270,7 @@
    <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <i class="fas fa-bell"></i> {{ config.ANNOUNCEMENT|safe }}
+                <svg class="svg-inline--fa fa-bell fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="bell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.884 366.059C411.634 343.809 384 316.118 384 208c0-79.394-57.831-145.269-133.663-157.83A31.845 31.845 0 0 0 256 32c0-17.673-14.327-32-32-32s-32 14.327-32 32c0 6.75 2.095 13.008 5.663 18.17C121.831 62.731 64 128.606 64 208c0 108.118-27.643 135.809-49.893 158.059C-16.042 396.208 5.325 448 48.048 448H160c0 35.346 28.654 64 64 64s64-28.654 64-64h111.943c42.638 0 64.151-51.731 33.941-81.941zM224 472a8 8 0 0 1 0 16c-22.056 0-40-17.944-40-40h16c0 13.234 10.766 24 24 24z"></path></svg> {{ config.ANNOUNCEMENT|safe }}
             </div>
         </div>
     </div>
@@ -254,7 +286,9 @@
     <div class="container theme-showcase" role="main">
         <a name="info" class="jumptonav"></a>
         <div class="jumbotron">
-            <h1 class="display-4"><i class="fas fa-info-circle"></i> {% trans "What do i see?" %}</h1>
+            <h1 class="display-4">
+                <svg class="svg-inline--fa fa-info-circle fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg>
+                {% trans "What do i see?" %}</h1>
             <p class="lead">{% trans "whats do i see explained" %}</p>
             <p>{% blocktrans with RESPONSIBLE_ORGANIZATION_NAME=config.RESPONSIBLE_ORGANIZATION_NAME PROJECT_ISSUE_MAIL=config.PROJECT_ISSUE_MAIL %} This website is run by {{ RESPONSIBLE_ORGANIZATION_NAME }}. To submit new domains, or ask questions, contact us via: {{ PROJECT_ISSUE_MAIL }}.{% endblocktrans %}</p>
         </div>
@@ -270,7 +304,9 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="charts" class="jumptonav"></a>
-                <h2><i class="fas fa-list-ol"></i> {% trans "Charts" %}</h2>
+                <h2>
+                    <svg class="svg-inline--fa fa-list-ol fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="list-ol" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
+                    {% trans "Charts" %}</h2>
                 <p>{% trans "Chart introduction" %}</p>
                 <p></p>
             </div>
@@ -288,54 +324,54 @@
 <section name="report">
     <div class="container">
         <div class="page-header" id="report">
-            <div>
-                <div class="page-header">
-                    <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                    <a name="reports" id="report-anchor" class="jumptonav"></a>
-                    <h2><span class="organization_points"></span><i class="far fa-file-alt"></i> {% trans "Report" %}</h2>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        {% trans "Show report for organization" %}:
-                        {% verbatim %}
-                        <select v-model="selected">
-                            <option v-for="organization in organizations" :value="organization.name">
-                                {{ organization.name }}
-                            </option>
-                        </select>
-                        <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span>
-                        {% endverbatim %}
-                        <br />
-                    </div>
-                </div>
-                <br /><br />
-                <div class="row">
-                    <div v-if="name" id="reportcontent" class="col-md-12">
-                        <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
-                        <br/>
-                        <a @click="closereport()" class="btn btn-primary" style="color:white;"><i class="fas fa-times"></i> {% trans "close report" %}</a>
-                        <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><i class="fas fa-print"></i> {% trans "print report" %}</a>
-                        <br style="clear: both">
-                        <i>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</i><br/>
-                        <br/>
-                        <ul>
-                        <li v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}
-                        </li>
-                        <li>{% trans "RSS change feed teaser" %}
-                        <a :href="'/data/updates_on_organization_feed/' + selected"
-                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</li>
-                        <li>
-                        {% trans "Report ask domains leader" %} <a
-                            :href="'mailto:{{ config.PROJECT_ISSUE_MAIL }}?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a><br/>
-                        </li>
-                        </ul>
-                        <br style="clear: both">
 
-                        {% include "map/shared_report_contents.html" %}
+            <div class="page-header">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                <a name="reports" id="report-anchor" class="jumptonav"></a>
+                <h2><span class="organization_points"></span>
+                    <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
+                    {% trans "Report" %}</h2>
+            </div>
 
-                    </div>
+            <div class="row">
+                <div class="col-md-12">
+                    {% trans "Show report for organization" %}:
+                    {% verbatim %}
+                    <v-select label="name" v-model="selected" :options="organizations"></v-select>
+                    <span v-if='loading'><div class="loader"></div></span>
+                    {% endverbatim %}
+                    <br />
                 </div>
             </div>
+
+            <br style="clear: both;">
+            <br style="clear: both;">
+            <br style="clear: both;">
+
+            <div class="page-header" v-if="name">
+                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
+                <a name="reports" id="report-anchor" class="jumptonav"></a>
+                <h2>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h2>
+                <p>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</p>
+                <p v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}</p>
+            </div>
+
+            <div class="row" v-if="name" style="margin-bottom: 30px;">
+                <div  class="col-md-3">
+                    <a @click="closereport()" class="btn btn-danger" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="" class="svg-inline--fa fa-times fa-w-12"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg> {% trans "close report" %}</a>
+                </div>
+                <div  class="col-md-3">
+                    <a @click="printreport('report')" class="btn btn-primary" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="print" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-print fa-w-16"><path fill="currentColor" d="M464 192h-16V81.941a24 24 0 0 0-7.029-16.97L383.029 7.029A24 24 0 0 0 366.059 0H88C74.745 0 64 10.745 64 24v168H48c-26.51 0-48 21.49-48 48v132c0 6.627 5.373 12 12 12h52v104c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V384h52c6.627 0 12-5.373 12-12V240c0-26.51-21.49-48-48-48zm-80 256H128v-96h256v96zM128 224V64h192v40c0 13.2 10.8 24 24 24h40v96H128zm304 72c-13.254 0-24-10.746-24-24s10.746-24 24-24 24 10.746 24 24-10.746 24-24 24z"></path></svg> {% trans "print report" %}</a>
+                </div>
+                <div  class="col-md-3">
+                    <a :href="'/data/updates_on_organization_feed/' + selected" target="_blank" class="btn btn-warning" style="color:white;  width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="rss" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-rss fa-w-14"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg> {% trans "rss feed" %}</a>
+                </div>
+                <div  class="col-md-3">
+                    <a class="btn btn-success" style="color:white; width: 100%" :href="'mailto:{{ config.PROJECT_ISSUE_MAIL }}?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a>
+                </div>
+            </div>
+
+            {% include "map/shared_report_contents.html" %}
         </div>
     </div>
 </section>
@@ -349,7 +385,9 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="extensive_statistics" class="jumptonav"></a>
-                <h2><i class="fas fa-chart-area"></i> {% trans "Extensive statistics" %}</h2>
+                <h2><svg class="svg-inline--fa fa-chart-area fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="chart-area" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M500 384c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v308h436zM372.7 159.5L288 216l-85.3-113.7c-5.1-6.8-15.5-6.3-19.9 1L96 248v104h384l-89.9-187.8c-3.2-6.5-11.4-8.7-17.4-4.7z"></path></svg>
+                    {% trans "Extensive statistics" %}
+                </h2>
             </div>
             <div class="row">
                 <div class="col-md-6">
@@ -378,37 +416,39 @@
                         </div>
                     </div>
 
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th width="25%">{% trans "When" %}</th>
-                            <th width="5%">{% trans "Number" %}</th>
-                            <th width="20%">{% trans "Good" %}</th>
-                            <th width="20%">{% trans "Average" %}</th>
-                            <th width="20%">{% trans "Bad" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody v-if="data.data">
-                        {% verbatim %}
-                        <tr v-for="(x, key) in data.data">
-                            <td>{{ translate(key) }}</td>
-                            <td>{{ x["included_organizations"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green percentage'] + '%, transparent ' + x['green percentage'] + '%, transparent 100%);'">
-                                {{ x["green"] }}
-                                <small>({{ x["green percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange percentage'] + '%, transparent ' + x['orange percentage'] + '%, transparent 100%);'">
-                                {{ x["orange"] }}
-                                <small>({{ x["orange percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red percentage'] + '%, transparent ' + x['red percentage'] + '%, transparent 100%);'">
-                                {{ x["red"] }}
-                                <small>({{ x["red percentage"] }}%)</small>
-                            </td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th width="25%">{% trans "When" %}</th>
+                                <th width="5%">{% trans "Number" %}</th>
+                                <th width="20%">{% trans "Good" %}</th>
+                                <th width="20%">{% trans "Average" %}</th>
+                                <th width="20%">{% trans "Bad" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="data.data">
+                            {% verbatim %}
+                            <tr v-for="(x, key) in data.data">
+                                <td>{{ translate(key) }}</td>
+                                <td>{{ x["included_organizations"] }}</td>
+                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green percentage'] + '%, transparent ' + x['green percentage'] + '%, transparent 100%);'">
+                                    {{ x["green"] }}
+                                    <small>({{ x["green percentage"] }}%)</small>
+                                </td>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange percentage'] + '%, transparent ' + x['orange percentage'] + '%, transparent 100%);'">
+                                    {{ x["orange"] }}
+                                    <small>({{ x["orange percentage"] }}%)</small>
+                                </td>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red percentage'] + '%, transparent ' + x['red percentage'] + '%, transparent 100%);'">
+                                    {{ x["red"] }}
+                                    <small>({{ x["red percentage"] }}%)</small>
+                                </td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <div class="progress">
@@ -422,37 +462,39 @@
                             <span class='sr-only'>{% trans "stats remark red" %}</span>
                         </div>
                     </div>
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th width="25%">{% trans "When" %}</th>
-                            <th width="5%">{% trans "Number" %}</th>
-                            <th width="20%">{% trans "Good" %}</th>
-                            <th width="20%">{% trans "Average" %}</th>
-                            <th width="20%">{% trans "Bad" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody v-if="data.data">
-                        {% verbatim %}
-                        <tr v-for="(x, key) in data.data">
-                            <td>{{ translate(key) }}</td>
-                            <td>{{ x["total_urls"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green url percentage'] + '%, transparent ' + x['green url percentage'] + '%, transparent 100%);'">
-                                {{ x["green_urls"] }}
-                                <small>({{ x["green url percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange url percentage'] + '%, transparent ' + x['orange url percentage'] + '%, transparent 100%);'">
-                                {{ x["orange_urls"] }}
-                                <small>({{ x["orange url percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red url percentage'] + '%, transparent ' + x['red url percentage'] + '%, transparent 100%);'">
-                                {{ x["red_urls"] }}
-                                <small>({{ x["red url percentage"] }}%)</small>
-                            </td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th width="25%">{% trans "When" %}</th>
+                                <th width="5%">{% trans "Number" %}</th>
+                                <th width="20%">{% trans "Good" %}</th>
+                                <th width="20%">{% trans "Average" %}</th>
+                                <th width="20%">{% trans "Bad" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody v-if="data.data">
+                            {% verbatim %}
+                            <tr v-for="(x, key) in data.data">
+                                <td>{{ translate(key) }}</td>
+                                <td>{{ x["total_urls"] }}</td>
+                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green url percentage'] + '%, transparent ' + x['green url percentage'] + '%, transparent 100%);'">
+                                    {{ x["green_urls"] }}
+                                    <small>({{ x["green url percentage"] }}%)</small>
+                                </td>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange url percentage'] + '%, transparent ' + x['orange url percentage'] + '%, transparent 100%);'">
+                                    {{ x["orange_urls"] }}
+                                    <small>({{ x["orange url percentage"] }}%)</small>
+                                </td>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red url percentage'] + '%, transparent ' + x['red url percentage'] + '%, transparent 100%);'">
+                                    {{ x["red_urls"] }}
+                                    <small>({{ x["red url percentage"] }}%)</small>
+                                </td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -469,68 +511,72 @@
             <div class="row" v-if="data.data && (issue_categories.includes('integrity') || issue_categories.includes('website'))">
                 <div class="col-md-6">
                     <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                        <table class="table" v-if="x['explained']">
-                            <thead>
-                            <tr>
-                                <th width="10%">{% trans "Technology" %}</th>
-                                <th width="50%">{% trans "Result" %}</th>
-                                <th width="40%">{% trans "Total" %}</th>
-                            </tr>
-                            </thead>
-                            <tbody v-for="issue in issues" v-if="issue.category.includes('integrity')">
+                        <div class="table-responsive">
+                            <table class="table" v-if="x['explained']">
+                                <thead>
                                 <tr>
-                                    <td colspan="3" v-html="translate(issue['name'])"></td>
+                                    <th width="10%">{% trans "Technology" %}</th>
+                                    <th width="50%">{% trans "Result" %}</th>
+                                    <th width="40%">{% trans "Total" %}</th>
                                 </tr>
-                                <tr class="redrow" v-for="grade in issue.statistics.bad">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                                <tr class="orangerow" v-for="grade in issue.statistics.medium">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                                <tr class="greenrow" v-for="grade in issue.statistics.good">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody v-for="issue in issues" v-if="issue.category.includes('integrity')">
+                                    <tr>
+                                        <td colspan="3" v-html="translate(issue['name'])"></td>
+                                    </tr>
+                                    <tr class="redrow" v-for="grade in issue.statistics.bad">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                    <tr class="orangerow" v-for="grade in issue.statistics.medium">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                    <tr class="greenrow" v-for="grade in issue.statistics.good">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                        <table class="table" v-if="x['explained']">
-                            <thead>
-                            <tr>
-                                <th width="10%">{% trans "Technology" %}</th>
-                                <th width="50%">{% trans "Result" %}</th>
-                                <th width="40%">{% trans "Total" %}</th>
-                            </tr>
-                            </thead>
-                            <tbody v-for="issue in issues" v-if="issue.category.includes('website')">
+                        <div class="table-responsive">
+                            <table class="table" v-if="x['explained']">
+                                <thead>
                                 <tr>
-                                    <td colspan="3" v-html="translate(issue['name'])"></td>
+                                    <th width="10%">{% trans "Technology" %}</th>
+                                    <th width="50%">{% trans "Result" %}</th>
+                                    <th width="40%">{% trans "Total" %}</th>
                                 </tr>
-                                <tr class="redrow" v-for="grade in issue.statistics.bad">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                                <tr class="orangerow" v-for="grade in issue.statistics.medium">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                                <tr class="greenrow" v-for="grade in issue.statistics.good">
-                                    <td></td>
-                                    <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody v-for="issue in issues" v-if="issue.category.includes('website')">
+                                    <tr>
+                                        <td colspan="3" v-html="translate(issue['name'])"></td>
+                                    </tr>
+                                    <tr class="redrow" v-for="grade in issue.statistics.bad">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                    <tr class="orangerow" v-for="grade in issue.statistics.medium">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                    <tr class="greenrow" v-for="grade in issue.statistics.good">
+                                        <td></td>
+                                        <td v-html="translate(grade.explanation)">:</td>
+                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -540,40 +586,42 @@
                     <h3>{% trans "Services" %}</h3>
                     <p>{% trans "Services explained" %}</p>
                         <p>{% trans "Number of service checked" %}</p>
-                        <table class="table table-striped" id="services_table">
-                            <thead>
-                                <tr>
-                                    <th @click="sortBy('ip_version')" :class="{ active: sortKey == 'ip_version' }">
-                                        {% trans "IP Version" %}
-                                        <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'">
-                                    </th>
-                                    <th @click="sortBy('protocol')" :class="{ active: sortKey == 'protocol' }">
-                                        {% trans "Protocol" %}
-                                        <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'">
-                                    </th>
-                                    <th @click="sortBy('port')" :class="{ active: sortKey == 'port' }">
-                                        {% trans "Port" %}
-                                        <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'">
-                                    </th>
-                                    <th @click="sortBy('amount')" :class="{ active: sortKey == 'amount' }">
-                                        {% trans "Amount" %}
-                                        <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'">
-                                    </th>
-                                    <th>{% trans "Percentage" %}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% verbatim %}
-                                <tr v-for="service in filteredData">
-                                    <td>{{ service['ip_version'] }}</td>
-                                    <td>{{ service['protocol'] }}</td>
-                                    <td>{{ service['port'] }}</td>
-                                    <td>{{ service['amount'] }}</td>
-                                    <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
-                                </tr>
-                                {% endverbatim %}
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="services_table">
+                                <thead>
+                                    <tr>
+                                        <th @click="sortBy('ip_version')" :class="{ active: sortKey == 'ip_version' }">
+                                            {% trans "IP Version" %}
+                                            <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'"></span>
+                                        </th>
+                                        <th @click="sortBy('protocol')" :class="{ active: sortKey == 'protocol' }">
+                                            {% trans "Protocol" %}
+                                            <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'"></span>
+                                        </th>
+                                        <th @click="sortBy('port')" :class="{ active: sortKey == 'port' }">
+                                            {% trans "Port" %}
+                                            <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'"></span>
+                                        </th>
+                                        <th @click="sortBy('amount')" :class="{ active: sortKey == 'amount' }">
+                                            {% trans "Amount" %}
+                                            <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'"></span>
+                                        </th>
+                                        <th>{% trans "Percentage" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% verbatim %}
+                                    <tr v-for="service in filteredData">
+                                        <td>{{ service['ip_version'] }}</td>
+                                        <td>{{ service['protocol'] }}</td>
+                                        <td>{{ service['port'] }}</td>
+                                        <td>{{ service['amount'] }}</td>
+                                        <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
+                                    </tr>
+                                    {% endverbatim %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
             </div>
             {% endif %}
@@ -685,29 +733,35 @@
             <div class="row">
                 <div class="col-md-6" v-for="issue in issues">
                     <h4 v-html="translate(issue.name)"></h4>
-                    <p>{% trans "RSS feed teaser" %} <a :href="'/data/feed/' + issue.name"
-                                                        target="_blank"> <i class="fas fa-rss"></i> {% trans "rss feed" %}</a>.</p>
+                    <p>{% trans "RSS feed teaser" %}
+                        <a :href="'/data/feed/' + issue.name" target="_blank">
+                        <svg aria-hidden="true" data-prefix="fas" data-icon="rss" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-rss fa-w-14"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg>
+                        {% trans "rss feed" %}
+                        </a>.
+                    </p>
 
-                    <table class="table table-striped changes">
-                        <thead>
-                        <tr>
-                            <th>{% trans "Scan moment" %}</th>
-                            <th>{% trans "Url" %}</th>
-                        </tr>
-                        </thead>
-                        <tbody v-for="scan in scans[issue['name']]">
-                        {% verbatim %}
-                        <tr :class="rowcolor(scan)">
-                            <td class="date">{{ scan.last_scan_humanized }}</td>
-                            <td class="url">{{ scan.url }}</td>
-                        </tr>
-                        <tr>
-                            <td class="service">{{ scan.service }}</td>
-                            <td colspan="2" class="explanation">{{ translate(scan.explanation) }}</td>
-                        </tr>
-                        {% endverbatim %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-striped changes">
+                            <thead>
+                            <tr>
+                                <th>{% trans "Scan moment" %}</th>
+                                <th>{% trans "Url" %}</th>
+                            </tr>
+                            </thead>
+                            <tbody v-for="scan in scans[issue['name']]">
+                            {% verbatim %}
+                            <tr :class="rowcolor(scan)">
+                                <td class="date">{{ scan.last_scan_humanized }}</td>
+                                <td class="url">{{ scan.url }}</td>
+                            </tr>
+                            <tr>
+                                <td class="service">{{ scan.service }}</td>
+                                <td colspan="2" class="explanation">{{ translate(scan.explanation) }}</td>
+                            </tr>
+                            {% endverbatim %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>
@@ -724,7 +778,7 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="comply_or_explain_info" class="jumptonav"></a>
-                <h2><i class='fas fa-comments'></i> {% trans "Comply or explain" %}</h2>
+                <h2><svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg> {% trans "Comply or explain" %}</h2>
                 <p>
                 {% trans "Comply or explain introduction" %}
                     {% if config.SHOW_DATASETS %}
@@ -773,7 +827,8 @@
                         <ul style="padding-left: 0px">
                             <li v-for="organization in explain.organizations" class="explain_reports">
                                 <a @click="showreport(organization.id)" :title="'View report for ' + organization.name">
-                                <i class="far fa-file-alt"></i> {% verbatim %}{{ organization.name }}{% endverbatim %}
+                                <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
+                                    {% verbatim %}{{ organization.name }}{% endverbatim %}
                                 </a>
                             </li>
                         </ul>
@@ -807,7 +862,10 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="schedule" class="jumptonav"></a>
-                <h2><i class="far fa-clock"></i> {% trans "Scan schedule" %}</h2>
+                <h2>
+                    <svg class="svg-inline--fa fa-clock fa-w-16" aria-hidden="true" data-prefix="far" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
+                    {% trans "Scan schedule" %}
+                </h2>
                 {% trans "Below scans and tasks will be performed in the future. This can help you getting a better perspective on when updates will be hapening to your organization. Note that all times are approximate due to caching and rounding. The time listed is the time the scan starts, it might take a while before your organization is scanned." %}
                 <p></p>
             </div>
@@ -832,7 +890,9 @@
             <div class="page-header">
                 <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
                 <a name="datasets" class="jumptonav"></a>
-                <h2><i class="fas fa-download"></i> {% trans "Datasets" %}</h2>
+                <h2>
+                    <svg class="svg-inline--fa fa-download fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="download" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg>
+                    {% trans "Datasets" %}</h2>
                 {% trans "Datasets explanation" %}
                 <p></p>
             </div>
@@ -841,29 +901,41 @@
                     <table style="width:100%" class="table table-striped">
                         <thead>
                             <tr>
-                                <th colspan="2"><h3><i class="fas fa-chart-pie"></i> {% verbatim %}{{ translate("category_menu_" + layer) }}{% endverbatim %}</h3></th>
+                                <th colspan="2"><h3>
+                                    <svg aria-hidden="true" data-prefix="fas" data-icon="chart-pie" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg="" class="svg-inline--fa fa-chart-pie fa-w-18"><path fill="currentColor" d="M288 12.3V240h227.7c6.9 0 12.3-5.8 12-12.7-6.4-122.4-104.5-220.6-227-227-6.9-.3-12.7 5.1-12.7 12zM552.7 288c6.9 0 12.3 5.8 12 12.7-2.8 53.2-23.2 105.6-61.2 147.8-4.6 5.1-12.6 5.4-17.5.5L325 288h227.7zM401 433c4.8 4.8 4.7 12.8-.4 17.3-42.6 38.4-99 61.7-160.8 61.7C107.6 511.9-.2 403.8 0 271.5.2 143.4 100.8 38.9 227.3 32.3c6.9-.4 12.7 5.1 12.7 12V272l161 161z"></path></svg>
+                                    {% verbatim %}{{ translate("category_menu_" + layer) }}{% endverbatim %}</h3></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <th><i class="fas fa-list-ul"></i> {% trans "Only urls" %}</th>
+                                <th>
+                                    <svg aria-hidden="true" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-list-ul fa-w-16"><path fill="currentColor" d="M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
+                                    {% trans "Only urls" %}</th>
                                 <td>⬇️ <a :href="create_link(layer, 'urls_only')">{% trans "Download" %}</a></td>
                             </tr><tr>
-                                <th><i class="fas fa-city"></i> {% trans "Organization types" %}*</th>
+                                <th>
+                                    <svg aria-hidden="true" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-list-ul fa-w-16"><path fill="currentColor" d="M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
+                                    {% trans "Organization types" %}*</th>
                                 <td>⬇️ <a :href="create_link(layer, 'organization_types')">{% trans "Download" %}</a></td>
                             </tr><tr>
-                                <th><i class="fas fa-building"></i> {% trans "Organizations" %}*</th>
+                                <th>
+                                    <svg aria-hidden="true" data-prefix="fas" data-icon="building" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-building fa-w-14"><path fill="currentColor" d="M436 480h-20V24c0-13.255-10.745-24-24-24H56C42.745 0 32 10.745 32 24v456H12c-6.627 0-12 5.373-12 12v20h448v-20c0-6.627-5.373-12-12-12zM128 76c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12V76zm0 96c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40zm52 148h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12zm76 160h-64v-84c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v84zm64-172c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40zm0-96c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40zm0-96c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12V76c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40z"></path></svg>
+                                    {% trans "Organizations" %}*</th>
                                 <td>⬇️ <a :href="create_link(layer, 'organizations')">{% trans "Download" %}</a></td>
                             </tr><tr>
-                                <th><i class="fas fa-map-marker-alt"></i> {% trans "Map Data" %}*</th>
+                                <th>
+                                    <svg class="svg-inline--fa fa-map-marker-alt fa-w-12" aria-hidden="true" data-prefix="fas" data-icon="map-marker-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path></svg>
+                                    {% trans "Map Data" %}*</th>
                                 <td>⬇️ <a :href="create_link(layer, 'coordinates')">{% trans "Download" %}</a></td>
                             </tr><tr>
-                                <th><i class="far fa-compass"></i> {% trans "Urls" %}*</th>
+                                <th>
+                                    <svg aria-hidden="true" data-prefix="far" data-icon="compass" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-compass fa-w-16"><path fill="currentColor" d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 448c-110.532 0-200-89.451-200-200 0-110.531 89.451-200 200-200 110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200zm91.326-312.131l-33.359 137.779a24.005 24.005 0 0 1-6.772 11.729l-102.64 97.779c-17.104 16.293-45.56.434-39.88-23.024l33.359-137.779a23.997 23.997 0 0 1 6.772-11.729l102.642-97.779c17.285-16.47 45.494-.175 39.878 23.024zM256 224c-17.673 0-32 14.327-32 32s14.327 32 32 32 32-14.327 32-32-14.327-32-32-32z"></path></svg>
+                                    {% trans "Urls" %}*</th>
                                 <td>⬇️ <a :href="create_link(layer, 'urls')">{% trans "Download" %}</a></td>
                             </tr>
                             {% if config.SHOW_COMPLY_OR_EXPLAIN %}
                                 <tr>
-                                    <th><i class="fas fa-comments"></i>  {% trans "Explanations" %}</th>
+                                    <th><svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg>  {% trans "Explanations" %}</th>
                                     <td>⬇️ <a :href="create_link(layer, 'explains')">{% trans "Download" %}️</a></td>
                                 </tr>
                             {% endif %}
@@ -898,10 +970,11 @@
                 {% endif %}
 
                 <ul>
-                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
-                    <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_MAIL }}" target="_blank">
+                        <svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
+                    <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
                     {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                        <li>{% trans "Comply or explain" %}: <a href="mailto:{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}" target="_blank"><i class="fas fa-envelope-square"></i></a></li>
+                        <li>{% trans "Comply or explain" %}: <a href="mailto:{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
                     {%  endif %}
 
                     <li>
@@ -909,11 +982,11 @@
                             {% trans "Also on social media" %}:
 
                             {% if config.PROJECT_TWITTER %}
-                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><i class="fab fa-twitter-square"></i></a>
+                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><svg class="svg-inline--fa fa-twitter-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="twitter-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"></path></svg></a>
                             {% endif %}
 
                             {% if config.PROJECT_FACEBOOK %}
-                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><i class="fab fa-facebook-square"></i></a>
+                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><svg class="svg-inline--fa fa-facebook-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="facebook-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M448 80v352c0 26.5-21.5 48-48 48h-85.3V302.8h60.6l8.7-67.6h-69.3V192c0-19.6 5.4-32.9 33.5-32.9H384V98.7c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9H184v67.6h60.9V480H48c-26.5 0-48-21.5-48-48V80c0-26.5 21.5-48 48-48h352c26.5 0 48 21.5 48 48z"></path></svg></a>
                             {% endif %}
 
                         {% endif %}
@@ -955,27 +1028,27 @@
 
                     <li>{% trans "Contact" %}:
                         {% if config.RESPONSIBLE_ORGANIZATION_MAIL %}
-                        <a href="mailto:{{ config.RESPONSIBLE_ORGANIZATION_MAIL }}" target="_blank"><i class="fas fa-envelope-square"></i></a>
+                        <a href="mailto:{{ config.RESPONSIBLE_ORGANIZATION_MAIL }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_TWITTER %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank" rel="noopener"><i class="fab fa-twitter-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank" rel="noopener"><svg class="svg-inline--fa fa-twitter-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="twitter-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"></path></svg></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_FACEBOOK %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank" rel="noopener"><i class="fab fa-facebook-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank" rel="noopener"><svg class="svg-inline--fa fa-facebook-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="facebook-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M448 80v352c0 26.5-21.5 48-48 48h-85.3V302.8h60.6l8.7-67.6h-69.3V192c0-19.6 5.4-32.9 33.5-32.9H384V98.7c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9H184v67.6h60.9V480H48c-26.5 0-48-21.5-48-48V80c0-26.5 21.5-48 48-48h352c26.5 0 48 21.5 48 48z"></path></svg></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_LINKEDIN %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank" rel="noopener"><i class="fas fa-linkedin"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="linkedin" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-linkedin fa-w-14"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" class=""></path></svg></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_WHATSAPP %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank" rel="noopener"><i class="fab fa-whatsapp-square"></i></a>
+                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="whatsapp-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-whatsapp-square fa-w-14"><path fill="currentColor" d="M224 122.8c-72.7 0-131.8 59.1-131.9 131.8 0 24.9 7 49.2 20.2 70.1l3.1 5-13.3 48.6 49.9-13.1 4.8 2.9c20.2 12 43.4 18.4 67.1 18.4h.1c72.6 0 133.3-59.1 133.3-131.8 0-35.2-15.2-68.3-40.1-93.2-25-25-58-38.7-93.2-38.7zm77.5 188.4c-3.3 9.3-19.1 17.7-26.7 18.8-12.6 1.9-22.4.9-47.5-9.9-39.7-17.2-65.7-57.2-67.7-59.8-2-2.6-16.2-21.5-16.2-41s10.2-29.1 13.9-33.1c3.6-4 7.9-5 10.6-5 2.6 0 5.3 0 7.6.1 2.4.1 5.7-.9 8.9 6.8 3.3 7.9 11.2 27.4 12.2 29.4s1.7 4.3.3 6.9c-7.6 15.2-15.7 14.6-11.6 21.6 15.3 26.3 30.6 35.4 53.9 47.1 4 2 6.3 1.7 8.6-1 2.3-2.6 9.9-11.6 12.5-15.5 2.6-4 5.3-3.3 8.9-2 3.6 1.3 23.1 10.9 27.1 12.9s6.6 3 7.6 4.6c.9 1.9.9 9.9-2.4 19.1zM400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zM223.9 413.2c-26.6 0-52.7-6.7-75.8-19.3L64 416l22.5-82.2c-13.9-24-21.2-51.3-21.2-79.3C65.4 167.1 136.5 96 223.9 96c42.4 0 82.2 16.5 112.2 46.5 29.9 30 47.9 69.8 47.9 112.2 0 87.4-72.7 158.5-160.1 158.5z" class=""></path></svg></a>
                         {% endif %}
 
                         {% if config.RESPONSIBLE_ORGANIZATION_PHONE %}
-                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank" rel="noopener"><i class="fas fa-phone-square"></i></a>
+                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="phone-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-phone-square fa-w-14"><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM94 416c-7.033 0-13.057-4.873-14.616-11.627l-14.998-65a15 15 0 0 1 8.707-17.16l69.998-29.999a15 15 0 0 1 17.518 4.289l30.997 37.885c48.944-22.963 88.297-62.858 110.781-110.78l-37.886-30.997a15.001 15.001 0 0 1-4.289-17.518l30-69.998a15 15 0 0 1 17.16-8.707l65 14.998A14.997 14.997 0 0 1 384 126c0 160.292-129.945 290-290 290z" class=""></path></svg></a>
                         {% endif %}
                     </li>
                 </ul>
@@ -991,26 +1064,19 @@
     </div>
 </div>
 {% endif %}
-
-<!--
-<div id="viewmore">
-    <span><a href="#info"><i class="fas fa-chevron-circle-down"></i> {% trans "Review many more details below!" %} <i class="fas fa-chevron-circle-down"></i></a></span>
-</div>
--->
-
 </body>
 
 <script type="x-template" id="fullscreenreport">
     <div class="page-header" id="fullscreenreport" v-if="visible">
         <div v-if="name" class="fullscreenlayout">
             <p class="closebutton" onclick="vueFullScreenReport.hide()">
-                <i class="fas fa-window-close"></i>
+                [ x ]
             </p>
 
             <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
             <br />
-            <a onclick="vueFullScreenReport.hide()" class="btn btn-primary" style="color:white;"><i class="fas fa-times"></i> {% trans "close report" %}</a>
-            <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><i class="fas fa-print"></i> {% trans "print report" %}</a>
+            <a onclick="vueFullScreenReport.hide()" class="btn btn-primary" style="color:white;"><svg aria-hidden="true" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="" class="svg-inline--fa fa-times fa-w-12"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg> {% trans "close report" %}</a>
+            <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><svg aria-hidden="true" data-prefix="fas" data-icon="print" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-print fa-w-16"><path fill="currentColor" d="M464 192h-16V81.941a24 24 0 0 0-7.029-16.97L383.029 7.029A24 24 0 0 0 366.059 0H88C74.745 0 64 10.745 64 24v168H48c-26.51 0-48 21.49-48 48v132c0 6.627 5.373 12 12 12h52v104c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V384h52c6.627 0 12-5.373 12-12V240c0-26.51-21.49-48-48-48zm-80 256H128v-96h256v96zM128 224V64h192v40c0 13.2 10.8 24 24 24h40v96H128zm304 72c-13.254 0-24-10.746-24-24s10.746-24 24-24 24 10.746 24 24-10.746 24-24 24z"></path></svg> {% trans "print report" %}</a>
             <br /><br />
             {% include "map/shared_report_contents.html" %}
         </div>
@@ -1020,7 +1086,7 @@
 <script type="x-template" id="historycontrol_template">
     <div id="historycontrol" style="max-width: 300px; overflow:hidden;">
         <h4>{% trans "Moment" %}</h4>
-        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="fa fa-spinner fa-spin"></div></span></h5>
+        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="loader"></div></span></h5>
         <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
         <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt; {% trans "One week earlier" %}'/>
         <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;'/>

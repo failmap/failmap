@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-12 12:55+0000\n"
+"POT-Creation-Date: 2019-03-13 12:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
-#: websecmap/map/static/js/map.js websecmap/map/static/js/views.js
+#: websecmap/map/static/js/map.js
 msgid "View Full Screen"
 msgstr ""
 
@@ -222,6 +222,46 @@ msgstr ""
 msgid ""
 "Content-Security-Policy header found, which covers the security aspect of "
 "the X-XSS-Protection header."
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "STARTTLS Available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "STARTTLS Missing"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "SPF Available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "SPF Missing"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DKIM Available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DKIM Missing"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DMARC Available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DMARC Missing"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DANE Available"
+msgstr ""
+
+#: websecmap/map/static/js/script.js
+msgid "DANE Missing"
 msgstr ""
 
 #: websecmap/map/static/js/script.js
@@ -494,10 +534,6 @@ msgstr "medium"
 #: websecmap/map/static/js/views.js
 msgid "score low"
 msgstr "low"
-
-#: websecmap/map/static/js/views.js
-msgid "Exit Full Screen"
-msgstr ""
 
 #~ msgid "report_header_tls_qualys"
 #~ msgstr "Encrypted transport (https)"

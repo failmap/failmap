@@ -56,6 +56,16 @@ var dynamic_translations = function(){
     gettext('Certificate is trusted.');
     gettext('Content-Security-Policy header found, which covers the security aspect of the X-Frame-Options header.');
     gettext('Content-Security-Policy header found, which covers the security aspect of the X-XSS-Protection header.');
+    gettext('STARTTLS Available');
+    gettext('STARTTLS Missing');
+    gettext('SPF Available');
+    gettext('SPF Missing');
+    gettext('DKIM Available');
+    gettext('DKIM Missing');
+    gettext('DMARC Available');
+    gettext('DMARC Missing');
+    gettext('DANE Available');
+    gettext('DANE Missing');
 
     // some categories:
     gettext('category_menu_municipality');
@@ -127,6 +137,8 @@ var dynamic_translations = function(){
 
 let document_ready = function() {
     map.initialize(mapbox_token, country, debug);
+    Vue.component('v-select', VueSelect.VueSelect);
+
     views(); // start all vues
     lazyload(); // allow for lazy loading of images
 

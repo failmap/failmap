@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-12 12:55+0000\n"
+"POT-Creation-Date: 2019-03-13 12:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: websecmap/map/static/js/map.js websecmap/map/static/js/views.js
+#: websecmap/map/static/js/map.js
 msgid "View Full Screen"
 msgstr "Volledig scherm"
 
@@ -206,7 +206,7 @@ msgstr ""
 
 #: websecmap/map/static/js/script.js
 msgid "not trusted"
-msgstr ""
+msgstr "Certificaat wordt niet vertrouwd."
 
 #: websecmap/map/static/js/script.js
 msgid "trusted"
@@ -235,6 +235,46 @@ msgid ""
 msgstr ""
 "Content-Security-Policy header gevonden, deze header bevat ook de "
 "beveiligingsaspecten van de X-XSS-Protection header."
+
+#: websecmap/map/static/js/script.js
+msgid "STARTTLS Available"
+msgstr "STARTTLS Beschikbaar"
+
+#: websecmap/map/static/js/script.js
+msgid "STARTTLS Missing"
+msgstr "STARTTLS Onbtreekt"
+
+#: websecmap/map/static/js/script.js
+msgid "SPF Available"
+msgstr "SPF beschikbaar"
+
+#: websecmap/map/static/js/script.js
+msgid "SPF Missing"
+msgstr "SPF Ontbreekt"
+
+#: websecmap/map/static/js/script.js
+msgid "DKIM Available"
+msgstr "DKIM Beschikbaar"
+
+#: websecmap/map/static/js/script.js
+msgid "DKIM Missing"
+msgstr "DKIM Ontbreekt"
+
+#: websecmap/map/static/js/script.js
+msgid "DMARC Available"
+msgstr "DMARC Beschikbaar"
+
+#: websecmap/map/static/js/script.js
+msgid "DMARC Missing"
+msgstr "DMARC Ontbreekt"
+
+#: websecmap/map/static/js/script.js
+msgid "DANE Available"
+msgstr "DANE beschikbaar"
+
+#: websecmap/map/static/js/script.js
+msgid "DANE Missing"
+msgstr "DANE ontbreekt"
 
 #: websecmap/map/static/js/script.js
 msgid "category_menu_municipality"
@@ -378,7 +418,7 @@ msgstr "Voldoet"
 
 #: websecmap/map/static/js/script.js
 msgid "Broken"
-msgstr ""
+msgstr "Onveilig"
 
 #: websecmap/map/static/js/script.js
 msgid "TLS rated C"
@@ -402,11 +442,11 @@ msgstr ""
 
 #: websecmap/map/static/js/script.js
 msgid "Not at all"
-msgstr ""
+msgstr "Helemaal niet"
 
 #: websecmap/map/static/js/script.js
 msgid "Redirect from unsafe address"
-msgstr ""
+msgstr "Doorsturen naar veilig adres vanaf een onveilig adres."
 
 #: websecmap/map/static/js/script.js
 msgid "FTP Insecure"
@@ -507,9 +547,8 @@ msgstr "midden"
 msgid "score low"
 msgstr "laag"
 
-#: websecmap/map/static/js/views.js
-msgid "Exit Full Screen"
-msgstr "Sluit volledig scherm"
+#~ msgid "Exit Full Screen"
+#~ msgstr "Sluit volledig scherm"
 
 #~ msgid "Unknown"
 #~ msgstr "Onbekend"

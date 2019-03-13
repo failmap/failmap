@@ -435,7 +435,7 @@ const report_mixin = {
         twitter_handle: '',
         name: "",
         urls: Array,
-        selected: null,
+        selected: {'id': null, 'label': null, 'name': null},
         loading: false,
         visible: false,  // fullscreenreport
         promise: false,
@@ -1552,26 +1552,6 @@ function views(autoload_default_map_data=true) {
         }
     });
 
-
-    window.vueFullscreen = new Vue({
-        name: "fullscreen",
-
-        el: '#fullscreen',
-        data: {
-            fullscreen: gettext("View Full Screen")
-        },
-        methods: {
-            toggleFullScreen: function () {
-                map.map.toggleFullscreen(map.map.options);
-                if (vueFullscreen.fullscreen === gettext("View Full Screen")) {
-                    vueFullscreen.fullscreen = gettext("Exit Full Screen")
-                } else {
-                    vueFullscreen.fullscreen = gettext("View Full Screen")
-                }
-            }
-        }
-    });
-
     window.vueTopfail = new Vue({
         name: "topfail",
 
@@ -1930,7 +1910,7 @@ function views(autoload_default_map_data=true) {
             layers: [""],
             countries: [""],
             selected_layer: "",
-            selected_country: ""
+            selected_country: "",
         },
 
         mounted: function() {
@@ -2002,6 +1982,7 @@ function views(autoload_default_map_data=true) {
                     let organizations = vueMap.features.map(function (feature) {
                         return {
                             "id": feature.properties.organization_id,
+                            "label": feature.properties.organization_name,
                             "name": feature.properties.organization_name,
                             "slug": feature.properties.organization_slug
                         }
@@ -2017,7 +1998,7 @@ function views(autoload_default_map_data=true) {
         watch: {
             selected: function () {
                 // load selected organization id
-                this.load(this.selected);
+                this.load(this.selected.id);
             }
         }
 
@@ -2057,7 +2038,7 @@ function views(autoload_default_map_data=true) {
             },
             showreport(organization_id){
                 location.href = '#report';
-                vueReport.selected = organization_id;
+                vueReport.selected = {'id': organization_id};
             },
             showmore(){
                 if (this.more_explains.length > 3) {
