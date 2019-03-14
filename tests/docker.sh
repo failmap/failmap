@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -xe
 
@@ -28,7 +28,7 @@ docker run --rm --name websecmap-$$ -e "ALLOWED_HOSTS=$host" -p 8000 -d \
   production --migrate --loaddata development
 docker logs websecmap-$$ -f 2>&1 | awk '$0="docker: "$0' &
 logs_pid=$!
-trap "exit_cleanup" EXIT
+trap "exit_cleanup" EXIT INT QUIT HUP TERM ALRM USR1
 port="$(docker port websecmap-$$ 8000/tcp | cut -d: -f2)"
 
 # wait for server to be ready
