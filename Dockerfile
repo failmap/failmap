@@ -26,23 +26,6 @@ RUN apk --no-cache add \
   go \
   bash
 
-# install app and dependencies in a artifact-able directory
-RUN /usr/bin/pip3 install poetry virtualenv
-RUN virtualenv /pyenv
-ENV VIRTUAL_ENV = /pyenv
-ENV PATH=/pyenv/bin:$PATH
-
-# install requirements seperately as they change less often then source, improved caching
-COPY pyproject.toml poetry.lock README.md /source/
-COPY websecmap/ /source/websecmap/
-# copy pip cache to improve build speeds
-COPY ./.pip-cache/ /root/.cache/pip/
-WORKDIR /source
-# Install app by linking source into virtualenv. This is against convention
-# but allows the source to be overwritten by a volume during development.
-RUN poetry install -v --no-dev --extras deploy --develop websecmap
-WORKDIR /
-
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
 COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
@@ -54,6 +37,22 @@ RUN npm install osmtogeojson
 # build hypersh hypercli
 COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
 RUN cd /gopath/src/github.com/hyperhq/hypercli; GOPATH=/gopath HYPER_GITCOMMIT=0 ./build.sh
+
+RUN /usr/bin/pip3 install poetry virtualenv
+RUN virtualenv /pyenv
+ENV VIRTUAL_ENV = /pyenv
+ENV PATH=/pyenv/bin:$PATH
+
+COPY pyproject.toml poetry.lock README.md /source/
+COPY websecmap/ /source/websecmap/
+# copy pip cache to improve build speeds
+COPY ./.pip-cache/ /root/.cache/pip/
+WORKDIR /source
+# Install app and dependencies in a artifact-able directory
+# App is installed by linking source into virtualenv. This is against convention
+# but allows the source to be overwritten by a volume during development.
+RUN poetry install -v --no-dev --extras deploy --develop websecmap
+WORKDIR /
 
 # restart with a clean image
 FROM websecmap/o-saft:latest
@@ -125,11 +124,6 @@ COPY /tools/dnssec.pl /source/tools/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
-
-# copy all relevant files for python installation
-COPY websecmap/ /source/websecmap
-# add wildcard to version file as it may not exists (eg: local development)
-COPY README.md version* /source/
 
 WORKDIR /
 
