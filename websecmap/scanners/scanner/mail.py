@@ -81,7 +81,7 @@ def compose_task(
     **kwargs
 ) -> Task:
 
-    if not allowed_to_scan("mail"):
+    if not allowed_to_scan("internet_nl_mail"):
         return group()
 
     default_filter = {"is_dead": False, "not_resolvable": False, "dns_supports_mx": True}
@@ -127,7 +127,7 @@ def compose_discover_task(
     :return:
     """
 
-    if not allowed_to_scan("mail"):
+    if not allowed_to_scan("internet_nl_mail"):
         return group()
 
     default_filter = {"is_dead": False, "not_resolvable": False}
@@ -171,8 +171,31 @@ def find_mx_records(urls: List[Url]):
     resolver.nameservers = ['1.1.1.1', '8.8.8.8', '9.9.9.9', '208.67.222.222']
 
     for url in urls:
+        log.debug('Checking for MX at %s' % url)
         # a little delay to be friendly towards the server
         sleep(0.03)
+
+        try:
+            records = resolver.query(url.url, 'CNAME')
+
+            # CNAMES often give the impression that MX records are attached. This is not true.
+            # the CNAME points to a location that has MX records and those are returned.
+            # You can test this with `dig www.basisbeveiliging.nl mx`. You'll receive MX records
+            # for the TLD. So if this name is a CNAME, it doesn't have an MX record...
+            # ... it's a heuristic, and implementations may vary.
+            # The MX records for CNAMES might also be different per resolver... hooray.
+            if records:
+                log.debug("-- %s is a CNAME and might give problems with DKIM." % url)
+                continue
+
+        except NoAnswer:
+            log.debug("   %s is a not a CNAME and has the possibility of having a legit MX record." % url)
+        except NXDOMAIN as e:
+            log.debug("EX %s resulted in error: %s, skipping" % (url, str(e)))
+        except NoNameservers as e:
+            log.debug("EX %s Name server did not accept any more queries. Are you asking too much? %s" % (url, str(e)))
+            log.debug("Pausing, or add more DNS servers...")
+            sleep(20)
 
         try:
             records = resolver.query(url.url, 'MX')
