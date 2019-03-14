@@ -330,7 +330,7 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     scan_id = str(uuid.uuid4())
     urls = [url.url for url in urls]
     data = {"name": "Web Security Map Scan %s" % scan_id, "domains": urls}
-    answer = requests.post(API_URL_MAIL, json=data, auth=HTTPBasicAuth(username, password), timeout=(300, 300))
+    answer = requests.post(api_url, json=data, auth=HTTPBasicAuth(username, password), timeout=(300, 300))
     log.debug("Received answer from internet.nl: %s" % answer.content)
 
     answer = answer.json()
