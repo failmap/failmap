@@ -38,6 +38,7 @@ RUN npm install osmtogeojson
 COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
 RUN cd /gopath/src/github.com/hyperhq/hypercli; GOPATH=/gopath HYPER_GITCOMMIT=0 ./build.sh
 
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 RUN /usr/bin/pip3 install poetry virtualenv
 RUN virtualenv /pyenv
 ENV VIRTUAL_ENV = /pyenv

@@ -12,6 +12,7 @@ test: &test_template
 
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+    PIP_DISABLE_PIP_VERSION_CHECK: 1
   cache:
     paths:
       - "$CI_PROJECT_DIR/.pip-cache"
@@ -149,6 +150,7 @@ image_test:
 
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+    PIP_DISABLE_PIP_VERSION_CHECK: 1
     SYSTEM_TEST_TIMEOUT: "120"
     GIT_SUBMODULE_STRATEGY: recursive
   cache:
@@ -193,6 +195,7 @@ test_system:
 
   variables:
     SYSTEM_TEST_TIMEOUT: 120
+    PIP_DISABLE_PIP_VERSION_CHECK: 1
     IMAGE: websecmap/websecmap:build
 
   before_script:
