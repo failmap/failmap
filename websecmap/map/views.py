@@ -1034,7 +1034,10 @@ def vulnerability_graphs(request, country: str = "NL", organization_type="munici
 
         stats[statistic.scan_type].append({'high': statistic.high, 'medium': statistic.medium,
                                            'low': statistic.low, 'date': statistic.when.isoformat(),
-                                           'urls': statistic.urls, 'endpoints': statistic.endpoints})
+                                           'urls': statistic.urls, 'ok_urls': statistic.ok_urls,
+                                           'endpoints': statistic.endpoints, 'ok_endpoints': statistic.ok_endpoints,
+                                           'ok': statistic.ok
+                                           })
 
     return JsonResponse(stats, encoder=JSEncoder)
 

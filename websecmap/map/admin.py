@@ -366,7 +366,8 @@ class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.VulnerabilityStatistic)
 class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
-        'country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low', 'urls', 'endpoints')
+        'country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low',
+        'urls', 'ok_urls', 'endpoints', 'ok_endpoints', 'ok')
     list_filter = ['country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low'][::-1]
     search_fields = (['country', 'organization_type', 'scan_type'])
 

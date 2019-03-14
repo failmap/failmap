@@ -178,5 +178,10 @@ class VulnerabilityStatistic(models.Model):
     endpoints = models.PositiveIntegerField(default=0, blank=False, null=False,
                                             help_text="Makes only sense on the total number of vulnerabilities")
 
+    ok = models.PositiveIntegerField(default=0, blank=False, null=False,
+                                     help_text="Determines on the scan type what is stored here.")
+    ok_urls = models.PositiveIntegerField(default=0, blank=False, null=False)
+    ok_endpoints = models.PositiveIntegerField(default=0, blank=False, null=False)
+
     class Meta:
         managed = True

@@ -41,7 +41,7 @@ urlpatterns = [
     path('data/defaults/', views.get_defaults),
     path('data/default_layer_for_country/<c:country>/', views.get_default_layer_for_country),
     path('data/layers/<c:country>/', views.get_layers),
-    path('data/vulnstats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),
+    path('data/vulnerability_graphs/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),
     path('data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_fail),
     path('data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_win),
     path('data/latest_scans/<c:country>/<slug:organization_type>/<slug:scan_type>', views.latest_scans),

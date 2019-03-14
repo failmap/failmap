@@ -28,12 +28,12 @@
         <br style="clear: both">
 
         <div class="chart-container" style="position: relative; height:555px; width:100%">
-            <canvas id="organization_vulnerability_timeline"></canvas>
+            <vulnerability-chart :data="timeline" :axis="['high', 'medium', 'low']"></vulnerability-chart>
         </div>
 
         <br />
         <div class="chart-container" style="position: relative; height:555px; width:100%">
-            <canvas id="organization_connectivity_timeline"></canvas>
+            <connectivity-chart :data="timeline"></connectivity-chart>
         </div>
     </div>
 </div>
@@ -103,11 +103,11 @@
                     <span v-html="awarded_points(rating.high, rating.medium, rating.low)"></span> {{ translate(rating.explanation) }}<br/>
                     {% endverbatim %}{% trans "Since" %}{% verbatim %}: {{ humanize(rating.since) }}, {% endverbatim %}{% trans "Last check" %}{% verbatim %}: {{ humanize(rating.last_scan) }}
                     <div class="finding_references">
-                            <span v-html="second_opinion_links(rating, url)"> </span>
-                            {% endverbatim %}
-                            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                                <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
-                            {% endif %}{% verbatim %}
+                        <span v-html="second_opinion_links(rating, url)"> </span>
+                        {% endverbatim %}
+                        {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+                            <span class="explain_link" v-html="explain_link('{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}', rating, url)"></span>
+                        {% endif %}{% verbatim %}
                     </div>
                 </div>
             </div>

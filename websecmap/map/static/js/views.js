@@ -416,6 +416,13 @@ const state_mixin = {
            this.layer = layer;
            this.load();
        }
+    },
+    computed: {
+        valid_state: function(){
+            if (!this.country || !this.layer)
+                return false;
+            return true;
+        }
     }
 };
 
@@ -443,6 +450,7 @@ const report_mixin = {
         // so they can be destroyed and re-initialized
         myChart: null,
         myChart2: null,
+        timeline: [],
 
         issues: ordered_issues
     },
@@ -521,179 +529,6 @@ const report_mixin = {
 
             return {'bgcolor': bgcolor, 'text': text}
 
-        },
-
-        // translations say "unterminated string", which doesn't make sense.
-        vulnerability_timeline_for_organization: function(organization_id){
-            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.layer + '/' + this.country)
-                .then(response => response.json()).then(data => {
-
-                let labels = Array();
-                let high = Array();
-                let medium = Array();
-                let low = Array();
-
-                let urls = Array();
-                let endpoints = Array();
-
-                for(let i=0; i<data.length; i++){
-                    labels.push(data[i].date);
-                    high.push(data[i].high);
-                    medium.push(data[i].medium);
-                    low.push(data[i].low);
-                    urls.push(data[i].urls);
-                    endpoints.push(data[i].endpoints);
-                }
-
-                // remove previous charts
-                if (this.myChart)
-                    this.myChart.destroy();
-
-                if (this.myChart2)
-                    this.myChart2.destroy();
-
-
-                let ctx = document.getElementById("organization_vulnerability_timeline").getContext('2d');
-                this.myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-
-                        datasets: [{
-                            label: '# High risk',
-                            data: high,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255,99,132,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        },
-                        {
-                            label: '# Medium risk',
-                            data: medium,
-                            backgroundColor: 'rgba(255, 102, 0, 0.2)',
-                            borderColor: 'rgba(255,102,0,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        },
-                        {
-                            label: '# Low risk',
-                            data: low,
-                            backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                            borderColor: 'rgba(255,255,0,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        },
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        title: {
-                            display: true,
-                            text: 'Vulnerabilities over time for this organization'
-                        },
-                        tooltips: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        hover: {
-                            mode: 'nearest',
-                            intersect: true
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                type: 'time',
-                                distribution: 'linear',
-                                time: {
-                                    unit: 'month'
-                                },
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Month'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                stacked: true,
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Value'
-                                }
-                            }]
-                        }
-                    }
-                });
-
-
-                let context = document.getElementById("organization_connectivity_timeline").getContext('2d');
-                this.myChart2 = new Chart(context, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-
-                        datasets: [{
-                            label: '# Internet Adresses',
-                            data: urls,
-                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                            borderColor: 'rgba(0,0,0,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        },
-                        {
-                            label: '# Services',
-                            data: endpoints,
-                            backgroundColor: 'rgba(0, 40, 255, 0.2)',
-                            borderColor: 'rgba(0,40,255,1)',
-                            borderWidth: 1,
-                            lineTension: 0
-                        },
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        title: {
-                            display: true,
-                            text: 'Internet connectivity of this organization'
-                        },
-                        tooltips: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        hover: {
-                            mode: 'nearest',
-                            intersect: true
-                        },
-                        scales: {
-                            xAxes: [{
-                                display: true,
-                                type: 'time',
-                                distribution: 'linear',
-                                time: {
-                                    unit: 'month'
-                                },
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Month'
-                                }
-                            }],
-                            yAxes: [{
-                                display: true,
-                                stacked: false,
-                                scaleLabel: {
-                                    display: false,
-                                    labelString: 'Value'
-                                },
-                                ticks: {
-                                    min: 0,
-                                }
-                            }]
-                        }
-                    }
-                });
-
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
         },
 
         rating_text: function (rating) {
@@ -843,26 +678,38 @@ const report_mixin = {
 
             vueReport.loading = true;
             vueReport.name = null;
-            let self = this;
-            $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_ago, function (data) {
-                self.loading = false;
-                self.urls = data.calculation["organization"]["urls"];
-                self.points = data.rating;
-                self.high = data.calculation["organization"]["high"];
-                self.medium = data.calculation["organization"]["medium"];
-                self.low = data.calculation["organization"]["low"];
-                self.when = data.when;
-                self.name = data.name;
-                self.twitter_handle = data.twitter_handle;
-                self.promise = data.promise;
-                self.slug = data.slug;
 
-                // include id in anchor to allow url sharing
-                let newHash = 'report-' + self.slug;
-                $('a#report-anchor').attr('name', newHash);
-                history.replaceState({}, '', '#' + newHash);
-                self.vulnerability_timeline_for_organization(organization_id);
-            });
+            // first update the graphs, doing this around, the graph will show the previous data, not the current stuff
+            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.layer + '/' + this.country)
+                .then(response => response.json()).then(timelinedata => {
+                    this.timeline = timelinedata;
+
+
+                    fetch('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_ago)
+                        .then(response => response.json()).then(data => {
+                        this.loading = false;
+                        this.urls = data.calculation["organization"]["urls"];
+                        this.points = data.rating;
+                        this.high = data.calculation["organization"]["high"];
+                        this.medium = data.calculation["organization"]["medium"];
+                        this.low = data.calculation["organization"]["low"];
+                        this.when = data.when;
+                        this.name = data.name;
+                        this.twitter_handle = data.twitter_handle;
+                        this.promise = data.promise;
+                        this.slug = data.slug;
+
+                        // include id in anchor to allow url sharing
+                        let newHash = 'report-' + this.slug;
+                        $('a#report-anchor').attr('name', newHash);
+                        history.replaceState({}, '', '#' + newHash);
+
+                    }).catch((fail) => {console.log('An error occurred: ' + fail)});
+
+                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+
+
+
         },
         show_in_browser: function () {
             // you can only jump once to an anchor, unless you use a dummy
@@ -939,7 +786,7 @@ const top_mixin = {
             $.getJSON(this.$data.data_url + this.country + '/' + this.layer + '/' + weeknumber, function (data) {
                 self.data = data.ranking.slice(0,10);
                 self.fulldata = data.ranking;
-                self.metadata  = data.metadata;
+                self.metadata = data.metadata;
             });
         },
         sortBy: function (key) {
@@ -1001,10 +848,15 @@ function preview(country, layer){
 }
 
 
-Vue.component('vulnerability-chart', {
+const chart_mixin = {
     props: {
         data: {type: Array, required: true},
-        axis: {type: Array, required: false}
+        axis: {type: Array, required: false},
+    },
+    data: {
+        // [Vue warn]: The "data" option should be a function that returns a per-instance value in component definitions.
+        // so what should i use then? No suggestion?
+        chart: {}
     },
     render: function(createElement) {
         return createElement(
@@ -1015,59 +867,27 @@ Vue.component('vulnerability-chart', {
         )
     },
     mounted: function () {
-        this.renderChart();
+        this.buildChart();
+        this.renderData();
     },
+    watch: {
+        data: function(newsetting, oldsetting){
+            this.renderData();
+        },
+    }
+};
+
+Vue.component('vulnerability-chart', {
+    mixins: [chart_mixin],
+
     methods: {
-        renderChart: function(){
-            let data = this.data;
-
-            let labels = Array();
-            let high = Array();
-            let medium = Array();
-            let low = Array();
-
-            for(let i=0; i<data.length; i++){
-                labels.push(data[i].date);
-                high.push(data[i].high);
-                medium.push(data[i].medium);
-                low.push(data[i].low);
-            }
-
-
+        // let's see if we can do it even better.
+        buildChart: function(){
             let context = this.$refs.canvas.getContext('2d');
-            new Chart(context, {
+            this.chart = new Chart(context, {
                 type: 'line',
                 data: {
-                    labels: labels,
-
-                    datasets: [{
-                        label: '# High risk',
-                        data: high,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255,99,132,1)',
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('high')
-                    },
-                    {
-                        label: '# Medium risk',
-                        data: medium,
-                        backgroundColor: 'rgba(255, 102, 0, 0.2)',
-                        borderColor: 'rgba(255,102,0,1)',
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('medium')
-                    },
-                    {
-                        label: '# Low risk',
-                        data: low,
-                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                        borderColor: 'rgba(255,255,0,1)',
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('low')
-                    },
-                    ]
+                    datasets: []
                 },
                 options: {
                     legend: {
@@ -1077,7 +897,7 @@ Vue.component('vulnerability-chart', {
                     maintainAspectRatio: false,
                     title: {
                         display: true,
-                        text: 'Vulnerabilities over time'
+                        text: 'Risks over time'
                     },
                     tooltips: {
                         mode: 'index',
@@ -1111,65 +931,163 @@ Vue.component('vulnerability-chart', {
                     }
                 }
             });
+        },
+
+        renderData: function(){
+            let data = this.data;
+
+            let labels = Array();
+            let high = Array();
+            let medium = Array();
+            let low = Array();
+
+            for(let i=0; i<data.length; i++){
+                labels.push(data[i].date);
+                high.push(data[i].high);
+                medium.push(data[i].medium);
+                low.push(data[i].low);
+            }
+
+            this.chart.data.labels = labels;
+            this.chart.data.datasets = [{
+                        label: '# High risk',
+                        data: high,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255,99,132,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('high')
+                    },
+                    {
+                        label: '# Medium risk',
+                        data: medium,
+                        backgroundColor: 'rgba(255, 102, 0, 0.2)',
+                        borderColor: 'rgba(255,102,0,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('medium')
+                    },
+                    {
+                        label: '# Low risk',
+                        data: low,
+                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
+                        borderColor: 'rgba(255,255,0,1)',
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('low')
+                    },
+                ];
+
+            this.chart.update();
+        }
+    }
+});
+
+// not because pie charts are useful, but because they look cool.
+// https://www.businessinsider.com/pie-charts-are-the-worst-2013-6?international=true&r=US&IR=T
+// https://www.datapine.com/blog/notorious-pie-charts/
+Vue.component('vulnerability-donut', {
+    mixins: [chart_mixin],
+
+    methods: {
+
+        buildChart: function(){
+            let context = this.$refs.canvas.getContext('2d');
+            this.chart = new Chart(context, {
+                type: 'doughnut',
+                data: {
+
+                },
+                options: {
+                    legend: {
+                        display: true
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: "Today's risk overview",
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                }
+            });
+
+        },
+        renderData: function(){
+            let data = this.data;
+
+            let labels = Array();
+            let high = Array();
+            let medium = Array();
+            let low = Array();
+            let ok = Array();
+
+            high.push(data[data.length-1].high);
+            medium.push(data[data.length-1].medium);
+            low.push(data[data.length-1].low);
+            ok.push(data[data.length-1].ok);
+
+            let backgroundColor = [];
+            let borderColor = [];
+            let chartdata = [];
+
+            if (this.axis.includes('high')){
+                backgroundColor.push('rgba(255, 99, 132, 0.2)');
+                borderColor.push('rgba(255,99,132,1)');
+                labels.push('# High risk');
+                chartdata.push(high);
+            }
+            if (this.axis.includes('medium')){
+                backgroundColor.push('rgba(255, 102, 0, 0.2)');
+                borderColor.push('rgba(255,102,0,1)');
+                labels.push('# Medium risk');
+                chartdata.push(medium);
+
+            }
+            if (this.axis.includes('low')){
+                backgroundColor.push('rgba(255, 255, 0, 0.2)');
+                borderColor.push('rgba(255,255,0,1)');
+                labels.push('# Low risk');
+                chartdata.push(low);
+            }
+
+            // Only include OK in the donuts, not the graphs. Otherwise the graphs become unreadable (too much data)
+            backgroundColor.push('rgba(50, 255, 50, 0.2)');
+            borderColor.push('rgba(50, 255, 50, 1)');
+            labels.push('# No risk');
+            chartdata.push(ok);
+
+            this.chart.data.labels = labels;
+            this.chart.data.datasets = [{
+                data: chartdata,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                borderWidth: 1,
+                lineTension: 0,
+            }];
+
+            this.chart.update();
         }
     }
 });
 
 Vue.component('connectivity-chart', {
-    props: {
-        data: {type: Array, required: true},
-        axis: {type: Array, required: false}
-    },
-    render: function(createElement) {
-        return createElement(
-            'canvas',
-            {
-                ref: 'canvas'
-            },
-        )
-    },
-    mounted: function () {
-        this.renderChart();
-    },
+    mixins: [chart_mixin],
+
     methods: {
-        renderChart: function(){
-            let data = this.data;
-
-            let labels = Array();
-
-            let urls = Array();
-            let endpoints = Array();
-
-            for(let i=0; i<data.length; i++){
-                labels.push(data[i].date);
-                urls.push(data[i].urls);
-                endpoints.push(data[i].endpoints);
-            }
-
-
+        buildChart: function() {
             let context = this.$refs.canvas.getContext('2d');
-            new Chart(context, {
+            this.chart = new Chart(context, {
                 type: 'line',
                 data: {
-                    labels: labels,
 
-                    datasets: [{
-                        label: '# Internet Adresses',
-                        data: urls,
-                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                        borderColor: 'rgba(0,0,0,1)',
-                        borderWidth: 1,
-                        lineTension: 0
-                    },
-                    {
-                        label: '# Services',
-                        data: endpoints,
-                        backgroundColor: 'rgba(0, 40, 255, 0.2)',
-                        borderColor: 'rgba(0,40,255,1)',
-                        borderWidth: 1,
-                        lineTension: 0
-                    },
-                    ]
                 },
                 options: {
                     legend: {
@@ -1216,36 +1134,80 @@ Vue.component('connectivity-chart', {
                     }
                 }
             });
+        },
+
+        renderData: function(){
+            let data = this.data;
+
+            let labels = Array();
+
+            let urls = Array();
+            let endpoints = Array();
+
+            for(let i=0; i<data.length; i++){
+                labels.push(data[i].date);
+                urls.push(data[i].urls);
+                endpoints.push(data[i].endpoints);
+            }
+
+            this.chart.data.labels = labels;
+            this.chart.data.datasets = [{
+                label: '# Internet Adresses',
+                data: urls,
+                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                borderColor: 'rgba(0,0,0,1)',
+                borderWidth: 1,
+                lineTension: 0
+            },
+            {
+                label: '# Services',
+                data: endpoints,
+                backgroundColor: 'rgba(0, 40, 255, 0.2)',
+                borderColor: 'rgba(0,40,255,1)',
+                borderWidth: 1,
+                lineTension: 0
+            }];
+
+            this.chart.update();
         }
     }
 });
+
+const data_loader_mixin = {
+    // might need a callback function after data loading is done...
+    data: {
+            data: []
+    },
+
+    methods: {
+        load_data_from_url: function(url){
+            fetch(url)
+                    .then(response => response.json()).then(data => {
+                        this.data = data;
+            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+        }
+    }
+};
 
 function views(autoload_default_map_data=true) {
 
     window.vueGraphs = new Vue({
         el: '#graphs',
         name: "graphs",
-        mixins: [state_mixin, translation_mixin],
+        mixins: [state_mixin, translation_mixin, data_loader_mixin],
 
-        // the mixin requires data to exist, otherwise massive warnings.
         data: {
             issues: ordered_issues,
-            chart_data: []
         },
 
         methods: {
             load: function () {
-
-                if (!this.country || !this.layer)
+                if (!this.valid_state)
                     return;
 
-                fetch('/data/vulnstats/' + this.country + '/' + this.layer + '/0')
-                    .then(response => response.json()).then(data => {
-                        this.chart_data = data;
-                }).catch((fail) => {console.log('An error occurred: ' + fail)});
-
+                this.load_data_from_url('/data/vulnerability_graphs/' + this.country + '/' + this.layer + '/0');
             },
-        }
+        },
     });
 
     window.vueStatistics = new Vue({

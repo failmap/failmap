@@ -12,7 +12,7 @@ from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.models import OrganizationReport
 from websecmap.reporting.report import (create_organization_reports_now,
                                         default_organization_rating, recreate_url_reports)
-from websecmap.scanners import ALL_SCAN_TYPES
+from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.scanner.scanner import q_configurations_to_report
 
 log = logging.getLogger(__package__)
@@ -116,13 +116,13 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
         scan_types.add('total')  # the total would be separated per char if directly passed into set()
-        scan_types.add('ftp')
         organization_type_id = map_configuration['organization_type']
         country = map_configuration['country']
 
         # for the entire year, starting with oldest (in case the other tasks are not ready)
         for days_back in list(reversed(range(0, days))):
-            measurement = {'total': {'high': 0, 'medium': 0, 'low': 0}}
+            measurement = {'total': {'high': 0, 'medium': 0, 'low': 0, 'ok_urls': 0, 'ok_endpoints': 0,
+                                     'applicable_endpoints': 0, 'applicable_urls': 0}}
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
             log.info("Days back:%s Date: %s" % (days_back, when))
 
@@ -283,7 +283,11 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                         #     (rating['type'], rating['high'], rating['medium'], rating['low']))
 
                         if rating['type'] not in measurement:
-                            measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+                            measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0,
+                                                           'ok_urls': 0, 'ok_endpoints': 0,
+                                                           'applicable_endpoints': 0,
+                                                           'applicable_urls': 0
+                                                           }
 
                         # if rating['type'] not in scan_types:
                         scan_types.add(rating['type'])
@@ -291,17 +295,24 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                         measurement[rating['type']]['high'] += rating['high']
                         measurement[rating['type']]['medium'] += rating['medium']
                         measurement[rating['type']]['low'] += rating['low']
+                        measurement[rating['type']]['ok_urls'] += rating['ok']
+                        measurement[rating['type']]['applicable_urls'] += 1
 
                         measurement['total']['high'] += rating['high']
                         measurement['total']['medium'] += rating['medium']
                         measurement['total']['low'] += rating['low']
+                        measurement['total']['ok_urls'] += rating['ok']
+                        measurement['total']['applicable_urls'] += 1
 
                     # endpoint reports
                     for endpoint in urlrating['endpoints']:
 
                         for rating in endpoint['ratings']:
                             if rating['type'] not in measurement:
-                                measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0}
+                                measurement[rating['type']] = {'high': 0, 'medium': 0, 'low': 0,
+                                                               'ok_urls': 0, 'ok_endpoints': 0,
+                                                               'applicable_endpoints': 0,
+                                                               'applicable_urls': 0}
 
                             # debugging, perhaps it appears that the latest scan is not set properly
                             # if rating['type'] == 'ftp' and rating['high']:
@@ -313,10 +324,14 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                             measurement[rating['type']]['high'] += rating['high']
                             measurement[rating['type']]['medium'] += rating['medium']
                             measurement[rating['type']]['low'] += rating['low']
+                            measurement[rating['type']]['ok_endpoints'] += rating['ok']
+                            measurement[rating['type']]['applicable_endpoints'] += 1
 
                             measurement['total']['high'] += rating['high']
                             measurement['total']['medium'] += rating['medium']
                             measurement['total']['low'] += rating['low']
+                            measurement['total']['ok_endpoints'] += rating['ok']
+                            measurement['total']['applicable_endpoints'] += 1
 
             # store these results per scan type, and only retrieve this per scan type...
             for scan_type in scan_types:
@@ -330,8 +345,19 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                     vs.high = measurement[scan_type]['high']
                     vs.medium = measurement[scan_type]['medium']
                     vs.low = measurement[scan_type]['low']
-                    vs.urls = number_of_urls
-                    vs.endpoints = number_of_endpoints
+                    vs.ok_urls = measurement[scan_type]['ok_urls']
+                    vs.ok_endpoints = measurement[scan_type]['ok_endpoints']
+                    vs.urls = measurement[scan_type]['applicable_urls']
+                    vs.endpoints = measurement[scan_type]['applicable_endpoints']
+
+                    if scan_type in ENDPOINT_SCAN_TYPES:
+                        vs.ok = measurement[scan_type]['ok_endpoints']
+                    elif scan_type in URL_SCAN_TYPES:
+                        vs.ok = measurement[scan_type]['ok_urls']
+                    else:
+                        # total: everything together.
+                        vs.ok = measurement[scan_type]['ok_urls'] + measurement[scan_type]['ok_endpoints']
+
                     vs.save()
 
 
