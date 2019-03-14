@@ -32,7 +32,7 @@ COPY tools/docker-install-dnscheck.sh /tools/docker-install-dnscheck.sh
 RUN tools/docker-install-dnscheck.sh
 
 # install osmtogeojson
-RUN npm install osmtogeojson
+RUN npm install --global osmtogeojson
 
 # build hypersh hypercli
 COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
@@ -115,8 +115,8 @@ COPY --from=build /usr/local/share/perl5 /usr/local/share/perl5
 COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
 
 # copy artifacts from osmtogeojson install
-COPY --from=build /node_modules /node_modules
-RUN ln -s /node_modules/.bin/osmtogeojson /usr/local/bin/
+COPY --from=build /usr/lib/node_modules/osmtogeojson /usr/lib/node_modules/osmtogeojson
+RUN ln -s /usr/lib/node_modules/osmtogeojson/osmtogeojson /usr/local/bin/
 
 # copy hypercli binary
 COPY --from=build /gopath/src/github.com/hyperhq/hypercli/hyper/hyper /usr/local/bin/hyper
