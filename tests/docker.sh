@@ -13,7 +13,7 @@ else
   timeout="timeout ${TIMEOUT:-60}"
 fi
 
-if [ "$(uname -s)" == Darwin ] && ! command -v timeout;then
+if [ "$(uname -s)" = Darwin ] && ! command -v timeout;then
   timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }
 fi
 
