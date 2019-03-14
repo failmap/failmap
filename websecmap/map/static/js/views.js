@@ -1925,9 +1925,10 @@ function views(autoload_default_map_data=true) {
                 fetch('/data/defaults/').then(response => response.json()).then(data => {
                     this.selected_layer = data.layer;
                     this.selected_country = data.country;
-                    // done in the map.
+                    // countries are already loaded in the django template for faster menus
+                    // then load this as fast as you can.
+                    this.get_layers();
                     vueMap.set_state(this.selected_country, this.selected_layer, true);
-                    this.get_countries();
                 }).catch((fail) => {console.log('An error occurred: ' + fail)});
             },
             get_countries: function() {
