@@ -45,6 +45,7 @@ urlpatterns = [
     path('data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_fail),
     path('data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_win),
     path('data/latest_scans/<c:country>/<slug:organization_type>/<slug:scan_type>', views.latest_scans),
+    path('data/all_latest_scans/<c:country>/<slug:organization_type>/', views.all_latest_scans),
     path('data/feed/<slug:scan_type>', views.LatestScanFeed()),
     path('data/terrible_urls/<c:country>/<slug:organization_type>/<w:weeks_back>', views.terrible_urls,),
     path('data/improvements/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>',

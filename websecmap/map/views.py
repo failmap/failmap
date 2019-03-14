@@ -43,7 +43,7 @@ four_hours = 60 * 60 * 4
 one_day = 24 * 60 * 60
 ten_minutes = 60 * 10
 
-remark = "Get the code and all data from our gitlab repo: https://gitlab.com/failmap/"
+remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
 
 # This list changes roughly every second, but that's not our problem anymore.
 COUNTRIES = iso3166.countries_by_alpha2
@@ -1917,6 +1917,71 @@ def latest_scans(request, scan_type, country: str = "NL", organization_type="mun
                 "last_scan_humanized": naturaltime(scan.last_scan_moment),
                 "last_scan_moment": scan.last_scan_moment.isoformat()
             })
+
+    return JsonResponse(dataset, encoder=JSEncoder)
+
+
+@cache_page(ten_minutes)
+def all_latest_scans(request, country: str = "NL", organization_type="municipality"):
+    scans = {}
+
+    dataset = {
+        "scans": {},
+        "render_date": datetime.now(pytz.utc).isoformat(),
+        "remark": remark,
+    }
+
+    for scan_type in ENDPOINT_SCAN_TYPES:
+        scans[scan_type] = list(EndpointGenericScan.objects.filter(
+            type=scan_type,
+            endpoint__url__organization__type=get_organization_type(organization_type),
+            endpoint__url__organization__country=get_country(country)
+        ).order_by('-rating_determined_on')[0:6])
+
+    for scan_type in URL_SCAN_TYPES:
+        scans[scan_type] = list(UrlGenericScan.objects.filter(
+            type=scan_type,
+            url__organization__type=get_organization_type(organization_type),
+            url__organization__country=get_country(country)
+        ).order_by('-rating_determined_on')[0:6])
+
+    for scan_type in ALL_SCAN_TYPES:
+
+        dataset["scans"][scan_type] = []
+
+        for scan in scans[scan_type]:
+            calculation = get_severity(scan)
+
+            if scan_type in URL_SCAN_TYPES:
+                # url scans
+                dataset["scans"][scan_type].append({
+                    "url": scan.url.url,
+                    "service": "%s" % scan.url.url,
+                    "protocol": scan_type,
+                    "port": "-",
+                    "ip_version": "-",
+                    "explanation": calculation.get("explanation", ""),
+                    "high": calculation.get("high", 0),
+                    "medium": calculation.get("medium", 0),
+                    "low": calculation.get("low", 0),
+                    "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                    "last_scan_moment": scan.last_scan_moment.isoformat()
+                })
+            else:
+                # endpoint scans
+                dataset["scans"][scan_type].append({
+                    "url": scan.endpoint.url.url,
+                    "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
+                    "protocol": scan.endpoint.protocol,
+                    "port": scan.endpoint.port,
+                    "ip_version": scan.endpoint.ip_version,
+                    "explanation": calculation.get("explanation", ""),
+                    "high": calculation.get("high", 0),
+                    "medium": calculation.get("medium", 0),
+                    "low": calculation.get("low", 0),
+                    "last_scan_humanized": naturaltime(scan.last_scan_moment),
+                    "last_scan_moment": scan.last_scan_moment.isoformat()
+                })
 
     return JsonResponse(dataset, encoder=JSEncoder)
 

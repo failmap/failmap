@@ -1586,19 +1586,16 @@ function views(autoload_default_map_data=true) {
                     return;
                 }
 
-                ordered_issues.forEach(function (item)
-                {
-                    let data_url = vueLatest.data_url + vueLatest.country + '/' + vueLatest.layer + '/' + item['name'];
+                let data_url = "/data/all_latest_scans/" + vueLatest.country + '/' + vueLatest.layer + '/';
                     fetch(data_url)
                         .then(response => response.json()).then(data => {
-                        vueLatest.scans[item['name']] = data.scans;
+                        vueLatest.scans = data.scans;
 
-                        // because some nested keys are used (results[x['bla']), updates are not handled correclty.
+                        // because some nested keys are used (results[x['bla']), updates are not handled correctly.
                         vueLatest.$forceUpdate();
                     }).catch((fail) => {
                         console.log('An error occurred: ' + fail)
-                    });
-                })
+                });
             },
             rowcolor: function (scan) {
                 if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
@@ -1617,7 +1614,6 @@ function views(autoload_default_map_data=true) {
         data: {
             issues: ordered_issues,
             scans: {},
-            data_url: "/data/latest_scans/"
         }
     });
 
