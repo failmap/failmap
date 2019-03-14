@@ -102,7 +102,8 @@ def compose_task(
 
     log.info('Creating internetnl mail scan task for %s urls.', len(urls))
 
-    return group([register_scan.si(urls, config.INTERNET_NL_API_USERNAME, config.INTERNET_NL_API_PASSWORD)])
+    return group([register_scan.si(urls, config.INTERNET_NL_API_USERNAME, config.INTERNET_NL_API_PASSWORD, 'mail',
+                                   API_URL_MAIL)])
 
 
 def compose_discover_task(
@@ -294,7 +295,8 @@ def check_running_scans():
             scan.finished = True
             scan.finished_on = datetime.now(pytz.utc)
             scan.success = True
-            store(response)
+            log.debug("Going to process the scan results.")
+            store(response, internet_nl_scan_type=scan.type)
 
         if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
             log.debug("Scan encountered an error.")
@@ -307,7 +309,7 @@ def check_running_scans():
 
 
 @app.task(queue="storage")
-def register_scan(urls: List[Url], username, password):
+def register_scan(urls: List[Url], username, password, internet_nl_scan_type: str = 'mail', api_url: str = ""):
     """
     This registers a scan and results the URL where the scan results can be found later on.
 
@@ -327,7 +329,7 @@ def register_scan(urls: List[Url], username, password):
     """
     scan_id = str(uuid.uuid4())
     urls = [url.url for url in urls]
-    data = {"name": "Failmap Scan %s" % scan_id, "domains": urls}
+    data = {"name": "Web Security Map Scan %s" % scan_id, "domains": urls}
     answer = requests.post(API_URL_MAIL, json=data, auth=HTTPBasicAuth(username, password), timeout=(300, 300))
     log.debug("Received answer from internet.nl: %s" % answer.content)
 
@@ -356,7 +358,7 @@ def register_scan(urls: List[Url], username, password):
     scan.started = True
     scan.status_url = status_url
     scan.message = answer
-    scan.type = "mail"
+    scan.type = internet_nl_scan_type
     # todo: do we need to add a list of urls or something like that for debugging purposes?
 
     scan.save()
@@ -536,16 +538,17 @@ def test_store():
         "success": True
     }
 
-    store(result)
+    store(result, internet_nl_scan_type='mail')
 
 
 @app.task(queue='storage')
-def store(result: dict):
+def store(result: dict, internet_nl_scan_type: str = 'mail'):
     # todo: it's not clear what the answer is if there is no MX record / no mail server defined. What is the score then?
     # relevant since MX might point to nothing or is removed meanwhile.
     """
     :param result: json blob from internet.nl
     :param urls: list of urls in failmap database
+    :param internet_nl_scan_type: mail or web
     """
 
     domains = result.get('data', {}).get('domains', {})
@@ -557,7 +560,7 @@ def store(result: dict):
         log.debug(domain)
 
         if domain['status'] != "ok":
-            log.debug("Mail scan failed on %s" % domain['domain'])
+            log.debug("%s scan failed on %s" % (internet_nl_scan_type, domain['domain']))
             continue
 
         # try to match the url
@@ -572,7 +575,7 @@ def store(result: dict):
 
         # link changes every time, so can't save that as message.
         store_url_scan_result(
-            scan_type='internet_nl_mail_overall_score',
+            scan_type='internet_nl_%s_overall_score' % internet_nl_scan_type,
             url=url,
             rating=domain['score'],
             message='ok',
@@ -581,7 +584,7 @@ def store(result: dict):
 
         # startls, dane etc.
         for category in domain['categories']:
-            scan_type = 'internet_nl_mail_%s' % category['category']
+            scan_type = 'internet_nl_%s_%s' % (internet_nl_scan_type, category['category'])
             store_url_scan_result(
                 scan_type=scan_type,
                 url=url,

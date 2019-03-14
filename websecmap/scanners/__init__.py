@@ -171,7 +171,20 @@ SCANNERS = [
         # to reduce complexity, this scanner creates no scan types specifically.
         'creates endpoint scan types': [],
         'creates url scan types': [],
-    }
+    },
+    {
+        'name': 'internet_nl_web',
+        'verbose name': 'Scans websites on basic HTTP security',
+        'description': 't.b.d.',
+        'can discover endpoints': False,
+        'can verify endpoints': False,
+
+        # finds if there are MX records on url, pre scan and during scan.
+        'can discover urls': False,
+        'can verify urls': False,
+        'creates endpoint scan types': [],
+        'creates url scan types': ['internet_nl_web_web_ipv6_ws_similar']
+    },
 ]
 
 BETA_SCANNERS = ['tls_osaft', 'screenshot']

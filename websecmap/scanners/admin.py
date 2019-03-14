@@ -229,10 +229,10 @@ class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmi
 
 @admin.register(models.InternetNLScan)
 class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('started_on', 'finished_on', 'success', 'message')
+    list_display = ('pk', 'type', 'started_on', 'finished_on', 'success', 'message')
     search_fields = ('message', 'status_url')
-    list_filter = ('started_on', 'finished_on', 'success', 'message', )
-    fields = ('started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'status_url')
+    list_filter = ('started_on', 'finished_on', 'success', 'message', 'type')
+    fields = ('type', 'started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'status_url')
 
 
 @admin.register(models.ScanProxy)
