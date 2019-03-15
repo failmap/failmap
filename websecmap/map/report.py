@@ -302,7 +302,6 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                         measurement['total']['medium'] += rating['medium']
                         measurement['total']['low'] += rating['low']
                         measurement['total']['ok_urls'] += rating['ok']
-                        measurement['total']['applicable_urls'] += 1
 
                     # endpoint reports
                     for endpoint in urlrating['endpoints']:
@@ -331,7 +330,6 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                             measurement['total']['medium'] += rating['medium']
                             measurement['total']['low'] += rating['low']
                             measurement['total']['ok_endpoints'] += rating['ok']
-                            measurement['total']['applicable_endpoints'] += 1
 
             # store these results per scan type, and only retrieve this per scan type...
             for scan_type in scan_types:
@@ -347,8 +345,14 @@ def calculate_vulnerability_statistics(days: int = 366, country: List[str] = [])
                     vs.low = measurement[scan_type]['low']
                     vs.ok_urls = measurement[scan_type]['ok_urls']
                     vs.ok_endpoints = measurement[scan_type]['ok_endpoints']
-                    vs.urls = measurement[scan_type]['applicable_urls']
-                    vs.endpoints = measurement[scan_type]['applicable_endpoints']
+
+                    if scan_type in ALL_SCAN_TYPES:
+                        vs.urls = measurement[scan_type]['applicable_urls']
+                        vs.endpoints = measurement[scan_type]['applicable_endpoints']
+                    else:
+                        # total
+                        vs.urls = number_of_urls
+                        vs.endpoints = number_of_endpoints
 
                     if scan_type in ENDPOINT_SCAN_TYPES:
                         vs.ok = measurement[scan_type]['ok_endpoints']
