@@ -185,3 +185,18 @@ class VulnerabilityStatistic(models.Model):
 
     class Meta:
         managed = True
+
+
+class HighLevelStatistic(models.Model):
+
+    country = CountryField(db_index=True,
+                           help_text="Part of the combination shown on the map.")
+
+    organization_type = models.ForeignKey(
+        OrganizationType,
+        on_delete=models.CASCADE,
+        help_text="Part of the combination shown on the map.")
+
+    when = models.DateField()
+
+    report = JSONField()

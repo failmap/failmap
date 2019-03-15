@@ -1,4 +1,5 @@
 import logging
+from collections import OrderedDict
 from datetime import datetime, timedelta
 from typing import List
 
@@ -6,7 +7,8 @@ import pytz
 from celery import group
 
 from websecmap.celery import Task, app
-from websecmap.map.models import Configuration, MapDataCache, VulnerabilityStatistic
+from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
+                                  VulnerabilityStatistic)
 from websecmap.map.views import get_map_data
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.models import OrganizationReport
@@ -65,7 +67,7 @@ def compose_task(
         log.debug("Organization filter: %s" % organizations_filter)
         log.debug("Url filter: %s" % urls_filter)
         log.debug("urls to display: %s" % q_configurations_to_report())
-        log.debug("organizatins to display: %s" % q_configurations_to_report('organization'))
+        log.debug("organizations to display: %s" % q_configurations_to_report('organization'))
         return group()
 
     # when trying to report on a specific url or organization (so not everything) also don't rebuild all caches
@@ -87,13 +89,16 @@ def compose_task(
     if organizations_filter.get('country__in', None):
         tasks.append(calculate_vulnerability_statistics.si(1, organizations_filter['country__in']))
         tasks.append(calculate_map_data.si(1, organizations_filter['country__in']))
+        tasks.append(calculate_high_level_stats.si(1, organizations_filter['country__in']))
     elif organizations_filter.get('country', None):
         tasks.append(calculate_vulnerability_statistics.si(1, [organizations_filter['country']]))
         tasks.append(calculate_map_data.si(1, [organizations_filter['country']]))
+        tasks.append(calculate_high_level_stats.si(1, [organizations_filter['country']]))
     else:
         # 2 days if you have altered stuff a day before etc...
         tasks.append(calculate_vulnerability_statistics.si(days))
         tasks.append(calculate_map_data.si(days))
+        tasks.append(calculate_high_level_stats.si(days))
 
     task = group(tasks)
 
@@ -101,17 +106,10 @@ def compose_task(
 
 
 @app.task(queue='storage')
-def calculate_vulnerability_statistics(days: int = 366, country: List[str] = []):
+def calculate_vulnerability_statistics(days: int = 366, countries: List = None, organization_types: List = None):
     log.info("Calculation vulnerability graphs")
 
-    # for everything that is displayed on the site:
-    if country:
-        # if you have a country, (or other filter) you don't care about the default filter.
-        map_configurations = Configuration.objects.all().filter(country__in=country)
-    else:
-        map_configurations = Configuration.objects.all().filter(is_displayed=True)
-
-    map_configurations = map_configurations.order_by('display_order').values('country', 'organization_type')
+    map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     for map_configuration in map_configurations:
         scan_types = set()  # set instead of list to prevent checking if something is in there already.
@@ -371,19 +369,12 @@ def calculate_map_data_today():
 
 
 @app.task(queue='storage')
-def calculate_map_data(days: int = 366, country: List[str] = []):
+def calculate_map_data(days: int = 366, countries: List = None, organization_types: List = None):
     from django.db import OperationalError
 
     log.info("calculate_map_data")
 
-    if country:
-        # if you have a country, (or other filter) you don't care about the default filter.
-        map_configurations = Configuration.objects.all().filter(country__in=country)
-    else:
-        map_configurations = Configuration.objects.all().filter(is_displayed=True)
-
-    map_configurations = map_configurations.order_by('display_order').values(
-        'country', 'organization_type__name', 'organization_type')
+    map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     # the "all" filter will retrieve all layers at once
     scan_types = ALL_SCAN_TYPES + ["all"]
@@ -422,3 +413,189 @@ def calculate_map_data(days: int = 366, country: List[str] = []):
                 except OperationalError as a:
                     # The public user does not have permission to run insert statements....
                     log.exception(a)
+
+
+def filter_map_configs(countries: List = None, organization_types: List = None):
+    configs = Configuration.objects.all()
+
+    log.debug("filter for countries: %s" % countries)
+    log.debug("filter for organization_types: %s" % organization_types)
+
+    configs = configs.filter(is_displayed=True)
+
+    if countries:
+        configs = configs.filter(country__in=countries)
+
+    if organization_types:
+        configs = configs.filter(organization_type__name__in=organization_types)
+
+    return configs.order_by('display_order').values('country', 'organization_type__name',
+                                                    'organization_type',)
+
+
+@app.task(queue='storage')
+def calculate_high_level_stats(days: int = 1, countries: List = None, organization_types: List = None):
+    log.info("Creating high_level_stats")
+
+    map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
+
+    for map_configuration in map_configurations:
+        for days_back in list(reversed(range(0, days))):
+            log.debug('For country: %s type: %s days back: %s' % (
+                map_configuration['country'], map_configuration['organization_type__name'], days_back))
+
+            when = datetime.now(pytz.utc) - timedelta(days=days_back)
+
+            measurement = {'red': 0, 'orange': 0, 'green': 0,
+                           'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
+                           'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
+                           'included_organizations': 0, 'endpoints': 0,
+                           "endpoint": OrderedDict(), "explained": {}}
+
+            # todo: filter out dead organizations and make sure it's the correct layer.
+            sql = """SELECT * FROM
+                           reporting_organizationreport
+                       INNER JOIN
+                       (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+                       WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+                       ON x.id2 = reporting_organizationreport.id
+                       INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
+                       INNER JOIN organizations_organizationtype ON
+                       (organization.type_id = organizations_organizationtype.id)
+                       WHERE organizations_organizationtype.name = '%(OrganizationType)s'
+                       AND organization.country = '%(country)s'
+                       """ % {"when": when, "OrganizationType": map_configuration['organization_type__name'],
+                              "country": map_configuration['country']}
+
+            # log.debug(sql)
+
+            ratings = OrganizationReport.objects.raw(sql)
+
+            noduplicates = []
+            for rating in ratings:
+
+                # do not create stats over empty organizations. That would count empty organizations.
+                # you can't really filter them out above? todo: Figure that out at a next release.
+                # if rating.rating == -1:
+                #    continue
+
+                measurement["total_organizations"] += 1
+
+                if rating.high:
+                    measurement["red"] += 1
+                elif rating.medium:
+                    measurement["orange"] += 1
+                else:
+                    measurement["green"] += 1
+
+                # count the urls, from the latest rating. Which is very dirty :)
+                # it will double the urls that are shared between organizations.
+                # that is not really bad, it distorts a little.
+                # we're forced to load each item separately anyway, so why not read it?
+                calculation = rating.calculation
+                measurement["total_urls"] += len(calculation['organization']['urls'])
+
+                measurement["green_urls"] += sum([l['high'] == 0 and l['medium'] == 0
+                                                  for l in calculation['organization']['urls']])
+                measurement["orange_urls"] += sum([l['high'] == 0 and l['medium'] > 0
+                                                   for l in calculation['organization']['urls']])
+                measurement["red_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
+
+                measurement["included_organizations"] += 1
+
+                # make some generic stats for endpoints
+                for url in calculation['organization']['urls']:
+                    if url['url'] in noduplicates:
+                        continue
+                    noduplicates.append(url['url'])
+
+                    # endpoints
+
+                    # only add this to the first output, otherwise you have to make this a graph.
+                    # it's simply too much numbers to make sense anymore.
+                    # yet there is not enough data to really make a graph.
+                    # do not have duplicate urls in the stats.
+                    # ratings
+                    for r in url['ratings']:
+                        # stats over all different ratings
+                        if r['type'] not in measurement["explained"]:
+                            measurement["explained"][r['type']] = {}
+                            measurement["explained"][r['type']]['total'] = 0
+                        if not r['explanation'].startswith("Repeated finding."):
+                            if r['explanation'] not in measurement["explained"][r['type']]:
+                                measurement["explained"][r['type']][r['explanation']] = 0
+
+                            measurement["explained"][r['type']][r['explanation']] += 1
+                            measurement["explained"][r['type']]['total'] += 1
+
+                    for endpoint in url['endpoints']:
+
+                        # Only add the endpoint once for a series of ratings. And only if the
+                        # ratings is not a repeated finding.
+                        added_endpoint = False
+
+                        for r in endpoint['ratings']:
+                            # stats over all different ratings
+                            if r['type'] not in measurement["explained"]:
+                                measurement["explained"][r['type']] = {}
+                                measurement["explained"][r['type']]['total'] = 0
+                            if not r['explanation'].startswith("Repeated finding."):
+                                if r['explanation'] not in measurement["explained"][r['type']]:
+                                    measurement["explained"][r['type']][r['explanation']] = 0
+
+                                measurement["explained"][r['type']][r['explanation']] += 1
+                                measurement["explained"][r['type']]['total'] += 1
+
+                                # stats over all endpoints
+                                # duplicates skew these stats.
+                                # it is possible to have multiple endpoints of the same type
+                                # while you can have multiple ipv4 and ipv6, you can only reach one
+                                # therefore reduce this to have only one v4 and v6
+                                if not added_endpoint:
+                                    added_endpoint = True
+                                    endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
+                                                                   ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"))
+                                    if endpointtype not in measurement["endpoint"]:
+                                        measurement["endpoint"][endpointtype] = {'amount': 0,
+                                                                                 'port': endpoint["port"],
+                                                                                 'protocol': endpoint["protocol"],
+                                                                                 'ip_version': endpoint["ip_version"]}
+                                    measurement["endpoint"][endpointtype]['amount'] += 1
+                                    measurement["endpoints"] += 1
+
+            """                 measurement["total_organizations"] += 1
+                                measurement["total_score"] += 0
+                                measurement["no_rating"] += 1
+            """
+            measurement["endpoint"] = sorted(measurement["endpoint"].items())
+
+            if measurement["included_organizations"]:
+                measurement["red percentage"] = round((measurement["red"] /
+                                                       measurement["included_organizations"]) * 100)
+                measurement["orange percentage"] = round((measurement["orange"] /
+                                                          measurement["included_organizations"]) * 100)
+                measurement["green percentage"] = round((measurement["green"] /
+                                                         measurement["included_organizations"]) * 100)
+            else:
+                measurement["red percentage"] = 0
+                measurement["orange percentage"] = 0
+                measurement["green percentage"] = 0
+
+            if measurement["total_urls"]:
+                measurement["red url percentage"] = round((measurement["red_urls"] /
+                                                           measurement["total_urls"]) * 100)
+                measurement["orange url percentage"] = round((measurement["orange_urls"] /
+                                                              measurement["total_urls"]) * 100)
+                measurement["green url percentage"] = round((measurement["green_urls"] /
+                                                             measurement["total_urls"]) * 100)
+            else:
+                measurement["red url percentage"] = 0
+                measurement["orange url percentage"] = 0
+                measurement["green url percentage"] = 0
+
+            s = HighLevelStatistic()
+            s.country = map_configuration['country']
+            s.organization_type = OrganizationType.objects.get(name=map_configuration['organization_type__name'])
+            s.when = when
+            s.report = measurement
+            s.save()

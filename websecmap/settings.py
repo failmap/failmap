@@ -1085,6 +1085,7 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'map.administrativeregion', 'label': _('Region Importer')},
         {'name': 'map.mapdatacache', 'label': 'Map Data Cache (generated)'},
         {'name': 'map.vulnerabilitystatistic', 'label': 'Statistics (generated)'},
+        {'name': 'map.highlevelstatistic', 'label': 'Organization statistics (generated)'}
     ], 'permissions': ['admin']},
 
     {'app_label': 'organizations', 'label': _('🏢 Organizations'), 'items': [

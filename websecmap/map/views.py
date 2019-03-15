@@ -1,6 +1,4 @@
-import collections
 import logging
-import re
 from datetime import datetime, timedelta
 from math import ceil
 
@@ -12,7 +10,6 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.contrib.syndication.views import Feed
-from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
 from django.db.models import Count
@@ -28,7 +25,8 @@ from import_export.resources import modelresource_factory
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
-from websecmap.map.models import Configuration, MapDataCache, VulnerabilityStatistic
+from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
+                                  VulnerabilityStatistic)
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from websecmap.reporting.models import OrganizationReport, UrlReport
 from websecmap.reporting.severity import get_severity
@@ -775,173 +773,26 @@ def stats_determine_when(stat, weeks_back=0):
 
 @cache_page(one_hour)
 def stats(request, country: str = "NL", organization_type="municipality", weeks_back=0):
+
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
                   '1 months ago': 0, '2 months ago': 0, '3 months ago': 0}
 
+    when = []
     for stat in timeframes:
+        when.append(stats_determine_when(stat, weeks_back).date())
 
-        when = stats_determine_when(stat, weeks_back)
+    stats = HighLevelStatistic.objects.all().filter(
+        country=country,
+        organization_type=get_organization_type(organization_type),
+        when__in=when
+    )
 
-        measurement = {'red': 0, 'orange': 0, 'green': 0,
-                       'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
-                       'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
-                       'included_organizations': 0, 'endpoints': 0,
-                       "endpoint": collections.OrderedDict(), "explained": {}}
+    # todo: apply the label of the timeframe in the report result.
+    reports = {}
+    for idx, stat in enumerate(timeframes):
+        reports[stat] = stats[idx].report
 
-        # todo: filter out dead organizations and make sure it's the correct layer.
-        sql = """SELECT * FROM
-                   reporting_organizationreport
-               INNER JOIN
-               (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
-               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-               ON x.id2 = reporting_organizationreport.id
-               INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
-               WHERE organization.type_id = '%(OrganizationTypeId)s'
-               AND organization.country = '%(country)s'
-               """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                      "country": get_country(country)}
-
-        # log.debug(sql)
-
-        # django cacheops doesn't work with raw.
-        # too bad https://github.com/Suor/django-cacheops
-        # it's the elephant in the room in the documentation: all are explained except this one.
-        # we can of course do function caching :)
-
-        # caching for about 30 minutes.
-        # But is it really set if the process is killed? Is the process killed?
-        pattern = re.compile('[\W_]+')
-        cache_key = pattern.sub('', "stats sql %s %s %s" % (country, organization_type, weeks_back))
-        ratings = cache.get(cache_key)
-        if not ratings:
-            ratings = OrganizationReport.objects.raw(sql)
-            cache.set(cache_key, ratings, 1800)
-
-        noduplicates = []
-        for rating in ratings:
-
-            # do not create stats over empty organizations. That would count empty organizations.
-            # you can't really filter them out above? todo: Figure that out at a next release.
-            # if rating.rating == -1:
-            #    continue
-
-            measurement["total_organizations"] += 1
-
-            if rating.high:
-                measurement["red"] += 1
-            elif rating.medium:
-                measurement["orange"] += 1
-            else:
-                measurement["green"] += 1
-
-            # count the urls, from the latest rating. Which is very dirty :)
-            # it will double the urls that are shared between organizations.
-            # that is not really bad, it distorts a little.
-            # we're forced to load each item separately anyway, so why not read it?
-            calculation = rating.calculation
-            measurement["total_urls"] += len(calculation['organization']['urls'])
-
-            measurement["green_urls"] += sum([l['high'] == 0 and l['medium'] == 0
-                                              for l in calculation['organization']['urls']])
-            measurement["orange_urls"] += sum([l['high'] == 0 and l['medium'] > 0
-                                               for l in calculation['organization']['urls']])
-            measurement["red_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
-
-            measurement["included_organizations"] += 1
-
-            # make some generic stats for endpoints
-            for url in calculation['organization']['urls']:
-                if url['url'] in noduplicates:
-                    continue
-                noduplicates.append(url['url'])
-
-                # endpoints
-
-                # only add this to the first output, otherwise you have to make this a graph.
-                # it's simply too much numbers to make sense anymore.
-                # yet there is not enough data to really make a graph.
-                # do not have duplicate urls in the stats.
-                # ratings
-                for r in url['ratings']:
-                    # stats over all different ratings
-                    if r['type'] not in measurement["explained"]:
-                        measurement["explained"][r['type']] = {}
-                        measurement["explained"][r['type']]['total'] = 0
-                    if not r['explanation'].startswith("Repeated finding."):
-                        if r['explanation'] not in measurement["explained"][r['type']]:
-                            measurement["explained"][r['type']][r['explanation']] = 0
-
-                        measurement["explained"][r['type']][r['explanation']] += 1
-                        measurement["explained"][r['type']]['total'] += 1
-
-                for endpoint in url['endpoints']:
-
-                    # Only add the endpoint once for a series of ratings. And only if the
-                    # ratings is not a repeated finding.
-                    added_endpoint = False
-
-                    for r in endpoint['ratings']:
-                        # stats over all different ratings
-                        if r['type'] not in measurement["explained"]:
-                            measurement["explained"][r['type']] = {}
-                            measurement["explained"][r['type']]['total'] = 0
-                        if not r['explanation'].startswith("Repeated finding."):
-                            if r['explanation'] not in measurement["explained"][r['type']]:
-                                measurement["explained"][r['type']][r['explanation']] = 0
-
-                            measurement["explained"][r['type']][r['explanation']] += 1
-                            measurement["explained"][r['type']]['total'] += 1
-
-                            # stats over all endpoints
-                            # duplicates skew these stats.
-                            # it is possible to have multiple endpoints of the same type
-                            # while you can have multiple ipv4 and ipv6, you can only reach one
-                            # therefore reduce this to have only one v4 and v6
-                            if not added_endpoint:
-                                added_endpoint = True
-                                endpointtype = "%s/%s (%s)" % (endpoint["protocol"], endpoint["port"],
-                                                               ("IPv4" if endpoint["ip_version"] == 4 else "IPv6"))
-                                if endpointtype not in measurement["endpoint"]:
-                                    measurement["endpoint"][endpointtype] = {'amount': 0,
-                                                                             'port': endpoint["port"],
-                                                                             'protocol': endpoint["protocol"],
-                                                                             'ip_version': endpoint["ip_version"]}
-                                measurement["endpoint"][endpointtype]['amount'] += 1
-                                measurement["endpoints"] += 1
-
-        """                 measurement["total_organizations"] += 1
-                            measurement["total_score"] += 0
-                            measurement["no_rating"] += 1
-        """
-        measurement["endpoint"] = sorted(measurement["endpoint"].items())
-
-        if measurement["included_organizations"]:
-            measurement["red percentage"] = round((measurement["red"] /
-                                                   measurement["included_organizations"]) * 100)
-            measurement["orange percentage"] = round((measurement["orange"] /
-                                                      measurement["included_organizations"]) * 100)
-            measurement["green percentage"] = round((measurement["green"] /
-                                                     measurement["included_organizations"]) * 100)
-        else:
-            measurement["red percentage"] = 0
-            measurement["orange percentage"] = 0
-            measurement["green percentage"] = 0
-
-        if measurement["total_urls"]:
-            measurement["red url percentage"] = round((measurement["red_urls"] /
-                                                       measurement["total_urls"]) * 100)
-            measurement["orange url percentage"] = round((measurement["orange_urls"] /
-                                                          measurement["total_urls"]) * 100)
-            measurement["green url percentage"] = round((measurement["green_urls"] /
-                                                         measurement["total_urls"]) * 100)
-        else:
-            measurement["red url percentage"] = 0
-            measurement["orange url percentage"] = 0
-            measurement["green url percentage"] = 0
-
-        timeframes[stat] = measurement
-
-    return JsonResponse({"data": timeframes}, encoder=JSEncoder)
+    return JsonResponse({"data": reports}, encoder=JSEncoder)
 
 
 @cache_page(one_hour)
@@ -1858,70 +1709,6 @@ def empty_response():
 #         })
 #
 #     return JsonResponse(dataset, encoder=JSEncoder)
-
-
-@cache_page(ten_minutes)
-def latest_scans(request, scan_type, country: str = "NL", organization_type="municipality"):
-    scans = []
-
-    dataset = {
-        "scans": [],
-        "render_date": datetime.now(pytz.utc).isoformat(),
-        "remark": remark,
-    }
-
-    if scan_type not in ALL_SCAN_TYPES:
-        return empty_response()
-
-    if scan_type in ENDPOINT_SCAN_TYPES:
-        scans = list(EndpointGenericScan.objects.filter(
-            type=scan_type,
-            endpoint__url__organization__type=get_organization_type(organization_type),
-            endpoint__url__organization__country=get_country(country)
-        ).order_by('-rating_determined_on')[0:6])
-
-    if scan_type in URL_SCAN_TYPES:
-        scans = list(UrlGenericScan.objects.filter(
-            type=scan_type,
-            url__organization__type=get_organization_type(organization_type),
-            url__organization__country=get_country(country)
-        ).order_by('-rating_determined_on')[0:6])
-
-    for scan in scans:
-        calculation = get_severity(scan)
-
-        if scan_type in URL_SCAN_TYPES:
-            # url scans
-            dataset["scans"].append({
-                "url": scan.url.url,
-                "service": "%s" % scan.url.url,
-                "protocol": scan_type,
-                "port": "-",
-                "ip_version": "-",
-                "explanation": calculation.get("explanation", ""),
-                "high": calculation.get("high", 0),
-                "medium": calculation.get("medium", 0),
-                "low": calculation.get("low", 0),
-                "last_scan_humanized": naturaltime(scan.last_scan_moment),
-                "last_scan_moment": scan.last_scan_moment.isoformat()
-            })
-        else:
-            # endpoint scans
-            dataset["scans"].append({
-                "url": scan.endpoint.url.url,
-                "service": "%s/%s (IPv%s)" % (scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version),
-                "protocol": scan.endpoint.protocol,
-                "port": scan.endpoint.port,
-                "ip_version": scan.endpoint.ip_version,
-                "explanation": calculation.get("explanation", ""),
-                "high": calculation.get("high", 0),
-                "medium": calculation.get("medium", 0),
-                "low": calculation.get("low", 0),
-                "last_scan_humanized": naturaltime(scan.last_scan_moment),
-                "last_scan_moment": scan.last_scan_moment.isoformat()
-            })
-
-    return JsonResponse(dataset, encoder=JSEncoder)
 
 
 @cache_page(ten_minutes)

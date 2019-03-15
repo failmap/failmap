@@ -14,7 +14,7 @@ from websecmap.app.models import Job
 from websecmap.celery import PRIO_HIGH, app
 from websecmap.map import models
 from websecmap.map.geojson import import_from_scratch, update_coordinates
-from websecmap.map.models import MapDataCache, VulnerabilityStatistic
+from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic
 from websecmap.map.report import compose_task
 
 log = logging.getLogger(__package__)
@@ -375,6 +375,22 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def instant_cache_clear(self, request, queryset):
         VulnerabilityStatistic.objects.all().delete()
+
+    instant_cache_clear.short_description = 'Clear all caches (select 1)'
+    actions.append(instant_cache_clear)
+
+
+@admin.register(models.HighLevelStatistic)
+class HighLevelStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    list_display = ('country', 'organization_type', 'when', )
+    list_filter = ['country', 'organization_type', 'when'][::-1]
+    search_fields = (['country', 'organization_type'])
+
+    actions = []
+
+    def instant_cache_clear(self, request, queryset):
+        HighLevelStatistic.objects.all().delete()
 
     instant_cache_clear.short_description = 'Clear all caches (select 1)'
     actions.append(instant_cache_clear)
