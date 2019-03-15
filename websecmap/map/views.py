@@ -2030,7 +2030,7 @@ def latest_updates(organization_id):
     for scan in scans:
         scan_type = scan.type
         calculation = get_severity(scan)
-        if scan_type in ['DNSSEC']:
+        if scan_type in URL_SCAN_TYPES:
             # url scans
             dataset["scans"].append({
                 "organization": organization.name,
@@ -2262,9 +2262,6 @@ class LatestScanFeed(Feed):
         if scan_type in URL_SCAN_TYPES:
             return UrlGenericScan.objects.filter(type=scan_type).order_by('-last_scan_moment')[0:30]
 
-        # have some default.
-        return UrlGenericScan.objects.filter(type='DNSSEC').order_by('-last_scan_moment')[0:30]
-
     def item_title(self, item):
         calculation = get_severity(item)
         if not calculation:
@@ -2276,7 +2273,7 @@ class LatestScanFeed(Feed):
         badge = "✅" if not any([calculation['high'], calculation['medium'], calculation['low']]) else \
             "🔴" if calculation['high'] else "🔶" if calculation['medium'] else "🍋"
 
-        if item.type in ["DNSSEC"]:
+        if item.type in URL_SCAN_TYPES:
             # url generic scan:
             return "%s %s - %s" % (badge, rating, item.url.url)
         else:
@@ -2292,7 +2289,7 @@ class LatestScanFeed(Feed):
 
     # item_link is only needed if NewsItem has no get_absolute_url method.
     def item_link(self, item):
-        if item.type in ["DNSSEC"]:
+        if item.type in URL_SCAN_TYPES:
             # url generic scan:
             return "%s/#updates/%s/%s" % (config.PROJECT_WEBSITE, item.last_scan_moment, item.url.url)
         else:
