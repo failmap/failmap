@@ -11,7 +11,7 @@ from celery import Task, group
 from constance import config
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.scanner.mail import register_scan
+from websecmap.scanners.scanner.internet_nl_mail import register_scan
 from websecmap.scanners.scanner.scanner import (allowed_to_scan, q_configurations_to_scan,
                                                 url_filters)
 

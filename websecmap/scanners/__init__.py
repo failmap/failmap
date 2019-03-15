@@ -41,7 +41,7 @@ SCANNERS = [
     },
     {
         'name': 'internet_nl_mail',
-        'verbose name': 'Scan recipient for STARTTLS, SPF, DKIM and DMARC',
+        'verbose name': 'Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl',
         'description': 'Scans the mail server in the MX record to see if they support STARTTLS, SPF, DKIM and DMARC. '
                        'Requires internet.nl scan account.',
         'can discover endpoints': False,
@@ -174,7 +174,7 @@ SCANNERS = [
     },
     {
         'name': 'internet_nl_web',
-        'verbose name': 'Scans websites on basic HTTP security',
+        'verbose name': 'Scans websites on basic HTTP security (Tested with internet.nl)',
         'description': 't.b.d.',
         'can discover endpoints': False,
         'can verify endpoints': False,

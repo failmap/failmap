@@ -22,12 +22,6 @@ class EndpointGenericScanInline(CompactInline):
     ordering = ["-rating_determined_on"]
 
 
-# can't make this admin, there is no join. And there shouldn't be.
-# class TlsQualysScratchpadAdminInline(admin.StackedInline):
-#    model = TlsQualysScratchpad
-#    extra = 0
-
-
 @admin.register(models.UrlIp)
 class UrlIpAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('url', 'ip', 'rdns_name', 'discovered_on', 'is_unused_since')
@@ -55,24 +49,6 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     )
 
     readonly_fields = ['discovered_on']
-
-    @staticmethod
-    def tls_scans(inst):
-        # slow subqueries are slow
-        return 0
-        return models.TlsQualysScan.objects.filter(endpoint=inst.id).count()
-
-    @staticmethod
-    def endpoint_generic_scans(inst):
-        # slow subqueries are slow
-        return 0
-        return models.EndpointGenericScan.objects.filter(endpoint_id=inst.id).count()
-
-    @staticmethod
-    def url_generic_scans(inst):
-        # slow subqueries are slow
-        return 0
-        return models.UrlGenericScan.objects.filter(url__endpoint=inst.id).count()
 
     @staticmethod
     def visit(inst):
