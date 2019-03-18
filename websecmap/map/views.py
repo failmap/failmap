@@ -1384,6 +1384,7 @@ def map_potential(request, country: str = "NL", organization_type: str = "munici
                     "low": 0,
                     "data_from": 0,
                     "color": "green",
+                    "impact": "good",
                     "total_urls": 0,
                     "high_urls": 0,
                     "medium_urls": 0,
@@ -1596,9 +1597,11 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
         if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
             color = "gray"
+            severity = "unknown"
         else:
             # things have to be OK in order to be colored. If it's all empty... then it's not OK.
             color = "red" if high else "orange" if medium else "yellow" if low else "green" if ok else "gray"
+            severity = "bad" if high else "medium" if medium else "yellow" if low else "good" if ok else "unknown"
 
         dataset = {
             "type": "Feature",
@@ -1614,6 +1617,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     "low": low,
                     "data_from": when,
                     "color": color,
+                    "severity": severity,
                     "total_urls": i[11],  # = 100%
                     "high_urls": i[12],
                     "medium_urls": i[13],

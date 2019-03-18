@@ -477,7 +477,7 @@ const report_mixin = {
             let findings = "";
 
             ordered_issues.forEach(function (item) {
-                findings += `<td class='text-center' style='background-color: ${worst[item['name']].bgcolor}'>${worst[item['name']].text}</td>`;
+                findings += `<td class='text-center' class='${worst[item['name']].bgclass}'>${worst[item['name']].text}</td>`;
             });
 
             return text + findings;
@@ -505,29 +505,29 @@ const report_mixin = {
             }
 
             let text = "";
-            let bgcolor = "";  // green, todo: use classes
+            let bgclass = "";
 
             if (high){
                 text = "";
-                bgcolor = "rgba(251, 173, 173, 0.3)";
+                bgclass = "report_background_bad";
             } else if (medium){
                 text = "";
-                bgcolor = "rgba(249, 209, 139, 0.3)";
+                bgclass = "report_background_medium";
             } else if (low){
                 text = "";
-                bgcolor = "rgba(249, 247, 139, 0.3)";
+                bgclass = "report_background_low";
             } else if (risk_found) {
                 text = "";
-                bgcolor = "rgba(191, 255, 171, 0.3)";
+                bgclass = "report_url_background_good";
             }
 
             if (explained) {
                 // if this is a string with "", translations say unterminated string. As ES6 template it's fine.
                 text = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>`;
-                bgcolor = "rgba(191, 255, 171, 0.3)";
+                bgclass = "report_url_background_good";
             }
 
-            return {'bgcolor': bgcolor, 'text': text}
+            return {'bgclass': bgclass, 'text': text}
 
         },
 
@@ -540,14 +540,14 @@ const report_mixin = {
         },
 
         colorize: function (high, medium, low) {
-            if (high > 0) return "red";
-            if (medium > 0) return "orange";
-            return "green";
+            if (high > 0) return "bad";
+            if (medium > 0) return "medium";
+            return "good";
         },
         colorizebg: function (high, medium, low) {
-            if (high > 0) return "rgba(251, 173, 173, 0.3)";
-            if (medium > 0) return "rgba(249, 209, 139, 0.3)";
-            return "rgba(191, 255, 171, 0.3)";
+            if (high > 0) return "report_url_background_bad";
+            if (medium > 0) return "report_url_background_medium";
+            return "report_url_background_good";
         },
         idize: function (url) {
             url = url.toLowerCase();
@@ -1241,20 +1241,20 @@ function views(autoload_default_map_data=true) {
                 });
                 return _categories;
             },
-            greenpercentage: function () {
-                return this.perc(this.data.data, "green", "total_organizations");
+            goodpercentage: function () {
+                return this.perc(this.data.data, "good", "total_organizations");
             },
 
-            redpercentage: function () {
-                return this.perc(this.data.data, "red", "total_organizations");
+            highpercentage: function () {
+                return this.perc(this.data.data, "high", "total_organizations");
             },
 
-            orangepercentage: function () {
+            mediumpercentage: function () {
                 if (this.data.data) {
                     let score = 100 -
                         roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["red"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["green"] / this.data.data.now["total_organizations"] * 100, 2);
+                        roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
+                        roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
@@ -1262,19 +1262,19 @@ function views(autoload_default_map_data=true) {
             unknownpercentage: function () {
                 return this.perc(this.data.data, "no_rating", "total_organizations");
             },
-            greenurlpercentage: function () {
-                return this.perc(this.data.data, "green_urls", "total_urls");
+            goodurlpercentage: function () {
+                return this.perc(this.data.data, "good_urls", "total_urls");
             },
 
-            redurlpercentage: function () {
-                return this.perc(this.data.data, "red_urls", "total_urls");
+            highurlpercentage: function () {
+                return this.perc(this.data.data, "high_urls", "total_urls");
             },
 
-            orangeurlpercentage: function () {
+            mediumurlpercentage: function () {
                 if (this.data.data) {
                     let score = 100 -
-                        roundTo(this.data.data.now["red_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                        roundTo(this.data.data.now["green_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                        roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                        roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
                     return roundTo(score, 2) + "%";
                 }
                 return 0
@@ -1431,11 +1431,11 @@ function views(autoload_default_map_data=true) {
             },
             arrow: function(value, rank){
                 if (value > 0)
-                    return "<a style='color: red'>▲</a>+"+ value + " ";
+                    return "<a class='bad'>▲</a>+"+ value + " ";
                 if (value === 0)
                     return "▶0";
                 if (value < 0)
-                    return "<a style='color: green'>▼</a>-" + (value * -1) + " ";
+                    return "<a class='good'>▼</a>-" + (value * -1) + " ";
             },
             get_tickertext: function() {
                 // weird that this should be a function...
@@ -1462,7 +1462,7 @@ function views(autoload_default_map_data=true) {
 
                         if (!change['high_now'] && !change['medium_now'] && !change['low_now']){
 
-                            this.tickertext += "<a style='color: green' title='---------------------------------------" +
+                            this.tickertext += "<a class='good' title='---------------------------------------" +
                                 "------'>PERFECT</a>  ";
 
                         } else {

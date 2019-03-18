@@ -73,8 +73,7 @@
 </div>
 
 {% verbatim %}
-<div v-if="name" v-for="url in urls" class="perurl"
-     :style="'background: linear-gradient(' + colorizebg(url.high, url.medium, url.low) + ', rgba(255, 255, 255, 0.0));'">
+<div v-if="name" v-for="url in urls" class="perurl" :class="colorizebg(url.high, url.medium, url.low)">
 
     <div class="row">
         <div class="col-md-4">

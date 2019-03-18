@@ -69,17 +69,14 @@ body {
 
 .green {
     text-decoration: none;
-    color: #00ff00;
 }
 
 .orange {
     text-decoration: none;
-    color: #FFA500;
 }
 
 .red {
     text-decoration: none;
-    color: #ff0000;
 }
 
 #domainlist {
@@ -199,8 +196,6 @@ div#report {
 }
 
 .awarded_points_orange, .awarded_points_medium {
-    border: 1px solid darkorange;
-    background-color: orange;
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
@@ -208,8 +203,6 @@ div#report {
 }
 
 .awarded_points_red, .awarded_points_high {
-    border: 1px solid darkred;
-    background-color: red;
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
@@ -217,8 +210,6 @@ div#report {
 }
 
 .awarded_points_green, .awarded_points_low, .awarded_points_perfect {
-    border: 1px solid green;
-    background-color: lightgreen;
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
@@ -226,8 +217,6 @@ div#report {
 }
 
 .awarded_points_explained {
-    border: 2px solid #8b8987;
-    background-color: #fdfffb;
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
@@ -235,8 +224,6 @@ div#report {
 }
 
 .total_awarded_points_orange {
-    border: 2px solid darkorange;
-    background-color: orange;
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
@@ -245,8 +232,6 @@ div#report {
 }
 
 .total_awarded_points_red {
-    border: 2px solid darkred;
-    background-color: red;
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
@@ -255,8 +240,6 @@ div#report {
 }
 
 .total_awarded_points_green {
-    border: 2px solid green;
-    background-color: lightgreen;
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
@@ -323,26 +306,6 @@ div#report {
     margin-top: 40px;
 }
 
-.yellowrow {
-    color: #f0cf3c;
-}
-
-.orangerow {
-    color: darkorange;
-}
-
-.redrow {
-    color: #d30000;
-}
-
-.greenrow {
-    color: #00c700;
-}
-
-.grayrow {
-    color: darkgray;
-}
-
 /* awesome transition */
 path {
     -webkit-transition: fill 400ms;
@@ -374,39 +337,23 @@ path {
     font-size: 12px;
 }
 
-.selected_country {
-    background-color: #e8e8e8;
-    border-top: 4px solid blue;
-    color: black;
-}
-
-.selected_layer {
-    background-color: #e8e8e8;
-    border-bottom: 4px solid blue;
-    color: black;
-}
-
 #categorynavbar, #countrynavbar {
     margin-bottom: 0 !important;
 }
 
 .improvements_good, .improvements_neutral {
-    color: green;
     font-size: 40px;
 }
 
 .improvements_bad {
-    color: red;
     font-size: 40px;
 }
 
 .improvements_good_large, .improvements_neutral_large {
-    color: green;
     font-size: 100px;
 }
 
 .improvements_bad_large {
-    color: red;
     font-size: 100px;
 }
 
@@ -475,32 +422,6 @@ path {
     display: block;
     border-radius: 10px;
 }
-
-.high {
-    background-color: #f70000;
-}
-
-.medium {
-    background-color: #f78900;;
-}
-
-.low {
-    background-color: #f7e400;
-}
-
-.high_text {
-    color: #f70000;
-}
-
-.medium_text {
-    color: #f78900;;
-}
-
-.low_text {
-    color: #f7e400;
-}
-
-
 
 /* Make it a marquee */
 #marquee {
@@ -593,15 +514,12 @@ th.active .arrow {
 
 
 #lastrow {
-    background-color: black;
     padding-top: 40px;
-    border-top: 10px solid lightgreen;
     left: 0;
     right: 0;
     position: absolute;
     margin-top: 40px;
     padding-bottom: 40px;
-    color: white;
 }
 
 #lastrow ul {
@@ -679,8 +597,6 @@ th.active .arrow {
 
 .leaflet-marker-red
 {
-    background-color: rgba(255,0,0,0.6);
-    border: 2px solid rgba(179,0,0,0.5);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;
@@ -689,8 +605,6 @@ th.active .arrow {
 
 .leaflet-marker-orange
 {
-    background-color: rgba(255, 125, 0, 0.6);
-    border: 2px solid rgba(162, 85, 0, 0.5);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;
@@ -699,8 +613,6 @@ th.active .arrow {
 
 .leaflet-marker-green
 {
-    background-color: rgba(32, 255, 0, 0.6);
-    border: 2px solid rgba(0, 162, 2, 0.50);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;
@@ -709,8 +621,6 @@ th.active .arrow {
 
 .leaflet-marker-yellow
 {
-    background-color: rgba(253, 255, 5, 0.6);
-    border: 2px solid rgba(179, 172, 0, 0.5);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;
@@ -719,8 +629,6 @@ th.active .arrow {
 
 .leaflet-marker-gray
 {
-    background-color: rgba(0, 88, 255, 0.6);
-    border: 2px solid rgba(0, 68, 179, 0.5);
     font-weight: bold;
     text-align: center;
     border-radius: 50%;
@@ -735,7 +643,6 @@ th.active .arrow {
     text-align: center;
 
     margin-bottom: 0;
-    background-color: #ffefef;
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -751,7 +658,6 @@ th.active .arrow {
 }
 
 .chat_quote_left {
-    background-color: rgba(254, 114, 114, 0.1);
     border-radius: 20px;
     padding: 10px 15px;
     margin-right: 10%;
@@ -761,7 +667,6 @@ th.active .arrow {
 .chat_quote_right {
     border-radius: 20px;
     padding: 10px 15px;
-    background-color: #95f09533;
     margin-left: 10%;
     margin-bottom:40px;
 }
@@ -805,4 +710,25 @@ th.active .arrow {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+
+.marker-cluster {
+    background-clip: padding-box;
+    border-radius: 20px;
+}
+
+.marker-cluster div {
+    width: 30px;
+    height: 30px;
+    margin-left: 5px;
+    margin-top: 5px;
+
+    text-align: center;
+    border-radius: 15px;
+    font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
+.marker-cluster span {
+    line-height: 30px;
 }

@@ -135,6 +135,14 @@ var dynamic_translations = function(){
     gettext('Risks');
 };
 
+let current_colorscheme = "trafficlight";
+function set_colorscheme(scheme_name){
+    let thing = 'link[href="'+$('link#colorscheme').attr('href') + '"]';
+    current_colorscheme = scheme_name;
+    $(thing).attr('href', `/static/css/colors.${scheme_name}.css`);
+    return true;
+}
+
 let document_ready = function() {
     map.initialize(mapbox_token, country, debug);
     Vue.component('v-select', VueSelect.VueSelect);
@@ -153,6 +161,11 @@ let document_ready = function() {
         vueReport.selected = organization_name;
     }
 
+    let colorschemes = {
+        "trafficlight": "/static/css/colors.trafficlight.css",
+        "pink": "/static/css/colors.trafficlight.css",
+    };
+
     // switch themes
     // http://jsfiddle.net/82AsF/
     let themes = {
@@ -165,14 +178,14 @@ let document_ready = function() {
         themesheet.appendTo('head');
         $('.theme-link').click(function(){
             let selected_theme = $(this).attr('data-theme');
-           let themeurl = themes[selected_theme];
-           let thing = 'link[href="'+$('link#active_theme').attr('href') + '"]';
-           $(thing).attr('href', themeurl);
+            let themeurl = themes[selected_theme];
+            let thing = 'link[href="'+$('link#active_theme').attr('href') + '"]';
+            $(thing).attr('href', themeurl);
 
-           if (selected_theme === 'darkly')
-               map.set_theme('dark');
+            if (selected_theme === 'darkly')
+                map.set_theme('dark');
 
-           if (selected_theme === 'default')
+            if (selected_theme === 'default')
                 map.set_theme('light');
         });
     });

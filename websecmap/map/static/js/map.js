@@ -6,7 +6,7 @@ const map = {
 
     polygons: L.geoJson(),  // geographical regions
 
-    possibleIconColors: ["unknown", "green", "yellow", "orange", "red"],
+    possibleIconSeverities: ["unknown", "good", "low", "medium", "high"],
     markers: L.markerClusterGroup(
         {
             maxClusterRadius: 25,
@@ -16,7 +16,7 @@ const map = {
 
                 let childmarkers = cluster.getAllChildMarkers();
 
-                let selected_color = 0;
+                let selected_severity = 0;
 
                 // doesn't even need to be an array, as it just matters if the text matches somewhere
                 let searchedfor = false;
@@ -25,10 +25,10 @@ const map = {
                         searchedfor = true;
 
 
-                    // upgrade colors until you find the highest risk issue.
-                    if (map.possibleIconColors.indexOf(point.feature.properties.color) > selected_color){
-                        selected_color = map.possibleIconColors.indexOf(point.feature.properties.color);
-                        css_class = point.feature.properties.color;
+                    // upgrade severity until you find the highest risk issue.
+                    if (map.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
+                        selected_severity = map.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                        css_class = point.feature.properties.severity;
                     }
                 }
 
@@ -91,17 +91,16 @@ const map = {
         this.add_div("<div style='max-width: 300px;'><div id='infobox'></div><br /><br /><div id='domainlist'></div></div>", "info table-light", true);
 
         let labels=[];
-        labels.push('<i style="background:' + map.getColorCode('green') + '"></i> '+ gettext('Perfect'));
-        labels.push('<i style="background:' + map.getColorCode('yellow') + '"></i> '+ gettext('Good'));
-        labels.push('<i style="background:' + map.getColorCode('orange') + '"></i> '+ gettext('Mediocre'));
-        labels.push('<i style="background:' + map.getColorCode('red') + '"></i> '+ gettext('Bad'));
-        labels.push('<i style="background:' + map.getColorCode('unknown') + '"></i> '+ gettext('No data available'));
+        labels.push('<i class="map_polygon_good"></i> '+ gettext('Perfect'));
+        labels.push('<i class="map_polygon_good"></i> '+ gettext('Good'));
+        labels.push('<i class="map_polygon_medium"></i> '+ gettext('Mediocre'));
+        labels.push('<i class="map_polygon_low"></i> '+ gettext('Bad'));
+        labels.push('<i class="map_polygon_unknown"></i> '+ gettext('No data available'));
         this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);
 
         // scale
         L.control.scale().addTo(this.map);
-
 
         this.map.addControl(new L.Control.Fullscreen());
 
@@ -468,13 +467,9 @@ const map = {
         new_div.addTo(this.map);
     },
 
-    getColorCode: function (d) {
-        return d === "red" ? '#bd383c' : d === "orange" ? '#fc9645' : d === "yellow" ? '#d3fc6a' : d === "green" ? '#62fe69' : '#c1bcbb';
-    },
-
     style: function (feature) {
         return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.7,
-            fillColor: map.getColorCode(feature.properties.color)
+            className: 'map_polygon_' + feature.properties.severity
         };
     },
 
@@ -483,12 +478,6 @@ const map = {
     },
 
     pointToLayer: function (geoJsonPoint, latlng) {
-        switch (geoJsonPoint.properties.color){
-            case "red": return L.circleMarker(latlng, map.style(geoJsonPoint));
-            case "orange": return L.circleMarker(latlng, map.style(geoJsonPoint));
-            case "green": return L.circleMarker(latlng, map.style(geoJsonPoint));
-            case "yellow": return L.circleMarker(latlng, map.style(geoJsonPoint));
-        }
         return L.circleMarker(latlng, map.style(geoJsonPoint));
     },
 
@@ -727,7 +716,7 @@ const map = {
             } else {
                 // colors changed, shapes / points on the map stay the same.
                 existing_feature.properties.Overall = new_feature.properties.Overall;
-                existing_feature.properties.color = new_feature.properties.color;
+                existing_feature.properties.severity = new_feature.properties.severity;
                 // make the transition
                 layer.setStyle(map.style(layer.feature));
             }

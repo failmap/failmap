@@ -1,0 +1,324 @@
+.marker-cluster-unknown {
+    background-color: rgba(115, 157, 226, 0.6);
+}
+
+.marker-cluster-unknown div {
+    background-color: rgba(56, 99, 204, 0.6);
+}
+
+.marker-cluster-white {
+    background-color: rgba(221, 226, 226, 0.6);
+}
+
+.marker-cluster-white div {
+    background-color: rgba(204, 202, 199, 0.6);
+}
+
+
+.marker-cluster-good {
+    background-color: rgba(181, 226, 140, 0.6);
+}
+
+.marker-cluster-good div {
+    background-color: rgba(110, 204, 57, 0.6);
+}
+
+.marker-cluster-medium {
+    background-color: rgba(241, 211, 87, 0.6);
+}
+
+.marker-cluster-medium div {
+    background-color: rgba(240, 132, 38, 0.6);
+}
+
+.marker-cluster-low {
+    background-color: rgba(241, 237, 75, 0.6);
+}
+
+.marker-cluster-low div {
+    background-color: rgba(255, 249, 30, 0.6);
+}
+
+.marker-cluster-high {
+    background-color: rgba(253, 156, 115, 0.6);
+}
+
+.marker-cluster-high div {
+    background-color: rgba(241, 40, 37, 0.6);
+}
+
+.good {
+    color: #00ff00;
+}
+
+.medium {
+    color: #FFA500;
+}
+
+.bad {
+    color: #ff0000;
+}
+
+.report_background_bad {
+    background-color: rgba(251, 173, 173, 0.3);
+}
+
+.report_background_medium {
+    background-color: rgba(249, 209, 139, 0.3);
+}
+
+.report_background_low {
+    background-color: rgba(249, 247, 139, 0.3);
+}
+
+.report_url_background_good {
+    background-color: rgba(191, 255, 171, 0.3);
+}
+
+.report_url_background_bad {
+    background: linear-gradient(rgba(251, 173, 173, 0.3), rgba(255, 255, 255, 0.0));
+}
+
+.report_url_background_medium {
+    background: linear-gradient(rgba(249, 209, 139, 0.3), rgba(255, 255, 255, 0.0));
+}
+
+.report_url_background_good {
+    background: linear-gradient(rgba(191, 255, 171, 0.3), rgba(255, 255, 255, 0.0));
+}
+
+.awarded_points_orange, .awarded_points_medium {
+    border: 1px solid darkorange;
+    background-color: orange;
+}
+
+.awarded_points_red, .awarded_points_high {
+    border: 1px solid darkred;
+    background-color: red;
+}
+
+.awarded_points_low, .awarded_points_perfect {
+    border: 1px solid green;
+    background-color: lightgreen;
+}
+
+.awarded_points_explained {
+    border: 2px solid #8b8987;
+    background-color: #fdfffb;
+}
+
+.total_awarded_points_medium  {
+    border: 2px solid darkorange;
+    background-color: orange;
+}
+
+.total_awarded_points_bad {
+    border: 2px solid darkred;
+    background-color: red;
+}
+
+total_awarded_points_good {
+    border: 2px solid green;
+    background-color: lightgreen;
+}
+
+
+.lowrow {
+    color: #f0cf3c;
+}
+
+.mediumrow {
+    color: darkorange;
+}
+
+.badrow {
+    color: #d30000;
+}
+
+.goodrow {
+    color: #00c700;
+}
+
+.grayrow, .unknownrow {
+    color: darkgray;
+}
+
+.improvements_good, .improvements_neutral {
+    color: green;
+}
+
+.improvements_bad {
+    color: red;
+}
+
+.improvements_good_large, .improvements_neutral_large {
+    color: green;
+}
+
+.improvements_bad_large {
+    color: red;
+}
+
+.high {
+    background-color: #f70000;
+}
+
+.medium {
+    background-color: #f78900;;
+}
+
+.low {
+    background-color: #f7e400;
+}
+
+.high_text {
+    color: #f70000;
+}
+
+.medium_text {
+    color: #f78900;;
+}
+
+.low_text {
+    color: #f7e400;
+}
+
+.leaflet-marker-high
+{
+    background-color: rgba(255,0,0,0.6);
+    border: 2px solid rgba(179,0,0,0.5);
+}
+
+.leaflet-marker-medium
+{
+    background-color: rgba(255, 125, 0, 0.6);
+    border: 2px solid rgba(162, 85, 0, 0.5);
+}
+
+.leaflet-marker-good
+{
+    background-color: rgba(32, 255, 0, 0.6);
+    border: 2px solid rgba(0, 162, 2, 0.50);
+}
+
+.leaflet-marker-low
+{
+    background-color: rgba(253, 255, 5, 0.6);
+    border: 2px solid rgba(179, 172, 0, 0.5);
+}
+
+.leaflet-marker-unknown
+{
+    background-color: rgba(0, 88, 255, 0.6);
+    border: 2px solid rgba(0, 68, 179, 0.5);
+}
+
+.map_polygon_high
+{
+    fill: #bd383c;
+}
+
+.map_polygon_medium
+{
+    fill: #fc9645;
+}
+
+.map_polygon_low
+{
+    fill: #d3fc6a;
+}
+
+.map_polygon_good
+{
+    fill: #62fe69;
+}
+
+.map_polygon_unknown
+{
+    fill: #c1bcbb;
+}
+
+/* These are the colors of bootstrap. We'll switch it lateron i guess... */
+.bg-danger, .btn-danger {
+    background-color: inherit;
+}
+
+.bg-warning {
+    background-color: inherit;
+}
+
+.bg-success, .btn-success {
+    background-color: inherit;
+}
+
+.bg-primary {
+    background-color: inherit;
+}
+
+.btn-info {
+    background-color: inherit;
+}
+
+a, a:hover, a:visited {
+    color: inherit;
+}
+
+.announcement{
+    background-color: #ffefef;
+}
+
+.charts_high {
+    background-color: rgba(255, 99, 132, 0.2);
+    border-color: rgba(255,99,132,1);
+}
+
+.charts_medium {
+    background-color: rgba(255, 102, 0, 0.2);
+    border-color: rgba(255,102,0,1);
+}
+
+.charts_low {
+    background-color: rgba(255, 255, 0, 0.2);
+    border-color: rgba(255,255,0,1);
+}
+
+.charts_good {
+    background-color: rgba(50, 255, 50, 0.2);
+    border-color: rgba(50, 255, 50, 1);
+}
+
+.charts_connectivity_internet_adresses {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0,0,0,1);
+}
+
+.charts_connectivity_services {
+    background-color: rgba(0, 40, 255, 0.2);
+    border-color: rgba(0,40,255,1);
+}
+
+.selected_country {
+    background-color: #e8e8e8;
+    border-top: 4px solid blue;
+    color: black;
+}
+
+.selected_layer {
+    background-color: #e8e8e8;
+    border-bottom: 4px solid blue;
+    color: black;
+}
+
+#lastrow {
+    background-color: black;
+    border-top: 10px solid lightgreen;
+    color: white;
+}
+
+.chat_quote_left {
+    background-color: rgba(254, 114, 114, 0.1);
+}
+
+.chat_quote_right {
+    background-color: #95f09533;
+}

@@ -52,6 +52,8 @@
 
     <!-- This stylesheet is changed on the fly using themes. -->
     <link rel="stylesheet" type="text/css" id="active_theme" href="{% static 'css/vendor/bootstrap.min.css' %}"/>
+    <!-- Allow various color schemes -->
+    <link id="colorscheme" href="{% static '/css/colors.trafficlight.css' %}" rel="stylesheet" />
 
     {% compress css %}
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
@@ -401,17 +403,17 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="progress">
-                        <div class="progress-bar bg-success" :style="{width:greenpercentage}">
-                            <span class="sr-only">{% trans "stats remark green" %}</span>
+                        <div class="progress-bar bg-success" :style="{width:goodpercentage}">
+                            <span class="sr-only">{% trans "stats remark good" %}</span>
                         </div>
-                        <div class="progress-bar bg-warning" :style="{width:orangepercentage}">
-                            <span class="sr-only">{% trans "stats remark orange" %}</span>
+                        <div class="progress-bar bg-warning" :style="{width:mediumpercentage}">
+                            <span class="sr-only">{% trans "stats remark medium" %}</span>
                         </div>
-                        <div class="progress-bar bg-danger" :style="{width:redpercentage}">
-                            <span class='sr-only'>{% trans "stats remark red" %}</span>
+                        <div class="progress-bar bg-danger" :style="{width:highpercentage}">
+                            <span class='sr-only'>{% trans "stats remark high" %}</span>
                         </div>
                         <div class="progress-bar bg-basic" :style="{width:unknownpercentage}">
-                            <span class='sr-only'>{% trans "stats remark gray" %}</span>
+                            <span class='sr-only'>{% trans "stats remark unknown" %}</span>
                         </div>
                     </div>
 
@@ -431,17 +433,17 @@
                             <tr v-for="(x, key) in data.data">
                                 <td>{{ translate(key) }}</td>
                                 <td>{{ x["included_organizations"] }}</td>
-                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green percentage'] + '%, transparent ' + x['green percentage'] + '%, transparent 100%);'">
-                                    {{ x["green"] }}
-                                    <small>({{ x["green percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good percentage'] + '%, transparent ' + x['good percentage'] + '%, transparent 100%);'">
+                                    {{ x["good"] }}
+                                    <small>({{ x["good percentage"] }}%)</small>
                                 </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange percentage'] + '%, transparent ' + x['orange percentage'] + '%, transparent 100%);'">
-                                    {{ x["orange"] }}
-                                    <small>({{ x["orange percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium percentage'] + '%, transparent ' + x['medium percentage'] + '%, transparent 100%);'">
+                                    {{ x["medium"] }}
+                                    <small>({{ x["medium percentage"] }}%)</small>
                                 </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red percentage'] + '%, transparent ' + x['red percentage'] + '%, transparent 100%);'">
-                                    {{ x["red"] }}
-                                    <small>({{ x["red percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high percentage'] + '%, transparent ' + x['high percentage'] + '%, transparent 100%);'">
+                                    {{ x["high"] }}
+                                    <small>({{ x["high percentage"] }}%)</small>
                                 </td>
                             </tr>
                             {% endverbatim %}
@@ -451,14 +453,14 @@
                 </div>
                 <div class="col-md-6">
                     <div class="progress">
-                        <div class="progress-bar bg-success" :style="{width:greenurlpercentage}">
-                            <span class="sr-only">{% trans "stats remark green" %}</span>
+                        <div class="progress-bar bg-success" :style="{width:goodurlpercentage}">
+                            <span class="sr-only">{% trans "stats remark good" %}</span>
                         </div>
-                        <div class="progress-bar bg-warning" :style="{width:orangeurlpercentage}">
-                            <span class="sr-only">{% trans "stats remark orange" %}</span>
+                        <div class="progress-bar bg-warning" :style="{width:mediumurlpercentage}">
+                            <span class="sr-only">{% trans "stats remark medium" %}</span>
                         </div>
-                        <div class="progress-bar bg-danger" :style="{width:redurlpercentage}">
-                            <span class='sr-only'>{% trans "stats remark red" %}</span>
+                        <div class="progress-bar bg-danger" :style="{width:highurlpercentage}">
+                            <span class='sr-only'>{% trans "stats remark high" %}</span>
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -477,17 +479,17 @@
                             <tr v-for="(x, key) in data.data">
                                 <td>{{ translate(key) }}</td>
                                 <td>{{ x["total_urls"] }}</td>
-                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['green url percentage'] + '%, transparent ' + x['green url percentage'] + '%, transparent 100%);'">
-                                    {{ x["green_urls"] }}
-                                    <small>({{ x["green url percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good url percentage'] + '%, transparent ' + x['good url percentage'] + '%, transparent 100%);'">
+                                    {{ x["good_urls"] }}
+                                    <small>({{ x["good url percentage"] }}%)</small>
                                 </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['orange url percentage'] + '%, transparent ' + x['orange url percentage'] + '%, transparent 100%);'">
-                                    {{ x["orange_urls"] }}
-                                    <small>({{ x["orange url percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium url percentage'] + '%, transparent ' + x['medium url percentage'] + '%, transparent 100%);'">
+                                    {{ x["medium_urls"] }}
+                                    <small>({{ x["medium url percentage"] }}%)</small>
                                 </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['red url percentage'] + '%, transparent ' + x['red url percentage'] + '%, transparent 100%);'">
-                                    {{ x["red_urls"] }}
-                                    <small>({{ x["red url percentage"] }}%)</small>
+                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high url percentage'] + '%, transparent ' + x['high url percentage'] + '%, transparent 100%);'">
+                                    {{ x["high_urls"] }}
+                                    <small>({{ x["high url percentage"] }}%)</small>
                                 </td>
                             </tr>
                             {% endverbatim %}
@@ -523,17 +525,17 @@
                                     <tr>
                                         <td colspan="3" v-html="translate(issue['name'])"></td>
                                     </tr>
-                                    <tr class="redrow" v-for="grade in issue.statistics.bad">
+                                    <tr class="badrow" v-for="grade in issue.statistics.bad">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
                                     </tr>
-                                    <tr class="orangerow" v-for="grade in issue.statistics.medium">
+                                    <tr class="mediumrow" v-for="grade in issue.statistics.medium">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
                                     </tr>
-                                    <tr class="greenrow" v-for="grade in issue.statistics.good">
+                                    <tr class="goodrow" v-for="grade in issue.statistics.good">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
@@ -558,17 +560,17 @@
                                     <tr>
                                         <td colspan="3" v-html="translate(issue['name'])"></td>
                                     </tr>
-                                    <tr class="redrow" v-for="grade in issue.statistics.bad">
+                                    <tr class="badrow" v-for="grade in issue.statistics.bad">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
                                     </tr>
-                                    <tr class="orangerow" v-for="grade in issue.statistics.medium">
+                                    <tr class="mediumrow" v-for="grade in issue.statistics.medium">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
                                     </tr>
-                                    <tr class="greenrow" v-for="grade in issue.statistics.good">
+                                    <tr class="goodrow" v-for="grade in issue.statistics.good">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>

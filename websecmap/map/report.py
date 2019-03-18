@@ -446,9 +446,9 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
 
-            measurement = {'red': 0, 'orange': 0, 'green': 0,
+            measurement = {'high': 0, 'medium': 0, 'good': 0,
                            'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
-                           'total_urls': 0, 'red_urls': 0, 'orange_urls': 0, 'green_urls': 0,
+                           'total_urls': 0, 'high_urls': 0, 'medium_urls': 0, 'good_urls': 0,
                            'included_organizations': 0, 'endpoints': 0,
                            "endpoint": OrderedDict(), "explained": {}}
 
@@ -482,11 +482,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 measurement["total_organizations"] += 1
 
                 if rating.high:
-                    measurement["red"] += 1
+                    measurement["high"] += 1
                 elif rating.medium:
-                    measurement["orange"] += 1
+                    measurement["medium"] += 1
                 else:
-                    measurement["green"] += 1
+                    measurement["good"] += 1
 
                 # count the urls, from the latest rating. Which is very dirty :)
                 # it will double the urls that are shared between organizations.
@@ -495,11 +495,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 calculation = rating.calculation
                 measurement["total_urls"] += len(calculation['organization']['urls'])
 
-                measurement["green_urls"] += sum([l['high'] == 0 and l['medium'] == 0
+                measurement["good_urls"] += sum([l['high'] == 0 and l['medium'] == 0
                                                   for l in calculation['organization']['urls']])
-                measurement["orange_urls"] += sum([l['high'] == 0 and l['medium'] > 0
+                measurement["medium_urls"] += sum([l['high'] == 0 and l['medium'] > 0
                                                    for l in calculation['organization']['urls']])
-                measurement["red_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
+                measurement["high_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
 
                 measurement["included_organizations"] += 1
 
@@ -570,28 +570,28 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
             measurement["endpoint"] = sorted(measurement["endpoint"].items())
 
             if measurement["included_organizations"]:
-                measurement["red percentage"] = round((measurement["red"] /
+                measurement["high percentage"] = round((measurement["high"] /
                                                        measurement["included_organizations"]) * 100)
-                measurement["orange percentage"] = round((measurement["orange"] /
+                measurement["medium percentage"] = round((measurement["medium"] /
                                                           measurement["included_organizations"]) * 100)
-                measurement["green percentage"] = round((measurement["green"] /
+                measurement["good percentage"] = round((measurement["good"] /
                                                          measurement["included_organizations"]) * 100)
             else:
-                measurement["red percentage"] = 0
-                measurement["orange percentage"] = 0
-                measurement["green percentage"] = 0
+                measurement["high percentage"] = 0
+                measurement["medium percentage"] = 0
+                measurement["good percentage"] = 0
 
             if measurement["total_urls"]:
-                measurement["red url percentage"] = round((measurement["red_urls"] /
+                measurement["high url percentage"] = round((measurement["high_urls"] /
                                                            measurement["total_urls"]) * 100)
-                measurement["orange url percentage"] = round((measurement["orange_urls"] /
+                measurement["medium url percentage"] = round((measurement["medium_urls"] /
                                                               measurement["total_urls"]) * 100)
-                measurement["green url percentage"] = round((measurement["green_urls"] /
+                measurement["good url percentage"] = round((measurement["good_urls"] /
                                                              measurement["total_urls"]) * 100)
             else:
-                measurement["red url percentage"] = 0
-                measurement["orange url percentage"] = 0
-                measurement["green url percentage"] = 0
+                measurement["high url percentage"] = 0
+                measurement["medium url percentage"] = 0
+                measurement["good url percentage"] = 0
 
             s = HighLevelStatistic()
             s.country = map_configuration['country']
