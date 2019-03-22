@@ -703,10 +703,10 @@
                 <div class="col-md-12">
                     <h4>{% trans "Overall" %}</h4>
                     <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
-                        <vulnerability-chart :data="data.total" :axis="['high', 'medium', 'low']"></vulnerability-chart>
+                        <vulnerability-chart :color_scheme="color_scheme" :data="data.total" :axis="['high', 'medium', 'low']"></vulnerability-chart>
                     </div>
                     <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
-                        <connectivity-chart :data="data.total"></connectivity-chart>
+                        <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
                     </div>
                 </div>
             </div>
@@ -720,12 +720,12 @@
 
                     <div class="col-md-6"  v-if="data[issue['name']]" style="margin-bottom: 30px;">
                         <div class="chart-container" style="position: relative; height:400px; width:100%">
-                            <vulnerability-donut :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-donut>
+                            <vulnerability-donut :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-donut>
                         </div>
                     </div>
                     <div class="col-md-6"  v-if="data[issue['name']]">
                         <div class="chart-container" style="position: relative; height:400px; width:100%">
-                            <vulnerability-chart :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-chart>
+                            <vulnerability-chart :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-chart>
                         </div>
                     </div>
                 </template>
@@ -1155,6 +1155,16 @@
     </div>
 </script>
 {% endverbatim %}
+
+<!-- These elements are added so they can be accessed from a jquery selector. You can't directly access css classes. -->
+<div id="inkpot" style="visibility: hidden;">
+    <div class="charts_high"></div>
+    <div class="charts_medium"></div>
+    <div class="charts_low"></div>
+    <div class="charts_good"></div>
+    <div class="charts_connectivity_internet_adresses"></div>
+    <div class="charts_connectivity_services"></div>
+</div>
 
 <iframe name="print_frame" title="Print frame, used to load reports when clicking print." width="0" height="0" frameborder="0" src="about:blank"></iframe>
 </html>

@@ -140,8 +140,41 @@ function set_colorscheme(scheme_name){
     let thing = 'link[href="'+$('link#colorscheme').attr('href') + '"]';
     current_colorscheme = scheme_name;
     $(thing).attr('href', `/static/css/colors.${scheme_name}.css`);
+
+    setTimeout(set_graph_colorscheme, 500);
+
     return true;
 }
+
+function set_graph_colorscheme(){
+    // can we now access elements that contain these colors via javascript selectors, because that's not
+    // a horrible solution at all... </sarcasm>
+    // The browser has to load it... so we need to run this at a timeout... (you've got to be kidding me)
+    // try the color scheme:
+    let charts_high = $('.charts_high');
+    let charts_medium = $('.charts_medium');
+    let charts_low = $('.charts_low');
+    let charts_good = $('.charts_good');
+    let charts_connectivity_internet_adresses = $('.charts_connectivity_internet_adresses');
+    let charts_connectivity_services = $('.charts_connectivity_services');
+    vueGraphs.color_scheme = {
+        'high_background': charts_high.css('background-color'),
+        'high_border': charts_high.css('background-color'),
+        'medium_background': charts_medium.css('background-color'),
+        'medium_border': charts_medium.css('background-color'),
+        'low_background': charts_low.css('background-color'),
+        'low_border': charts_low.css('background-color'),
+        'good_background': charts_good.css('background-color'),
+        'good_border': charts_good.css('background-color'),
+        'addresses_background': charts_connectivity_internet_adresses.css('background-color'),
+        'addresses_border': charts_connectivity_internet_adresses.css('background-color'),
+        'services_background': charts_connectivity_services.css('background-color'),
+        'services_border': charts_connectivity_services.css('background-color'),
+    };
+
+}
+
+
 
 let document_ready = function() {
     map.initialize(mapbox_token, country, debug);

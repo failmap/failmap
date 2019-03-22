@@ -852,6 +852,7 @@ const chart_mixin = {
     props: {
         data: {type: Array, required: true},
         axis: {type: Array, required: false},
+        color_scheme: {type: Object, required: false}
     },
     data: {
         // [Vue warn]: The "data" option should be a function that returns a per-instance value in component definitions.
@@ -872,6 +873,12 @@ const chart_mixin = {
     },
     watch: {
         data: function(newsetting, oldsetting){
+            this.renderData();
+        },
+
+        // Supports changing the colors of this graph ad-hoc.
+        // charts.js is not reactive.
+        color_scheme: function(newsetting, oldsetting){
             this.renderData();
         },
     }
@@ -952,8 +959,8 @@ Vue.component('vulnerability-chart', {
             this.chart.data.datasets = [{
                         label: '# High risk',
                         data: high,
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255,99,132,1)',
+                        backgroundColor: this.color_scheme.high_background,
+                        borderColor: this.color_scheme.high_border,
                         borderWidth: 1,
                         lineTension: 0,
                         hidden: !this.axis.includes('high')
@@ -961,8 +968,8 @@ Vue.component('vulnerability-chart', {
                     {
                         label: '# Medium risk',
                         data: medium,
-                        backgroundColor: 'rgba(255, 102, 0, 0.2)',
-                        borderColor: 'rgba(255,102,0,1)',
+                        backgroundColor: this.color_scheme.medium_background,
+                        borderColor: this.color_scheme.medium_border,
                         borderWidth: 1,
                         lineTension: 0,
                         hidden: !this.axis.includes('medium')
@@ -970,8 +977,8 @@ Vue.component('vulnerability-chart', {
                     {
                         label: '# Low risk',
                         data: low,
-                        backgroundColor: 'rgba(255, 255, 0, 0.2)',
-                        borderColor: 'rgba(255,255,0,1)',
+                        backgroundColor: this.color_scheme.low_background,
+                        borderColor: this.color_scheme.low_border,
                         borderWidth: 1,
                         lineTension: 0,
                         hidden: !this.axis.includes('low')
@@ -1039,28 +1046,28 @@ Vue.component('vulnerability-donut', {
             let chartdata = [];
 
             if (this.axis.includes('high')){
-                backgroundColor.push('rgba(255, 99, 132, 0.2)');
-                borderColor.push('rgba(255,99,132,1)');
+                backgroundColor.push(this.color_scheme.high_background);
+                borderColor.push(this.color_scheme.high_border);
                 labels.push('# High risk');
                 chartdata.push(high);
             }
             if (this.axis.includes('medium')){
-                backgroundColor.push('rgba(255, 102, 0, 0.2)');
-                borderColor.push('rgba(255,102,0,1)');
+                backgroundColor.push(this.color_scheme.medium_background);
+                borderColor.push(this.color_scheme.medium_border);
                 labels.push('# Medium risk');
                 chartdata.push(medium);
 
             }
             if (this.axis.includes('low')){
-                backgroundColor.push('rgba(255, 255, 0, 0.2)');
-                borderColor.push('rgba(255,255,0,1)');
+                backgroundColor.push(this.color_scheme.low_background);
+                borderColor.push(this.color_scheme.low_border);
                 labels.push('# Low risk');
                 chartdata.push(low);
             }
 
             // Only include OK in the donuts, not the graphs. Otherwise the graphs become unreadable (too much data)
-            backgroundColor.push('rgba(50, 255, 50, 0.2)');
-            borderColor.push('rgba(50, 255, 50, 1)');
+            backgroundColor.push(this.color_scheme.good_background);
+            borderColor.push(this.color_scheme.good_border);
             labels.push('# No risk');
             chartdata.push(ok);
 
@@ -1154,16 +1161,16 @@ Vue.component('connectivity-chart', {
             this.chart.data.datasets = [{
                 label: '# Internet Adresses',
                 data: urls,
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                borderColor: 'rgba(0,0,0,1)',
+                backgroundColor: this.color_scheme.addresses_background,
+                borderColor: this.color_scheme.addresses_border,
                 borderWidth: 1,
                 lineTension: 0
             },
             {
                 label: '# Services',
                 data: endpoints,
-                backgroundColor: 'rgba(0, 40, 255, 0.2)',
-                borderColor: 'rgba(0,40,255,1)',
+                backgroundColor: this.color_scheme.services_background,
+                borderColor: this.color_scheme.services_border,
                 borderWidth: 1,
                 lineTension: 0
             }];
@@ -1198,6 +1205,21 @@ function views(autoload_default_map_data=true) {
 
         data: {
             issues: ordered_issues,
+            // A default color scheme is based on a traffic light layout.
+            color_scheme: {
+                    'high_background': 'rgba(255, 99, 132, 0.2)',
+                    'high_border': 'rgba(255, 99, 132, 0.2)',
+                    'medium_background': 'rgba(255, 102, 0, 0.2)',
+                    'medium_border': 'rgba(255,102,0,1)',
+                    'low_background': 'rgba(255, 255, 0, 0.2)',
+                    'low_border': 'rgba(255,255,0,1)',
+                    'good_background': 'rgba(50, 255, 50, 0.2)',
+                    'good_border': 'rgba(50, 255, 50, 1)',
+                    'addresses_background': 'rgba(0, 0, 0, 0.2)',
+                    'addresses_border': 'rgba(0,0,0,1)',
+                    'services_background': 'rgba(0, 40, 255, 0.2)',
+                    'services_border': 'rgba(0,40,255,1)',
+                }
         },
 
         methods: {
