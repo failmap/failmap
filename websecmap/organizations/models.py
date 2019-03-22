@@ -473,9 +473,10 @@ class Dataset(models.Model):
         blank=True,
         help_text="Fill out either the URL or File source. - "
                   "A file upload has to be in a specific Excel format. You can download this format here: "
-                  "<a href='/static/empty_organizations_import_file.xlsx'>empty file</a>. You can also download "
+                  "<a href='/static/websecmap/empty_organizations_import_file.xlsx'>empty file</a>. "
+                  "You can also download "
                   "an example that shows how to enter the data correctly. You can download the example here: "
-                  "<a href='/static/example_organizations_import_file.xlsx'>example file</a>"
+                  "<a href='/static/websecmap/example_organizations_import_file.xlsx'>example file</a>"
     )
 
     is_imported = models.BooleanField(default=False,)
