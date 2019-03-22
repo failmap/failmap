@@ -1129,10 +1129,10 @@
                 {% verbatim %}
                 <tbody>
                     <tr v-for="url in urls">
-                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.high }}</span></td>
-                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.medium }}</span></td>
-                        <td><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.low }}</span></td>
-                        <td nowrap><span v-bind:class="colorize(url.high, url.medium, url.low)">{{ url.url }}</span></td>
+                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
+                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
+                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
+                        <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
                     </tr>
                 </tbody>
                 {% endverbatim %}
