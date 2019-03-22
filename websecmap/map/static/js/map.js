@@ -469,8 +469,21 @@ const map = {
 
     style: function (feature) {
         return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.7,
-            className: 'map_polygon_' + feature.properties.severity
+            fillColor: map.getColorCode(feature.properties.severity),
+            // className: map.a_function_that_makes_the_classname(feature.properties.severity)
         };
+    },
+
+    // The map has a problem with dynamic class names, once the class name is set, it's not updated.
+    // Using the fillColor resolves the problem. The challenge is now to make these colors dynamic.
+    // perhaps it's a bug and it has been fixed.
+    a_function_that_makes_the_classname: function(severity){
+        return 'map_polygon_' + severity
+    },
+
+    getColorCode: function(d){
+        return d === "high" ? '#bd383c' : d === "medium" ? '#fc9645' : d === "low" ? '#d3fc6a' : d === "good" ? '#62fe69' : '#c1bcbb';
+
     },
 
     searchResultStyle: function (feature) {
