@@ -141,7 +141,7 @@ function set_colorscheme(scheme_name){
     current_colorscheme = scheme_name;
     $(thing).attr('href', `/static/css/colors.${scheme_name}.css`);
 
-    setTimeout(set_graph_colorscheme, 500);
+    setTimeout(set_graph_colorscheme, 2000);
 
     return true;
 }
@@ -157,7 +157,8 @@ function set_graph_colorscheme(){
     let charts_good = $('.charts_good');
     let charts_connectivity_internet_adresses = $('.charts_connectivity_internet_adresses');
     let charts_connectivity_services = $('.charts_connectivity_services');
-    vueGraphs.color_scheme = {
+
+    let new_color_scheme = {
         'high_background': charts_high.css('background-color'),
         'high_border': charts_high.css('background-color'),
         'medium_background': charts_medium.css('background-color'),
@@ -171,6 +172,10 @@ function set_graph_colorscheme(){
         'services_background': charts_connectivity_services.css('background-color'),
         'services_border': charts_connectivity_services.css('background-color'),
     };
+
+    vueGraphs.color_scheme = new_color_scheme;
+    vueReport.color_scheme = new_color_scheme;
+    vueFullScreenReport.color_scheme = new_color_scheme;
 
 }
 

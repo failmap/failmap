@@ -1,9 +1,18 @@
+/*
+https://www.maggiemaggio.com/color/wp-content/uploads/2007/09/color-blind-versionwebsafebtlabschart.jpg
+
+Green -> Dark Blue
+Yellow -> Light Blue
+Red -> Can stay red, becomes brown
+Orange -> Can stay orange, becomes a light brown
+
+*/
 .marker-cluster-unknown {
-    background-color: rgba(115, 157, 226, 0.6);
+    background-color: rgba(224, 221, 226, 0.6);
 }
 
 .marker-cluster-unknown div {
-    background-color: rgba(56, 99, 204, 0.6);
+    background-color: rgba(186, 189, 204, 0.6);
 }
 
 .marker-cluster-white {
@@ -14,12 +23,13 @@
     background-color: rgba(204, 202, 199, 0.6);
 }
 
+
 .marker-cluster-good {
-    background-color: rgba(181, 226, 140, 0.6);
+    background-color: rgba(122, 214, 226, 0.6);
 }
 
 .marker-cluster-good div {
-    background-color: rgba(110, 204, 57, 0.6);
+    background-color: rgba(92, 191, 204, 0.6);
 }
 
 .marker-cluster-medium {
@@ -31,7 +41,7 @@
 }
 
 .marker-cluster-low {
-    background-color: rgba(241, 237, 75, 0.6);
+    background-color: rgba(159, 192, 241, 0.6);
 }
 
 .marker-cluster-low div {
@@ -47,7 +57,7 @@
 }
 
 .good_text {
-    color: #00ff00;
+    color: #0a6aff;
 }
 
 .medium_text {
@@ -67,11 +77,11 @@
 }
 
 .report_background_low, .low_background_light {
-    background-color: rgba(249, 247, 139, 0.3);
+    background-color: rgba(170, 191, 249, 0.3);
 }
 
 .report_url_background_good, .good_background_light {
-    background-color: rgba(191, 255, 171, 0.3);
+    background-color: rgba(102, 168, 255, 0.3);
 }
 
 .report_url_background_high {
@@ -83,7 +93,7 @@
 }
 
 .report_url_background_good {
-    background: linear-gradient(rgba(191, 255, 171, 0.3), rgba(255, 255, 255, 0.0));
+    background: linear-gradient(rgba(81, 163, 255, 0.3), rgba(255, 255, 255, 0.0));
 }
 
 .awarded_points_medium {
@@ -97,8 +107,8 @@
 }
 
 .awarded_points_low, .awarded_points_perfect {
-    border: 1px solid green;
-    background-color: lightgreen;
+    border: 1px solid #003280;
+    background-color: #84bfee;
 }
 
 .awarded_points_explained {
@@ -117,13 +127,13 @@
 }
 
 .total_awarded_points_good {
-    border: 2px solid green;
-    background-color: lightgreen;
+    border: 2px solid #003c80;
+    background-color: #75aaee;
 }
 
 
 .lowrow {
-    color: #f0cf3c;
+    color: #a1dbf0;
 }
 
 .mediumrow {
@@ -135,7 +145,7 @@
 }
 
 .goodrow {
-    color: #00c700;
+    color: #0055c7;
 }
 
 .grayrow, .unknownrow {
@@ -143,7 +153,7 @@
 }
 
 .improvements_good, .improvements_neutral {
-    color: green;
+    color: #002380;
 }
 
 .improvements_high {
@@ -151,14 +161,14 @@
 }
 
 .improvements_good_large, .improvements_neutral_large {
-    color: green;
+    color: #002580;
 }
 
 .improvements_high_large {
     color: red;
 }
 
-.high {
+.high, .bg-danger, .btn-danger {
     background-color: #f70000;
 }
 
@@ -167,7 +177,7 @@
 }
 
 .low {
-    background-color: #f7e400;
+    background-color: #a2ccf7;
 }
 
 .high_text {
@@ -179,7 +189,7 @@
 }
 
 .low_text {
-    color: #f7e400;
+    color: #93cdf7;
 }
 
 .leaflet-marker-high
@@ -196,20 +206,20 @@
 
 .leaflet-marker-good
 {
-    background-color: rgba(32, 255, 0, 0.6);
-    border: 2px solid rgba(0, 162, 2, 0.50);
+    background-color: rgba(10, 82, 255, 0.6);
+    border: 2px solid rgba(0, 27, 162, 0.5);
 }
 
 .leaflet-marker-low
 {
-    background-color: rgba(253, 255, 5, 0.6);
-    border: 2px solid rgba(179, 172, 0, 0.5);
+    background-color: rgba(142, 210, 255, 0.6);
+    border: 2px solid rgba(97, 140, 179, 0.5);
 }
 
 .leaflet-marker-unknown
 {
-    background-color: rgba(0, 88, 255, 0.6);
-    border: 2px solid rgba(0, 68, 179, 0.5);
+    background-color: rgba(220, 239, 255, 0.6);
+    border: 2px solid rgba(153, 165, 179, 0.5);
 }
 
 .map_polygon_high, .bg-danger, .btn-danger
@@ -226,14 +236,14 @@
 
 .map_polygon_low
 {
-    fill: #d3fc6a;
-    background-color: #d3fc6a;
+    fill: #8ebcfc;
+    background-color: #9acbfc;
 }
 
 .map_polygon_good, .bg-success, .btn-success
 {
-    fill: #62fe69;
-    background-color: #62fe69;
+    fill: #3f74fe;
+    background-color: #3f74fe !important;  /* Some overrides from gitter... */
 }
 
 .map_polygon_unknown
@@ -270,13 +280,13 @@ a, a:hover, a:visited {
 }
 
 .charts_low {
-    background-color: rgba(255, 255, 0, 0.2);
-    border-color: rgba(255,255,0,1);
+    background-color: rgba(145, 182, 255, 0.2);
+    border-color: rgb(129, 178, 255);
 }
 
 .charts_good {
-    background-color: rgba(50, 255, 50, 0.2);
-    border-color: rgba(50, 255, 50, 1);
+    background-color: rgba(39, 95, 255, 0.2);
+    border-color: rgb(10, 84, 255);
 }
 
 .charts_connectivity_internet_adresses {
@@ -303,7 +313,7 @@ a, a:hover, a:visited {
 
 #lastrow {
     background-color: black;
-    border-top: 10px solid lightgreen;
+    border-top: 10px solid #74acee;
     color: white;
 }
 

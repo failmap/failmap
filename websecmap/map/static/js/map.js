@@ -92,9 +92,9 @@ const map = {
 
         let labels=[];
         labels.push('<i class="map_polygon_good"></i> '+ gettext('Perfect'));
-        labels.push('<i class="map_polygon_good"></i> '+ gettext('Good'));
+        labels.push('<i class="map_polygon_low"></i> '+ gettext('Good'));
         labels.push('<i class="map_polygon_medium"></i> '+ gettext('Mediocre'));
-        labels.push('<i class="map_polygon_low"></i> '+ gettext('Bad'));
+        labels.push('<i class="map_polygon_high"></i> '+ gettext('Bad'));
         labels.push('<i class="map_polygon_unknown"></i> '+ gettext('No data available'));
         this.add_div("<span class='legend_title'>" + gettext('legend_basic_security') + "</span><br />" + labels.join('<br />'), "info legend table-light", false, {position: 'bottomright'});
         this.add_div(document.getElementById('fullscreenreport').innerHTML, "fullscreenmap", true);

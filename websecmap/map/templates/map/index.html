@@ -525,7 +525,7 @@
                                     <tr>
                                         <td colspan="3" v-html="translate(issue['name'])"></td>
                                     </tr>
-                                    <tr class="badrow" v-for="grade in issue.statistics.bad">
+                                    <tr class="highrow" v-for="grade in issue.statistics.bad">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
@@ -560,7 +560,7 @@
                                     <tr>
                                         <td colspan="3" v-html="translate(issue['name'])"></td>
                                     </tr>
-                                    <tr class="badrow" v-for="grade in issue.statistics.bad">
+                                    <tr class="highrow" v-for="grade in issue.statistics.bad">
                                         <td></td>
                                         <td v-html="translate(grade.explanation)">:</td>
                                         <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>

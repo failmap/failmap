@@ -28,12 +28,12 @@
         <br style="clear: both">
 
         <div class="chart-container" style="position: relative; height:555px; width:100%">
-            <vulnerability-chart :data="timeline" :axis="['high', 'medium', 'low']"></vulnerability-chart>
+            <vulnerability-chart :color_scheme="color_scheme" :data="timeline" :axis="['high', 'medium', 'low']"></vulnerability-chart>
         </div>
 
         <br />
         <div class="chart-container" style="position: relative; height:555px; width:100%">
-            <connectivity-chart :data="timeline"></connectivity-chart>
+            <connectivity-chart :color_scheme="color_scheme" :data="timeline"></connectivity-chart>
         </div>
     </div>
 </div>
@@ -82,7 +82,7 @@
         <div class="col-md-8">
             <a :name="'report_url_'+url.url"></a>
             <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-            <span class="faildomain" :class="colorize(url.high, url.medium, url.low)" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+            <span :class="'faildomain ' + colorize(url.high, url.medium, url.low)+'_text'" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
             <a :href="'mailto:{% endverbatim %}{{ config.PROJECT_ISSUE_MAIL }}{% verbatim %}?subject={% endverbatim %}{% trans "Incorrect finding on mail subject" %}{% verbatim %}' + url.url + '&body={% endverbatim %}{% trans "Incorrect finding on mail body" %}{% verbatim %}'" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                 {% endverbatim %}{% trans "Report incorrect finding" %}</a>
         </div>

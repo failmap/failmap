@@ -430,6 +430,21 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let default_color_scheme = {
+    'high_background': 'rgba(255, 99, 132, 0.2)',
+    'high_border': 'rgba(255, 99, 132, 0.2)',
+    'medium_background': 'rgba(255, 102, 0, 0.2)',
+    'medium_border': 'rgba(255,102,0,1)',
+    'low_background': 'rgba(255, 255, 0, 0.2)',
+    'low_border': 'rgba(255,255,0,1)',
+    'good_background': 'rgba(50, 255, 50, 0.2)',
+    'good_border': 'rgba(50, 255, 50, 1)',
+    'addresses_background': 'rgba(0, 0, 0, 0.2)',
+    'addresses_border': 'rgba(0,0,0,1)',
+    'services_background': 'rgba(0, 40, 255, 0.2)',
+    'services_border': 'rgba(0,40,255,1)',
+};
+
 const report_mixin = {
     data: {
         calculation: '',
@@ -452,7 +467,8 @@ const report_mixin = {
         myChart2: null,
         timeline: [],
 
-        issues: ordered_issues
+        issues: ordered_issues,
+        color_scheme: default_color_scheme,
     },
     // https://vuejs.org/v2/api/#updated
     updated: function () {
@@ -465,19 +481,19 @@ const report_mixin = {
 
             let worst = {};
 
-            ordered_issues.forEach(function (item) {
-                if (url_issue_names.includes(item['name']))
-                    worst[item['name']] = vueReport.worstof(item['name'], [url]);
+            ordered_issues.forEach(function (issue) {
+                if (url_issue_names.includes(issue['name']))
+                    worst[issue['name']] = vueReport.worstof(issue['name'], [url]);
                 else
-                    worst[item['name']] = vueReport.worstof(item['name'], url.endpoints);
+                    worst[issue['name']] = vueReport.worstof(issue['name'], url.endpoints);
             });
 
             text = `<td><b><a href="#report_url_${url.url}">${url.url}</a></b></td>`;
 
             let findings = "";
 
-            ordered_issues.forEach(function (item) {
-                findings += `<td class='text-center' class='${worst[item['name']].bgclass}'>${worst[item['name']].text}</td>`;
+            ordered_issues.forEach(function (issue) {
+                findings += `<td class='text-center ${worst[issue['name']].bgclass}'>${worst[issue['name']].text}</td>`;
             });
 
             return text + findings;
@@ -509,22 +525,22 @@ const report_mixin = {
 
             if (high){
                 text = "";
-                bgclass = "report_background_bad";
+                bgclass = "high_background_light";
             } else if (medium){
                 text = "";
-                bgclass = "report_background_medium";
+                bgclass = "medium_background_light";
             } else if (low){
                 text = "";
-                bgclass = "report_background_low";
+                bgclass = "low_background_light";
             } else if (risk_found) {
                 text = "";
-                bgclass = "report_url_background_good";
+                bgclass = "good_background_light";
             }
 
             if (explained) {
                 // if this is a string with "", translations say unterminated string. As ES6 template it's fine.
                 text = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>`;
-                bgclass = "report_url_background_good";
+                bgclass = "good_background_light";
             }
 
             return {'bgclass': bgclass, 'text': text}
@@ -533,19 +549,19 @@ const report_mixin = {
 
         rating_text: function (rating) {
             if (rating.comply_or_explain_valid_at_time_of_report) return '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>';
-            if (rating.high > 0) return "red";
-            if (rating.medium > 0) return "orange";
-            if (rating.low > 0) return "yellow";
+            if (rating.high > 0) return "high";
+            if (rating.medium > 0) return "medium";
+            if (rating.low > 0) return "low";
             return "✅";
         },
 
         colorize: function (high, medium, low) {
-            if (high > 0) return "bad";
+            if (high > 0) return "high";
             if (medium > 0) return "medium";
             return "good";
         },
         colorizebg: function (high, medium, low) {
-            if (high > 0) return "report_url_background_bad";
+            if (high > 0) return "report_url_background_high";
             if (medium > 0) return "report_url_background_medium";
             return "report_url_background_good";
         },
@@ -1206,20 +1222,7 @@ function views(autoload_default_map_data=true) {
         data: {
             issues: ordered_issues,
             // A default color scheme is based on a traffic light layout.
-            color_scheme: {
-                    'high_background': 'rgba(255, 99, 132, 0.2)',
-                    'high_border': 'rgba(255, 99, 132, 0.2)',
-                    'medium_background': 'rgba(255, 102, 0, 0.2)',
-                    'medium_border': 'rgba(255,102,0,1)',
-                    'low_background': 'rgba(255, 255, 0, 0.2)',
-                    'low_border': 'rgba(255,255,0,1)',
-                    'good_background': 'rgba(50, 255, 50, 0.2)',
-                    'good_border': 'rgba(50, 255, 50, 1)',
-                    'addresses_background': 'rgba(0, 0, 0, 0.2)',
-                    'addresses_border': 'rgba(0,0,0,1)',
-                    'services_background': 'rgba(0, 40, 255, 0.2)',
-                    'services_border': 'rgba(0,40,255,1)',
-                }
+            color_scheme: default_color_scheme,
         },
 
         methods: {
@@ -1374,9 +1377,9 @@ function views(autoload_default_map_data=true) {
         data: {urls: Array},
         methods: {
             colorize: function (high, medium, low) {
-                if (high > 0) return "red";
-                if (medium > 0) return "orange";
-                return "green";
+                if (high > 0) return "high";
+                if (medium > 0) return "medium";
+                return "good";
             },
             load: debounce(function (organization_id, weeks_back) {
 
@@ -1439,21 +1442,19 @@ function views(autoload_default_map_data=true) {
                     return "black";
 
                 if (rank === "high")
-                    return "crimson";
+                    return "high";
 
                 if (rank === "medium")
-                    return "darkorange";
+                    return "medium";
 
                 if (rank === "low")
-                    return "gold";
+                    return "low";
 
-                if (high > 0) return "red";
-                if (medium > 0) return "orange";
-                return "green";
+                return "good";
             },
             arrow: function(value, rank){
                 if (value > 0)
-                    return "<a class='bad'>▲</a>+"+ value + " ";
+                    return "<a class='high'>▲</a>+"+ value + " ";
                 if (value === 0)
                     return "▶0";
                 if (value < 0)
@@ -1484,20 +1485,20 @@ function views(autoload_default_map_data=true) {
 
                         if (!change['high_now'] && !change['medium_now'] && !change['low_now']){
 
-                            this.tickertext += "<a class='good' title='---------------------------------------" +
-                                "------'>PERFECT</a>  ";
+                            this.tickertext += "<span class='goodrow' title='---------------------------------------" +
+                                "------'>PERFECT</span>  ";
 
                         } else {
 
-                            this.tickertext += "<a style='color: " + this.colorize(change['high_now'], 'high') + "'>" + change['high_now'] + "</a>";
+                            this.tickertext += "<span class='" + this.colorize(change['high_now'], 'high') + "row'>" + change['high_now'] + "</span>";
                             this.tickertext += this.arrow(change['high_changes'], 'high');
                             this.tickertext += " &nbsp; ";
 
-                            this.tickertext += "<a style='color: " + this.colorize(change['medium_now'], 'medium') + "'>" + change['medium_now'] + "</a>";
+                            this.tickertext += "<span class='" + this.colorize(change['medium_now'], 'medium') + "row'>" + change['medium_now'] + "</span>";
                             this.tickertext += this.arrow(change['medium_changes'], 'medium');
                             this.tickertext += " &nbsp; ";
 
-                            this.tickertext += "<a style='color: " + this.colorize(change['low_now'], 'low') + "'>" + change['low_now'] + "</a>";
+                            this.tickertext += "<span class='" + this.colorize(change['low_now'], 'low') + "row'>" + change['low_now'] + "</span>";
                             this.tickertext += this.arrow(change['low_changes'], 'low');
                             this.tickertext += "  ";
 
@@ -1583,13 +1584,13 @@ function views(autoload_default_map_data=true) {
             },
             rowcolor: function (scan) {
                 if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
-                    return "greenrow";
+                    return "goodrow";
                 else if (scan.high > 0)
-                    return "redrow";
+                    return "highrow";
                 else if (scan.medium > 0)
-                    return "orangerow";
+                    return "mediumrow";
                 else
-                    return "yellowrow";
+                    return "lowrow";
             },
             translate: function(string){
                 return gettext(string);
@@ -1680,7 +1681,7 @@ function views(autoload_default_map_data=true) {
                 if (value > 0)
                     return "improvements_good";
 
-                return "improvements_bad"
+                return "improvements_high"
             }
         }
     });
