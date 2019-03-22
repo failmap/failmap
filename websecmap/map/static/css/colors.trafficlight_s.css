@@ -1,0 +1,64 @@
+.good_background {background-color: rgba(32, 255, 0, 0.6);}
+.good_background_gradient {background: linear-gradient(rgba(191, 255, 171, 0.3), rgba(255, 255, 255, 0.0));}
+.good_background_transparent {background-color: rgba(191, 255, 171, 0.3);}
+.good_border {border: 2px solid rgba(0, 162, 2, 0.50);}
+.good_fill {fill: #00c700;}
+.good_text {color: #00c700;}
+.high_background {background-color: #f70000;}
+.high_background_gradient {background: linear-gradient(rgba(251, 173, 173, 0.3), rgba(255, 255, 255, 0.0));}
+.high_background_transparent { background-color: rgba(251, 173, 173, 0.3);}
+.high_border {border: 2px solid rgba(179,0,0,0.5);}
+.high_fill {fill: #bd383c;}
+.high_text  {color: #bd383c;}
+.low_background {background-color: rgba(253, 255, 5, 0.6);}
+.low_background_transparent {background-color: rgba(249, 247, 139, 0.3);}
+.low_border {border: 2px solid rgba(249, 247, 139, 0.3);}
+.low_fill {fill: #d3fc6a;}
+.low_text {color: #d3fc6a;}
+.medium_background {background-color: rgba(255, 125, 0, 0.6);}
+.medium_background_gradient {background: linear-gradient(rgba(249, 209, 139, 0.3), rgba(255, 255, 255, 0.0));}
+.medium_background_transparent {background-color: rgba(249, 209, 139, 0.3);}
+.medium_border {border: 2px solid rgba(162, 85, 0, 0.5);}
+.medium_fill {fill: #fc9645;}
+.medium_text {color: #fc9645;}
+.unknown_border {border: 2px solid rgba(157, 172, 179, 0.5);}
+.unknown_fill {fill: #c1bcbb;}
+.unknown_text {color: darkgray;}
+
+/* These are the colors of bootstrap. We'll switch it later on i guess... */
+/* Todo: move these to above declarations */
+.bg-danger, .btn-danger {background-color: inherit;}
+.bg-warning, .btn-danger {background-color: inherit;}
+.bg-success, .btn-success {background-color: inherit;}
+.bg-primary {background-color: inherit;}
+.btn-info {background-color: inherit;}
+a, a:hover, a:visited {color: inherit;}
+
+/* Other / custom contexts: */
+.announcement{background-color: #ffefef;}
+.chat_quote_left {background-color: rgba(254, 114, 114, 0.1);}
+.chat_quote_right {background-color: #95f09533;}
+
+
+.charts_connectivity_internet_adresses {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0,0,0,1);
+}
+
+.charts_connectivity_services {
+    background-color: rgba(0, 40, 255, 0.2);
+    border-color: rgba(0,40,255,1);
+}
+
+.selected_country, .selected_layer {
+    background-color: #e8e8e8;
+    border-bottom: 4px solid blue;
+    color: black;
+}
+
+#lastrow {
+    background-color: black;
+    border-top: 10px solid lightgreen;
+    color: white;
+}
+
