@@ -477,6 +477,7 @@ const map = {
     // The map has a problem with dynamic class names, once the class name is set, it's not updated.
     // Using the fillColor resolves the problem. The challenge is now to make these colors dynamic.
     // perhaps it's a bug and it has been fixed.
+    // perhaps the className is updated via a separate function, and style just 'happened to work'
     a_function_that_makes_the_classname: function(severity){
         return 'map_polygon_' + severity
     },
