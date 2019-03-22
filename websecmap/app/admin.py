@@ -144,7 +144,7 @@ admin.site.unregister(CrontabSchedule)
 admin.site.unregister(IntervalSchedule)
 admin.site.register(PeriodicTask, IEPeriodicTaskAdmin)
 admin.site.register(SolarSchedule, IESolarSchedule)
-admin.site.register(CrontabSchedule, IESolarSchedule)
+admin.site.register(CrontabSchedule, IECrontabSchedule)
 admin.site.register(IntervalSchedule, IEIntervalSchedule)
 
 

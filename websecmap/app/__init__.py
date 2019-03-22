@@ -9,9 +9,9 @@ from django.conf import settings
 log = logging.getLogger(__name__)
 
 
-class Failmap(AppConfig):
+class Websecmap(AppConfig):
     name = 'websecmap.app'
-    verbose_name = "Failmap"
+    verbose_name = "Web Security Map"
 
     def ready(self):
         """Run when Failmap app has fully loaded."""
@@ -25,4 +25,4 @@ class Failmap(AppConfig):
                 defaultdict(str, **settings.DATABASES['default'])))
 
 
-default_app_config = 'websecmap.app.Failmap'
+default_app_config = 'websecmap.app.Websecmap'
