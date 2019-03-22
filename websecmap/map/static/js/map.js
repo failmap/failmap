@@ -715,7 +715,6 @@ const map = {
                 map.polygons.addData(new_feature);
             } else {
                 // colors changed, shapes / points on the map stay the same.
-                existing_feature.properties.Overall = new_feature.properties.Overall;
                 existing_feature.properties.severity = new_feature.properties.severity;
                 // make the transition
                 layer.setStyle(map.style(layer.feature));

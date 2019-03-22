@@ -1460,6 +1460,9 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             "render_date": datetime.now(pytz.utc),
             "data_from_time": when,
             "remark": remark,
+            "applied filter": displayed_issue,
+            "layer": organization_type,
+            "country": country
         },
         "crs":
             {
@@ -1596,12 +1599,10 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # removed json parsing of the calculation. This saves time.
         # no contents, no endpoint ever mentioned in any url (which is a standard attribute)
         if "total_urls" not in calculation["organization"] or not calculation["organization"]["total_urls"]:
-            color = "gray"
             severity = "unknown"
         else:
             # things have to be OK in order to be colored. If it's all empty... then it's not OK.
-            color = "red" if high else "orange" if medium else "yellow" if low else "green" if ok else "gray"
-            severity = "bad" if high else "medium" if medium else "yellow" if low else "good" if ok else "unknown"
+            severity = "high" if high else "medium" if medium else "low" if low else "good" if ok else "unknown"
 
         dataset = {
             "type": "Feature",
@@ -1611,12 +1612,10 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     "organization_type": i[2],
                     "organization_name": i[1],
                     "organization_slug": slugify(i[1]),
-                    "overall": i[0],
                     "high": high,
                     "medium": medium,
                     "low": low,
                     "data_from": when,
-                    "color": color,
                     "severity": severity,
                     "total_urls": i[11],  # = 100%
                     "high_urls": i[12],
