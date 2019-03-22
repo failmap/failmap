@@ -1,5 +1,4 @@
 - model: auth.user
-  pk: 1
   fields:
     password: pbkdf2_sha256$36000$AVp6H74Dcqmy$5L1bnfpvg06UCs9XRrC+5lXjx4KUhHEWtEMgFrXeggo=
     last_login: null
