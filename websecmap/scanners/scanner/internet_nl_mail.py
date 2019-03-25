@@ -397,7 +397,8 @@ def check_running_scans(store_as_protocol: str = 'mx_mail'):
 
 
 @app.task(queue="storage")
-def register_scan(urls: List[Url], username, password, internet_nl_scan_type: str = 'mail', api_url: str = ""):
+def register_scan(urls: List[Url], username, password, internet_nl_scan_type: str = 'mail', api_url: str = "",
+                  scan_name: str = ""):
     """
     This registers a scan and results the URL where the scan results can be found later on.
 
@@ -417,7 +418,13 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     """
     scan_id = str(uuid.uuid4())
     urls = [url.url for url in urls]
-    data = {"name": "Web Security Map Scan %s" % scan_id, "domains": urls}
+
+    if scan_name:
+        scan_name += " %s" % scan_id
+    else:
+        scan_name = "Web Security Map Scan %s" % scan_id
+
+    data = {"name": scan_name, "domains": urls}
     answer = requests.post(api_url, json=data, auth=HTTPBasicAuth(username, password), timeout=(300, 300))
     log.debug("Received answer from internet.nl: %s" % answer.content)
 
