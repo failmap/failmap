@@ -363,7 +363,7 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
 
     scan.save()
 
-    return status_url
+    return scan
 
 
 def check_correct_user(answer):
