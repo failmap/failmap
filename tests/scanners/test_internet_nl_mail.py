@@ -2,7 +2,6 @@ from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.internet_nl_mail import store
 
-
 # The result from the documentation can be ignored, it's not up to date anymore.
 # this result is from a real scan
 result = {

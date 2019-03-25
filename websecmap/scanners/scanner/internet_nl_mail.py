@@ -52,6 +52,7 @@ import smtplib
 import socket
 import uuid
 from datetime import datetime
+from smtplib import SMTP, SMTPConnectError
 from time import sleep
 from typing import List
 
@@ -61,16 +62,15 @@ from celery import Task, group
 from constance import config
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver
 from requests.auth import HTTPBasicAuth
-from websecmap.scanners.scanner.http import connect_result
+from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import InternetNLScan, Endpoint
+from websecmap.scanners.models import Endpoint, InternetNLScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.scanner import (allowed_to_scan, q_configurations_to_scan,
-                                                url_filters, endpoint_filters)
-from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_exponential
-from smtplib import SMTP, SMTPConnectError
+from websecmap.scanners.scanner.http import connect_result
+from websecmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
+                                                q_configurations_to_scan, url_filters)
 
 log = logging.getLogger(__name__)
 
@@ -263,7 +263,7 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     """
     From the docs:
     If the connect() call returns anything other than a success code, an SMTPConnectError is raised.
-    
+
     Which is incorrect, there are at least 5 other exceptions that can occur when connecting.
     """
     try:
@@ -330,7 +330,7 @@ def get_dns_records(url, record_type):
         log.debug("The DNS response does not contain an answer to the question. %s %s " % (url.url, record_type))
         return None
     except NXDOMAIN:
-        log.debug("dns query name does not exist. %s %s"  % (url.url, record_type))
+        log.debug("dns query name does not exist. %s %s" % (url.url, record_type))
         return None
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
