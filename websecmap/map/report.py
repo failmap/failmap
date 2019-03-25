@@ -496,7 +496,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 measurement["total_urls"] += len(calculation['organization']['urls'])
 
                 measurement["good_urls"] += sum([l['high'] == 0 and l['medium'] == 0
-                                                  for l in calculation['organization']['urls']])
+                                                 for l in calculation['organization']['urls']])
                 measurement["medium_urls"] += sum([l['high'] == 0 and l['medium'] > 0
                                                    for l in calculation['organization']['urls']])
                 measurement["high_urls"] += sum([l['high'] > 0 for l in calculation['organization']['urls']])
@@ -571,11 +571,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             if measurement["included_organizations"]:
                 measurement["high percentage"] = round((measurement["high"] /
-                                                       measurement["included_organizations"]) * 100)
+                                                        measurement["included_organizations"]) * 100)
                 measurement["medium percentage"] = round((measurement["medium"] /
                                                           measurement["included_organizations"]) * 100)
                 measurement["good percentage"] = round((measurement["good"] /
-                                                         measurement["included_organizations"]) * 100)
+                                                        measurement["included_organizations"]) * 100)
             else:
                 measurement["high percentage"] = 0
                 measurement["medium percentage"] = 0
@@ -583,11 +583,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             if measurement["total_urls"]:
                 measurement["high url percentage"] = round((measurement["high_urls"] /
-                                                           measurement["total_urls"]) * 100)
+                                                            measurement["total_urls"]) * 100)
                 measurement["medium url percentage"] = round((measurement["medium_urls"] /
                                                               measurement["total_urls"]) * 100)
                 measurement["good url percentage"] = round((measurement["good_urls"] /
-                                                             measurement["total_urls"]) * 100)
+                                                            measurement["total_urls"]) * 100)
             else:
                 measurement["high url percentage"] = 0
                 measurement["medium url percentage"] = 0
