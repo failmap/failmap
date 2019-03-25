@@ -162,6 +162,8 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     - - This implies when the url was alive (at least after a positive result).
     - When a url was not resolvable (aka: is not in the report anymore)
 
+    Note: something is considered alive again after a scan has been found on the endpoint or url.
+
     :return:
     """
 

@@ -48,6 +48,8 @@ You can load up this file in ipython and run test_store() if needed.
 """
 
 import logging
+import smtplib
+import socket
 import uuid
 from datetime import datetime
 from time import sleep
@@ -59,19 +61,34 @@ from celery import Task, group
 from constance import config
 from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver
 from requests.auth import HTTPBasicAuth
+from websecmap.scanners.scanner.http import connect_result
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
-from websecmap.scanners.models import InternetNLScan, UrlGenericScan
-from websecmap.scanners.scanmanager import store_url_scan_result
+from websecmap.scanners.models import InternetNLScan, Endpoint
+from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.scanner import (allowed_to_scan, q_configurations_to_scan,
-                                                url_filters)
+                                                url_filters, endpoint_filters)
+from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_exponential
+from smtplib import SMTP, SMTPConnectError
 
 log = logging.getLogger(__name__)
 
 
 API_URL_MAIL = "https://batch.internet.nl/api/batch/v1.0/mail/"
 MAX_INTERNET_NL_SCANS = 5000
+
+NAMESERVERS = ['1.1.1.1', '8.8.8.8', '9.9.9.9', '208.67.222.222']
+
+# since you'll be asking a lot of DNS questions, use a set of resolvers:
+resolver = Resolver()
+# cloudflare, google, quad9, cisco.
+resolver.nameservers = NAMESERVERS
+
+
+# while internet.nl scans on port 25
+# (see https://github.com/NLnetLabs/Internet.nl/blob/f003365b1d560bdfbb5bd772d735a41696277639/checks/tasks/tls.py)
+# we will see if SMTP works on both standard ports.
 
 
 def compose_task(
@@ -84,9 +101,11 @@ def compose_task(
     if not allowed_to_scan("internet_nl_mail"):
         return group()
 
-    default_filter = {"is_dead": False, "not_resolvable": False, "dns_supports_mx": True}
+    default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+
+    endpoints_filter = {'is_dead': False, "protocol": 'mx_mail'}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
     if not urls:
@@ -118,10 +137,13 @@ def compose_discover_task(
     Warning: this scanner does NOT try to create mail server endpoints.
     Thus no endpoints will be created from this list:
     25/tcp  open  smtp
+    587/tcp open  smtp
+    465/tcp open  smtps
+
+    receiving, not relevant
     106/tcp open  pop3pw
     110/tcp open  pop3
     143/tcp open  imap
-    465/tcp open  smtps
     993/tcp open  imaps
     995/tcp open  pop3s
 
@@ -141,117 +163,182 @@ def compose_discover_task(
         return group()
 
     urls = list(set(urls))
-    task = discover_mx_records.si(urls)
-    return group(task)
+
+    tasks = []
+
+    # Endpoint life cycle helps with keeping track of scan results over time. For internet.nl scans we create a few
+    # 'fake' endpoints that are used to store scan results. The fake endpoints have a default port of 25, and ipv4
+    # but these could be alternative ports and ipv6 as well. That is because the internet.nl scanner summarizes things
+    # mostly on the url level.
+    for url in urls:
+        tasks.append(
+            # If there is an MX record, that is not part of a CNAME, store it as an mx_mail endpoint.
+            # This is a special endpoint that helps with the life-cycle of sending mail to this address.
+            discover_mx_records.si(url)
+            | connect_result.s(protocol="mx_mail", url=url, port=25, ip_version=4)
+
+            # The same goes for SOA records, which is now the primary check for internet.nl If there is a SOA
+            # record, you can run a mail scan. It's unclear at the time of writing why this is.
+            | discover_soa_record.si(url)
+            | connect_result.s(protocol="soa_mail", url=url, port=25, ip_version=4)
+        )
+
+    # Given the mail server can be at any location, depending on the MX record, making a list of Mail servers AT
+    # a certain url doesn't add much value. Therefore below code is disabled.
+    # for ip_version in [4, 6]:
+    #     queue = "ipv4" if ip_version == 4 else "ipv6"
+    #     for port in [25, 587]:
+    #         for url in urls:
+    #             # MX also allows mailservers to run somewhere else. In that case there is an MX record,
+    #             # but no mailserver on that same address.
+    #             tasks.append(
+    #                 # This discovers if there is a mailserver running on the address. While helpful + a true endpoint
+    #                 # it is very much (and common) the case that mail is handled elsewhere. This is what the MX
+    #                 # record can state. Therefore there is not much value in just checking this.
+    #                 # todo: we should follow the MX value, instead of scanning the host directly.
+    #                 # Also: the MX value can have a series of failovers. So... now what?
+    #                 can_connect.si(protocol="smtp", url=url, port=port, ip_version=ip_version).set(queue=queue)
+    #                 | connect_result.s(protocol="smtp", url=url, port=port, ip_version=ip_version)
+    #             )
+
+    return group(tasks)
+
+
+def compose_verify_task(
+    organizations_filter: dict = dict(),
+    urls_filter: dict = dict(),
+    endpoints_filter: dict = dict(),
+    **kwargs
+) -> Task:
+    """Verifies existing https and http endpoints. Is pretty quick, as it will not stumble upon non-existing services
+    as much.
+    """
+
+    if not allowed_to_scan("internet_nl_mail"):
+        return group()
+
+    default_filter = {"protocol__in": ["smtp", "smtps"], "is_dead": False}
+    endpoints_filter = {**endpoints_filter, **default_filter}
+    endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
+    tasks = []
+    for endpoint in endpoints:
+
+        tasks.append(
+            discover_mx_records.si(endpoint.url)
+            | connect_result.s(protocol="mx_mail", url=endpoint.url, port=25, ip_version=4)
+            | discover_soa_record.si(endpoint.url)
+            | connect_result.s(protocol="soa_mail", url=endpoint.url, port=25, ip_version=4)
+        )
+
+        # Just like above, we don't need to verify this.
+        # queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
+        # tasks.append(can_connect.si(protocol=endpoint.protocol, url=endpoint.url,
+        #                             port=endpoint.port, ip_version=endpoint.ip_version).set(queue=queue)
+        #              | connect_result.s(protocol=endpoint.protocol, url=endpoint.url,
+        #                                 port=endpoint.port, ip_version=endpoint.ip_version))
+    return group(tasks)
+
+
+@app.task(queue="4and6", rate_limit='120/s')
+def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
+    """
+    Will try to connect to a mail server over a given port. Make sure the queue is set properly, so ipv6 is
+    tested correctly too.
+
+    todo: Important: sometimes you'll get an MX record back when there is no MX. This means the endpoint will be
+    created but will not store scan results. Mail scans only occur if the MX is valid(?).
+    """
+
+    # The address that receives mail doesn't need an MX record. But does it _require_ a SOA record? Let's assume no.
+    # If there are no MX records, then why try to connect at all?
+    # Start of authority required for mail?
+    # if not get_dns_records(url, 'SOA'):
+    #     return False
+
+    smtp = SMTP(timeout=5)
+    log.debug('Checking if we can connect to the SMTP server on %s:%s' % (url.url, port))
+
+    """
+    From the docs:
+    If the connect() call returns anything other than a success code, an SMTPConnectError is raised.
+    
+    Which is incorrect, there are at least 5 other exceptions that can occur when connecting.
+    """
+    try:
+        smtp.connect(host=url.url, port=port)
+        return True
+    except SMTPConnectError:
+        return False
+    except (TimeoutError, socket.timeout, socket.gaierror):
+        # socket.timeout: timed out = Specifying timeout.
+        # socket.gaierror = [Errno 8] nodename nor servname provided, or not known
+        return False
+    except ConnectionRefusedError:
+        # ConnectionRefusedError: [Errno 61] Connection refused
+        return False
+    except smtplib.SMTPServerDisconnected:
+        # smtplib.SMTPServerDisconnected: Connection unexpectedly closed: timed out
+        return False
+
+
+# this should be a more generic DNS log.
+@app.task(queue="storage")
+def discover_mx_records(url: Url):
+
+    if has_mx_records(url):
+        return True
+    else:
+        return False
 
 
 @app.task(queue="storage")
-def discover_mx_records(urls: List[Url]):
-    urls_with_mx = find_mx_records(urls)
-
-    log.debug("Found %s urls with MX record." % len(list(urls_with_mx)))
-
-    for url in urls_with_mx:
-        url.dns_supports_mx = True
-        url.save(update_fields=['dns_supports_mx'])
-
-    # clean up removed mailservers, saved as "no mx"
-    urls_without_mx = list(set(urls) - set(urls_with_mx))
-
-    clean_urls_without_mx(urls_without_mx)
+def discover_soa_record(url: Url):
+    if get_dns_records(url, 'SOA'):
+        return True
+    return False
 
 
-def find_mx_records(urls: List[Url]):
+def has_mx_records(url: Url) -> bool:
     # todo: can we check if the mail is routed outside of the country somehow? Due to privacy concerns / GDPR?
 
-    has_mx = []
+    log.debug('Checking for MX at %s' % url)
+    # a little delay to be friendly towards the server
+    sleep(0.03)
 
-    # since you'll be asking a lot of DNS questions, use a set of resolvers:
-    resolver = Resolver()
-    # cloudflare, google, quad9, cisco.
-    resolver.nameservers = ['1.1.1.1', '8.8.8.8', '9.9.9.9', '208.67.222.222']
+    cname_records = get_dns_records(url, 'CNAME')
 
-    for url in urls:
-        log.debug('Checking for MX at %s' % url)
-        # a little delay to be friendly towards the server
-        sleep(0.03)
+    if cname_records:
+        log.debug("-- %s is a CNAME and might give problems with DKIM." % url)
+        return False
 
-        try:
-            records = resolver.query(url.url, 'CNAME')
+    mx_records = get_dns_records(url, 'MX')
+    if mx_records:
+        log.debug("!! %s MX Found. Exchange: %s" % (url, mx_records[0].exchange))
+        return True
 
-            # CNAMES often give the impression that MX records are attached. This is not true.
-            # the CNAME points to a location that has MX records and those are returned.
-            # You can test this with `dig www.basisbeveiliging.nl mx`. You'll receive MX records
-            # for the TLD. So if this name is a CNAME, it doesn't have an MX record...
-            # ... it's a heuristic, and implementations may vary.
-            # The MX records for CNAMES might also be different per resolver... hooray.
-            if records:
-                log.debug("-- %s is a CNAME and might give problems with DKIM." % url)
-                continue
-
-        except NoAnswer:
-            log.debug("   %s is a not a CNAME and has the possibility of having a legit MX record." % url)
-        except NXDOMAIN as e:
-            log.debug("EX %s resulted in error: %s, skipping" % (url, str(e)))
-        except NoNameservers as e:
-            log.debug("EX %s Name server did not accept any more queries. Are you asking too much? %s" % (url, str(e)))
-            log.debug("Pausing, or add more DNS servers...")
-            sleep(20)
-
-        try:
-            records = resolver.query(url.url, 'MX')
-            if records:
-                # use visual markers to quickly see if this test works.
-                log.debug("!! %s MX Found. Exchange: %s" % (url, records[0].exchange))
-                has_mx.append(url)
-        except NoAnswer:
-            log.debug("   %s has no MX record, skipping." % url)
-        except NXDOMAIN as e:
-            log.debug("EX %s resulted in error: %s, skipping" % (url, str(e)))
-        except NoNameservers as e:
-            # Too many iterations will cause an error to return and to return more often.
-            log.debug("EX %s Name server did not accept any more queries. Are you asking too much? %s" % (url, str(e)))
-            log.debug("Pausing, or add more DNS servers...")
-            urls.append(url)
-            sleep(20)
-
-    return has_mx
+    return False
 
 
-def clean_urls_without_mx(urls: List[Url]):
-    # There are often MANY urls that don't have an MX. Update those.
-
-    # We're doing this using iteration because an IN query with 1000's of id's
-    # will trigger OperationalError too many SQL variables.
-
-    # We're not still doing IN queries with chunked urls, because that's ugly and complex.
-
-    for url in urls:
-        # do not attempt to scan anymore, as there is no MX:
-        url.dns_supports_mx = True
-        url.save(update_fields=['dns_supports_mx'])
-
-        obsolete_scans = UrlGenericScan.objects.all().filter(
-            is_the_latest_scan=True,
-            type__startswith='internet_nl_mail_',
-            url=url
-        )
-
-        # log.debug("Found %s obsolete scans for this url %s." % (len(list(obsolete_scans)), url))
-
-        for obsolete_scan in obsolete_scans:
-            store_url_scan_result(
-                scan_type=obsolete_scan.type,
-                url=obsolete_scan.url,
-                rating="mx removed",
-                message="MX record removed, not possible to send mail to this url anymore."
-            )
-
-    log.debug("Cleaned obsolete scans.")
+@retry(wait=wait_exponential(multiplier=1, min=0, max=10),
+       stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
+def get_dns_records(url, record_type):
+    try:
+        return resolver.query(url.url, record_type)
+    except NoAnswer:
+        log.debug("The DNS response does not contain an answer to the question. %s %s " % (url.url, record_type))
+        return None
+    except NXDOMAIN:
+        log.debug("dns query name does not exist. %s %s"  % (url.url, record_type))
+        return None
+    except NoNameservers:
+        log.debug("Pausing, or add more DNS servers...")
+        sleep(20)
 
 
 @app.task(queue='storage')
-def check_running_scans():
+def check_running_scans(store_as_protocol: str = 'mx_mail'):
     """
     Gets status on all running scans from internet, and try to handle/finish the scan when possible.
 
@@ -296,7 +383,8 @@ def check_running_scans():
             scan.finished_on = datetime.now(pytz.utc)
             scan.success = True
             log.debug("Going to process the scan results.")
-            store(response, internet_nl_scan_type=scan.type)
+
+            store(response, internet_nl_scan_type=scan.type, protocol=store_as_protocol)
 
         if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
             log.debug("Scan encountered an error.")
@@ -359,7 +447,6 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     scan.status_url = status_url
     scan.message = answer
     scan.type = internet_nl_scan_type
-    # todo: do we need to add a list of urls or something like that for debugging purposes?
 
     scan.save()
 
@@ -387,166 +474,14 @@ def get_status_url(answer):
     return status_url
 
 
-def test_store():
-    # The result from the documentation can be ignored, it's not up to date anymore.
-    # this result is from a real scan
-    result = {
-        "message": "OK",
-        "data": {
-            "name": "Failmap Scan 9b33a48d-3507-422d-b520-974a0bcdbcd8",
-            "submission-date": "2018-11-22T09:45:07.274815+00:00",
-            "api-version": "1.0",
-            "domains": [
-                {
-                    "status": "ok",
-                    "domain": "arnhem.nl",
-                    "views": [
-                        {
-                            "result": True,
-                            "name": "mail_starttls_cert_domain"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_version"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_cert_chain"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_available"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_clientreneg"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_ciphers"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_starttls_dane_valid"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_starttls_dane_exist"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_secreneg"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_starttls_dane_rollover"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_cert_pubkey"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_cert_sig"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_starttls_tls_compress"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_starttls_tls_keyexchange"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_auth_dmarc_policy"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_auth_dmarc_exist"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_auth_spf_policy"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_auth_dkim_exist"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_auth_spf_exist"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_dnssec_mailto_exist"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_dnssec_mailto_valid"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_dnssec_mx_valid"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_dnssec_mx_exist"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_ipv6_mx_address"
-                        },
-                        {
-                            "result": False,
-                            "name": "mail_ipv6_mx_reach"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_ipv6_ns_reach"
-                        },
-                        {
-                            "result": True,
-                            "name": "mail_ipv6_ns_address"
-                        }
-                    ],
-                    "score": 77,
-                    "link": "https://batch.internet.nl/mail/arnhem.nl/223685/",
-                    "categories": [
-                        {
-                            "category": "ipv6",
-                            "passed": False
-                        },
-                        {
-                            "category": "dnssec",
-                            "passed": True
-                        },
-                        {
-                            "category": "auth",
-                            "passed": False
-                        },
-                        {
-                            "category": "tls",
-                            "passed": False
-                        }
-                    ]
-                }
-            ],
-            "finished-date": "2018-11-22T09:55:56.103073+00:00",
-            "identifier": "e5ea54ede6ce42f5a20fad6d0b049d89"
-        },
-        "success": True
-    }
-
-    store(result, internet_nl_scan_type='mail')
-
-
 @app.task(queue='storage')
-def store(result: dict, internet_nl_scan_type: str = 'mail'):
+def store(result: dict, internet_nl_scan_type: str = 'mail', protocol='mx_mail'):
     # todo: it's not clear what the answer is if there is no MX record / no mail server defined. What is the score then?
     # relevant since MX might point to nothing or is removed meanwhile.
     """
     :param result: json blob from internet.nl
+    :param internet_nl_scan_type: web or mail
+    :param protocol: what endpoint protocol to select, defaults to mx_mail, can also be soa_mail.
     :param urls: list of urls in failmap database
     :param internet_nl_scan_type: mail or web
     """
@@ -563,20 +498,19 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
             log.debug("%s scan failed on %s" % (internet_nl_scan_type, domain['domain']))
             continue
 
-        # try to match the url
-        url = Url.objects.all().filter(
-            is_dead=False,
-            not_resolvable=False,
-            url=domain['domain']).first()
+        # try to match the endpoint. Internet nl scans target port 25 and ipv4 primarily.
+        endpoint = Endpoint.objects.all().filter(protocol=protocol, port=25,
+                                                 url__url=domain['domain'],
+                                                 is_dead=False, ip_version=4).first()
 
-        if not url:
-            log.debug("No matching URL found, perhaps this was deleted / resolvable meanwhile. Skipping")
+        if not endpoint:
+            log.debug("No matching endpoint found, perhaps this was deleted / resolvable meanwhile. Skipping")
             continue
 
         # link changes every time, so can't save that as message.
-        store_url_scan_result(
+        store_endpoint_scan_result(
             scan_type='internet_nl_%s_overall_score' % internet_nl_scan_type,
-            url=url,
+            endpoint=endpoint,
             rating=domain['score'],
             message='ok',
             evidence=domain['link']
@@ -585,9 +519,9 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
         # startls, dane etc.
         for category in domain['categories']:
             scan_type = 'internet_nl_%s_%s' % (internet_nl_scan_type, category['category'])
-            store_url_scan_result(
+            store_endpoint_scan_result(
                 scan_type=scan_type,
-                url=url,
+                endpoint=endpoint,
                 rating=category['passed'],
                 message='',
                 evidence=domain['link']
@@ -596,9 +530,9 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in domain['views']:
             scan_type = 'internet_nl_%s' % view['name']
-            store_url_scan_result(
+            store_endpoint_scan_result(
                 scan_type=scan_type,
-                url=url,
+                endpoint=endpoint,
                 rating=view['result'],
                 message='',
                 evidence=domain['link']

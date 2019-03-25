@@ -18,9 +18,10 @@
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/MarkerCluster.map.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
     {% endcompress %}
+
+    <link id="colorscheme" href="{% static '/css/colors.trafficlight.css' %}" rel="stylesheet" />
 
     <!-- remove all controls, remove all margins, so the map is 100% covering the screen. -->
     <style>

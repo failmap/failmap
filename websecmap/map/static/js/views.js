@@ -333,10 +333,6 @@ let ordered_issues = [
 // what issues are at url level
 let url_issue_names = [
     issues['DNSSEC']['name'],
-    issues['internet_nl_mail_starttls_tls_available']['name'],
-    issues['internet_nl_mail_auth_spf_exist']['name'],
-    issues['internet_nl_mail_auth_dkim_exist']['name'],
-    issues['internet_nl_mail_auth_dmarc_exist']['name'],
 ];
 
 // what issues are at endpoint level
@@ -349,6 +345,10 @@ let endpoint_issue_names = [
     issues["http_security_header_x_frame_options"]['name'],
     issues["http_security_header_x_content_type_options"]['name'],
     issues["http_security_header_x_xss_protection"]['name'],
+    issues['internet_nl_mail_starttls_tls_available']['name'],
+    issues['internet_nl_mail_auth_spf_exist']['name'],
+    issues['internet_nl_mail_auth_dkim_exist']['name'],
+    issues['internet_nl_mail_auth_dmarc_exist']['name'],
 ];
 
 function debounce(func, wait, immediate) {

@@ -44,15 +44,18 @@ SCANNERS = [
         'verbose name': 'Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl',
         'description': 'Scans the mail server in the MX record to see if they support STARTTLS, SPF, DKIM and DMARC. '
                        'Requires internet.nl scan account.',
-        'can discover endpoints': False,
-        'can verify endpoints': False,
+        'can discover endpoints': True,
+        'can verify endpoints': True,
 
         # finds if there are MX records on url, pre scan and during scan.
         'can discover urls': False,
         'can verify urls': False,
-        'creates endpoint scan types': [],
-        'creates url scan types': ['internet_nl_mail_starttls_tls_available', 'internet_nl_mail_auth_spf_exist',
-                                   'internet_nl_mail_auth_dkim_exist', 'internet_nl_mail_auth_dmarc_exist']
+        'creates endpoint scan types': [
+            'internet_nl_mail_starttls_tls_available',
+            'internet_nl_mail_auth_spf_exist',
+            'internet_nl_mail_auth_dkim_exist',
+            'internet_nl_mail_auth_dmarc_exist'],
+        'creates url scan types': []
     },
     {
         'name': 'plain_http',

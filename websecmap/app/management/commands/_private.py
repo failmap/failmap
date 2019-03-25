@@ -83,7 +83,10 @@ class TaskCommand(BaseCommand):
         else:
             result = self.run_task(*args, **options)
 
-        return json.dumps(result, cls=ResultEncoder)
+        try:
+            return json.dumps(result, cls=ResultEncoder)
+        except TypeError:
+            return json.dumps({'complex_type': str(result)}, cls=ResultEncoder)
 
     def run_task(self, *args, **options):
         # try to compose task if not specified
