@@ -146,3 +146,4 @@ pyexcel-xls
 pyexcel-xlsx
 pyexcel-ods
 
+mmh3  # deepdiff likes this
