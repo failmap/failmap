@@ -160,7 +160,7 @@ def test_internet_nl_mail(db):
     assert scan_count == 0
 
     url, created = Url.objects.all().get_or_create(url='arnhem.nl')
-    endpoint, created = Endpoint.objects.all().get_or_create(url=url, port='25', protocol='mx_mail')
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_mx_no_cname')
 
     store(result, internet_nl_scan_type='mail')
 

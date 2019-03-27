@@ -62,8 +62,8 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, InternetNLScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
-                                                 q_configurations_to_scan, url_filters)
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configurations_to_scan,
+                                                 url_filters)
 
 log = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ def compose_task(
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
 
-    endpoints_filter = {'is_dead': False, "protocol": 'mx_mail'}
+    endpoints_filter = {'is_dead': False, "protocol": 'dns_mx_no_cname'}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
     if not urls:
@@ -111,7 +111,7 @@ def compose_task(
 
 
 @app.task(queue='storage')
-def check_running_scans(store_as_protocol: str = 'mx_mail'):
+def check_running_scans():
     """
     Gets status on all running scans from internet, and try to handle/finish the scan when possible.
 
@@ -157,7 +157,7 @@ def check_running_scans(store_as_protocol: str = 'mx_mail'):
             scan.success = True
             log.debug("Going to process the scan results.")
 
-            store(response, internet_nl_scan_type=scan.type, protocol=store_as_protocol)
+            store(response, internet_nl_scan_type=scan.type)
 
         if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
             log.debug("Scan encountered an error.")
@@ -226,6 +226,7 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     scan.started = True
     scan.status_url = status_url
     scan.message = answer
+    scan.friendly_message = answer.get('message', 'No message received.')
     scan.type = internet_nl_scan_type
 
     scan.save()
@@ -255,16 +256,16 @@ def get_status_url(answer):
 
 
 @app.task(queue='storage')
-def store(result: dict, internet_nl_scan_type: str = 'mail', protocol='mx_mail'):
+def store(result: dict, internet_nl_scan_type: str = 'mail'):
     # todo: it's not clear what the answer is if there is no MX record / no mail server defined. What is the score then?
     # relevant since MX might point to nothing or is removed meanwhile.
     """
     :param result: json blob from internet.nl
-    :param internet_nl_scan_type: web or mail
-    :param protocol: what endpoint protocol to select, defaults to mx_mail, can also be soa_mail.
-    :param urls: list of urls in failmap database
-    :param internet_nl_scan_type: mail or web
+    :param internet_nl_scan_type: mail, mail_dashboard or web
     """
+
+    # supported scan types: They determine what type of endpoint the scan results are stored at.
+    scan_type_to_protocol = {'mail': 'dns_mx_no_cname', 'mail_dashboard': 'dns_soa', 'web': 'dns_a_aaaa'}
 
     domains = result.get('data', {}).get('domains', {})
     if not domains:
@@ -279,9 +280,9 @@ def store(result: dict, internet_nl_scan_type: str = 'mail', protocol='mx_mail')
             continue
 
         # try to match the endpoint. Internet nl scans target port 25 and ipv4 primarily.
-        endpoint = Endpoint.objects.all().filter(protocol=protocol, port=25,
+        endpoint = Endpoint.objects.all().filter(protocol=scan_type_to_protocol[internet_nl_scan_type],
                                                  url__url=domain['domain'],
-                                                 is_dead=False, ip_version=4).first()
+                                                 is_dead=False).first()
 
         if not endpoint:
             log.debug("No matching endpoint found, perhaps this was deleted / resolvable meanwhile. Skipping")

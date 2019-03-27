@@ -217,7 +217,7 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
 
     todo: Important: sometimes you'll get an MX record back when there is no MX. This means the endpoint will be
     created but will not store scan results. Mail scans only occur if the MX is valid(?).
-    
+
     Thus no endpoints will be created from this list:
     25/tcp  open  smtp
     587/tcp open  smtp
@@ -229,7 +229,7 @@ def can_connect(protocol: str, url: Url, port: int, ip_version: int) -> bool:
     143/tcp open  imap
     993/tcp open  imaps
     995/tcp open  pop3s
-    
+
     \"""
 
     # The address that receives mail doesn't need an MX record. But does it _require_ a SOA record? Let's assume no.

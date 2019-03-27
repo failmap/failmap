@@ -689,7 +689,14 @@ class InternetNLScan(models.Model):
 
     message = models.TextField(
         max_length=500,
-        help_text="A status message received from the service",
+        help_text="The complete answer retrieved from the server.",
+        blank=True,
+        null=True
+    )
+
+    friendly_message = models.CharField(
+        max_length=255,
+        help_text="The message from the complete answer. Gives insight into progress of the scan.",
         blank=True,
         null=True
     )

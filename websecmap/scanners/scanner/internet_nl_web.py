@@ -35,7 +35,7 @@ def compose_task(
     # todo: has to have HTTP/HTTPS endpoints.
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
-    endpoints_filter = {'protocol__in': ['http', 'https']}
+    endpoints_filter = {'protocol__in': ['dns_a_aaa']}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
 
