@@ -1,6 +1,7 @@
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.internet_nl_mail import store
+from websecmap.scanners.scanner.internet_nl_mail import store, true_when_all_match
+import pytest
 
 # The result from the documentation can be ignored, it's not up to date anymore.
 # this result is from a real scan
@@ -166,8 +167,42 @@ def test_internet_nl_mail(db):
 
     # We've added 32 items, including the score and the categories
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 32
+    assert scan_count == 39
 
     # Should be added once
     scan_count = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').count()
     assert scan_count == 1
+
+    views = [
+        {
+            "result": False,
+            "name": "mail_ipv6_mx_address"
+        },
+        {
+            "result": False,
+            "name": "mail_ipv6_mx_reach"
+        },
+        {
+            "result": True,
+            "name": "mail_ipv6_ns_reach"
+        },
+        {
+            "result": True,
+            "name": "mail_ipv6_ns_address"
+        }
+    ]
+
+    # both true
+    assert true_when_all_match(views, ['mail_ipv6_ns_reach', 'mail_ipv6_ns_address']) is True
+
+    # one false
+    assert true_when_all_match(views, ['mail_ipv6_ns_reach', 'mail_ipv6_mx_reach']) is False
+
+    # both false
+    assert true_when_all_match(views, ['mail_ipv6_mx_reach', 'mail_ipv6_mx_address']) is False
+
+    with pytest.raises(ValueError, match=r'.*view.*'):
+        assert true_when_all_match([], ['mail_ipv6_mx_reach', 'mail_ipv6_mx_address']) is False
+
+    with pytest.raises(ValueError, match=r'.*values.*'):
+        assert true_when_all_match(views, []) is False

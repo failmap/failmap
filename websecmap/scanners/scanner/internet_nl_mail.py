@@ -266,6 +266,7 @@ def get_status_url(answer):
 def store(result: dict, internet_nl_scan_type: str = 'mail'):
     # todo: it's not clear what the answer is if there is no MX record / no mail server defined. What is the score then?
     # relevant since MX might point to nothing or is removed meanwhile.
+    # todo: also mail.
     """
     :param result: json blob from internet.nl
     :param internet_nl_scan_type: mail, mail_dashboard or web
@@ -315,6 +316,68 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
                 evidence=domain['link']
             )
 
+        # If a number of conditions are positive, then another 'view' is set to True. Otherwise to false.
+        # These views are backwards compatible with previous reports. (column j)
+        # todo: have to verify if these are the correct colums
+        # todo: test.
+        domain['views'].append({
+            'name': 'ipv6_nameserver',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_ipv6_ns_address', 'web_ipv6_ns_reach']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'ipv6_webserver',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_ipv6_ws_address', 'web_ipv6_ws_reach', 'web_ipv6_ws_similar']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'tls_available',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_https_http_available']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'https_enforced',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_https_http_redirect']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'hsts',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_https_http_hsts']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'tls_ncsc',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_https_tls_version', 'web_https_tls_ciphers', 'web_https_tls_keyexchange',
+                 'web_https_tls_compress', 'web_https_tls_secreneg', 'web_https_tls_clientreneg',
+                 'web_https_cert_chain', 'web_https_cert_pubkey', 'web_https_cert_sig', 'web_https_cert_domain']
+            )
+        })
+
+        domain['views'].append({
+            'name': 'dane',
+            'result': true_when_all_match(
+                domain['views'],
+                ['web_ipv6_ns_address', 'web_https_dane_exist']
+            )
+        })
+
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in domain['views']:
             scan_type = 'internet_nl_%s' % view['name']
@@ -325,3 +388,19 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
                 message='',
                 evidence=domain['link']
             )
+
+
+def true_when_all_match(views, values) -> {}:
+
+    if not views:
+        raise ValueError('No views provided. Something went wrong in the API response?')
+
+    if not values:
+        raise ValueError('No values provided. Would always result in True, which could be risky.')
+
+    for view in views:
+        if view['name'] in values:
+            if not view['result']:
+                return False
+
+    return True
