@@ -6,8 +6,8 @@ import pytz
 from django.core.management.base import BaseCommand
 
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.scanner.dns import discover_wildcard
 from websecmap.scanners.scanner.http import resolves
+from websecmap.scanners.scanner.subdomains import discover_wildcard
 
 log = logging.getLogger(__package__)
 

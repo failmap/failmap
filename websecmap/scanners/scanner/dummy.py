@@ -14,8 +14,8 @@ from django.conf import settings
 from websecmap.celery import ParentFailed, app
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
-                                                q_configurations_to_scan)
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
+                                                 q_configurations_to_scan)
 
 log = logging.getLogger(__name__)
 

@@ -8,15 +8,15 @@ from celery import group
 
 from websecmap.celery import app
 from websecmap.scanners.models import ScanProxy
-from websecmap.scanners.scanner import (dns, dnssec, dummy, ftp, http, internet_nl_mail,
-                                        internet_nl_web, plain_http, security_headers, tls_qualys)
+from websecmap.scanners.scanner import (dnssec, dummy, ftp, http, internet_nl_mail, internet_nl_web,
+                                        plain_http, security_headers, subdomains, tls_qualys)
 from websecmap.scanners.scanner.tls_qualys import check_proxy
 
 log = logging.getLogger(__name__)
 
 
 # explicitly declare the imported modules as this modules 'content', prevents pyflakes issues
-__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, dns, internet_nl_mail, internet_nl_web]
+__all__ = [tls_qualys, security_headers, dummy, http, dnssec, ftp, subdomains, internet_nl_mail, internet_nl_web]
 
 # This is the single source of truth regarding scanner configuration.
 # Lists to be used elsewhere when tasks need to be composed, these lists contain compose functions.
@@ -26,7 +26,7 @@ DEFAULT_EXPLORERS = [http.compose_discover_task, ftp.compose_discover_task]
 
 # Beta: dns.brute_known_subdomains_compose_task, - old code still
 TLD_DEFAULT_CRAWLERS = [
-    dns.compose_discover_task]
+    subdomains.compose_discover_task]
 DEFAULT_CRAWLERS = []
 
 # Beta: tls_osaft.compose_task, - is this using the outdated ssl library?

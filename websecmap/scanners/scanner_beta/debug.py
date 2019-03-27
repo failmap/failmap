@@ -4,7 +4,7 @@ from celery import Task, group
 from constance import config
 
 from websecmap.scanners.models import Endpoint
-from websecmap.scanners.scanner.scanner import endpoint_filters, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
 
 log = logging.getLogger(__name__)
 

@@ -12,7 +12,7 @@ from websecmap.celery import PRIO_HIGH, PRIO_LOW, PRIO_NORMAL, app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)

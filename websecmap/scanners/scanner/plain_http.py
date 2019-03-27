@@ -14,9 +14,9 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import endpoint_has_scans, store_endpoint_scan_result
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.scanner.http import (can_connect, connect_result, redirects_to_safety,
                                              resolves_on_v4, resolves_on_v6)
-from websecmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 log = logging.getLogger(__package__)
 

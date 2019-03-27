@@ -40,24 +40,6 @@ SCANNERS = [
         'creates url scan types': [],
     },
     {
-        'name': 'internet_nl_mail',
-        'verbose name': 'Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl',
-        'description': 'Scans the mail server in the MX record to see if they support STARTTLS, SPF, DKIM and DMARC. '
-                       'Requires internet.nl scan account.',
-        'can discover endpoints': True,
-        'can verify endpoints': True,
-
-        # finds if there are MX records on url, pre scan and during scan.
-        'can discover urls': False,
-        'can verify urls': False,
-        'creates endpoint scan types': [
-            'internet_nl_mail_starttls_tls_available',
-            'internet_nl_mail_auth_spf_exist',
-            'internet_nl_mail_auth_dkim_exist',
-            'internet_nl_mail_auth_dmarc_exist'],
-        'creates url scan types': []
-    },
-    {
         'name': 'plain_http',
         'verbose name': 'Missing Encryption',
         'description': 'Scans HTTP endpoints to see if there is an HTTPS counterpart.',
@@ -107,7 +89,7 @@ SCANNERS = [
         'creates url scan types': [],
     },
     {
-        'name': 'dns',
+        'name': 'subdomains',
         'verbose name': 'Discover subdomains using open data sources',
         'description': 'Uses NSEC1 and Certificate Tranparency to discover new urls. '
         'About NSEC1: Discover new domains using DNSSEC NSEC1 enumeration. This is a powerful but not frequently used '
@@ -176,17 +158,43 @@ SCANNERS = [
         'creates url scan types': [],
     },
     {
+        'name': 'dns_endpoints',
+        'verbose name': 'Finds DNS pointers towards supposedly existing services. Used for internet.nl scans.',
+        'description': 'Checks DNS for various advertised services and manages a special type of endpoint to resemble '
+                       'it\'s discovery and verification (life cycle).',
+        'can discover endpoints': True,
+        'can verify endpoints': True,
+        'can discover urls': False,
+        'can verify urls': False,
+        'creates endpoint scan types': [],
+        'creates url scan types': [],
+    },
+    {
+        'name': 'internet_nl_mail',
+        'verbose name': 'Scan recipient for STARTTLS, SPF, DKIM and DMARC using internet.nl',
+        'description': 'Scans the mail server in the MX record to see if they support STARTTLS, SPF, DKIM and DMARC. '
+                       'Requires internet.nl scan account.',
+        'can discover endpoints': False,
+        'can verify endpoints': False,
+        'can discover urls': False,
+        'can verify urls': False,
+        'creates endpoint scan types': [
+            'internet_nl_mail_starttls_tls_available',
+            'internet_nl_mail_auth_spf_exist',
+            'internet_nl_mail_auth_dkim_exist',
+            'internet_nl_mail_auth_dmarc_exist'],
+        'creates url scan types': []
+    },
+    {
         'name': 'internet_nl_web',
         'verbose name': 'Scans websites on basic HTTP security (Tested with internet.nl)',
         'description': 't.b.d.',
         'can discover endpoints': False,
         'can verify endpoints': False,
-
-        # finds if there are MX records on url, pre scan and during scan.
         'can discover urls': False,
         'can verify urls': False,
-        'creates endpoint scan types': [],
-        'creates url scan types': ['internet_nl_web_web_ipv6_ws_similar']
+        'creates endpoint scan types': ['internet_nl_web_web_ipv6_ws_similar'],
+        'creates url scan types': []
     },
 ]
 

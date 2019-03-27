@@ -3,8 +3,8 @@ import logging
 from celery import Task, group
 
 from websecmap.organizations.models import Url
-from websecmap.scanners.scanner.dns import handle_resolves, url_resolves
-from websecmap.scanners.scanner.scanner import q_configurations_to_scan, url_filters
+from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
+from websecmap.scanners.scanner.subdomains import handle_resolves, url_resolves
 
 log = logging.getLogger(__package__)
 

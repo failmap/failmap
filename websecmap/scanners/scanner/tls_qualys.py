@@ -42,8 +42,8 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.scanner.http import store_url_ips
-from websecmap.scanners.scanner.scanner import allowed_to_scan, q_configurations_to_scan
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.

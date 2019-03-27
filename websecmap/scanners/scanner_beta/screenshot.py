@@ -53,8 +53,8 @@ from PIL import Image
 
 from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, Screenshot
-from websecmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
-                                                q_configurations_to_scan)
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
+                                                 q_configurations_to_scan)
 from websecmap.scanners.timeout import timeout
 
 log = logging.getLogger(__package__)

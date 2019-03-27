@@ -17,8 +17,8 @@ from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.scanner import (allowed_to_scan, endpoint_filters,
-                                                q_configurations_to_scan, url_filters)
+from websecmap.scanners.scanner.__init__ import (allowed_to_scan, endpoint_filters,
+                                                 q_configurations_to_scan, url_filters)
 
 log = logging.getLogger(__name__)
 

@@ -15,9 +15,9 @@ from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.scanner.__init__ import (allowed_to_discover_urls, q_configurations_to_scan,
+                                                 url_filters)
 from websecmap.scanners.scanner.http import get_ips
-from websecmap.scanners.scanner.scanner import (allowed_to_discover_urls, q_configurations_to_scan,
-                                                url_filters)
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
 sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')

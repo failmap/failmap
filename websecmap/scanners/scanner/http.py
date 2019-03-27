@@ -43,8 +43,8 @@ from requests.exceptions import ConnectionError
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, UrlIp
-from websecmap.scanners.scanner.scanner import (allowed_to_discover_endpoints, endpoint_filters,
-                                                q_configurations_to_scan)
+from websecmap.scanners.scanner.__init__ import (allowed_to_discover_endpoints, endpoint_filters,
+                                                 q_configurations_to_scan)
 from websecmap.scanners.timeout import timeout
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

@@ -1,18 +1,17 @@
 import logging
 
 from websecmap.app.management.commands._private import DiscoverTaskCommand
-from websecmap.scanners.scanner import dns, dns_known_subdomains, ftp, http, internet_nl_mail
+from websecmap.scanners.scanner import dns_endpoints, dns_known_subdomains, ftp, http, subdomains
 
 log = logging.getLogger(__name__)
 
 
-# todo: subdomains, from scanner.dns
 scanners = {
     'ftp': ftp,
     'http': http,
-    'subdomains': dns,
+    'subdomains': subdomains,
     'known_subdomains': dns_known_subdomains,
-    'mail': internet_nl_mail
+    'dns_endpoints': dns_endpoints
 }
 
 

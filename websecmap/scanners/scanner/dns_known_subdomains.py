@@ -18,8 +18,8 @@ import logging
 
 from celery import Task, group
 
-from websecmap.scanners.scanner.dns import get_subdomains, url_by_filters, wordlist_scan
-from websecmap.scanners.scanner.scanner import allowed_to_discover_urls
+from websecmap.scanners.scanner.__init__ import allowed_to_discover_urls
+from websecmap.scanners.scanner.subdomains import get_subdomains, url_by_filters, wordlist_scan
 
 log = logging.getLogger(__package__)
 
