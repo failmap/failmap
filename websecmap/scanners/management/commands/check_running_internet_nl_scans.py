@@ -1,15 +1,16 @@
 import logging
 
-from websecmap.app.management.commands._private import DiscoverTaskCommand
-from websecmap.scanners.scanner import mail
+from django.core.management.base import BaseCommand
+
+from websecmap.scanners.scanner import internet_nl_mail
 
 log = logging.getLogger(__name__)
 
 
-class Command(DiscoverTaskCommand):
+class Command(BaseCommand):
     """Checks running internet nl scans."""
 
     help = __doc__
 
     def handle(self, *args, **options):
-        mail.check_running_scans()
+        internet_nl_mail.check_running_scans()

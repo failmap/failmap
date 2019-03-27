@@ -123,48 +123,55 @@ def check_running_scans():
 
     unfinished_scans = InternetNLScan.objects.all().filter(finished=False)
     for scan in unfinished_scans:
-        # poll the url for updates.
-        """
-        Retrieving the status is a simple get request
+        response = get_scan_status(scan.status_url, config.INTERNET_NL_API_USERNAME, config.INTERNET_NL_API_PASSWORD)
+        handle_running_scan_reponse(response, scan)
 
-        GET /api/batch/v1.0/results/01c70c7972d143ffb0c5b45d5b8116cb/ HTTP/1.1
-        """
-        try:
-            response = requests.get(
-                scan.status_url,
-                auth=HTTPBasicAuth(config.INTERNET_NL_API_USERNAME, config.INTERNET_NL_API_PASSWORD),
-                # a massive timeout for a large file.
-                timeout=(300, 300)
-            )
-            response = response.json()
-        except requests.exceptions.ConnectionError:
-            log.exception("Could not connect to batch.internet.nl")
-            return
 
-        """
-        Some status messages you can expect:
-            "message": "Batch request is registering domains",
-            "message": "Batch request is running",
-            "message": "Results are being generated",
-        """
-        scan.message = response['message']
-        log.debug("Scan %s: %s" % (scan.pk, response['message']))
+def get_scan_status(url, username, password):
+    try:
+        response = requests.get(
+            url,
+            auth=HTTPBasicAuth(username, password),
+            # a massive timeout for a large file.
+            timeout=(300, 300)
+        )
+        return response.json()
+    except requests.exceptions.ConnectionError:
+        log.exception("Could not connect to batch.internet.nl")
+        return {}
 
-        if response['message'] == "OK":
-            log.debug("Hooray, a scan has finished.")
-            scan.finished = True
-            scan.finished_on = datetime.now(pytz.utc)
-            scan.success = True
-            log.debug("Going to process the scan results.")
 
-            store(response, internet_nl_scan_type=scan.type)
+def handle_running_scan_reponse(response, scan):
+    """
+    Some status messages you can expect:
+        "message": "Batch request is registering domains",
+        "message": "Batch request is running",
+        "message": "Results are being generated",
+    """
 
-        if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
-            log.debug("Scan encountered an error.")
-            scan.finished = True
-            scan.finished_on = datetime.now(pytz.utc)
+    if not response:
+        log.debug('Recceived no updates from internet.nl')
+        return None
 
-        scan.save()
+    scan.message = response['message']
+    scan.friendly_message = response['message']
+    log.debug("Scan %s: %s" % (scan.pk, response['message']))
+
+    if response['message'] == "OK":
+        log.debug("Hooray, a scan has finished.")
+        scan.finished = True
+        scan.finished_on = datetime.now(pytz.utc)
+        scan.success = True
+        log.debug("Going to process the scan results.")
+
+        store(response, internet_nl_scan_type=scan.type)
+
+    if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
+        log.debug("Scan encountered an error.")
+        scan.finished = True
+        scan.finished_on = datetime.now(pytz.utc)
+
+    scan.save()
 
     return None
 
