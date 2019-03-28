@@ -22,7 +22,7 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
 
     # last scan had exactly the same result, so don't create a new scan and just update the
     # last scan date.
-    if gs.explanation == message and gs.rating == rating:
+    if gs.explanation == message and gs.rating == str(rating):
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         gs.last_scan_moment = datetime.now(pytz.utc)
         gs.save()
