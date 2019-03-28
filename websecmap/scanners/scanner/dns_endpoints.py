@@ -78,7 +78,7 @@ def compose_verify_task(
     **kwargs
 ) -> Task:
 
-    default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaa"], "is_dead": False}
+    default_filter = {"protocol__in": ["dns_mx_no_cname", "dns_soa", "dns_a_aaaa"], "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
@@ -91,7 +91,7 @@ def compose_verify_task(
             | has_soa.si(endpoint.url)
             | connect_result.s(protocol="dns_soa", url=endpoint.url, port=0, ip_version=0)
             | has_a_or_aaaa.si(endpoint.url)
-            | connect_result.s(protocol="dns_a_aaa", url=endpoint.url, port=0, ip_version=0)
+            | connect_result.s(protocol="dns_a_aaaa", url=endpoint.url, port=0, ip_version=0)
         )
     return group(tasks)
 
