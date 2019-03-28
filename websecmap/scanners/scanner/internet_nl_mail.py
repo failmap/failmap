@@ -163,8 +163,7 @@ def handle_running_scan_reponse(response, scan):
         scan.finished_on = datetime.now(pytz.utc)
         scan.success = True
         log.debug("Going to process the scan results.")
-
-        store(response, internet_nl_scan_type=scan.type)
+        store.apply_async([response, scan.type])
 
     if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
         log.debug("Scan encountered an error.")
