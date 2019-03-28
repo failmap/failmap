@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
+import re
 
 from websecmap.celery import app
 
@@ -41,13 +42,31 @@ class Job(models.Model):
         Task signatures are for informational purpose and not functionally required. Currently
         there is no reason to keep large signatures so truncating to arbitrary limit of 1k.
         """
-        return self.cleaned_data['task'][:1000*1]
+        data = self.cleaned_data['task'][:1000*1]
+
+        return Job.censor_sensitive_data(data)
+
+    @staticmethod
+    def censor_sensitive_data(data):
+        # Heuristicly remove sensitive data from the task output. This will not cover all cases.
+        # This will prevent password leakage from database leaks.
+
+        # Full Match: pass='.....'
+        # Group 1: pass=
+        # Group 2: pass
+        # Group 3: " (' or ", enclosing)
+        # Replaces it to fieldname + quote + asteriks + quote
+        # https://regex101.com/
+        # @regex101: (note that \3 has to be written as \g3, thus ((pass|password|key|secret|hash|salt)=)(['"]).*?\g3
+        data = re.sub(r"(?i)((pass|password|key|secret|hash|salt)=)(['\"]).*?\3",
+                      r"\1\3********************\3", data, flags=re.MULTILINE)
+        return data
 
     @classmethod
     def create(cls, task: celery.Task, name: str, request, *args, **kwargs) -> 'Job':
         """Create job object and publish task on celery queue."""
         # create database object
-        job = cls(task=str(task))
+        job = cls(task=Job.censor_sensitive_data(str(task)))
         if request:
             job.created_by = request.user
         job.name = name[:255]
@@ -73,7 +92,11 @@ class Job(models.Model):
         job.result = result
         job.status = 'completed'
         job.finished_on = timezone.now()
-        job.save(update_fields=['result', 'status', 'finished_on'])
+        try:
+            job.save(update_fields=['result', 'status', 'finished_on'])
+        except TypeError:
+            job.result = "Job returned a '%s' which could not be serialized. Job finished." % type(result)
+            job.save(update_fields=['result', 'status', 'finished_on'])
 
     def __str__(self):
         return self.name
