@@ -6,7 +6,7 @@ from websecmap.scanners.scanner.internet_nl_mail import store, true_when_all_mat
 
 # The result from the documentation can be ignored, it's not up to date anymore.
 # this result is from a real scan
-result = {
+mail_result = {
     "message": "OK",
     "data": {
         "name": "Failmap Scan 9b33a48d-3507-422d-b520-974a0bcdbcd8",
@@ -154,25 +154,82 @@ result = {
     "success": True
 }
 
+web_result = {
+    "message": "OK",
+    "data": {
+        "name": "Internet.nl Dashboard, Type: Web, Account: Internet Cleanup Foundation, List: testsites c5555e21-5a21",
+        "submission-date": "2019-03-28T09:52:43.907671+00:00", "api-version": "1.0",
+        "domains":
+            [
+                {
+                    "status": "ok",
+                    "domain": "arnhem.nl",
+                    "views": [{"result": True, "name": "web_https_cert_domain"},
+                              {"result": False, "name": "web_https_http_redirect"},
+                              {"result": True, "name": "web_https_cert_chain"},
+                              {"result": True, "name": "web_https_tls_version"},
+                              {"result": True, "name": "web_https_tls_clientreneg"},
+                              {"result": True, "name": "web_https_tls_ciphers"},
+                              {"result": True, "name": "web_https_http_available"},
+                              {"result": False, "name": "web_https_dane_exist"},
+                              {"result": True, "name": "web_https_http_compress"},
+                              {"result": True, "name": "web_https_http_hsts"},
+                              {"result": True, "name": "web_https_tls_secreneg"},
+                              {"result": False, "name": "web_https_dane_valid"},
+                              {"result": True, "name": "web_https_cert_pubkey"},
+                              {"result": True, "name": "web_https_cert_sig"},
+                              {"result": True, "name": "web_https_tls_compress"},
+                              {"result": True, "name": "web_https_tls_keyexchange"},
+                              {"result": True, "name": "web_dnssec_exist"},
+                              {"result": True, "name": "web_dnssec_valid"},
+                              {"result": False, "name": "web_ipv6_ns_address"},
+                              {"result": False, "name": "web_ipv6_ws_similar"},
+                              {"result": False, "name": "web_ipv6_ns_reach"},
+                              {"result": False, "name": "web_ipv6_ws_address"},
+                              {"result": False, "name": "web_ipv6_ws_reach"}],
+                    "score": 63,
+                    "link": "https://batch.internet.nl/site/hdsr.nl/535985/",
+                    "categories": [
+                        {"category": "ipv6", "passed": False},
+                        {"category": "dnssec", "passed": True},
+                        {"category": "tls", "passed": False}
+                    ]
+                },
+            ],
+        "finished-date": "2019-03-28T09:55:11.415837+00:00",
+        "identifier": "ef69d623fbc649449f730bc15c643176"
+    },
+    "success": True
+}
+
 
 def test_internet_nl_mail(db):
-
     # should not exist yet
     scan_count = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').count()
     assert scan_count == 0
 
     url, created = Url.objects.all().get_or_create(url='arnhem.nl')
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_mx_no_cname')
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_a_aaaa')
 
-    store(result, internet_nl_scan_type='mail')
-
-    # We've added 32 items, including the score and the categories
+    # add 27 views, 4 categories, 1 score, 9 auto generated = 41
+    # Amount of legacy items auto-generated: 9
+    store(mail_result, internet_nl_scan_type='mail')
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 39
+    assert scan_count == 41
 
-    # Should be added once
+    # add 23 views, 1 score, 3 categories, 7 auto generated = 34
+    store(web_result, internet_nl_scan_type='web')
+    scan_count = EndpointGenericScan.objects.all().filter().count()
+    assert scan_count == 41 + 34
+
+    # Should be added once, scan result didn't change.
+    store(mail_result, internet_nl_scan_type='mail')
     scan_count = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').count()
     assert scan_count == 1
+
+    scan_count = EndpointGenericScan.objects.all().filter().count()
+    assert scan_count == 41 + 34
 
     views = [
         {
