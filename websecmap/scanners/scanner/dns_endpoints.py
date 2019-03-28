@@ -20,7 +20,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
 from websecmap.scanners.scanner.__init__ import (endpoint_filters, q_configurations_to_scan,
-                                                 url_filters)
+                                                 url_filters, add_model_filter)
 from websecmap.scanners.scanner.http import connect_result
 
 log = logging.getLogger(__name__)
@@ -45,6 +45,7 @@ def compose_discover_task(
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = add_model_filter(urls, **kwargs)
 
     if not urls:
         log.warning('Applied filters resulted in no urls. Cannot discover DNS endpoints without urls.')
