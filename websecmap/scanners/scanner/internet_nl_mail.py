@@ -267,9 +267,10 @@ def get_status_url(answer):
 
 @app.task(queue='storage')
 def store(result: dict, internet_nl_scan_type: str = 'mail'):
-    # todo: it's not clear what the answer is if there is no MX record / no mail server defined. What is the score then?
-    # relevant since MX might point to nothing or is removed meanwhile.
-    # todo: also mail.
+    # Done: is the status set to finished AS SOON AS this is requested? Otherwise every half hour this data
+    # will be added to be processed. As it might take some time before this task is processed. This is OK as the
+    # Finished value is set before calling this. And this is called asycnronously.
+    #
     """
     :param result: json blob from internet.nl
     :param internet_nl_scan_type: mail, mail_dashboard or web
@@ -373,7 +374,7 @@ def inject_legacy_views(scan_type, views):
         })
 
         views.append({
-            'name': web_legacy_prefix + 'legacy_hsts',
+            'name': web_legacy_prefix + 'hsts',
             'result': true_when_all_match(
                 views,
                 ['web_https_http_hsts']
@@ -381,7 +382,7 @@ def inject_legacy_views(scan_type, views):
         })
 
         views.append({
-            'name': web_legacy_prefix + 'tls_ncsc',
+            'name': web_legacy_prefix + 'tls_ncsc_web',
             'result': true_when_all_match(
                 views,
                 ['web_https_tls_version', 'web_https_tls_ciphers', 'web_https_tls_keyexchange',
@@ -394,7 +395,7 @@ def inject_legacy_views(scan_type, views):
             'name': web_legacy_prefix + 'dane',
             'result': true_when_all_match(
                 views,
-                ['web_ipv6_ns_address', 'web_https_dane_exist']
+                ['web_https_dane_exist', 'web_https_dane_exist']
             )
         })
 
