@@ -164,6 +164,8 @@ def handle_running_scan_reponse(response, scan):
         scan.finished = True
         scan.finished_on = datetime.now(pytz.utc)
         scan.success = True
+        scan.message = response['message']
+        scan.friendly_message = "Scan has finished."
         log.debug("Going to process the scan results.")
         store.apply_async([response, scan.type])
 
