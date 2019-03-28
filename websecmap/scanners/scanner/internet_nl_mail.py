@@ -127,6 +127,7 @@ def check_running_scans():
         handle_running_scan_reponse(response, scan)
 
 
+@app.task(queue='storage')
 def get_scan_status(url, username, password):
     try:
         response = requests.get(
@@ -141,6 +142,7 @@ def get_scan_status(url, username, password):
         return {}
 
 
+@app.task(queue='storage')
 def handle_running_scan_reponse(response, scan):
     """
     Some status messages you can expect:

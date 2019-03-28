@@ -3,13 +3,13 @@
 
 import importlib
 import logging
+import re
 
 import celery
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 from jsonfield import JSONField
-import re
 
 from websecmap.celery import app
 
@@ -103,6 +103,30 @@ class Job(models.Model):
 
     def __str__(self):
         return self.name
+
+
+@app.task(queue='storage')
+def create_function_job(function: str, **kwargs):
+    """Helper to allow Jobs to be created using Celery Beat.
+
+    function: complete path to a function inside a module. This will be executed.
+
+    This function helps when not all tasks have been discovered or are called directly. It sets no requirement to how
+    a module should look. Anything that composes tasks can be inserted here.
+    """
+
+    parts = function.split('.')
+    module = ".".join(parts[0:-1])
+    function_name = parts[-1]
+
+    module = importlib.import_module(module)
+    call = getattr(module, function_name, None)
+    if not call:
+        raise ValueError('Function %s not found in %s.' % (function_name, module))
+
+    task = call(**kwargs)
+
+    return Job.create(task, function, None)
 
 
 @app.task(queue='storage')
