@@ -236,8 +236,7 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     scan.started = True
     scan.status_url = status_url
     scan.message = answer.get('message', 'No message received.')
-    scan.friendly_message = "Batch request has been registered" \
-        if answer.get('OK', False) else "Error when registering batch request"
+    scan.friendly_message = "Batch request has been registered"
     scan.type = internet_nl_scan_type
 
     scan.save()
