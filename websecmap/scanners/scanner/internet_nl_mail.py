@@ -340,7 +340,7 @@ def inject_legacy_views(scan_type, views):
     # These views are backwards compatible with previous reports. (column j)
     # todo: have to verify if these are the correct colums
     if scan_type in ["web"]:
-        web_legacy_prefix = 'internet_nl_web_legacy_'
+        web_legacy_prefix = 'web_legacy_'
         views.append({
             'name': web_legacy_prefix + 'ipv6_nameserver',
             'result': true_when_all_match(
@@ -401,7 +401,7 @@ def inject_legacy_views(scan_type, views):
 
     # Also add a bunch of legacy fields for mail, on the condition that all are true.
     if scan_type in ["mail", "mail_dashboard"]:
-        mail_legacy_prefix = "internet_nl_mail_legacy_"
+        mail_legacy_prefix = "mail_legacy_"
         views.append({
             'name': mail_legacy_prefix + 'ipv6_nameserver',
             'result': true_when_all_match(
