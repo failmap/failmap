@@ -335,7 +335,7 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
 
 
 def inject_legacy_views(scan_type, views):
-    
+
     # If a number of conditions are positive, then another 'view' is set to True. Otherwise to false.
     # These views are backwards compatible with previous reports. (column j)
     # todo: have to verify if these are the correct colums

@@ -19,8 +19,8 @@ from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint
-from websecmap.scanners.scanner.__init__ import (endpoint_filters, q_configurations_to_scan,
-                                                 url_filters, add_model_filter)
+from websecmap.scanners.scanner.__init__ import (add_model_filter, endpoint_filters,
+                                                 q_configurations_to_scan, url_filters)
 from websecmap.scanners.scanner.http import connect_result
 
 log = logging.getLogger(__name__)
