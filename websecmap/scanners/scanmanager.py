@@ -13,35 +13,46 @@ def store_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, 
 
     # Check if the latest scan has the same rating or not:
     try:
-        gs = EndpointGenericScan.objects.all().filter(
-            type=scan_type,
-            endpoint=endpoint,
-        ).latest('last_scan_moment')
+        gs = EndpointGenericScan.objects.all().filter(type=scan_type, endpoint=endpoint).latest('last_scan_moment')
+        exists = True
     except ObjectDoesNotExist:
+        exists = False
         gs = EndpointGenericScan()
 
-    # last scan had exactly the same result, so don't create a new scan and just update the
-    # last scan date.
-    if gs.explanation == message and gs.rating == str(rating):
+    # To deduplicate data, only store changes to scans. We'll update just the scan moment, and the rest stays the same.
+    # The amount of data saved runs in the gigabytes. So it's worth the while doing it like this :)
+    if gs.explanation == str(message) and gs.rating == str(rating):
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         gs.last_scan_moment = datetime.now(pytz.utc)
-        gs.save()
-    else:
-        # message and rating changed for this scan_type, so it's worth while to save the scan.
-        log.debug("Message or rating changed: making a new generic scan.")
-        gs = EndpointGenericScan()
-        gs.explanation = message
-        gs.rating = rating
-        gs.endpoint = endpoint
-        gs.type = scan_type
-        gs.evidence = evidence
-        gs.last_scan_moment = datetime.now(pytz.utc)
-        gs.rating_determined_on = datetime.now(pytz.utc)
-        gs.is_the_latest_scan = True
-        gs.save()
+        gs.save(update_fields=['last_scan_moment'])
+        return
 
-        EndpointGenericScan.objects.all().filter(endpoint=gs.endpoint, type=gs.type).exclude(
-            pk=gs.pk).update(is_the_latest_scan=False)
+    # message and rating changed for this scan_type, so it's worth while to save the scan.
+    if not exists:
+        log.debug("No prior scan result found, creating a new one.")
+    else:
+        log.debug("Message or rating changed compared to previous scan. Saving the new scan result.")
+
+    gs = EndpointGenericScan()
+    gs.explanation = message
+    gs.rating = rating
+    gs.endpoint = endpoint
+    gs.type = scan_type
+    gs.evidence = evidence
+    gs.last_scan_moment = datetime.now(pytz.utc)
+    gs.rating_determined_on = datetime.now(pytz.utc)
+    gs.is_the_latest_scan = True
+    gs.save()
+
+    # Set all the previous endpoint scans of this endpoint + type to NOT be the latest scan.
+    EndpointGenericScan.objects.all().filter(
+        endpoint=gs.endpoint,
+        type=gs.type
+    ).exclude(
+        pk=gs.pk
+    ).update(
+        is_the_latest_scan=False
+    )
 
 
 def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, evidence: str = ""):
@@ -61,7 +72,7 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
 
     # last scan had exactly the same result, so don't create a new scan and just update the last scan date.
     # while we have type hinting, it's still possible to pass in a boolean and then you compare a str to a bool...
-    if gs.explanation == message and gs.rating == str(rating):
+    if gs.explanation == str(message) and gs.rating == str(rating):
         log.debug("Scan had the same rating and message, updating last_scan_moment only.")
         gs.last_scan_moment = datetime.now(pytz.utc)
         gs.save(update_fields=['last_scan_moment'])
@@ -86,6 +97,20 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
 def store_historic_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str,
                                         rating_determined_on, last_scan_moment, is_latest):
 
+    """
+    Warning: the ID of the endpointscans is relevant. So when using this, make sure that the oldest values are
+    imported first(!).
+
+    :param scan_type:
+    :param endpoint:
+    :param rating:
+    :param message:
+    :param evidence:
+    :param rating_determined_on:
+    :param last_scan_moment:
+    :param is_latest:
+    :return:
+    """
     # Check if the latest scan has the same rating or not:
     try:
         gs = EndpointGenericScan.objects.all().filter(
