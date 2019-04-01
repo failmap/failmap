@@ -164,18 +164,15 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # datasets.
     # we don't store tls_qualys scans in a separate table anymore
 
-    generic_scans = EndpointGenericScan.objects.all().filter(type__in=reported_scan_types, endpoint__url__in=urls).\
+    endpoint_scans = EndpointGenericScan.objects.all().filter(type__in=reported_scan_types, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
-    generic_scans = latest_rating_per_day_only(generic_scans)
-    generic_scan_dates = [x.rating_determined_on for x in generic_scans]
-    # this is not faster.
-    # generic_scan_dates = list(generic_scans.values_list("rating_determined_on", flat=True))
+    endpoint_scans = latest_rating_per_day_only(endpoint_scans)
+    endpoint_scan_dates = [x.rating_determined_on for x in endpoint_scans]
 
-    # url generic scans
-    generic_url_scans = UrlGenericScan.objects.all().filter(type__in=reported_scan_types, url__in=urls).\
+    url_scans = UrlGenericScan.objects.all().filter(type__in=reported_scan_types, url__in=urls).\
         prefetch_related("url")
-    generic_url_scans = latest_rating_per_day_only(generic_url_scans)
-    generic_url_scan_dates = [x.rating_determined_on for x in generic_url_scans]
+    url_scans = latest_rating_per_day_only(url_scans)
+    url_scan_dates = [x.rating_determined_on for x in url_scans]
 
     dead_endpoints = Endpoint.objects.all().filter(url__in=urls, is_dead=True)
     dead_scan_dates = [x.is_dead_since for x in dead_endpoints]
@@ -188,7 +185,7 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
 
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient. Using the latest possible time of the day is used.
-    moments = generic_scan_dates + generic_url_scan_dates + non_resolvable_dates + \
+    moments = endpoint_scan_dates + url_scan_dates + non_resolvable_dates + \
         dead_scan_dates + dead_url_dates
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
@@ -196,8 +193,8 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # If there are no scans at all, just return instead of storing useless junk or make other mistakes
     if not moments:
         return [], {
-            'generic_scans': [],
-            'generic_url_scans': [],
+            'endpoint_scans': [],
+            'url_scans': [],
             'dead_endpoints': [],
             'non_resolvable_urls': [],
             'dead_urls': []
@@ -213,8 +210,8 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # using scans, the query of "what scan happened when" doesn't need to be answered anymore.
     # the one thing is that scans have to be mapped to the moments (called a timeline)
     happenings = {
-        'generic_scans': generic_scans,
-        'generic_url_scans': generic_url_scans,
+        'endpoint_scans': endpoint_scans,
+        'url_scans': url_scans,
         'dead_endpoints': dead_endpoints,
         'non_resolvable_urls': non_resolvable_urls,
         'dead_urls': dead_urls
@@ -436,29 +433,29 @@ def create_timeline(url: Url):
     # we could save a list of dead endpoints, but the catch is that an endpoint can start living
     # again over time. The scans with only dead endpoints should not be made.
 
-    for scan in happenings['generic_scans']:
+    for scan in happenings['endpoint_scans']:
         some_day = scan.rating_determined_on.date()
 
         # can we create this set in an easier way?
-        if "generic_scan" not in timeline[some_day]:
-            timeline[some_day]["generic_scan"] = {'scans': [], 'endpoints': []}
+        if "endpoint_scan" not in timeline[some_day]:
+            timeline[some_day]["endpoint_scan"] = {'scans': [], 'endpoints': []}
 
-        # timeline[some_day]["generic_scan"]["scanned"] = True  # do we ever check on this? Seems not.
-        timeline[some_day]["generic_scan"]['scans'].append(scan)
-        timeline[some_day]["generic_scan"]["endpoints"].append(scan.endpoint)
+        # timeline[some_day]["endpoint_scan"]["scanned"] = True  # do we ever check on this? Seems not.
+        timeline[some_day]["endpoint_scan"]['scans'].append(scan)
+        timeline[some_day]["endpoint_scan"]["endpoints"].append(scan.endpoint)
         timeline[some_day]["endpoints"].append(scan.endpoint)
         timeline[some_day]['scans'].append(scan)  # todo: should be named endpoint_scans
 
-    for scan in happenings['generic_url_scans']:
+    for scan in happenings['url_scans']:
         some_day = scan.rating_determined_on.date()
 
         # can we create this set in an easier way?
-        if "generic_url_scan" not in timeline[some_day]:
-            timeline[some_day]["generic_url_scan"] = {'scans': [], 'urls': []}
+        if "url_scan" not in timeline[some_day]:
+            timeline[some_day]["url_scan"] = {'scans': [], 'urls': []}
 
-        # timeline[some_day]["generic_scan"]["scanned"] = True  # do we ever check on this? Seems not.
-        timeline[some_day]["generic_url_scan"]['scans'].append(scan)
-        timeline[some_day]["generic_url_scan"]["urls"].append(scan.url)
+        # timeline[some_day]["endpoint_scan"]["scanned"] = True  # do we ever check on this? Seems not.
+        timeline[some_day]["url_scan"]['scans'].append(scan)
+        timeline[some_day]["url_scan"]["urls"].append(scan.url)
         timeline[some_day]["urls"].append(scan.url)
         timeline[some_day]['url_scans'].append(scan)
 
@@ -959,29 +956,18 @@ def inspect_timeline(timeline, url: Url):
         # for debugging
         # message += "|- %s: Contents: %s" % (moment, timeline[moment]) + newline
 
-        if 'tls_qualys' in timeline[moment]:
-            message += "|  |- tls_qualys" + newline
-            for item in timeline[moment]['tls_qualys']['endpoints']:
-                message += "|  |  |- Endpoint %s" % item + newline
-            for item in timeline[moment]['tls_qualys']['scans']:
+        if 'url_scan' in timeline[moment]:
+            message += "|  |- url scan" + newline
+            for item in timeline[moment]['url_scan']['scans']:
                 calculation = get_severity(item)
                 message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
                                                                   calculation.get('medium', '?'),
                                                                   calculation.get('low', '?'),
                                                                   item) + newline
 
-        if 'generic_url_scan' in timeline[moment]:
-            message += "|  |- url generic_scan" + newline
-            for item in timeline[moment]['generic_url_scan']['scans']:
-                calculation = get_severity(item)
-                message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
-                                                                  calculation.get('medium', '?'),
-                                                                  calculation.get('low', '?'),
-                                                                  item) + newline
-
-        if 'generic_scan' in timeline[moment]:
-            message += "|  |- endpoint generic_scan" + newline
-            for item in timeline[moment]['generic_scan']['scans']:
+        if 'endpoint_scan' in timeline[moment]:
+            message += "|  |- endpoint scan" + newline
+            for item in timeline[moment]['endpoint_scan']['scans']:
                 calculation = get_severity(item)
                 message += "|  |  |-  H:%2s M:%2s L:%2s %-40s" % (calculation.get('high', '?'),
                                                                   calculation.get('medium', '?'),
