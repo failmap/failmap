@@ -1,7 +1,7 @@
 
 from django.core.management.base import BaseCommand
 
-from websecmap.reporting.report import default_organization_rating
+from websecmap.reporting.for_map_organizations import default_organization_rating
 
 
 class Command(BaseCommand):

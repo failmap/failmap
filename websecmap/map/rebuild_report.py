@@ -4,7 +4,8 @@ from celery import group
 
 from websecmap.celery import Task
 from websecmap.organizations.models import Organization, Url
-from websecmap.reporting.report import recreate_organization_reports, recreate_url_reports
+from websecmap.reporting.report import recreate_url_reports
+from websecmap.reporting.for_map_organizations import recreate_organization_reports
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)

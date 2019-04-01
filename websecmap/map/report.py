@@ -12,8 +12,8 @@ from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCach
 from websecmap.map.views import get_map_data
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.models import OrganizationReport
-from websecmap.reporting.report import (create_organization_reports_now,
-                                        default_organization_rating, recreate_url_reports)
+from websecmap.reporting.report import (recreate_url_reports)
+from websecmap.reporting.for_map_organizations import default_organization_rating, create_organization_reports_now
 from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 

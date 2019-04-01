@@ -8,7 +8,7 @@ from django.db import transaction
 from websecmap.map.geojson import update_coordinates
 from websecmap.organizations.adminstrative_transformations import add_url_to_new_organization, merge
 from websecmap.organizations.models import Organization
-from websecmap.reporting.report import recreate_organization_reports
+from websecmap.reporting.for_map_organizations import recreate_organization_reports
 
 log = logging.getLogger(__package__)
 
