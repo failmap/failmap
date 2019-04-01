@@ -353,7 +353,7 @@ def create_timeline(url: Url):
         moment_date = moment.date()
         timeline[moment_date] = {}
         timeline[moment_date]["endpoints"] = []
-        timeline[moment_date]['scans'] = []   # todo: should be named endpoint_scans
+        timeline[moment_date]['endpoint_scans'] = []
         timeline[moment_date]['url_scans'] = []
         timeline[moment_date]["dead_endpoints"] = []
         timeline[moment_date]["urls"] = []
@@ -374,7 +374,7 @@ def create_timeline(url: Url):
         timeline[some_day]["endpoint_scan"]['scans'].append(scan)
         timeline[some_day]["endpoint_scan"]["endpoints"].append(scan.endpoint)
         timeline[some_day]["endpoints"].append(scan.endpoint)
-        timeline[some_day]['scans'].append(scan)  # todo: should be named endpoint_scans
+        timeline[some_day]['endpoint_scans'].append(scan)
 
     for scan in happenings['url_scans']:
         some_day = scan.rating_determined_on.date()
@@ -425,8 +425,6 @@ def create_url_report(timeline, url: Url):
 
     # work on a sorted timeline as otherwise this code is non-deterministic!
     for moment in sorted(timeline):
-        total_high, total_medium, total_low = 0, 0, 0
-        explained_total_high, explained_total_medium, explained_total_low = 0, 0, 0
         given_ratings = {}
 
         if ('url_not_resolvable' in timeline[moment] or 'url_is_dead' in timeline[moment]) \
@@ -435,66 +433,25 @@ def create_url_report(timeline, url: Url):
                       'this domain if it had a score. It has been cleaned up. (hooray)')
             # this is the end for the domain.
             default_calculation = {
-                "url": {
-                    "url": url.url,
-                    "ratings": [],
-                    "endpoints": [],
-
-                    "total_issues:": 0,
-                    "high": 0,
-                    "medium": 0,
-                    "low": 0,
-                    'ok': 0,
-                    "total_endpoints": 0,
-                    "high_endpoints": 0,
-                    "medium_endpoints": 0,
-                    "low_endpoints": 0,
-                    "ok_endpoints": 0,
-                    "total_url_issues": 0,
-                    "url_issues_high": 0,
-                    "url_issues_medium": 0,
-                    "url_issues_low": 0,
-                    "url_ok": 0,
-                    "total_endpoint_issues": 0,
-                    "endpoint_issues_high": 0,
-                    "endpoint_issues_medium": 0,
-                    "endpoint_issues_low": 0,
-                    "endpoint_ok": 0,
-
-                    "explained_total_issues:": 0,
-                    "explained_high": 0,
-                    "explained_medium": 0,
-                    "explained_low": 0,
-                    "explained_total_endpoints": 0,
-                    "explained_high_endpoints": 0,
-                    "explained_medium_endpoints": 0,
-                    "explained_low_endpoints": 0,
-                    "explained_total_url_issues": 0,
-                    "explained_url_issues_high": 0,
-                    "explained_url_issues_medium": 0,
-                    "explained_url_issues_low": 0,
-                    "explained_total_endpoint_issues": 0,
-                    "explained_endpoint_issues_high": 0,
-                    "explained_endpoint_issues_medium": 0,
-                    "explained_endpoint_issues_low": 0,
-                }
+                "url": url.url,
+                "reports": [],
+                "endpoints": [],
             }
 
-            save_url_report(url, moment, 0, 0, 0, default_calculation, total_issues=0, total_endpoints=0,
-                            high_endpoints=0, medium_endpoints=0, low_endpoints=0)
+            save_url_report(url, moment, default_calculation)
             return
 
         # reverse the relation: so we know all ratings per endpoint.
         # It is not really relevant what endpoints _really_ exist.
         endpoint_scans = {}
-        for scan in timeline[moment]['scans']:
+        for scan in timeline[moment]['endpoint_scans']:
             endpoint_scans[scan.endpoint.id] = []
 
-        for scan in timeline[moment]['scans']:
+        for scan in timeline[moment]['endpoint_scans']:
             endpoint_scans[scan.endpoint.id].append(scan)
 
         # create the report for this moment
-        endpoint_reports = []
+        endpoint_calculations = []
 
         # also include all endpoints from the past time, which we do until the endpoints are dead.
         relevant_endpoints = set(timeline[moment]["endpoints"] + previous_endpoints)
@@ -513,11 +470,6 @@ def create_url_report(timeline, url: Url):
                     previous_endpoints.remove(dead_endpoint)
 
         total_endpoints, high_endpoints, medium_endpoints, low_endpoints, ok_endpoints = 0, 0, 0, 0, 0
-        explained_high_endpoints, explained_medium_endpoints, explained_low_endpoints = 0, 0, 0
-
-        # Some sums that will be saved as stats:
-        endpoint_issues_high, endpoint_issues_medium, endpoint_issues_low = 0, 0, 0
-        explained_endpoint_issues_high, explained_endpoint_issues_medium, explained_endpoint_issues_low = 0, 0, 0
         for endpoint in relevant_endpoints:
             # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
             total_endpoints += 1
@@ -560,34 +512,10 @@ def create_url_report(timeline, url: Url):
             if label not in given_ratings:
                 given_ratings[label] = []
 
-            endpoint_high, endpoint_medium, endpoint_low = 0, 0, 0
-            explained_endpoint_high, explained_endpoint_medium, explained_endpoint_low = 0, 0, 0
             for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
                 if endpoint_scan_type in these_endpoint_scans:
                     if endpoint_scan_type not in given_ratings[label]:
-                        calculation = get_severity(these_endpoint_scans[endpoint_scan_type])
-                        if calculation:
-                            calculations.append(calculation)
-                            if these_endpoint_scans[endpoint_scan_type].comply_or_explain_is_explained:
-                                explained_endpoint_high += calculation["high"]
-                                explained_endpoint_issues_high += calculation["high"]
-                                explained_endpoint_medium += calculation["medium"]
-                                explained_endpoint_issues_medium += calculation["medium"]
-                                explained_endpoint_low += calculation["low"]
-                                explained_endpoint_issues_low += calculation["low"]
-                                explained_total_high += calculation["high"]
-                                explained_total_medium += calculation["medium"]
-                                explained_total_low += calculation["low"]
-                            else:
-                                endpoint_high += calculation["high"]
-                                endpoint_issues_high += calculation["high"]
-                                endpoint_medium += calculation["medium"]
-                                endpoint_issues_medium += calculation["medium"]
-                                endpoint_low += calculation["low"]
-                                endpoint_issues_low += calculation["low"]
-                                total_high += calculation["high"]
-                                total_medium += calculation["medium"]
-                                total_low += calculation["low"]
+                        calculations.append(get_severity(these_endpoint_scans[endpoint_scan_type]))
 
                         given_ratings[label].append(endpoint_scan_type)
                     else:
@@ -610,29 +538,10 @@ def create_url_report(timeline, url: Url):
                             'comply_or_explain_valid_at_time_of_report': False
                         })
 
-            endpoint_ok = 0 if endpoint_high or endpoint_medium or endpoint_low else 1
-
-            # give an idea how many endpoint issues there are compared to the total # of endpoints
-            if endpoint_high:
-                high_endpoints += 1
-            if endpoint_medium:
-                medium_endpoints += 1
-            if endpoint_low:
-                low_endpoints += 1
-            if endpoint_ok:
-                ok_endpoints += 1
-
-            if explained_endpoint_high:
-                explained_high_endpoints += 1
-            if explained_endpoint_medium:
-                explained_medium_endpoints += 1
-            if explained_endpoint_low:
-                explained_low_endpoints += 1
-
             # Readibility is important: it's ordered from the worst to least points.
             calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
 
-            endpoint_reports.append({
+            endpoint_calculations.append({
                 "id": endpoint.pk,
                 "concat": "%s/%s IPv%s" % (endpoint.protocol, endpoint.port, endpoint.ip_version),
                 "ip": endpoint.ip_version,
@@ -640,14 +549,7 @@ def create_url_report(timeline, url: Url):
                 "port": endpoint.port,
                 "protocol": endpoint.protocol,
                 "v4": endpoint.is_ipv4(),
-                "high": endpoint_high,
-                "medium": endpoint_medium,
-                "low": endpoint_low,
-                "ok": endpoint_ok,
-                "explained_high": explained_endpoint_high,
-                "explained_medium":  explained_endpoint_medium,
-                "explained_low":  explained_endpoint_low,
-                "ratings": calculations
+                "reports": calculations
             })
 
         previous_endpoints += relevant_endpoints
@@ -684,190 +586,254 @@ def create_url_report(timeline, url: Url):
         previous_url_ratings[url.id] = {}
         previous_url_ratings[url.id] = these_url_scans
 
-        url_issues_high, url_issues_medium, url_issues_low = 0, 0, 0
-        explained_url_issues_high, explained_url_issues_medium, explained_url_issues_low = 0, 0, 0
         for url_scan_type in url_scan_types:
             if url_scan_type in these_url_scans:
-                calculation = get_severity(these_url_scans[url_scan_type])
-                if calculation:
-                    url_calculations.append(calculation)
-                    if these_url_scans[url_scan_type].comply_or_explain_is_explained:
-                        explained_url_issues_high += calculation["high"]
-                        explained_total_high += calculation["high"]
-                        explained_total_medium += calculation["medium"]
-                        explained_url_issues_medium += calculation["medium"]
-                        explained_total_low += calculation["low"]
-                        explained_url_issues_low += calculation["low"]
-                    else:
-                        url_issues_high += calculation["high"]
-                        total_high += calculation["high"]
-                        total_medium += calculation["medium"]
-                        url_issues_medium += calculation["medium"]
-                        total_low += calculation["low"]
-                        url_issues_low += calculation["low"]
+                url_calculations.append(get_severity(these_url_scans[url_scan_type]))
 
         # prevent empty ratings cluttering the database and skewing the stats.
         # todo: only do this if there never was a urlrating before this.
-        if not endpoint_reports and not url_was_once_rated and not url_calculations:
+        if not endpoint_calculations and not url_was_once_rated and not url_calculations:
             continue
 
-        url_issues_ok = 0 if url_issues_high or url_issues_medium or url_issues_low else 1
-
-        total_url_issues = url_issues_high + url_issues_medium + url_issues_low
-        explained_total_url_issues = explained_url_issues_high + explained_url_issues_medium + explained_url_issues_low
-        total_endpoint_issues = endpoint_issues_high + endpoint_issues_medium + endpoint_issues_low
-        explained_total_endpoint_issues = \
-            explained_endpoint_issues_high + explained_endpoint_issues_medium + explained_endpoint_issues_low
-
-        url_and_endpoints_ok = 0 if total_endpoint_issues or total_url_issues else 1
-        sorted_url_reports = sorted(url_calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
-
-        sorted_endpoints_reports = sorted(
-            endpoint_reports, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
-
-        total_issues = total_high + total_medium + total_low
-        explained_total_issues = explained_total_high + explained_total_medium + explained_total_low
         calculation = {
             "url": url.url,
-            "ratings": sorted_url_reports,
-            "endpoints": sorted_endpoints_reports,
-
-            "total_issues": total_issues,
-            "high": total_high,
-            "medium": total_medium,
-            "low": total_low,
-            "ok": url_and_endpoints_ok,
-            "total_endpoints": total_endpoints,
-            "high_endpoints": high_endpoints,
-            "medium_endpoints": medium_endpoints,
-            "low_endpoints": low_endpoints,
-            "ok_endpoints": ok_endpoints,
-            "total_url_issues": total_url_issues,
-            "url_issues_high": url_issues_high,
-            "url_issues_medium": url_issues_medium,
-            "url_issues_low": url_issues_low,
-            "url_ok": url_issues_ok,
-            "total_endpoint_issues": total_endpoint_issues,
-            "endpoint_issues_high": endpoint_issues_high,
-            "endpoint_issues_medium": endpoint_issues_medium,
-            "endpoint_issues_low": endpoint_issues_low,
-
-            "explained_total_issues": explained_total_issues,
-            "explained_high": explained_total_high,
-            "explained_medium": explained_total_medium,
-            "explained_low": explained_total_low,
-            # The number of endpoints doesn't change if issues are explained,
-            # just like the number of urls doesn't change.
-            # "explained_total_endpoints": explained_total_endpoints,
-            "explained_high_endpoints": explained_high_endpoints,
-            "explained_medium_endpoints": explained_medium_endpoints,
-            "explained_low_endpoints": explained_low_endpoints,
-            "explained_total_url_issues": explained_total_url_issues,
-            "explained_url_issues_high": explained_url_issues_high,
-            "explained_url_issues_medium": explained_url_issues_medium,
-            "explained_url_issues_low": explained_url_issues_low,
-            "explained_total_endpoint_issues": explained_total_endpoint_issues,
-            "explained_endpoint_issues_high": explained_endpoint_issues_high,
-            "explained_endpoint_issues_medium": explained_endpoint_issues_medium,
-            "explained_endpoint_issues_low": explained_endpoint_issues_low,
+            "reports": url_calculations,
+            "endpoints": endpoint_calculations,
         }
 
-        log.debug("On %s %s has %s endpoints and %s high, %s medium and %s low vulnerabilities" %
-                  (moment, url, len(sorted_endpoints_reports), total_high, total_medium, total_low))
+        log.debug("On %s %s has %s endpoints." % (moment, url, len(endpoint_calculations)))
 
-        save_url_report(url, moment, total_high, total_medium, total_low, calculation,
-                        total_issues=total_issues, total_endpoints=total_endpoints, high_endpoints=high_endpoints,
-                        medium_endpoints=medium_endpoints, low_endpoints=low_endpoints,
-                        total_url_issues=total_url_issues, total_endpoint_issues=total_endpoint_issues,
-                        url_issues_high=url_issues_high, url_issues_medium=url_issues_medium,
-                        url_issues_low=url_issues_low, endpoint_issues_high=endpoint_issues_high,
-                        endpoint_issues_medium=endpoint_issues_medium, endpoint_issues_low=endpoint_issues_low,
-                        explained_high=explained_total_high, explained_medium=explained_total_medium,
-                        explained_low=explained_total_low,
-                        explained_total_issues=explained_total_issues,
-                        explained_high_endpoints=explained_high_endpoints,
-                        explained_medium_endpoints=explained_medium_endpoints,
-                        explained_low_endpoints=explained_low_endpoints,
-                        explained_total_url_issues=explained_total_url_issues,
-                        explained_total_endpoint_issues=explained_total_endpoint_issues,
-                        explained_url_issues_high=explained_url_issues_high,
-                        explained_url_issues_medium=explained_url_issues_medium,
-                        explained_url_issues_low=explained_url_issues_low,
-                        explained_endpoint_issues_high=explained_endpoint_issues_high,
-                        explained_endpoint_issues_medium=explained_endpoint_issues_medium,
-                        explained_endpoint_issues_low=explained_endpoint_issues_low,
-                        ok=url_and_endpoints_ok, ok_endpoints=ok_endpoints, url_ok=url_issues_ok,
-                        )
+        save_url_report(url, moment, calculation)
 
 
-def save_url_report(url: Url, date: datetime, high: int, medium: int, low: int, calculation,
-                    total_issues: int = 0, total_endpoints: int = 0,
-                    high_endpoints: int = 0, medium_endpoints: int = 0, low_endpoints: int = 0,
-                    total_url_issues: int = 0, total_endpoint_issues: int = 0,
-                    url_issues_high: int = 0, url_issues_medium: int = 0, url_issues_low: int = 0,
-                    endpoint_issues_high: int = 0, endpoint_issues_medium: int = 0, endpoint_issues_low: int = 0,
+def add_report_to_key(amount_of_issues, key, report):
+    """
+    Simply combines numbers from reports into categories.
 
-                    explained_high: int = 0, explained_medium: int = 0, explained_low: int = 0,
-                    explained_total_issues: int = 0, explained_high_endpoints: int = 0,
-                    explained_medium_endpoints: int = 0, explained_low_endpoints: int = 0,
-                    explained_total_url_issues: int = 0, explained_total_endpoint_issues: int = 0,
-                    explained_url_issues_high: int = 0, explained_url_issues_medium: int = 0,
-                    explained_url_issues_low: int = 0, explained_endpoint_issues_high: int = 0,
-                    explained_endpoint_issues_medium: int = 0, explained_endpoint_issues_low: int = 0,
-                    ok: int = 0, ok_endpoints: int = 0, url_ok: int = 0, endpoint_ok: int = 0
-                    ):
+    :param amount_of_issues:
+    :param key:
+    :param report:
+    :return:
+    """
+    amount_of_issues[key]['high'] += report['high']
+    amount_of_issues[key]['medium'] += report['medium']
+    amount_of_issues[key]['low'] += report['low']
+    amount_of_issues[key]['any'] += (report['low'] + report['medium'] + report['high'])
+    amount_of_issues[key]['ok'] += report['ok']
+    return amount_of_issues
+
+
+def judge(amount_of_issues, clean_issues_for_judgement, key, reports):
+    # All reports for the endpoint can determine a judgement for the endpoint. For example, if all endpoint reports
+    # say that the result is ok. The endpoint itself becomes 'ok'.
+    judgement_issues = deepcopy(clean_issues_for_judgement)
+    for report in reports:
+        judgement_issues = add_report_to_key(judgement_issues, key, report)
+
+    # Now we know the statistics for the endpoint, we can add a judgement to the endpoint.
+    if judgement_issues[key]['high']:
+        amount_of_issues[key + '_judgements']['high'] += 1
+
+    if judgement_issues['endpoint']['medium']:
+        amount_of_issues[key + '_judgements']['medium'] += 1
+
+    if judgement_issues['endpoint']['low']:
+        amount_of_issues[key + '_judgements']['low'] += 1
+
+    if judgement_issues['endpoint']['ok']:
+        amount_of_issues[key + '_judgements']['ok'] += 1
+
+    return amount_of_issues, judgement_issues
+
+
+def statistics_over_url_calculation(calculation):
+    # Calculate statistics here, instead of working with all kinds of variables.
+    amount_of_issues = {
+        'overall': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+
+        # sum of all issues on the url level
+        'url': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+
+        # sum of all issues in endpoints
+        'endpoint': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+
+        # judgements are complex situation: when ALL reports of an endpoint say the endpoint is OK, a single
+        # judgement is added for that endpoint. There are multiple endpoints with multiple judgements.
+        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        # Some reports will be explained, that means the endpoint will be explained on a certain level.
+        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+
+        # As there is only one url, with multiple reports, only one judgement will be made.
+        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+
+        # If there is a single high endpoint judgement, or a single high url judgement, the overall is high.
+        # This can have a maximum of 1 value, which summarizes all url_judgements and endpoint_judgements
+        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+    }
+
+    clean_issues_for_judgement = deepcopy(amount_of_issues)
+
+    for i, endpoint in enumerate(calculation['endpoints']):
+
+        # Simply sum numbers.
+        for report in endpoint['reports']:
+            if report['is_explained']:
+                amount_of_issues = add_report_to_key(amount_of_issues, 'endpoint_explained', report)
+            else:
+                amount_of_issues = add_report_to_key(amount_of_issues, 'endpoint', report)
+
+        amount_of_issues, judgement_issues = judge(amount_of_issues, clean_issues_for_judgement, 'endpoint', endpoint['reports'])
+        amount_of_issues, explained_judgement_issues = judge(amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', endpoint['reports'])
+
+        # inject statistics inside the calculation per endpoint.
+        calculation['endpoints'][i]['high'] = judgement_issues['endpoint']['high']
+        calculation['endpoints'][i]['medium'] = judgement_issues['endpoint']['medium']
+        calculation['endpoints'][i]['low'] = judgement_issues['endpoint']['low']
+        calculation['endpoints'][i]['ok'] = judgement_issues['endpoint']['ok']
+        calculation['endpoints'][i]['explained_high'] = explained_judgement_issues['endpoint_explained']['high']
+        calculation['endpoints'][i]['explained_medium'] = explained_judgement_issues['endpoint_explained']['medium']
+        calculation['endpoints'][i]['explained_low'] = explained_judgement_issues['endpoint_explained']['low']
+
+    for report in calculation['reports']:
+        if report['is_explained']:
+            amount_of_issues = add_report_to_key(amount_of_issues, 'url_explained', report)
+        else:
+            amount_of_issues = add_report_to_key(amount_of_issues, 'url', report)
+
+    amount_of_issues, clean = judge(amount_of_issues, clean_issues_for_judgement, 'url', calculation['reports'])
+    amount_of_issues, clean = judge(
+        amount_of_issues, clean_issues_for_judgement, 'url_explained', calculation['reports'])
+
+    # and to calculate the overall, we can use the same routine, as the same keys are available.
+    amount_of_issues = add_report_to_key(amount_of_issues, 'overall', amount_of_issues['url'])
+    amount_of_issues = add_report_to_key(amount_of_issues, 'overall', amount_of_issues['endpoint'])
+
+    amount_of_issues = add_report_to_key(amount_of_issues, 'overall_explained', amount_of_issues['url_explained'])
+    amount_of_issues = add_report_to_key(amount_of_issues, 'overall_explained', amount_of_issues['endpoint_explained'])
+
+    # and determine the final judgement: Not used yet.
+    if amount_of_issues['endpoint_judgements']['high'] or amount_of_issues['url_judgements']['high']:
+        amount_of_issues['overall_judgements']['high'] = 1
+    elif amount_of_issues['endpoint_judgements']['medium'] or amount_of_issues['url_judgements']['medium']:
+        amount_of_issues['overall_judgements']['medium'] = 1
+    elif amount_of_issues['endpoint_judgements']['low'] or amount_of_issues['url_judgements']['low']:
+        amount_of_issues['overall_judgements']['low'] = 1
+    elif amount_of_issues['endpoint_judgements']['ok'] or amount_of_issues['url_judgements']['ok']:
+        amount_of_issues['overall_judgements']['ok'] = 1
+
+    return calculation, amount_of_issues
+
+
+def save_url_report(url: Url, date: datetime, calculation):
+
+    # This also injects the statistics into the json, for use in representations / views in the right places.
+    calculation, amount_of_issues = statistics_over_url_calculation(calculation)
+
     u = UrlReport()
     u.url = url
 
     # save it as NOW if it's done today, else on the last moment on the same day.
     # So the url ratings immediately are shown, even if the day is not over.
-
     if date == datetime.now().date():
         u.when = datetime.now(pytz.utc)
     else:
         u.when = datetime(year=date.year, month=date.month, day=date.day,
                           hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
-    u.calculation = calculation
-    u.total_endpoints = total_endpoints
+    u.total_endpoints = len(calculation['endpoints'])
 
-    u.high = high
-    u.medium = medium
-    u.low = low
-    u.ok = ok
+    u.high = amount_of_issues['overall']['high']
+    u.medium = amount_of_issues['overall']['medium']
+    u.low = amount_of_issues['overall']['low']
+    u.total_issues = amount_of_issues['overall']['any']
+    u.ok = amount_of_issues['overall']['ok']
 
-    u.total_issues = total_issues
-    u.high_endpoints = high_endpoints
-    u.medium_endpoints = medium_endpoints
-    u.low_endpoints = low_endpoints
-    u.ok_endpoints = ok_endpoints
-    u.total_url_issues = total_url_issues
-    u.total_endpoint_issues = total_endpoint_issues
-    u.url_issues_high = url_issues_high
-    u.url_issues_medium = url_issues_medium
-    u.url_issues_low = url_issues_low
+    u.high_endpoints = amount_of_issues['endpoint_judgements']['high']
+    u.medium_endpoints = amount_of_issues['endpoint_judgements']['medium']
+    u.low_endpoints = amount_of_issues['endpoint_judgements']['low']
+    u.ok_endpoints = amount_of_issues['endpoint_judgements']['ok']
+
+    u.total_url_issues = amount_of_issues['url']['any']
+    u.total_endpoint_issues = amount_of_issues['endpoint']['any']
+
+    u.url_issues_high = amount_of_issues['url']['high']
+    u.url_issues_medium = amount_of_issues['url']['medium']
+    u.url_issues_low = amount_of_issues['url']['low']
+
     # probably the same as OK, as you can only be OK once.
-    u.url_ok = url_ok
-    u.endpoint_issues_high = endpoint_issues_high
-    u.endpoint_issues_medium = endpoint_issues_medium
-    u.endpoint_issues_low = endpoint_issues_low
-    u.endpoint_ok = endpoint_ok
+    u.url_ok = amount_of_issues['url']['ok']
 
-    u.explained_high = explained_high
-    u.explained_medium = explained_medium
-    u.explained_low = explained_low
-    u.explained_total_issues = explained_total_issues
-    u.explained_high_endpoints = explained_high_endpoints
-    u.explained_medium_endpoints = explained_medium_endpoints
-    u.explained_low_endpoints = explained_low_endpoints
-    u.explained_total_url_issues = explained_total_url_issues
-    u.explained_total_endpoint_issues = explained_total_endpoint_issues
-    u.explained_url_issues_high = explained_url_issues_high
-    u.explained_url_issues_medium = explained_url_issues_medium
-    u.explained_url_issues_low = explained_url_issues_low
-    u.explained_endpoint_issues_high = explained_endpoint_issues_high
-    u.explained_endpoint_issues_medium = explained_endpoint_issues_medium
-    u.explained_endpoint_issues_low = explained_endpoint_issues_low
+    u.endpoint_issues_high = amount_of_issues['endpoint']['high']
+    u.endpoint_issues_medium = amount_of_issues['endpoint']['medium']
+    u.endpoint_issues_low = amount_of_issues['endpoint']['low']
+    u.endpoint_ok = amount_of_issues['endpoint']['ok']
+
+    u.explained_high = amount_of_issues['url_explained_judgements']['high']
+    u.explained_medium = amount_of_issues['url_explained_judgements']['medium']
+    u.explained_low = amount_of_issues['url_explained_judgements']['low']
+
+    u.explained_total_issues = amount_of_issues['overall_explained']['any']
+
+    u.explained_high_endpoints = amount_of_issues['endpoint_explained_judgements']['high']
+    u.explained_medium_endpoints = amount_of_issues['endpoint_explained_judgements']['medium']
+    u.explained_low_endpoints = amount_of_issues['endpoint_explained_judgements']['low']
+
+    u.explained_total_url_issues = amount_of_issues['url_explained']['any']
+    u.explained_total_endpoint_issues = amount_of_issues['endpoint_explained']['any']
+    u.explained_url_issues_high = amount_of_issues['url_explained']['high']
+    u.explained_url_issues_medium = amount_of_issues['url_explained']['medium']
+    u.explained_url_issues_low = amount_of_issues['url_explained']['low']
+    u.explained_endpoint_issues_high = amount_of_issues['endpoint_explained']['high']
+    u.explained_endpoint_issues_medium = amount_of_issues['endpoint_explained']['medium']
+    u.explained_endpoint_issues_low = amount_of_issues['endpoint_explained']['low']
+
+    calculation['reports'] = sorted(calculation['reports'], key=lambda k: (k['high'], k['medium'], k['low']),
+                                    reverse=True)
+    calculation['endpoints'] = sorted(calculation['endpoints'], key=lambda k: (k['high'], k['medium'], k['low']),
+                                      reverse=True)
+
+    # inject all kinds of statistics inside the json for easier(?) representation.
+    calculation["total_issues"] = u.total_issues
+    calculation["high"] = u.high
+    calculation["medium"] = u.medium
+    calculation["low"] = u.low
+    calculation["ok"] = u.ok
+    calculation["total_endpoints"] = u.total_endpoints
+    calculation["high_endpoints"] = u.high_endpoints
+    calculation["medium_endpoints"] = u.medium_endpoints
+    calculation["low_endpoints"] = u.low_endpoints
+    calculation["ok_endpoints"] = u.ok_endpoints
+    calculation["total_url_issues"] = u.total_url_issues
+    calculation["url_issues_high"] = u.url_issues_high
+    calculation["url_issues_medium"] = u.url_issues_medium
+    calculation["url_issues_low"] = u.url_issues_low
+    calculation["url_ok"] = u.url_ok
+    calculation["total_endpoint_issues"] = u.total_endpoint_issues
+    calculation["endpoint_issues_high"] = u.endpoint_issues_high
+    calculation["endpoint_issues_medium"] = u.endpoint_issues_medium
+    calculation["endpoint_issues_low"] = u.endpoint_issues_low
+    calculation["explained_total_issues"] = u.explained_total_issues
+    calculation["explained_high"] = u.explained_high
+    calculation["explained_medium"] = u.explained_medium
+    calculation["explained_low"] = u.explained_low
+    calculation["explained_high_endpoints"] = u.explained_high_endpoints
+    calculation["explained_medium_endpoints"] = u.explained_medium_endpoints
+    calculation["explained_low_endpoints"] = u.explained_low_endpoints
+    calculation["explained_total_url_issues"] = u.explained_total_url_issues
+    calculation["explained_url_issues_high"] = u.explained_url_issues_high
+    calculation["explained_url_issues_medium"] = u.explained_url_issues_medium
+    calculation["explained_url_issues_low"] = u.explained_url_issues_low
+    calculation["explained_total_endpoint_issues"] = u.explained_total_endpoint_issues
+    calculation["explained_endpoint_issues_high"] = u.explained_endpoint_issues_high
+    calculation["explained_endpoint_issues_medium"] = u.explained_endpoint_issues_medium
+    calculation["explained_endpoint_issues_low"] = u.explained_endpoint_issues_low
+
+    u.calculation = calculation
+
     u.save()
 
 
