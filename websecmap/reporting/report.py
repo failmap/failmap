@@ -46,8 +46,6 @@ def get_allowed_to_report():
 def recreate_url_reports(urls: List):
     """Remove the rating of one url and rebuild anew."""
 
-    # todo: only for allowed organizations...
-
     for url in urls:
         # Delete the ratings for this url, they are going to be rebuilt
         UrlReport.objects.all().filter(url=url).delete()
@@ -79,7 +77,7 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
     log.debug("Making a timeline for %s urls: %s" % (len(urls), urls))
 
     if not urls:
-        log.info("Could not find urls from organization or url.")
+        log.info("No urls, so no moments")
         return []
 
     # since we want to know all about these endpoints, get them at the same time, which is faster.

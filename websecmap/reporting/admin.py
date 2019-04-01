@@ -2,10 +2,11 @@ from django.contrib import admin
 from django.utils.html import format_html
 from import_export.admin import ImportExportModelAdmin
 
+import websecmap.map.models
 from websecmap.reporting import models
 
 
-@admin.register(models.OrganizationReport)
+@admin.register(websecmap.map.models.OrganizationReport)
 class OrganizationRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def inspect_organization(self, obj):
         return format_html(
