@@ -163,8 +163,6 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # qualys_rating=0 means "Unable to connect to the server" and is not returned with a score. This happens in old
     # datasets.
     # we don't store tls_qualys scans in a separate table anymore
-    tls_qualys_scans = []
-    tls_qualys_scan_dates = []
 
     generic_scans = EndpointGenericScan.objects.all().filter(type__in=reported_scan_types, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
@@ -190,7 +188,7 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
 
     # reduce this to one moment per day only, otherwise there will be a report for every change
     # which is highly inefficient. Using the latest possible time of the day is used.
-    moments = tls_qualys_scan_dates + generic_scan_dates + generic_url_scan_dates + non_resolvable_dates + \
+    moments = generic_scan_dates + generic_url_scan_dates + non_resolvable_dates + \
         dead_scan_dates + dead_url_dates
     moments = [latest_moment_of_datetime(x) for x in moments]
     moments = sorted(set(moments))
@@ -198,7 +196,6 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # If there are no scans at all, just return instead of storing useless junk or make other mistakes
     if not moments:
         return [], {
-            'tls_qualys_scans': [],
             'generic_scans': [],
             'generic_url_scans': [],
             'dead_endpoints': [],
@@ -216,7 +213,6 @@ def significant_moments(organizations: List[Organization] = None, urls: List[Url
     # using scans, the query of "what scan happened when" doesn't need to be answered anymore.
     # the one thing is that scans have to be mapped to the moments (called a timeline)
     happenings = {
-        'tls_qualys_scans': tls_qualys_scans,
         'generic_scans': generic_scans,
         'generic_url_scans': generic_url_scans,
         'dead_endpoints': dead_endpoints,
@@ -465,18 +461,6 @@ def create_timeline(url: Url):
         timeline[some_day]["generic_url_scan"]["urls"].append(scan.url)
         timeline[some_day]["urls"].append(scan.url)
         timeline[some_day]['url_scans'].append(scan)
-
-    for scan in happenings['tls_qualys_scans']:
-        some_day = scan.rating_determined_on.date()
-
-        # can we create this set in an easier way?
-        if "tls_qualys" not in timeline[some_day]:
-            timeline[some_day]["tls_qualys"] = {'scans': [], 'endpoints': []}
-
-        timeline[some_day]["tls_qualys"]['scans'].append(scan)
-        timeline[some_day]["tls_qualys"]["endpoints"].append(scan.endpoint)
-        timeline[some_day]["endpoints"].append(scan.endpoint)
-        timeline[some_day]['scans'].append(scan)  # todo: should be named endpoint_scans
 
     # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
     # see there are gaps in using the url over time. Which is more truthful.
