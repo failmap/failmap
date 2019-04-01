@@ -933,21 +933,12 @@ CONSTANCE_CONFIG_FIELDSETS.update([
       'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
 ])
 
-
-# Check for constance configuration issues:
-# All Fields defined above must be in the fieldsets.
-# See also: https://github.com/jazzband/django-constance/issues/293
-variables_in_fieldsets = [i for sub in [CONSTANCE_CONFIG_FIELDSETS[x] for x in CONSTANCE_CONFIG_FIELDSETS] for i in sub]
-variables_in_config = [x for x in CONSTANCE_CONFIG]
-missing = set(variables_in_config) - set(variables_in_fieldsets)
-if missing:
-    raise EnvironmentError("Constance config variables %s are missing in constance config fieldsets." % missing)
-
-# All fieldsets fields must be defined:
-missing = set(variables_in_fieldsets) - set(variables_in_config)
-if missing:
-    raise EnvironmentError("Constance Fieldsets refer to missing fields: %s." % missing)
-
+# try / except: Prevent QA to move the import to the top of the file before the apps are loaded.
+try:
+    from websecmap.app.constance import validate_constance_configuration
+    validate_constance_configuration(CONSTANCE_CONFIG, CONSTANCE_CONFIG_FIELDSETS)
+except EnvironmentError as e:
+    raise EnvironmentError(e)
 
 # End constance settings
 ########

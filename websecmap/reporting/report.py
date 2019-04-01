@@ -5,10 +5,10 @@ from typing import List
 
 import pytz
 from celery import group
-from constance import config
 from deepdiff import DeepDiff
 from django.db.models import Q
 
+from websecmap.app.constance import constance_cached_value
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.reporting.models import OrganizationReport, UrlReport
@@ -116,35 +116,6 @@ def recreate_organization_reports(organizations: List):
             # Make sure the organization has the default rating
 
             default_organization_rating(organizations=[organization])
-
-
-constance_cache = {}
-
-
-def constance_cached_value(key):
-    # todo: add this to the constance codebase. Constance is highly inefficient: 1 query per value on each access.
-    """
-    Tries to minimize access to the database for constance. Every time you want a value, you'll get the latest value.
-
-    That's great but not really needed: it takes 8 roundtrips per url, which is not slow but still slows things down.
-    That means about 5000 * 8 database hits per rebuild. = 40.000, which does have an impact.
-
-    This cache holds the value for ten minutes.
-
-    :param key:
-    :return:
-    """
-    now = datetime.now(pytz.utc).timestamp()
-    expired = now - 600  # 10 minute cache, 600 seconds. So changes still affect a rebuild.
-
-    if constance_cache.get(key, None):
-        if constance_cache[key]['time'] > expired:
-            return constance_cache[key]['value']
-
-    # add value to cache, or update cache
-    value = getattr(config, key)
-    constance_cache[key] = {'value': value, 'time': datetime.now(pytz.utc).timestamp()}
-    return value
 
 
 def significant_moments(organizations: List[Organization] = None, urls: List[Url] = None,
@@ -1123,6 +1094,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
 
 
 def aggegrate_url_rating_scores(url_ratings: List):
+
     scores = {
         'high': 0,
         'medium': 0,
