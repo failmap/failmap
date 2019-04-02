@@ -249,6 +249,32 @@ def internet_nl_mail_auth_dmarc_exist(scan):
         return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
 
 
+def internet_nl_generic_boolean_value(scan):
+    if scan.rating == "True":
+        return standard_calculation(scan=scan, explanation="%s available" % scan.type, high=0, medium=0, low=0)
+
+    return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=0, medium=1, low=0)
+
+
+def internet_nl_score(scan):
+    # Todo: these numbers are completely chosen at random and need to be defined.
+    score = int(scan.rating)
+
+    if score == 100:
+        return standard_calculation(scan=scan, explanation="perfect", high=0, medium=0, low=0)
+
+    if score > 90:
+        return standard_calculation(scan=scan, explanation="good", high=0, medium=0, low=1)
+
+    if score > 80:
+        return standard_calculation(scan=scan, explanation="nice", high=0, medium=0, low=1)
+
+    if score > 70:
+        return standard_calculation(scan=scan, explanation="ok", high=0, medium=1, low=0)
+
+    return standard_calculation(scan=scan, explanation="not ok", high=1, medium=0, low=0)
+
+
 def dummy_calculated_values(scan):
     explanation = "This is a dummy scan."
     high, medium, low = 0, 0, 0
@@ -283,10 +309,89 @@ calculation_methods = {
     'tls_qualys_certificate_trusted': tls_qualys_certificate_trusted,
     'tls_qualys_encryption_quality': tls_qualys_encryption_quality,
     'Dummy': dummy_calculated_values,
+
+    # internet nl mail has 27 views, 4 categories, 1 score, 9 auto generated = 41
     'internet_nl_mail_starttls_tls_available': internet_nl_mail_starttls_tls_available,
     'internet_nl_mail_auth_spf_exist': internet_nl_mail_auth_spf_exist,
     'internet_nl_mail_auth_dkim_exist': internet_nl_mail_auth_dkim_exist,
     'internet_nl_mail_auth_dmarc_exist': internet_nl_mail_auth_dmarc_exist,
+
+    'internet_nl_mail_ipv6_mx_reach': internet_nl_generic_boolean_value,
+    'internet_nl_mail_ipv6_ns_reach': internet_nl_generic_boolean_value,
+    'internet_nl_mail_ipv6_ns_address': internet_nl_generic_boolean_value,
+    'internet_nl_mail_ipv6_mx_address': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dnssec_mx_exist': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dnssec_mx_valid': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dnssec_mailto_valid': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dnssec_mailto_exist': internet_nl_generic_boolean_value,
+    'internet_nl_mail_auth_spf_policy': internet_nl_generic_boolean_value,
+    'internet_nl_mail_auth_dmarc_policy': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_keyexchange': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_compress': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_cert_sig': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_cert_pubkey': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_dane_rollover': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_secreneg': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_dane_exist': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_dane_valid': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_ciphers': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_clientreneg': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_cert_chain': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_tls_version': internet_nl_generic_boolean_value,
+    'internet_nl_mail_starttls_cert_domain': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_tls': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_auth': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_dnssec': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_ipv6': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_overall_score': internet_nl_score,
+
+    'internet_nl_mail_legacy_dane': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_tls_available': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_spf': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_dkim': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_dmarc': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_dnsssec_mailserver_domain': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_dnssec_email_domain': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_ipv6_mailserver': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_ipv6_nameserver': internet_nl_generic_boolean_value,
+
+    # internet nl web has: 23 views, 1 score, 3 categories, 7 auto generated = 34
+    'internet_nl_web_ipv6_ws_similar': internet_nl_generic_boolean_value,
+
+    'internet_nl_web_ipv6_ws_address': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6_ns_reach': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6_ws_reach': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6_ns_address': internet_nl_generic_boolean_value,
+    'internet_nl_web_dnssec_valid': internet_nl_generic_boolean_value,
+    'internet_nl_web_dnssec_exist': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_keyexchange': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_compress': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_cert_sig': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_cert_pubkey': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_dane_valid': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_secreneg': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_http_hsts': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_http_compress': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_dane_exist': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_http_available': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_ciphers': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_clientreneg': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_tls_version': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_cert_chain': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_http_redirect': internet_nl_generic_boolean_value,
+    'internet_nl_web_https_cert_domain': internet_nl_generic_boolean_value,
+    'internet_nl_web_tls': internet_nl_generic_boolean_value,
+    'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
+    'internet_nl_web_overall_score': internet_nl_score,
+
+    'internet_nl_web_legacy_dane': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_tls_ncsc_web': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_hsts': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_https_enforced': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_tls_available': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_ipv6_webserver': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_ipv6_nameserver': internet_nl_generic_boolean_value,
 }
 
 
