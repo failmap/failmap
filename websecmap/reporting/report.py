@@ -694,7 +694,7 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.url_issues_low = amount_of_issues['url']['low']
 
     # probably the same as OK, as you can only be OK once.
-    u.url_ok = amount_of_issues['url']['ok']
+    u.url_ok = amount_of_issues['overall_judgements']['ok']
 
     u.endpoint_issues_high = amount_of_issues['endpoint']['high']
     u.endpoint_issues_medium = amount_of_issues['endpoint']['medium']
@@ -875,6 +875,11 @@ def aggegrate_url_rating_scores(url_ratings: List):
         scores['high'] += urlrating.high
         scores['medium'] += urlrating.medium
         scores['low'] += urlrating.low
+
+        # can be many per url.
+        scores['ok'] += urlrating.ok
+
+        # can only be one per url
         scores['ok_urls'] += urlrating.url_ok
 
         scores['total_endpoints'] += urlrating.total_endpoints
