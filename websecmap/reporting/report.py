@@ -641,9 +641,9 @@ def statistics_over_url_calculation(calculation):
         else:
             amount_of_issues = add_report_to_key(amount_of_issues, 'url', report)
 
-    amount_of_issues, clean = judge(amount_of_issues, clean_issues_for_judgement, 'url', calculation['ratings'])
+    amount_of_issues, clean = judge(amount_of_issues, clean_issues_for_judgement, 'url', [amount_of_issues['url']])
     amount_of_issues, clean = judge(
-        amount_of_issues, clean_issues_for_judgement, 'url_explained', calculation['ratings'])
+        amount_of_issues, clean_issues_for_judgement, 'url_explained', [amount_of_issues['url_explained']])
 
     # and to calculate the overall, we can use the same routine, as the same keys are available.
     amount_of_issues = add_report_to_key(amount_of_issues, 'overall', amount_of_issues['url'])
