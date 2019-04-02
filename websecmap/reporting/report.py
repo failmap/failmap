@@ -733,45 +733,52 @@ def save_url_report(url: Url, date: datetime, calculation):
     calculation['endpoints'] = sorted(calculation['endpoints'], key=lambda k: (k['high'], k['medium'], k['low']),
                                       reverse=True)
 
-    # inject all kinds of statistics inside the json for easier(?) representation.
-    calculation['total_issues'] = u.total_issues
-    calculation['high'] = u.high
-    calculation['medium'] = u.medium
-    calculation['low'] = u.low
-    calculation['ok'] = u.ok
-    calculation['total_endpoints'] = u.total_endpoints
-    calculation['high_endpoints'] = u.high_endpoints
-    calculation['medium_endpoints'] = u.medium_endpoints
-    calculation['low_endpoints'] = u.low_endpoints
-    calculation['ok_endpoints'] = u.ok_endpoints
-    calculation['total_url_issues'] = u.total_url_issues
-    calculation['url_issues_high'] = u.url_issues_high
-    calculation['url_issues_medium'] = u.url_issues_medium
-    calculation['url_issues_low'] = u.url_issues_low
-    calculation['url_ok'] = u.url_ok
-    calculation['total_endpoint_issues'] = u.total_endpoint_issues
-    calculation['endpoint_issues_high'] = u.endpoint_issues_high
-    calculation['endpoint_issues_medium'] = u.endpoint_issues_medium
-    calculation['endpoint_issues_low'] = u.endpoint_issues_low
-    calculation['explained_total_issues'] = u.explained_total_issues
-    calculation['explained_high'] = u.explained_high
-    calculation['explained_medium'] = u.explained_medium
-    calculation['explained_low'] = u.explained_low
-    calculation['explained_high_endpoints'] = u.explained_high_endpoints
-    calculation['explained_medium_endpoints'] = u.explained_medium_endpoints
-    calculation['explained_low_endpoints'] = u.explained_low_endpoints
-    calculation['explained_total_url_issues'] = u.explained_total_url_issues
-    calculation['explained_url_issues_high'] = u.explained_url_issues_high
-    calculation['explained_url_issues_medium'] = u.explained_url_issues_medium
-    calculation['explained_url_issues_low'] = u.explained_url_issues_low
-    calculation['explained_total_endpoint_issues'] = u.explained_total_endpoint_issues
-    calculation['explained_endpoint_issues_high'] = u.explained_endpoint_issues_high
-    calculation['explained_endpoint_issues_medium'] = u.explained_endpoint_issues_medium
-    calculation['explained_endpoint_issues_low'] = u.explained_endpoint_issues_low
-
+    # all statistics, except for endpoints can be added at the end of the json
+    calculation = add_statistics_to_calculation(calculation, amount_of_issues)
     u.calculation = calculation
 
     u.save()
+
+
+def add_statistics_to_calculation(calculation, amount_of_issues):
+
+    # inject all kinds of statistics inside the json for easier(?) representation.
+    calculation['total_issues'] = amount_of_issues['overall']['any']
+    calculation['high'] = amount_of_issues['overall']['high']
+    calculation['medium'] = amount_of_issues['overall']['medium']
+    calculation['low'] = amount_of_issues['overall']['low']
+    calculation['ok'] = amount_of_issues['overall']['ok']
+    calculation['total_endpoints'] = len(calculation['endpoints'])
+    calculation['high_endpoints'] = amount_of_issues['endpoint_judgements']['high']
+    calculation['medium_endpoints'] = amount_of_issues['endpoint_judgements']['medium']
+    calculation['low_endpoints'] = amount_of_issues['endpoint_judgements']['low']
+    calculation['ok_endpoints'] = amount_of_issues['endpoint_judgements']['ok']
+    calculation['total_url_issues'] = amount_of_issues['url']['any']
+    calculation['url_issues_high'] = amount_of_issues['url']['high']
+    calculation['url_issues_medium'] = amount_of_issues['url']['medium']
+    calculation['url_issues_low'] = amount_of_issues['url']['low']
+    calculation['url_ok'] = amount_of_issues['overall_judgements']['ok']
+    calculation['total_endpoint_issues'] = amount_of_issues['endpoint']['any']
+    calculation['endpoint_issues_high'] = amount_of_issues['endpoint']['high']
+    calculation['endpoint_issues_medium'] = amount_of_issues['endpoint']['medium']
+    calculation['endpoint_issues_low'] = amount_of_issues['endpoint']['low']
+    calculation['explained_total_issues'] = amount_of_issues['overall_explained']['any']
+    calculation['explained_high'] = amount_of_issues['url_explained_judgements']['high']
+    calculation['explained_medium'] = amount_of_issues['url_explained_judgements']['medium']
+    calculation['explained_low'] = amount_of_issues['url_explained_judgements']['low']
+    calculation['explained_high_endpoints'] = amount_of_issues['endpoint_explained_judgements']['high']
+    calculation['explained_medium_endpoints'] = amount_of_issues['endpoint_explained_judgements']['medium']
+    calculation['explained_low_endpoints'] = amount_of_issues['endpoint_explained_judgements']['low']
+    calculation['explained_total_url_issues'] = amount_of_issues['url_explained']['any']
+    calculation['explained_url_issues_high'] = amount_of_issues['url_explained']['high']
+    calculation['explained_url_issues_medium'] = amount_of_issues['url_explained']['medium']
+    calculation['explained_url_issues_low'] = amount_of_issues['url_explained']['low']
+    calculation['explained_total_endpoint_issues'] = amount_of_issues['endpoint_explained']['any']
+    calculation['explained_endpoint_issues_high'] = amount_of_issues['endpoint_explained']['high']
+    calculation['explained_endpoint_issues_medium'] = amount_of_issues['endpoint_explained']['medium']
+    calculation['explained_endpoint_issues_low'] = amount_of_issues['endpoint_explained']['low']
+
+    return calculation
 
 
 def inspect_timeline(timeline, url: Url):
@@ -826,7 +833,13 @@ def inspect_timeline(timeline, url: Url):
     return message
 
 
-def aggegrate_url_rating_scores(url_ratings: List):
+def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str] = None):
+    """
+
+    :param url_ratings: All url ratings that should be combined into a single report.
+    :param only_include_issues: List of issue names, that will be added in the report. This can save a lot of data.
+    :return:
+    """
 
     scores = {
         'high': 0,
@@ -880,61 +893,76 @@ def aggegrate_url_rating_scores(url_ratings: List):
 
     for urlrating in url_ratings:
 
-        scores['high'] += urlrating.high
-        scores['medium'] += urlrating.medium
-        scores['low'] += urlrating.low
+        # done: filter out only the relevant issues in the calculations and throw away the rest.
+        # done if the 'only_include_issues' has been set, all calculations are void and have to be done again
+        # todo: when the calculation changed, all properties from the urlrating are void.
+
+        if only_include_issues:
+            calculation = remove_issues_from_calculation(urlrating.calculation, only_include_issues)
+            # This already overrides endpoint statistics, use the calculation you get from this.
+            calculation, amount_of_issues = statistics_over_url_calculation(calculation)
+            # overwrite the rest of the statistics.
+            calculation = add_statistics_to_calculation(calculation, amount_of_issues)
+        else:
+            calculation = urlrating.calculation
+
+        # use the statistics in the calculation, as they might be changed due to a filter being applied.
+        # these scores are used to update the statistics for the report.
+        scores['urls'].append(calculation)
+
+        scores['high'] += calculation['high']
+        scores['medium'] += calculation['medium']
+        scores['low'] += calculation['low']
 
         # can be many per url.
-        scores['ok'] += urlrating.ok
+        scores['ok'] += calculation['ok']
 
         # can only be one per url
-        scores['ok_urls'] += urlrating.url_ok
+        scores['ok_urls'] += calculation['url_ok']
 
-        scores['total_endpoints'] += urlrating.total_endpoints
-        scores['high_endpoints'] += urlrating.high_endpoints
-        scores['medium_endpoints'] += urlrating.medium_endpoints
-        scores['low_endpoints'] += urlrating.low_endpoints
-        scores['ok_endpoints'] += urlrating.ok_endpoints
+        scores['total_endpoints'] += calculation['total_endpoints']
+        scores['high_endpoints'] += calculation['high_endpoints']
+        scores['medium_endpoints'] += calculation['medium_endpoints']
+        scores['low_endpoints'] += calculation['low_endpoints']
+        scores['ok_endpoints'] += calculation['ok_endpoints']
 
-        scores['total_url_issues'] += urlrating.total_url_issues
-        scores['total_endpoint_issues'] += urlrating.total_endpoint_issues
-        scores['url_issues_high'] += urlrating.url_issues_high
-        scores['url_issues_medium'] += urlrating.url_issues_medium
-        scores['url_issues_low'] += urlrating.url_issues_low
-        scores['endpoint_issues_high'] += urlrating.endpoint_issues_high
-        scores['endpoint_issues_medium'] += urlrating.endpoint_issues_medium
-        scores['endpoint_issues_low'] += urlrating.endpoint_issues_low
+        scores['total_url_issues'] += calculation['total_url_issues']
+        scores['total_endpoint_issues'] += calculation['total_endpoint_issues']
+        scores['url_issues_high'] += calculation['url_issues_high']
+        scores['url_issues_medium'] += calculation['url_issues_medium']
+        scores['url_issues_low'] += calculation['url_issues_low']
+        scores['endpoint_issues_high'] += calculation['endpoint_issues_high']
+        scores['endpoint_issues_medium'] += calculation['endpoint_issues_medium']
+        scores['endpoint_issues_low'] += calculation['endpoint_issues_low']
 
-        scores['explained_total_endpoint_issues'] += urlrating.explained_total_endpoint_issues
-        scores['explained_endpoint_issues_high'] += urlrating.explained_endpoint_issues_high
-        scores['explained_endpoint_issues_medium'] += urlrating.explained_endpoint_issues_medium
-        scores['explained_endpoint_issues_low'] += urlrating.explained_endpoint_issues_low
-        scores['explained_total_url_issues'] += urlrating.explained_total_url_issues
-        scores['explained_url_issues_high'] += urlrating.explained_url_issues_high
-        scores['explained_url_issues_medium'] += urlrating.explained_url_issues_medium
-        scores['explained_url_issues_low'] += urlrating.explained_url_issues_low
-        scores['explained_high_urls'] += 1 if urlrating.explained_url_issues_high else 0
-        scores['explained_medium_urls'] += 1 if urlrating.explained_url_issues_medium else 0
-        scores['explained_low_urls'] += 1 if urlrating.explained_url_issues_low else 0
-        scores['explained_high_endpoints'] += urlrating.explained_high_endpoints
-        scores['explained_medium_endpoints'] += urlrating.explained_medium_endpoints
-        scores['explained_low_endpoints'] += urlrating.explained_low_endpoints
-        scores['explained_high'] += urlrating.explained_high
-        scores['explained_medium'] += urlrating.explained_medium
-        scores['explained_low'] += urlrating.explained_low
+        scores['explained_total_endpoint_issues'] += calculation['explained_total_endpoint_issues']
+        scores['explained_endpoint_issues_high'] += calculation['explained_endpoint_issues_high']
+        scores['explained_endpoint_issues_medium'] += calculation['explained_endpoint_issues_medium']
+        scores['explained_endpoint_issues_low'] += calculation['explained_endpoint_issues_low']
+        scores['explained_total_url_issues'] += calculation['explained_total_url_issues']
+        scores['explained_url_issues_high'] += calculation['explained_url_issues_high']
+        scores['explained_url_issues_medium'] += calculation['explained_url_issues_medium']
+        scores['explained_url_issues_low'] += calculation['explained_url_issues_low']
+        scores['explained_high_urls'] += 1 if calculation['explained_url_issues_high'] else 0
+        scores['explained_medium_urls'] += 1 if calculation['explained_url_issues_medium'] else 0
+        scores['explained_low_urls'] += 1 if calculation['explained_url_issues_low'] else 0
+        scores['explained_high_endpoints'] += calculation['explained_high_endpoints']
+        scores['explained_medium_endpoints'] += calculation['explained_medium_endpoints']
+        scores['explained_low_endpoints'] += calculation['explained_low_endpoints']
+        scores['explained_high'] += calculation['explained_high']
+        scores['explained_medium'] += calculation['explained_medium']
+        scores['explained_low'] += calculation['explained_low']
 
         scores['total_urls'] += 1
 
         # url can only be in one category (otherwise there are urls in multiple categories which makes it
         # hard to display)
-        if urlrating.high_endpoints:
+        if calculation['high_endpoints']:
             scores['high_urls'] += 1
-        elif urlrating.medium_endpoints:
+        elif calculation['medium_endpoints']:
             scores['medium_urls'] += 1
-        elif urlrating.low_endpoints:
+        elif calculation['low_endpoints']:
             scores['low_urls'] += 1
-
-        scores['urls'].append(urlrating.calculation)
 
     scores['total_issues'] = scores['high'] + scores['medium'] + scores['low']
 
@@ -942,6 +970,31 @@ def aggegrate_url_rating_scores(url_ratings: List):
     scores['ok'] = 0 if scores['total_issues'] else 1 if scores['total_urls'] else 0
 
     return scores
+
+
+def remove_issues_from_calculation(calculation, issues):
+
+    # todo: also recalculate here?
+    new_url_ratings = []
+    for url_rating in calculation['ratings']:
+        if url_rating['type'] in issues:
+            new_url_ratings.append(url_rating)
+    calculation['ratings'] = new_url_ratings
+
+    # endpoints are a bit harder, they will be removed if there are no relevant issues for the endpoint.
+    new_endpoints = []
+    for endpoint in calculation['endpoints']:
+        new_endpoint_ratings = []
+        for endpoint_rating in endpoint['ratings']:
+            if endpoint_rating['type'] in issues:
+                new_endpoint_ratings.append(endpoint_rating)
+        if new_endpoint_ratings:
+            endpoint['ratings'] = new_endpoint_ratings
+            new_endpoints.append(endpoint)
+
+    calculation['endpoints'] = new_endpoints
+
+    return calculation
 
 
 def get_latest_urlratings_fast(urls: List[Url], when):
