@@ -624,7 +624,8 @@ def statistics_over_url_calculation(calculation):
         amount_of_issues, judgement_issues = judge(
             amount_of_issues, clean_issues_for_judgement, 'endpoint', [amount_of_issues['endpoint']])
         amount_of_issues, explained_judgement_issues = judge(
-            amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', [amount_of_issues['endpoint_explained']])
+            amount_of_issues, clean_issues_for_judgement, 'endpoint_explained',
+            [amount_of_issues['endpoint_explained']])
 
         # inject statistics inside the calculation per endpoint.
         calculation['endpoints'][i]['high'] = judgement_issues['endpoint']['high']
