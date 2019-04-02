@@ -561,13 +561,13 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports):
     if judgement_issues[key]['high']:
         amount_of_issues[key + '_judgements']['high'] += 1
 
-    if judgement_issues['endpoint']['medium']:
+    if judgement_issues[key]['medium']:
         amount_of_issues[key + '_judgements']['medium'] += 1
 
-    if judgement_issues['endpoint']['low']:
+    if judgement_issues[key]['low']:
         amount_of_issues[key + '_judgements']['low'] += 1
 
-    if judgement_issues['endpoint']['ok']:
+    if judgement_issues[key]['ok']:
         amount_of_issues[key + '_judgements']['ok'] += 1
 
     return amount_of_issues, judgement_issues

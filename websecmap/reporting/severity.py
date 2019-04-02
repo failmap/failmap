@@ -261,18 +261,18 @@ def internet_nl_score(scan):
     score = int(scan.rating)
 
     if score == 100:
-        return standard_calculation(scan=scan, explanation="perfect", high=0, medium=0, low=0)
+        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=0)
 
     if score > 90:
-        return standard_calculation(scan=scan, explanation="good", high=0, medium=0, low=1)
+        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=1)
 
     if score > 80:
-        return standard_calculation(scan=scan, explanation="nice", high=0, medium=0, low=1)
+        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=1)
 
     if score > 70:
-        return standard_calculation(scan=scan, explanation="ok", high=0, medium=1, low=0)
+        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=1, low=0)
 
-    return standard_calculation(scan=scan, explanation="not ok", high=1, medium=0, low=0)
+    return standard_calculation(scan=scan, explanation=scan.rating, high=1, medium=0, low=0)
 
 
 def dummy_calculated_values(scan):
