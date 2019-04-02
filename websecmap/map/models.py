@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from jsonfield import JSONField
 
-from websecmap.organizations.models import OrganizationType, Organization
+from websecmap.organizations.models import Organization, OrganizationType
 from websecmap.reporting.models import SeriesOfUrlsReportMixin
 
 

@@ -398,10 +398,8 @@ def create_url_report(timeline, url: Url):
                 while dead_endpoint in previous_endpoints:
                     previous_endpoints.remove(dead_endpoint)
 
-        total_endpoints, high_endpoints, medium_endpoints, low_endpoints, ok_endpoints = 0, 0, 0, 0, 0
         for endpoint in relevant_endpoints:
             # All endpoints of all time are iterated. The dead endpoints etc should be filtered out above.
-            total_endpoints += 1
             url_was_once_rated = True
 
             calculations = []
@@ -615,8 +613,10 @@ def statistics_over_url_calculation(calculation):
             else:
                 amount_of_issues = add_report_to_key(amount_of_issues, 'endpoint', report)
 
-        amount_of_issues, judgement_issues = judge(amount_of_issues, clean_issues_for_judgement, 'endpoint', endpoint['ratings'])
-        amount_of_issues, explained_judgement_issues = judge(amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', endpoint['ratings'])
+        amount_of_issues, judgement_issues = judge(
+            amount_of_issues, clean_issues_for_judgement, 'endpoint', endpoint['ratings'])
+        amount_of_issues, explained_judgement_issues = judge(
+            amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', endpoint['ratings'])
 
         # inject statistics inside the calculation per endpoint.
         calculation['endpoints'][i]['high'] = judgement_issues['endpoint']['high']
@@ -987,5 +987,3 @@ def relevant_urls_at_timepoint(queryset, when: datetime):
     ).values_list("id", flat=True)
     # print(both.query)
     return list(set(both))
-
-

@@ -96,7 +96,6 @@ def store_url_scan_result(scan_type: str, url: Url, rating: str, message: str, e
 
 def store_historic_endpoint_scan_result(scan_type: str, endpoint: Endpoint, rating: str, message: str, evidence: str,
                                         rating_determined_on, last_scan_moment, is_latest):
-
     """
     Warning: the ID of the endpointscans is relevant. So when using this, make sure that the oldest values are
     imported first(!).

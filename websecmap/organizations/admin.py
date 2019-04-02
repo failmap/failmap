@@ -20,12 +20,12 @@ from leaflet.admin import LeafletGeoAdminMixin
 from websecmap import types
 from websecmap.app.models import Job
 from websecmap.celery import PRIO_HIGH, app
+from websecmap.map.models import OrganizationReport
 from websecmap.organizations import datasources
 from websecmap.organizations.datasources import dutch_government, excel
 from websecmap.organizations.models import (Coordinate, Dataset, Organization, OrganizationType,
                                             Promise, Url)
 from websecmap.reporting.models import UrlReport
-from websecmap.map.models import OrganizationReport
 from websecmap.scanners import SCANNERS
 from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan, UrlIp
 

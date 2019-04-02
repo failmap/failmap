@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     state_operations = [migrations.DeleteModel('OrganizationReport')]
 
     operations = [
-      migrations.SeparateDatabaseAndState(
-        database_operations=database_operations,
-        state_operations=state_operations)
+        migrations.SeparateDatabaseAndState(
+            database_operations=database_operations,
+            state_operations=state_operations)
     ]

@@ -1,8 +1,14 @@
+import logging
+
 import pytest
 
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
-from websecmap.scanners.scanner.internet_nl_mail import store, true_when_all_match
+from websecmap.scanners.scanner.internet_nl_mail import (inject_legacy_views, store,
+                                                         true_when_all_match)
+
+log = logging.getLogger('websecmap')
+
 
 # The result from the documentation can be ignored, it's not up to date anymore.
 # this result is from a real scan
@@ -204,6 +210,23 @@ web_result = {
 
 
 def test_internet_nl_mail(db):
+    # Make sure legacy views are injected in the results:
+    domains = mail_result.get('data', {}).get('domains', {})
+    has_legacy_view = False
+    for domain in domains:
+        assert domain['domain'] == 'arnhem.nl'
+        assert len(domain['views']) == 27
+        domain['views'] = inject_legacy_views('mail_dashboard', domain['views'])
+        assert len(domain['views']) == 27 + 9
+
+        for view in domain['views']:
+            # internet_nl is added just before storing the scan result
+            if view['name'] == "mail_legacy_ipv6_mailserver":
+                has_legacy_view = True
+
+    log.debug(domain['views'])
+    assert has_legacy_view is True
+
     # should not exist yet
     scan_count = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').count()
     assert scan_count == 0

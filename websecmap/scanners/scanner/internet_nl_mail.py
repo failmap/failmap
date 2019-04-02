@@ -320,10 +320,11 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
                 evidence=domain['link']
             )
 
-        domain['views'] = inject_legacy_views(internet_nl_scan_type, domain['views'])
+        # don't overwrite domain['views'] here, as that somehow does not work.
+        views = inject_legacy_views(internet_nl_scan_type, domain['views'])
 
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
-        for view in domain['views']:
+        for view in views:
             scan_type = 'internet_nl_%s' % view['name']
             store_endpoint_scan_result(
                 scan_type=scan_type,

@@ -1,7 +1,8 @@
-from websecmap.organizations.models import Url
 from datetime import datetime
+
 import pytz
 
+from websecmap.organizations.models import Url
 from websecmap.reporting.models import UrlReport
 from websecmap.reporting.report import create_timeline, create_url_report
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
@@ -15,13 +16,13 @@ def test_url_report(db):
     # Previous scan was now a High.
     day_2 = datetime(day=3, month=1, year=2000, tzinfo=pytz.utc)
     day_3 = datetime(day=4, month=1, year=2000, tzinfo=pytz.utc)
-    day_4 = datetime(day=5, month=1, year=2000, tzinfo=pytz.utc)
-    day_5 = datetime(day=6, month=1, year=2000, tzinfo=pytz.utc)
-    day_6 = datetime(day=7, month=1, year=2000, tzinfo=pytz.utc)
-    day_7 = datetime(day=8, month=1, year=2000, tzinfo=pytz.utc)
-    day_8 = datetime(day=9, month=1, year=2000, tzinfo=pytz.utc)
+    # day_4 = datetime(day=5, month=1, year=2000, tzinfo=pytz.utc)
+    # day_5 = datetime(day=6, month=1, year=2000, tzinfo=pytz.utc)
+    # day_6 = datetime(day=7, month=1, year=2000, tzinfo=pytz.utc)
+    # day_7 = datetime(day=8, month=1, year=2000, tzinfo=pytz.utc)
+    # day_8 = datetime(day=9, month=1, year=2000, tzinfo=pytz.utc)
     # Url test.nl could not be found anymore
-    day_9 = datetime(day=10, month=1, year=2000, tzinfo=pytz.utc)
+    # day_9 = datetime(day=10, month=1, year=2000, tzinfo=pytz.utc)
     url, created = Url.objects.all().get_or_create(url='test.nl', created_on=day_0, not_resolvable=False)
 
     # a standard HTTPS endpoint

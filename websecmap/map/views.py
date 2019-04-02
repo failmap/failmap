@@ -26,7 +26,7 @@ from import_export.resources import modelresource_factory
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
-                                  VulnerabilityStatistic, OrganizationReport)
+                                  OrganizationReport, VulnerabilityStatistic)
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
 from websecmap.reporting.models import UrlReport
 from websecmap.reporting.severity import get_severity

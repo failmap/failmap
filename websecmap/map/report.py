@@ -10,12 +10,13 @@ from deepdiff import DeepDiff
 
 from websecmap.celery import Task, app
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
-                                  VulnerabilityStatistic, OrganizationReport)
+                                  OrganizationReport, VulnerabilityStatistic)
 from websecmap.map.views import get_map_data
 from websecmap.organizations.models import Organization, OrganizationType, Url
-from websecmap.reporting.report import (recreate_url_reports, log, get_latest_urlratings_fast,
-                                        aggegrate_url_rating_scores, relevant_urls_at_timepoint, START_DATE,
-                                        significant_moments, get_allowed_to_report)
+from websecmap.reporting.report import (START_DATE, aggegrate_url_rating_scores,
+                                        get_allowed_to_report, get_latest_urlratings_fast,
+                                        recreate_url_reports, relevant_urls_at_timepoint,
+                                        significant_moments)
 from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
