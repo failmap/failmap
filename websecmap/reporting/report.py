@@ -542,6 +542,7 @@ def add_report_to_key(amount_of_issues, key, report):
     :param report:
     :return:
     """
+
     amount_of_issues[key]['high'] += report['high']
     amount_of_issues[key]['medium'] += report['medium']
     amount_of_issues[key]['low'] += report['low']
@@ -550,26 +551,33 @@ def add_report_to_key(amount_of_issues, key, report):
     return amount_of_issues
 
 
-def judge(amount_of_issues, clean_issues_for_judgement, key, reports):
+def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
     # All reports for the endpoint can determine a judgement for the endpoint. For example, if all endpoint reports
     # say that the result is ok. The endpoint itself becomes 'ok'.
+
     judgement_issues = deepcopy(clean_issues_for_judgement)
+
     for report in reports:
         judgement_issues = add_report_to_key(judgement_issues, key, report)
 
     # Now we know the statistics for the endpoint, we can add a judgement to the endpoint.
     if judgement_issues[key]['high']:
         amount_of_issues[key + '_judgements']['high'] += 1
+        return amount_of_issues, judgement_issues
 
     if judgement_issues[key]['medium']:
         amount_of_issues[key + '_judgements']['medium'] += 1
+        return amount_of_issues, judgement_issues
 
     if judgement_issues[key]['low']:
         amount_of_issues[key + '_judgements']['low'] += 1
+        return amount_of_issues, judgement_issues
 
     if judgement_issues[key]['ok']:
         amount_of_issues[key + '_judgements']['ok'] += 1
+        return amount_of_issues, judgement_issues
 
+    # nothing is set? weird... no. Because explained can be zero if things are not explained.
     return amount_of_issues, judgement_issues
 
 
@@ -614,9 +622,9 @@ def statistics_over_url_calculation(calculation):
                 amount_of_issues = add_report_to_key(amount_of_issues, 'endpoint', report)
 
         amount_of_issues, judgement_issues = judge(
-            amount_of_issues, clean_issues_for_judgement, 'endpoint', endpoint['ratings'])
+            amount_of_issues, clean_issues_for_judgement, 'endpoint', [amount_of_issues['endpoint']])
         amount_of_issues, explained_judgement_issues = judge(
-            amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', endpoint['ratings'])
+            amount_of_issues, clean_issues_for_judgement, 'endpoint_explained', [amount_of_issues['endpoint_explained']])
 
         # inject statistics inside the calculation per endpoint.
         calculation['endpoints'][i]['high'] = judgement_issues['endpoint']['high']
