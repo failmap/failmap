@@ -145,5 +145,8 @@ django-excel
 pyexcel-xls
 pyexcel-xlsx
 pyexcel-ods
+# https://github.com/pyexcel-renderers/pyexcel-text
+# supports json, latex, rst, mediawiki and more.
+pyexcel-text
 
 mmh3  # deepdiff likes this

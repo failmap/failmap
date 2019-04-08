@@ -2,6 +2,7 @@ import logging
 from datetime import datetime, timedelta
 from math import ceil
 
+import django_excel as excel
 import iso3166
 import pytz
 import simplejson as json
@@ -21,10 +22,12 @@ from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.decorators.cache import cache_page
 from django_celery_beat.models import PeriodicTask
-from import_export.resources import modelresource_factory
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
+from websecmap.map.logic import datasets
+from websecmap.map.logic.datasets import create_filename
+from websecmap.map.logic.map_defaults import get_country, get_organization_type
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
                                   OrganizationReport, VulnerabilityStatistic)
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
@@ -43,250 +46,62 @@ ten_minutes = 60 * 10
 
 remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
 
-# This list changes roughly every second, but that's not our problem anymore.
-COUNTRIES = iso3166.countries_by_alpha2
 
-# even while this might be a bit expensive (caching helps), it still is more helpful then
-# defining everything by hand.
+def generic_download(filename, data, file_type):
 
+    supported_types = {
+        'xlsx': {'content_type': "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        'ods': {'content_type': "application/vnd.oasis.opendocument.spreadsheet"},
+        'csv': {'content_type': "text/csv"},
+        'json': {'content_type': "text/json"},
+        'mediawiki': {'content_type': "text/plain"},
+        'latex': {'content_type': "text/plain"},
+    }
 
-def get_organization_type(name: str):
-    try:
-        return OrganizationType.objects.get(name=name).id
-    except OrganizationType.DoesNotExist:
-        default = Configuration.objects.all().filter(
-            is_displayed=True, is_the_default_option=True
-        ).order_by('display_order').values_list('organization_type__id', flat=True).first()
+    if file_type in supported_types:
+        http_response = excel.make_response(data, file_type)
+        http_response["Content-Disposition"] = "attachment; filename=%s.%s" % (slugify(filename), file_type)
+        http_response["Content-type"] = supported_types[file_type]['content_type']
+        return http_response
 
-        return default if default else 1
-
-
-# any two letters will do... :)
-# All countries are managed by django-countries, but we're fine with any other weird stuff.
-# url routing does validation... expect it will go wrong so STILL do validation...
-def get_country(code: str):
-    import re
-
-    # existing countries. Yes, you can add fictional countries if you would like to, that will be handled below.
-    if code in COUNTRIES:
-        return code
-
-    match = re.search(r"[A-Z]{2}", code)
-    if not match:
-        # https://what-if.xkcd.com/53/
-        return config.PROJECT_COUNTRY
-
-    # check if we have a country like that in the db:
-    if not Organization.objects.all().filter(country=code).exists():
-        return config.PROJECT_COUNTRY
-
-    return code
-
-
-def get_defaults(request, ):
-    data = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values('country', 'organization_type__name').first()
-
-    if not data:
-        return JsonResponse({'country': "NL", 'layer': "municipality"}, safe=False, encoder=JSEncoder)
-
-    return JsonResponse({'country': data['country'], 'layer': data['organization_type__name']},
-                        safe=False, encoder=JSEncoder)
-
-
-def get_default_country(request, ):
-    country = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values_list('country', flat=True).first()
-
-    if not country:
-        return config.PROJECT_COUNTRY
-
-    return JsonResponse([country], safe=False, encoder=JSEncoder)
-
-
-def get_default_layer(request, ):
-
-    organization_type = Configuration.objects.all().filter(
-        is_displayed=True,
-        is_the_default_option=True
-    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
-
-    if not organization_type:
-        return 'municipality'
-    # from config table
-    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
-
-
-def get_default_layer_for_country(request, country: str = "NL"):
-
-    organization_type = Configuration.objects.all().filter(
-        is_displayed=True,
-        country=get_country(country)
-    ).order_by('display_order').values_list('organization_type__name', flat=True).first()
-
-    if not organization_type:
-        return 'municipality'
-    # from config table
-    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
-
-
-# note: this is only visual, this is no security mechanism(!) Don't act like it is.
-# the data in this system is as open as possible.
-def get_countries(request,):
-    # sqllite doens't do distinct on, workaround
-
-    confs = Configuration.objects.all().filter(
-        is_displayed=True).order_by('display_order').values_list('country', flat=True)
-
-    list = []
-    for conf in confs:
-        if conf not in list:
-            list.append(conf)
-
-    return JsonResponse(list, safe=False, encoder=JSEncoder)
-
-
-def get_layers(request, country: str = "NL"):
-
-    layers = Configuration.objects.all().filter(
-        country=get_country(country),
-        is_displayed=True
-    ).order_by('display_order').values_list('organization_type__name', flat=True)
-
-    return JsonResponse(list(layers), safe=False, encoder=JSEncoder)
-
-
-def generic_export(query, set, country: str = "NL", organization_type="municipality", file_format: str = "json"):
-    """
-    This dataset can be imported in another instance blindly using the admin interface.
-
-    It does not export dead organizations, to save waste.
-
-    A re-import, or existing data, will be duplicated. There is no matching algorithm yet. The first intention
-    was to get you started getting an existing dataset from a certain country, and making it easy to get "up to
-    speed" with another instance of this software.
-
-    :return:
-    """
-
-    # prevent some filename manipulation trolling :)
-    country = get_country(country)
-    organization_type_name = OrganizationType.objects.filter(name=organization_type).values('name').first()
-
-    if not organization_type_name:
-        organization_type_name = 'municipality'
-    else:
-        organization_type_name = organization_type_name.get('name')
-
-    if file_format not in ['csv', 'xlsx', 'xls', 'ods', 'html', 'tsv', 'yaml', 'json']:
-        file_format = 'json'
-
-    # you can't call query.format, as it will result in parsing to that format which is expensive.
-    data = {}
-    if file_format == "json":
-        data = query.json
-    if file_format == "csv":
-        # works only on complete dataset, cannot omit fields.
-        data = query.json
-    if file_format == "xls":
-        # xls only results in empty files... so no xls support
-        data = query.json
-    if file_format == "xlsx":
-        # cell() missing 1 required positional argument: 'column'
-        # So no xslx support for now.
-        data = query.json
-    if file_format == "yaml":
-        data = query.yaml
-    if file_format == "tsv":
-        # works only on complete dataset, cannot omit fields.
-        data = query.json
-    if file_format == "html":
-        # works only on complete dataset
-        data = query.json
-    if file_format == "ods":
-        # ods only results in empty files... so no ods support, works only on complete dataset.
-        data = query.json
-
-    response = HttpResponse(data, content_type='application/octet-stream')
-    response['Content-Disposition'] = 'attachment; filename="%s_%s_%s_%s.%s"' % (
-        country, organization_type_name, set, timezone.datetime.now().date(), file_format)
-    return response
+    return JsonResponse({}, encoder=JSEncoder)
 
 
 @cache_page(one_day)
 def export_urls_only(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
-    query = Url.objects.all().filter(
-        is_dead=False,
-        not_resolvable=False,
-        organization__is_dead=False,
-        organization__country=get_country(country),
-        organization__type=get_organization_type(organization_type)
-    ).values_list('url', flat=True)
+    data = datasets.export_urls_only(country, organization_type)
+    filename = create_filename('urls_only', country, organization_type)
 
-    exporter = modelresource_factory(query.model)
-    dataset = exporter().export(query)
-
-    return generic_export(dataset, 'urls_only', country, organization_type, file_format)
+    return generic_download(filename, data, file_format)
 
 
 @cache_page(one_day)
 def export_organizations(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
-    query = Organization.objects.all().filter(
-        country=get_country(country),
-        type=get_organization_type(organization_type),
-        is_dead=False
-    ).values('id', 'name', 'type', 'wikidata', 'wikipedia', 'twitter_handle')
-
-    exporter = modelresource_factory(query.model)
-    dataset = exporter().export(query)
-
-    return generic_export(dataset, 'organizations', country, organization_type, file_format)
+    data = datasets.export_organizations(country, organization_type)
+    filename = create_filename('organizations', country, organization_type)
+    return generic_download(filename, data, file_format)
 
 
 @cache_page(one_day)
 def export_organization_types(request, country: str = "NL", organization_type="municipality",
                               file_format: str = "json"):
-    query = OrganizationType.objects.all().values('name')
-    exporter = modelresource_factory(query.model)
-    dataset = exporter().export(query)
-    return generic_export(dataset, 'organization_types', country, organization_type, file_format)
+    data = datasets.export_organization_types()
+    filename = create_filename('organization_types', country, organization_type)
+    return generic_download(filename, data, file_format)
 
 
 @cache_page(one_day)
 def export_coordinates(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
-    organizations = Organization.objects.all().filter(
-        country=get_country(country),
-        type=get_organization_type(organization_type))
-
-    query = Coordinate.objects.all().filter(
-        organization__in=list(organizations),
-        is_dead=False
-    ).values('id', 'organization', 'geojsontype', 'area')
-
-    exporter = modelresource_factory(query.model)
-    dataset = exporter().export(query)
-
-    return generic_export(dataset, 'coordinates', country, organization_type, file_format)
+    data = datasets.export_coordinates(country, organization_type)
+    filename = create_filename('coordinates', country, organization_type)
+    return generic_download(filename, data, file_format)
 
 
 @cache_page(one_day)
 def export_urls(request, country: str = "NL", organization_type="municipality", file_format: str = "json"):
-    query = Url.objects.all().filter(
-        organization__in=Organization.objects.all().filter(
-            country=get_country(country),
-            type=get_organization_type(organization_type)),
-        is_dead=False,
-        not_resolvable=False
-    ).values('id', 'url', 'organization')
-
-    exporter = modelresource_factory(query.model)
-    dataset = exporter().export(query)
-
-    return generic_export(dataset, 'urls', country, organization_type, file_format)
+    data = datasets.export_urls(country, organization_type)
+    filename = create_filename('urls', country, organization_type)
+    return generic_download(filename, data, file_format)
 
 
 @cache_page(one_hour)

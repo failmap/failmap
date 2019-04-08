@@ -1526,11 +1526,12 @@ function views(autoload_default_map_data=true) {
         mixins: [translation_mixin, state_mixin],
         el: '#export',
         data: {
-            layers: Array
+            layers: Array,
+            supported_formats: ["json", "csv", "ods", "xlsx", "mediawiki", "latex"]
         },
         methods: {
-            create_link: function(layer, linktype){
-                return '/data/export/' + linktype + '/' + this.country + '/' + layer + '/json/';
+            create_link: function(layer, linktype, filetype="json"){
+                return `/data/export/${linktype}/${this.country}/${layer}/${filetype}/`;
             },
             load: function(){
                 // doesn't have a load method, but is auto called via the state_mixin.

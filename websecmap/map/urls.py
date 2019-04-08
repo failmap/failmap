@@ -5,6 +5,7 @@ from django.conf.urls import url
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 
+import websecmap.map.logic.map_defaults
 from websecmap import converters
 from websecmap.map import views
 
@@ -35,12 +36,12 @@ urlpatterns = [
     path('data/map_default/<d:days_back>/<slug:displayed_issue>/', views.map_default),
     path('data/map_default/<d:days_back>//', views.map_default),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
-    path('data/countries/', views.get_countries),
-    path('data/default_country/', views.get_default_country),
-    path('data/default_layer/', views.get_default_layer),
-    path('data/defaults/', views.get_defaults),
-    path('data/default_layer_for_country/<c:country>/', views.get_default_layer_for_country),
-    path('data/layers/<c:country>/', views.get_layers),
+    path('data/countries/', websecmap.map.logic.map_defaults.get_countries),
+    path('data/default_country/', websecmap.map.logic.map_defaults.get_default_country),
+    path('data/default_layer/', websecmap.map.logic.map_defaults.get_default_layer),
+    path('data/defaults/', websecmap.map.logic.map_defaults.get_defaults),
+    path('data/default_layer_for_country/<c:country>/', websecmap.map.logic.map_defaults.get_default_layer_for_country),
+    path('data/layers/<c:country>/', websecmap.map.logic.map_defaults.get_layers),
     path('data/vulnerability_graphs/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),
     path('data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_fail),
     path('data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_win),
@@ -68,6 +69,7 @@ urlpatterns = [
     path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
     path('data/updates_on_organization_feed/<oid:organization_id>', views.UpdatesOnOrganizationFeed()),
 
+    # dataset downloads
     path('data/export/urls_only/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_urls_only),
     path('data/export/organization_types/<c:country>/<slug:organization_type>/<slug:file_format>/',
          views.export_organization_types),
