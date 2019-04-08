@@ -200,15 +200,15 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                         coordinate_stack.geoJsonType,
                         organization.id,
                         or3.calculation,
-                        reporting_organizationreport.high,
-                        reporting_organizationreport.medium,
-                        reporting_organizationreport.low,
-                        reporting_organizationreport.total_issues,
-                        reporting_organizationreport.total_urls,
-                        reporting_organizationreport.high_urls,
-                        reporting_organizationreport.medium_urls,
-                        reporting_organizationreport.low_urls
-                    FROM reporting_organizationreport
+                        map_organizationreport.high,
+                        map_organizationreport.medium,
+                        map_organizationreport.low,
+                        map_organizationreport.total_issues,
+                        map_organizationreport.total_urls,
+                        map_organizationreport.high_urls,
+                        map_organizationreport.medium_urls,
+                        map_organizationreport.low_urls
+                    FROM map_organizationreport
                     INNER JOIN
                       (SELECT id as stacked_organization_id
                       FROM organization stacked_organization
@@ -216,7 +216,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       OR (
                       '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
                       AND stacked_organization.is_dead = 1)) as organization_stack
-                      ON organization_stack.stacked_organization_id = reporting_organizationreport.organization_id
+                      ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
                     INNER JOIN
                       organization on organization.id = stacked_organization_id
                     INNER JOIN
@@ -228,15 +228,15 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       OR
                       ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
                       AND stacked_coordinate.is_dead = 1) GROUP BY area, organization_id) as coordinate_stack
-                      ON coordinate_stack.organization_id = reporting_organizationreport.organization_id
+                      ON coordinate_stack.organization_id = map_organizationreport.organization_id
                     INNER JOIN
-                      (SELECT MAX(id) as stacked_organizationrating_id FROM reporting_organizationreport
+                      (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
                       WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
-                      ON stacked_organizationrating.stacked_organizationrating_id = reporting_organizationreport.id
-                    INNER JOIN reporting_organizationreport as or3 ON or3.id = reporting_organizationreport.id
+                      ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
+                    INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
                     WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
-                    ORDER BY reporting_organizationreport.`when` ASC
+                    ORDER BY map_organizationreport.`when` ASC
                     """ % {"when": when, "OrganizationTypeId": organization_type_id,
                            "country": country}
 
@@ -457,12 +457,12 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             # todo: filter out dead organizations and make sure it's the correct layer.
             sql = """SELECT * FROM
-                           reporting_organizationreport
+                           map_organizationreport
                        INNER JOIN
-                       (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+                       (SELECT MAX(id) as id2 FROM map_organizationreport or2
                        WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-                       ON x.id2 = reporting_organizationreport.id
-                       INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
+                       ON x.id2 = map_organizationreport.id
+                       INNER JOIN organization ON map_organizationreport.organization_id = organization.id
                        INNER JOIN organizations_organizationtype ON
                        (organization.type_id = organizations_organizationtype.id)
                        WHERE organizations_organizationtype.name = '%(OrganizationType)s'

@@ -9,7 +9,8 @@ def websecmap_menu_items():
             {'name': 'map.administrativeregion', 'label': _('Region Importer')},
             {'name': 'map.mapdatacache', 'label': 'Map Data Cache (generated)'},
             {'name': 'map.vulnerabilitystatistic', 'label': 'Statistics (generated)'},
-            {'name': 'map.highlevelstatistic', 'label': 'Organization statistics (generated)'}
+            {'name': 'map.highlevelstatistic', 'label': 'Organization statistics (generated)'},
+            {'name': 'map.organizationreport'},
         ], 'permissions': ['admin']},
 
         {'app_label': 'organizations', 'label': _('🏢 Organizations'), 'items': [
@@ -18,9 +19,9 @@ def websecmap_menu_items():
             # Promises have been replaced with comply or explain. On feature request they might return in the future.
             # The code is still in the system for this.
             # {'name': 'promise'},
-            {'name': 'organizationtype'},
             {'name': 'dataset', 'label': 'Data Set Import'},
             {'name': 'coordinate'},
+            {'name': 'organizationtype'}
         ], 'permissions': ['admin']},
 
         {'label': _('🕒 Periodic Tasks'), 'items': [
@@ -53,7 +54,6 @@ def websecmap_menu_items():
         ]},
 
         {'label': _('📄 Reporting (generated)'), 'items': [
-            {'name': 'reporting.organizationreport'},
             {'name': 'reporting.urlreport'},
         ], 'permissions': ['admin']},
 

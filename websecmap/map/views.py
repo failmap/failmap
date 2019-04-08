@@ -430,17 +430,17 @@ def top_fail(request, country: str = "NL", organization_type="municipality", wee
                 low,
                 total_urls,
                 total_endpoints
-            FROM reporting_organizationreport
+            FROM map_organizationreport
             INNER JOIN
-              organization on organization.id = reporting_organizationreport.organization_id
+              organization on organization.id = map_organizationreport.organization_id
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+              (SELECT MAX(id) as id2 FROM map_organizationreport or2
               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = reporting_organizationreport.id
+              ON x.id2 = map_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
@@ -520,17 +520,17 @@ def top_win(request, country: str = "NL", organization_type="municipality", week
                 low,
                 total_urls,
                 total_endpoints
-            FROM reporting_organizationreport
+            FROM map_organizationreport
             INNER JOIN
-              organization on organization.id = reporting_organizationreport.organization_id
+              organization on organization.id = map_organizationreport.organization_id
             INNER JOIN
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
-              (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+              (SELECT MAX(id) as id2 FROM map_organizationreport or2
               WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = reporting_organizationreport.id
+              ON x.id2 = map_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
@@ -964,13 +964,13 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
     # but do not include urls that don't exist.
 
     # the query is INSTANT!
-    sql = """SELECT reporting_organizationreport.id as id, name, high, medium, low FROM
-               reporting_organizationreport
+    sql = """SELECT map_organizationreport.id as id, name, high, medium, low FROM
+               map_organizationreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+           (SELECT MAX(id) as id2 FROM map_organizationreport or2
            WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = reporting_organizationreport.id
-           INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
+           ON x.id2 = map_organizationreport.id
+           INNER JOIN organization ON map_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
@@ -980,13 +980,13 @@ def ticker(request, country: str = "NL", organization_type: str = "municipality"
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """SELECT reporting_organizationreport.id as id, name, high, medium, low FROM
-               reporting_organizationreport
+    sql = """SELECT map_organizationreport.id as id, name, high, medium, low FROM
+               map_organizationreport
            INNER JOIN
-           (SELECT MAX(id) as id2 FROM reporting_organizationreport or2
+           (SELECT MAX(id) as id2 FROM map_organizationreport or2
            WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = reporting_organizationreport.id
-           INNER JOIN organization ON reporting_organizationreport.organization_id = organization.id
+           ON x.id2 = map_organizationreport.id
+           INNER JOIN organization ON map_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
         """ % {"when": when - timedelta(days=(weeks_duration * 7)),
@@ -1305,23 +1305,23 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     # a bit slower it seems, but still well within acceptable levels.
     sql = """
         SELECT
-            reporting_organizationreport.low,
+            map_organizationreport.low,
             organization.name,
             organizations_organizationtype.name,
             coordinate_stack.area,
             coordinate_stack.geoJsonType,
             organization.id,
             or3.calculation,
-            reporting_organizationreport.high,
-            reporting_organizationreport.medium,
-            reporting_organizationreport.low,
-            reporting_organizationreport.total_issues,
-            reporting_organizationreport.total_urls,
-            reporting_organizationreport.high_urls,
-            reporting_organizationreport.medium_urls,
-            reporting_organizationreport.low_urls,
+            map_organizationreport.high,
+            map_organizationreport.medium,
+            map_organizationreport.low,
+            map_organizationreport.total_issues,
+            map_organizationreport.total_urls,
+            map_organizationreport.high_urls,
+            map_organizationreport.medium_urls,
+            map_organizationreport.low_urls,
             coordinate_stack.stacked_coordinate_id
-        FROM reporting_organizationreport
+        FROM map_organizationreport
         INNER JOIN
           (SELECT id as stacked_organization_id
           FROM organization stacked_organization
@@ -1329,7 +1329,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           OR (
           '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
           AND stacked_organization.is_dead = 1)) as organization_stack
-          ON organization_stack.stacked_organization_id = reporting_organizationreport.organization_id
+          ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
         INNER JOIN
           organization on organization.id = stacked_organization_id
         INNER JOIN
@@ -1341,15 +1341,15 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           OR
           ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
           AND stacked_coordinate.is_dead = 1) GROUP BY organization_id) as coordinate_stack
-          ON coordinate_stack.organization_id = reporting_organizationreport.organization_id
+          ON coordinate_stack.organization_id = map_organizationreport.organization_id
         INNER JOIN
-          (SELECT MAX(id) as stacked_organizationrating_id FROM reporting_organizationreport
+          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
           WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
-          ON stacked_organizationrating.stacked_organizationrating_id = reporting_organizationreport.id
-        INNER JOIN reporting_organizationreport as or3 ON or3.id = reporting_organizationreport.id
+          ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
+        INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
-        ORDER BY reporting_organizationreport.`when` ASC
+        ORDER BY map_organizationreport.`when` ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
