@@ -9,9 +9,9 @@ from celery import group
 from deepdiff import DeepDiff
 
 from websecmap.celery import Task, app
+from websecmap.map.logic.map import get_map_data
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
                                   OrganizationReport, VulnerabilityStatistic)
-from websecmap.map.views import get_map_data
 from websecmap.organizations.models import Organization, OrganizationType, Url
 from websecmap.reporting.report import (START_DATE, aggegrate_url_rating_scores,
                                         get_allowed_to_report, get_latest_urlratings_fast,

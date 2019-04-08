@@ -1,5 +1,9 @@
+from datetime import datetime
+
 import iso3166
+import pytz
 from constance import config
+from dateutil.relativedelta import relativedelta
 from django.http import JsonResponse
 
 from websecmap.app.common import JSEncoder
@@ -125,3 +129,13 @@ def get_layers(request, country: str = "NL"):
     ).order_by('display_order').values_list('organization_type__name', flat=True)
 
     return JsonResponse(list(layers), safe=False, encoder=JSEncoder)
+
+
+def get_when(weeks_back):
+    if not weeks_back:
+        return datetime.now(pytz.utc)
+    else:
+        return datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
+
+
+remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
