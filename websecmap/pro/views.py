@@ -13,6 +13,7 @@ from django.utils.text import slugify
 
 from websecmap.app.common import JSEncoder
 from websecmap.pro.forms import MailSignupForm
+from websecmap.pro.logic.comply_or_explain import try_explain
 from websecmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
                                   UrlListReport)
 from websecmap.reporting.severity import get_severity
@@ -392,3 +393,9 @@ def getAccount(request):
     except AttributeError:
         raise AttributeError('Logged in user does not have a pro user account associated. '
                              'Please associate one or login as another user.')
+
+
+def explain(request, scan_id, scan_type, explanation):
+    account = getAccount(request)
+    data = try_explain(account, scan_id, scan_type, explanation)
+    return JsonResponse(data, encoder=JSEncoder)
