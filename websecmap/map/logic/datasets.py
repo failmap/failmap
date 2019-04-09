@@ -22,17 +22,11 @@ def generic_export(queryset, column_names):
     """
     This dataset can be imported in another instance blindly using the admin interface.
 
-    It does not export dead organizations, to save waste.
-
-    A re-import, or existing data, will be duplicated. There is no matching algorithm yet. The first intention
-    was to get you started getting an existing dataset from a certain country, and making it easy to get "up to
-    speed" with another instance of this software.
-
     The re-import feature has been dropped, as using django_import_export required extra models that where very
     specific. Using a factory for a model, and then set options to meta didn't work. Also the number of formats
     was too limited. Therefore we've switched to pyexcel as it supports tons of formats.
 
-    Currently we don't write headers.
+    Many pexcel formats are supported. There are a LOT.
 
     :return:
     """

@@ -133,3 +133,5 @@ def rows_to_dataset(rows, when):
 
         # je zou evt de ranking kunnen omkeren, van de totale lijst aan organisaties...
         data["ranking"].append(dataset)
+
+    return data

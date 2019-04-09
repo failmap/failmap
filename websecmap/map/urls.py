@@ -5,7 +5,6 @@ from django.conf.urls import url
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 
-import websecmap.map.logic.map_defaults
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
 from websecmap.map import views
@@ -30,18 +29,16 @@ urlpatterns = [
     path('autocomplete/<c:country>/<slug:organization_type>/organization/<str:parameter>',
          views.organization_autcomplete),
 
-    path('data/organizationtype_exists/<slug:organization_type_name>', views.organizationtype_exists),
     path('data/map/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/', views.map_data),
     path('data/map/<c:country>/<slug:organization_type>/<d:days_back>//', views.map_data),
     path('data/map_default/<d:days_back>/<slug:displayed_issue>/', views.map_default),
     path('data/map_default/<d:days_back>//', views.map_default),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
-    path('data/countries/', websecmap.map.logic.map_defaults.get_countries),
-    path('data/default_country/', websecmap.map.logic.map_defaults.get_default_country),
-    path('data/default_layer/', websecmap.map.logic.map_defaults.get_default_layer),
-    path('data/defaults/', websecmap.map.logic.map_defaults.get_defaults),
-    path('data/default_layer_for_country/<c:country>/', websecmap.map.logic.map_defaults.get_default_layer_for_country),
-    path('data/layers/<c:country>/', websecmap.map.logic.map_defaults.get_layers),
+
+    # defaults
+    path('data/defaults/', views.defaults),
+    path('data/layers/<c:country>/', views.layers),
+
     path('data/vulnerability_graphs/<c:country>/<slug:organization_type>/<w:weeks_back>', views.vulnerability_graphs),
     path('data/topfail/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_fail),
     path('data/topwin/<c:country>/<slug:organization_type>/<w:weeks_back>', views.top_win),
@@ -50,21 +47,25 @@ urlpatterns = [
     path('data/improvements/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>',
          views.improvements),
     path('data/ticker/<c:country>/<slug:organization_type>/<w:weeks_back>/<w:weeks_duration>', views.ticker),
-    path('data/wanted/', views.wanted_urls),
     path('data/explained/<c:country>/<slug:organization_type>/', views.explain_list),
-    path('data/report/<c:country>/<slug:organization_type>/<oid:organization_id>/<w:weeks_back>',
-         views.organization_report),
-    # be compattible with optional parameters and types.
+
+
+    # be compatible with optional parameters and types.
     path('data/organization_vulnerability_timeline/<oid:organization_id>', views.organization_vulnerability_timeline),
     path('data/organization_vulnerability_timeline/<oid:organization_id>/<slug:organization_type>/<c:country>',
          views.organization_vulnerability_timeline),
+
     path('data/organization_vulnerability_timeline/<str:organization_name>/<slug:organization_type>/<c:country>',
          views.organization_vulnerability_timeline_via_name),
     path(
         'data/organization_vulnerability_timeline/<str:organization_name>/',
         views.organization_vulnerability_timeline_via_name),
+
+    path('data/report/<c:country>/<slug:organization_type>/<oid:organization_id>/<w:weeks_back>',
+         views.organization_report_by_id),
     path('data/report/<c:country>/<slug:organization_type>/<str:organization_name>/<w:weeks_back>',
-         views.organization_report),
+         views.organization_report_by_name),
+
     path('data/updates_on_organization/<oid:organization_id>', views.updates_on_organization),
     path('data/updates_on_organization_feed/<oid:organization_id>',
          websecmap.map.logic.rss_feeds.UpdatesOnOrganizationFeed()),

@@ -4,9 +4,7 @@ import iso3166
 import pytz
 from constance import config
 from dateutil.relativedelta import relativedelta
-from django.http import JsonResponse
 
-from websecmap.app.common import JSEncoder
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization, OrganizationType
 
@@ -24,6 +22,11 @@ COUNTRIES = iso3166.countries_by_alpha2
 
 # note: this is only visual, this is no security mechanism(!) Don't act like it is.
 # the data in this system is as open as possible.
+
+
+remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
+DEFAULT_COUNTRY = 'NL'
+DEFAULT_LAYER = 'municipality'
 
 
 def get_organization_type(name: str):
@@ -56,32 +59,31 @@ def get_country(code: str):
     return code
 
 
-def get_defaults(request, ):
+def get_defaults():
     data = Configuration.objects.all().filter(
         is_displayed=True,
         is_the_default_option=True
     ).order_by('display_order').values('country', 'organization_type__name').first()
 
     if not data:
-        return JsonResponse({'country': "NL", 'layer': "municipality"}, safe=False, encoder=JSEncoder)
+        return {'country': DEFAULT_COUNTRY, 'layer': DEFAULT_LAYER}
 
-    return JsonResponse({'country': data['country'], 'layer': data['organization_type__name']},
-                        safe=False, encoder=JSEncoder)
+    return {'country': data['country'], 'layer': data['organization_type__name']}
 
 
-def get_default_country(request, ):
+def get_default_country():
     country = Configuration.objects.all().filter(
         is_displayed=True,
         is_the_default_option=True
     ).order_by('display_order').values_list('country', flat=True).first()
 
     if not country:
-        return config.PROJECT_COUNTRY
+        return [config.PROJECT_COUNTRY]
 
-    return JsonResponse([country], safe=False, encoder=JSEncoder)
+    return [country]
 
 
-def get_default_layer(request, ):
+def get_default_layer():
 
     organization_type = Configuration.objects.all().filter(
         is_displayed=True,
@@ -89,12 +91,12 @@ def get_default_layer(request, ):
     ).order_by('display_order').values_list('organization_type__name', flat=True).first()
 
     if not organization_type:
-        return 'municipality'
-    # from config table
-    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
+        return [DEFAULT_LAYER]
+
+    return [organization_type]
 
 
-def get_default_layer_for_country(request, country: str = "NL"):
+def get_default_layer_for_country(country: str = "NL"):
 
     organization_type = Configuration.objects.all().filter(
         is_displayed=True,
@@ -102,12 +104,13 @@ def get_default_layer_for_country(request, country: str = "NL"):
     ).order_by('display_order').values_list('organization_type__name', flat=True).first()
 
     if not organization_type:
-        return 'municipality'
+        return [DEFAULT_LAYER]
     # from config table
-    return JsonResponse([organization_type], safe=False, encoder=JSEncoder)
+
+    return [organization_type]
 
 
-def get_countries(request,):
+def get_countries():
     # sqllite doens't do distinct on, workaround
 
     confs = Configuration.objects.all().filter(
@@ -118,17 +121,17 @@ def get_countries(request,):
         if conf not in list:
             list.append(conf)
 
-    return JsonResponse(list, safe=False, encoder=JSEncoder)
+    return list
 
 
-def get_layers(request, country: str = "NL"):
+def get_layers(country: str = "NL"):
 
     layers = Configuration.objects.all().filter(
         country=get_country(country),
         is_displayed=True
     ).order_by('display_order').values_list('organization_type__name', flat=True)
 
-    return JsonResponse(list(layers), safe=False, encoder=JSEncoder)
+    return list(layers)
 
 
 def get_when(weeks_back):
@@ -138,4 +141,29 @@ def get_when(weeks_back):
         return datetime.now(pytz.utc) - relativedelta(weeks=int(weeks_back))
 
 
-remark = "Get the code and all data from our gitlab repo: https://gitlab.com/internet-cleanup-foundation/"
+def get_initial_countries():
+    """
+    # save a query and a bunch of translation issues (django countries contains all countries in every language
+    # so we don't have to find a javascript library to properly render...
+    # the downside is that we have to run a query every load, and do less with javascript. Upside is that
+    # it renders faster and easier.
+
+    :return:
+    """
+    confs = Configuration.objects.all().filter(
+        is_displayed=True
+    ).order_by('display_order').values_list('country', flat=True)
+
+    inital_countries = []
+    for conf in confs:
+        if conf not in inital_countries:
+            inital_countries.append(conf)
+
+    return inital_countries
+
+
+def organizationtype_exists(organization_type_name):
+    if OrganizationType.objects.filter(name=organization_type_name).first():
+        return {"set": True}
+
+    return {"set": False}

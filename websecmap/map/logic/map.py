@@ -14,10 +14,7 @@ from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 def get_map_data(country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
                  displayed_issue: str = None):
 
-    if not days_back:
-        when = datetime.now(pytz.utc)
-    else:
-        when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
+    when = datetime.now(pytz.utc) - relativedelta(days=int(days_back))
 
     desired_url_scans = []
     desired_endpoint_scans = []
@@ -240,21 +237,5 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         }
 
         data["features"].append(dataset)
-
-    # We don't try to insert the latest queryset given the website user doesn't have permission (and should not)
-    # to run insert statements. Therefore a cache query here will always fail. A celery beat worker will
-    # make sure the data is up to date for caching (reporting) until then loading the map is a bit slower for new
-    # # queries.
-    # This is what you don't need, but might write if you think of optimizing this code a bit more:
-    # try:
-    #     cached = MapDataCache()
-    #     cached.organization_type = OrganizationType(pk=get_organization_type(organization_type))
-    #     cached.country = country
-    #     cached.filters = desired_url_scans + desired_endpoint_scans
-    #     cached.when = when
-    #     cached.dataset = data
-    #     cached.save()
-    # except OperationalError:
-    #     # The public user does not have permission to run insert statements....
 
     return data

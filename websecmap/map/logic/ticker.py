@@ -1,10 +1,8 @@
 from datetime import timedelta
 
 from constance import config
-from dateutil.relativedelta import relativedelta
-from django.utils import timezone
 
-from websecmap.map.logic.map_defaults import get_country, get_organization_type
+from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when
 from websecmap.map.models import OrganizationReport
 
 
@@ -22,10 +20,7 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
     if not weeks_duration:
         weeks_duration = 10
 
-    if not weeks_back:
-        when = timezone.now()
-    else:
-        when = timezone.now() - relativedelta(weeks=int(weeks_back))
+    when = get_when(weeks_back)
 
     # looks a lot like graphs, but then just subtract/add some values and done (?)
 
