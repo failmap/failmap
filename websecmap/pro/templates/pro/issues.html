@@ -226,7 +226,47 @@ vueIssues = new Vue({
             }
         }
     }
-})
+});
+
+
+// 'explain component', is a dialog / form that has it's own logic which might be applied in multiple places
+// not written as component as i'm a vue noob. Wouldn't be too hard to refactor without the appl becoming a js
+// hipster hell with frameworks that are obsolete the next day.
+vueExplain = new Vue({
+    name: 'explain',
+    el: '#explain_view',
+    template: '#explain_item',
+
+    data: {
+        scan_id: 0,
+        scan_type: '',
+
+        // current scan.
+        scan: {}
+    },
+
+    methods: {
+        get_scan_data(scan_id, scan_type){
+            // call
+            this.scan = scan;
+        },
+        try_explain(scan_id, scan_type){
+
+        },
+        remove_explanation(scan_id, scan_type){
+
+        },
+        extend_explanation(scan_id, scan_type){
+
+        },
+        explain_costs(scan_id, scan_type){
+
+        }
+    }
+
+
+
+});
 
 </script>
 {% endblock %}

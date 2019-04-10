@@ -4,12 +4,13 @@ from typing import Any, Dict, Union
 from django.utils import timezone
 
 from websecmap.pro.models import Account
+from websecmap.reporting.severity import get_severity
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 # todo: make it impossible to explain past scans. Only allow explanations on "is_the_latest_scan" otherwise it
 # may be unnecessarily costly and complex to manage.
-# Todo; prevent explanations costing something when it's already explained.
+# Done: prevent explanations costing something when it's already explained.
 
 
 def explain_costs():
@@ -108,3 +109,30 @@ def get_scan(account: Account, scan_id: int, scan_type: str) -> Union[EndpointGe
             pk=scan_id, type=scan_type, url__urllist__account=account).first()
 
     return None
+
+
+def get_scan_data(account: Account, scan_id: int, scan_type: str):
+    scan = get_scan(account, scan_id, scan_type)
+
+    severity = get_severity(scan)
+
+    impact = "high" if severity.get("high", 0) else "medium" if severity.get("medium", 0) else "low" \
+        if severity.get("low", 0) else "ok"
+
+    # also get the severity(or is that stored?)
+    return {'id': scan.id,
+            'rating': scan.rating,
+            'explanation': scan.explanation,
+            'evidence': scan.evidence,
+            'last_scan_moment': scan.last_scan_moment.isoformat(),
+            'rating_determined_on': scan.rating_determined_on.isoformat(),
+            'is_the_latest_scan': scan.is_the_latest_scan,
+            'comply_or_explain_is_explained': scan.comply_or_explain_is_explained,
+            'comply_or_explain_explanation_valid_until': scan.comply_or_explain_explanation_valid_until.isoformat(),
+            'comply_or_explain_explanation': scan.comply_or_explain_explanation,
+            'comply_or_explain_explained_by': scan.comply_or_explain_explained_by,
+            'comply_or_explain_explained_on': scan.comply_or_explain_explained_on.isoformat(),
+            'comply_or_explain_case_handled_by': scan.comply_or_explain_case_handled_by,
+            'comply_or_explain_case_additional_notes': scan.comply_or_explain_case_additional_notes,
+            'impact': impact,
+            }

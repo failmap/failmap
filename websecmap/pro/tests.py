@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from websecmap.organizations.models import Url
 from websecmap.pro.logic.comply_or_explain import (explain_costs, extend_explanation,
-                                                   get_canned_explanations, get_scan,
+                                                   get_canned_explanations, get_scan, get_scan_data,
                                                    remove_explanation, try_explain)
 from websecmap.pro.models import Account, CreditMutation, UrlList
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
@@ -130,5 +130,8 @@ def test_explanations(db):
     account.receive_credits(explain_costs(), 'Test Explanation')
     explained = extend_explanation(account=account, scan_id=scan.pk, scan_type=scan.type)
     assert explained['success'] is True and explained['message'] == "Explanation extended."
+
+    retrieved_scan = get_scan_data(account=account, scan_id=scan.pk, scan_type=scan.type)
+    assert retrieved_scan['id'] == scan.pk
 
     # todo: parameterize test cases for permission checks on each of these methods.
