@@ -26,10 +26,6 @@ def get_canned_explanations():
 
 
 def try_explain(account: Account, scan_id: int, scan_type: str, explanation: str):
-    if not account.can_spend(explain_costs()):
-        return {'error': True, 'success': False,
-                'message': 'This account does not have enough credits to perform this operation. Please contact '
-                           'support to upgrade your account.'}
 
     scan = get_scan(account, scan_id, scan_type)
     if not scan:
@@ -37,6 +33,18 @@ def try_explain(account: Account, scan_id: int, scan_type: str, explanation: str
 
     if not explanation:
         return {'error': True, 'success': False, 'message': 'Explanation was empty, could not save explanation.'}
+
+    # you can change the explanation at zero cost. It won't extend the expiration date, etc.
+    if scan.comply_or_explain_is_explained is True:
+        scan.comply_or_explain_explanation = explanation
+        scan.save()
+        return {'error': False, 'success': True, 'message': 'Explanation altered.'}
+
+    # First explanation costs credits
+    if not account.can_spend(explain_costs()):
+        return {'error': True, 'success': False,
+                'message': 'This account does not have enough credits to perform this operation. Please contact '
+                           'support to upgrade your account.'}
 
     scan.comply_or_explain_is_explained = True
     scan.comply_or_explain_explained_by = account.name
