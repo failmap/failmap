@@ -127,9 +127,6 @@ django-select2
 # ISO country code conversion
 iso3166
 
-# hyper scaling
-docker
-
 # generic retry library
 tenacity
 
