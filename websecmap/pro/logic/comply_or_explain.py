@@ -1,10 +1,10 @@
 from datetime import timedelta
-from typing import Union
+from typing import Any, Dict, Union
 
 from django.utils import timezone
 
 from websecmap.pro.models import Account
-from websecmap.scanners import ENDPOINT_SCAN_TYPES
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 # todo: make it impossible to explain past scans. Only allow explanations on "is_the_latest_scan" otherwise it
@@ -25,7 +25,7 @@ def get_canned_explanations():
     ]
 
 
-def try_explain(account: Account, scan_id: int, scan_type: str, explanation: str):
+def try_explain(account: Account, scan_id: int, scan_type: str, explanation: str) -> Dict[str, Any]:
 
     scan = get_scan(account, scan_id, scan_type)
     if not scan:
@@ -59,19 +59,19 @@ def try_explain(account: Account, scan_id: int, scan_type: str, explanation: str
     return {'error': False, 'success': True, 'message': 'Explanation saved.'}
 
 
-def remove_explanation(account, scan_id, scan_type):
+def remove_explanation(account: Account, scan_id: int, scan_type: str) -> Dict[str, Any]:
     # this is free
 
     scan = get_scan(account, scan_id, scan_type)
     if not scan:
-        return {'success': False, 'error': True}
+        return {'success': False, 'error': True, 'message': 'This is not a valid scan.'}
 
     scan.comply_or_explain_is_explained = False
     scan.save(update_fields=['comply_or_explain_is_explained'])
     return {'success': True, 'error': False, 'message': 'Explanation removed.'}
 
 
-def extend_explanation(account, scan_id, scan_type):
+def extend_explanation(account: Account, scan_id: int, scan_type: str) -> Dict[str, Any]:
     """
     Will extend the validity of the explanation (default a year), for an amount of credits. The maximum is one year.
     This does not stack, so you cannot explain it for dozens of years as that removes the incentive to comply.
@@ -97,10 +97,14 @@ def extend_explanation(account, scan_id, scan_type):
     return {'success': True, 'error': False, 'message': 'Explanation extended.'}
 
 
-def get_scan(account, scan_id, scan_type) -> Union[EndpointGenericScan, UrlGenericScan]:
+def get_scan(account: Account, scan_id: int, scan_type: str) -> Union[EndpointGenericScan, UrlGenericScan, None]:
 
     if scan_type in ENDPOINT_SCAN_TYPES:
-        return EndpointGenericScan.objects.all().filter(pk=scan_id, endpoint__url__urllist__account=account).first()
+        return EndpointGenericScan.objects.all().filter(
+            pk=scan_id, type=scan_type, endpoint__url__urllist__account=account).first()
 
-    else:
-        return UrlGenericScan.objects.all().filter(pk=scan_id, url__urllist__account=account).first()
+    if scan_type in URL_SCAN_TYPES:
+        return UrlGenericScan.objects.all().filter(
+            pk=scan_id, type=scan_type, url__urllist__account=account).first()
+
+    return None

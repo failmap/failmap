@@ -56,7 +56,7 @@ class Account(models.Model):
     # Since this is not in the same transaction as spend, it might be possible this is outdated. Yet, in most
     # cases it will be fine.
     def can_spend(self, amount):
-        return (self.credits - amount) > 0
+        return (self.credits - amount) >= 0
 
     @transaction.atomic
     def spend_credits(self, amount, goal):
