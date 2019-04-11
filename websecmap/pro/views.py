@@ -13,7 +13,7 @@ from django.utils.text import slugify
 
 from websecmap.app.common import JSEncoder
 from websecmap.pro.forms import MailSignupForm
-from websecmap.pro.logic.comply_or_explain import try_explain
+from websecmap.pro.logic.shared import get_account
 from websecmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
                                   UrlListReport)
 from websecmap.reporting.severity import get_severity
@@ -31,7 +31,7 @@ def dummy(request):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def home(request):
-    account = getAccount(request)
+    account = get_account(request)
 
     user = User.objects.all().filter(pk=request.user.id).first()
     prouser = ProUser.objects.all().filter(user=request.user).first()
@@ -89,7 +89,7 @@ def rescan_costs(scan):
 def issue_data(request, list_name: str = ""):
     all_scans_view = []
 
-    account = getAccount(request)
+    account = get_account(request)
 
     rescan_requests = list(RescanRequest.objects.all().filter(account=account).exclude(status="finished"))
     endpoint_rescanned_ids = [x.scan_id for x in rescan_requests if x.scan_type in ENDPOINT_SCAN_TYPES]
@@ -198,7 +198,7 @@ def issue_data(request, list_name: str = ""):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def issues(request):
-    this_account = getAccount(request)
+    this_account = get_account(request)
 
     return render(request, 'pro/issues.html', {'account': this_account,
                                                'credits': this_account.credits})
@@ -206,7 +206,7 @@ def issues(request):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def account(request):
-    this_account = getAccount(request)
+    this_account = get_account(request)
 
     transactions = CreditMutation.objects.all().filter(account=this_account)
 
@@ -216,7 +216,7 @@ def account(request):
 
 @login_required(login_url='/pro/login/?next=/pro/')
 def portfolio(request):
-    account = getAccount(request)
+    account = get_account(request)
     return render(request, 'pro/portfolio.html', {'account': account})
 
 
@@ -227,7 +227,7 @@ def portfolio_data(request):
     report_statistics = UrlListReport.objects.filter(when__gte=one_year_ago).only(
         'when', 'total_endpoints', 'total_urls', 'high', 'medium', 'low').order_by('when')
     urllists = UrlList.objects.all().filter(
-        account=getAccount(request)
+        account=get_account(request)
     ).prefetch_related(
         'urls',
         Prefetch('urllistreport_set', queryset=report_statistics),
@@ -291,7 +291,7 @@ def mail(request):
 @login_required(login_url='/pro/login/?next=/pro/')
 def rescan_request(request, scan_type, scan_id):
 
-    account = getAccount(request)
+    account = get_account(request)
 
     if scan_type not in ALL_SCAN_TYPES:
         log.debug('No valid scan type.')
@@ -384,18 +384,3 @@ def empty_response():
 
 def error_response(message):
     return JsonResponse({'error': True, 'message': message, 'success': False, 'cost': 0}, encoder=JSEncoder)
-
-
-# todo: replace with session variable which is faster(?)
-def getAccount(request):
-    try:
-        return ProUser.objects.all().filter(user=request.user).first().account
-    except AttributeError:
-        raise AttributeError('Logged in user does not have a pro user account associated. '
-                             'Please associate one or login as another user.')
-
-
-def explain(request, scan_id, scan_type, explanation):
-    account = getAccount(request)
-    data = try_explain(account, scan_id, scan_type, explanation)
-    return JsonResponse(data, encoder=JSEncoder)

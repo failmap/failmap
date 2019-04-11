@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from websecmap.pro import views
+from websecmap.pro.view import explain
 
 # todo: https://wsvincent.com/django-user-authentication-tutorial-signup/
 urlpatterns = [
@@ -21,5 +22,11 @@ urlpatterns = [
     path('data/issues/', views.issue_data),
     path('rescan_request/<str:scan_type>/<int:scan_id>/', views.rescan_request),
 
-    # path('data/explain/get_scan_data/<str:scan_type>/<int:scan_id>/')
+
+    path('data/explain/get_canned_explanations/', explain.get_canned_explanations_view),
+    path('data/explain/get_explain_costs/', explain.get_explain_costs_view),
+    path('data/explain/get_scan_data/<str:scan_type>/<int:scan_id>/', explain.get_scan_data_view),
+    path('data/explain/try_explain/<str:scan_type>/<int:scan_id>/', explain.try_explain_view),
+    path('data/explain/extend_explanation/<str:scan_type>/<int:scan_id>/', explain.extend_explanation_view),
+    path('data/explain/remove_explanation/<str:scan_type>/<int:scan_id>/', explain.remove_explanation_view),
 ]
