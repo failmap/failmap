@@ -20,4 +20,6 @@ urlpatterns = [
     path('issues/<str:list_name>/', views.issues),
     path('data/issues/', views.issue_data),
     path('rescan_request/<str:scan_type>/<int:scan_id>/', views.rescan_request),
+
+    # path('data/explain/get_scan_data/<str:scan_type>/<int:scan_id>/')
 ]

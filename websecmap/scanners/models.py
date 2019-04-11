@@ -580,8 +580,8 @@ class Screenshot(models.Model):
 class InternetNLScan(models.Model):
 
     type = models.CharField(
-        max_length=4,
-        help_text="mail or web",
+        max_length=30,
+        help_text="mail, mail_dashboard or web",
         blank=True,
         null=True
     )

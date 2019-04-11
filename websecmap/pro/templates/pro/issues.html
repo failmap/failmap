@@ -227,7 +227,24 @@ vueIssues = new Vue({
         }
     }
 });
+</script>
 
+
+<script type="x-template" id="explain_item">
+    <form>
+        <span v-if="scan.comply_or_explain_is_explained">Already explained</span>
+        <span v-if="scan.comply_or_explain_is_explained" :click="remove_explanation()">Remove.</span>
+        <span v-if="scan.comply_or_explain_is_explained" :click="extend_explanation()">
+            This comply or explain will expire in. Please try to fix this issue asap. [Extend]</span>
+        <span v-if="!scan.comply_or_explain_is_explained">New explanation.</span>
+
+        <input type="text" :model="explanation">
+
+        <input type="button" :click="try_explain(explanation)">
+    </form>
+</script>
+
+<script>
 
 // 'explain component', is a dialog / form that has it's own logic which might be applied in multiple places
 // not written as component as i'm a vue noob. Wouldn't be too hard to refactor without the appl becoming a js
@@ -242,10 +259,19 @@ vueExplain = new Vue({
         scan_type: '',
 
         // current scan.
-        scan: {}
+        scan: {},
+
+        // explanation that is being tried.
+        explanation: '',
+
+        canned_explanations: [],
     },
 
     methods: {
+        get_canned_explanations(){
+
+        },
+
         get_scan_data(scan_id, scan_type){
             // call
             this.scan = scan;
@@ -253,14 +279,14 @@ vueExplain = new Vue({
         try_explain(scan_id, scan_type){
 
         },
-        remove_explanation(scan_id, scan_type){
-
+        remove_explanation(){
+            // call to remove explanation with scan_id, scan_type
         },
-        extend_explanation(scan_id, scan_type){
-
+        extend_explanation(){
+            // call to extend explanation with scan_id, scan_type
         },
-        explain_costs(scan_id, scan_type){
-
+        explain_costs(){
+            // call to explain costs.
         }
     }
 
