@@ -40,7 +40,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
             AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
-            ORDER BY low ASC, LENGTH(`calculation`) DESC, `organization`.`name` ASC
+            ORDER BY low ASC, total_endpoints DESC, `organization`.`name` ASC
             LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
