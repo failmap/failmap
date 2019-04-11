@@ -1,11 +1,10 @@
-import requests
 import json
+
+import requests
 
 from websecmap.scanners.logic.scanproxy import import_proxies_by_country
 from websecmap.scanners.models import ScanProxy
 from websecmap.scanners.scanner.tls_qualys import check_proxy
-
-# mock result: https://api.openproxy.space/short/country/%s?limit=50&skip=%s&ts=%s
 
 
 def file_get_contents(filepath):
@@ -28,10 +27,11 @@ def mocked_requests_get(*args, **kwargs):
 
 def test_scanproxies(db, monkeypatch):
 
-    monkeypatch.setattr(requests, 'get', mocked_requests_get)
     # don't create tasks or invoke celery
-
+    monkeypatch.setattr(requests, 'get', mocked_requests_get)
     monkeypatch.setattr(check_proxy, 'apply_async', lambda x: True)
+
+    # try to import proxies.
     import_proxies_by_country(countries=['NL'], amount=50)
 
     assert ScanProxy.objects.all().count() == 15

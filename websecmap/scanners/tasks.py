@@ -71,5 +71,3 @@ def scan_tasks(url_chunk):
                 tasks.append(tld_scanner(urls_filter={"url": url}))
 
     return group(tasks)
-
-
