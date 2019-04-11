@@ -3,7 +3,7 @@ import logging
 import iso3166
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners.tasks import import_proxies_by_country
+from websecmap.scanners.logic.scanproxy import import_proxies_by_country
 
 log = logging.getLogger(__name__)
 
