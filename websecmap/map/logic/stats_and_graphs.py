@@ -117,23 +117,31 @@ def stats_determine_when(stat, weeks_back=0):
 
 
 def get_stats(country, organization_type, weeks_back):
+    """
+    Stats are calculated using websecmap calculate_high_level_statistics
+
+    :param country:
+    :param organization_type:
+    :param weeks_back:
+    :return:
+    """
 
     timeframes = {'now': 0, '7 days ago': 0, '2 weeks ago': 0, '3 weeks ago': 0,
                   '1 months ago': 0, '2 months ago': 0, '3 months ago': 0}
 
-    when = []
-    for stat in timeframes:
-        when.append(stats_determine_when(stat, weeks_back).date())
-
-    stats = HighLevelStatistic.objects.all().filter(
-        country=country,
-        organization_type=get_organization_type(organization_type),
-        when__in=when
-    )
-
-    # todo: apply the label of the timeframe in the report result.
     reports = {}
-    for idx, stat in enumerate(timeframes):
-        reports[stat] = stats[idx].report
+    for stat in timeframes:
+        when = stats_determine_when(stat, weeks_back).date()
+
+        # seven queryies, but __never__ a missing result.
+        stats = HighLevelStatistic.objects.all().filter(
+            country=country,
+            organization_type=get_organization_type(organization_type),
+            when__lte=when
+        ).order_by('-when').first()
+
+        # no stats before a certain date, or database empty.
+        if stats:
+            reports[stat] = stats.report
 
     return reports
