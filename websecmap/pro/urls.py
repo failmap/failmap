@@ -25,8 +25,8 @@ urlpatterns = [
 
     path('data/explain/get_canned_explanations/', explain.get_canned_explanations_view),
     path('data/explain/get_explain_costs/', explain.get_explain_costs_view),
-    path('data/explain/get_scan_data/<str:scan_type>/<int:scan_id>/', explain.get_scan_data_view),
-    path('data/explain/try_explain/<str:scan_type>/<int:scan_id>/', explain.try_explain_view),
-    path('data/explain/extend_explanation/<str:scan_type>/<int:scan_id>/', explain.extend_explanation_view),
-    path('data/explain/remove_explanation/<str:scan_type>/<int:scan_id>/', explain.remove_explanation_view),
+    path('data/explain/get_scan_data/<int:scan_id>/<str:scan_type>/', explain.get_scan_data_view),
+    path('data/explain/try_explain/<int:scan_id>/<str:scan_type>/<str:explanation>/', explain.try_explain_view),
+    path('data/explain/extend_explanation/<int:scan_id>/<str:scan_type>/', explain.extend_explanation_view),
+    path('data/explain/remove_explanation/<int:scan_id>/<str:scan_type>/', explain.remove_explanation_view),
 ]

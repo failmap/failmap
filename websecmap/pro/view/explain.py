@@ -12,37 +12,37 @@ from websecmap.pro.logic.shared import get_account
 
 @login_required(login_url=LOGIN_URL)
 def get_canned_explanations_view(request) -> JsonResponse:
-    return JsonResponse(get_canned_explanations(), encoder=JSEncoder)
+    return JsonResponse(get_canned_explanations(), encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url=LOGIN_URL)
 def get_explain_costs_view(request) -> JsonResponse:
-    return JsonResponse(explain_costs(), encoder=JSEncoder)
+    return JsonResponse(explain_costs(), encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url=LOGIN_URL)
 def get_scan_data_view(request, scan_id, scan_type):
     account = get_account(request)
     data = get_scan_data(account, scan_id, scan_type)
-    return JsonResponse(data, encoder=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url=LOGIN_URL)
 def try_explain_view(request, scan_id, scan_type, explanation):
     account = get_account(request)
     data = try_explain(account, scan_id, scan_type, explanation)
-    return JsonResponse(data, encoder=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url=LOGIN_URL)
 def extend_explanation_view(request, scan_id, scan_type):
     account = get_account(request)
     data = extend_explanation(account, scan_id, scan_type)
-    return JsonResponse(data, encoder=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @login_required(login_url=LOGIN_URL)
 def remove_explanation_view(request, scan_id, scan_type):
     account = get_account(request)
     data = remove_explanation(account, scan_id, scan_type)
-    return JsonResponse(data, encoder=JSEncoder)
+    return JsonResponse(data, encoder=JSEncoder, safe=False)

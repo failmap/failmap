@@ -128,10 +128,13 @@ def get_scan_data(account: Account, scan_id: int, scan_type: str):
             'rating_determined_on': scan.rating_determined_on.isoformat(),
             'is_the_latest_scan': scan.is_the_latest_scan,
             'comply_or_explain_is_explained': scan.comply_or_explain_is_explained,
-            'comply_or_explain_explanation_valid_until': scan.comply_or_explain_explanation_valid_until.isoformat(),
+
+            'comply_or_explain_explanation_valid_until': scan.comply_or_explain_explanation_valid_until.isoformat(
+            ) if scan.comply_or_explain_explanation_valid_until else None,
             'comply_or_explain_explanation': scan.comply_or_explain_explanation,
             'comply_or_explain_explained_by': scan.comply_or_explain_explained_by,
-            'comply_or_explain_explained_on': scan.comply_or_explain_explained_on.isoformat(),
+            'comply_or_explain_explained_on': scan.comply_or_explain_explained_on.isoformat(
+            ) if scan.comply_or_explain_explained_on else None,
             'comply_or_explain_case_handled_by': scan.comply_or_explain_case_handled_by,
             'comply_or_explain_case_additional_notes': scan.comply_or_explain_case_additional_notes,
             'impact': impact,

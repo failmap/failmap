@@ -1,6 +1,9 @@
 {% extends 'pro/base.html' %}{% load humanize %}{% load i18n %}
 {% block content %}
     <h1 id="Issues">Issues</h1>
+    <div id="explain_view"></div>
+
+
     <div id="issue_view"></div>
 
     <style>
@@ -58,9 +61,8 @@
                             :data-scan-id="issue.id"
                             :data-scan-type="issue.type"
                             :data-scan-label="issue.url +' '+issue.service">Rescan now</button>
-                        <button type="button"
-                                class="btn btn-info btn-block" data-toggle="modal" data-target="#rescanModal"
-                            :data-cost="issue.explain_cost">Explain</button>
+                        <button v-if="!issue.is_explained" type="button" class="btn btn-info btn-block" @click="start_explaining(issue.id, issue.type)">Explain</button>
+                        <button v-if="issue.is_explained" type="button" class="btn btn-info btn-block" @click="start_explaining(issue.id, issue.type)">Edit / Remove explanation</button>
                         <button type="button" id="issue.unique_id"
                                 class="btn btn-warning btn-block" data-toggle="modal" data-target="#rescanModal"
                             :data-cost="issue.rescan_cost"
@@ -224,6 +226,10 @@ vueIssues = new Vue({
                 this.sub_header_value = value;
                 return true;
             }
+        },
+
+        start_explaining(scan_id, scan_type){
+            vueExplain.start_explaining(scan_id, scan_type);
         }
     }
 });
@@ -231,17 +237,31 @@ vueIssues = new Vue({
 
 
 <script type="x-template" id="explain_item">
-    <form>
-        <span v-if="scan.comply_or_explain_is_explained">Already explained</span>
-        <span v-if="scan.comply_or_explain_is_explained" :click="remove_explanation()">Remove.</span>
-        <span v-if="scan.comply_or_explain_is_explained" :click="extend_explanation()">
+    <div v-if="scan_id">
+        <input type="button" @click="stop_explaining()" value="Close"><br>
+        <div v-if="result['message']">
+            <h3>Results</h3>
+            <span v-if="result['success']">Success!</span>
+            <span v-if="result['error']">Error!</span>
+            <span v-html="result['message']"></span>
+        </div>
+
+        <div v-if="scan.comply_or_explain_is_explained">
+        <h3>Already explained</h3>
+        <span>Already explained</span>
+        <span @click="remove_explanation()">Remove.</span>
+        <span @click="extend_explanation()">
             This comply or explain will expire in. Please try to fix this issue asap. [Extend]</span>
-        <span v-if="!scan.comply_or_explain_is_explained">New explanation.</span>
+        </div>
 
-        <input type="text" :model="explanation">
+        <h3>Explain</h3>
+        <span v-if="!scan.comply_or_explain_is_explained">New explanation:</span>
+        <span v-if="scan.comply_or_explain_is_explained">Alter explanation:</span><br>
+        Current explanation: <i><span v-html="scan.comply_or_explain_explanation"></span></i><br>
+        <input type="text" v-model="explanation">
 
-        <input type="button" :click="try_explain(explanation)">
-    </form>
+        <input type="button" @click="try_explain()" value="Explain">
+    </div>
 </script>
 
 <script>
@@ -249,6 +269,9 @@ vueIssues = new Vue({
 // 'explain component', is a dialog / form that has it's own logic which might be applied in multiple places
 // not written as component as i'm a vue noob. Wouldn't be too hard to refactor without the appl becoming a js
 // hipster hell with frameworks that are obsolete the next day.
+// todo: show costs and cost button.
+// todo: make sure costs are directly visible when clicking.
+// todo: nicer layout of explantions
 vueExplain = new Vue({
     name: 'explain',
     el: '#explain_view',
@@ -265,28 +288,67 @@ vueExplain = new Vue({
         explanation: '',
 
         canned_explanations: [],
+
+        // whatever result we get back.
+        result: {},
+
+        explain_costs: 0,
     },
-
+    mounted: function () {
+        this.get_canned_explanations();
+        this.get_explain_costs();
+    },
     methods: {
+        start_explaining: function(scan_id, scan_type){
+            // make sure we start with a clean slate
+            this.stop_explaining();
+
+            this.scan_id = scan_id;
+            this.scan_type = scan_type;
+            this.get_scan_data();
+        },
+        stop_explaining: function(){
+            // reset everything.
+            this.scan_id = 0;
+            this.scan_type = '';
+            this.scan = {};
+            this.result = {};
+        },
+
+
         get_canned_explanations(){
-
+            fetch(`/pro/data/explain/get_canned_explanations/`).then(response => response.json()).then(data => {
+                this.canned_explanations = data;
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
-
-        get_scan_data(scan_id, scan_type){
-            // call
-            this.scan = scan;
+        get_scan_data(){
+            fetch(`/pro/data/explain/get_scan_data/${this.scan_id}/${this.scan_type}/`).then(response => response.json()).then(data => {
+                this.scan = data;
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
-        try_explain(scan_id, scan_type){
+        try_explain(){
+            // todo: post.
+            fetch(`/pro/data/explain/try_explain/${this.scan_id}/${this.scan_type}/${this.explanation}/`).then(response => response.json()).then(data => {
+                this.result = data;
 
+                // refresh the view, new options might become available.
+                this.get_scan_data();
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
         remove_explanation(){
-            // call to remove explanation with scan_id, scan_type
+            fetch(`/pro/data/explain/remove_explanation/${this.scan_id}/${this.scan_type}/`).then(response => response.json()).then(data => {
+                this.result = data;
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
         extend_explanation(){
-            // call to extend explanation with scan_id, scan_type
+            fetch(`/pro/data/explain/extend_explanation/${this.scan_id}/${this.scan_type}/`).then(response => response.json()).then(data => {
+                this.result = data;
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
-        explain_costs(){
-            // call to explain costs.
+        get_explain_costs(){
+            fetch(`/pro/data/explain/get_explain_costs/`).then(response => response.json()).then(data => {
+                this.explain_costs = data;
+            }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         }
     }
 
