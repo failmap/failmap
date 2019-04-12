@@ -27,7 +27,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                    reporting_urlreport
                INNER JOIN
                (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-               WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+               WHERE at_when <= '%(when)s' GROUP BY url_id) as x
                ON x.id2 = reporting_urlreport.id
                INNER JOIN url ON reporting_urlreport.url_id = url.id
                INNER JOIN url_organization on url.id = url_organization.url_id
@@ -45,7 +45,7 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
                    reporting_urlreport
                INNER JOIN
                (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-               WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+               WHERE at_when <= '%(when)s' GROUP BY url_id) as x
                ON x.id2 = reporting_urlreport.id
                INNER JOIN url ON reporting_urlreport.url_id = url.id
                INNER JOIN url_organization on url.id = url_organization.url_id

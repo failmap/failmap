@@ -344,8 +344,8 @@ class ConfigurationAdmin(ImportExportModelAdmin, admin.ModelAdmin, SortableAdmin
 
 @admin.register(models.MapDataCache)
 class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('pk', 'country', 'organization_type', 'filters', 'when')
-    list_filter = ['country', 'organization_type', 'filters', 'when'][::-1]
+    list_display = ('pk', 'country', 'organization_type', 'filters', 'at_when')
+    list_filter = ['country', 'organization_type', 'filters', 'at_when'][::-1]
     search_fields = (['country', 'organization_type', 'filters'])
 
     readonly_fields = ['cached_on']
@@ -367,9 +367,9 @@ class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.VulnerabilityStatistic)
 class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
-        'country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low',
+        'country', 'organization_type', 'scan_type', 'at_when', 'high', 'medium', 'low',
         'urls', 'ok_urls', 'endpoints', 'ok_endpoints', 'ok')
-    list_filter = ['country', 'organization_type', 'scan_type', 'when', 'high', 'medium', 'low'][::-1]
+    list_filter = ['country', 'organization_type', 'scan_type', 'at_when', 'high', 'medium', 'low'][::-1]
     search_fields = (['country', 'organization_type', 'scan_type'])
 
     actions = []
@@ -384,8 +384,8 @@ class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 @admin.register(models.HighLevelStatistic)
 class HighLevelStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
-    list_display = ('country', 'organization_type', 'when', )
-    list_filter = ['country', 'organization_type', 'when'][::-1]
+    list_display = ('country', 'organization_type', 'at_when', )
+    list_filter = ['country', 'organization_type', 'at_when'][::-1]
     search_fields = (['country', 'organization_type'])
 
     actions = []
@@ -407,9 +407,9 @@ class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = ('organization', 'total_urls', 'ok_urls', 'total_endpoints', 'ok_endpoints',
                     'high', 'medium', 'low', 'ok',
-                    'explained_high', 'explained_medium', 'explained_low', 'when', 'inspect_organization')
-    search_fields = (['organization__name', 'when'])
-    list_filter = ['organization', 'organization__country', 'organization__type__name', 'when'][::-1]
+                    'explained_high', 'explained_medium', 'explained_low', 'at_when', 'inspect_organization')
+    search_fields = (['organization__name', 'at_when'])
+    list_filter = ['organization', 'organization__country', 'organization__type__name', 'at_when'][::-1]
     # fields = [field.name for field in OrganizationRating._meta.get_fields() if field.name != "id"][::-1]
 
     fields = ('organization', 'total_urls', 'total_endpoints',
@@ -452,9 +452,9 @@ class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
               'explained_endpoint_issues_high',
               'explained_endpoint_issues_medium',
               'explained_endpoint_issues_low',
-              'when',
+              'at_when',
               'calculation')
 
-    ordering = ["-when"]
+    ordering = ["-at_when"]
 
     save_as = True

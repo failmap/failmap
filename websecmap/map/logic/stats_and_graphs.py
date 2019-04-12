@@ -19,8 +19,8 @@ def get_vulnerability_graph(country, organization_type, weeks_back):
     one_year_ago = when - timedelta(days=365)
 
     data = VulnerabilityStatistic.objects.all().filter(
-        organization_type=organization_type_id, country=country, when__lte=when, when__gte=one_year_ago
-    ).order_by('scan_type', 'when')
+        organization_type=organization_type_id, country=country, at_when__lte=when, at_when__gte=one_year_ago
+    ).order_by('scan_type', 'at_when')
 
     """
     Desired output:
@@ -48,7 +48,7 @@ def get_vulnerability_graph(country, organization_type, weeks_back):
             {'high': statistic.high,
              'medium': statistic.medium,
              'low': statistic.low,
-             'date': statistic.when.isoformat(),
+             'date': statistic.at_when.isoformat(),
              'urls': statistic.urls,
              'ok_urls': statistic.ok_urls,
              'endpoints': statistic.endpoints,
@@ -63,12 +63,12 @@ def get_organization_vulnerability_timeline(organization_id: int):
     one_year_ago = timezone.now() - timedelta(days=365)
 
     ratings = OrganizationReport.objects.all().filter(organization=organization_id,
-                                                      when__gte=one_year_ago).order_by('when')
+                                                      at_when__gte=one_year_ago).order_by('at_when')
 
     stats = []
 
     for rating in ratings:
-        stats.append({'date': rating.when.date().isoformat(),
+        stats.append({'date': rating.at_when.date().isoformat(),
                       'endpoints': rating.total_endpoints,
                       'urls': rating.total_urls,
                       'high': rating.url_issues_high + rating.endpoint_issues_high,
@@ -137,8 +137,8 @@ def get_stats(country, organization_type, weeks_back):
         stats = HighLevelStatistic.objects.all().filter(
             country=country,
             organization_type=get_organization_type(organization_type),
-            when__lte=when
-        ).order_by('-when').first()
+            at_when__lte=when
+        ).order_by('-at_when').first()
 
         # no stats before a certain date, or database empty.
         if stats:

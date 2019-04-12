@@ -58,7 +58,7 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
 
     log.info("Creating report for urllist %s on %s" % (UrlList, when, ))
 
-    if UrlListReport.objects.all().filter(urllist=urllist, when=when).exists():
+    if UrlListReport.objects.all().filter(urllist=urllist, at_when=when).exists():
         log.debug("UrllistReport already exists for %s on %s. Not overwriting." % (urllist, when))
         return
 
@@ -67,7 +67,7 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
     scores = aggegrate_url_rating_scores(all_url_ratings)
 
     try:
-        last = UrlListReport.objects.filter(urllist=urllist, when__lte=when).latest('when')
+        last = UrlListReport.objects.filter(urllist=urllist, at_when__lte=when).latest('at_when')
     except UrlListReport.DoesNotExist:
         last = UrlListReport()  # create a dummy one for comparison
 
@@ -88,7 +88,7 @@ def rate_urllist_on_moment(urllist: UrlList, when: datetime = None):
 
     report = UrlListReport(**init_scores)
     report.urllist = urllist
-    report.when = when
+    report.at_when = when
     report.calculation = calculation
     report.save()
 

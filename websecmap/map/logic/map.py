@@ -33,13 +33,13 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # look if we have data in the cache, which will save some calculations and a slower query
         cached = MapDataCache.objects.all().filter(country=country,
                                                    organization_type=get_organization_type(organization_type),
-                                                   when=when,
+                                                   at_when=when,
                                                    filters=['all']).first()
     else:
         # look if we have data in the cache, which will save some calculations and a slower query
         cached = MapDataCache.objects.all().filter(country=country,
                                                    organization_type=get_organization_type(organization_type),
-                                                   when=when,
+                                                   at_when=when,
                                                    filters=desired_url_scans + desired_endpoint_scans).first()
 
     if cached:
@@ -129,12 +129,12 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
         INNER JOIN
           (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
-          WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
+          WHERE at_when <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
         INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
-        ORDER BY map_organizationreport.`when` ASC
+        ORDER BY map_organizationreport.at_when ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 

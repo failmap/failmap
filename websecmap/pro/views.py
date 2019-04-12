@@ -226,8 +226,8 @@ def portfolio_data(request):
 
     one_year_ago = datetime.now(pytz.utc) - timedelta(days=365)
 
-    report_statistics = UrlListReport.objects.filter(when__gte=one_year_ago).only(
-        'when', 'total_endpoints', 'total_urls', 'high', 'medium', 'low').order_by('when')
+    report_statistics = UrlListReport.objects.filter(at_when__gte=one_year_ago).only(
+        'at_when', 'total_endpoints', 'total_urls', 'high', 'medium', 'low').order_by('at_when')
     urllists = UrlList.objects.all().filter(
         account=get_account(request)
     ).prefetch_related(
@@ -260,7 +260,7 @@ def portfolio_data(request):
 
         for report in urllist.urllistreport_set.all():
             stats.append({
-                'date': report.when.date().isoformat(),
+                'date': report.at_when.date().isoformat(),
                 'urls': report.total_urls,
                 'endpoints': report.total_endpoints,
                 'high': report.high,

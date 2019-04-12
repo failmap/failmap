@@ -104,11 +104,11 @@ class TlsQualysScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.TlsQualysScratchpad)
 class TlsQualysScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('domain', 'when')
-    search_fields = ('domain', 'when')
-    list_filter = ['domain', 'when'][::-1]
+    list_display = ('domain', 'at_when')
+    search_fields = ('domain', 'at_when')
+    list_filter = ['domain', 'at_when'][::-1]
     fields = ('domain', 'data')
-    readonly_fields = ['when']
+    readonly_fields = ['at_when']
 
 
 @admin.register(models.Screenshot)
@@ -197,10 +197,10 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.EndpointGenericScanScratchpad)
 class EndpointGenericScanScratchpadAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('type', 'domain', 'when', 'data')
-    search_fields = ('type', 'domain', 'when', 'data')
-    list_filter = ['type', 'domain', 'when', 'data'][::-1]
-    fields = ('type', 'domain', 'when', 'data')
+    list_display = ('type', 'domain', 'at_when', 'data')
+    search_fields = ('type', 'domain', 'at_when', 'data')
+    list_filter = ['type', 'domain', 'at_when', 'data'][::-1]
+    fields = ('type', 'domain', 'at_when', 'data')
 
 
 @admin.register(models.InternetNLScan)

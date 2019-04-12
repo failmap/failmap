@@ -130,7 +130,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
             # delete this specific moment as it's going to be replaced, so it's not really noticable an update is
             # taking place.
             VulnerabilityStatistic.objects.all().filter(
-                when=when, country=country, organization_type=OrganizationType(pk=organization_type_id)).delete()
+                at_when=when, country=country, organization_type=OrganizationType(pk=organization_type_id)).delete()
 
             # about 1 second per query, while it seems to use indexes.
             # Also moved the calculation field here also from another table, which greatly improves joins on Mysql.
@@ -167,7 +167,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                    FROM reporting_urlreport
                    INNER JOIN
                    (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                   WHERE `when` <= '%(when)s' GROUP BY url_id) as x
+                   WHERE at_when <= '%(when)s' GROUP BY url_id) as x
                    ON x.id2 = reporting_urlreport.id
                    INNER JOIN url ON reporting_urlreport.url_id = url.id
                    INNER JOIN url_organization on url.id = url_organization.url_id
@@ -231,12 +231,12 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       ON coordinate_stack.organization_id = map_organizationreport.organization_id
                     INNER JOIN
                       (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
-                      WHERE `when` <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
+                      WHERE at_when <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
                       ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
                     INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
                     WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
-                    ORDER BY map_organizationreport.`when` ASC
+                    ORDER BY map_organizationreport.at_when ASC
                     """ % {"when": when, "OrganizationTypeId": organization_type_id,
                            "country": country}
 
@@ -337,7 +337,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                 # log.debug(scan_type)
                 if scan_type in measurement:
                     vs = VulnerabilityStatistic()
-                    vs.when = when
+                    vs.at_when = when
                     vs.organization_type = OrganizationType(pk=organization_type_id)
                     vs.country = country
                     vs.scan_type = scan_type
@@ -389,7 +389,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
 
                 # You can expect something to change each day. Therefore just store the map data each day.
                 MapDataCache.objects.all().filter(
-                    when=when, country=map_configuration['country'],
+                    at_when=when, country=map_configuration['country'],
                     organization_type=OrganizationType(pk=map_configuration['organization_type']),
                     filters=[scan_type]
                 ).delete()
@@ -410,7 +410,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
                     cached.organization_type = OrganizationType(pk=map_configuration['organization_type'])
                     cached.country = map_configuration['country']
                     cached.filters = [scan_type]
-                    cached.when = when
+                    cached.at_when = when
                     cached.dataset = data
                     cached.save()
                 except OperationalError as a:
@@ -460,7 +460,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                            map_organizationreport
                        INNER JOIN
                        (SELECT MAX(id) as id2 FROM map_organizationreport or2
-                       WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+                       WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
                        ON x.id2 = map_organizationreport.id
                        INNER JOIN organization ON map_organizationreport.organization_id = organization.id
                        INNER JOIN organizations_organizationtype ON
@@ -599,7 +599,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
             s = HighLevelStatistic()
             s.country = map_configuration['country']
             s.organization_type = OrganizationType.objects.get(name=map_configuration['organization_type__name'])
-            s.when = when
+            s.at_when = when
             s.report = measurement
             s.save()
 
@@ -624,7 +624,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # this is probably a lot quicker than calculating the score and then deepdiffing it.
     # using this check we can also ditch deepdiff, because ratings on the same day are always the same.
     # todo: we should be able to continue on a certain day.
-    if OrganizationReport.objects.all().filter(organization=organization, when=when).exists():
+    if OrganizationReport.objects.all().filter(organization=organization, at_when=when).exists():
         log.info("Rating already exists for %s on %s. Not overwriting." % (organization, when))
 
     # Done: closing off urls, after no relevant endpoints, but still resolvable. Done.
@@ -641,7 +641,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # Still do deepdiff to prevent double reports.
     try:
         last = OrganizationReport.objects.filter(
-            organization=organization, when__lte=when).latest('when')
+            organization=organization, at_when__lte=when).latest('when')
     except OrganizationReport.DoesNotExist:
         log.debug("Could not find the last organization rating, creating a dummy one.")
         last = OrganizationReport()  # create an empty one
@@ -661,7 +661,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
 
         organizationrating = OrganizationReport(**init_scores)
         organizationrating.organization = organization
-        organizationrating.when = when
+        organizationrating.at_when = when
         organizationrating.calculation = calculation
 
         organizationrating.save()
@@ -698,7 +698,7 @@ def default_organization_rating(organizations: List[Organization]):
         when = organization.created_on if organization.created_on else START_DATE
 
         r = OrganizationReport()
-        r.when = when
+        r.at_when = when
         r.organization = organization
         r.calculation = {
             "organization": {

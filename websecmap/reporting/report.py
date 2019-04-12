@@ -677,10 +677,10 @@ def save_url_report(url: Url, date: datetime, calculation):
     # save it as NOW if it's done today, else on the last moment on the same day.
     # So the url ratings immediately are shown, even if the day is not over.
     if date == datetime.now().date():
-        u.when = datetime.now(pytz.utc)
+        u.at_when = datetime.now(pytz.utc)
     else:
-        u.when = datetime(year=date.year, month=date.month, day=date.day,
-                          hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+        u.at_when = datetime(year=date.year, month=date.month, day=date.day,
+                             hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
 
     u.total_endpoints = len(calculation['endpoints'])
 
@@ -1012,7 +1012,7 @@ def get_latest_urlratings_fast(urls: List[Url], when):
                 FROM reporting_urlreport
                 INNER JOIN
                   (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-                  WHERE `when` <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
+                  WHERE at_when <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
                   GROUP BY url_id) as x
                   ON x.id2 = reporting_urlreport.id
                 ORDER BY `high` DESC, `medium` DESC, `low` DESC, `url_id` ASC

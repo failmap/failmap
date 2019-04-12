@@ -70,7 +70,7 @@ class Account(models.Model):
                 credits_spent=int(amount),
                 credits_received=0,
                 credit_mutation=-int(amount),
-                when=datetime.now(pytz.utc),
+                at_when=datetime.now(pytz.utc),
                 goal=goal,
             )
             mutation.save()
@@ -87,7 +87,7 @@ class Account(models.Model):
                 credits_spent=0,
                 credits_received=int(amount),
                 credit_mutation=int(amount),
-                when=datetime.now(pytz.utc),
+                at_when=datetime.now(pytz.utc),
                 goal=goal,
             )
             mutation.save()
@@ -139,15 +139,15 @@ class CreditMutation(models.Model):
         null=True,
     )
 
-    when = models.DateTimeField(
+    at_when = models.DateTimeField(
         blank=True,
         null=True,
         help_text="When the transaction was made."
     )
 
     class Meta:
-        get_latest_by = "when"
-        ordering = ('-when', )
+        get_latest_by = "at_when"
+        ordering = ('-at_when', )
 
 
 class ProUser(models.Model):
@@ -263,9 +263,9 @@ class UrlListReport(SeriesOfUrlsReportMixin):
     urllist = models.ForeignKey(UrlList, on_delete=models.CASCADE)
 
     class Meta:
-        get_latest_by = "when"
+        get_latest_by = "at_when"
         index_together = [
-            ["when", "id"],
+            ["at_when", "id"],
         ]
 
 

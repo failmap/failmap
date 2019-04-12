@@ -17,7 +17,7 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
                 organization.name,
                 organizations_organizationtype.name,
                 organization.id,
-                `when`,
+                at_when,
                 organization.twitter_handle,
                 high,
                 medium,
@@ -33,14 +33,14 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
               coordinate ON coordinate.organization_id = organization.id
           INNER JOIN
               (SELECT MAX(id) as id2 FROM map_organizationreport or2
-              WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+              WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
-            ORDER BY low ASC, total_endpoints DESC, `organization`.`name` ASC
+            ORDER BY low ASC, total_endpoints DESC, organization.name ASC
             LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
@@ -60,7 +60,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
                 organization.name,
                 organizations_organizationtype.name,
                 organization.id,
-                `when`,
+                at_when,
                 organization.twitter_handle,
                 high,
                 medium,
@@ -76,14 +76,14 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
               (SELECT MAX(id) as id2 FROM map_organizationreport or2
-              WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+              WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
               ON x.id2 = map_organizationreport.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
             AND organization.country = '%(country)s'
             AND total_urls > 0
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
-            ORDER BY `high` DESC, `medium` DESC, `medium` DESC, `organization`.`name` ASC
+            ORDER BY high DESC, medium DESC, medium DESC, organization.name ASC
             LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}

@@ -73,7 +73,7 @@ class SeriesOfUrlsReportMixin(models.Model):
     explained_endpoint_issues_low = models.IntegerField(help_text="Total amount of issues on endpoint level.",
                                                         default=0)
 
-    when = models.DateTimeField(db_index=True)
+    at_when = models.DateTimeField(db_index=True)
     calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment, for all urls "
                   "of this organization. This can be a lot."
@@ -81,9 +81,9 @@ class SeriesOfUrlsReportMixin(models.Model):
 
     def __str__(self):
         if any([self.high, self.medium, self.low]):
-            return '🔴%s 🔶%s 🍋%s | %s' % (self.high, self.medium, self.low, self.when.date(),)
+            return '🔴%s 🔶%s 🍋%s | %s' % (self.high, self.medium, self.low, self.at_when.date(),)
         else:
-            return '✅ perfect | %s' % self.when.date()
+            return '✅ perfect | %s' % self.at_when.date()
 
     class Meta:
         abstract = True
@@ -153,7 +153,7 @@ class UrlReport(models.Model):
     explained_endpoint_issues_low = models.IntegerField(help_text="Total amount of issues on endpoint level.",
                                                         default=0)
 
-    when = models.DateTimeField(db_index=True)
+    at_when = models.DateTimeField(db_index=True)
 
     calculation = JSONField(
         help_text="Contains JSON with a calculation of all scanners at this moment. The rating can "
@@ -168,6 +168,6 @@ class UrlReport(models.Model):
         verbose_name_plural = _('Url Reports')
 
     def __str__(self):
-        return '%s,%s,%s  - %s' % (self.high, self.medium, self.low, self.when.date(),)
+        return '%s,%s,%s  - %s' % (self.high, self.medium, self.low, self.at_when.date(),)
 
 # todo: we can make a vulnerabilitystatistic per organization type or per tag. But not per country, list etc.

@@ -32,7 +32,7 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
                map_organizationreport
            INNER JOIN
            (SELECT MAX(id) as id2 FROM map_organizationreport or2
-           WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+           WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
            ON x.id2 = map_organizationreport.id
            INNER JOIN organization ON map_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'
@@ -48,7 +48,7 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
                map_organizationreport
            INNER JOIN
            (SELECT MAX(id) as id2 FROM map_organizationreport or2
-           WHERE `when` <= '%(when)s' GROUP BY organization_id) as x
+           WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
            ON x.id2 = map_organizationreport.id
            INNER JOIN organization ON map_organizationreport.organization_id = organization.id
             WHERE organization.type_id = '%(OrganizationTypeId)s'

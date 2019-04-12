@@ -132,7 +132,7 @@ class MapDataCache(models.Model):
         on_delete=models.CASCADE,
         help_text="Part of the combination shown on the map.")
 
-    when = models.DateField()
+    at_when = models.DateField()
 
     filters = models.CharField(
         max_length=1024,
@@ -147,7 +147,7 @@ class MapDataCache(models.Model):
     cached_on = models.DateField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
-        return 'Map Cache %s %s %s' % (self.country, self.organization_type, self.when)
+        return 'Map Cache %s %s %s' % (self.country, self.organization_type, self.at_when)
 
 
 # It took too long to calculate these stats, resulting in non showing graphs. Therefore we're now storing
@@ -162,7 +162,7 @@ class VulnerabilityStatistic(models.Model):
         on_delete=models.CASCADE,
         help_text="Part of the combination shown on the map.")
 
-    when = models.DateField()
+    at_when = models.DateField()
 
     scan_type = models.CharField(
         max_length=255,
@@ -198,7 +198,7 @@ class HighLevelStatistic(models.Model):
         on_delete=models.CASCADE,
         help_text="Part of the combination shown on the map.")
 
-    when = models.DateField()
+    at_when = models.DateField()
 
     report = JSONField()
 
@@ -228,9 +228,9 @@ class OrganizationReport(SeriesOfUrlsReportMixin):
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     class Meta:
-        get_latest_by = "when"
+        get_latest_by = "at_when"
         index_together = [
-            ["when", "id"],
+            ["at_when", "id"],
         ]
         verbose_name = _('Organization Report')
         verbose_name_plural = _('Organization Reports')

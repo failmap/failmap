@@ -82,9 +82,9 @@ class UrlListReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return obj
 
     list_display = ('urllist', 'total_urls', 'total_endpoints', 'report', 'explained_high', 'explained_medium',
-                    'explained_low', 'when', 'inspect_urllist')
-    search_fields = (['organization__name', 'when'])
-    list_filter = ['urllist', 'urllist__account', 'when'][::-1]
+                    'explained_low', 'at_when', 'inspect_urllist')
+    search_fields = (['organization__name', 'at_when'])
+    list_filter = ['urllist', 'urllist__account', 'at_when'][::-1]
     fields = [field.name for field in UrlListReport._meta.get_fields() if field.name != "id"][::-1]
 
 
@@ -93,7 +93,7 @@ class CreditMutationAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     all_fields = [field.name for field in CreditMutation._meta.get_fields() if field.name != "id"][::-1]
     search_fields = ['account']
-    list_filter = ['account', 'when'][::-1]
+    list_filter = ['account', 'at_when'][::-1]
     list_display = all_fields[::-1]
     fields = all_fields
 

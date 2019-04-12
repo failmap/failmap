@@ -85,7 +85,7 @@ def analyze_headers(result: requests.Response, endpoint):
 
     # scratch it, for debugging.
     egss = EndpointGenericScanScratchpad()
-    egss.when = datetime.now(pytz.utc)
+    egss.at_when = datetime.now(pytz.utc)
     egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
     egss.type = "security headers"
     egss.save()

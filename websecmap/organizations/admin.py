@@ -146,17 +146,17 @@ class CoordinateAdminInline(CompactInline):
 class OrganizationRatingAdminInline(CompactInline):
     model = OrganizationReport
     extra = 0
-    readonly_fields = ('organization', 'high', 'medium', 'low', 'when', 'calculation')
+    readonly_fields = ('organization', 'high', 'medium', 'low', 'at_when', 'calculation')
     can_delete = False
-    ordering = ["-when"]
+    ordering = ["-at_when"]
 
 
 class UrlRatingAdminInline(CompactInline):
     model = UrlReport
     extra = 0
-    readonly_fields = ('url', 'high', 'medium', 'low', 'when', 'calculation')
+    readonly_fields = ('url', 'high', 'medium', 'low', 'at_when', 'calculation')
     can_delete = False
-    ordering = ["-when"]
+    ordering = ["-at_when"]
 
 
 class UrlIpInline(CompactInline):
@@ -496,7 +496,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def current_rating(obj):
-        x = UrlReport.objects.filter(url=obj).latest('when')
+        x = UrlReport.objects.filter(url=obj).latest('at_when')
 
         if not any([x.high, x.medium, x.low]):
             return "✅ Perfect"

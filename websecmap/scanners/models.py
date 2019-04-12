@@ -560,7 +560,7 @@ class EndpointGenericScanScratchpad(models.Model):
         blank=True,
         null=True
     )
-    when = models.DateTimeField(
+    at_when = models.DateTimeField(
         auto_now_add=True
     )
     data = models.TextField(
@@ -712,5 +712,5 @@ class TlsQualysScratchpad(models.Model):
     You can easily truncate this log after 30 days.
     """
     domain = models.CharField(max_length=255)
-    when = models.DateTimeField(auto_now_add=True)
+    at_when = models.DateTimeField(auto_now_add=True)
     data = models.TextField()

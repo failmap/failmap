@@ -11,9 +11,9 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return format_html('<a href="../../organizations/url/{id}/change">inspect</a>',
                            id=format(obj.url_id))
 
-    list_display = ('url', 'high', 'medium', 'low', 'ok', 'total_endpoints', 'ok_endpoints', 'when', 'inspect_url')
-    search_fields = (['url__organization__name', 'url__url', 'when'])
-    list_filter = ['url', 'when', 'url__organization__type', 'url__organization__country'][::-1]
+    list_display = ('url', 'high', 'medium', 'low', 'ok', 'total_endpoints', 'ok_endpoints', 'at_when', 'inspect_url')
+    search_fields = (['url__organization__name', 'url__url', 'at_when'])
+    list_filter = ['url', 'at_when', 'url__organization__type', 'url__organization__country'][::-1]
     fields = ('url', 'total_endpoints',
               'total_issues',
 
@@ -50,8 +50,8 @@ class UrlRatingAdmin(ImportExportModelAdmin, admin.ModelAdmin):
               'explained_endpoint_issues_medium',
               'explained_endpoint_issues_low',
 
-              'when', 'calculation')
+              'at_when', 'calculation')
 
-    ordering = ["-when"]
+    ordering = ["-at_when"]
 
     save_as = True

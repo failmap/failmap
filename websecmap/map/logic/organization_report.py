@@ -38,17 +38,17 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
     if not organization:
         return {}
 
-    ratings = organization.filter(organizationreport__when__lte=when)
+    ratings = organization.filter(organizationreport__at_when__lte=when)
     values = ratings.values(
         'organizationreport__calculation',
-        'organizationreport__when',
+        'organizationreport__at_when',
         'name',
         'pk',
         'twitter_handle',
         'organizationreport__high',
         'organizationreport__medium',
         'organizationreport__low'
-    ).latest('organizationreport__when')
+    ).latest('organizationreport__at_when')
 
     # get the most recent non-expired 'promise'
     promise = get_last_promise(organization_id)
@@ -58,7 +58,7 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
         "slug": slugify(values['name']),
         "id": values['pk'],
         "twitter_handle": values['twitter_handle'],
-        "when": values['organizationreport__when'].isoformat(),
+        "when": values['organizationreport__at_when'].isoformat(),
 
         # fixing json being presented and escaped as a string, this makes it a lot slowr
         # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
