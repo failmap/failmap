@@ -127,6 +127,7 @@ django-admin-sortable2 = "*"  # nice sorting in the admin, used in map configura
 
 hyper_sh = "^1.0"
 celery = {version = "^4.2",extras = ["redis", "eventlet"]}
+pyexcel-text = "^0.2.7"
 # game team colors
 django-colorful = "*"
 
