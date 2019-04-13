@@ -1,0 +1,52 @@
+all: check test
+
+VIRTUAL_ENV := $(shell poetry config settings.virtualenvs.path|tr -d \")/websecmap-py3.6
+export PATH := ${VIRTUAL_ENV}/bin:${PATH}
+
+setup: ${VIRTUAL_ENV}/bin/websecmap
+
+${VIRTUAL_ENV}/bin/websecmap: poetry.lock | ${poetry}
+	poetry install --develop=websecmap
+	test -f $@ && touch $@
+
+test: | setup
+	# run testsuite
+	DJANGO_SETTINGS_MODULE=websecmap.settings coverage run --include 'websecmap/*' \
+		-m pytest -v -k 'not integration and not system' ${testargs}
+	# generate coverage
+	coverage report
+	# and pretty html
+	coverage html
+	# ensure no model updates are commited without migrations
+	websecmap makemigrations --check
+
+check: | setup
+	pylama websecmap tests --skip "**/migrations/*"
+
+autofix fix: | setup
+	# fix trivial pep8 style issues
+	autopep8 -ri websecmap tests
+	# remove unused imports
+	autoflake -ri --remove-all-unused-imports websecmap tests
+	# sort imports
+	isort -rc websecmap tests
+	# do a check after autofixing to show remaining problems
+	pylama websecmap tests --skip "**/migrations/*"
+
+test_integration: | setup
+  	DB_NAME=test.sqlite3 pytest -v -k 'integration' ${testargs}
+
+test_system: | setup
+	pytest -v tests/system ${testargs}
+
+test_datasets: | setup
+	/bin/sh -ec "find websecmap -path '*/fixtures/*.yaml' -print0 | \
+		xargs -0n1 basename -s .yaml | uniq | \
+		xargs -n1 websecmap test_dataset"
+
+test_deterministic: | ${virtualenv}
+	/bin/bash tools/compare_differences.sh HEAD HEAD tools/show_ratings.sh testdata
+
+clean:
+	rm -fr ${VIRTUAL_ENV}/{bin,include,lib,share,*.cfg,*.json}
+	test -d ${VIRTUAL_ENV} && rmdir ${VIRTUAL_ENV} || true

@@ -1,8 +1,14 @@
-[![Code Climate](https://codeclimate.com/github/Web Security Map/Web Security Map/badges/gpa.svg)](https://codeclimate.com/github/Web Security Map/Web Security Map) [![pipeline status](https://gitlab.com/Web Security Map/Web Security Map/badges/master/pipeline.svg)](https://gitlab.com/Web Security Map/Web Security Map/commits/master) [![Test Coverage](https://codeclimate.com/github/Web Security Map/Web Security Map/badges/coverage.svg)](https://codeclimate.com/github/Web Security Map/Web Security Map/coverage)
-[![Badges](https://img.shields.io/badge/badges-6-yellowgreen.svg)](https://shields.io) [![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl) [![Join the chat at https://gitter.im/internet-cleanup-foundation/Lobby](https://badges.gitter.im/internet-cleanup-foundation/Lobby.svg)](https://gitter.im/internet-cleanup-foundation/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Web Security Map
 
-Why Web Security Map
-===========
+[![Code Climate](https://codeclimate.com/github/failmap/failmap/badges/gpa.svg)](https://codeclimate.com/github/failmap/failmap)
+[![pipeline status](https://gitlab.com/internet-cleanup-foundation/web-security-map/badges/master/pipeline.svg)](https://gitlab.com/internet-cleanup-foundation/web-security-map/commits/master)
+[![Test Coverage](https://codeclimate.com/github/failmap/failmap/badges/coverage.svg)](https://codeclimate.com/github/internet-cleanup-foundation/web-security-map/coverage)
+[![Badges](https://img.shields.io/badge/badges-6-yellowgreen.svg)](https://shields.io)
+[![Cyberveiligheid](https://img.shields.io/badge/Cyberveiligheid-97%25-yellow.svg)](https://eurocyber.nl)
+[![Join the chat at https://gitter.im/internet-cleanup-foundation/Lobby](https://badges.gitter.im/internet-cleanup-foundation/Lobby.svg)](https://gitter.im/internet-cleanup-foundation/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+## Why Web Security Map
+
 We believe privacy and information integrity are the basics of a resilient information society.
 
 By providing unprecedented transparency on the most basic levels of information security, insight in
@@ -14,9 +20,8 @@ for safeguarding information are doing what they are supposed to do.
 It is perfectly possible to run Web Security Map software for yourself, allowing you to independently verify the
 state of information security basics. All our products are open source.
 
+## What is it
 
-What is it
-----------
 Web Security Map is an open source web application that continuously evaluates the implementation of security standards and
 best practices at (governmental) organizations.
 
@@ -26,135 +31,96 @@ This repository contains the mapping application fo Web Security Map: the public
 
 ![screenshot](docs/admin_interface.png)
 
+## Getting started
 
-Getting started
-===============
 Keywords: quickstart, installation
 
-## 0: If you want a complete production setup
+### If you want a complete production setup
+
 Then read the installation tutorial, which is significantly easier than the below development setup!
 
-For full installation with everything and anything, check: https://gitlab.com/Web Security Map/server/
+For full installation with everything and anything, check: https://gitlab.com/internet-cleanup-foundation/server/
 
+### If you want a local test or development environment
 
-## 1: Install dependencies on your system
-Setup your system to run this software using your favourite package manager.
+Please follow these instructions to setup a development environment for Web Security Map:
 
-**MacOS (brew)**
+#### Install OS specific dependencies
+
+**macOS** via `brew`
+
 ```bash
-brew install git python3 direnv
+brew install git python3 direnv docker
 ```
 
-**Debian Linux (apt)**
+**Debian Linux** via `apt`
+
 ```bash
-apt-get install git python3 direnv
+apt-get install -y git python3 direnv docker.io
 ```
 
-**Redhat/CentOS (yum)**
+**Redhat/CentOS Linux** via `yum`
+
 ```bash
-yum install git python3 direnv
+yum install -y git python3 direnv docker
 ```
 
 Or download and install each package separately:
 
-- [git](https://git-scm.com/downloads) (download and install)
-- [python3.6](https://www.python.org/downloads/) (download and install)
-- [Tox](http://tox.readthedocs.io/) (`pip3 install --user tox`)
-- [direnv](https://direnv.net/) (download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
+- [make](https://www.gnu.org/software/make/) (required, pre-installed on most systems)
+- [git](https://git-scm.com/downloads) (required, download and install)
+- [python3.6](https://www.python.org/downloads/) (required, download and install)
+- [direnv](https://direnv.net/) (recommended, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
 
-## 2: Install direnv correctly
-Then set up direnv, the right command depends on your shell:
+#### Generic install steps
 
-**BASH**
-Add the following line at the end of the ~/.bashrc file:
+Install Poetry, this is used to handle all Python environment and dependency management:
+
 ```bash
-eval "$(direnv hook bash)"
+pip3 install --user poetry
 ```
 
-Make sure it appears even after rvm, git-prompt and other shell extensions that manipulate the prompt.
+In a directory of your choosing, download the software and enter the directory:
 
-**ZSH**
-Add the following line at the end of the ~/.zshrc file:
 ```bash
-eval "$(direnv hook zsh)"
+git clone --recursive https://gitlab.com/internet-cleanup-foundation/websecmap/ && cd websecmap/
 ```
 
-**FISH**
-Add the following line at the end of the ~/.config/fish/config.fish file:
+Running `make` once to create a development Virtualenv and setup the App and its dependencies. Running `make` without arguments by default also runs basic checks and tests to verify project code quality.
 
 ```bash
-eval (direnv hook fish)
-```
-
-**TCSH**
-Add the following line at the end of the ~/.cshrc file:
-
-```bash
-eval `direnv hook tcsh`
-```
-
-
-## 3: Generic install steps
-Install Tox, which helps to install the rest of the dependencies of this project:
-
-```bash
-pip3 install --user tox
-```
-
-In a directory of your choosing:
-
-download the software
-
-```bash
-git clone --recursive https://gitlab.com/Web Security Map/Web Security Map/
-```
-
-enter the directory of the downloaded software
-
-```bash
-cd Web Security Map/
-```
-
-This prepares the shell environment for local development.
-
-```bash
-direnv allow
-```
-
-Running Tox once creates a development Virtualenv in .tox/default/ which is automatically used after creation due to Direnv setup. Running Tox without arguments by default also runs basic checks and tests to verify project code quality.
-
-```bash
-tox
+make
 ```
 
 After completing successfully Web Security Map is available to run. For example, to show a list of commands:
 
 ```bash
-Web Security Map help
+poetry run websecmap help
 ```
+
 Now run the following command to start a full development server.
 
 ```bash
-Web Security Map devserver
+poetry run websecmap devserver
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
 
-## 4. Optional Steps
+#### Optional Steps
+
 This shows the current data on the map:
 
 ```bash
-Web Security Map rebuild_ratings
+poetry run websecmap rebuild_ratings
 ```
 
 It is possible to start the server without redis and without (re)loading data:
 
 ```bash
-Web Security Map devserver --no-backend --no-data
+poetry run websecmap devserver --no-backend --no-data
 ```
-
 
 Give everyone an F rating!
 
@@ -166,23 +132,21 @@ https://www.youtube.com/watch?v=a14Y2V5zJlY
 https://www.youtube.com/watch?v=eAwq2QV7f1k
 ```
 
+## Documentation
 
-Documentation
-=============
-Documentation is provided at [ReadTheDocs](http://Web Security Map.readthedocs.io/).
+Documentation is provided at [ReadTheDocs](http://websecmap.readthedocs.io/).
 
-Get involved
-============
+## Get involved
 
-Web Security Map is open organisation run by volunteers.
+Internet Cleanup Foundation is open organisation run by volunteers.
 
 - Talk to us via [gitter.im/internet-cleanup-foundation](https://gitter.im/internet-cleanup-foundation/Lobby#).
 - Or using IRC: #internet-cleanup-foundation/Lobby @ irc.gitter.im (see https://irc.gitter.im for information)
 - E-mail us at: [info@faalkaart.nl](mailto:info@faalkaart.nl),
-- Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/Web Security Map/Web Security Map/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/Web Security Map/Web Security Map.org/merge_requests/new).
+- Or simply start hacking on the code, open an [Gitlab Issue](https://gitlab.com/internet-cleanup-foundation/websecmap/issues/new) or send a [Gitlab Merge Request](https://gitlab.com/internet-cleanup-foundation/websecmap.org/merge_requests/new).
 
-Thanks to
-=========
+## Thanks to
+
 This project is being maintained by the [Internet Cleanup Foundation](https://internetcleanup.foundation).
 Special thanks to the SIDN Fonds for believing in this method of improving privacy.
 

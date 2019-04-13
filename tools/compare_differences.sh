@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-env
+
 set -ex
 
 # Compare output of a test script run against two different branches.
@@ -25,9 +25,9 @@ for index in "${!branches[@]}"; do
   websecmap migrate -v0
 
   # load dataset and update ratings
-  websecmap load-dataset -v0 "$dataset"
+  websecmap load_dataset -v0 "$dataset"
   # explictly set different random seed as gitlab CI environment don't seem random enought
-  websecmap rebuild-ratings -v0
+  websecmap rebuild_reports -v0
 
   # create output
   "$test_script" > "$index-$branch.txt"

@@ -1,9 +1,11 @@
 # Development
+
 Please follow the [quickstart](getting_started.md) to get Web Security Map on your system.
 
 Additionally the [Docker](docker.md) page could be very helpful.
 
 ## A normal change to the software
+
 This is an illustration to show a normal development practices.
 
 We use git, which comes with many pitfalls. Just search your answer on stack exchange first and ask in the group later.
@@ -11,52 +13,38 @@ We use git, which comes with many pitfalls. Just search your answer on stack exc
 Make sure Web Security Map is up and running, by following the [getting started](getting_started.md) instructions. Then make a
 branch that describes what you are doing. For example:
 
-```
-git branch documentation_upgrade
-```
+    git branch documentation_upgrade
 
 Then make any changes to the source code. You'll see that the devserver automatically restarts after every save.
 
 Once you're happy with your changes, and you've tested it on your environment using a meaningful dataset
 (eg productiondata), then you can verify (and autofix) the code to our code standards:
 
-```
-tox -e autofix
-```
+    make fix
 
 Fix any of the remarks it gives, otherwise your changes will not be added to the master branch.
 
 You can only commit files to the master branch if you're up to date with it's code:
 
-```
-git pull --rebase origin master
-```
+    git pull --rebase origin master
 
 Follow the instructions on screen to fix merge conflicts if any.
 
 When you are happy, review your changes and remove any temporary files using the instructions given:
 
-```
-git status
-```
+    git status
 
 If you like the files that are changed, add all changes to be merged:
 
-```
-git add -A
-```
+    git add -A
 
 Then commit them:
 
-```
-git commit -m "a short description why you changed something"
-```
+    git commit -m "a short description why you changed something"
 
 Then push them to the server:
 
-```
-git push
-```
+    git push
 
 The push command will give you a link to file a merge request. Meanwhile the build servers are checking your code
 before merging.
@@ -69,20 +57,17 @@ So ask.
 
 ## FAQ
 
-### The web security map command won't start and i get some weird errors...?
+### The web security map command won't start and i get some weird errors
+
 Make sure you've got an up to date development environment. You can do so by running the following commands:
 
 Rebuild the environment:
 
-```
-tox -r
-```
+    make clean
 
 Get all requirements and development requirements:
-```
-pip install -r requirements.txt
-pip install -r requirements.dev.txt
-```
+
+    make setup
 
 ## Code quality / Testing
 
@@ -90,23 +75,23 @@ This project sticks to default pycodestyle/pyflakes configuration to maintain co
 
 To run code quality checks and unit tests run:
 
-    tox
+    make
 
 For a comprehensive test run:
 
-    tox -e check,test,datasets
+    make check test test_datasets
 
-To make life easier you can use `autopep8`/`isort` before running `tox` to automatically fix most style issues:
+To make life easier you can use `autopep8`/`isort` before running `make` to automatically fix most style issues:
 
-    tox -e autofix
+    make fix
 
 To run only a specific test use:
 
-    tox -e test -- -k test_name
+    make test testargs="-k test_name"
 
 To only run a specific test suite use for example:
 
-    .tox/default/bin/websecmap test tests/scanners/test_dummy.py
+    poetry run websecmap test tests/scanners/test_dummy.py
 
 A coverage report is generated after running tests, on OSX it can be viewed using:
 
@@ -114,20 +99,21 @@ A coverage report is generated after running tests, on OSX it can be viewed usin
 
 Pytest allows to drop into Python debugger when a tests fails. To enable run:
 
-    tox -- --pdb
+    make testargs=--pdb
 
 ## Integration/system tests
+
 Besides quality checks and unit tests there are also integration and system testing frameworks available.
 
-These frameworks will run in the CI system but not by default when running `tox` due to their dependencies.
+These frameworks will run in the CI system but not by default when running `make` due to their dependencies.
 
 To run these testsuites make sure Docker is installed and running and run either:
 
-    tox -e integration
+    make test_integration
 
 or
 
-    tox -e system
+    make test_system
 
 ## Direnv / Virtualenv
 

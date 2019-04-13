@@ -15,11 +15,11 @@ test: &test_template
     PIP_DISABLE_PIP_VERSION_CHECK: 1
   cache:
     paths:
-      - "$CI_PROJECT_DIR/.pip-cache"
+      - ".pip-cache"
     key: "$CI_JOB_NAME"
 
   script:
-    - tox -e test
+    - make test
 
   retry: 1
 
@@ -37,9 +37,10 @@ test_mysql: &test_mysql_template
     # select mysql database settings, all settings default to 'failmap'
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
-    # add mysqlclient to tox environment
-    TOX_EXTRAS: deploy
   retry: 1
+  # install mysql dependencies
+  before_script:
+    - poetry install --develop=websecmap --extras=deploy
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
@@ -57,8 +58,9 @@ test_postgres: &test_postgres_template
     DJANGO_DATABASE: production
     DB_ENGINE: postgresql_psycopg2
     DB_HOST: postgres
-    # add mysqlclient to tox environment
-    TOX_EXTRAS: deploy
+  # install postgresql dependencies
+  before_script:
+    - poetry install --develop=websecmap --extras=deploy
 
   # run long/non-critical tests only on master
   only: [master]
@@ -70,7 +72,7 @@ check:
   stage: test
 
   script:
-    - tox -e check
+    - make check
     - shellcheck tests/*.sh tools/*.sh
 
 # integration tests
@@ -87,24 +89,24 @@ integration:
     C_FORCE_ROOT: 1
 
   script:
-    - tox -e integration
+    - make test_integration
 
 dataset:
   <<: *test_template
   script:
-    - tox -e datasets
+    - make test_datasets
 
 dataset_mysql:
   <<: *test_mysql_template
   script:
-    - tox -e datasets
+    - make test_datasets
   # run long tests only on master
   only: [master]
 
 dataset_postgres:
   <<: *test_postgres_template
   script:
-    - tox -e datasets
+    - make test_datasets
   # run long tests only on master
   only: [master]
 
@@ -180,7 +182,7 @@ image_test:
     - time tests/docker.sh docker
 
     # run system tests against image
-    - time tox -e system
+    - time make test_system
 
   # run on merge request to determine if build will not break on master
   except: [master]
@@ -200,9 +202,10 @@ test_system:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+    - pip install pytest pytest-logging retry
 
   script:
-    - time tox -e system
+    - time make test_system
 
   only: [master]
   retry: 1

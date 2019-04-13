@@ -2,8 +2,6 @@
 .DS_Store
 *.sqlite3
 *.py[co]
-.tox
-.tox2
 *.egg-info
 .cache
 .coverage
@@ -38,3 +36,7 @@ db.sqlite3-journal
 *.p12
 config.json
 pip-wheel-metadata/
+
+# legacy
+.tox
+.tox2

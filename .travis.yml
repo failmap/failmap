@@ -1,13 +1,13 @@
 language: python
 python:
-  - 3.6
+  - "3.6"
 
 # dependencies (pin coverage for codeclimate compat)
 # https://bitbucket.org/ned/coveragepy/issues/578/incomplete-file-path-in-xml-report
-install: pip install tox codeclimate-test-reporter "coverage<4.4"
+install: pip install poetry codeclimate-test-reporter "coverage<4.4"
 
 # run tests
-script: tox
+script: make
 
 # push results to CC
 after_success:
