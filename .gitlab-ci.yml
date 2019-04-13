@@ -121,6 +121,8 @@ bump:
     - git push
     - git push --tags
 
+  only: [master]
+
 # create distributable release
 build:
   stage: build
