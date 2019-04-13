@@ -20,6 +20,14 @@ test: | setup
 	# ensure no model updates are commited without migrations
 	websecmap makemigrations --check
 
+test_mysql:
+	docker run --name mysql -d --rm -p 3306:3306 \
+		-e MYSQL_ROOT_PASSWORD=failmap \
+		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
+		mysql:5
+	sleep 5
+	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 $(MAKE) test; e=$$?; docker stop mysql; exit $$e
+
 check: | setup
 	pylama websecmap tests --skip "**/migrations/*"
 
