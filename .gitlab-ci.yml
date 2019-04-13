@@ -177,6 +177,9 @@ image_test:
 
   image: websecmap/ci:docker-git
 
+  before_script:
+    - pip install pytest pytest-logging retry
+
   script:
     # build docker image to test building
     - time docker build . --tag websecmap/websecmap:latest

@@ -56,7 +56,7 @@ autofix fix: | setup
 test_integration: | setup
   	DB_NAME=test.sqlite3 pytest -v -k 'integration' ${testargs}
 
-test_system: | setup
+test_system:
 	pytest -v tests/system ${testargs}
 
 test_datasets: | setup
