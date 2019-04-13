@@ -135,7 +135,7 @@ class MapDataCache(models.Model):
     at_when = models.DateField()
 
     filters = models.CharField(
-        max_length=1024,
+        max_length=767,
         blank=True,
         null=True,
         db_index=True,

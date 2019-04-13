@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
             model_name='map_data_cache',
             name='filters',
             field=models.CharField(blank=True, db_index=True,
-                                   help_text='Any set of desired scan_types', max_length=1024, null=True),
+                                   help_text='Any set of desired scan_types', max_length=767, null=True),
         ),
     ]
