@@ -20,26 +20,6 @@ test: | setup
 	# ensure no model updates are commited without migrations
 	websecmap makemigrations --check
 
-test_mysql:
-	docker run --name mysql -d --rm -p 3306:3306 \
-		-e MYSQL_ROOT_PASSWORD=failmap \
-		-e MYSQL_DATABASE=failmap \
-		-e MYSQL_USER=failmap \
-		-e MYSQL_PASSWORD=failmap \
-		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
-		mysql:5.6
-	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 \
-		$(MAKE) test; e=$$?; docker stop mysql; exit $$e
-
-test_postgres:
-	docker run --name postgres -d --rm -p 5432:5432 \
-		-e POSTGRES_DB=failmap \
-		-e POSTGRES_USER=root \
-		-e POSTGRES_PASSWORD=failmap \
-		postgres:9.4
-	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
-		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
-
 check: | setup
 	pylama websecmap tests --skip "**/migrations/*"
 
@@ -66,6 +46,26 @@ test_datasets: | setup
 
 test_deterministic: | ${virtualenv}
 	/bin/bash tools/compare_differences.sh HEAD HEAD tools/show_ratings.sh testdata
+
+test_mysql:
+	docker run --name mysql -d --rm -p 3306:3306 \
+		-e MYSQL_ROOT_PASSWORD=failmap \
+		-e MYSQL_DATABASE=failmap \
+		-e MYSQL_USER=failmap \
+		-e MYSQL_PASSWORD=failmap \
+		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
+		mysql:5.6
+	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 \
+		$(MAKE) test; e=$$?; docker stop mysql; exit $$e
+
+test_postgres:
+	docker run --name postgres -d --rm -p 5432:5432 \
+		-e POSTGRES_DB=failmap \
+		-e POSTGRES_USER=root \
+		-e POSTGRES_PASSWORD=failmap \
+		postgres:9.4
+	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
+		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
 
 clean:
 	rm -fr ${VIRTUAL_ENV}/{bin,include,lib,share,*.cfg,*.json}
