@@ -23,6 +23,10 @@ test: | setup
 test_mysql:
 	docker run --name mysql -d --rm -p 3306:3306 \
 		-e MYSQL_ROOT_PASSWORD=failmap \
+		-e MYSQL_DATABASE=failmap \
+		-e MYSQL_USER=failmap \
+		-e MYSQL_PASSWORD=failmap \
+		-v $$PWD/tests/etc/mysql-minimal-memory.cnf:/etc/mysql/conf.d/mysql.cnf \
 		mysql:5.6
 	DJANGO_DATABASE=production DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop mysql; exit $$e

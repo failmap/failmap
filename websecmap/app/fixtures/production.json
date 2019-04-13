@@ -531,7 +531,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 6,
     "fields": {
-      "name": "\u2795 Discover new HTTP/HTTPS servers",
+      "name": "&#x2795 Discover new HTTP/HTTPS servers",
       "task": "websecmap.app.models.create_discover_job",
       "interval": null,
       "crontab": 7,
@@ -631,7 +631,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 10,
     "fields": {
-      "name": "\u2795 Discover new FTP servers",
+      "name": "&#x2795 Discover new FTP servers",
       "task": "websecmap.app.models.create_discover_job",
       "interval": null,
       "crontab": 11,
@@ -656,7 +656,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 11,
     "fields": {
-      "name": "\u2795 Discover new subdomains",
+      "name": "&#x2795 Discover new subdomains",
       "task": "websecmap.app.models.create_discover_job",
       "interval": null,
       "crontab": 10,
@@ -681,7 +681,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 12,
     "fields": {
-      "name": "\u2705 Verify that FTP servers still exist",
+      "name": "&#x2705 Verify that FTP servers still exist",
       "task": "websecmap.app.models.create_verify_job",
       "interval": null,
       "crontab": 4,
@@ -706,7 +706,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 13,
     "fields": {
-      "name": "\u2705 Verify that HTTP/HTTPS servers still exist",
+      "name": "&#x2705 Verify that HTTP/HTTPS servers still exist",
       "task": "websecmap.app.models.create_verify_job",
       "interval": null,
       "crontab": 6,
@@ -731,7 +731,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 14,
     "fields": {
-      "name": "\u2705 Verify that internet adresses still resolve (DNS)",
+      "name": "&#x2705 Verify that internet adresses still resolve (DNS)",
       "task": "websecmap.app.models.create_verify_job",
       "interval": null,
       "crontab": 16,
@@ -856,7 +856,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 21,
     "fields": {
-      "name": "\u2795  Discover Urls with MX records (hidden)",
+      "name": "&#x2795  Discover Urls with MX records (hidden)",
       "task": "websecmap.app.models.create_discover_job",
       "interval": null,
       "crontab": 7,
@@ -956,7 +956,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 25,
     "fields": {
-      "name": "\u2795 Discover DNS endpoints",
+      "name": "&#x2795 Discover DNS endpoints",
       "task": "websecmap.app.models.create_discover_job",
       "interval": null,
       "crontab": 7,
@@ -981,7 +981,7 @@
     "model": "django_celery_beat.periodictask",
     "pk": 26,
     "fields": {
-      "name": "\u2705 Verify that DNS endpoints still exist",
+      "name": "&#x2705 Verify that DNS endpoints still exist",
       "task": "websecmap.app.models.create_verify_job",
       "interval": null,
       "crontab": 6,
