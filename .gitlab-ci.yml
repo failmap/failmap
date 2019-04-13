@@ -27,7 +27,7 @@ test: &test_template
 test_mysql: &test_mysql_template
   <<: *test_template
   services:
-    - mysql:5.5
+    - mysql:5.6
   variables:
     # configuration for docker mysql service
     MYSQL_ROOT_PASSWORD: failmap
@@ -58,13 +58,10 @@ test_postgres: &test_postgres_template
     DJANGO_DATABASE: production
     DB_ENGINE: postgresql_psycopg2
     DB_HOST: postgres
+  retry: 1
   # install postgresql dependencies
   before_script:
     - poetry install --develop=websecmap --extras=deploy
-
-  # run long/non-critical tests only on master
-  only: [master]
-  retry: 1
 
 # code quality checks
 check:
