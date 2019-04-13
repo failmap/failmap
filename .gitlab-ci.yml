@@ -1,5 +1,6 @@
 stages:
   - test
+  - bump
   - build
   - staging
   - production
@@ -107,6 +108,19 @@ dataset_postgres:
   # run long tests only on master
   only: [master]
 
+bump:
+  stage: bump
+
+  image: websecmap/ci:latest
+
+  script:
+    - poetry version patch
+    - git add pyproject.toml
+    - git ci -m "Bump version to $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)"
+    - git tag $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)
+    - git push
+    - git push --tags
+
 # create distributable release
 build:
   stage: build
@@ -121,14 +135,10 @@ build:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-    # required for quering python package version
-    - apk add --no-cache python3
-    # cache previous docker image if available
-    - docker pull websecmap/websecmap:latest || true
 
   script:
     # store current version as artifact to copy into docker container
-    - python3 setup.py --version > version
+    - sed -En 's/^version = "(.*)"/\1/p' pyproject.toml > version
 
     # build docker image and push to registry
     - time docker build . --tag websecmap/websecmap:build
@@ -166,10 +176,6 @@ image_test:
     - docker:dind
 
   image: websecmap/ci:docker-git
-
-  before_script:
-    # cache previous build image if available for quicker build
-    - docker pull websecmap/websecmap:latest || true
 
   script:
     # build docker image to test building
