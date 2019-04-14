@@ -124,7 +124,7 @@ build:
 
   script:
     # store current version as artifact to copy into docker container
-    - sed -En "s/^version = "(.*\.)[0-9]+"/\1$(git rev-list --count master)/p" pyproject.toml > version
+    - sed -En "s/^version = \"(.*\.)[0-9]+\"/\1$(git rev-list --count master)/p" pyproject.toml > version
 
     # build docker image and push to registry
     - time docker build . --tag websecmap/websecmap:build
