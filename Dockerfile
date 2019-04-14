@@ -46,8 +46,7 @@ ENV PATH=/pyenv/bin:$PATH
 
 COPY pyproject.toml poetry.lock README.md /source/
 COPY websecmap/ /source/websecmap/
-# copy pip cache to improve build speeds
-COPY ./.pip-cache/ /root/.cache/pip/
+
 WORKDIR /source
 # Install app and dependencies in a artifact-able directory
 # App is installed by linking source into virtualenv. This is against convention
