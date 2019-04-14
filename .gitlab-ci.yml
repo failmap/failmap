@@ -1,6 +1,5 @@
 stages:
   - test
-  - bump
   - build
   - staging
   - production
@@ -108,21 +107,6 @@ dataset_postgres:
   # run long tests only on master
   only: [master]
 
-bump:
-  stage: bump
-
-  image: websecmap/ci:latest
-
-  script:
-    - poetry version patch
-    - git add pyproject.toml
-    - git commit -m "Bump version to $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)"
-    - git tag $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)
-    - git push
-    - git push --tags
-
-  only: [master]
-
 # create distributable release
 build:
   stage: build
@@ -140,7 +124,7 @@ build:
 
   script:
     # store current version as artifact to copy into docker container
-    - sed -En 's/^version = "(.*)"/\1/p' pyproject.toml > version
+    - sed -En "s/^version = "(.*\.)[0-9]+"/\1$(git rev-list --count master)/p" pyproject.toml > version
 
     # build docker image and push to registry
     - time docker build . --tag websecmap/websecmap:build
