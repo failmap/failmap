@@ -211,7 +211,7 @@ staging:
 
   script:
     # store current version as artifact to copy into docker container
-    - python3 setup.py --version > version
+    - sed -En "s/^version = \"(.*\.)[0-9]+\"/\1$(git rev-list --count master)/p" pyproject.toml > version
     - export tag=$(cat version|tr + _)
 
     # pull latest version and tag as staging
