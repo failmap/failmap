@@ -116,7 +116,7 @@ bump:
   script:
     - poetry version patch
     - git add pyproject.toml
-    - git ci -m "Bump version to $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)"
+    - git commit -m "Bump version to $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)"
     - git tag $(sed -En 's/^version = "(.*)"/\1/p' pyproject.toml)
     - git push
     - git push --tags
