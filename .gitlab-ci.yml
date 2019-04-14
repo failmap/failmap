@@ -191,7 +191,6 @@ test_system:
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-    - pip install pytest pytest-logging retry
 
   script:
     - time make test_system
