@@ -190,7 +190,11 @@ def claim_proxy():
             #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
 
         else:
-            log.error('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
+            # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
+            # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own thread
+            # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
+            # When you have over 500 proxy requests, things are off. It's better to start with a clean slate then.
+            log.debug('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
 
         sleep(60)
 

@@ -213,7 +213,7 @@ class ScanProxy(models.Model):
         default='Unchecked.'
     )
 
-    check_result_date = models.DateField(
+    check_result_date = models.DateTimeField(
         blank=True,
         null=True
     )
