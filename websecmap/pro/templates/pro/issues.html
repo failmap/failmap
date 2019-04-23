@@ -22,21 +22,20 @@
 <div>
     <div class="loading" v-if="loading"><svg class="svg_icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path></svg></div>
 
-        <!-- Todo: font awesome slows down the results significantly as it scans the entire tree. For large results this can take seconds. x-->
-    <input class="search_input" v-if="!loading" type="text" v-model="query" placeholder="🔍 Search for an issue" v-on:change="find">
-        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_high" v-on:change="find">High</label>
-        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_medium" v-on:change="find">Medium</label>
-        <label v-if="!loading"><input v-if="!loading" type="checkbox" v-model="show_low" v-on:change="find">Low</label>
-        <label v-if="!loading">Is Explained: <select v-model="is_explained"><option selected>---</option><option>Yes</option><option>No</option></select></label>
-        <label v-if="!loading">Is Rescanned: <select v-model="is_rescanned"><option selected>---</option><option>Yes</option><option>No</option></select></label>
-
-
+    <div v-if="!loading">
+        <input class="search_input" type="text" v-model="query" placeholder="🔍 Search for an issue" v-on:change="find">
+        <label><input type="checkbox" v-model="show_high" v-on:change="find">High</label>
+        <label><input type="checkbox" v-model="show_medium" v-on:change="find">Medium</label>
+        <label><input type="checkbox" v-model="show_low" v-on:change="find">Low</label>
+        <label>Is Explained: <select v-model="is_explained"><option selected>---</option><option>Yes</option><option>No</option></select></label>
+        <label>Is Rescanned: <select v-model="is_rescanned"><option selected>---</option><option>Yes</option><option>No</option></select></label>
+    </div>
 
         <div class="row">
 
-            <!-- todo: how to add headers that are not extremely slow etc? -->
-        <!-- <h2 v-if="header_changed(issue.domain)" :id="issue.domain">{{ issue.domain }}</h2>
-        <h3 v-if="sub_header_changed(issue.domain_and_impact)" :id="issue.domain_and_impact">{{ issue.impact }}</h3> -->
+        <!-- todo: how to add headers that are not extremely slow etc? Problem is reactivity on the variables. -->
+        <!-- <h2 v-if="header_changed(issue.domain)" :id="issue.domain">{{ issue.domain }}</h2> -->
+        <!-- <h3 v-if="sub_header_changed(issue.domain_and_impact)" :id="issue.domain_and_impact">{{ issue.impact }}</h3> -->
 
         <div class="col-md-4" style="margin-bottom: 30px;" v-for="issue in relevant_issues">
             <table class="table table-sm table-striped table-bordered table-hover rounded-top issue_table">
@@ -52,6 +51,7 @@
                     <tr><td>Impact</td><td>{{ issue.impact }}</td></tr>
                     <tr><td>When</td><td><span :title="issue.last_scan_moment_python">{{ issue.last_scan_humanized }}</span></td></tr>
                         <tr><td colspan="2">
+                        <!-- Rescanning not yet supported:
                         <button v-if='issue.being_rescanned' type="button" id="issue.unique_id"
                             class="btn btn-secondary btn-block" disabled data-toggle="modal" data-target="#rescanModal">
                             [spinner] Rescanning</button>
@@ -60,15 +60,15 @@
                             :data-cost="issue.rescan_cost"
                             :data-scan-id="issue.id"
                             :data-scan-type="issue.type"
-                            :data-scan-label="issue.url +' '+issue.service">Rescan now</button>
+                            :data-scan-label="issue.url +' '+issue.service">Rescan now</button> -->
                         <button v-if="!issue.is_explained" type="button" class="btn btn-info btn-block" @click="start_explaining(issue.id, issue.type)">Explain</button>
                         <button v-if="issue.is_explained" type="button" class="btn btn-info btn-block" @click="start_explaining(issue.id, issue.type)">Edit / Remove explanation</button>
-                        <button type="button" id="issue.unique_id"
+                        <!-- Error reporting not yet supported: <button type="button" id="issue.unique_id"
                                 class="btn btn-warning btn-block" data-toggle="modal" data-target="#rescanModal"
                             :data-cost="issue.rescan_cost"
                             :data-scan-id="issue.id"
                             :data-scan-type="issue.type"
-                            :data-scan-label="issue.url + ' ' +issue.service">Report error with scan</button>
+                            :data-scan-label="issue.url + ' ' +issue.service">Report error with scan</button> -->
                         </td></tr>
                 </tbody>
             </table>
@@ -142,7 +142,7 @@ vueIssues = new Vue({
         this.load();
         this.$nextTick(function () {
 
-            tocbot.refresh();
+            // tocbot.refresh();
             // Code that will run only after the
             // entire view has been rendered
           });
@@ -236,33 +236,69 @@ vueIssues = new Vue({
 </script>
 
 
+<!-- modal code taken from: https://vuejs.org/v2/examples/modal.html -->
+{% verbatim %}
 <script type="x-template" id="explain_item">
-    <div v-if="scan_id">
-        <input type="button" @click="stop_explaining()" value="Close"><br>
-        <div v-if="result['message']">
-            <h3>Results</h3>
-            <span v-if="result['success']">Success!</span>
-            <span v-if="result['error']">Error!</span>
-            <span v-html="result['message']"></span>
+    <transition name="modal" v-if="showModal">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+
+                    <div class="modal-header">
+                        <slot name="header">
+                            <div v-if="result['error']">
+                                <h3 v-if="result['error']">Something went wrong...</h3>
+                            </div>
+                            <div v-if="result['success']">
+                                <h3 v-if="result['success']">Explanation saved!</h3>
+                            </div>
+
+                            <h3 v-if="!scan.comply_or_explain_is_explained && !result['message']">New explanation</h3>
+                            <h3 v-if="scan.comply_or_explain_is_explained && !result['message']">Change explanation</h3>
+                        </slot>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" @click="stop_explaining()">
+                                <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <slot name="body">
+                            <p v-if="result['message']" v-html="result['message']"></p>
+                            <p>Enter an explanation below:</p>
+                            <p v-if="scan.comply_or_explain_explanation"></p>
+                            <textarea v-model="explanation" placeholder="Enter explanation here..." v-html="scan.comply_or_explain_explanation"></textarea>
+
+                            <div v-if="scan.comply_or_explain_is_explained">
+                                <span>The explanation is valid until {{ scan.comply_or_explain_explanation_valid_until }}.</span>
+                            </div>
+                        </slot>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <slot name="footer">
+
+                            <button type="button" class="btn btn-secondary" @click="stop_explaining()">Close</button>
+
+                            <div v-if="scan.comply_or_explain_is_explained">
+                                <!-- Todo: <button type="button" class="btn btn-warning" @click="extend_explanation()">Extend validity with N days. ⭐{{ explain_costs }}</button> -->
+                                <button type="button" class="btn btn-danger" @click="remove_explanation()">Remove</button>
+                                <button class="btn btn-primary" @click="try_explain()"><i class="fas fa-coins"></i> Explain</button>
+                            </div>
+
+                            <!-- Only first explanation and extension have costs, alterations are free. -->
+                            <div v-if="!scan.comply_or_explain_is_explained">
+                            <button class="btn btn-primary" @click="try_explain()">Explain ⭐{{ explain_costs }}</button>
+                            </div>
+                        </slot>
+                    </div>
+
+                </div>
+            </div>
         </div>
-
-        <div v-if="scan.comply_or_explain_is_explained">
-        <h3>Already explained</h3>
-        <span>Already explained</span>
-        <span @click="remove_explanation()">Remove.</span>
-        <span @click="extend_explanation()">
-            This comply or explain will expire in. Please try to fix this issue asap. [Extend]</span>
-        </div>
-
-        <h3>Explain</h3>
-        <span v-if="!scan.comply_or_explain_is_explained">New explanation:</span>
-        <span v-if="scan.comply_or_explain_is_explained">Alter explanation:</span><br>
-        Current explanation: <i><span v-html="scan.comply_or_explain_explanation"></span></i><br>
-        <input type="text" v-model="explanation">
-
-        <input type="button" @click="try_explain()" value="Explain">
-    </div>
+    </transition>
 </script>
+{% endverbatim %}
 
 <script>
 
@@ -293,6 +329,9 @@ vueExplain = new Vue({
         result: {},
 
         explain_costs: 0,
+
+        // modal interaction
+        showModal: false,
     },
     mounted: function () {
         this.get_canned_explanations();
@@ -300,17 +339,20 @@ vueExplain = new Vue({
     },
     methods: {
         start_explaining: function(scan_id, scan_type){
-            // make sure we start with a clean slate
             this.stop_explaining();
 
+            // make sure we start with a clean slate
             this.scan_id = scan_id;
             this.scan_type = scan_type;
             this.get_scan_data();
         },
         stop_explaining: function(){
             // reset everything.
+            this.showModal = false;
+
             this.scan_id = 0;
             this.scan_type = '';
+            this.explanation = '';
             this.scan = {};
             this.result = {};
         },
@@ -322,8 +364,29 @@ vueExplain = new Vue({
             }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
         get_scan_data(){
+            /*
+            {
+                'id': scan.id,
+                'rating': scan.rating,
+                'explanation': scan.explanation,
+                'evidence': scan.evidence,
+                'last_scan_moment': scan.last_scan_moment.isoformat(),
+                'rating_determined_on': scan.rating_determined_on.isoformat(),
+                'is_the_latest_scan': scan.is_the_latest_scan,
+                'comply_or_explain_is_explained': scan.comply_or_explain_is_explained,
+                'comply_or_explain_explanation_valid_until': scan.comply_or_explain_explanation_valid_until.isoformat
+                'comply_or_explain_explanation': scan.comply_or_explain_explanation,
+                'comply_or_explain_explained_by': scan.comply_or_explain_explained_by,
+                'comply_or_explain_explained_on': scan.comply_or_explain_explained_on.isoformat
+                'comply_or_explain_case_handled_by': scan.comply_or_explain_case_handled_by,
+                'comply_or_explain_case_additional_notes': scan.comply_or_explain_case_additional_notes,
+                'impact': impact,
+            }
+            */
+
             fetch(`/pro/data/explain/get_scan_data/${this.scan_id}/${this.scan_type}/`).then(response => response.json()).then(data => {
                 this.scan = data;
+                this.showModal = true;
             }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
         try_explain(){
