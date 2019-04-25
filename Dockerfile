@@ -39,7 +39,9 @@ COPY vendor/hypercli  /gopath/src/github.com/hyperhq/hypercli
 RUN cd /gopath/src/github.com/hyperhq/hypercli; GOPATH=/gopath HYPER_GITCOMMIT=0 ./build.sh
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-RUN /usr/bin/pip3 install poetry virtualenv
+# required because pip 19+ breaks pyproject.toml editable builds: https://github.com/pypa/pip/issues/6434
+ENV PIP_USE_PEP517=false
+RUN /usr/bin/pip3 install --upgrade poetry virtualenv pip
 RUN virtualenv /pyenv
 ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
