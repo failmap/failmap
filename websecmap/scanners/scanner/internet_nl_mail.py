@@ -258,6 +258,12 @@ def check_api_version(answer):
 
 
 def get_status_url(answer):
+    # When there are issues registering a scan, this message is returned, and data is not a dict but a list, a bug
+    # in the internet.nl API. For python it does not matter if it's an empty [] or {}, so that's fine.
+    # Received answer from internet.nl: b'{"message": "Problem parsing domains", "data": [], "success": false}'
+    if not answer:
+        return ''
+
     status_url = answer.get('data', {}).get('results', "")
     if not status_url:
         raise AttributeError("Could not get scanning status url. Response from server: %s" % answer)
