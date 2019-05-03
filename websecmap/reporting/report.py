@@ -968,7 +968,11 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
     scores['total_issues'] = scores['high'] + scores['medium'] + scores['low']
 
     # the score cannot be OK if there are no urls.
-    scores['ok'] = 0 if scores['total_issues'] else 1 if scores['total_urls'] else 0
+    # Why is this done? It seems like this is more to give a sign the score is 'perfect'
+    # i thought OK would mean the number of things that are OK, so you can compare them to the not OK things (high etc)
+    # What depends on this 'ok' number? Nothing would be ok like this, so my guess is nothing uses this.
+    # If there would be a field for perfection, it should be named 'perfect'. 
+    # scores['ok'] = 0 if scores['total_issues'] else 1 if scores['total_urls'] else 0
 
     return scores
 

@@ -24,6 +24,10 @@ def add_model_filter(queryset, **kwargs):
 
     The filter can deliver cartesian products. And the filter does not 'exclude' things.
 
+    Note that with this kind of filtering, users can retrieve passwords and other sensitive fields. For example
+    with comparing to the text / hash value. So while this is a really convenient function, don't give users
+    access to this function.
+
     :param queryset:
     :param kwargs:
     :return:
@@ -95,6 +99,12 @@ def q_configurations_to_scan(level: str = 'url'):
     :return:
     """
     configurations = list(Configuration.objects.all().filter(is_scanned=True).values('country', 'organization_type'))
+    if not configurations:
+        log.debug('No scanning configuration defined, not filtering.')
+        return Q()
+
+    # log.debug('Adding %s level configurations: %s' % (level, configurations))
+
     qs = Q()
 
     if level == 'organization':

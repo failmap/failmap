@@ -228,6 +228,7 @@ def portfolio_data(request):
 
     report_statistics = UrlListReport.objects.filter(at_when__gte=one_year_ago).only(
         'at_when', 'total_endpoints', 'total_urls', 'high', 'medium', 'low').order_by('at_when')
+
     urllists = UrlList.objects.all().filter(
         account=get_account(request)
     ).prefetch_related(
