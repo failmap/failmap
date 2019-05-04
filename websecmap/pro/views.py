@@ -245,7 +245,7 @@ def portfolio_data(request):
     for urllist in urllists:
 
         # getting the latest report manually, which is unacceptable. i mean wtf!
-        # latest_report = UrlListReport.objects.all().filter(urllist=urllist).only('calculation').latest('when')
+        # latest_report = UrlListReport.objects.all().filter(urllist=urllist).only('calculation').latest('at_when')
         # not displaying this yet...
 
         stats = []

@@ -641,7 +641,7 @@ def create_organization_report_on_moment(organization: Organization, when: datet
     # Still do deepdiff to prevent double reports.
     try:
         last = OrganizationReport.objects.filter(
-            organization=organization, at_when__lte=when).latest('when')
+            organization=organization, at_when__lte=when).latest('at_when')
     except OrganizationReport.DoesNotExist:
         log.debug("Could not find the last organization rating, creating a dummy one.")
         last = OrganizationReport()  # create an empty one
