@@ -162,12 +162,20 @@ def handle_running_scan_reponse(response, scan):
     if response['message'] == "OK":
         log.debug("Hooray, a scan has finished.")
         scan.finished = True
-        scan.finished_on = datetime.now(pytz.utc)
+        # We'll NOT set the scan finished_on value just yet, as the new values need to be stored.
+        # Reporting checks the finished on date, and tries to find the latest values 'before' that date...
+        # if the values are updated after the date, we'll miss out on report data.
+        # As this is async, there is no guarantee the finished on date is at a set time. It could be 10 minutesm
+        # it could be 10 months.
+        # scan.finished_on = datetime.now(pytz.utc)
         scan.success = True
         scan.message = response['message']
         scan.friendly_message = "Scan has finished."
         log.debug("Going to process the scan results.")
-        store.apply_async([response, scan.type])
+
+        # See above why finished on is stored later.
+        (store.si(response, scan.type) | set_finished_on_date.si(scan)).apply_async()
+        # store.apply_async([response, scan.type])
 
     if response['message'] in ["Error while registering the domains" or "Problem parsing domains"]:
         log.debug("Scan encountered an error.")
@@ -177,6 +185,13 @@ def handle_running_scan_reponse(response, scan):
     scan.save()
 
     return None
+
+
+@app.task(queue="storage")
+def set_finished_on_date(scan):
+    log.debug('Updating finished date for scan %s' % scan)
+    scan.finished_on = datetime.now(pytz.utc)
+    scan.save(update_fields=['finished_on'])
 
 
 @app.task(queue="storage")
