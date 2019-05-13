@@ -233,6 +233,16 @@ class ScanProxyAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     check_qualys_proxy.short_description = "Check proxy"
     actions.append('check_qualys_proxy')
 
+    def release_proxy(self, request, queryset):
+        for proxy in queryset:
+            proxy.out_of_resource_counter = 0
+            proxy.currently_used_in_tls_qualys_scan = False
+            proxy.save()
+
+        self.message_user(request, "Proxies released.")
+    release_proxy.short_description = "Release proxy"
+    actions.append('release_proxy')
+
     def reset_proxy(self, request, queryset):
         for proxy in queryset:
             proxy.is_dead = False
