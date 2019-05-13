@@ -14,24 +14,24 @@ test: | setup
 	DJANGO_SETTINGS_MODULE=websecmap.settings coverage run --include 'websecmap/*' \
 		-m pytest -v -k 'not integration and not system' ${testargs}
 	# generate coverage
-	coverage report
+	poetry run coverage report
 	# and pretty html
-	coverage html
+	poetry run coverage html
 	# ensure no model updates are commited without migrations
-	websecmap makemigrations --check
+	poetry run websecmap makemigrations --check
 
 check: | setup
 	pylama websecmap tests --skip "**/migrations/*"
 
 autofix fix: | setup
 	# fix trivial pep8 style issues
-	autopep8 -ri websecmap tests
+	poetry run autopep8 -ri websecmap tests
 	# remove unused imports
-	autoflake -ri --remove-all-unused-imports websecmap tests
+	poetry run autoflake -ri --remove-all-unused-imports websecmap tests
 	# sort imports
-	isort -rc websecmap tests
+	poetry run isort -rc websecmap tests
 	# do a check after autofixing to show remaining problems
-	pylama websecmap tests --skip "**/migrations/*"
+	poetry run pylama websecmap tests --skip "**/migrations/*"
 
 test_integration: | setup
   	DB_NAME=test.sqlite3 pytest -v -k 'integration' ${testargs}

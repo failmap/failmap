@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import List
 
 import requests
@@ -6,7 +7,8 @@ import requests
 from websecmap.celery import app
 from websecmap.scanners.models import ScanProxy
 from websecmap.scanners.scanner.tls_qualys import check_proxy
-from websecmap.scanners.tasks import log
+
+log = logging.getLogger(__name__)
 
 
 @app.task(queue='storage')
