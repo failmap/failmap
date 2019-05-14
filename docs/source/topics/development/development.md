@@ -63,7 +63,7 @@ Make sure you've got an up to date development environment. You can do so by run
 
 Rebuild the environment:
 
-    make clean
+    make mrproper
 
 Get all requirements and development requirements:
 
@@ -91,7 +91,7 @@ To run only a specific test use:
 
 To only run a specific test suite use for example:
 
-    poetry run websecmap test tests/scanners/test_dummy.py
+    make test testargs=tests/scanners/test_dummy.py
 
 A coverage report is generated after running tests, on OSX it can be viewed using:
 

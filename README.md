@@ -75,12 +75,6 @@ Or download and install each package separately:
 
 #### Generic install steps
 
-Install Poetry, this is used to handle all Python environment and dependency management:
-
-```bash
-pip3 install --user poetry
-```
-
 In a directory of your choosing, download the software and enter the directory:
 
 ```bash
@@ -93,16 +87,10 @@ Running `make` once to create a development Virtualenv and setup the App and its
 make
 ```
 
-After completing successfully Web Security Map is available to run. For example, to show a list of commands:
+After completing successfully Web Security Map development server is available to run:
 
 ```bash
-poetry run websecmap help
-```
-
-Now run the following command to start a full development server.
-
-```bash
-poetry run websecmap devserver
+make run
 ```
 
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
@@ -110,16 +98,22 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 
 #### Optional Steps
 
+If your shell support tab completion you can get a complete list of supported commands by tabbing `make`:
+
+```bash
+make <tab><tab>
+```
+
 This shows the current data on the map:
 
 ```bash
-poetry run websecmap rebuild_ratings
+make rebuild_reports
 ```
 
 It is possible to start the server without redis and without (re)loading data:
 
 ```bash
-poetry run websecmap devserver --no-backend --no-data
+make devserver args="--no-backend --no-data"
 ```
 
 Give everyone an F rating!

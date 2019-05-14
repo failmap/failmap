@@ -183,16 +183,18 @@ def worker_verify_role_capabilities(role):
         return not failed
 
     if role in ROLES_REQUIRING_IPV6 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
-        # verify if a https connection to a IPv6 website can be made
-        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
-        try:
-            s.connect((config.IPV6_TEST_DOMAIN, 443))
-        except socket.gaierror:
-            # docker container DNS might not be ready, retry
-            raise
-        except BaseException:
-            log.warning('Failed to connect to ipv6 test domain %s via IPv6', config.IPV6_TEST_DOMAIN, exc_info=True)
-            failed = True
+        # allow IPv6 support to be faked during development
+        if not os.environ.get('NETWORK_SUPPORTS_IPV6', False):
+            # verify if a https connection to a IPv6 website can be made
+            s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM, 0)
+            try:
+                s.connect((config.IPV6_TEST_DOMAIN, 443))
+            except socket.gaierror:
+                # docker container DNS might not be ready, retry
+                raise
+            except BaseException:
+                log.warning('Failed to connect to ipv6 test domain %s via IPv6', config.IPV6_TEST_DOMAIN, exc_info=True)
+                failed = True
 
     if role in ROLES_REQUIRING_IPV4 or role in ROLES_REQUIRING_IPV4_AND_IPV6:
         # verify if a https connection to a website can be made

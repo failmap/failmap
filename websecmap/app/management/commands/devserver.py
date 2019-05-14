@@ -30,14 +30,14 @@ Please follow these instructions to install Docker and try again: https://docs.d
 Alternatively if you only need to develop on 'website' parts of Failmap and not on scanner tasks and backend
 processing you can start the devserver with backend disabled:
 
-failmap devserver --no-backend
+websecmap devserver --no-backend
 
 """
 
 
 def start_borker(uuid):
 
-    name = 'failmap-broker-%s' % str(uuid.int)
+    name = 'websecmap-broker-%s' % str(uuid.int)
 
     borker_command = 'docker run --rm --name=%s -p 6379 redis' % name
     borker_process = subprocess.Popen(borker_command.split(), stdout=subprocess.DEVNULL, stderr=sys.stderr.buffer)
@@ -56,7 +56,7 @@ def start_worker(broker_port, silent=True):
     watchdog = ('watchmedo auto-restart --directory={} --pattern=*.py'
                 ' --recursive --signal=SIGKILL -- ').format(SOURCE_DIRECTORY).split()
     # watchdog = 'tools/autoreload.sh'
-    worker_command = ('failmap celery worker --loglevel=info --pool=eventlet'
+    worker_command = ('websecmap celery worker --loglevel=info --pool=eventlet'
                       ' --concurrency=1 --broker redis://localhost:{}/0').format(broker_port).split()
 
     worker_process = subprocess.Popen(watchdog + worker_command, stdout=sys.stdout.buffer, stderr=sys.stderr.buffer)

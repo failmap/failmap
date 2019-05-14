@@ -1,50 +1,98 @@
+SHELL = /bin/bash
+
+# configure virtualenv to be created in OS specific cache directory
+ifeq ($(UNAME_S),Darwin)
+# macOS cache location
+CACHEDIR ?= ~/Library/Caches
+else
+# User customized cache location or Linux default
+XDG_CACHE_HOME ?= ~/.cache
+CACHEDIR ?= ${XDG_CACHE_HOME}
+endif
+VIRTUAL_ENV = ${CACHEDIR}/virtualenvs/$(notdir ${PWD})
+$(info Virtualenv path: ${VIRTUAL_ENV})
+
+$(info )
+
+# shortcuts for common used binaries
+bin = ${VIRTUAL_ENV}/bin
+python = ${bin}/python
+pip = ${bin}/pip
+poetry = ${bin}/poetry
+
+# application binary
+app = ${bin}/websecmap
+
+commands = devserver rebuild_reports
+
+src = $(shell find * -name *.py)
+
+.PHONY: ${commands} test check setup run fix autofix clean mrproper poetry test_integration
+
+# default action to run
 all: check test
 
-VIRTUAL_ENV := $(shell poetry config settings.virtualenvs.path|tr -d \")/websecmap-py3.6
-run := poetry run
+# setup entire dev environment
+setup: | ${app}
 
-setup: ${VIRTUAL_ENV}/bin/websecmap
-
-${VIRTUAL_ENV}/bin/websecmap: poetry.lock | ${poetry}
-	poetry install --develop=websecmap
+# install application and all its (python) dependencies
+${app}: poetry.lock | poetry
+	# install project and its dependencies
+	VIRTUAL_ENV=${VIRTUAL_ENV} ${poetry} install --develop=$(notdir ${app})
 	test -f $@ && touch $@
 
-test: | setup
+test: .make.test
+.make.test: ${src} | setup
 	# run testsuite
-	DJANGO_SETTINGS_MODULE=websecmap.settings ${run} run coverage run --include 'websecmap/*' \
+	DJANGO_SETTINGS_MODULE=websecmap.settings ${bin}/coverage run --include 'websecmap/*' \
 		-m pytest -v -k 'not integration and not system' ${testargs}
 	# generate coverage
-	${run} run coverage report
+	${bin}/coverage report
 	# and pretty html
-	${run} run coverage html
+	${bin}/coverage html
 	# ensure no model updates are commited without migrations
-	${run} run websecmap makemigrations --check
+	${app} makemigrations --check
+	@touch $@
 
-check: | setup
-	${run} run pylama websecmap tests --skip "**/migrations/*"
+check: .make.check
+.make.check: ${src} | setup
+	# check code quality
+	${bin}/pylama websecmap tests --skip "**/migrations/*"
+	@touch $@
 
-autofix fix: | setup
+autofix fix: .make.fix
+.make.fix: ${src} | setup
 	# fix trivial pep8 style issues
-	${run} run autopep8 -ri websecmap tests
+	${bin}/autopep8 -ri websecmap tests
 	# remove unused imports
-	${run} run autoflake -ri --remove-all-unused-imports websecmap tests
+	${bin}/autoflake -ri --remove-all-unused-imports websecmap tests
 	# sort imports
-	${run} run isort -rc websecmap tests
+	${bin}/isort -rc websecmap tests
 	# do a check after autofixing to show remaining problems
-	${run} run pylama websecmap tests --skip "**/migrations/*"
+	${MAKE} check
+	@touch $@
+
+run: | setup
+	# start server (this can take a while)
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} devserver
+
+${commands}: | setup
+	${app} $@ ${args}
 
 test_integration: | setup
-  	DB_NAME=test.sqlite3 ${run} pytest -v -k 'integration' ${testargs}
+	# run integration tests
+	DB_NAME=test.sqlite3 ${bin}/pytest -v -k 'integration' ${testargs}
 
 test_system:
-	${run} pytest -v tests/system ${testargs}
+	# run system tests
+	${bin}/pytest -v tests/system ${testargs}
 
 test_datasets: | setup
 	/bin/sh -ec "find websecmap -path '*/fixtures/*.yaml' -print0 | \
 		xargs -0n1 basename -s .yaml | uniq | \
-		xargs -n1 websecmap test_dataset"
+		xargs -n1 ${app} test_dataset"
 
-test_deterministic: | ${virtualenv}
+test_deterministic: | ${VIRTUAL_ENV}
 	/bin/bash tools/compare_differences.sh HEAD HEAD tools/show_ratings.sh testdata
 
 test_mysql:
@@ -67,6 +115,33 @@ test_postgres:
 	DJANGO_DATABASE=production DB_ENGINE=postgresql_psycopg2 DB_USER=root DB_HOST=127.0.0.1 \
 		$(MAKE) test; e=$$?; docker stop postgres; exit $$e
 
+# cleanup build artifacts, caches, etc.
 clean:
-	rm -fr ${VIRTUAL_ENV}/{bin,include,lib,share,*.cfg,*.json}
-	test -d ${VIRTUAL_ENV} && rmdir ${VIRTUAL_ENV} || true
+	# remove python cache files
+	find * -name __pycache__ -print0 | xargs -0 rm -rf
+	# remove state files
+	rm -f .make.*
+	# remove test artifacts
+	rm -rf .pytest_cache htmlcov/
+	# remove build artifacts
+	rm -rf *.egg-info dist/ pip-wheel-metadata/
+	# remove runtime state files
+	rm -rf *.sqlite3
+
+# thorough clean, remove virtualenv
+mrproper: clean
+	rm -fr ${VIRTUAL_ENV}/
+
+# don't let poetry manage the virtualenv, we do it ourselves to make it deterministic
+poetry: ${VIRTUAL_ENV}/bin/poetry
+poetry_version=0.12.15
+${VIRTUAL_ENV}/bin/poetry: ${python}
+	# install poetry
+	${pip} install -q poetry==${poetry_version}
+
+${python}:
+	@if ! command -v python3.6 &>/dev/null;then \
+		echo "Python 3.6 is not avaiable. Please refer to installation instructions in README.md"; \
+	fi
+	# create virtualenv
+	python3.6 -mvenv ${VIRTUAL_ENV}

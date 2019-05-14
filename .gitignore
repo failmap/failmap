@@ -36,6 +36,7 @@ db.sqlite3-journal
 *.p12
 config.json
 pip-wheel-metadata/
+.make.*
 
 # legacy
 .tox
