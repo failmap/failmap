@@ -1,7 +1,7 @@
 all: check test
 
 VIRTUAL_ENV := $(shell poetry config settings.virtualenvs.path|tr -d \")/websecmap-py3.6
-export PATH := ${VIRTUAL_ENV}/bin:${PATH}
+run := poetry run
 
 setup: ${VIRTUAL_ENV}/bin/websecmap
 
@@ -11,33 +11,33 @@ ${VIRTUAL_ENV}/bin/websecmap: poetry.lock | ${poetry}
 
 test: | setup
 	# run testsuite
-	DJANGO_SETTINGS_MODULE=websecmap.settings coverage run --include 'websecmap/*' \
+	DJANGO_SETTINGS_MODULE=websecmap.settings ${run} run coverage run --include 'websecmap/*' \
 		-m pytest -v -k 'not integration and not system' ${testargs}
 	# generate coverage
-	poetry run coverage report
+	${run} run coverage report
 	# and pretty html
-	poetry run coverage html
+	${run} run coverage html
 	# ensure no model updates are commited without migrations
-	poetry run websecmap makemigrations --check
+	${run} run websecmap makemigrations --check
 
 check: | setup
-	pylama websecmap tests --skip "**/migrations/*"
+	${run} run pylama websecmap tests --skip "**/migrations/*"
 
 autofix fix: | setup
 	# fix trivial pep8 style issues
-	poetry run autopep8 -ri websecmap tests
+	${run} run autopep8 -ri websecmap tests
 	# remove unused imports
-	poetry run autoflake -ri --remove-all-unused-imports websecmap tests
+	${run} run autoflake -ri --remove-all-unused-imports websecmap tests
 	# sort imports
-	poetry run isort -rc websecmap tests
+	${run} run isort -rc websecmap tests
 	# do a check after autofixing to show remaining problems
-	poetry run pylama websecmap tests --skip "**/migrations/*"
+	${run} run pylama websecmap tests --skip "**/migrations/*"
 
 test_integration: | setup
-  	DB_NAME=test.sqlite3 pytest -v -k 'integration' ${testargs}
+  	DB_NAME=test.sqlite3 ${run} pytest -v -k 'integration' ${testargs}
 
 test_system:
-	pytest -v tests/system ${testargs}
+	${run} pytest -v tests/system ${testargs}
 
 test_datasets: | setup
 	/bin/sh -ec "find websecmap -path '*/fixtures/*.yaml' -print0 | \
