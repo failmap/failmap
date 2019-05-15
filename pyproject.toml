@@ -199,11 +199,12 @@ colorama = "*"
 pydotplus = "*"  # generating graphs with the docs command...
 
 # used to restart celery worker on file changes
-watchdog = "~0.9.0"
+watchdog = {version = "~0.9.0", extras = ["watchmedo"]}
 
 ipython = "*"  # websecmap shell -i ipython
 django-cprofile-middleware = "*"
 moviepy = "*"
+
 
 [tool.poetry.extras]
 deploy = ["mysqlclient","psycopg2","uwsgi"]
