@@ -32,7 +32,7 @@ websecmap = 'websecmap.manage:main'
 
 [tool.poetry.dependencies]
 # support recent Python3 versions but at least the default download from: https://www.python.org/downloads/
-python = ">=3.6, <=3.7"
+python = ">=3.6"
 
 django = "*"
 django-jet = "*"
