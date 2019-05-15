@@ -1,5 +1,3 @@
-SHELL = /bin/bash
-
 # configure virtualenv to be created in OS specific cache directory
 ifeq ($(UNAME_S),Darwin)
 # macOS cache location
@@ -16,6 +14,7 @@ $(info )
 
 # shortcuts for common used binaries
 bin = ${VIRTUAL_ENV}/bin
+env = PATH=${bin}:$$PATH
 python = ${bin}/python
 pip = ${bin}/pip
 poetry = ${bin}/poetry
@@ -25,7 +24,8 @@ app = ${bin}/websecmap
 
 commands = devserver rebuild_reports
 
-src = $(shell find * -name *.py)
+pysrc = $(shell find * -name *.py)
+shsrc = $(shell find * ! -path vendor\* -name *.sh)
 
 .PHONY: ${commands} test check setup run fix autofix clean mrproper poetry test_integration
 
@@ -38,36 +38,41 @@ setup: | ${app}
 # install application and all its (python) dependencies
 ${app}: poetry.lock | poetry
 	# install project and its dependencies
-	VIRTUAL_ENV=${VIRTUAL_ENV} ${poetry} install --develop=$(notdir ${app})
+	VIRTUAL_ENV=${VIRTUAL_ENV} ${poetry} install --develop=$(notdir ${app}) ${poetry_args}
 	test -f $@ && touch $@
 
 test: .make.test
-.make.test: ${src} | setup
+.make.test: ${pysrc} | setup
 	# run testsuite
-	DJANGO_SETTINGS_MODULE=websecmap.settings ${bin}/coverage run --include 'websecmap/*' \
-		-m pytest -v -k 'not integration and not system' ${testargs}
+	DJANGO_SETTINGS_MODULE=websecmap.settings ${env} coverage run --include 'websecmap/*' \
+		-m pytest -k 'not integration and not system' ${testargs}
 	# generate coverage
-	${bin}/coverage report
+	${env} coverage report
 	# and pretty html
-	${bin}/coverage html
+	${env} coverage html
 	# ensure no model updates are commited without migrations
 	${app} makemigrations --check
 	@touch $@
 
-check: .make.check
-.make.check: ${src} | setup
+check: .make.check .make.check.sh
+.make.check: ${pysrc} ${shsrc} | setup
 	# check code quality
-	${bin}/pylama websecmap tests --skip "**/migrations/*"
+	${env} pylama websecmap tests --skip "**/migrations/*"
+	@touch $@
+
+.make.check.sh: ${shsrc}
+	# shell script checks (if installed)
+	if command -v shellcheck &>/dev/null;then shellcheck ${shsrc}; fi
 	@touch $@
 
 autofix fix: .make.fix
-.make.fix: ${src} | setup
+.make.fix: ${pysrc} | setup
 	# fix trivial pep8 style issues
-	${bin}/autopep8 -ri websecmap tests
+	${env} autopep8 -ri websecmap tests
 	# remove unused imports
-	${bin}/autoflake -ri --remove-all-unused-imports websecmap tests
+	${env} autoflake -ri --remove-all-unused-imports websecmap tests
 	# sort imports
-	${bin}/isort -rc websecmap tests
+	${env} isort -rc websecmap tests
 	# do a check after autofixing to show remaining problems
 	${MAKE} check
 	@touch $@
@@ -81,11 +86,12 @@ ${commands}: | setup
 
 test_integration: | setup
 	# run integration tests
-	DB_NAME=test.sqlite3 ${bin}/pytest -v -k 'integration' ${testargs}
+	${env} DJANGO_SETTINGS_MODULE=websecmap.settings DB_NAME=test.sqlite3 \
+		${env} pytest -k 'integration' ${testargs}
 
 test_system:
 	# run system tests
-	${bin}/pytest -v tests/system ${testargs}
+	${env} pytest tests/system ${testargs}
 
 test_datasets: | setup
 	/bin/sh -ec "find websecmap -path '*/fixtures/*.yaml' -print0 | \

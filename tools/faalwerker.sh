@@ -20,7 +20,7 @@ faalaantalprocessen=10
 faalaantalprocessenqualys=1
 faalgeheim=geheim
 
-kloptalles? (){
+kloptalles (){
   if ! test -f "$faalp12bestand";then
     echo "Falen: Je hebt waarschijnlijk een bestand dat eindigt op .p12 gekregen, hernoem het naar client.p12 en zorg dat het in deze folder staat."
     exit 1
@@ -76,7 +76,7 @@ faalafsluiten (){
   echo "Klaar met falen"
 }
 
-kloptalles?
+kloptalles
 
 wegmetdieouwezooi
 

@@ -50,19 +50,20 @@ Please follow these instructions to setup a development environment for Web Secu
 **macOS** via `brew`
 
 ```bash
-brew install git python3 direnv docker
+brew install git python3 direnv docker shellcheck
 ```
 
 **Debian Linux** via `apt`
 
 ```bash
-apt-get install -y git python3 direnv docker.io
+apt-get install -y git python3 direnv docker.io shellcheck
 ```
 
 **Redhat/CentOS Linux** via `yum`
 
 ```bash
-yum install -y git python3 direnv docker
+yum install -y epel-release
+yum install -y git python3 direnv docker ShellCheck
 ```
 
 Or download and install each package separately:
@@ -72,6 +73,7 @@ Or download and install each package separately:
 - [python3.6](https://www.python.org/downloads/) (required, download and install)
 - [direnv](https://direnv.net/) (recommended, download and install, then follow [setup instructions](https://direnv.net/), see Direnv section below)
 - [Docker](https://docs.docker.com/engine/installation/) (recommended, follow instructions to install.)
+- [ShellCheck](https://github.com/koalaman/shellcheck#installing) (recommended, follow instructions to install
 
 #### Generic install steps
 

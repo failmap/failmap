@@ -16,10 +16,12 @@ test: &test_template
   cache:
     paths:
       - ".pip-cache"
+      - "~/.cache"
     key: "$CI_JOB_NAME"
 
   script:
-    - make test
+    # run check and test
+    - make
 
   retry: 1
 
@@ -37,10 +39,9 @@ test_mysql: &test_mysql_template
     # select mysql database settings, all settings default to 'failmap'
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
+    # make poetry install mysql dependencies
+    poetry_args: --extras=deploy
   retry: 1
-  # install mysql dependencies
-  before_script:
-    - poetry install --develop=websecmap --extras=deploy
 
 # functional testing using postgres database instead of sqlite
 test_postgres: &test_postgres_template
@@ -58,19 +59,9 @@ test_postgres: &test_postgres_template
     DJANGO_DATABASE: production
     DB_ENGINE: postgresql_psycopg2
     DB_HOST: postgres
+    # make poetry install postgres dependencies
+    poetry_args: --extras=deploy
   retry: 1
-  # install postgresql dependencies
-  before_script:
-    - poetry install --develop=websecmap --extras=deploy
-
-# code quality checks
-check:
-  <<: *test_template
-  stage: test
-
-  script:
-    - make check
-    - shellcheck tests/*.sh tools/*.sh
 
 # integration tests
 integration:

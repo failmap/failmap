@@ -49,6 +49,10 @@ def celery_worker(queues, request):
     worker_process = subprocess.Popen(worker_command,
                                       stdout=sys.stdout.buffer, stderr=sys.stderr.buffer,
                                       preexec_fn=os.setsid, env=worker_env)
+    # catch early errors
+    time.sleep(1)
+    assert not worker_process.poll(), "Worker exited early."
+
     # wrap assert in try/finally to kill worker on failing assert, wrap yield as well for cleaner code
     try:
         # wait for worker to start accepting tasks before turning to test function

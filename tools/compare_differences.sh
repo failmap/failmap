@@ -9,7 +9,7 @@ set -ex
 
 # usage: tools/compare_differences.sh <branch1> <branch2> <test_script> [<dataset-name>]
 
-branches=(${1?First argument needs to be branch name} ${2?Second argument needs to be branch name})
+branches=("${1?First argument needs to be branch name}" "${2?Second argument needs to be branch name}")
 test_script=${3?Last argument needs to be test script}
 dataset=${4:-productiondata}
 
