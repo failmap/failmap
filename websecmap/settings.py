@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     'constance',
     'constance.backends.database',
     'websecmap.app',
-    'django_fsm_log',
     'adminsortable2',
     # Jet admin dashboard
     'jet.dashboard',

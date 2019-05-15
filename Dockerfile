@@ -21,7 +21,7 @@ RUN apk --no-cache add \
   libxml2-dev \
   libxslt-dev \
   python3-dev \
-  git \
+  git
 
 # install dnscheck
 COPY vendor/dnscheck /vendor/dnscheck
@@ -34,7 +34,7 @@ RUN npm install --global osmtogeojson
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 # required because pip 19+ breaks pyproject.toml editable builds: https://github.com/pypa/pip/issues/6434
 ENV PIP_USE_PEP517=false
-RUN /usr/bin/pip3 install --upgrade poetry virtualenv pip
+RUN /usr/bin/pip3 install --upgrade poetry==0.12.15 virtualenv pip
 RUN virtualenv /pyenv
 ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
@@ -90,7 +90,6 @@ RUN apk --no-cache add \
   nodejs \
   nodejs-npm
 
-RUN /usr/bin/pip3 install poetry
 ENV VIRTUAL_ENV = /pyenv
 ENV PATH=/pyenv/bin:$PATH
 

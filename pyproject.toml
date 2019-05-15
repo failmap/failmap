@@ -32,7 +32,7 @@ websecmap = 'websecmap.manage:main'
 
 [tool.poetry.dependencies]
 # support recent Python3 versions but at least the default download from: https://www.python.org/downloads/
-python = ">=3.6"
+python = ">=3.6, <=3.8"
 
 django = "*"
 django-jet = "*"
@@ -52,9 +52,10 @@ pytz = "*"
 
 # task processing framework
 django-celery-beat = "*"
-tornado = "<6" # dependency of flower, breaks on 6+ until resolved: https://github.com/mher/flower/issues/878
-# celery 4.3 pin: https://github.com/celery/celery/issues/4500#issuecomment-400350526
+# celery 4.3+: https://github.com/celery/celery/issues/4500#issuecomment-400350526
 celery = {version = "^4.3",extras = ["redis", "eventlet"]}
+# flower < 0.9.3 conflicts with tornado >6.0
+flower = ">=0.9.3"
 
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla = "*"
@@ -85,14 +86,12 @@ raven = "*"
 # allow recursive comparison of dictionaries
 deepdiff = "*"
 
-influxdb = "*"
 urllib3 = "*"
 
 # loading json is faster in simplejson
 # https://stackoverflow.com/questions/712791/what-are-the-differences-between-json-and-simplejson-python-modules
 # needed for mapping reasons.
 simplejson = "*"
-
 
 # Remote worker TLS
 pyopenssl = "*"
@@ -103,9 +102,6 @@ csscompressor = "*"  # css compression
 
 retry = "*"
 
-# docs / readthedocs.io
-recommonmark = "*"
-
 # map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)
 rdp = "*"
 
@@ -113,12 +109,6 @@ clint = "*"  # downloading stuff from overpass
 wikidata = "*"  # downloading data from wikidata
 
 django-nested-admin = "*"  # going deeper underground
-sphinx_rtd_theme = "*"
-
-django-fsm = "*"
-django-fsm-log = "*"
-
-flower = "*"
 
 # game requirements
 django-crispy-forms = "*"
@@ -155,10 +145,10 @@ pyexcel-ods = "*"
 # database clients
 mysqlclient = {version = "*", optional = true}
 psycopg2 = {version = "*", optional = true}
-django-uwsgi = {version = "*"}
 
 # wsgi server
 uwsgi = {version = "*", optional = true}
+django-uwsgi = {version = "*"}
 
 # Tools/dependencies required for development or running tests.
 [tool.poetry.dev-dependencies]
@@ -172,7 +162,7 @@ pytest = "<4.1.0"
 pytest-cov = "*"
 pytest-django = "*"
 # counterpart of requests for mock responses
-pytest-responses = "*"
+pytest-responses = ">=0.4.0"
 # output logging when test fails
 pytest-logging = "*"
 django-coverage = "*"
@@ -186,6 +176,7 @@ pytest-docker = "*"
 sphinx = "*"
 sphinx-autobuild = "*"
 recommonmark = "*"
+sphinx_rtd_theme = "*"
 
 # tests (of scanners)
 httmock = "*"
@@ -200,9 +191,8 @@ ipython = "*"  # websecmap shell -i ipython
 django-cprofile-middleware = "*"
 moviepy = "*"
 
-
 [tool.poetry.extras]
 deploy = ["mysqlclient","psycopg2","uwsgi"]
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry==0.12.15"]
