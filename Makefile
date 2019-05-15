@@ -39,13 +39,14 @@ setup: | ${app}
 ${app}: poetry.lock | poetry
 	# install project and its dependencies
 	VIRTUAL_ENV=${VIRTUAL_ENV} ${poetry} install --develop=$(notdir ${app}) ${poetry_args}
-	test -f $@ && touch $@
+	@test -f $@ && touch $@
 
 poetry.lock: pyproject.toml | poetry
+	# update package version lock
 	${env} poetry lock
 
 test: .make.test
-.make.test: ${pysrc} | setup
+.make.test: ${pysrc} ${app}
 	# run testsuite
 	DJANGO_SETTINGS_MODULE=websecmap.settings ${env} coverage run --include 'websecmap/*' \
 		-m pytest -k 'not integration and not system' ${testargs}
@@ -57,8 +58,8 @@ test: .make.test
 	${app} makemigrations --check
 	@touch $@
 
-check: .make.check .make.check.sh
-.make.check: ${pysrc} ${shsrc} | setup
+check: .make.check.py .make.check.sh
+.make.check.py: ${pysrc} ${app}
 	# check code quality
 	${env} pylama websecmap tests --skip "**/migrations/*"
 	@touch $@

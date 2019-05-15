@@ -51,10 +51,10 @@ certifi = "*"
 pytz = "*"
 
 # task processing framework
-redis = "<3"  # forcing a specific version of redis, 3.0.1 gives timeout errors during build.
-kombu = "<4.4.0"  # Kombu 4.4.0 requires redis 3.2.0 or higher
 django-celery-beat = "*"
 tornado = "<6" # dependency of flower, breaks on 6+ until resolved: https://github.com/mher/flower/issues/878
+# celery 4.3 pin: https://github.com/celery/celery/issues/4500#issuecomment-400350526
+celery = {version = "^4.3",extras = ["redis", "eventlet"]}
 
 # https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
 django-statsd-mozilla = "*"
@@ -127,7 +127,7 @@ django-autocomplete-light = "*"
 django-admin-sortable2 = "*"  # nice sorting in the admin, used in map configurations.
 
 hyper_sh = "^1.0"
-celery = {version = "^4.2",extras = ["redis", "eventlet"]}
+
 pyexcel-text = "^0.2.7"
 # game team colors
 django-colorful = "*"
