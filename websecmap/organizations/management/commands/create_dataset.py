@@ -65,7 +65,6 @@ class Command(DumpDataCommand):
         "map.Configuration",
         "map.AdministrativeRegion",
         "game",
-        "hypersh",
         "django_celery_beat"
     )
 

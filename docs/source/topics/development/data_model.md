@@ -17,12 +17,8 @@ It has been generated with 'websecmap docs'.
 ## app
 ![Data Model](data_model/app_models.png)
 
-## hypersh
-![Data Model](data_model/hypersh_models.png)
-
 ## pro
 ![Data Model](data_model/pro_models.png)
 
 ## All in one
 ![Data Model](data_model/Web Security Map_models.png)
-

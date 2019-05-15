@@ -126,8 +126,6 @@ django-autocomplete-light = "*"
 
 django-admin-sortable2 = "*"  # nice sorting in the admin, used in map configurations.
 
-hyper_sh = "^1.0"
-
 pyexcel-text = "^0.2.7"
 # game team colors
 django-colorful = "*"
@@ -137,9 +135,6 @@ django-select2 = "*"
 
 # ISO country code conversion
 iso3166 = "*"
-
-# hyper scaling
-docker = "*"
 
 # generic retry library
 tenacity = "*"

@@ -38,9 +38,6 @@ class Command(BaseCommand):
             log.info("Testing app commands")
             test_app_commands()
 
-            log.info("Testing hypersh commands")
-            test_hypersh_commands()
-
             log.info("Testing map commands")
             test_map_commands(organization, url)
 
@@ -127,13 +124,6 @@ def test_app_commands():
     # ignore devserver, we use that all day, every day
     # test_dataset is run during build.
     # production is used in production, so well...
-
-
-def test_hypersh_commands():
-    # containers will be rebuilt if live anyway. It's not awesome, but well...
-    # nuking can have a lot of devastating impact when ran with the wrong credentials.
-    # call_debug_command('hyper_nuke')
-    pass
 
 
 def test_map_commands(organization, url):

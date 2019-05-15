@@ -28,7 +28,7 @@ app = ${bin}/${app_name}
 
 pysrcdirs = ${app_name}/ tests/
 pysrc = $(shell find ${pysrcdirs} -name *.py)
-shsrc = $(shell find * .github ! -path vendor\* -name *.sh)
+shsrc = $(shell find * ! -path vendor\* -name *.sh)
 
 .PHONY: ${commands} test check setup run fix autofix clean mrproper poetry test_integration
 

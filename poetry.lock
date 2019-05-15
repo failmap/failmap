@@ -609,49 +609,6 @@ version = "1.16.0"
 
 [[package]]
 category = "main"
-description = "A Python library for the Docker Engine API."
-name = "docker"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-version = "3.7.2"
-
-[package.dependencies]
-docker-pycreds = ">=0.4.0"
-requests = ">=2.14.2,<2.18.0 || >2.18.0"
-six = ">=1.4.0"
-websocket-client = ">=0.32.0"
-
-[package.dependencies.pypiwin32]
-python = ">=3.6"
-version = "223"
-
-[[package]]
-category = "main"
-description = "Python client for Docker."
-name = "docker-py"
-optional = false
-python-versions = "*"
-version = "1.10.6"
-
-[package.dependencies]
-docker-pycreds = ">=0.2.1"
-requests = ">=2.5.2,<2.11.0 || >2.11.0"
-six = ">=1.4.0"
-websocket-client = ">=0.32.0"
-
-[[package]]
-category = "main"
-description = "Python bindings for the docker credentials store API"
-name = "docker-pycreds"
-optional = false
-python-versions = "*"
-version = "0.4.0"
-
-[package.dependencies]
-six = ">=1.4.0"
-
-[[package]]
-category = "main"
 description = "Docutils -- Python Documentation Utilities"
 name = "docutils"
 optional = false
@@ -745,17 +702,6 @@ version = "1.3.0"
 
 [package.dependencies]
 requests = ">=1.0.0"
-
-[[package]]
-category = "main"
-description = "docker-py on hyper infra"
-name = "hyper-sh"
-optional = false
-python-versions = "*"
-version = "1.0.7"
-
-[package.dependencies]
-docker-py = "*"
 
 [[package]]
 category = "main"
@@ -1364,18 +1310,6 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 version = "2.4.0"
 
 [[package]]
-category = "main"
-description = ""
-marker = "sys_platform == \"win32\" and python_version >= \"3.6\""
-name = "pypiwin32"
-optional = false
-python-versions = "*"
-version = "223"
-
-[package.dependencies]
-pywin32 = ">=223"
-
-[[package]]
 category = "dev"
 description = "pytest: simple powerful testing with Python"
 name = "pytest"
@@ -1513,15 +1447,6 @@ name = "pytz"
 optional = false
 python-versions = "*"
 version = "2019.1"
-
-[[package]]
-category = "main"
-description = "Python for Window Extensions"
-marker = "sys_platform == \"win32\" and python_version >= \"3.6\""
-name = "pywin32"
-optional = false
-python-versions = "*"
-version = "224"
 
 [[package]]
 category = "main"
@@ -1942,17 +1867,6 @@ version = "0.1.7"
 
 [[package]]
 category = "main"
-description = "WebSocket client for Python. hybi13 is supported."
-name = "websocket-client"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.56.0"
-
-[package.dependencies]
-six = "*"
-
-[[package]]
-category = "main"
 description = "Wikidata client library"
 name = "wikidata"
 optional = false
@@ -1982,7 +1896,7 @@ version = "1.3.0"
 deploy = ["mysqlclient", "psycopg2", "uwsgi"]
 
 [metadata]
-content-hash = "0ae74d9cd6600df4694a3e73b05d82957571c5f2c594fdcb09f4c8dfbdd3bbeb"
+content-hash = "bb3eccf41bfba8880e1315cc782968fe330cea3d4da0011c019fabbe8847325f"
 python-versions = ">=3.6"
 
 [metadata.hashes]
@@ -2046,9 +1960,6 @@ django-statsd-mozilla = ["0d87cb63de8107279cbb748caad9aa74c6a44e7e96ccc5dbf07b89
 django-timezone-field = ["7d7a37cfeacec5b1e81cd2f0aa334d46ebaa369cd516028579ed343cbc676c38", "d9fdab77c443b78c362ffaeb50fe7d7b54692c89aaae8ca1cae67848139b82ac"]
 django-uwsgi = ["921fb5547e1c5edc740019ba65e0f066448f99730f4194c4ba736b40333de23f", "eadbc34f5c4e3bd54b65717bc91411501327f3a94dd2607e587d7e5aeb5dda3c"]
 dnspython = ["36c5e8e38d4369a08b6780b7f27d790a292b2b08eea01607865bf0936c558e01", "f69c21288a962f4da86e56c4905b49d11aba7938d3d740e80d9e366ee4f1632d"]
-docker = ["2b1f48041cfdcc9f6b5da0e04e0e326ded225e736762ade2060000e708f4c9b7", "c456ded5420af5860441219ff8e51cdec531d65f4a9e948ccd4133e063b72f50"]
-docker-py = ["35b506e95861914fa5ad57a6707e3217b4082843b883be246190f57013948aba", "4c2a75875764d38d67f87bc7d03f7443a3895704efc57962bdf6500b8d4bc415"]
-docker-pycreds = ["6ce3270bcaf404cc4c3e27e4b6c70d3521deae82fb508767870fdbf772d584d4", "7266112468627868005106ec19cd0d722702d2b7d5912a28e19b826c3d37af49"]
 docutils = ["02aec4bd92ab067f6ff27a38a38a41173bf01bed8f89157768c1573f53e474a6", "51e64ef2ebfb29cae1faa133b3710143496eca21c530f3f71424d77687764274", "7a4bd47eaf6596e1295ecb11361139febe29b084a87bf005bf899f9a42edc3c6"]
 et-xmlfile = ["614d9722d572f6246302c4491846d2c393c199cfa4edc9af593437691683335b"]
 eventlet = ["c584163e006e613707e224552fafc63e4e0aa31d7de0ab18b481ac0b385254c8", "d9d31a3c8dbcedbcce5859a919956d934685b17323fc80e1077cb344a2ffa68d"]
@@ -2058,7 +1969,6 @@ future = ["67045236dcfd6816dc439556d009594abf643e5eb48992e36beac09c2ca659b8"]
 googlemaps = ["7831f83f565fdf855421a4c6c4760fbfa80496fbf4b80ff7131707e03cd8d9da", "e13d8f4101f033bc39d76ade52f99977f077814d79087794735d1bb71f35dcc2"]
 greenlet = ["000546ad01e6389e98626c1367be58efa613fa82a1be98b0c6fc24b563acc6d0", "0d48200bc50cbf498716712129eef819b1729339e34c3ae71656964dac907c28", "23d12eacffa9d0f290c0fe0c4e81ba6d5f3a5b7ac3c30a5eaf0126bf4deda5c8", "37c9ba82bd82eb6a23c2e5acc03055c0e45697253b2393c9a50cef76a3985304", "51503524dd6f152ab4ad1fbd168fc6c30b5795e8c70be4410a64940b3abb55c0", "8041e2de00e745c0e05a502d6e6db310db7faa7c979b3a5877123548a4c0b214", "81fcd96a275209ef117e9ec91f75c731fa18dcfd9ffaa1c0adbdaa3616a86043", "853da4f9563d982e4121fed8c92eea1a4594a2299037b3034c3c898cb8e933d6", "8b4572c334593d449113f9dc8d19b93b7b271bdbe90ba7509eb178923327b625", "9416443e219356e3c31f1f918a91badf2e37acf297e2fa13d24d1cc2380f8fbc", "9854f612e1b59ec66804931df5add3b2d5ef0067748ea29dc60f0efdcda9a638", "99a26afdb82ea83a265137a398f570402aa1f2b5dfb4ac3300c026931817b163", "a19bf883b3384957e4a4a13e6bd1ae3d85ae87f4beb5957e35b0be287f12f4e4", "a9f145660588187ff835c55a7d2ddf6abfc570c2651c276d3d4be8a2766db490", "ac57fcdcfb0b73bb3203b58a14501abb7e5ff9ea5e2edfa06bb03035f0cff248", "bcb530089ff24f6458a81ac3fa699e8c00194208a724b644ecc68422e1111939", "beeabe25c3b704f7d56b573f7d2ff88fc99f0138e43480cecdfcaa3b87fe4f87", "d634a7ea1fc3380ff96f9e44d8d22f38418c1c381d5fac680b272d7d90883720", "d97b0661e1aead761f0ded3b769044bb00ed5d33e1ec865e891a8b128bf7c656"]
 httmock = ["e0bbaced224426bcd994a5f1c64ab60e0c923ea615825c53e6c0190b2a7341fe"]
-hyper-sh = ["05d41f2625578def599594cafc6747b1b603f0d5d9c1194bc814413093843592", "b5d090a2a760553e010fa989a5cf3b526f66c91cc13553b1c1f6b0753b19c5cd"]
 idna = ["c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407", "ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"]
 imageio = ["1a2bbbb7cd38161340fa3b14d806dfbf914abf3ee6fd4592af2afb87d049f209", "42e65aadfc3d57a1043615c92bdf6319b67589e49a0aae2b985b82144aceacad"]
 imageio-ffmpeg = ["28500544acdebc195159d53a4670b76d596f368b218317bad5d3cbf43b00d6c2", "400345dd194f2cb2b424294aa0f3c90afce1de96879ffe3266afeece3494d93c", "991416c0eed0d221229e67342b8264a8b9defdec61d8a9e7688b90dbb838fb1e", "f3d4096bf6e211540c4f6b9628c56d8e700cf12027ed842724173ab9c6666d1a", "f99476aa42aac2ca0657483b417874a825b2f526aaa8a7a823b8a803f366caab"]
@@ -2118,7 +2028,6 @@ pygments = ["31cba6ffb739f099a85e243eff8cb717089fdd3c7300767d9fc34cb8e1b065f5", 
 pylama = ["9bae53ef9c1a431371d6a8dca406816a60d547147b60a4934721898f553b7d8f", "fd61c11872d6256b019ef1235be37b77c922ef37ac9797df6bd489996dddeb15"]
 pyopenssl = ["aeca66338f6de19d1aa46ed634c3b9ae519a64b458f8468aec688e7e3c20f200", "c727930ad54b10fc157015014b666f2d8b41f70c0d03e83ab67624fd3dd5d1e6"]
 pyparsing = ["1873c03321fc118f4e9746baf201ff990ceb915f433f23b395f5580d1840cb2a", "9b6323ef4ab914af344ba97510e966d64ba91055d6b9afa6b30799340e89cc03"]
-pypiwin32 = ["67adf399debc1d5d14dffc1ab5acacb800da569754fafdc576b2a039485aa775", "71be40c1fbd28594214ecaecb58e7aa8b708eabfa0125c8a109ebd51edbd776a"]
 pytest = ["f689bf2fc18c4585403348dd56f47d87780bf217c53ed9ae7a3e2d7faa45f8e9", "f812ea39a0153566be53d88f8de94839db1e8a05352ed8a49525d7d7f37861e9"]
 pytest-cov = ["2b097cde81a302e1047331b48cadacf23577e431b61e9c6f49a1170bbe3d3da6", "e00ea4fdde970725482f1f35630d12f074e121a23801aabf2ae154ec6bdd343a"]
 pytest-django = ["30d773f1768e8f214a3106f1090e00300ce6edfcac8c55fd13b675fe1cbd1c85", "4d3283e774fe1d40630ee58bf34929b83875e4751b525eeb07a7506996eb42ee"]
@@ -2131,7 +2040,6 @@ python-dateutil = ["7e6584c74aeed623791615e26efd690f29817a27c73085b78e4bad02493d
 python-monkey-business = ["6d4cf47f011945db838ccf04643acd49b82f7ad6ab7ecba4c8165385687a828a", "9976522989766f00b2aaa24ec96eacb91a6de7b7001d1452079323b071988e0e"]
 python-resize-image = ["1831c00c805d93108420add8884d5238148a8260f3ba8c46a07de45b122e645d", "885ad37445ad131769650efd7e9c1daa76f65df6f82b8355613868d489b89811"]
 pytz = ["303879e36b721603cc54604edcac9d20401bdbe31e1e4fdee5b9f98d5d31dfda", "d747dd3d23d77ef44c6a3526e274af6efeb0a6f1afd5a69ba4d5be4098c8e141"]
-pywin32 = ["22e218832a54ed206452c8f3ca9eff07ef327f8e597569a4c2828be5eaa09a77", "32b37abafbfeddb0fe718008d6aada5a71efa2874f068bee1f9e703983dcc49a", "35451edb44162d2f603b5b18bd427bc88fcbc74849eaa7a7e7cfe0f507e5c0c8", "4eda2e1e50faa706ff8226195b84fbcbd542b08c842a9b15e303589f85bfb41c", "5f265d72588806e134c8e1ede8561739071626ea4cc25c12d526aa7b82416ae5", "6852ceac5fdd7a146b570655c37d9eacd520ed1eaeec051ff41c6fc94243d8bf", "6dbc4219fe45ece6a0cc6baafe0105604fdee551b5e876dc475d3955b77190ec", "9bd07746ce7f2198021a9fa187fa80df7b221ec5e4c234ab6f00ea355a3baf99"]
 pyyaml = ["1adecc22f88d38052fb787d959f003811ca858b799590a5eaa70e63dca50308c", "436bc774ecf7c103814098159fbb84c2715d25980175292c648f2da143909f95", "460a5a4248763f6f37ea225d19d5c205677d8d525f6a83357ca622ed541830c2", "5a22a9c84653debfbf198d02fe592c176ea548cccce47553f35f466e15cf2fd4", "7a5d3f26b89d688db27822343dfa25c599627bc92093e788956372285c6298ad", "9372b04a02080752d9e6f990179a4ab840227c6e2ce15b95e1278456664cf2ba", "a5dcbebee834eaddf3fa7366316b880ff4062e4bcc9787b78c7fbb4a26ff2dd1", "aee5bab92a176e7cd034e57f46e9df9a9862a71f8f37cad167c6fc74c65f5b4e", "c51f642898c0bacd335fc119da60baae0824f2cde95b0330b56c0553439f0673", "c68ea4d3ba1705da1e0d85da6684ac657912679a649e8868bd850d2c299cce13", "e23d0cc5299223dcc37885dae624f382297717e459ea24053709675a976a3e19"]
 raven = ["3fa6de6efa2493a7c827472e984ce9b020797d0da16f1db67197bcc23c8fae54", "44a13f87670836e153951af9a3c80405d36b43097db869a36e92809673692ce4"]
 rcssmin = ["ca87b695d3d7864157773a61263e5abb96006e9ff0e021eff90cbe0e1ba18270"]
@@ -2173,7 +2081,6 @@ uwsgi = ["4972ac538800fb2d421027f49b4a1869b66048839507ccf0aa2fda792d99f583"]
 vine = ["133ee6d7a9016f177ddeaf191c1f58421a1dcc6ee9a42c58b34bed40e1d2cd87", "ea4947cc56d1fd6f2095c8d543ee25dad966f78692528e68b4fada11ba3f98af"]
 watchdog = ["965f658d0732de3188211932aeb0bb457587f04f63ab4c1e33eab878e9de961d"]
 wcwidth = ["3df37372226d6e63e1b1e1eda15c594bca98a22d33a23832a90998faa96bc65e", "f4ebe71925af7b40a864553f761ed559b43544f8f71746c2d756c7fe788ade7c"]
-websocket-client = ["1151d5fb3a62dc129164292e1227655e4bbc5dd5340a5165dfae61128ec50aa9", "1fd5520878b68b84b5748bb30e592b10d0a91529d5383f74f4964e72b297fd3a"]
 wikidata = ["72998341af4fc3484ae46d6f6e140334325508dcebe3ab80fe5dbe84931c9f66", "895753e98c3f3d8d391249c636ee7af6e7181add50d7c68094e1bad69ab7d422"]
 xlrd = ["546eb36cee8db40c3eaa46c351e67ffee6eeb5fa2650b71bc4c758a29a1b29b2", "e551fb498759fa3a5384a94ccd4c3c02eb7c00ea424426e212ac0c57be9dfbde"]
 xlwt = ["a082260524678ba48a297d922cc385f58278b8aa68741596a87de01a9c628b2e", "c59912717a9b28f1a3c2a98fd60741014b06b043936dcecbc113eaaada156c88"]

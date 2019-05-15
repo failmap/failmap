@@ -53,9 +53,6 @@ curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/m
 # Test if o-saft runs
 docker exec websecmap-$$ /O-Saft/o-saft
 
-# Test if hypersh CLI is available
-docker exec websecmap-$$ /usr/local/bin/hyper
-
 # cleanup
 rm -f cookie-$$
 

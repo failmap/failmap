@@ -95,10 +95,6 @@ msgstr ""
 msgid "ℹ️ helpdesk"
 msgstr ""
 
-#: websecmap/settings.py:868
-msgid "☁️ hypersh cloud scans"
-msgstr ""
-
 #: websecmap/settings.py:875
 msgid "👾️ the game"
 msgstr ""

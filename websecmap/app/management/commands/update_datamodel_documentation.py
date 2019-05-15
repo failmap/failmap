@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        apps = ['organizations', 'scanners', 'map', 'game', 'app', 'hypersh', 'pro']
+        apps = ['organizations', 'scanners', 'map', 'game', 'app', 'pro']
 
         for app in apps:
             log.info("creating image for: %s", app)
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         # not using -a, because it's hard to see where some of the models originate from (and then to remove them
         # using -X). So making it more explicit.
         log.info("creating image for all models in one.")
-        call_command('graph_models', 'organizations', 'scanners', 'map', 'game', 'app', 'hypersh', '-o',
+        call_command('graph_models', 'organizations', 'scanners', 'map', 'game', 'app', '-o',
                      'docs/source/topics/development/data_model/failmap_models.png')
 
         # Creating a file that contains all above models...

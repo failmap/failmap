@@ -7,6 +7,3 @@
 [submodule "vendor/dnscheck"]
 	path = vendor/dnscheck
 	url = https://github.com/stitch/dnscheck.git
-[submodule "vendor/hypercli"]
-	path = vendor/hypercli
-	url = https://github.com/hyperhq/hypercli
