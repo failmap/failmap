@@ -129,6 +129,8 @@ https://www.youtube.com/watch?v=eAwq2QV7f1k
 ```
 
 ## FAQ / Troubleshooting
+
+### Missing xcode (mac users)
 During installation mac users might get the following error, due to not having xcode installed or updated.
 
 ```
@@ -140,6 +142,17 @@ You can update / install xcode tools with the following command:
 ```
 xcode-select --install
 ```
+
+### Missing Docker Daemon (mac users)
+While docker is installed using brew in prior steps, you probably want to have
+a gui controlling docker.
+
+Docker for mac can be downloaded here:
+https://download.docker.com/mac/stable/Docker.dmg
+
+You can also visit the docker website and get the link using the time tested Oracle(tm) download strategy, here:
+https://hub.docker.com/editions/community/docker-ce-desktop-mac
+
 
 
 ## Documentation
