@@ -41,6 +41,9 @@ ${app}: poetry.lock | poetry
 	VIRTUAL_ENV=${VIRTUAL_ENV} ${poetry} install --develop=$(notdir ${app}) ${poetry_args}
 	test -f $@ && touch $@
 
+poetry.lock: pyproject.toml | poetry
+	${env} poetry lock
+
 test: .make.test
 .make.test: ${pysrc} | setup
 	# run testsuite
@@ -124,30 +127,30 @@ test_postgres:
 # cleanup build artifacts, caches, etc.
 clean:
 	# remove python cache files
-	find * -name __pycache__ -print0 | xargs -0 rm -rf
+	-find * -name __pycache__ -print0 | xargs -0 rm -rf
 	# remove state files
-	rm -f .make.*
+	-rm -f .make.*
 	# remove test artifacts
-	rm -rf .pytest_cache htmlcov/
+	-rm -rf .pytest_cache htmlcov/
 	# remove build artifacts
-	rm -rf *.egg-info dist/ pip-wheel-metadata/
+	-rm -rf *.egg-info dist/ pip-wheel-metadata/
 	# remove runtime state files
-	rm -rf *.sqlite3
+	-rm -rf *.sqlite3
 
 # thorough clean, remove virtualenv
 mrproper: clean
-	rm -fr ${VIRTUAL_ENV}/
+	-rm -fr ${VIRTUAL_ENV}/
 
 # don't let poetry manage the virtualenv, we do it ourselves to make it deterministic
-poetry: ${VIRTUAL_ENV}/bin/poetry
+poetry: ${poetry}
 poetry_version=0.12.15
-${VIRTUAL_ENV}/bin/poetry: ${python}
+${poetry}: ${python}
 	# install poetry
 	${pip} install -q poetry==${poetry_version}
 
 ${python}:
-	@if ! command -v python3.6 &>/dev/null;then \
-		echo "Python 3.6 is not avaiable. Please refer to installation instructions in README.md"; \
+	@if ! command -v python3 &>/dev/null;then \
+		echo "Python 3 is not available. Please refer to installation instructions in README.md"; \
 	fi
 	# create virtualenv
-	python3.6 -mvenv ${VIRTUAL_ENV}
+	python3 -mvenv ${VIRTUAL_ENV}
