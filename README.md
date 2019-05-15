@@ -80,7 +80,7 @@ Or download and install each package separately:
 In a directory of your choosing, download the software and enter the directory:
 
 ```bash
-git clone --recursive https://gitlab.com/internet-cleanup-foundation/websecmap/ && cd websecmap/
+git clone --recursive https://gitlab.com/internet-cleanup-foundation/web-security-map/ && cd web-security-map/
 ```
 
 Running `make` once to create a development Virtualenv and setup the App and its dependencies. Running `make` without arguments by default also runs basic checks and tests to verify project code quality.
