@@ -128,6 +128,20 @@ https://www.youtube.com/watch?v=a14Y2V5zJlY
 https://www.youtube.com/watch?v=eAwq2QV7f1k
 ```
 
+## FAQ / Troubleshooting
+During installation mac users might get the following error, due to not having xcode installed or updated.
+
+```
+xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
+```
+
+You can update / install xcode tools with the following command:
+
+```
+xcode-select --install
+```
+
+
 ## Documentation
 
 Documentation is provided at [ReadTheDocs](http://websecmap.readthedocs.io/).
