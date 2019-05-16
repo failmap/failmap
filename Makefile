@@ -86,7 +86,7 @@ autofix fix: .make.fix
 
 run: ${app}
 	# start server (this can take a while)
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${app} devserver
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver
 
 test_integration: ${app}
   	DB_NAME=test.sqlite3 ${run} pytest -v -k 'integration' ${testargs}
