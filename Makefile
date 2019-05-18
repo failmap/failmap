@@ -27,8 +27,6 @@ poetry = ${bin}/poetry
 # application binary
 app = ${bin}/${app_name}
 
-commands = $(shell ${env} ${app})
-
 $(info Run App: ${env} ${app})
 $(info )
 $(info Run `make help` for available commands or use tab-completion.)
@@ -38,7 +36,7 @@ pysrcdirs = ${app_name}/ tests/
 pysrc = $(shell find ${pysrcdirs} -name *.py)
 shsrc = $(shell find * ! -path vendor\* -name *.sh)
 
-.PHONY: ${commands} test check setup run fix autofix clean mrproper poetry test_integration
+.PHONY: test check setup run fix autofix clean mrproper poetry test_integration
 
 # default action to run
 all: check test
@@ -107,9 +105,6 @@ run-broker:  ## only run broker
 
 test_integration: ${app}  ## perform integration test suite
 	DB_NAME=test.sqlite3 ${env} pytest -v -k 'integration' ${testargs}
-
-$(addprefix cmd-,${commands}): ${app}
-	${env} ${app} $@ ${args}
 
 test_integration: ${app}
 	# run integration tests
