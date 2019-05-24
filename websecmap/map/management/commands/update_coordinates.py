@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-from websecmap.map.geojson import update_coordinates
+from websecmap.map.logic.openstreetmap import update_coordinates
 
 log = logging.getLogger(__package__)
 

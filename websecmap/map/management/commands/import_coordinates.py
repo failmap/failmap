@@ -4,7 +4,7 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-from websecmap.map.geojson import import_from_scratch
+from websecmap.map.logic.openstreetmap import import_from_scratch
 from websecmap.map.models import AdministrativeRegion
 
 log = logging.getLogger(__package__)

@@ -31,6 +31,7 @@ import tldextract
 from constance import config
 from django.conf import settings
 
+from websecmap.app.progressbar import print_progress_bar
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 from websecmap.scanners.scanner.http import resolves
 
@@ -358,27 +359,6 @@ def save_url(website, failmap_organization):
     if not url.organization.all().filter(pk=failmap_organization.pk).exists():
         url.organization.add(failmap_organization)
         url.save()
-
-
-def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█'):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filled_length = int(length * iteration // total)
-    bar = fill * filled_length + '-' * (length - filled_length)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end='\r')
-    # Print New Line on Complete
-    if iteration == total:
-        print()
 
 
 def debug_organizations(organizations):

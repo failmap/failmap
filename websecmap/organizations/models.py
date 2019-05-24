@@ -124,6 +124,15 @@ class Organization(models.Model):
         else:
             return "%s, %s/%s (%s)" % (self.name, self.country, type_label, self.created_on.strftime("%b %Y"))
 
+    def add_url(self, url: str):
+
+        # add url to database with validation etc:
+        url = Url.add(url)
+
+        # then add it to the organization
+        url.organization.add(self)
+        url.save()
+
 
 GEOJSON_TYPES = (
     ('MultiPolygon', 'MultiPolygon'),
@@ -409,6 +418,29 @@ class Url(models.Model):
         # discover_wildcards([u])
 
         return u
+
+    @staticmethod
+    def add(url: str):
+        # todo: check if resolves (default true, for example: skip_resolve, for semi-reliable datasources)
+        # todo: validate content of url, same method as dashboard
+
+        # all urls are always lowercase.
+        url = url.lower()
+
+        extract = tldextract.extract(url)
+
+        if not extract.suffix:
+            raise ValueError("Added url does not have a suffix. Only DNS names are allowed, not IP addresses.")
+
+        existing_url = Url.objects.all().filter(url=url, is_dead=False).first()
+        if not existing_url:
+            new_url = Url(url=url)
+            new_url.created_on = datetime.now(pytz.utc)
+            new_url.save()
+            return new_url
+
+        return existing_url
+
 
 # are open ports based on IP adresses.
 # adresses might change (and thus an endpoint changes).

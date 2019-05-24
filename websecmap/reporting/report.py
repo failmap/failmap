@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime
 from typing import List
@@ -346,6 +347,23 @@ def latest_moment_of_datetime(datetime_: datetime):
 
 
 def create_url_report(timeline, url: Url):
+    """
+    This creates:
+    {
+        "url": ...,
+        "ratings": [
+            {Rating 1}, {Rating 2}
+            ],
+        "endpoints":
+        {...
+        "Ratings": {Rating1, Rating 2...
+
+
+    :param timeline:
+    :param url:
+    :return:
+    """
+
     log.info("Rebuilding ratings for url %s on %s moments" % (url, len(timeline)))
     previous_endpoint_ratings = {}
     previous_url_ratings = {}
@@ -411,14 +429,11 @@ def create_url_report(timeline, url: Url):
 
             # enrich the ratings with previous ratings, without overwriting them.
             for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
-                if endpoint_scan_type not in these_endpoint_scans:
-                    if endpoint.id in previous_endpoint_ratings:
-                        if endpoint_scan_type in previous_endpoint_ratings[endpoint.id]:
-                            these_endpoint_scans[endpoint_scan_type] = \
-                                previous_endpoint_ratings[endpoint.id][endpoint_scan_type]
+                if all([endpoint_scan_type not in these_endpoint_scans,
+                        endpoint_scan_type in previous_endpoint_ratings.get(endpoint.id, [])]):
+                    these_endpoint_scans[endpoint_scan_type] = previous_endpoint_ratings[endpoint.id][endpoint_scan_type]
 
             # propagate the ratings to the next iteration.
-            previous_endpoint_ratings[endpoint.id] = {}
             previous_endpoint_ratings[endpoint.id] = these_endpoint_scans
 
             # build the calculation:
@@ -437,6 +452,7 @@ def create_url_report(timeline, url: Url):
             # "repeated" message, so you know a rating is repeated, and didn't get extra points.
             label = str(moment) + str(endpoint.is_ipv6()) + str(endpoint.port)
             if label not in given_ratings:
+                # todo: this can be a defaultdict
                 given_ratings[label] = []
 
             for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
@@ -446,6 +462,8 @@ def create_url_report(timeline, url: Url):
 
                         given_ratings[label].append(endpoint_scan_type)
                     else:
+                        # should we just remove the repeated findings? There should not be one of these anyone
+                        # anymore...
                         calculations.append({
                             "type": endpoint_scan_type,
                             "explanation": "Repeated finding. Probably because this url changed IP adresses or has "
@@ -467,17 +485,7 @@ def create_url_report(timeline, url: Url):
 
             # Readibility is important: it's ordered from the worst to least points.
             calculations = sorted(calculations, key=lambda k: (k['high'], k['medium'], k['low']), reverse=True)
-
-            endpoint_calculations.append({
-                "id": endpoint.pk,
-                "concat": "%s/%s IPv%s" % (endpoint.protocol, endpoint.port, endpoint.ip_version),
-                "ip": endpoint.ip_version,
-                "ip_version": endpoint.ip_version,
-                "port": endpoint.port,
-                "protocol": endpoint.protocol,
-                "v4": endpoint.is_ipv4(),
-                "ratings": calculations
-            })
+            endpoint_calculations.append(create_endpoint_calculation(endpoint, calculations))
 
         previous_endpoints += relevant_endpoints
 
@@ -485,10 +493,7 @@ def create_url_report(timeline, url: Url):
         # - It reuses ratings from the previous moment, but if there are new ratings for a specific scan type only the
         # rating for this specific scan type is overwritten.
         # - Dead and not resolvable urls have been checked above, which helps.
-        url_scans = {}
-        for scan in timeline[moment]['url_scans']:
-            url_scans[scan.url.id] = []
-
+        url_scans = defaultdict(list)
         for scan in timeline[moment]['url_scans']:
             url_scans[scan.url.id].append(scan)
 
@@ -503,14 +508,13 @@ def create_url_report(timeline, url: Url):
 
         # enrich the ratings with previous ratings, which saves queries.
         for url_scan_type in url_scan_types:
-            if url_scan_type not in these_url_scans:
-                if url.id in previous_url_ratings:
-                    if url_scan_type in previous_url_ratings[url.id]:
-                        these_url_scans[url_scan_type] = \
-                            previous_url_ratings[url.id][url_scan_type]
+            if all([
+                url_scan_type not in these_url_scans,
+                url_scan_type in previous_url_ratings.get(url.id, [])
+            ]):
+                these_url_scans[url_scan_type] = previous_url_ratings[url.id][url_scan_type]
 
         # propagate the ratings to the next iteration.
-        previous_url_ratings[url.id] = {}
         previous_url_ratings[url.id] = these_url_scans
 
         for url_scan_type in url_scan_types:
@@ -531,6 +535,19 @@ def create_url_report(timeline, url: Url):
         log.debug("On %s %s has %s endpoints." % (moment, url, len(endpoint_calculations)))
 
         save_url_report(url, moment, calculation)
+
+
+def create_endpoint_calculation(endpoint, calculations):
+    return {
+        "id": endpoint.pk,
+        "concat": "%s/%s IPv%s" % (endpoint.protocol, endpoint.port, endpoint.ip_version),
+        "ip": endpoint.ip_version,
+        "ip_version": endpoint.ip_version,
+        "port": endpoint.port,
+        "protocol": endpoint.protocol,
+        "v4": endpoint.is_ipv4(),
+        "ratings": calculations
+    }
 
 
 def add_report_to_key(amount_of_issues, key, report):

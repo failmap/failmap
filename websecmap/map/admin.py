@@ -14,7 +14,7 @@ from import_export.admin import ImportExportModelAdmin
 from websecmap.app.models import Job
 from websecmap.celery import PRIO_HIGH, app
 from websecmap.map import models
-from websecmap.map.geojson import import_from_scratch, update_coordinates
+from websecmap.map.logic.openstreetmap import import_from_scratch, update_coordinates
 from websecmap.map.models import HighLevelStatistic, MapDataCache, VulnerabilityStatistic
 from websecmap.map.report import compose_task
 

@@ -106,6 +106,12 @@ run-broker:  ## only run broker
 test_integration: ${app}  ## perform integration test suite
 	DB_NAME=test.sqlite3 ${env} pytest -v -k 'integration' ${testargs}
 
+test_testcase: ${app}
+	# run specific testcase
+	# example: make test_testcase testargs=test_openstreetmaps
+	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
+		${env} pytest -k ${testargs}
+
 test_integration: ${app}
 	# run integration tests
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
