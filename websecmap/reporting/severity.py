@@ -392,6 +392,19 @@ calculation_methods = {
     'internet_nl_web_legacy_tls_available': internet_nl_generic_boolean_value,
     'internet_nl_web_legacy_ipv6_webserver': internet_nl_generic_boolean_value,
     'internet_nl_web_legacy_ipv6_nameserver': internet_nl_generic_boolean_value,
+
+    'internet_nl_mail_non_sending_domain': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_mail_server_configured': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_mail_servers_testable': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_mail_starttls_dane_ta': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_mail_auth_dmarc_policy_only': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_csp': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_referrer_policy': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_frame_options': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_xss_protection': internet_nl_generic_boolean_value,  # Added 24th of May 2019
 }
 
 
