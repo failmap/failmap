@@ -163,7 +163,7 @@ MIDDLEWARE = [
 # if loadbalancer/proxy provides authetication (eg: basic auth) trust it to provide the user
 # https://docs.djangoproject.com/en/dev/howto/auth-remote-user
 if os.environ.get('USE_REMOTE_USER', False):
-    MIDDLEWARE.append('django.contrib.auth.middleware.RemoteUserMiddleware')
+    MIDDLEWARE.append('websecmap.app.middleware.remote_user.CustomRemoteUserMiddleware')
     AUTHENTICATION_BACKENDS = [
         'django.contrib.auth.backends.RemoteUserBackend',
         # fallback to traditional auth if no REMOTE_USER is provided
