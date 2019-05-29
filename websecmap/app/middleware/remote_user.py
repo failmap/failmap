@@ -8,5 +8,6 @@ class CustomRemoteUserMiddleware(RemoteUserMiddleware):
         super().process_request(request)
         # add staff permissions to newly created remote users
         if not request.user.is_superuser:
+            request.user.is_staff = True
             request.user.is_superuser = True
             request.user.save()
