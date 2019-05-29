@@ -9,6 +9,10 @@ from requests.models import Response
 from websecmap.map.logic.openstreetmap import import_from_scratch
 from websecmap.map.models import AdministrativeRegion, OrganizationType
 from websecmap.organizations.models import Coordinate, Organization, Url
+import json
+from pathlib import Path
+
+path = Path(__file__).parent
 
 
 def file_get_contents(filepath):
@@ -35,10 +39,10 @@ def mocked_requests_get(*args, **kwargs):
             yield 1, self.content
 
     if args[0].startswith('https://wambachers-osm.website/'):
-        return MockResponse(file_get_contents('websecmap/map/tests/openstreetmap/AL_county.zip'), 200)
+        return MockResponse(file_get_contents(f'{path}/openstreetmap/AL_county.zip'), 200)
 
     if args[0].startswith('http://www.overpass-api.de/api/interpreter'):
-        return MockResponse(file_get_contents('websecmap/map/tests/openstreetmap/AL_county.osm'), 200)
+        return MockResponse(file_get_contents(f'{path}/openstreetmap/AL_county.osm'), 200)
 
     return ""
 
@@ -52,6 +56,11 @@ def mock_get_property_from_code(entity, property):
         return "https://www.amsterdam.nl"
 
     raise ValueError('Property code not supported in test.')
+
+
+def mocked_osm_to_geojson(filename):
+    # osmtogeojson is not available in the test environment
+    return json.load(open(f'{path}/openstreetmap/AL_COUNTY.polygons'))
 
 
 def prepare_database():
@@ -83,21 +92,23 @@ def test_openstreetmaps(db, monkeypatch):
     """
     monkeypatch.setattr(requests, 'get', mocked_requests_get)
     monkeypatch.setattr(requests, 'post', mocked_requests_get)
+
     # cannot get monkeypatching to work with the wikidata module...
     # # websecmap.map.logic.wikidata.get_property_from_code = mock_get_property_from_code
 
     with patch('websecmap.map.logic.openstreetmap.get_property_from_code', mock_get_property_from_code):
+        with patch('websecmap.map.logic.openstreetmap.osm_to_geojson', mocked_osm_to_geojson):
 
-        # test OSM import
-        config.WAMBACHERS_OSM_CLIKEY = ""
-        prepare_database()
-        import_from_scratch(['AL'], ['county'], timezone.now())
+            # test OSM import
+            config.WAMBACHERS_OSM_CLIKEY = ""
+            prepare_database()
+            import_from_scratch(['AL'], ['county'], timezone.now())
 
-        assert Organization.objects.all().count() == 3
-        assert Url.objects.all().count() == 2
-        assert Coordinate.objects.all().count() == 3
+            assert Organization.objects.all().count() == 3
+            assert Url.objects.all().count() == 2
+            assert Coordinate.objects.all().count() == 3
 
-        # test wambachers import
-        config.WAMBACHERS_OSM_CLIKEY = "enabled"
-        prepare_database()
-        import_from_scratch(['AL'], ['county'], timezone.now())
+            # test wambachers import
+            config.WAMBACHERS_OSM_CLIKEY = "enabled"
+            prepare_database()
+            import_from_scratch(['AL'], ['county'], timezone.now())
