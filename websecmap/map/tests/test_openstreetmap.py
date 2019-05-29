@@ -60,7 +60,7 @@ def mock_get_property_from_code(entity, property):
 
 def mocked_osm_to_geojson(filename):
     # osmtogeojson is not available in the test environment
-    return json.load(open(f'{path}/openstreetmap/AL_COUNTY.polygons'))
+    return json.load(open(f'{path}/openstreetmap/AL_county.polygons'))
 
 
 def prepare_database():
