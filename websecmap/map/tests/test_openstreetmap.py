@@ -13,7 +13,7 @@ from websecmap.organizations.models import Coordinate, Organization, Url
 
 def file_get_contents(filepath):
     # does this read the entire file?
-    with open(filepath, 'rb', encoding='utf-8') as content_file:
+    with open(filepath, 'rb') as content_file:
         return content_file.read()
 
 
@@ -38,7 +38,7 @@ def mocked_requests_get(*args, **kwargs):
         return MockResponse(file_get_contents('websecmap/map/tests/openstreetmap/AL_county.zip'), 200)
 
     if args[0].startswith('http://www.overpass-api.de/api/interpreter'):
-        return MockResponse(file_get_contents('websecmap/map/tests/openstreetmap/AL_county.osm').encode(), 200)
+        return MockResponse(file_get_contents('websecmap/map/tests/openstreetmap/AL_county.osm'), 200)
 
     return ""
 
@@ -92,6 +92,10 @@ def test_openstreetmaps(db, monkeypatch):
         config.WAMBACHERS_OSM_CLIKEY = ""
         prepare_database()
         import_from_scratch(['AL'], ['county'], timezone.now())
+
+        assert Organization.objects.all().count() == 3
+        assert Url.objects.all().count() == 2
+        assert Coordinate.objects.all().count() == 3
 
         # test wambachers import
         config.WAMBACHERS_OSM_CLIKEY = "enabled"
