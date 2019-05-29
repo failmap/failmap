@@ -1,4 +1,6 @@
 
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 import requests
@@ -9,8 +11,6 @@ from requests.models import Response
 from websecmap.map.logic.openstreetmap import import_from_scratch
 from websecmap.map.models import AdministrativeRegion, OrganizationType
 from websecmap.organizations.models import Coordinate, Organization, Url
-import json
-from pathlib import Path
 
 path = Path(__file__).parent
 
