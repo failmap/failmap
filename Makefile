@@ -97,14 +97,18 @@ run: ${app}  ## run complete application stack (frontend, worker, broker)
 run-frontend: ${app}  ## only run frontend component
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver
 
+app: ${app}  ## perform arbitrary app commands
+    # make app args="help"
+    # make app args="report -y municipality"
+    # make app args="makemigrations"
+    # make app args="migrate"
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} ${args}
+
 run-worker: ${app}  ## only run worker component
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} celery worker -ldebug
 
 run-broker:  ## only run broker
 	docker run --rm --name=redis -p 6379 redis
-
-test_integration: ${app}  ## perform integration test suite
-	DB_NAME=test.sqlite3 ${env} pytest -v -k 'integration' ${testargs}
 
 test_testcase: ${app}
 	# run specific testcase
@@ -161,8 +165,13 @@ clean:  ## cleanup build artifacts, caches, databases, etc.
 	# remove runtime state files
 	-rm -rf *.sqlite3
 
-mrproper: clean ## thorough clean, removes virtualenv
+clean_virtualenv:  ## cleanup virtualenv and installed app/dependencies
+	# clear poetry cache
+	-yes yes | poetry cache clear --all pypi
+	# remove virtualenv
 	-rm -fr ${VIRTUAL_ENV}/
+
+mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 
 # don't let poetry manage the virtualenv, we do it ourselves to make it deterministic
 poetry: ${poetry}
@@ -196,3 +205,5 @@ help:           ## Show this help.
 		printf '\033[0m'; \
 		printf "%s\n" $$help_info; \
 	done
+
+check-commit: fix test
