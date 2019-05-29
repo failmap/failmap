@@ -431,7 +431,8 @@ def create_url_report(timeline, url: Url):
             for endpoint_scan_type in ENDPOINT_SCAN_TYPES:
                 if all([endpoint_scan_type not in these_endpoint_scans,
                         endpoint_scan_type in previous_endpoint_ratings.get(endpoint.id, [])]):
-                    these_endpoint_scans[endpoint_scan_type] = previous_endpoint_ratings[endpoint.id][endpoint_scan_type]
+                    these_endpoint_scans[endpoint_scan_type] = previous_endpoint_ratings[endpoint.id][
+                        endpoint_scan_type]
 
             # propagate the ratings to the next iteration.
             previous_endpoint_ratings[endpoint.id] = these_endpoint_scans
