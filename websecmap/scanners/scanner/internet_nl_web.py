@@ -18,7 +18,7 @@ from websecmap.scanners.scanner.internet_nl_mail import register_scan
 log = logging.getLogger(__name__)
 
 
-API_URL_WEB = "https://batch.internet.nl/api/batch/v1.0/web/"
+API_URL_WEB = "https://batch.internet.nl/api/batch/v1.1/web/"
 MAX_INTERNET_NL_SCANS = 5000
 
 

@@ -68,7 +68,7 @@ from websecmap.scanners.scanner.__init__ import (allowed_to_scan, q_configuratio
 log = logging.getLogger(__name__)
 
 
-API_URL_MAIL = "https://batch.internet.nl/api/batch/v1.0/mail/"
+API_URL_MAIL = "https://batch.internet.nl/api/batch/v1.1/mail/"
 MAX_INTERNET_NL_SCANS = 5000
 
 # while internet.nl scans on port 25
