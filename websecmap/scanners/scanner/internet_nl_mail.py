@@ -194,7 +194,9 @@ def set_finished_on_date(scan):
     scan.save(update_fields=['finished_on'])
 
 
-@app.task(queue="storage")
+# exp backoff 2 = 2, 4, 8, 16, 32, 64, 128, 256 seconds
+@app.task(queue="storage", autoretry_for=(Exception,), retry_backoff=True, retry_kwargs={'max_retries': 10},
+          retry_jitter=False)
 def register_scan(urls: List[Url], username, password, internet_nl_scan_type: str = 'mail', api_url: str = "",
                   scan_name: str = ""):
     """
