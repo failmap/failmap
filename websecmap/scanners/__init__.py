@@ -225,6 +225,13 @@ SCANNERS = [
             'internet_nl_mail_legacy_dnssec_email_domain',
             'internet_nl_mail_legacy_ipv6_mailserver',
             'internet_nl_mail_legacy_ipv6_nameserver',
+
+            'internet_nl_mail_non_sending_domain',  # Added 24th of May 2019
+            'internet_nl_mail_server_configured',  # Added 24th of May 2019
+            'internet_nl_mail_servers_testable',   # Added 24th of May 2019
+            'internet_nl_mail_starttls_dane_ta',  # Added 24th of May 2019
+            'internet_nl_mail_auth_dmarc_policy_only',  # Added 24th of May 2019
+            'internet_nl_mail_auth_dmarc_ext_destination',  # Added 24th of May 2019
         ],
         'creates url scan types': []
     },
@@ -276,6 +283,14 @@ SCANNERS = [
             'internet_nl_web_legacy_tls_available',
             'internet_nl_web_legacy_ipv6_webserver',
             'internet_nl_web_legacy_ipv6_nameserver',
+
+            # Added 24 May 2019
+            'internet_nl_web_appsecpriv',
+            'internet_nl_web_appsecpriv_csp',
+            'internet_nl_web_appsecpriv_referrer_policy',
+            'internet_nl_web_appsecpriv_x_content_type_options',
+            'internet_nl_web_appsecpriv_x_frame_options',
+            'internet_nl_web_appsecpriv_x_xss_protection',
         ],
         'creates url scan types': []
     },
