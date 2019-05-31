@@ -346,6 +346,28 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
         # don't overwrite domain['views'] here, as that somehow does not work.
         views = inject_legacy_views(internet_nl_scan_type, domain['views'])
 
+        # icons: https://github.com/NLnetLabs/Internet.nl/tree/cece8255ac7f39bded137f67c94a10748970c3c7/checks/static
+        # Is not testable: icon-not-tested-question-mark.svg
+        # Not applicable: icon-not-tested.svg
+        # will be changed from true, false to passed, info, warning, failed.
+        # main chart: score divide by domain names (don't need to calculate yourself)
+
+        # Requirement levels: Required, Recommended, Optional,  Not Applicable
+        # Resultaten: Pass, Fail, Not Testable,                 Not Applicable
+        #
+        # Pass = Pass on any (Required, Recommended, Optional)
+        # Warning = Fail, Recommended
+        # Info = Fail, Optional
+        # Fail = Fail, Required
+        # Not Applicable = Not Applicable, Not Applicable (something made it not applicable)
+        # Not Tested = (Required, Recommended, Optional),
+        #               Not Testable... Can be any requirement: (Required, Recommended, Optional)
+        #
+        # DKIM is dan: Required maar kan Not Applicable zijn als bepaalde andere velden dat aangeven.
+        # https://www.internet.nl/faqs/report/
+
+        views = upgrade_api_response(internet_nl_scan_type, domain['views'])
+
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in views:
             scan_type = 'internet_nl_%s' % view['name']
@@ -358,6 +380,10 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
             )
 
 
+def upgrade_api_response(internet_nl_scan_type, views):
+    return views
+
+
 def inject_legacy_views(scan_type, views):
 
     # If a number of conditions are positive, then another 'view' is set to True. Otherwise to false.
@@ -365,22 +391,18 @@ def inject_legacy_views(scan_type, views):
     # todo: have to verify if these are the correct colums
     if scan_type in ["web"]:
         web_legacy_prefix = 'web_legacy_'
+
+        # forum standardisatie magazine = DNSSEC
+        # todo: new value, add this to report
         views.append({
-            'name': web_legacy_prefix + 'ipv6_nameserver',
+            'name': web_legacy_prefix + 'dnssec',
             'result': true_when_all_match(
                 views,
-                ['web_ipv6_ns_address', 'web_ipv6_ns_reach']
+                ['web_dnssec_exist', 'web_dnssec_valid']
             )
         })
 
-        views.append({
-            'name': web_legacy_prefix + 'ipv6_webserver',
-            'result': true_when_all_match(
-                views,
-                ['web_ipv6_ws_address', 'web_ipv6_ws_reach', 'web_ipv6_ws_similar']
-            )
-        })
-
+        # forum standardisatie magazine = TLS
         views.append({
             'name': web_legacy_prefix + 'tls_available',
             'result': true_when_all_match(
@@ -389,22 +411,8 @@ def inject_legacy_views(scan_type, views):
             )
         })
 
-        views.append({
-            'name': web_legacy_prefix + 'https_enforced',
-            'result': true_when_all_match(
-                views,
-                ['web_https_http_redirect']
-            )
-        })
-
-        views.append({
-            'name': web_legacy_prefix + 'hsts',
-            'result': true_when_all_match(
-                views,
-                ['web_https_http_hsts']
-            )
-        })
-
+        # forum standardisatie magazine = TLS_NCSC
+        # todo: not in report yet
         views.append({
             'name': web_legacy_prefix + 'tls_ncsc_web',
             'result': true_when_all_match(
@@ -415,49 +423,56 @@ def inject_legacy_views(scan_type, views):
             )
         })
 
+        # forum standardisatie magazine = HTTPS
+        views.append({
+            'name': web_legacy_prefix + 'https_enforced',
+            'result': true_when_all_match(
+                views,
+                ['web_https_http_redirect']
+            )
+        })
+
+        # forum standardisatie magazine = HSTS
+        views.append({
+            'name': web_legacy_prefix + 'hsts',
+            'result': true_when_all_match(
+                views,
+                ['web_https_http_hsts']
+            )
+        })
+
+        # Not in forum standardisatie magazine, but used internally
+        views.append({
+            'name': web_legacy_prefix + 'ipv6_nameserver',
+            'result': true_when_all_match(
+                views,
+                ['web_ipv6_ns_address', 'web_ipv6_ns_reach']
+            )
+        })
+
+        # Not in forum standardisatie magazine, but used internally
+        views.append({
+            'name': web_legacy_prefix + 'ipv6_webserver',
+            'result': true_when_all_match(
+                views,
+                ['web_ipv6_ws_address', 'web_ipv6_ws_reach', 'web_ipv6_ws_similar']
+            )
+        })
+
+        # Not in forum standardisatie magazine, but used internally
         views.append({
             'name': web_legacy_prefix + 'dane',
             'result': true_when_all_match(
                 views,
-                ['web_https_dane_exist', 'web_https_dane_exist']
+                ['web_https_dane_exist', 'web_https_dane_valid']
             )
         })
 
     # Also add a bunch of legacy fields for mail, on the condition that all are true.
     if scan_type in ["mail", "mail_dashboard"]:
         mail_legacy_prefix = "mail_legacy_"
-        views.append({
-            'name': mail_legacy_prefix + 'ipv6_nameserver',
-            'result': true_when_all_match(
-                views,
-                ['mail_ipv6_ns_adddress', 'mail_ipv6_ns_reach']
-            )
-        })
 
-        views.append({
-            'name': mail_legacy_prefix + 'ipv6_mailserver',
-            'result': true_when_all_match(
-                views,
-                ['mail_ipv6_mx_address', 'mail_ipv6_mx_reach']
-            )
-        })
-
-        views.append({
-            'name': mail_legacy_prefix + 'dnssec_email_domain',
-            'result': true_when_all_match(
-                views,
-                ['mail_dnssec_mailto_exist', 'mail_dnssec_mailto_valid']
-            )
-        })
-
-        views.append({
-            'name': mail_legacy_prefix + 'dnsssec_mailserver_domain',
-            'result': true_when_all_match(
-                views,
-                ['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid']
-            )
-        })
-
+        # forum standardisatie magazine = DMARC
         views.append({
             'name': mail_legacy_prefix + 'dmarc',
             'result': true_when_all_match(
@@ -466,6 +481,7 @@ def inject_legacy_views(scan_type, views):
             )
         })
 
+        # forum standardisatie magazine = DKIM
         views.append({
             'name': mail_legacy_prefix + 'dkim',
             'result': true_when_all_match(
@@ -474,6 +490,7 @@ def inject_legacy_views(scan_type, views):
             )
         })
 
+        # forum standardisatie magazine = SPF
         views.append({
             'name': mail_legacy_prefix + 'spf',
             'result': true_when_all_match(
@@ -482,21 +499,101 @@ def inject_legacy_views(scan_type, views):
             )
         })
 
+        # forum standardisatie magazine = DMARC Policy
         views.append({
-            'name': mail_legacy_prefix + 'tls_available',
+            'name': mail_legacy_prefix + 'dmarc_policy',
+            'result': true_when_all_match(
+                views,
+                ['mail_auth_dmarc_policy_only']
+            )
+        })
+
+        # forum standardisatie magazine = SPF Policy
+        views.append({
+            'name': mail_legacy_prefix + 'spf_policy',
+            'result': true_when_all_match(
+                views,
+                ['mail_auth_spf_policy']
+            )
+        })
+
+        # forum standardisatie magazine = START TLS
+        views.append({
+            'name': mail_legacy_prefix + 'start_tls',
             'result': true_when_all_match(
                 views,
                 ['mail_starttls_tls_available']
             )
         })
 
+        # forum standardisatie magazine = START TLS NCSC
+        # mail_starttls_cert_domain is mandatory ONLY when mail_starttls_dane_ta is True.
+        # And only then it should be in the view.
+        start_tls_ncsc_fields = \
+            ['mail_starttls_tls_available', 'mail_starttls_tls_version', 'mail_starttls_tls_ciphers',
+             'mail_starttls_tls_keyexchange', 'mail_starttls_tls_compress', 'mail_starttls_tls_secreneg',
+             'mail_starttls_cert_pubkey', 'mail_starttls_cert_sig']
+
+        for view in views:
+            if view['name'] == 'mail_starttls_dane_ta' and view['result'] is True:
+                start_tls_ncsc_fields.append('mail_starttls_cert_domain')
+
+        views.append({
+            'name': mail_legacy_prefix + 'start_tls_ncsc',
+            'result': true_when_all_match(
+                views,
+                start_tls_ncsc_fields
+            )
+        })
+
+        # Not in forum standardisatie magazine, but used internally
+        views.append({
+            'name': mail_legacy_prefix + 'dnssec_email_domain',
+            'result': true_when_all_match(
+                views,
+                ['mail_dnssec_mailto_exist', 'mail_dnssec_mailto_valid']
+            )
+        })
+
+        # forum standardisatie magazine = DNSSEC MX
+        views.append({
+            'name': mail_legacy_prefix + 'dnssec_mx',
+            'result': true_when_all_match(
+                views,
+                ['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid']
+            )
+        })
+
+        # forum standardisatie magazine = DANE
         views.append({
             'name': mail_legacy_prefix + 'dane',
             'result': true_when_all_match(
                 views,
-                ['mail_starttls_dane_exist']
+                ['mail_starttls_dane_exist', 'mail_starttls_dane_valid']
             )
         })
+
+        # Not in forum standardisatie magazine, but used internally
+        views.append({
+            'name': mail_legacy_prefix + 'ipv6_nameserver',
+            'result': true_when_all_match(
+                views,
+                ['mail_ipv6_ns_adddress', 'mail_ipv6_ns_reach']
+            )
+        })
+
+        # Not in forum standardisatie magazine, but used internally
+        views.append({
+            'name': mail_legacy_prefix + 'ipv6_mailserver',
+            'result': true_when_all_match(
+                views,
+                ['mail_ipv6_mx_address', 'mail_ipv6_mx_reach']
+            )
+        })
+
+        # todo: remove / change in translations:
+        # dnsssec_mailserver_domain is now dnssec_mx
+        # tls_available is now start_tls
 
     return views
 
