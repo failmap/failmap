@@ -49,6 +49,7 @@ You can load up this file in ipython and run test_store() if needed.
 
 import logging
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from typing import List
 
@@ -308,7 +309,7 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
 
     for domain in domains:
 
-        log.debug(domain)
+        # log.debug(domain)
 
         if domain['status'] != "ok":
             log.debug("%s scan failed on %s" % (internet_nl_scan_type, domain['domain']))
@@ -346,27 +347,7 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
         # don't overwrite domain['views'] here, as that somehow does not work.
         views = inject_legacy_views(internet_nl_scan_type, domain['views'])
 
-        # icons: https://github.com/NLnetLabs/Internet.nl/tree/cece8255ac7f39bded137f67c94a10748970c3c7/checks/static
-        # Is not testable: icon-not-tested-question-mark.svg
-        # Not applicable: icon-not-tested.svg
-        # will be changed from true, false to passed, info, warning, failed.
-        # main chart: score divide by domain names (don't need to calculate yourself)
-
-        # Requirement levels: Required, Recommended, Optional,  Not Applicable
-        # Resultaten: Pass, Fail, Not Testable,                 Not Applicable
-        #
-        # Pass = Pass on any (Required, Recommended, Optional)
-        # Warning = Fail, Recommended
-        # Info = Fail, Optional
-        # Fail = Fail, Required
-        # Not Applicable = Not Applicable, Not Applicable (something made it not applicable)
-        # Not Tested = (Required, Recommended, Optional),
-        #               Not Testable... Can be any requirement: (Required, Recommended, Optional)
-        #
-        # DKIM is dan: Required maar kan Not Applicable zijn als bepaalde andere velden dat aangeven.
-        # https://www.internet.nl/faqs/report/
-
-        views = upgrade_api_response(internet_nl_scan_type, domain['views'])
+        views = upgrade_api_response(views)
 
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in views:
@@ -374,13 +355,270 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
             store_endpoint_scan_result(
                 scan_type=scan_type,
                 endpoint=endpoint,
-                rating=view['result'],
-                message='',
+                rating=view['upgraded_result'],
+                message=view['explanation'],
                 evidence=domain['link']
             )
 
 
-def upgrade_api_response(internet_nl_scan_type, views):
+def upgrade_api_response(views):
+    """
+    The API now only returns True or False. In some cases these values influence each other, making some values
+    not applicable anymore... yet still true or false is given. This piece of logic is implemented here, and it will
+    transform results from True or False into the following:
+
+    Requirement levels: Required, Recommended, Optional, Not Applicable
+    Results: Pass, Fail, Not Testable, Not Applicable
+
+    As we can only store one result, we'll connect the requirement level and results. In the front-end, this has been
+    done like that. Where the following report values exist:
+
+                    Result          Requirement level
+    Passed          Pass            Required, Recommended, Optional
+    Fail            Faile           Required
+    Warning         Failed          Recommended
+    Info            Failed          Optional
+    Not Testable    Not Testable    Required, Recommended, Optional, Not Applicable
+    Not Applicable  Not Applicable  Not Applicable
+
+    So the result that we'll store is:
+    <requirement_level>_<api_result>
+
+    For example:
+    required~passed
+    required~failed
+    required~not_testable
+    optional~failed
+    not_applicable~not_applicable
+
+    These values can then be translated to web security map like this:
+    ok = <any>~passed
+    low = optional~failed
+    medium = recommended~failed
+    high = required~fail
+
+    Will these extra values be added to web security map, next to high, medium, low, ok? It makes sort of sense.
+    You want the 'reason' why something is not available... This should be stored as explanation.
+    not_testable = <any>~not_testable
+    not_applicable = not_applicable~not_applicable
+
+    But how to handle "not testable" and "not applicable" values? Should that be an extra field?
+
+    Basically we're now extracting the internet.nl UI from a boolean API. Which is now the only way to handle with
+    a number of edge cases badly impacting the metrics. It will still not solve everything as some are not possible
+    to deduce from a True/False API. Hopefully this documentation helps a little bit in redefining the API to match
+    the UI from internet.nl (including translations on various warnings).
+
+    icons: https://github.com/NLnetLabs/Internet.nl/tree/cece8255ac7f39bded137f67c94a10748970c3c7/checks/static
+    Not testable: icon-not-tested-question-mark.svg
+    Not applicable: icon-not-tested.svg
+
+    The requirement level is taken from:
+    https://github.com/internetstandards/Internet.nl-API-docs/blob/master/20190524_FS_default_view_API_InternetNL.ods
+
+    # We'll make the result as follows:
+    <requirement_level>~<api_result>~<reasoning>
+
+    :param internet_nl_scan_type:
+    :param views:
+    :return:
+    """
+
+    requirement_levels = {
+        # Feature flags, will not be manipulated here.
+        'mail_non_sending_domain': 'NA',
+        'mail_server_configured': 'NA',
+        'mail_servers_testable': 'NA',
+        'mail_starttls_dane_ta': 'NA',
+
+        # Actual requirements with default values
+        'mail_ipv6_ns_address': 'required',
+        'mail_ipv6_ns_reach': 'required',
+        'mail_ipv6_mx_address': 'required',
+        'mail_ipv6_mx_reach': 'required',
+        'mail_dnssec_mailto_exist': 'required',
+        'mail_dnssec_mailto_valid': 'required',
+        'mail_dnssec_mx_exist': 'required',
+        'mail_dnssec_mx_valid': 'required',
+        'mail_auth_dmarc_exist': 'required',
+        'mail_auth_dmarc_policy': 'required',
+        'mail_auth_dmarc_policy_only': 'required',
+        'mail_auth_dmarc_ext_destination': 'required',
+        'mail_auth_dkim_exist': 'required',
+        'mail_auth_spf_exist': 'required',
+        'mail_auth_spf_policy': 'required',
+        'mail_starttls_tls_available': 'required',
+        'mail_starttls_tls_version': 'required',
+        'mail_starttls_tls_ciphers': 'required',
+        'mail_starttls_tls_keyexchange': 'required',
+        'mail_starttls_tls_compress': 'required',
+        'mail_starttls_tls_secreneg': 'required',
+        'mail_starttls_tls_clientreneg': 'recommended',
+        'mail_starttls_cert_chain': 'optional',
+        'mail_starttls_cert_pubkey': 'required',
+        'mail_starttls_cert_sig': 'required',
+        'mail_starttls_cert_domain': 'optional',
+        'mail_starttls_dane_exist': 'required',
+        'mail_starttls_dane_valid': 'required',
+        'mail_starttls_dane_rollover': 'optional',
+        'web_ipv6_ns_address': 'required',
+        'web_ipv6_ns_reach': 'required',
+        'web_ipv6_ws_address': 'required',
+        'web_ipv6_ws_reach': 'required',
+        'web_ipv6_ws_similar': 'required',
+        'web_dnssec_exist': 'required',
+        'web_dnssec_valid': 'required',
+        'web_https_http_available': 'required',
+        'web_https_http_redirect': 'required',
+        'web_https_http_hsts': 'required',
+        'web_https_http_compress': 'recommended',
+        'web_https_tls_version': 'required',
+        'web_https_tls_ciphers': 'required',
+        'web_https_tls_keyexchange': 'required',
+        'web_https_tls_compress': 'required',
+        'web_https_tls_secreneg': 'required',
+        'web_https_tls_clientreneg': 'required',
+        'web_https_cert_chain': 'required',
+        'web_https_cert_pubkey': 'required',
+        'web_https_cert_sig': 'required',
+        'web_https_cert_domain': 'required',
+        'web_https_dane_exist': 'optional',
+        'web_https_dane_valid': 'optional',
+        'web_appsecpriv_x_frame_options': 'recommended',
+        'web_appsecpriv_x_content_type_options': 'recommended',
+        'web_appsecpriv_x_xxs_protection': 'recommended',
+        'web_appsecpriv_csp': 'optional',
+        'web_appsecpriv_referrer_policy': 'recommended',
+
+        # It's not clear what the Forum Standardisatie Views have in terms of requirement level.
+        # Give them a default level, required.
+        'mail_legacy_dmarc': 'required',
+        'mail_legacy_dkim': 'required',
+        'mail_legacy_spf': 'required',
+        'mail_legacy_dmarc_policy': 'required',
+        'mail_legacy_spf_policy': 'required',
+        'mail_legacy_start_tls': 'required',
+        'mail_legacy_start_tls_ncsc': 'required',
+        'mail_legacy_dnssec_email_domain': 'required',
+        'mail_legacy_dnssec_mx': 'required',
+        'mail_legacy_dane': 'required',
+        'mail_legacy_ipv6_nameserver': 'required',
+        'mail_legacy_ipv6_mailserver': 'required',
+        'web_legacy_dnssec': 'required',
+        'web_legacy_tls_available': 'required',
+        'web_legacy_tls_ncsc_web': 'required',
+        'web_legacy_https_enforced': 'required',
+        'web_legacy_hsts': 'required',
+        'web_legacy_ipv6_nameserver': 'required',
+        'web_legacy_ipv6_webserver': 'required',
+        'web_legacy_dane': 'required',
+    }
+
+    explanations = defaultdict(str)
+
+    # First handle feature flags that influence the requirement levels
+    for view in views:
+
+        # Valid DANE-TA (2) record available? (If yes, “Domain name on certificate” must be considered as Required.)
+        if view['name'] == 'mail_starttls_dane_ta' and view['result']:
+            requirement_levels['mail_starttls_cert_domain'] = 'required'
+            explanations['mail_starttls_cert_domain'] += "Valid DANE-TA (2) record available, "
+
+        # SPF record with "v=spf1 -all" and DMARC record with "v=DMARC1;p=reject;” detected?
+        # (If yes, DKIM could be considered as not relevant.)
+        if view['name'] == 'mail_non_sending_domain' and view['result']:
+            requirement_levels['mail_auth_dkim_exist'] = 'not_applicable'
+            explanations['mail_auth_dkim_exist'] += \
+                'SPF record with "v=spf1 -all" and DMARC record with "v=DMARC1;p=reject;” detected, '
+
+    # This overrides all previously made requirment overrides
+    for view in views:
+        # MX record (that is not ‘Null MX’) available?
+        # (If no, all subtests of the ‘STARTTLS and DANE’ test category will show fails and should be
+        # treated as not relevant.)
+        if view['name'] == 'mail_server_configured' and view['result'] is False:
+            requirement_levels['mail_starttls_tls_available'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_version'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_ciphers'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_keyexchange'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_compress'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_secreneg'] = 'not_applicable'
+            requirement_levels['mail_starttls_tls_clientreneg'] = 'not_applicable'
+            requirement_levels['mail_starttls_cert_chain'] = 'not_applicable'
+            requirement_levels['mail_starttls_cert_pubkey'] = 'not_applicable'
+            requirement_levels['mail_starttls_cert_sig'] = 'not_applicable'
+            requirement_levels['mail_starttls_cert_domain'] = 'not_applicable'
+            requirement_levels['mail_starttls_dane_exist'] = 'not_applicable'
+            requirement_levels['mail_starttls_dane_valid'] = 'not_applicable'
+            requirement_levels['mail_starttls_dane_rollover'] = 'not_applicable'
+
+            explanations['mail_starttls_tls_available'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_version'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_ciphers'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_keyexchange'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_compress'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_secreneg'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_tls_clientreneg'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_cert_chain'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_cert_pubkey'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_cert_sig'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_cert_domain'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_dane_exist'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_dane_valid'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_starttls_dane_rollover'] = 'No MX record (that is not ‘Null MX’) available'
+
+    # Modify values in the results, as some things might not be testable
+    # Views should have been implemented as a dictionary... We could convert it with the key as name...??
+
+    not_testable_fields = []
+    for view in views:
+        # All MX’s testable? (If no, all subtests of the ‘STARTTLS and DANE’
+        # test category will show fails and should be interpreted as ‘no test result available’.)
+        if view['name'] == 'mail_servers_testable' and not view['result']:
+            not_testable_fields += ['mail_starttls_tls_available', 'mail_starttls_tls_version',
+                                    'mail_starttls_tls_ciphers', 'mail_starttls_tls_keyexchange',
+                                    'mail_starttls_tls_compress', 'mail_starttls_tls_secreneg',
+                                    'mail_starttls_tls_clientreneg', 'mail_starttls_cert_chain',
+                                    'mail_starttls_cert_pubkey', 'mail_starttls_cert_sig',
+                                    'mail_starttls_cert_domain', 'mail_starttls_dane_exist',
+                                    'mail_starttls_dane_valid', 'mail_starttls_dane_rollover']
+
+            explanations['mail_starttls_tls_available'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_version'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_ciphers'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_keyexchange'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_compress'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_secreneg'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_tls_clientreneg'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_cert_chain'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_cert_pubkey'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_cert_sig'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_cert_domain'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_dane_exist'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_dane_valid'] = 'Not All MX’s testable, '
+            explanations['mail_starttls_dane_rollover'] = 'Not All MX’s testable, '
+
+    # Translate the old value to the new one:
+    for view in views:
+
+        # Add some explanations to these findings, which makes it easier to debug:
+        view['explanation'] = explanations[view["name"]]
+
+        if requirement_levels[view["name"]] == "not_applicable":
+            # log.warning(f"{view['name']} = {requirement_levels[view['name']]}")
+            view['upgraded_result'] = f"not_applicable~not_applicable"
+            continue
+
+        if view['name'] in not_testable_fields:
+            view['upgraded_result'] = f'{requirement_levels[view["name"]]}~not_testable'
+            continue
+
+        if view['result']:
+            view['upgraded_result'] = f'{requirement_levels[view["name"]]}~passed'
+            continue
+
+        view['upgraded_result'] = f'{requirement_levels[view["name"]]}~failed'
+
     return views
 
 
@@ -413,6 +651,7 @@ def inject_legacy_views(scan_type, views):
 
         # forum standardisatie magazine = TLS_NCSC
         # todo: not in report yet
+        # internet_nl_web_legacy_dnssec, internet_nl_web_legacy_tls_ncsc_web
         views.append({
             'name': web_legacy_prefix + 'tls_ncsc_web',
             'result': true_when_all_match(

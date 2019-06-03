@@ -5,7 +5,7 @@ import pytest
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanner.internet_nl_mail import (inject_legacy_views, store,
-                                                         true_when_all_match)
+                                                         true_when_all_match, upgrade_api_response)
 
 log = logging.getLogger('websecmap')
 
@@ -130,6 +130,24 @@ mail_result = {
                     {
                         "result": True,
                         "name": "mail_ipv6_ns_address"
+                    },
+                    {
+                        "result": True,
+                        "name": "mail_servers_testable"
+                    },
+                    # This will set the requirement to not applicable on a number of tests
+                    {
+                        "result": False,
+                        "name": "mail_server_configured"
+                    },
+                    # This sets mail_starttls_cert_domain to required, which is overridden by being not required above
+                    {
+                        "result": True,
+                        "name": "mail_starttls_dane_ta"
+                    },
+                    {
+                        "result": False,
+                        "name": 'mail_non_sending_domain',
                     }
                 ],
                 "score": 77,
@@ -209,22 +227,46 @@ web_result = {
 }
 
 
+def reload_data(api_response, internet_nl_scan_type='mail'):
+    EndpointGenericScan.objects.all().delete()
+    Endpoint.objects.all().delete()
+    Url.objects.all().delete()
+
+    url, created = Url.objects.all().get_or_create(url='arnhem.nl')
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_mx_no_cname')
+    endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_a_aaaa')
+    store(api_response, internet_nl_scan_type)
+
+
+def change_api_value(api_data, key="mail_server_configured", new_value=True):
+
+    for domain in api_data['data']['domains']:
+        for view in domain['views']:
+            if view['name'] == key:
+                view['result'] = new_value
+
+    return api_data
+
+
 def test_internet_nl_mail(db):
     # Make sure legacy views are injected in the results:
     domains = mail_result.get('data', {}).get('domains', {})
+
     has_legacy_view = False
     for domain in domains:
         assert domain['domain'] == 'arnhem.nl'
-        assert len(domain['views']) == 27
+        assert len(domain['views']) == 31
         domain['views'] = inject_legacy_views('mail_dashboard', domain['views'])
-        assert len(domain['views']) == 27 + 9
+
+        # changes true/false to requirement_level~result (includes not applicable / not testable)
+        domain['views'] = upgrade_api_response(domain['views'])
+        assert len(domain['views']) == 31 + 12
 
         for view in domain['views']:
             # internet_nl is added just before storing the scan result
             if view['name'] == "mail_legacy_ipv6_mailserver":
                 has_legacy_view = True
 
-    log.debug(domain['views'])
     assert has_legacy_view is True
 
     # should not exist yet
@@ -235,16 +277,16 @@ def test_internet_nl_mail(db):
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_mx_no_cname')
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_a_aaaa')
 
-    # add 27 views, 4 categories, 1 score, 9 auto generated = 41
-    # Amount of legacy items auto-generated: 9
+    # add 29 views, 4 categories, 1 score, 12 auto generated = 44
+    # Amount of legacy items auto-generated: 12
     store(mail_result, internet_nl_scan_type='mail')
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 41
+    assert scan_count == 48
 
-    # add 23 views, 1 score, 3 categories, 7 auto generated = 34
+    # add 23 views, 1 score, 3 categories, 8 auto generated = 35
     store(web_result, internet_nl_scan_type='web')
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 41 + 34
+    assert scan_count == 48 + 35
 
     # Should be added once, scan result didn't change.
     store(mail_result, internet_nl_scan_type='mail')
@@ -252,7 +294,43 @@ def test_internet_nl_mail(db):
     assert scan_count == 1
 
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 41 + 34
+    assert scan_count == 48 + 35
+
+    # retrieve a value, and see if it's using the updated format
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').get()
+    assert epgs.rating == "required~passed"
+
+    # This has been set to not_applicable in the test data, we emulate a non-sending domain
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_starttls_tls_ciphers').get()
+    assert epgs.rating == "not_applicable~not_applicable"
+
+    # required, but then overwritten to be not applicable
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_starttls_cert_domain').get()
+    assert epgs.rating == "not_applicable~not_applicable"
+
+    # now see that we can get a optional~passd for mail_starttls_cert_domain
+    data = change_api_value(mail_result, "mail_starttls_dane_ta", True)
+
+    # and we should check the internet_nl_mail_starttls_cert_domain for required~not_testable
+    data = change_api_value(data, "mail_server_configured", True)
+    data = change_api_value(data, "mail_servers_testable", False)
+    reload_data(data)
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_starttls_cert_domain').get()
+    assert epgs.rating == "required~not_testable"
+
+    # verify that when mail_starttls_dane_ta is false, the internet_nl_mail_starttls_cert_domain becomes optional
+    data = change_api_value(mail_result, "mail_starttls_dane_ta", False)
+    reload_data(data)
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_starttls_cert_domain').get()
+    assert epgs.rating == "optional~not_testable"
+
+    # todo: verify that settings mail_non_sending_domain makes mail_auth_dkim_exist not applicable
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_auth_dkim_exist').get()
+    assert epgs.rating == "required~passed"
+    data = change_api_value(mail_result, "mail_non_sending_domain", True)
+    reload_data(data)
+    epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_auth_dkim_exist').get()
+    assert epgs.rating == "not_applicable~not_applicable"
 
     views = [
         {

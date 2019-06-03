@@ -110,11 +110,11 @@ run-worker: ${app}  ## only run worker component
 run-broker:  ## only run broker
 	docker run --rm --name=redis -p 6379 redis
 
-test_testcase: ${app}
+testcase: ${app}
 	# run specific testcase
 	# example: make test_testcase testargs=test_openstreetmaps
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -k ${testargs}
+		${env} pytest -k ${case}
 
 test_integration: ${app}
 	# run integration tests
