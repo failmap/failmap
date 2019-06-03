@@ -33,11 +33,11 @@ RUN npm install --global osmtogeojson
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 # required because pip 19+ breaks pyproject.toml editable builds: https://github.com/pypa/pip/issues/6434
-ENV PIP_USE_PEP517=false
+ENV PIP_USE_PEP517 false
 RUN /usr/bin/pip3 install --upgrade poetry==0.12.15 virtualenv pip
 RUN virtualenv /pyenv
-ENV VIRTUAL_ENV = /pyenv
-ENV PATH=/pyenv/bin:$PATH
+ENV VIRTUAL_ENV /pyenv
+ENV PATH $VIRTUAL_ENV/bin:$PATH
 
 COPY pyproject.toml poetry.lock README.md /source/
 COPY websecmap/ /source/websecmap/
