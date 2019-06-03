@@ -256,23 +256,52 @@ def internet_nl_generic_boolean_value(scan):
     return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=0, medium=1, low=0)
 
 
+def internet_nl_requirement_tilde_value_format(scan):
+    """
+    See documentation of upgrade_api_response to learn how this parsing works.
+    :param scan:
+    :return:
+    """
+    requirement_level, scan_value = scan.rating.split('~')
+
+    if scan_value == 'passed':
+        return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0)
+
+    if scan_value == 'failed':
+        if requirement_level == 'required':
+            return standard_calculation(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0)
+        if requirement_level == 'recommended':
+            return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0)
+        if requirement_level == 'optional':
+            return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
+
+    # Not applicable and not testable are fine additions to the set of severity levels we use now.
+    # This way scanners can be even more flexible.
+    if scan_value == 'not_testable':
+        return standard_calculation(scan=scan, explanation=scan.explanation, not_testable=True)
+
+    if scan_value == 'not_applicable':
+        return standard_calculation(scan=scan, explanation=scan.explanation, not_applicable=True)
+
+
 def internet_nl_score(scan):
     # Todo: these numbers are completely chosen at random and need to be defined.
+    # todo: how to add the score and url to each url in a report? / other special values?
     score = int(scan.rating)
 
     if score == 100:
-        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=0)
+        return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=0, low=0)
 
     if score > 90:
-        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=1)
+        return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=0, low=1)
 
     if score > 80:
-        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=0, low=1)
+        return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=0, low=1)
 
     if score > 70:
-        return standard_calculation(scan=scan, explanation=scan.rating, high=0, medium=1, low=0)
+        return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=0, medium=1, low=0)
 
-    return standard_calculation(scan=scan, explanation=scan.rating, high=1, medium=0, low=0)
+    return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=1, medium=0, low=0)
 
 
 def dummy_calculated_values(scan):
@@ -281,7 +310,8 @@ def dummy_calculated_values(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def standard_calculation(scan, explanation, high, medium, low):
+def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
+                         not_testable: bool = False, not_applicable: bool = False):
 
     ok = 0 if high or medium or low else 1
 
@@ -293,7 +323,9 @@ def standard_calculation(scan, explanation, high, medium, low):
         "high": high,
         "medium": medium,
         "low": low,
-        "ok": ok
+        "ok": ok,
+        "not_testable": not_testable,
+        "not_applicable": not_applicable
     }
 
 

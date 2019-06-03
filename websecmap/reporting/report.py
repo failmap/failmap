@@ -565,6 +565,8 @@ def add_report_to_key(amount_of_issues, key, report):
     amount_of_issues[key]['medium'] += report['medium']
     amount_of_issues[key]['low'] += report['low']
     amount_of_issues[key]['any'] += (report['low'] + report['medium'] + report['high'])
+    amount_of_issues[key]['not_testable'] += report['not_testable']
+    amount_of_issues[key]['not_applicable'] += report['not_applicable']
     amount_of_issues[key]['ok'] += report['ok']
     return amount_of_issues
 
@@ -602,30 +604,30 @@ def judge(amount_of_issues, clean_issues_for_judgement, key, reports: List):
 def statistics_over_url_calculation(calculation):
     # Calculate statistics here, instead of working with all kinds of variables.
     amount_of_issues = {
-        'overall': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
-        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'overall': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
 
         # sum of all issues on the url level
-        'url': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
-        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
 
         # sum of all issues in endpoints
-        'endpoint': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
-        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
 
         # judgements are complex situation: when ALL reports of an endpoint say the endpoint is OK, a single
         # judgement is added for that endpoint. There are multiple endpoints with multiple judgements.
-        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
         # Some reports will be explained, that means the endpoint will be explained on a certain level.
-        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
 
         # As there is only one url, with multiple reports, only one judgement will be made.
-        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
-        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
 
         # If there is a single high endpoint judgement, or a single high url judgement, the overall is high.
         # This can have a maximum of 1 value, which summarizes all url_judgements and endpoint_judgements
-        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
     }
 
     clean_issues_for_judgement = deepcopy(amount_of_issues)
