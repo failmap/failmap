@@ -633,7 +633,7 @@ def statistics_over_url_calculation(calculation):
 
         # If there is a single high endpoint judgement, or a single high url judgement, the overall is high.
         # This can have a maximum of 1 value, which summarizes all url_judgements and endpoint_judgements
-        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'overall_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
     }
 
     clean_issues_for_judgement = deepcopy(amount_of_issues)
