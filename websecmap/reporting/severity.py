@@ -384,7 +384,7 @@ calculation_methods = {
     'internet_nl_mail_dashboard_auth': internet_nl_generic_boolean_value,
     'internet_nl_mail_dashboard_dnssec': internet_nl_generic_boolean_value,
     'internet_nl_mail_dashboard_ipv6': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_overall_score': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_overall_score': internet_nl_score,
 
     'internet_nl_mail_legacy_dmarc': internet_nl_requirement_tilde_value_format,
     'internet_nl_mail_legacy_dkim': internet_nl_requirement_tilde_value_format,
