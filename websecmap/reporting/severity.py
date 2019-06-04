@@ -348,7 +348,6 @@ calculation_methods = {
     'tls_qualys_encryption_quality': tls_qualys_encryption_quality,
     'Dummy': dummy_calculated_values,
 
-    # internet nl mail has 27 views, 4 categories, 1 score, 9 auto generated = 41
     # todo: the new format will change the translation fields of the UI somewhat...
     'internet_nl_mail_starttls_tls_available': internet_nl_requirement_tilde_value_format,
     'internet_nl_mail_auth_spf_exist': internet_nl_requirement_tilde_value_format,
@@ -378,11 +377,13 @@ calculation_methods = {
     'internet_nl_mail_starttls_cert_chain': internet_nl_requirement_tilde_value_format,
     'internet_nl_mail_starttls_tls_version': internet_nl_requirement_tilde_value_format,
     'internet_nl_mail_starttls_cert_domain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dashboard_tls': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dashboard_auth': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dashboard_dnssec': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dashboard_ipv6': internet_nl_requirement_tilde_value_format,
-    'internet_nl_mail_dashboard_overall_score': internet_nl_requirement_tilde_value_format,
+
+    # categories use the old format
+    'internet_nl_mail_dashboard_tls': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_auth': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_dnssec': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_ipv6': internet_nl_generic_boolean_value,
+    'internet_nl_mail_dashboard_overall_score': internet_nl_generic_boolean_value,
 
     'internet_nl_mail_legacy_dmarc': internet_nl_requirement_tilde_value_format,
     'internet_nl_mail_legacy_dkim': internet_nl_requirement_tilde_value_format,
@@ -423,9 +424,11 @@ calculation_methods = {
     'internet_nl_web_https_cert_chain': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_https_http_redirect': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_https_cert_domain': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_tls': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_dnssec': internet_nl_requirement_tilde_value_format,
-    'internet_nl_web_ipv6': internet_nl_requirement_tilde_value_format,
+
+    # Categories have an old format
+    'internet_nl_web_tls': internet_nl_generic_boolean_value,
+    'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
     'internet_nl_web_overall_score': internet_nl_score,
 
     'internet_nl_web_legacy_dnssec': internet_nl_requirement_tilde_value_format,
@@ -446,7 +449,7 @@ calculation_methods = {
 
     'internet_nl_mail_auth_dmarc_policy_only': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv': internet_nl_generic_boolean_value,  # Added 24th of May 2019
     'internet_nl_web_appsecpriv_csp': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_web_appsecpriv_referrer_policy': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_requirement_tilde_value_format,  # Added 24th of Ma
