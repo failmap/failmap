@@ -29,9 +29,6 @@
   pk: 10
   fields: {name: samtgemeinde_verwaltungsgemeinschaft}
 - model: organizations.organizationtype
-  pk: 11
-  fields: {name: county}
-- model: organizations.organizationtype
   pk: 12
   fields: {name: agency}
 - model: organizations.organizationtype
