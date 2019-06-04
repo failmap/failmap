@@ -486,7 +486,7 @@ def upgrade_api_response(views):
         'web_https_dane_valid': 'optional',
         'web_appsecpriv_x_frame_options': 'recommended',
         'web_appsecpriv_x_content_type_options': 'recommended',
-        'web_appsecpriv_x_xxs_protection': 'recommended',
+        'web_appsecpriv_x_xss_protection': 'recommended',
         'web_appsecpriv_csp': 'optional',
         'web_appsecpriv_referrer_policy': 'recommended',
 
