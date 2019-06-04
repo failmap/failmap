@@ -565,9 +565,15 @@ def add_report_to_key(amount_of_issues, key, report):
     amount_of_issues[key]['medium'] += report['medium']
     amount_of_issues[key]['low'] += report['low']
     amount_of_issues[key]['any'] += (report['low'] + report['medium'] + report['high'])
-    amount_of_issues[key]['not_testable'] += report['not_testable']
-    amount_of_issues[key]['not_applicable'] += report['not_applicable']
     amount_of_issues[key]['ok'] += report['ok']
+
+    # Only overall, endpoint and url contain not_testable and not_applicable values.
+    # This is due something being explained. Perhaps over time we want to also explain not_testable things?
+    # No judgement is needed on these values, as it has no effect on high, mids or low?
+    if key in ['overall', 'endpoint', 'url']:
+        amount_of_issues[key]['not_testable'] += report['not_testable']
+        amount_of_issues[key]['not_applicable'] += report['not_applicable']
+
     return amount_of_issues
 
 
@@ -605,25 +611,25 @@ def statistics_over_url_calculation(calculation):
     # Calculate statistics here, instead of working with all kinds of variables.
     amount_of_issues = {
         'overall': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'overall_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
 
         # sum of all issues on the url level
         'url': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'url_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
 
         # sum of all issues in endpoints
         'endpoint': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'endpoint_explained': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
 
         # judgements are complex situation: when ALL reports of an endpoint say the endpoint is OK, a single
         # judgement is added for that endpoint. There are multiple endpoints with multiple judgements.
-        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'endpoint_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
         # Some reports will be explained, that means the endpoint will be explained on a certain level.
-        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'endpoint_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
 
         # As there is only one url, with multiple reports, only one judgement will be made.
-        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
-        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0, 'not_testable': 0, 'not_applicable': 0},
+        'url_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
+        'url_explained_judgements': {'high': 0, 'medium': 0, 'low': 0, 'any': 0, 'ok': 0},
 
         # If there is a single high endpoint judgement, or a single high url judgement, the overall is high.
         # This can have a maximum of 1 value, which summarizes all url_judgements and endpoint_judgements
@@ -709,6 +715,8 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.low = amount_of_issues['overall']['low']
     u.total_issues = amount_of_issues['overall']['any']
     u.ok = amount_of_issues['overall']['ok']
+    u.not_testable = amount_of_issues['overall']['not_testable']
+    u.not_applicable = amount_of_issues['overall']['not_applicable']
 
     u.high_endpoints = amount_of_issues['endpoint_judgements']['high']
     u.medium_endpoints = amount_of_issues['endpoint_judgements']['medium']
@@ -721,6 +729,8 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.url_issues_high = amount_of_issues['url']['high']
     u.url_issues_medium = amount_of_issues['url']['medium']
     u.url_issues_low = amount_of_issues['url']['low']
+    u.url_not_testable = amount_of_issues['url']['not_testable']
+    u.url_not_applicable = amount_of_issues['url']['not_applicable']
 
     # probably the same as OK, as you can only be OK once.
     u.url_ok = amount_of_issues['overall_judgements']['ok']
@@ -729,6 +739,8 @@ def save_url_report(url: Url, date: datetime, calculation):
     u.endpoint_issues_medium = amount_of_issues['endpoint']['medium']
     u.endpoint_issues_low = amount_of_issues['endpoint']['low']
     u.endpoint_ok = amount_of_issues['endpoint']['ok']
+    u.endpoint_not_testable = amount_of_issues['endpoint']['not_testable']
+    u.endpoint_not_applicable = amount_of_issues['endpoint']['not_applicable']
 
     u.explained_high = amount_of_issues['url_explained_judgements']['high']
     u.explained_medium = amount_of_issues['url_explained_judgements']['medium']

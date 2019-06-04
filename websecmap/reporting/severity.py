@@ -264,24 +264,30 @@ def internet_nl_requirement_tilde_value_format(scan):
     """
     requirement_level, scan_value = scan.rating.split('~')
 
+    explanation = f"Test {scan.type} resulted in {scan_value}."
+    if len(scan.explanation) > 5:
+        explanation += f" Because {scan.explanation}."
+
     if scan_value == 'passed':
-        return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0)
+        return standard_calculation(scan=scan, explanation=explanation, high=0, medium=0, low=0)
 
     if scan_value == 'failed':
         if requirement_level == 'required':
-            return standard_calculation(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0)
+            return standard_calculation(scan=scan, explanation=explanation, high=1, medium=0, low=0)
         if requirement_level == 'recommended':
-            return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0)
+            return standard_calculation(scan=scan, explanation=explanation, high=0, medium=1, low=0)
         if requirement_level == 'optional':
-            return standard_calculation(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
+            return standard_calculation(scan=scan, explanation=explanation, high=0, medium=0, low=1)
 
     # Not applicable and not testable are fine additions to the set of severity levels we use now.
     # This way scanners can be even more flexible.
     if scan_value == 'not_testable':
-        return standard_calculation(scan=scan, explanation=scan.explanation, not_testable=True)
+        return standard_calculation(scan=scan, explanation=explanation, not_testable=True)
 
     if scan_value == 'not_applicable':
-        return standard_calculation(scan=scan, explanation=scan.explanation, not_applicable=True)
+        return standard_calculation(scan=scan, explanation=explanation, not_applicable=True)
+
+    raise ValueError(f'Cannot determine severity for internet.nl scan type {scan.type}')
 
 
 def internet_nl_score(scan):
@@ -313,7 +319,7 @@ def dummy_calculated_values(scan):
 def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
                          not_testable: bool = False, not_applicable: bool = False):
 
-    ok = 0 if high or medium or low else 1
+    ok = 0 if high or medium or low or not_testable or not_testable else 1
 
     return {
         "type": scan.type,
@@ -343,100 +349,109 @@ calculation_methods = {
     'Dummy': dummy_calculated_values,
 
     # internet nl mail has 27 views, 4 categories, 1 score, 9 auto generated = 41
-    'internet_nl_mail_starttls_tls_available': internet_nl_mail_starttls_tls_available,
-    'internet_nl_mail_auth_spf_exist': internet_nl_mail_auth_spf_exist,
-    'internet_nl_mail_auth_dkim_exist': internet_nl_mail_auth_dkim_exist,
-    'internet_nl_mail_auth_dmarc_exist': internet_nl_mail_auth_dmarc_exist,
+    # todo: the new format will change the translation fields of the UI somewhat...
+    'internet_nl_mail_starttls_tls_available': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_auth_spf_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_auth_dkim_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_auth_dmarc_exist': internet_nl_requirement_tilde_value_format,
 
-    'internet_nl_mail_ipv6_mx_reach': internet_nl_generic_boolean_value,
-    'internet_nl_mail_ipv6_ns_reach': internet_nl_generic_boolean_value,
-    'internet_nl_mail_ipv6_ns_address': internet_nl_generic_boolean_value,
-    'internet_nl_mail_ipv6_mx_address': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dnssec_mx_exist': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dnssec_mx_valid': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dnssec_mailto_valid': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dnssec_mailto_exist': internet_nl_generic_boolean_value,
-    'internet_nl_mail_auth_spf_policy': internet_nl_generic_boolean_value,
-    'internet_nl_mail_auth_dmarc_policy': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_keyexchange': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_compress': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_cert_sig': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_cert_pubkey': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_dane_rollover': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_secreneg': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_dane_exist': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_dane_valid': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_ciphers': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_clientreneg': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_cert_chain': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_tls_version': internet_nl_generic_boolean_value,
-    'internet_nl_mail_starttls_cert_domain': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_tls': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_auth': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_dnssec': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_ipv6': internet_nl_generic_boolean_value,
-    'internet_nl_mail_dashboard_overall_score': internet_nl_score,
+    'internet_nl_mail_ipv6_mx_reach': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_ipv6_ns_reach': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_ipv6_ns_address': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_ipv6_mx_address': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dnssec_mx_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dnssec_mx_valid': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dnssec_mailto_valid': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dnssec_mailto_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_auth_spf_policy': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_auth_dmarc_policy': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_keyexchange': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_compress': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_cert_sig': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_cert_pubkey': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_dane_rollover': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_secreneg': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_dane_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_dane_valid': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_ciphers': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_clientreneg': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_cert_chain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_version': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_cert_domain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dashboard_tls': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dashboard_auth': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dashboard_dnssec': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dashboard_ipv6': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_dashboard_overall_score': internet_nl_requirement_tilde_value_format,
 
-    'internet_nl_mail_legacy_dane': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_tls_available': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_spf': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_dkim': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_dmarc': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_dnsssec_mailserver_domain': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_dnssec_email_domain': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_ipv6_mailserver': internet_nl_generic_boolean_value,
-    'internet_nl_mail_legacy_ipv6_nameserver': internet_nl_generic_boolean_value,
+    'internet_nl_mail_legacy_dmarc': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_dkim': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_spf': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_dmarc_policy': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_spf_policy': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_start_tls': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_start_tls_ncsc': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_dnssec_email_domain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_dnssec_mx': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_dane': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_ipv6_nameserver': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_legacy_ipv6_mailserver': internet_nl_requirement_tilde_value_format,
+
 
     # internet nl web has: 23 views, 1 score, 3 categories, 7 auto generated = 34
-    'internet_nl_web_ipv6_ws_similar': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6_ws_similar': internet_nl_requirement_tilde_value_format,
 
-    'internet_nl_web_ipv6_ws_address': internet_nl_generic_boolean_value,
-    'internet_nl_web_ipv6_ns_reach': internet_nl_generic_boolean_value,
-    'internet_nl_web_ipv6_ws_reach': internet_nl_generic_boolean_value,
-    'internet_nl_web_ipv6_ns_address': internet_nl_generic_boolean_value,
-    'internet_nl_web_dnssec_valid': internet_nl_generic_boolean_value,
-    'internet_nl_web_dnssec_exist': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_keyexchange': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_compress': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_cert_sig': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_cert_pubkey': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_dane_valid': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_secreneg': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_http_hsts': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_http_compress': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_dane_exist': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_http_available': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_ciphers': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_clientreneg': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_tls_version': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_cert_chain': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_http_redirect': internet_nl_generic_boolean_value,
-    'internet_nl_web_https_cert_domain': internet_nl_generic_boolean_value,
-    'internet_nl_web_tls': internet_nl_generic_boolean_value,
-    'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
-    'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
+    'internet_nl_web_ipv6_ws_address': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_ipv6_ns_reach': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_ipv6_ws_reach': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_ipv6_ns_address': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_dnssec_valid': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_dnssec_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_keyexchange': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_compress': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_cert_sig': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_cert_pubkey': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_dane_valid': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_secreneg': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_http_hsts': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_http_compress': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_dane_exist': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_http_available': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_ciphers': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_clientreneg': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_version': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_cert_chain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_http_redirect': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_cert_domain': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_tls': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_dnssec': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_ipv6': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_overall_score': internet_nl_score,
 
-    'internet_nl_web_legacy_dane': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_tls_ncsc_web': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_hsts': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_https_enforced': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_tls_available': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_ipv6_webserver': internet_nl_generic_boolean_value,
-    'internet_nl_web_legacy_ipv6_nameserver': internet_nl_generic_boolean_value,
+    'internet_nl_web_legacy_dnssec': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_tls_available': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_tls_ncsc_web': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_https_enforced': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_hsts': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_ipv6_nameserver': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_ipv6_webserver': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_legacy_dane': internet_nl_requirement_tilde_value_format,
 
-    'internet_nl_mail_non_sending_domain': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_mail_server_configured': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_mail_servers_testable': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_mail_starttls_dane_ta': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_mail_auth_dmarc_policy_only': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_csp': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_referrer_policy': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_x_frame_options': internet_nl_generic_boolean_value,  # Added 24th of May 2019
-    'internet_nl_web_appsecpriv_x_xss_protection': internet_nl_generic_boolean_value,  # Added 24th of May 2019
+    # Feature flags are not reported, these are the feature flags that should not be in any report. Only
+    # the consequences of these flags will be visible.
+    # 'internet_nl_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    # 'internet_nl_mail_server_configured': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    # 'internet_nl_mail_servers_testable': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    # 'internet_nl_mail_starttls_dane_ta': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+
+    'internet_nl_mail_auth_dmarc_policy_only': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_csp': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_referrer_policy': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_content_type_options': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_frame_options': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_web_appsecpriv_x_xss_protection': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
 }
 
 
@@ -446,6 +461,9 @@ def get_severity(scan):
         raise ValueError("No calculation available for this scan type: %s" % scan.type)
 
     calculation = calculation_methods[scan.type](scan)
+
+    if not calculation:
+        raise ValueError(f'No calculation available for scan {scan.type}')
 
     # handle comply or explain
     # only when an explanation is given AND the explanation is still valid when creating the report.

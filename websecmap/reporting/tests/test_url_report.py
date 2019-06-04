@@ -56,6 +56,12 @@ def test_url_report(db):
         endpoint=first_endpoint, type='tls_qualys_encryption_quality', rating='F', rating_determined_on=day_2,
         last_scan_moment=day_2, comply_or_explain_is_explained=False, is_the_latest_scan=True)
 
+    # a not testable scan fron internet.nl is also stored:
+    error_scan, created = EndpointGenericScan.objects.all().get_or_create(
+        endpoint=first_endpoint, type='internet_nl_mail_starttls_tls_available',
+        rating='required~not_testable', rating_determined_on=day_2,
+        last_scan_moment=day_2, comply_or_explain_is_explained=False, is_the_latest_scan=True)
+
     # We always rebuild the entire set of reports, as it's crazy fast.
     UrlReport.objects.all().delete()
     create_url_report(create_timeline(url), url)
@@ -69,6 +75,7 @@ def test_url_report(db):
     assert len(report.calculation['endpoints']) == 1
     assert report.ok == 0
     assert report.high == 1
+    assert report.not_testable == 1
 
     # on day 3 the url becomes non resolvable. This means that the url + endpoints will be removed from the report
     # as it is not relevant anymore. The previous reports will be saved, and a third one will be generated where
