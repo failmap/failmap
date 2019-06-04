@@ -351,14 +351,17 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
 
         # tons of specific views and scan values that might be valuable to report on. Save all of them.
         for view in views:
-            scan_type = 'internet_nl_%s' % view['name']
-            store_endpoint_scan_result(
-                scan_type=scan_type,
-                endpoint=endpoint,
-                rating=view['upgraded_result'],
-                message=view['explanation'],
-                evidence=domain['link']
-            )
+
+            # feature flags do not have upgraded views and will not be stored
+            if 'upgraded_result' in view:
+                scan_type = 'internet_nl_%s' % view['name']
+                store_endpoint_scan_result(
+                    scan_type=scan_type,
+                    endpoint=endpoint,
+                    rating=view['upgraded_result'],
+                    message=view['explanation'],
+                    evidence=domain['link']
+                )
 
 
 def upgrade_api_response(views):
@@ -598,8 +601,19 @@ def upgrade_api_response(views):
             explanations['mail_starttls_dane_valid'] = 'Not All MX’s testable, '
             explanations['mail_starttls_dane_rollover'] = 'Not All MX’s testable, '
 
+    # Remove feature flag fields, now that all feature flags have been translated into something useful:
+    feature_flag_fields = ['mail_non_sending_domain',
+                           'mail_server_configured',
+                           'mail_servers_testable',
+                           'mail_starttls_dane_ta']
+
     # Translate the old value to the new one:
     for view in views:
+
+        # skip all feature flag fields.
+        # feature flags do not have upgraded views and will not be stored
+        if view['name'] in feature_flag_fields:
+            continue
 
         # Add some explanations to these findings, which makes it easier to debug:
         view['explanation'] = explanations[view["name"]]
