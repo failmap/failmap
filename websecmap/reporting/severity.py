@@ -253,7 +253,8 @@ def internet_nl_generic_boolean_value(scan):
     if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="%s available" % scan.type, high=0, medium=0, low=0)
 
-    return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=0, medium=1, low=0)
+    # medium and low don't impact percentages. Therefore, categories that are not complete should be treaded as high.
+    return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=1, medium=0, low=0)
 
 
 def internet_nl_requirement_tilde_value_format(scan):
