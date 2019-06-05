@@ -551,8 +551,8 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
 
     # we used to use the country name, which doesn't work very consistently and requires a greater source of knowledge
     # luckily OSM supports ISO3166-2, just like django countries. So that's a perfect fit.
-    query = f"""area["ISO3166-2"~"^{country}"]->.gem; relation(area.gem)[type=boundary]'
-            '[boundary=administrative][admin_level={admin_level}]; out geom;"""
+    query = f"""area["ISO3166-2"~"^{country}"]->.gem; relation(area.gem)[type=boundary]
+            [boundary=administrative][admin_level={admin_level}]; out geom;"""
 
     log.info("Connecting to overpass to download data. Downloading can take a while (minutes)!")
     log.debug(query)
