@@ -500,8 +500,10 @@ def get_osm_data_wambachers(country: str = "NL", organization_type: str = "munic
 
     # show a nice progress bar when downloading
     with open(filename, 'wb') as f:
-        for i, block in response.iter_content(chunk_size=1024):
-            print_progress_bar(i, 1000, 'Wambacher OSM data')
+        i = 0
+        for block in response.iter_content(chunk_size=1024):
+            i += 1
+            print_progress_bar(i, 100000, 'Wambacher OSM data')
             if block:
                 f.write(block)
                 f.flush()
@@ -571,9 +573,10 @@ def get_osm_data(country: str = "NL", organization_type: str = "municipality"):
         # 'Transfer-Encoding': 'chunked', 'Content-Type': 'application/osm3s+xml'}
         # overpass turbo does know this, probably _after_ downloading.
         # Assume 100 megabyte, NL = 40 MB. So give or take...
-
-        for i, block in response.iter_content(chunk_size=1024):
-            print_progress_bar(i, 1000, ' Generic OSM data')
+        i = 0
+        for block in response.iter_content(chunk_size=1024):
+            i += 1
+            print_progress_bar(i, 100000, ' Generic OSM data')
             if block:
                 f.write(block)
                 f.flush()

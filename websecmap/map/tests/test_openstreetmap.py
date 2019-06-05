@@ -36,7 +36,7 @@ def mocked_requests_get(*args, **kwargs):
         def iter_content(self, chunk_size):
             # return an iterator over the current content.
             # simulate the iterator :)
-            yield 1, self.content
+            yield self.content
 
     if args[0].startswith('https://wambachers-osm.website/'):
         return MockResponse(file_get_contents(f'{path}/openstreetmap/AL_county.zip'), 200)
