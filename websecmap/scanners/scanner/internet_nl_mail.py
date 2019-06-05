@@ -57,6 +57,7 @@ import pytz
 import requests
 from celery import Task, group
 from constance import config
+from django.utils import timezone
 from requests.auth import HTTPBasicAuth
 
 from websecmap.celery import app
@@ -158,6 +159,7 @@ def handle_running_scan_reponse(response, scan):
 
     scan.message = response['message']
     scan.friendly_message = response['message']
+    scan.last_check = timezone.now()
     log.debug("Scan %s: %s" % (scan.pk, response['message']))
 
     if response['message'] == "OK":
@@ -255,6 +257,7 @@ def register_scan(urls: List[Url], username, password, internet_nl_scan_type: st
     scan.status_url = status_url
     scan.message = answer.get('message', 'No message received.')
     scan.friendly_message = "Batch request has been registered"
+    scan.last_check = timezone.now()
     scan.type = internet_nl_scan_type
 
     scan.save()

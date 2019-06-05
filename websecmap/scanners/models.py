@@ -687,6 +687,11 @@ class InternetNLScan(models.Model):
         null=True
     )
 
+    last_check = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
     message = models.TextField(
         max_length=500,
         help_text="The complete answer retrieved from the server.",
