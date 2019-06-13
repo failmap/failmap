@@ -38,7 +38,7 @@ def reflag_urlgenericscan(type):
         FROM scanners_urlgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_urlgenericscan egs2
-             WHERE `last_scan_moment` <= '%(when)s' and type = '%(type)s' GROUP BY url_id
+             WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY url_id
              ) as x
         ON x.id2 = scanners_urlgenericscan.id
     ''' % {'when': datetime.now(pytz.utc), 'type': type}
@@ -59,7 +59,7 @@ def reflag_endpointgenericscan(type):
         FROM scanners_endpointgenericscan
         INNER JOIN
             (SELECT MAX(id) as id2 FROM scanners_endpointgenericscan egs2
-             WHERE `last_scan_moment` <= '%(when)s' and type = '%(type)s' GROUP BY endpoint_id
+             WHERE last_scan_moment <= '%(when)s' and type = '%(type)s' GROUP BY endpoint_id
              ) as x
         ON x.id2 = scanners_endpointgenericscan.id
     ''' % {'when': datetime.now(pytz.utc), 'type': type}

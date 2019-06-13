@@ -1051,7 +1051,7 @@ def get_latest_urlratings_fast(urls: List[Url], when):
                   WHERE at_when <= '%s' AND url_id IN (''' % (when, ) + ','.join(map(str, urls)) + ''')
                   GROUP BY url_id) as x
                   ON x.id2 = reporting_urlreport.id
-                ORDER BY `high` DESC, `medium` DESC, `low` DESC, `url_id` ASC
+                ORDER BY high DESC, medium DESC, low DESC, url_id ASC
                 '''
     # print(sql)
     # Doing this causes some delay. Would we add the calculation without the json conversion (which is 100% anyway)
