@@ -558,6 +558,11 @@ def upgrade_api_response(views):
             requirement_levels['mail_starttls_dane_valid'] = 'not_applicable'
             requirement_levels['mail_starttls_dane_rollover'] = 'not_applicable'
 
+            requirement_levels['mail_ipv6_mx_address'] = 'not_applicable'
+            requirement_levels['mail_ipv6_mx_reach'] = 'not_applicable'
+            requirement_levels['mail_dnssec_mx_exist'] = 'not_applicable'
+            requirement_levels['mail_dnssec_mx_valid'] = 'not_applicable'
+
             explanations['mail_starttls_tls_available'] = 'No MX record (that is not ‘Null MX’) available'
             explanations['mail_starttls_tls_version'] = 'No MX record (that is not ‘Null MX’) available'
             explanations['mail_starttls_tls_ciphers'] = 'No MX record (that is not ‘Null MX’) available'
@@ -572,6 +577,10 @@ def upgrade_api_response(views):
             explanations['mail_starttls_dane_exist'] = 'No MX record (that is not ‘Null MX’) available'
             explanations['mail_starttls_dane_valid'] = 'No MX record (that is not ‘Null MX’) available'
             explanations['mail_starttls_dane_rollover'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_ipv6_mx_address'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_ipv6_mx_reach'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_dnssec_mx_exist'] = 'No MX record (that is not ‘Null MX’) available'
+            explanations['mail_dnssec_mx_valid'] = 'No MX record (that is not ‘Null MX’) available'
 
     # Modify values in the results, as some things might not be testable
     # Views should have been implemented as a dictionary... We could convert it with the key as name...??
