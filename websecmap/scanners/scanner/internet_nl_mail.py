@@ -537,6 +537,11 @@ def upgrade_api_response(views):
             explanations['mail_auth_dkim_exist'] += \
                 'SPF record with "v=spf1 -all" and DMARC record with "v=DMARC1;p=reject;” detected, '
 
+        if view['name'] == 'mail_auth_dmarc_ext_destination' and not view['result']:
+            requirement_levels['mail_auth_dmarc_policy'] = 'recommended'
+            explanations['mail_auth_dmarc_policy'] += \
+                'Required, Recommended if only <mail_auth_dmarc_ext_destination> fails.'
+
     # This overrides all previously made requirment overrides
     for view in views:
         # MX record (that is not ‘Null MX’) available?
