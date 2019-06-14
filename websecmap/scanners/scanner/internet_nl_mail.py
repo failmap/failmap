@@ -449,7 +449,7 @@ def upgrade_api_response(views):
         'mail_auth_dmarc_exist': 'required',
         'mail_auth_dmarc_policy': 'required',
         'mail_auth_dmarc_policy_only': 'required',
-        'mail_auth_dmarc_ext_destination': 'required',
+        'mail_auth_dmarc_ext_destination': 'recommended',
         'mail_auth_dkim_exist': 'required',
         'mail_auth_spf_exist': 'required',
         'mail_auth_spf_policy': 'required',
