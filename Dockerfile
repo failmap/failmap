@@ -111,7 +111,7 @@ COPY --from=build /usr/local/bin/dnscheck /usr/local/bin/dnscheck
 COPY --from=build /usr/lib/node_modules/osmtogeojson /usr/lib/node_modules/osmtogeojson
 RUN ln -s /usr/lib/node_modules/osmtogeojson/osmtogeojson /usr/local/bin/
 
-COPY /tools/dnssec.pl /source/tools/dnssec.pl
+COPY /tools/dnssec.pl /usr/local/bin/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
