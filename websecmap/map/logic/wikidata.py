@@ -18,9 +18,16 @@ def get_property_from_code(wikidata_code: str, property_code: str):
     :param property_code: P856
     :return:
     """
+
+    if not wikidata_code or not property_code:
+        return ""
+
+    # log.debug(f"Wikidata code: {wikidata_code}, property_code: {property_code}")
+
     try:
         client = Client()
 
+        # reqests without a wikidata code result in raise HTTPError(req.full_url, code, msg, hdrs, fp)
         entity = client.get(wikidata_code, load=True)
         return_value = str(entity.get(client.get(property_code), None))
 
