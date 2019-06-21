@@ -170,9 +170,8 @@ def handle_running_scan_reponse(response, scan):
         # if the values are updated after the date, we'll miss out on report data.
         # As this is async, there is no guarantee the finished on date is at a set time. It could be 10 minutesm
         # it could be 10 months.
-        # scan.finished_on = datetime.now(pytz.utc)
+        scan.finished_on = datetime.now(pytz.utc)
         scan.success = True
-        scan.message = response['message']
         scan.friendly_message = "Scan has finished."
         log.debug("Going to process the scan results.")
 
