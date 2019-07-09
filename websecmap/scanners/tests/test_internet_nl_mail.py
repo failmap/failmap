@@ -273,8 +273,9 @@ def test_internet_nl_mail(db):
 
     assert has_legacy_view is True
 
-    # has_mail_server_configured should have been deleted, as it is a feature flag.
-    assert has_mail_server_configured is False
+    # feature flags are enabled, and the values should be visible here.
+    # <del>has_mail_server_configured should have been deleted, as it is a feature flag.</del>
+    assert has_mail_server_configured is True
 
     # should not exist yet
     scan_count = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').count()
@@ -284,16 +285,16 @@ def test_internet_nl_mail(db):
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_mx_no_cname')
     endpoint, created = Endpoint.objects.all().get_or_create(url=url, protocol='dns_a_aaaa')
 
-    # add 29 views, 4 categories, 1 score, 12 auto generated = 44 (feature flags are skipped)
+    # add 29 views, 4 categories, 1 score, 12 auto generated = 44 + 4 feature flags
     # Amount of legacy items auto-generated: 12
     store(mail_result, internet_nl_scan_type='mail')
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 44
+    assert scan_count == 48
 
     # add 23 views, 1 score, 3 categories, 8 auto generated = 35
     store(web_result, internet_nl_scan_type='web')
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 44 + 35
+    assert scan_count == 48 + 35
 
     # Should be added once, scan result didn't change.
     store(mail_result, internet_nl_scan_type='mail')
@@ -301,7 +302,7 @@ def test_internet_nl_mail(db):
     assert scan_count == 1
 
     scan_count = EndpointGenericScan.objects.all().filter().count()
-    assert scan_count == 44 + 35
+    assert scan_count == 48 + 35
 
     # retrieve a value, and see if it's using the updated format
     epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_ipv6_ns_address').get()
@@ -325,9 +326,10 @@ def test_internet_nl_mail(db):
     epgs = EndpointGenericScan.objects.all().filter(type='internet_nl_mail_starttls_cert_domain').get()
     assert epgs.rating == "required~not_testable"
 
-    # The mail_server_configured should not be stored as a scan result as it is a feature flag:
-    num_mailserver_configured = EndpointGenericScan.objects.all().filter(type='mail_server_configured').count()
-    assert num_mailserver_configured == 0
+    # The mail_server_configured will be stored as a scan result as it is a feature flag:
+    num_mailserver_configured = EndpointGenericScan.objects.all().filter(
+        type='internet_nl_mail_server_configured').count()
+    assert num_mailserver_configured == 1
 
     # verify that when mail_starttls_dane_ta is false, the internet_nl_mail_starttls_cert_domain becomes optional
     data = change_api_value(mail_result, "mail_starttls_dane_ta", False)

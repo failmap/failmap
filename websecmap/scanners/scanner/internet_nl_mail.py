@@ -431,10 +431,10 @@ def upgrade_api_response(views):
 
     requirement_levels = {
         # Feature flags, will not be manipulated here.
-        'mail_non_sending_domain': 'NA',
-        'mail_server_configured': 'NA',
-        'mail_servers_testable': 'NA',
-        'mail_starttls_dane_ta': 'NA',
+        'mail_non_sending_domain': 'observed_state',
+        'mail_server_configured': 'observed_state',
+        'mail_servers_testable': 'observed_state',
+        'mail_starttls_dane_ta': 'observed_state',
 
         # Actual requirements with default values
         'mail_ipv6_ns_address': 'required',
@@ -535,11 +535,15 @@ def upgrade_api_response(views):
             requirement_levels['mail_auth_dkim_exist'] = 'not_applicable'
             explanations['mail_auth_dkim_exist'] += \
                 'SPF record with "v=spf1 -all" and DMARC record with "v=DMARC1;p=reject;” detected, '
+            requirement_levels['mail_legacy_dkim'] = 'not_applicable'
+            explanations['mail_legacy_dkim'] += \
+                'SPF record with "v=spf1 -all" and DMARC record with "v=DMARC1;p=reject;” detected, '
 
         if view['name'] == 'mail_auth_dmarc_ext_destination' and not view['result']:
             requirement_levels['mail_auth_dmarc_policy'] = 'recommended'
             explanations['mail_auth_dmarc_policy'] += \
                 'Required, Recommended if only <mail_auth_dmarc_ext_destination> fails.'
+            # todo: what to do with the policy_only legacy variable?
 
     # This overrides all previously made requirment overrides
     for view in views:
@@ -547,6 +551,7 @@ def upgrade_api_response(views):
         # (If no, all subtests of the ‘STARTTLS and DANE’ test category will show fails and should be
         # treated as not relevant.)
         if view['name'] == 'mail_server_configured' and view['result'] is False:
+            # tls + legacy
             requirement_levels['mail_starttls_tls_available'] = 'not_applicable'
             requirement_levels['mail_starttls_tls_version'] = 'not_applicable'
             requirement_levels['mail_starttls_tls_ciphers'] = 'not_applicable'
@@ -561,11 +566,22 @@ def upgrade_api_response(views):
             requirement_levels['mail_starttls_dane_exist'] = 'not_applicable'
             requirement_levels['mail_starttls_dane_valid'] = 'not_applicable'
             requirement_levels['mail_starttls_dane_rollover'] = 'not_applicable'
+            requirement_levels['mail_legacy_start_tls'] = 'not_applicable'
+            requirement_levels['mail_legacy_start_tls_ncsc'] = 'not_applicable'
 
+            # ipv6 + legacy
             requirement_levels['mail_ipv6_mx_address'] = 'not_applicable'
             requirement_levels['mail_ipv6_mx_reach'] = 'not_applicable'
+            requirement_levels['mail_legacy_ipv6_nameserver'] = 'not_applicable'
+            requirement_levels['mail_legacy_ipv6_mailserver'] = 'not_applicable'
+
+            # dnssec + legacy
             requirement_levels['mail_dnssec_mx_exist'] = 'not_applicable'
             requirement_levels['mail_dnssec_mx_valid'] = 'not_applicable'
+            # both mail_dnssec_mailto_exist an dmail_dnssec_mailto_valid are not set to not applicable, so
+            # also not in the combined metric.
+            # requirement_levels['mail_legacy_dnssec_email_domain'] = 'not_applicable'
+            requirement_levels['mail_legacy_dnssec_mx'] = 'not_applicable'
 
             explanations['mail_starttls_tls_available'] = 'No MX record (that is not ‘Null MX’) available'
             explanations['mail_starttls_tls_version'] = 'No MX record (that is not ‘Null MX’) available'
@@ -600,7 +616,9 @@ def upgrade_api_response(views):
                                     'mail_starttls_tls_clientreneg', 'mail_starttls_cert_chain',
                                     'mail_starttls_cert_pubkey', 'mail_starttls_cert_sig',
                                     'mail_starttls_cert_domain', 'mail_starttls_dane_exist',
-                                    'mail_starttls_dane_valid', 'mail_starttls_dane_rollover']
+                                    'mail_starttls_dane_valid', 'mail_starttls_dane_rollover',
+                                    'mail_legacy_start_tls', 'mail_legacy_start_tls_ncsc',
+                                    ]
 
             explanations['mail_starttls_tls_available'] = 'Not All MX’s testable, '
             explanations['mail_starttls_tls_version'] = 'Not All MX’s testable, '
@@ -617,19 +635,8 @@ def upgrade_api_response(views):
             explanations['mail_starttls_dane_valid'] = 'Not All MX’s testable, '
             explanations['mail_starttls_dane_rollover'] = 'Not All MX’s testable, '
 
-    # Remove feature flag fields, now that all feature flags have been translated into something useful:
-    feature_flag_fields = ['mail_non_sending_domain',
-                           'mail_server_configured',
-                           'mail_servers_testable',
-                           'mail_starttls_dane_ta']
-
     # Translate the old value to the new one:
     for view in views:
-
-        # skip all feature flag fields.
-        # feature flags do not have upgraded views and will not be stored
-        if view['name'] in feature_flag_fields:
-            continue
 
         # Add some explanations to these findings, which makes it easier to debug:
         view['explanation'] = explanations[view["name"]]
@@ -847,7 +854,7 @@ def inject_legacy_views(scan_type, views):
             'name': mail_legacy_prefix + 'ipv6_nameserver',
             'result': true_when_all_match(
                 views,
-                ['mail_ipv6_ns_adddress', 'mail_ipv6_ns_reach']
+                ['mail_ipv6_ns_address', 'mail_ipv6_ns_reach']
             )
         })
 

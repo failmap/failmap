@@ -269,6 +269,28 @@ def internet_nl_requirement_tilde_value_format(scan):
     if len(scan.explanation) > 5:
         explanation += f" Because {scan.explanation}."
 
+    # Just pass the values from sending domain...
+    if requirement_level == 'observed_state':
+        """
+        Observed state is not really a sane representation and it's hard to express in
+        graphs. For example: mail_non_sending_domain -> true, what does that mean?
+        Is that high, medium, low? Not testable? How is that summed up?
+        """
+        # feature flags / observed state do not have any value in reporting. They are just
+        # artifacts that are shown to the user. This can be any value. (but you do want to make
+        # calculations over it... so we should subtract it later from the score / exclude these fields?
+        """
+        'mail_non_sending_domain' -> true = sum the non-sending domains in a graph. false = sum sending domains...
+        a double negation...
+        'mail_server_configured'
+        'mail_servers_testable'
+        'mail_starttls_dane_ta'
+        """
+        if scan_value == 'passed':
+            return standard_calculation(scan=scan, explanation=scan_value, high=0, medium=0, low=0)
+        else:
+            return standard_calculation(scan=scan, explanation=scan_value, high=1, medium=0, low=0)
+
     if scan_value == 'passed':
         return standard_calculation(scan=scan, explanation=explanation, high=0, medium=0, low=0)
 
@@ -443,10 +465,10 @@ calculation_methods = {
 
     # Feature flags are not reported, these are the feature flags that should not be in any report. Only
     # the consequences of these flags will be visible.
-    # 'internet_nl_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    # 'internet_nl_mail_server_configured': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    # 'internet_nl_mail_servers_testable': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
-    # 'internet_nl_mail_starttls_dane_ta': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_mail_server_configured': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_mail_servers_testable': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
+    'internet_nl_mail_starttls_dane_ta': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
 
     'internet_nl_mail_auth_dmarc_policy_only': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_mail_auth_dmarc_ext_destination': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
