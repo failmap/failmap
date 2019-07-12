@@ -215,12 +215,12 @@ def check_proxy(proxy):
     # send requests to a known domain to inspect the headers the proxies attach. There has to be something
     # that links various scans to each other.
     try:
-        requests.get(config.SCAN_PROXY_TESTING_URL,
-                     proxies={proxy.protocol: proxy.address},
-                     timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
-                     headers={'User-Agent': "Request through proxy %s" % proxy, },
-                     cookies={}
-                     )
+        requests.get(
+            config.SCAN_PROXY_TESTING_URL,
+            proxies={proxy.protocol: proxy.address},
+            timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
+            headers={'User-Agent': f"Request through proxy {proxy}"}
+        )
     except ProxyError:
         store_check_result.apply_async([proxy, "Proxy does not support https.", True, datetime.now(pytz.utc)])
         return False
