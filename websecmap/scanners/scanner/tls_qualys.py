@@ -32,7 +32,6 @@ import pytz
 import requests
 from celery import Task, group
 from constance import config
-from django.conf import settings
 from django.db import transaction
 from requests.exceptions import ConnectTimeout, ProxyError, SSLError
 from tenacity import RetryError, before_log, retry, stop_after_attempt, wait_fixed
