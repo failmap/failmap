@@ -871,31 +871,6 @@
   },
   {
     "model": "django_celery_beat.periodictask",
-    "pk": 21,
-    "fields": {
-      "name": "&#x2795  Discover Urls with MX records (hidden)",
-      "task": "websecmap.app.models.create_discover_job",
-      "interval": null,
-      "crontab": 7,
-      "solar": null,
-      "args": "[\"websecmap.scanners.scanner.internet_nl_mail\"]",
-      "kwargs": "{}",
-      "queue": "storage",
-      "exchange": null,
-      "routing_key": null,
-      "priority": null,
-      "expires": null,
-      "one_off": false,
-      "start_time": null,
-      "enabled": false,
-      "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 16,
-      "date_changed": "2019-01-20T00:00:45Z",
-      "description": ""
-    }
-  },
-  {
-    "model": "django_celery_beat.periodictask",
     "pk": 22,
     "fields": {
       "name": "&#x1F52C; Scan E-Mail Security (SPF, DKIM, DMARC, STARTLS)",
