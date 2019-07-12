@@ -86,7 +86,8 @@ def export_organization_types():
 def export_coordinates(country: str = "NL", organization_type="municipality"):
     organizations = Organization.objects.all().filter(
         country=get_country(country),
-        type=get_organization_type(organization_type))
+        type=get_organization_type(organization_type)
+    )
 
     columns = ['id', 'organization', 'geojsontype', 'area']
     query = Coordinate.objects.all().filter(
@@ -98,15 +99,17 @@ def export_coordinates(country: str = "NL", organization_type="municipality"):
 
 
 def export_urls(country: str = "NL", organization_type="municipality"):
+    organizations = Organization.objects.all().filter(
+        country=get_country(country),
+        type=get_organization_type(organization_type)
+    )
 
     columns = ['id', 'url', 'organization']
 
     query = Url.objects.all().filter(
-        organization__in=Organization.objects.all().filter(
-            country=get_country(country),
-            type=get_organization_type(organization_type)),
+        organization__in=list(organizations),
         is_dead=False,
         not_resolvable=False
-    ).values_list(columns)
+    ).values_list('id', 'url', 'organization')
 
     return generic_export(query, columns)

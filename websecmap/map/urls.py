@@ -80,7 +80,7 @@ urlpatterns = [
     path('data/export/urls/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_urls),
 
     # this is not a single dataset, so building all kinds of exports was a bit harder, when needed we can build it.
-    path('data/export/explains/<c:country>/<slug:organization_type>/', views.export_explains),
+    path('data/export/explains/<c:country>/<slug:organization_type>/<slug:file_format>/', views.export_explains),
 
     path('data/upcoming_and_past_scans/', views.upcoming_and_past_scans),
 

@@ -120,6 +120,18 @@ def export_urls(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAU
 
 
 @cache_page(one_hour)
+def export_explains(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER,
+                    file_format: str = DEFAULT_FILE_FORMAT):
+    # we cannot use the queryset, as explains are two querysets (or a complex query)
+    # so we currently offer json in any case, even if the site says otherwise.
+    data = get_all_explains(country, organization_type)
+    filename = create_filename('explains', country, organization_type)
+    response = JsonResponse(data, safe=False, encoder=JSEncoder, )
+    response['Content-Disposition'] = 'attachment; filename="%s.json"' % filename
+    return response
+
+
+@cache_page(one_hour)
 def index(request):
     initial_countries = get_initial_countries()
 
@@ -334,15 +346,6 @@ def all_latest_scans(request, country: str = DEFAULT_COUNTRY, organization_type=
 def explain_list(request, country, organization_type):
     data = get_recent_explains(country, organization_type)
     return JsonResponse(data, encoder=JSEncoder, safe=False)
-
-
-@cache_page(one_hour)
-def export_explains(request, country, organization_type):
-    explains = get_all_explains(country, organization_type)
-    filename = create_filename('explains', country, organization_type)
-    response = JsonResponse(explains, safe=False, encoder=JSEncoder, )
-    response['Content-Disposition'] = 'attachment; filename="%s.json"' % filename
-    return response
 
 
 @cache_page(ten_minutes)
