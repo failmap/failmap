@@ -473,6 +473,8 @@ def create_url_report(timeline, url: Url):
                             "medium": 0,
                             "low": 0,
                             "ok": 0,
+                            "not_applicable": 0,
+                            "not_testable": 0,
                             "since": these_endpoint_scans[endpoint_scan_type].rating_determined_on.isoformat(),
                             "last_scan": these_endpoint_scans[endpoint_scan_type].last_scan_moment.isoformat(),
 
