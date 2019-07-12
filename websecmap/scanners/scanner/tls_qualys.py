@@ -143,7 +143,7 @@ def compose_task(
     # a bulk scan of 25 urls takes about 45 minutes.
     tasks = []
     for chunk in chunks:
-        tasks.append(claim_proxy.s() | qualys_scan_bulk.s(chunk) | release_proxy.s())
+        tasks.append(claim_proxy.s(chunk[0]) | qualys_scan_bulk.s(chunk) | release_proxy.s(chunk[0]))
     return group(tasks)
 
 
@@ -157,50 +157,66 @@ def compose_task(
 # Moved this to a dedicated worker that can deadlock / block whatever it wants to block. We can add rate
 # limiting again so not everything gets claimed in advance.
 @app.task(queue='claim_proxy', rate_limit='30/h')
-def claim_proxy():
+def claim_proxy(tracing_label=""):
     """ A proxy should first be claimed and then checked. If not, several scans might use the same proxy and thus
     crash. """
 
     # try to get the first available, fastest, proxy
     while True:
 
-        with transaction.atomic():
+        log.debug(f"Attempting to claim a proxy to scan {tracing_label} et al...")
 
-            # proxies can die if they are limited too often.
-            proxy = ScanProxy.objects.all().filter(
-                is_dead=False,
-                currently_used_in_tls_qualys_scan=False,
-                manually_disabled=False,
-                request_speed_in_ms__gte=1,
-                qualys_capacity_current=0
-            ).order_by('request_speed_in_ms').first()
+        try:
 
-        if proxy:
+            with transaction.atomic():
 
-            # first claim to prevent duplicate claims
-            proxy.currently_used_in_tls_qualys_scan = True
-            proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+                # proxies can die if they are limited too often.
+                proxy = ScanProxy.objects.all().filter(
+                    is_dead=False,
+                    currently_used_in_tls_qualys_scan=False,
+                    manually_disabled=False,
+                    request_speed_in_ms__gte=1,
+                    qualys_capacity_current=0
+                ).order_by('request_speed_in_ms').first()
 
-            # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
-            # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
-            # if check_proxy(proxy):
-            #    log.debug('Using proxy %s for scan.' % proxy)
-            return proxy
-            # else:
-            #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
+                if proxy:
 
-        else:
-            # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
-            # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own thread
-            # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
-            # When you have over 500 proxy requests, things are off. It's better to start with a clean slate then.
-            log.debug('No proxies available. You can add more proxies to solve this. Will try again in 60 seconds.')
+                    # first claim to prevent duplicate claims
+                    log.debug(f"Proxy {proxy.id} claimed for {tracing_label} et al...")
+                    proxy.currently_used_in_tls_qualys_scan = True
+                    proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+
+                    # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
+                    # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
+                    # if check_proxy(proxy):
+                    #    log.debug('Using proxy %s for scan.' % proxy)
+                    return proxy
+                    # else:
+                    #     log.debug('Proxy %s was not suitable for scanning. Trying another one in 60 seconds.' % proxy)
+
+                else:
+                    # do not log an error here, when forgetting to add proxies or if there are no clean proxies anymore,
+                    # the queue might fill up with too many claim_proxy tasks. Each of them continuing in their own
+                    # thread
+                    # to get a proxy every 2 minutes (30/h). This can lead up to 30.000 issues per day.
+                    # When you have over 500 proxy requests, things are off. It's better to start with a clean
+                    # slate then.
+                    log.debug(f'No proxies available for {tracing_label} et al. '
+                              f'You can add more proxies to solve this. Will try again in 60 seconds.')
+
+        except BaseException as e:
+            # In some rare cases this method crashes, while it should be as reliable as can be.
+            log.error(f"Exception occurred when requesting a proxy for {tracing_label} et al")
+            log.exception(e)
+            raise e
 
         sleep(60)
 
 
 @app.task(queue='storage')
-def release_proxy(proxy):
+def release_proxy(proxy, tracing_label=""):
+    """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
+    log.debug(f"Releasing proxy {proxy.id} claimed for {tracing_label} et al...")
     proxy.currently_used_in_tls_qualys_scan = False
     proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
 
@@ -212,11 +228,17 @@ def check_proxy(proxy):
 
     log.debug("Testing proxy %s" % proxy)
 
+    if not config.SCAN_PROXY_TESTING_URL:
+        proxy_testing_url = "https://google.com/"
+        log.debug("No SCAN_PROXY_TESTING_URL configured, falling back to google.com.")
+    else:
+        proxy_testing_url = config.SCAN_PROXY_TESTING_URL
+
     # send requests to a known domain to inspect the headers the proxies attach. There has to be something
     # that links various scans to each other.
     try:
         requests.get(
-            config.SCAN_PROXY_TESTING_URL,
+            proxy_testing_url,
             proxies={proxy.protocol: proxy.address},
             timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
             headers={'User-Agent': f"Request through proxy {proxy}"}
@@ -348,68 +370,76 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
 # keeps scanning in a loop until it has the data to fire a
 def qualys_scan_thread(proxy, url):
 
-    scan_completed = False
-    data = {}
     waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
-    max_waiting_time = 180
+    max_waiting_time = 360
 
-    while not scan_completed:
+    while True:
         try:
             api_result = service_provider_scan_via_api_with_limits(proxy, url.url)
             data = api_result['data']
         except requests.RequestException:
             # ex: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
             # ex: EOF occurred in violation of protocol (_ssl.c:749)
-            log.exception("(Network or Server) Error when contacting Qualys for scan on %s", url.url)
+            log.exception(f"(Network or Server) Error when contacting Qualys for scan on {url.url}.")
+            sleep(60)
+            continue
 
         # Store debug data in database (this task has no direct DB access due to scanners queue).
         scratch.apply_async([url, data])
-
-        if settings.DEBUG:
-            report_to_console(url.url, data)
+        # Always log to console. Don't ask the database (constance) if this should happen.
+        report_to_console(url.url, data)
 
         # Qualys is already running a scan on this url
         if 'status' in data:
             # Qualys has completed the scan of the url and has a result.
             if data['status'] in ["READY", "ERROR"]:
-                scan_completed = True
+                # scan completed
+                # store the result on the storage queue.
+                log.debug(f"Qualys scan finished on {url.url}.")
+                process_qualys_result.apply_async([data, url])
+                return True
+            else:
+                log.debug(f"Scan on {url.url} has not yet finished. Waiting {waiting_time} seconds before next update.")
+                sleep(waiting_time)
+                continue
 
         # The API is in error state, let's see if we can be nice and recover.
         if "errors" in data:
+            error_message = data['errors'][0]['message']
             # {'errors': [{'message': 'Running at full capacity. Please try again later.'}], 'status': 'FAILURE'}
             # Don't increase the amount of waiting time yet... try again in a minute.
-            if data['errors'][0]['message'] == "Running at full capacity. Please try again later.":
-                log.error("Qualys is at full capacity, trying later.")
+            if error_message == "Running at full capacity. Please try again later.":
+                # this happens all the time, so don't raise an exception but just make a log message.
+                log.info(f"Error occurred while scanning {url.url}: qualys is at full capacity, trying later.")
+                sleep(waiting_time)
+                continue
 
             # We're going too fast with new assessments. Back off.
-            if data['errors'][0]['message'].startswith("Concurrent assessment limit reached "):
-                log.error("Too many concurrent assessments: Are you running multiple scans from the same IP? "
-                          "Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
-                          "Slow down. ""%s" % data['errors'][0]['message'])
+            if error_message.startswith("Concurrent assessment limit reached"):
+                log.error(f"Too many concurrent assessments: Are you running multiple scans from the same IP? "
+                          f"Concurrent scans slowly lower the concurrency limit of 25 concurrent scans to zero. "
+                          f"Slow down. {data['errors'][0]['message']}")
                 if waiting_time < max_waiting_time:
-                    waiting_time += 30
-            if data['errors'][0]['message'].startswith("Too many concurrent assessments"):
+                    waiting_time += 60
+                    sleep(waiting_time)
+                    continue
+
+            if error_message.startswith("Too many concurrent assessments"):
+                log.info(f"Error occurred while scanning {url.url}: Too many concurrent assessments.")
                 if waiting_time < max_waiting_time:
-                    waiting_time += 30
-            if data['errors'][0]['message'].startswith("Concurrent assessment limit reached"):
-                if waiting_time < max_waiting_time:
-                    waiting_time += 30
-            else:
-                log.error("Unexpected error from API on %s: %s", url.url, str(data))
+                    waiting_time += 60
+                    sleep(waiting_time)
+                    continue
 
-        elif data:
-            # scan started without errors. It's probably pending. Reset the waiting time to 60 seconds again as we
-            # we want to get the result asap.
-            waiting_time = 60
+            # All other situations that we did not foresee...
+            log.error("Unexpected error from API on %s: %s", url.url, str(data))
 
-        log.debug("Waiting %s seconds before next update." % waiting_time)
-        if not scan_completed:
-            sleep(waiting_time)
-
-    # scan completed
-    # store the result on the storage queue.
-    process_qualys_result.apply_async([data, url])
-    return True
+        # This is an undefined state.
+        # scan started without errors. It's probably pending. Reset the waiting time to 60 seconds again as we
+        # we want to get the result asap.
+        waiting_time = 60
+        log.debug(f"Got to an undefined state on qualys scan on {url.url}. Scan has not finished, and we're retrying.")
+        sleep(waiting_time)
 
 
 @app.task(queue='storage')
