@@ -409,28 +409,8 @@ TOOLS_DIR = os.environ.get('TOOLS_DIR', os.path.abspath(os.path.dirname(__file__
 
 TOOLS = {
     # Chrome and firefox are special cases: they install very easily and therefore don't need further grouping.
-    'chrome': {
-        'executable': {
-            # os.platform is used to see what binaries should be used on a worker.
-            'Darwin': os.environ.get(
-                'CHROME_EXECUTABLE_DARWIN', "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
-            'Linux': os.environ.get(
-                'CHROME_EXECUTABLE_LINUX', ""),
-        },
-        'screenshot_output_dir': OUTPUT_DIR + os.environ.get(
-            'CHROME_SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/'),
-    },
-    # Chrome and firefox are special cases: they install very easily and therefore don't need further grouping.
-    'firefox': {
-        'executable': {
-            # os.platform is used to see what binaries should be used on a worker.
-            'Darwin': os.environ.get(
-                'FIREFOX_EXECUTABLE_DARWIN', "/Applications/Firefox.app/Contents/MacOS/firefox"),
-            'Linux': os.environ.get(
-                'FIREFOX_EXECUTABLE_LINUX', ""),
-        },
-        'screenshot_output_dir': OUTPUT_DIR + os.environ.get(
-            'FIREFOX_SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/'),
+    'screenshot_scanner': {
+        'output_dir': OUTPUT_DIR + os.environ.get('SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/')
     },
     'theHarvester': {
         'executable': VENDOR_DIR + os.environ.get('THEHARVESTER_EXECUTABLE', "theHarvester/theHarvester.py"),
@@ -876,6 +856,10 @@ CONSTANCE_CONFIG = {
     'PRO_EMAIL_USE_SSL': ('', 'See django mail settings.', str),
     'PRO_EMAIL_SSL_KEYFILE': ('', 'See django mail settings.', str),
     'PRO_EMAIL_SSL_CERTFILE': ('', 'See django mail settings.', str),
+
+    # Screenshots:
+    'SCREENSHOT_API_URL_V4': ('http://screenshot_v4:1337', 'Use this service to create a screenshot over v4.', str),
+    'SCREENSHOT_API_URL_V6': ('http://screenshot_v6:1337', 'Use this service to create a screenshot over v6.', str),
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -921,8 +905,11 @@ CONSTANCE_CONFIG_FIELDSETS.update([
     ('Developer configuration. For debugging and verification',
      ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN', 'SCAN_PROXY_TESTING_URL',)),
 
-    ('<span class="beta">beta</span> Internet.nl Scans (in development)',
+    ('Internet.nl Scans',
      ('INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
+
+    ('Screenshot service options',
+     ('SCREENSHOT_API_URL_V4', 'SCREENSHOT_API_URL_V6')),
 
     ('<span class="beta">beta</span> Pro (in development)',
      ('ENABLE_PRO', 'PRO_REPLY_TO_MAIL_ADDRESS')),

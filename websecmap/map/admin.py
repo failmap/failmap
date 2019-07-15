@@ -358,11 +358,6 @@ class MapDataCacheAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     instant_cache_clear.short_description = 'Clear all caches (select 1)'
     actions.append(instant_cache_clear)
 
-    @staticmethod
-    def length(obj):
-        # retrieving this causes a massive slowdown on getting the dataset
-        return len(str(obj.dataset))
-
 
 @admin.register(models.VulnerabilityStatistic)
 class VulnerabilityStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
