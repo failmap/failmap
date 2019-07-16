@@ -426,6 +426,41 @@ const state_mixin = {
     }
 };
 
+const new_state_mixin = {
+    // new state mixin that is pure functional, and does not depend on html elements
+    data: {
+        layer: "",
+        country: ""
+    },
+    // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
+    // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
+
+    methods: {
+       set_state: function(country, layer) {
+
+           // prevent loading when things didn't change.
+           if (country === this.country && layer === this.layer)
+               return;
+
+           this.country = country;
+           this.layer = layer;
+           this.load();
+       }
+    },
+    computed: {
+        valid_state: function(){
+            if (!this.country || !this.layer)
+                return false;
+            return true;
+        }
+    },
+    watch: {
+        state: function(new_value){
+            this.set_state(new_value.country, new_value.layer)
+        }
+    }
+};
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -1214,25 +1249,25 @@ const data_loader_mixin = {
 
 function views(autoload_default_map_data=true) {
 
-    window.vueGraphs = new Vue({
-        el: '#graphs',
-        name: "graphs",
-        mixins: [state_mixin, translation_mixin, data_loader_mixin],
+    window.app = new Vue({
+        i18n,
+        el: '#app',
+        name: 'app',
+        mixins: [new_state_mixin],
 
         data: {
             issues: ordered_issues,
-            // A default color scheme is based on a traffic light layout.
             color_scheme: default_color_scheme,
         },
 
+        // expected by state_mixin
         methods: {
-            load: function () {
-                if (!this.valid_state)
-                    return;
-
-                this.load_data_from_url('/data/vulnerability_graphs/' + this.country + '/' + this.layer + '/0');
-            },
+          load: function(){}
         },
+
+        mounted: function(){
+            console.log("App loaded...")
+        }
     });
 
     window.vueStatistics = new Vue({
@@ -1628,65 +1663,6 @@ function views(autoload_default_map_data=true) {
           ],
           "security_headers_strict_transport_security": [
     * */
-    window.vueImprovements = new Vue({
-        name: "issue_improvements",
-        el: '#issue_improvements',
-        mixins: [state_mixin, translation_mixin],
-
-        mounted: function () {
-            this.load(0)
-        },
-
-        data: {
-            issues: ordered_issues,
-            results: {'overall': {high: 0, medium:0, low: 0}}
-        },
-
-        methods: {
-            load: function (weeks_ago) {
-
-                if (!this.country || !this.layer)
-                    return;
-
-                if (!weeks_ago) {
-                    weeks_ago = 0;
-                }
-
-                let self = this;
-                $.getJSON('/data/improvements/' + this.country + '/' + this.layer + '/' + weeks_ago + '/0', function (data) {
-                    if ($.isEmptyObject(data)) {
-                        self.issues.forEach(function (issue){
-                           self.results[issue['name']] = {high: 0, medium:0, low: 0}
-                        });
-
-                        self.results.overall = {high: 0, medium:0, low: 0}
-                    } else {
-                        self.issues.forEach(function (issue){
-                            if (data[issue['name']] !== undefined)
-                                self.results[issue['name']] = data[issue['name']].improvements;
-                        });
-
-                        if (data.overall !== undefined)
-                            self.results.overall = data.overall.improvements;
-                    }
-
-                    // because some nested keys are used (results[x['bla']), updates are not handled correclty.
-                    vueImprovements.$forceUpdate();
-                });
-
-            },
-            goodbad: function (value) {
-                if (value === 0)
-                    return "improvements_neutral";
-
-                if (value > 0)
-                    return "improvements_good";
-
-                return "improvements_bad"
-            }
-        }
-    });
-
 
 
     window.vueFullScreenReport = new Vue({
@@ -1782,8 +1758,7 @@ function views(autoload_default_map_data=true) {
                 vueTopwin.set_state(this.country, this.layer);
                 vueStatistics.set_state(this.country, this.layer);
                 vueLatest.set_state(this.country, this.layer);
-                vueGraphs.set_state(this.country, this.layer);
-                vueImprovements.set_state(this.country, this.layer);
+                app.set_state(this.country, this.layer);
                 vueExport.set_state(this.country, this.layer);
                 vueDomainlist.set_state(this.country, this.layer);
                 vueTicker.set_state(this.country, this.layer);

@@ -76,6 +76,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -91,6 +93,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
         <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -104,6 +108,17 @@
         </script>
         <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
     {% endif %}
+
+    <script>
+    const i18n = new VueI18n({
+        locale: window.navigator.language,
+        fallbackLocale: 'en',
+        // it's required this is called messages.
+        messages,
+    });
+    </script>
+    {% include "map/static/js/components/improvements.vue" %}
+    {% include "map/static/js/components/graphs.vue" %}
 
     <link rel="manifest" href="/manifest.json">
 </head>
@@ -628,113 +643,15 @@
         </div>
         {% endif %}
 
-        {% if config.SHOW_STATS_IMPROVEMENTS %}
-        <div id="issue_improvements" class="stats_part" v-cloak>
-            <div class="page-header">
-                <h3>{% trans "Improvements" %}</h3>
-                <p>{% trans "Improvements explained" %}</p>
-            </div>
-            <div class="row">
 
-                <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "High risk improvements" %}</h4>
-                    {% verbatim %}
-                    <span :class="goodbad(results.overall.high) + '_large'">{{ results.overall.high }}</span>
-
-
-                    <table class="table table-striped">
-                        <tr v-for="issue in issues" v-if="issue['relevant impacts'].includes('high')">
-                            <td v-html="translate(issue['name'])"></td>
-                            <td v-if="results[issue['name']] !== undefined" :class="'number-sm ' + goodbad(results[issue['name']].high)"> <!-- :class="'number-sm ' + goodbad(results[issue['name']].high)" -->
-                                {{ results[issue['name']]['high'] }}
-                            </td>
-                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
-                        </tr>
-                    </table>
-                    {% endverbatim %}
-                </div>
-
-
-                <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Medium risk improvements" %}</h4>
-                    {% verbatim %}
-                    <span :class="goodbad(results.overall.medium) + '_large'">{{ results.overall.medium }}</span>
-
-                    <table class="table table-striped">
-                        <tr v-for="issue in issues" v-if="issue['relevant impacts'].includes('medium')">
-                            <td v-html="translate(issue['name'])"></td>
-                            <td v-if="results[issue['name']]" :class="'number-sm ' + goodbad(results[issue['name']].medium)">
-                                {{ results[issue['name']].medium }}
-                            </td>
-                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
-                        </tr>
-                    </table>
-                    {% endverbatim %}
-                </div>
-                <div class="col-md-4" style="text-align:center">
-                    <h4>{% trans "Low risk improvements" %}</h4>
-                    {% verbatim %}
-                    <span :class="goodbad(results.overall.low) + '_large'">{{ results.overall.low }}</span>
-
-
-                    <table class="table table-striped">
-                        <tr v-for="issue in issues" v-if="issue['relevant impacts'].includes('low')">
-                            <td v-html="translate(issue['name'])"></td>
-                            <td v-if="results[issue['name']]" :class="'number-sm ' + goodbad(results[issue['name']].low)">
-                                {{ results[issue['name']].low }}
-                            </td>
-                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
-                        </tr>
-                    </table>
-                    {% endverbatim %}
-                </div>
-
-
-            </div>
-
+        <div id="app">
+            {% if config.SHOW_STATS_IMPROVEMENTS %}
+                <improvements :issues="issues" :state="{'country': country, 'layer': layer}"></improvements>
+            {% endif %}
+            {% if config.SHOW_STATS_GRAPHS %}
+                <graphs :issues="issues" :state="{'country': country, 'layer': layer}" :color_scheme="color_scheme"></graphs>
+            {% endif %}
         </div>
-        {% endif %}
-
-        {% if config.SHOW_STATS_GRAPHS %}
-        <div id="graphs" class="stats_part" v-cloak>
-            <div class="page-header">
-                <h3>{% trans "Graphs" %}</h3>
-            </div>
-
-            <div class="row" v-if="data">
-                <div class="col-md-12">
-                    <h4>{% trans "Overall" %}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
-                        <vulnerability-chart :color_scheme="color_scheme" :data="data.total" :axis="['high', 'medium', 'low']"></vulnerability-chart>
-                    </div>
-                    <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
-                        <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row" v-if="data">
-
-                <template v-for="issue in issues">
-                    <div class="col-md-12"  v-if="data[issue['name']]" style="text-align: center">
-                        <h4 v-html="translate(issue.name)"></h4>
-                    </div>
-
-                    <div class="col-md-6"  v-if="data[issue['name']]" style="margin-bottom: 30px;">
-                        <div class="chart-container" style="position: relative; height:400px; width:100%">
-                            <vulnerability-donut :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-donut>
-                        </div>
-                    </div>
-                    <div class="col-md-6"  v-if="data[issue['name']]">
-                        <div class="chart-container" style="position: relative; height:400px; width:100%">
-                            <vulnerability-chart :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-chart>
-                        </div>
-                    </div>
-                </template>
-
-            </div>
-        </div>
-        {% endif %}
 
         {% if config.SHOW_STATS_CHANGES %}
         <div id="latest_scans" class="stats_part">
