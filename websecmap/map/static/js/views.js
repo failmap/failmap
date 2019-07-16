@@ -1682,7 +1682,7 @@ function views(autoload_default_map_data=true) {
                 if (value > 0)
                     return "improvements_good";
 
-                return "improvements_high"
+                return "improvements_bad"
             }
         }
     });

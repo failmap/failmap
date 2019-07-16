@@ -648,6 +648,7 @@
                             <td v-if="results[issue['name']] !== undefined" :class="'number-sm ' + goodbad(results[issue['name']].high)"> <!-- :class="'number-sm ' + goodbad(results[issue['name']].high)" -->
                                 {{ results[issue['name']]['high'] }}
                             </td>
+                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
                         </tr>
                     </table>
                     {% endverbatim %}
@@ -665,6 +666,7 @@
                             <td v-if="results[issue['name']]" :class="'number-sm ' + goodbad(results[issue['name']].medium)">
                                 {{ results[issue['name']].medium }}
                             </td>
+                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
                         </tr>
                     </table>
                     {% endverbatim %}
@@ -681,6 +683,7 @@
                             <td v-if="results[issue['name']]" :class="'number-sm ' + goodbad(results[issue['name']].low)">
                                 {{ results[issue['name']].low }}
                             </td>
+                            <td v-if="results[issue['name']] === undefined" class="number-sm" style="font-size: 40px;">-</td>
                         </tr>
                     </table>
                     {% endverbatim %}
