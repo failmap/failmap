@@ -7,6 +7,9 @@ In docker container: https://github.com/microbox/node-url-to-pdf-api
 API examples:
 https://github.com/alvarcarto/url-to-pdf-api
 
+Test url:
+https://url-to-pdf-api.herokuapp.com
+
 Uses configuration setting:
 SCREENSHOT_API_URL_V4
 SCREENSHOT_API_URL_V6
@@ -31,6 +34,7 @@ from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
 from websecmap.scanners.timeout import timeout
+import urllib.parse
 
 log = logging.getLogger(__package__)
 
@@ -46,6 +50,7 @@ def compose_task(
 
     one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
 
+    # chromium also understands FTP servers and renders those
     no_screenshots = Endpoint.objects.all().filter(
         q_configurations_to_scan(level="endpoint"),
         is_dead=False,
@@ -70,55 +75,83 @@ def compose_task(
     log.info(f"Trying to make {len(endpoints)} screenshots.")
     log.info(f"Screenshots will be stored at: {settings.TOOLS['screenshot_scanner']['output_dir']}")
     log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
-    tasks = [make_screenshot.si(v4_service, endpoint) for endpoint in endpoints if endpoint.ip_version == 4]
-    tasks += [make_screenshot.si(v6_service, endpoint) for endpoint in endpoints if endpoint.ip_version == 6]
+    tasks = [make_screenshot.si(v4_service, endpoint.uri_url())
+             | save_screenshot.s(endpoint) for endpoint in endpoints if endpoint.ip_version == 4]
+    tasks += [make_screenshot.si(v6_service, endpoint.uri_url())
+              | save_screenshot.s(endpoint) for endpoint in endpoints if endpoint.ip_version == 6]
 
     return group(tasks)
 
 
 # We expect the screenshot tool to hang at non responsive urls.
-@app.task(queue='internet', rate_limit="10/m")
+@app.task(queue='internet', rate_limit="60/m")
 def make_screenshot(service, endpoint):
     try:
         return make_screenshot_with_u2p(service, endpoint)
-    except TimeoutError:
-        log.debug("Screenshot timed out.")
+    except (ConnectionError, TimeoutError) as e:
+        return e
+    except Exception as e:
+        return e
 
 
 @timeout(20, 'Took too long to make screenshot.')
-def make_screenshot_with_u2p(screenshot_service, endpoint):
+def make_screenshot_with_u2p(screenshot_service, url):
+    get_parameters = {
+        'output': 'screenshot',
+        'url': url,
+        'viewport.width': 1280,
+        'viewport.height': 720,
 
-    # ignoreHttpsErrors=true -> also give a result when a 404, https error or whatever is given
-    # screenshot.fullPage=false -> gives only the first 'screen' of the page, not the entire page.
+        # also give a result when a 404, https error or whatever is given
+        'ignoreHttpsErrors': True,
 
-    api_call = f"{screenshot_service}/api/render?output=screenshot&" \
-        f"url={endpoint.uri_url()}&viewport.width=1280&viewport.height=720" \
-        f"&ignoreHttpsErrors=true&screenshot.fullPage=false"
+        # gives only the first 'screen' of the page, not the entire page.
+        'screenshot.fullPage': False,
+    }
 
-    # https://2.python-requests.org//en/latest/user/quickstart/#binary-response-content
-    r = requests.get(api_call)
+    api_call = f"{screenshot_service}/api/render?{urllib.parse.urlencode(get_parameters)}"
 
-    # with an invalid / non-resolvable address, a 500 error is given.
-    if r.status_code != 500:
-        i = Image.open(BytesIO(r.content))
+    # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
+    return requests.get(api_call)
 
-        # make a thumbnail, with a very large height, so the width is always 320 pixels (sites with transparency get
-        # a cropped image).
-        size = 320, 240
-        i.thumbnail(size, Image.ANTIALIAS)
 
-        save_as_today = f"{settings.TOOLS['screenshot_scanner']['output_dir']}" \
-            f"{endpoint.id}_{datetime.now().year}{datetime.now().month}{datetime.now().day}.png"
-        save_as_latest = f"{settings.TOOLS['screenshot_scanner']['output_dir']}{endpoint.id}_latest.png"
-        i.save(save_as_today, "PNG")
-        i.save(save_as_latest, "PNG")
+@app.task(queue='storage')
+def save_screenshot(response, endpoint):
 
-        scr = Screenshot()
-        scr.created_on = datetime.now(pytz.utc).date()
-        scr.endpoint = endpoint
-        scr.filename = save_as_today
-        scr.width_pixels = 320
-        scr.height_pixels = 240
-        scr.save()
-    else:
-        log.debug(f"Received 500 at the API from {endpoint.uri_url()}, url probably does not resolve.")
+    # it might receive an exception, or "False" when there is no image data due to errors.
+    if isinstance(response, TimeoutError):
+        log.debug(f"Received exception at save screenshot, not saving. Probably took too long to paint page due to"
+                  f"a too complex page or a terribly slow server. This is business as usual. Details: {response}")
+        return False
+
+    if isinstance(response, Exception):
+        log.exception(f"Received unexpected exception at save screenshot, not saving. "
+                      f"Is the screenshot service available at this address? Details: {response}")
+        return False
+
+    # with an invalid / non-resolvable address, a 500 error is given by the image service.
+    if response.status_code == 500:
+        log.debug(f"Received 500 at the API from {endpoint.uri_url()}, url probably does not resolve. "
+                  f"This is business as usual. Not saving.")
+        return False
+
+    i = Image.open(BytesIO(response.content))
+    size = 320, 240
+    i.thumbnail(size, Image.ANTIALIAS)
+
+    # Save the tumbnails
+    output_dir = settings.TOOLS['screenshot_scanner']['output_dir']
+    now = datetime.now()
+    save_as_today = f"{output_dir}{endpoint.id}_{now.year}{now.month}{now.day}.png"
+    save_as_latest = f"{output_dir}{endpoint.id}_latest.png"
+    i.save(save_as_today, "PNG")
+    i.save(save_as_latest, "PNG")
+    log.debug(f"Created screenshot and thumbnail at {save_as_today}")
+
+    scr = Screenshot()
+    scr.created_on = datetime.now(pytz.utc).date()
+    scr.endpoint = endpoint
+    scr.filename = save_as_today
+    scr.width_pixels = 320
+    scr.height_pixels = 240
+    scr.save()
