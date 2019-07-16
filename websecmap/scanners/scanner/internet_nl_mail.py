@@ -71,7 +71,7 @@ log = logging.getLogger(__name__)
 
 
 API_URL_MAIL = "https://batch.internet.nl/api/batch/v1.1/mail/"
-MAX_INTERNET_NL_SCANS = 5000
+MAX_INTERNET_NL_SCANS = 20000
 
 # while internet.nl scans on port 25
 # (see https://github.com/NLnetLabs/Internet.nl/blob/f003365b1d560bdfbb5bd772d735a41696277639/checks/tasks/tls.py)
