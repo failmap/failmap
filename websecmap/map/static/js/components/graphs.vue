@@ -3,7 +3,6 @@
     <div class="stats_part" v-cloak>
         <div class="page-header">
             <h3>{{ $t("graphs.title") }}</h3>
-            <p>{{ $t("graphs.intro") }}</p>
         </div>
 
         <div class="row" v-if="data">
@@ -49,7 +48,6 @@ Vue.component('graphs', {
             en: {
                 graphs: {
                     title: "Graphs",
-                    intro: "",
                     overall: "Summed up"
 
                 }
@@ -57,7 +55,6 @@ Vue.component('graphs', {
             nl: {
                 graphs: {
                     title: "Grafieken",
-                    intro: "",
                     overall: "Alles bij elkaar"
                 }
             }
@@ -84,7 +81,8 @@ Vue.component('graphs', {
 
     methods: {
         load: function () {
-            if (!this.valid_state)
+
+            if (!this.country || !this.layer)
                 return;
 
             fetch(`/data/vulnerability_graphs/${this.country}/${this.layer}/0`).then(response => response.json()).then(data => {

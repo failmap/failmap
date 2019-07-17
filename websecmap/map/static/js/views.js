@@ -1270,137 +1270,6 @@ function views(autoload_default_map_data=true) {
         }
     });
 
-    window.vueStatistics = new Vue({
-        name: "statistics",
-
-        mixins: [state_mixin],
-        el: '#statistics',
-        mounted: function () {
-            this.load(0)
-        },
-        data: {
-            data: Array,
-            services: [],
-            endpoints_now: 0,
-
-            // sorting
-            columns: ['ip_version', 'protocol', 'port', 'amount'],
-            sortKey: 'amount',
-            sortOrders: {'ip_version': 1, 'protocol': 1, 'port': 1, 'amount': -1},
-
-            issues: ordered_issues,
-        },
-        computed: {
-            issue_categories: function() {
-                // this delivers duplicates, but given the number of issues is low, it's fine.
-                // otherway: arrayx = [array1, array2]
-                let _categories = [];
-                this.issues.forEach(function(issue){
-                    // console.log(_categories);
-                    _categories = _categories.concat(issue['category'])
-                });
-                return _categories;
-            },
-            goodpercentage: function () {
-                return this.perc(this.data.data, "good", "total_organizations");
-            },
-
-            highpercentage: function () {
-                return this.perc(this.data.data, "high", "total_organizations");
-            },
-
-            mediumpercentage: function () {
-                if (this.data.data) {
-                    let score = 100 -
-                        roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
-                    return roundTo(score, 2) + "%";
-                }
-                return 0
-            },
-            unknownpercentage: function () {
-                return this.perc(this.data.data, "no_rating", "total_organizations");
-            },
-            goodurlpercentage: function () {
-                return this.perc(this.data.data, "good_urls", "total_urls");
-            },
-
-            highurlpercentage: function () {
-                return this.perc(this.data.data, "high_urls", "total_urls");
-            },
-
-            mediumurlpercentage: function () {
-                if (this.data.data) {
-                    let score = 100 -
-                        roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                        roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
-                    return roundTo(score, 2) + "%";
-                }
-                return 0
-            },
-            filteredData: function () {
-                let sortKey = this.sortKey;
-                let filterKey = this.filterKey && this.filterKey.toLowerCase();
-                let order = this.sortOrders[sortKey] || 1;
-                let data = this.services;
-                if (filterKey) {
-                    data = data.filter(function (row) {
-                        return Object.keys(row).some(function (key) {
-                            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
-                        })
-                    })
-                }
-                if (sortKey) {
-                    data = data.slice().sort(function (a, b) {
-                        a = a[sortKey];
-                        b = b[sortKey];
-                        return (a === b ? 0 : a > b ? 1 : -1) * order
-                    })
-                }
-                return data
-            }
-        },
-        methods: {
-            load: function (weeknumber) {
-
-                if (!this.country || !this.layer)
-                    return;
-
-                if (weeknumber === undefined)
-                    weeknumber = 0;
-
-                let self = this;
-                $.getJSON('/data/stats/' + this.country + '/' + this.layer + '/' + weeknumber, function (data) {
-                    self.data = data;
-
-                    self.endpoints_now = data.data.now['endpoints'];
-
-                    self.services = [];
-
-                    for(let i=0; i<data.data.now['endpoint'].length; i++){
-                        let z = data.data.now['endpoint'][i][1];
-                        self.services.push({
-                            'amount': z.amount,
-                            'ip_version': z.ip_version,
-                            'protocol': z.protocol,
-                            'port': z.port})
-                    }
-                });
-            },
-            perc: function (data, amount, total) {
-                return (!data) ? "0%" :
-                    roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
-            },
-            translate: function(string){
-                return gettext(string);
-            },
-            sortBy: function (key) {
-                this.sortKey = key;
-                this.sortOrders[key] = this.sortOrders[key] * -1;
-            }
-        }
-    });
 
     window.vueDomainlist = new Vue({
         name: "domainlist",
@@ -1596,47 +1465,6 @@ function views(autoload_default_map_data=true) {
         mixins: [top_mixin, state_mixin]
     });
 
-    window.vueLatest = new Vue({
-        mixins: [state_mixin],
-        el: '#latest_scans',
-        name: "latest",
-        methods: {
-            load: function(){
-
-                if (!this.country || !this.layer) {
-                    return;
-                }
-
-                let data_url = "/data/all_latest_scans/" + vueLatest.country + '/' + vueLatest.layer + '/';
-                    fetch(data_url)
-                        .then(response => response.json()).then(data => {
-                        vueLatest.scans = data.scans;
-
-                        // because some nested keys are used (results[x['bla']), updates are not handled correctly.
-                        vueLatest.$forceUpdate();
-                    }).catch((fail) => {
-                        console.log('An error occurred: ' + fail)
-                });
-            },
-            rowcolor: function (scan) {
-                if (scan.high === 0 && scan.medium === 0 && scan.low === 0)
-                    return "goodrow";
-                else if (scan.high > 0)
-                    return "highrow";
-                else if (scan.medium > 0)
-                    return "mediumrow";
-                else
-                    return "lowrow";
-            },
-            translate: function(string){
-                return gettext(string);
-            }
-        },
-        data: {
-            issues: ordered_issues,
-            scans: {},
-        }
-    });
 
     /*
     * {
@@ -1756,13 +1584,10 @@ function views(autoload_default_map_data=true) {
 
                 vueTopfail.set_state(this.country, this.layer);
                 vueTopwin.set_state(this.country, this.layer);
-                vueStatistics.set_state(this.country, this.layer);
-                vueLatest.set_state(this.country, this.layer);
                 app.set_state(this.country, this.layer);
                 vueExport.set_state(this.country, this.layer);
                 vueDomainlist.set_state(this.country, this.layer);
                 vueTicker.set_state(this.country, this.layer);
-                vueExplains.set_state(this.country, this.layer);
 
                 // this needs state as the organizaton name in itself is not unique.
                 vueReport.set_state(this.country, this.layer);
@@ -1964,80 +1789,6 @@ function views(autoload_default_map_data=true) {
 
     });
 
-    window.vueExplains = new Vue({
-        name: "comply_or_explain",
-        el: '#comply_or_explain',
-        mixins: [state_mixin, translation_mixin],
-        data: {
-            explains: Array(),
-            more_explains: Array(),
-            more_available: true,
-        },
-
-        methods: {
-            humanize: function (date) {
-                // It's better to show how much time was between the last scan and now. This is easier to understand.
-                return moment(date).fromNow();
-            },
-            load: function() {
-
-             if (!this.country || !this.layer)
-                return;
-
-
-                fetch('/data/explained/' + this.country + '/' + this.layer + '/').then(response => response.json()).then(explains => {
-                    this.more_explains = explains.slice(3);
-                    this.explains = explains.slice(0, 3);
-
-                    if (this.more_explains.length === 0)
-                        this.more_available = false;
-
-                }).catch((fail) => {
-                    console.log('An error occurred: ' + fail)
-                });
-            },
-            showreport(organization_id){
-                location.href = '#report';
-                vueReport.selected = {'id': organization_id};
-            },
-            showmore(){
-                if (this.more_explains.length > 3) {
-                    this.explains.push(this.more_explains.shift());
-                    this.explains.push(this.more_explains.shift());
-                    this.explains.push(this.more_explains.shift());
-                } else if (this.more_explains.length > 1) {
-                    for (i=0; i<this.more_explains.length; i++){
-                        this.explains.push(this.more_explains.shift());
-                    }
-                    this.more_available = false;
-                }
-            }
-        },
-    });
-
-    window.vueSchedule = new Vue({
-        name: "schedule",
-        el: '#schedule',
-        data: {
-            next: Array(),
-            previous: Array(),
-        },
-
-        mounted: function () {
-            this.load()
-        },
-
-        methods: {
-            load: function() {
-                fetch('/data/upcoming_and_past_scans/').then(response => response.json()).then(data => {
-                    this.next = data.next;
-                    this.previous = data.previous;
-                }).catch((fail) => {
-                    console.log('An error occurred: ' + fail)
-                });
-            },
-        },
-    });
 
     window.vueInfo = new Vue({
         name: 'infobox',

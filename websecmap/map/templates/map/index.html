@@ -117,8 +117,13 @@
         messages,
     });
     </script>
+    <!-- Instead of @import... -->
+    {% include "map/static/js/components/changes.vue" %}
     {% include "map/static/js/components/improvements.vue" %}
     {% include "map/static/js/components/graphs.vue" %}
+    {% include "map/static/js/components/combined_number_statistics.vue" %}
+    {% include "map/static/js/components/comply_or_explain.vue" %}
+    {% include "map/static/js/components/scan_schedule.vue" %}
 
     <link rel="manifest" href="/manifest.json">
 </head>
@@ -391,427 +396,46 @@
     </div>
 </section>
 
-{% if config.SHOW_EXTENSIVE_STATISTICS %}
-<section name="extensive_statistics">
-    <div class="container">
 
-        {% if config.SHOW_STATS_NUMBERS %}
-        <div id="statistics" v-cloak>
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="extensive_statistics" class="jumptonav"></a>
-                <h2><svg class="svg-inline--fa fa-chart-area fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="chart-area" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M500 384c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v308h436zM372.7 159.5L288 216l-85.3-113.7c-5.1-6.8-15.5-6.3-19.9 1L96 248v104h384l-89.9-187.8c-3.2-6.5-11.4-8.7-17.4-4.7z"></path></svg>
-                    {% trans "Extensive statistics" %}
-                </h2>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>{% trans "Organizations" %}</h3>
-                    <p>{% trans "Organizations Explained" %}</p>
-                </div>
-                <div class="col-md-6">
-                    <h3>{% trans "Internet addresses" %}</h3>
-                    <p>{% trans "Internet addresses Explained" %}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="progress">
-                        <div class="progress-bar bg-success" :style="{width:goodpercentage}">
-                            <span class="sr-only">{% trans "stats remark good" %}</span>
-                        </div>
-                        <div class="progress-bar bg-warning" :style="{width:mediumpercentage}">
-                            <span class="sr-only">{% trans "stats remark medium" %}</span>
-                        </div>
-                        <div class="progress-bar bg-danger" :style="{width:highpercentage}">
-                            <span class='sr-only'>{% trans "stats remark high" %}</span>
-                        </div>
-                        <div class="progress-bar bg-basic" :style="{width:unknownpercentage}">
-                            <span class='sr-only'>{% trans "stats remark unknown" %}</span>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <th width="25%">{% trans "When" %}</th>
-                                <th width="5%">{% trans "Number" %}</th>
-                                <th width="20%">{% trans "Good" %}</th>
-                                <th width="20%">{% trans "Average" %}</th>
-                                <th width="20%">{% trans "Bad" %}</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="data.data">
-                            {% verbatim %}
-                            <tr v-for="(x, key) in data.data">
-                                <td>{{ translate(key) }}</td>
-                                <td>{{ x["included_organizations"] }}</td>
-                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good percentage'] + '%, transparent ' + x['good percentage'] + '%, transparent 100%);'">
-                                    {{ x["good"] }}
-                                    <small>({{ x["good percentage"] }}%)</small>
-                                </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium percentage'] + '%, transparent ' + x['medium percentage'] + '%, transparent 100%);'">
-                                    {{ x["medium"] }}
-                                    <small>({{ x["medium percentage"] }}%)</small>
-                                </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high percentage'] + '%, transparent ' + x['high percentage'] + '%, transparent 100%);'">
-                                    {{ x["high"] }}
-                                    <small>({{ x["high percentage"] }}%)</small>
-                                </td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="progress">
-                        <div class="progress-bar bg-success" :style="{width:goodurlpercentage}">
-                            <span class="sr-only">{% trans "stats remark good" %}</span>
-                        </div>
-                        <div class="progress-bar bg-warning" :style="{width:mediumurlpercentage}">
-                            <span class="sr-only">{% trans "stats remark medium" %}</span>
-                        </div>
-                        <div class="progress-bar bg-danger" :style="{width:highurlpercentage}">
-                            <span class='sr-only'>{% trans "stats remark high" %}</span>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <th width="25%">{% trans "When" %}</th>
-                                <th width="5%">{% trans "Number" %}</th>
-                                <th width="20%">{% trans "Good" %}</th>
-                                <th width="20%">{% trans "Average" %}</th>
-                                <th width="20%">{% trans "Bad" %}</th>
-                            </tr>
-                            </thead>
-                            <tbody v-if="data.data">
-                            {% verbatim %}
-                            <tr v-for="(x, key) in data.data">
-                                <td>{{ translate(key) }}</td>
-                                <td>{{ x["total_urls"] }}</td>
-                                <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good url percentage'] + '%, transparent ' + x['good url percentage'] + '%, transparent 100%);'">
-                                    {{ x["good_urls"] }}
-                                    <small>({{ x["good url percentage"] }}%)</small>
-                                </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium url percentage'] + '%, transparent ' + x['medium url percentage'] + '%, transparent 100%);'">
-                                    {{ x["medium_urls"] }}
-                                    <small>({{ x["medium url percentage"] }}%)</small>
-                                </td>
-                                <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high url percentage'] + '%, transparent ' + x['high url percentage'] + '%, transparent 100%);'">
-                                    {{ x["high_urls"] }}
-                                    <small>({{ x["high url percentage"] }}%)</small>
-                                </td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row" v-if="issue_categories.includes('integrity') || issue_categories.includes('website')">
-                <div class="col-md-6" v-if="issue_categories.includes('integrity')">
-                    <h4>{% trans "Technical TLS" %}</h4>
-                    <p>{% trans "Technical stats TLS explained" %}</p>
-                </div>
-                <div class="col-md-6" v-if="issue_categories.includes('website')">
-                    <h4>{% trans "Technical stats headers" %}</h4>
-                    <p>{% trans "Technical stats headers explained" %}</p>
-                </div>
-            </div>
-            <div class="row" v-if="data.data && (issue_categories.includes('integrity') || issue_categories.includes('website'))">
-                <div class="col-md-6">
-                    <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                        <div class="table-responsive">
-                            <table class="table" v-if="x['explained']">
-                                <thead>
-                                <tr>
-                                    <th width="10%">{% trans "Technology" %}</th>
-                                    <th width="50%">{% trans "Result" %}</th>
-                                    <th width="40%">{% trans "Total" %}</th>
-                                </tr>
-                                </thead>
-                                <tbody v-for="issue in issues" v-if="issue.category.includes('integrity')">
-                                    <tr>
-                                        <td colspan="3" v-html="translate(issue['name'])"></td>
-                                    </tr>
-                                    <tr class="highrow" v-for="grade in issue.statistics.bad">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                    <tr class="mediumrow" v-for="grade in issue.statistics.medium">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                    <tr class="goodrow" v-for="grade in issue.statistics.good">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div v-for="(x, key) in data.data" v-if="key == 'now'">
-                        <div class="table-responsive">
-                            <table class="table" v-if="x['explained']">
-                                <thead>
-                                <tr>
-                                    <th width="10%">{% trans "Technology" %}</th>
-                                    <th width="50%">{% trans "Result" %}</th>
-                                    <th width="40%">{% trans "Total" %}</th>
-                                </tr>
-                                </thead>
-                                <tbody v-for="issue in issues" v-if="issue.category.includes('website')">
-                                    <tr>
-                                        <td colspan="3" v-html="translate(issue['name'])"></td>
-                                    </tr>
-                                    <tr class="highrow" v-for="grade in issue.statistics.bad">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                    <tr class="mediumrow" v-for="grade in issue.statistics.medium">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                    <tr class="goodrow" v-for="grade in issue.statistics.good">
-                                        <td></td>
-                                        <td v-html="translate(grade.explanation)">:</td>
-                                        <td>{% verbatim %}{{ x['explained'][issue.name][grade.explanation] }}{% endverbatim %}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% if config.SHOW_SERVICES %}
-            <div class="row">
-                <div class="col-md-12" v-for="(x, key) in data.data" v-if="key == 'now'">
-                    <h3>{% trans "Services" %}</h3>
-                    <p>{% trans "Services explained" %}</p>
-                        <p>{% trans "Number of service checked" %}</p>
-                        <div class="table-responsive">
-                            <table class="table table-striped" id="services_table">
-                                <thead>
-                                    <tr>
-                                        <th @click="sortBy('ip_version')" :class="{ active: sortKey == 'ip_version' }">
-                                            {% trans "IP Version" %}
-                                            <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'"></span>
-                                        </th>
-                                        <th @click="sortBy('protocol')" :class="{ active: sortKey == 'protocol' }">
-                                            {% trans "Protocol" %}
-                                            <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'"></span>
-                                        </th>
-                                        <th @click="sortBy('port')" :class="{ active: sortKey == 'port' }">
-                                            {% trans "Port" %}
-                                            <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'"></span>
-                                        </th>
-                                        <th @click="sortBy('amount')" :class="{ active: sortKey == 'amount' }">
-                                            {% trans "Amount" %}
-                                            <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'"></span>
-                                        </th>
-                                        <th>{% trans "Percentage" %}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% verbatim %}
-                                    <tr v-for="service in filteredData">
-                                        <td>{{ service['ip_version'] }}</td>
-                                        <td>{{ service['protocol'] }}</td>
-                                        <td>{{ service['port'] }}</td>
-                                        <td>{{ service['amount'] }}</td>
-                                        <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
-                                    </tr>
-                                    {% endverbatim %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-            </div>
+<div id="app">
+    {% if config.SHOW_EXTENSIVE_STATISTICS %}
+    <section name="extensive_statistics">
+        <div class="container">
+            {% if config.SHOW_STATS_NUMBERS %}
+                <combined_number_statistics :issues="issues" :state="{'country': country, 'layer': layer}" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
             {% endif %}
-        </div>
-        {% endif %}
-
-
-        <div id="app">
             {% if config.SHOW_STATS_IMPROVEMENTS %}
                 <improvements :issues="issues" :state="{'country': country, 'layer': layer}"></improvements>
             {% endif %}
             {% if config.SHOW_STATS_GRAPHS %}
                 <graphs :issues="issues" :state="{'country': country, 'layer': layer}" :color_scheme="color_scheme"></graphs>
             {% endif %}
+            {% if config.SHOW_STATS_CHANGES %}
+                <changes :issues="issues" :state="{'country': country, 'layer': layer}"></changes>
+            {% endif %}
         </div>
+    </section>
+    {% endif %}
 
-        {% if config.SHOW_STATS_CHANGES %}
-        <div id="latest_scans" class="stats_part">
-            <div class="page-header">
-                <h3>{% trans "Latest changes" %}</h3>
-                <p>{% trans "Latest changes explanation" %}</p>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6" v-for="issue in issues">
-                    <h4 v-html="translate(issue.name)"></h4>
-                    <p>{% trans "RSS feed teaser" %}
-                        <a :href="'/data/feed/' + issue.name" target="_blank">
-                        <svg aria-hidden="true" data-prefix="fas" data-icon="rss" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-rss fa-w-14"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg>
-                        {% trans "rss feed" %}
-                        </a>.
-                    </p>
-
-                    <div class="table-responsive">
-                        <table class="table table-striped changes">
-                            <thead>
-                            <tr>
-                                <th>{% trans "Scan moment" %}</th>
-                                <th>{% trans "Url" %}</th>
-                            </tr>
-                            </thead>
-                            <tbody v-for="scan in scans[issue['name']]">
-                            {% verbatim %}
-                            <tr :class="rowcolor(scan)">
-                                <td class="date">{{ scan.last_scan_humanized }}</td>
-                                <td class="url">{{ scan.url }}</td>
-                            </tr>
-                            <tr>
-                                <td class="service">{{ scan.service }}</td>
-                                <td colspan="2" class="explanation">{{ translate(scan.explanation) }}</td>
-                            </tr>
-                            {% endverbatim %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-            </div>
+    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+        <!-- todo: get this to work, it is not tested yet... -->
+    <section name="comply_or_explain_info">
+        <div class="container">
+            <comply_or_explain :state="{'country': country, 'layer': layer}"></comply_or_explain>
         </div>
-        {% endif %}
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
-{% if config.SHOW_COMPLY_OR_EXPLAIN %}
-<section name="comply_or_explain_info">
-    <div class="container">
-        <div id="comply_or_explain">
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="comply_or_explain_info" class="jumptonav"></a>
-                <h2><svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg> {% trans "Comply or explain" %}</h2>
-                <p>
-                {% trans "Comply or explain introduction" %}
-                    {% if config.SHOW_DATASETS %}
-                        {% blocktrans %}You can download the entire dataset for further analysis in the <a href="#datasets">datasets</a> section.{% endblocktrans %}
-                    {% endif %}
-                </p>
-
-                {%  if config.SHOW_COMPLY_OR_EXPLAIN_DISCUSS %}
-                    <p>{% blocktrans with COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK=config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK %}
-                        The comply or explain argumentation can be discussed here:
-                        <a href="{{ COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}" target="_blank" title="Comply or explain forum.">comply or explain forum</a>.
-                    {% endblocktrans %}
-                    </p>
-
-                {% endif %}
-            </div>
-
-
-            <template v-for="explain in explains">
-                <div class="row">
-
-                    <div class="col-md-10">
-                        <div class="chat_quote_left">
-                            <del>
-                            <span :class="'awarded_points_' + explain.original_severity">
-                                {% verbatim %}{{ translate(explain.original_severity) }}{% endverbatim %}
-                            </span>&nbsp;&nbsp;
-                            {% verbatim %}{{ translate(explain.scan_type) }}{% endverbatim %}:
-                            {% verbatim %}{{ translate(explain.original_explanation) }}{% endverbatim %}
-                            </del>
-                        </div>
-                        <br>
-                        <blockquote class="blockquote text-right chat_quote_right">
-                            <p class="mb-0">
-                                {% verbatim %}{{ explain.explanation }}{% endverbatim %}
-                            </p>
-                            <footer class="blockquote-footer">
-                                {% verbatim %}{{ explain.explained_by }} <cite title="Source Title">{{ humanize(explain.explained_on) }}{% endverbatim %} </cite>
-                            </footer>
-                        </blockquote>
-
-                    </div>
-
-                    <div class="col-md-2 text-center">
-                        <small>{% trans "View report" %}</small>
-                        <ul style="padding-left: 0px">
-                            <li v-for="organization in explain.organizations" class="explain_reports">
-                                <a @click="showreport(organization.id)" :title="'View report for ' + organization.name">
-                                <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
-                                    {% verbatim %}{{ organization.name }}{% endverbatim %}
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                </div>
-            </template>
-
-            <div class="row" v-if="!explains.length">
-                <div class="col-md-12">
-                    {% trans "No explanations yet." %}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{% trans "Show more" %}</button>
-                </div>
-            </div>
-
+    {% if config.SHOW_SCAN_SCHEDULE %}
+    <section name="scan_schedule">
+        <div class="container">
+            <scan_schedule></scan_schedule>
         </div>
-    </div>
-</section>
-{% endif %}
+    </section>
+    {% endif %}
 
+</div>
 
-{% if config.SHOW_SCAN_SCHEDULE %}
-<section name="scan_schedule">
-    <div class="container">
-        <div id="schedule">
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="schedule" class="jumptonav"></a>
-                <h2>
-                    <svg class="svg-inline--fa fa-clock fa-w-16" aria-hidden="true" data-prefix="far" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
-                    {% trans "Scan schedule" %}
-                </h2>
-                {% trans "Below scans and tasks will be performed in the future. This can help you getting a better perspective on when updates will be hapening to your organization. Note that all times are approximate due to caching and rounding. The time listed is the time the scan starts, it might take a while before your organization is scanned." %}
-                <p></p>
-            </div>
-            <div class="row schedule_row" v-for="next_item in next">
-                {% verbatim %}
-                <div class="col-md-3 schedule_item">
-                    {{ next_item.human_date }}
-                </div>
-                <div class="col-md-9 schedule_item" v-html="next_item.name">
-                </div>
-                {% endverbatim %}
-            </div>
-        </div>
-    </div>
-</section>
-{% endif %}
 
 {% if config.SHOW_DATASETS %}
 <section name="datasets">
