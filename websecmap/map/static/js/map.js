@@ -638,7 +638,7 @@ const map = {
 
 
     add_polygons_to_map: function(polygons){
-        map.polygons = L.geoJson(polygons, {
+        this.polygons = L.geoJson(polygons, {
             style: map.style,
             pointToLayer: map.pointToLayer,
             onEachFeature: map.onEachFeature
@@ -759,3 +759,4 @@ const map = {
 
 
 };
+

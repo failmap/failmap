@@ -129,7 +129,7 @@ Vue.component('chart', {
                 this.data = data.ranking.slice(0,10);
                 this.fulldata = data.ranking;
                 this.metadata = data.metadata;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred in chart: ' + fail)});
         },
         sortBy: function (key) {
             this.sortKey = key;

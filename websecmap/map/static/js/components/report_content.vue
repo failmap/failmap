@@ -362,7 +362,7 @@ Vue.component('report_content', {
                 this.timeline = timelinedata;
             }).catch((fail) => {console.log('An error occurred: ' + fail)});
 
-            fetch('/data/report/' + this.country + '/' + this.layer + '/' + this.organization + '/' + weeks_ago)
+            fetch('/data/report/' + this.state.country + '/' + this.state.layer + '/' + this.organization + '/' + weeks_ago)
                 .then(response => response.json()).then(data => {
                 this.urls = data.calculation["organization"]["urls"];
                 this.points = data.rating;

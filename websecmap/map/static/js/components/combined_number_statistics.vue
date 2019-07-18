@@ -353,7 +353,7 @@ Vue.component('combined_number_statistics', {
                         'protocol': z.protocol,
                         'port': z.port})
                 }
-            }).catch((fail) => {console.log('An error occurred in explains: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred in combined number statistics: ' + fail)});
         },
         perc: function (data, amount, total) {
             return (!data) ? "0%" :

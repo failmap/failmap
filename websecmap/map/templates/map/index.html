@@ -78,6 +78,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/leaflet.markercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -95,6 +97,8 @@
         <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/leaflet.markercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -116,6 +120,15 @@
         // it's required this is called messages.
         messages,
     });
+
+
+    Vue.component('l-map', window.Vue2Leaflet.LMap);
+    Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+    Vue.component('l-control', window.Vue2Leaflet.LControl);
+    Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
+    Vue.component('v-marker-cluster', Vue2LeafletMarkerCluster);
+
+
     </script>
     <!-- Instead of @import... -->
     {% include "map/static/js/components/changes.vue" %}
@@ -129,6 +142,8 @@
     {% include "map/static/js/components/scan_schedule.vue" %}
     {% include "map/static/js/components/charts.vue" %}
     {% include "map/static/js/components/chart.vue" %}
+    {% include "map/static/js/components/intro.vue" %}
+    {% include "map/static/js/components/websecmap.vue" %}
 
     <link rel="manifest" href="/manifest.json">
 </head>
@@ -306,23 +321,20 @@
     <div id='map'></div>
 </section>
 
-{% if config.SHOW_INTRO %}
-<section>
-    <div class="container theme-showcase" role="main">
-        <a name="info" class="jumptonav"></a>
-        <div class="jumbotron">
-            <h1 class="display-4">
-                <svg class="svg-inline--fa fa-info-circle fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg>
-                {% trans "What do i see?" %}</h1>
-            <p class="lead">{% trans "whats do i see explained" %}</p>
-            <p>{% blocktrans with RESPONSIBLE_ORGANIZATION_NAME=config.RESPONSIBLE_ORGANIZATION_NAME PROJECT_ISSUE_MAIL=config.PROJECT_ISSUE_MAIL %} This website is run by {{ RESPONSIBLE_ORGANIZATION_NAME }}. To submit new domains, or ask questions, contact us via: {{ PROJECT_ISSUE_MAIL }}.{% endblocktrans %}</p>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-
 <div id="app">
+
+    <section>
+        <websecmap :state="state" :issues="issues" :mapbox_token="'{{ config.MAPBOX_ACCESS_TOKEN }}'" :debug="{{ debug | lower }}"></websecmap>
+    </section>
+
+
+    {% if config.SHOW_INTRO %}
+    <section>
+        <intro :organization="'{{ config.RESPONSIBLE_ORGANIZATION_NAME }}'" :organization_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"></intro>
+    </section>
+    {% endif %}
+
+
     {% if config.SHOW_CHARTS %}
     <section>
        <div class="container">
@@ -530,7 +542,6 @@
         </div>
     </div>
 </script>
-
 <script type="x-template" id="historycontrol_template">
     <div id="historycontrol" style="max-width: 300px; overflow:hidden;">
         <h4>{% trans "Moment" %}</h4>
@@ -551,6 +562,7 @@
 
     </div>
 </script>
+
 <script type="x-template" id="domainlist_template">
     <div id="domainlist">
         <div v-if="urls.length > 1" v-cloak>

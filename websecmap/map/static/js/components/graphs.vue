@@ -83,7 +83,7 @@ Vue.component('graphs', {
         load: function () {
             fetch(`/data/vulnerability_graphs/${this.state.country}/${this.state.layer}/0`).then(response => response.json()).then(data => {
                 this.data = data;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred in graphs: ' + fail)});
         },
     },
 });
