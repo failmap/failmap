@@ -103,11 +103,7 @@ Vue.component('improvements', {
 
     methods: {
         load: function (weeks_ago=0) {
-
-            if (!this.country || !this.layer)
-                return;
-
-            fetch(`/data/improvements/${this.country}/${this.layer}/${weeks_ago}/0`).then(response => response.json()).then(data => {
+            fetch(`/data/improvements/${this.state.country}/${this.state.layer}/${weeks_ago}/0`).then(response => response.json()).then(data => {
                 self = this;
                 if ($.isEmptyObject(data)) {
                     this.issues.forEach(function (issue){

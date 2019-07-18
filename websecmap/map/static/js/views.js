@@ -429,34 +429,26 @@ const state_mixin = {
 const new_state_mixin = {
     // new state mixin that is pure functional, and does not depend on html elements
     data: {
-        layer: "",
-        country: ""
+        state: {
+            'country': "",
+            'layer': "",
+            'week': 0,
+        },
     },
     // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
     // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
 
     methods: {
-       set_state: function(country, layer) {
 
-           // prevent loading when things didn't change.
-           if (country === this.country && layer === this.layer)
-               return;
-
-           this.country = country;
-           this.layer = layer;
-           this.load();
+        // make sure the first state set is as atomic as possible.
+        set_state: function(country, layer, week=0) {
+            // atomic change:
+            this.state = {'country': country, 'week': week, 'layer': layer};
        }
     },
-    computed: {
-        valid_state: function(){
-            if (!this.country || !this.layer)
-                return false;
-            return true;
-        }
-    },
     watch: {
-        state: function(new_value){
-            this.set_state(new_value.country, new_value.layer)
+        state: function(){
+            this.load()
         }
     }
 };
@@ -481,312 +473,8 @@ let default_color_scheme = {
 };
 
 const report_mixin = {
-    data: {
-        calculation: '',
-        rating: 0,
-        points: 0,
-        high: 0,
-        medium: 0,
-        low: 0,
-        when: 0,
-        twitter_handle: '',
-        name: "",
-        urls: Array,
-        selected: {'id': null, 'label': null, 'name': null},
-        loading: false,
-        visible: false,  // fullscreenreport
-        promise: false,
-
-        // so they can be destroyed and re-initialized
-        myChart: null,
-        myChart2: null,
-        timeline: [],
-
-        issues: ordered_issues,
-        color_scheme: default_color_scheme,
-    },
-    // https://vuejs.org/v2/api/#updated
-    updated: function () {
-      this.$nextTick(function () {
-          lazyload()
-      })
-    },
     methods: {
-        total_summary_row: function(url){
 
-            let worst = {};
-
-            ordered_issues.forEach(function (issue) {
-                if (url_issue_names.includes(issue['name']))
-                    worst[issue['name']] = vueReport.worstof(issue['name'], [url]);
-                else
-                    worst[issue['name']] = vueReport.worstof(issue['name'], url.endpoints);
-            });
-
-            text = `<td><b><a href="#report_url_${url.url}">${url.url}</a></b></td>`;
-
-            let findings = "";
-
-            ordered_issues.forEach(function (issue) {
-                findings += `<td class='text-center ${worst[issue['name']].bgclass}'>${worst[issue['name']].text}</td>`;
-            });
-
-            return text + findings;
-        },
-
-        worstof: function(risk, endpoints){
-            let high = 0, medium = 0, low = 0;
-            let risk_found = false;
-            let explained = false;
-
-            for(let i=0; i<endpoints.length; i++) {
-                let endpoint = endpoints[i];
-                for (let i = 0; i < endpoint.ratings.length; i++) {
-                    let rating = endpoint.ratings[i];
-
-                    if (rating.type === risk) {
-                        risk_found = true;
-                        high += rating.high;
-                        medium += rating.medium;
-                        low += rating.low;
-                        if (rating.comply_or_explain_valid_at_time_of_report)
-                            explained = true;
-                    }
-                }
-            }
-
-            let text = "";
-            let bgclass = "";
-
-            if (high){
-                text = "";
-                bgclass = "high_background_light";
-            } else if (medium){
-                text = "";
-                bgclass = "medium_background_light";
-            } else if (low){
-                text = "";
-                bgclass = "low_background_light";
-            } else if (risk_found) {
-                text = "";
-                bgclass = "good_background_light";
-            }
-
-            if (explained) {
-                // if this is a string with "", translations say unterminated string. As ES6 template it's fine.
-                text = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>`;
-                bgclass = "good_background_light";
-            }
-
-            return {'bgclass': bgclass, 'text': text}
-
-        },
-
-        rating_text: function (rating) {
-            if (rating.comply_or_explain_valid_at_time_of_report) return '<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>';
-            if (rating.high > 0) return "high";
-            if (rating.medium > 0) return "medium";
-            if (rating.low > 0) return "low";
-            return "✅";
-        },
-
-        colorize: function (high, medium, low) {
-            if (high > 0) return "high";
-            if (medium > 0) return "medium";
-            return "good";
-        },
-        colorizebg: function (high, medium, low) {
-            if (high > 0) return "report_url_background_high";
-            if (medium > 0) return "report_url_background_medium";
-            return "report_url_background_good";
-        },
-        idize: function (url) {
-            url = url.toLowerCase();
-            return url.replace(/[^0-9a-z]/gi, '')
-        },
-        idizetag: function (url) {
-            url = url.toLowerCase();
-            return "#" + url.replace(/[^0-9a-z]/gi, '')
-        },
-        humanize: function (date) {
-            // It's better to show how much time was between the last scan and now. This is easier to understand.
-            return moment(date).fromNow();
-        },
-        translate: function(string){
-            return gettext(string);
-        },
-        create_header: function (rating) {
-            return this.translate(rating.type);
-        },
-        // todo: have documentation links for all vulnerabilities for a dozen countries, so to stress the importance
-        second_opinion_links: function (rating, url) {
-
-            let selected_issue = issues[rating.type];
-
-            let links = "";
-
-            // todo: take in account language.
-            selected_issue['second opinion links'].forEach(function (item){
-                let filled_url = item.url;
-                filled_url = filled_url.replace("${url.url}", url.url);
-                links += `<a href="${filled_url}" target="_blank" class="btn-sm"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clipboard-check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="svg-inline--fa fa-clipboard-check fa-w-12"><path fill="currentColor" d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM192 40c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm121.2 231.8l-143 141.8c-4.7 4.7-12.3 4.6-17-.1l-82.6-83.3c-4.7-4.7-4.6-12.3.1-17L99.1 285c4.7-4.7 12.3-4.6 17 .1l46 46.4 106-105.2c4.7-4.7 12.3-4.6 17 .1l28.2 28.4c4.7 4.8 4.6 12.3-.1 17z" class=""></path></svg>&nbsp;` + gettext('Second opinion') + ` (${item.provider}) </a> `;
-            });
-
-            selected_issue['documentation links'].forEach(function (item){
-                links += `<a href="${item.url}" target="_blank" class="btn-sm"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-book fa-w-14"><path fill="currentColor" d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z" class=""></path></svg>&nbsp;` + gettext('Documentation') + ` (${item.provider})</a> `;
-            });
-
-            return links;
-
-        },
-        explain_link: function(address, rating, url) {
-            subject = gettext("Explanation of finding");
-            body = gettext("Hi!,\n" +
-                "\n" +
-                "I would like to explain the below finding.\n" +
-                "\n" +
-                "Address: {{ url }}\n" +
-                "Scan Type: {{ scan_type }}\n" +
-                "Scan ID: {{ scan_id }}\n" +
-                "Impact: High: {{ high }}, Medium {{ medium }}, Low: {{ low }}.\n" +
-                "\n" +
-                "I believe the finding to be incorrect. This is why:\n" +
-                "[... please enter your explanation for review here ...]\n" +
-                "\n" +
-                "I acknowledge that this finding will be published together with my organizations name.\n" +
-                "\n" +
-                "tip: please refer to documentation or standards where possible. Be aware that an explanation is valid " +
-                "for one year by default.\n" +
-                "\n" +
-                "Kind regards,\n" +
-                "");
-
-            explain = this.translate("Explain");
-
-            // use a sort-of-templating language
-            body = body.replace("{{ url }}", url.url);
-            body = body.replace("{{ scan_type }}", rating.type);
-            body = body.replace("{{ scan_id }}", rating.scan);
-            body = body.replace("{{ high }}", rating.high);
-            body = body.replace("{{ medium }}", rating.medium);
-            body = body.replace("{{ low }}", rating.low);
-
-            // make it so it can be sent in the mail:
-            subject = encodeURIComponent(subject);
-            body = encodeURIComponent(body);
-
-            link = `<a href='mailto:${address}?subject=${subject}&body=${body}' class='btn-sm'>
-                        <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path>
-                        </svg> ${explain}</a>`;
-
-            return link;
-        },
-        total_awarded_points: function (high, medium, low) {
-            let marker = vueReport.make_marker(high, medium, low);
-            return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
-        },
-        organization_points: function (high, medium, low) {
-            let marker = vueReport.make_marker(high, medium, low);
-            return '<span class="total_awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
-        },
-        awarded_points: function (high, medium, low) {
-            let marker = vueReport.make_marker(high, medium, low);
-            return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
-        },
-        make_marker: function (high, medium, low) {
-            if (high === 0 && medium === 0 && low === 0)
-                return gettext("score perfect");
-            else if (high > 0)
-                return gettext("score high");
-            else if (medium > 0)
-                return gettext("score medium");
-            else
-                return gettext("score low");
-        },
-        // fullscreen report
-        show: function () {
-            this.visible = true;
-        },
-        hide: function () {
-            this.visible = false;
-        },
-        // end fullscreen report
-        endpoint_type: function (endpoint) {
-            return endpoint.protocol + "/" + endpoint.port + " (IPv" + endpoint.ip_version + ")";
-        },
-        load: function (organization_id, weeks_ago) {
-
-            if (!weeks_ago) {
-                weeks_ago = 0;
-            }
-
-            if (!this.country || !this.layer)
-                return;
-
-            // against symptom of autoloading when setting state, this doesn't have the right parameters.
-            if (!organization_id)
-                return;
-
-            vueReport.loading = true;
-            vueReport.name = null;
-
-            // first update the graphs, doing this around, the graph will show the previous data, not the current stuff
-            fetch('/data/organization_vulnerability_timeline/' + organization_id + '/' + this.layer + '/' + this.country)
-                .then(response => response.json()).then(timelinedata => {
-                    this.timeline = timelinedata;
-
-
-                    fetch('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_ago)
-                        .then(response => response.json()).then(data => {
-                        this.loading = false;
-                        this.urls = data.calculation["organization"]["urls"];
-                        this.points = data.rating;
-                        this.high = data.calculation["organization"]["high"];
-                        this.medium = data.calculation["organization"]["medium"];
-                        this.low = data.calculation["organization"]["low"];
-                        this.when = data.when;
-                        this.name = data.name;
-                        this.twitter_handle = data.twitter_handle;
-                        this.promise = data.promise;
-                        this.slug = data.slug;
-
-                        // include id in anchor to allow url sharing
-                        let newHash = 'report-' + this.slug;
-                        $('a#report-anchor').attr('name', newHash);
-                        history.replaceState({}, '', '#' + newHash);
-
-                    }).catch((fail) => {console.log('An error occurred: ' + fail)});
-
-                }).catch((fail) => {console.log('An error occurred: ' + fail)});
-
-
-
-        },
-        show_in_browser: function () {
-            // you can only jump once to an anchor, unless you use a dummy
-            location.hash = "#loading";
-            location.hash = "#report";
-        },
-        formatDate: function (date) {
-            return new Date(date).toISOString().substring(0, 10)
-        },
-        closereport: function(){
-            this.name = "";
-        },
-        printreport: function(divId){
-            css1 = new String ('<link href="/static/css/vendor/bootstrap.min.css" rel="stylesheet" type="text/css">');
-            css3 = new String ('<link href="/static/css/vendor/fa-svg-with-js.css" rel="stylesheet" type="text/css">');
-            css4 = new String ('<link href="/static/css/overrides.css" rel="stylesheet" type="text/css">');
-            window.frames["print_frame"].document.body.innerHTML=css1 + css3 + css4 + document.getElementById(divId).innerHTML;
-
-            // there is no real guarantee that the content / css has loaded...
-            // even load doesn't do that it seems.
-            setTimeout(vueReport.theprint,1000);
-        },
-        theprint: function(){
-            window.frames["print_frame"].window.focus();
-            window.frames["print_frame"].window.print();
-        }
     }
 };
 
@@ -795,88 +483,6 @@ const translation_mixin = {
     methods: {
         translate: function (string) {
             return gettext(string);
-        }
-    }
-};
-
-
-const top_mixin = {
-    mounted: function () {
-        this.load(0)
-    },
-    props: {
-        filterKey: String,
-
-    },
-    data: {
-        data: Array, // a short list of 10 items.
-        fulldata: Array, // a much larger list.
-        columns: ['rank', 'high', 'medium', 'low', 'organization_id', 'total_urls', 'total_endpoints'],
-        sortKey: '',
-        metadata: {},
-        key: {}
-    },
-    methods: {
-        showReport: function (organization_id) {
-            vueReport.show_in_browser();
-            vueReport.load(organization_id, vueMap.week);
-            vueDomainlist.load(organization_id, vueMap.week);
-        },
-        humanize: function (date) {
-            return new Date(date).humanTimeStamp()
-        },
-        load: function (weeknumber) {
-
-            if (!this.country || !this.layer)
-                return;
-
-            if (weeknumber === undefined)
-                weeknumber = 0;
-
-            let self = this;
-            $.getJSON(this.$data.data_url + this.country + '/' + this.layer + '/' + weeknumber, function (data) {
-                self.data = data.ranking.slice(0,10);
-                self.fulldata = data.ranking;
-                self.metadata = data.metadata;
-            });
-        },
-        sortBy: function (key) {
-            this.sortKey = key;
-            this.sortOrders[key] = this.sortOrders[key] * -1
-        },
-        swapFull: function(){
-            temp = Array;
-            temp = this.data;
-            this.data = this.fulldata;
-            this.fulldata = temp;
-        }
-    },
-    computed: {
-        filteredData: function () {
-          let sortKey = this.sortKey;
-          let filterKey = this.filterKey && this.filterKey.toLowerCase();
-          let order = this.sortOrders[sortKey] || 1;
-          let data = this.data;
-          if (filterKey) {
-            data = data.filter(function (row) {
-              return Object.keys(row).some(function (key) {
-                return String(row[key]).toLowerCase().indexOf(filterKey) > -1
-              })
-            })
-          }
-          if (sortKey) {
-            data = data.slice().sort(function (a, b) {
-              a = a[sortKey];
-              b = b[sortKey];
-              return (a === b ? 0 : a > b ? 1 : -1) * order
-            })
-          }
-          return data
-        }
-    },
-    filters: {
-        capitalize: function (str) {
-            return str.charAt(0).toUpperCase() + str.slice(1)
         }
     }
 };
@@ -1249,28 +855,6 @@ const data_loader_mixin = {
 
 function views(autoload_default_map_data=true) {
 
-    window.app = new Vue({
-        i18n,
-        el: '#app',
-        name: 'app',
-        mixins: [new_state_mixin],
-
-        data: {
-            issues: ordered_issues,
-            color_scheme: default_color_scheme,
-        },
-
-        // expected by state_mixin
-        methods: {
-          load: function(){}
-        },
-
-        mounted: function(){
-            console.log("App loaded...")
-        }
-    });
-
-
     window.vueDomainlist = new Vue({
         name: "domainlist",
 
@@ -1424,48 +1008,6 @@ function views(autoload_default_map_data=true) {
         }
     });
 
-    window.vueExport = new Vue({
-        name: "export",
-
-        mixins: [translation_mixin, state_mixin],
-        el: '#export',
-        data: {
-            layers: Array,
-            supported_formats: ["json", "csv", "ods", "xlsx", "mediawiki", "latex"]
-        },
-        methods: {
-            create_link: function(layer, linktype, filetype="json"){
-                return `/data/export/${linktype}/${this.country}/${layer}/${filetype}/`;
-            },
-            load: function(){
-                // doesn't have a load method, but is auto called via the state_mixin.
-                // values are set via another vue, which is not very nice, but it works...
-            }
-        }
-    });
-
-    window.vueTopfail = new Vue({
-        name: "topfail",
-
-        el: '#topfail',
-        data: {
-            data_url: "/data/topfail/",
-            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1, 'relative': 1, 'total_urls': 1, 'total_endpoints': 1}
-        },
-        mixins: [top_mixin, state_mixin]
-    });
-
-    window.vueTopwin = new Vue({
-        name: "topwin",
-        el: '#topwin',
-        data: {
-            data_url: "/data/topwin/",
-            sortOrders: {'rank': 1, 'organization_id': 1, 'high': 1, 'medium': 1, 'low': 1}
-        },
-        mixins: [top_mixin, state_mixin]
-    });
-
-
     /*
     * {
           "tls_qualys": [
@@ -1497,6 +1039,14 @@ function views(autoload_default_map_data=true) {
         name: "fullscreenreport",
         el: '#fullscreenreport',
         mixins: [state_mixin, report_mixin, translation_mixin],
+        methods: {
+            show: function () {
+                this.visible = true;
+            },
+            hide: function () {
+                this.visible = false;
+            },
+        }
     });
 
     // there are some issues with having the map in a Vue. Somehow the map doesn't
@@ -1582,15 +1132,12 @@ function views(autoload_default_map_data=true) {
                     vueMap.show_week();
                 }
 
-                vueTopfail.set_state(this.country, this.layer);
-                vueTopwin.set_state(this.country, this.layer);
                 app.set_state(this.country, this.layer);
-                vueExport.set_state(this.country, this.layer);
+
                 vueDomainlist.set_state(this.country, this.layer);
                 vueTicker.set_state(this.country, this.layer);
 
                 // this needs state as the organizaton name in itself is not unique.
-                vueReport.set_state(this.country, this.layer);
                 vueFullScreenReport.set_state(this.country, this.layer);
             },
             // slowly moving the map into a vue. NOPE. denied.
@@ -1670,7 +1217,6 @@ function views(autoload_default_map_data=true) {
                 // nobody understands that when you drag the map slider, the rest
                 // of the site and all reports are also old.
                 // so don't. Add matching UI elsewhere...
-                // vueTopfail.load(this.week);
 
                 if (this.selected_organization > -1) {
                     // console.log(selected_organization);
@@ -1726,7 +1272,7 @@ function views(autoload_default_map_data=true) {
                 fetch('/data/layers/' + this.selected_country + '/').then(response => response.json()).then(layers => {
                     // it's fine to clear the navbar if there are no layers for this country
                     this.layers = layers;
-                    vueExport.layers = layers;  // todo: Move this to map? Can't. Figure out.
+                    app.layers = layers;  // todo: Move this to app... so layers will be reactive.
                 });
             },
             set_country: function(country_name) {
@@ -1753,41 +1299,7 @@ function views(autoload_default_map_data=true) {
         }
     });
 
-    window.vueReport = new Vue({
-        name: "report",
-        el: '#report',
-        mixins: [state_mixin, report_mixin, translation_mixin],
 
-        computed: {
-            // load list of organizations from map features
-            // todo: this doesn't update when region changes.
-            // todo: get map data from somewhere else. This should be placed elsewhere.
-            organizations: function () {
-                if (vueMap.features != null) {
-                    let organizations = vueMap.features.map(function (feature) {
-                        return {
-                            "id": feature.properties.organization_id,
-                            "label": feature.properties.organization_name,
-                            "name": feature.properties.organization_name,
-                            "slug": feature.properties.organization_slug
-                        }
-                    });
-                    return organizations.sort(function (a, b) {
-                        if (a['name'] > b['name']) return 1;
-                        if (a['name'] < b['name']) return -1;
-                        return 0;
-                    });
-                }
-            }
-        },
-        watch: {
-            selected: function () {
-                // load selected organization id
-                this.load(this.selected.id);
-            }
-        }
-
-    });
 
 
     window.vueInfo = new Vue({
@@ -1840,6 +1352,59 @@ function views(autoload_default_map_data=true) {
             }
         }
 
+    });
+
+    window.app = new Vue({
+        i18n,
+        el: '#app',
+        name: 'app',
+        mixins: [new_state_mixin],
+
+        data: {
+            issues: ordered_issues,
+            color_scheme: default_color_scheme,
+            layers: [],
+
+            organization: null,
+
+            // determines what week the data is shown from. Should be part of state.
+            week: 0,
+
+            // the app state is leading for the rest. So we should have a state value here, and when that is changed,
+            // it is reflected through the app. (probably already so, but not explicit enough.)
+        },
+
+        // expected by state_mixin
+        methods: {
+          load: function(){}
+        },
+
+        mounted: function(){
+            console.log("App loaded...")
+        },
+
+        computed: {
+            // load list of organizations from map features
+            // todo: this doesn't update when region changes.
+            // todo: get map data from somewhere else. This should be placed elsewhere.
+            organizations: function () {
+                if (vueMap.features != null) {
+                    let organizations = vueMap.features.map(function (feature) {
+                        return {
+                            "id": feature.properties.organization_id,
+                            "label": feature.properties.organization_name,
+                            "name": feature.properties.organization_name,
+                            "slug": feature.properties.organization_slug
+                        }
+                    });
+                    return organizations.sort(function (a, b) {
+                        if (a['name'] > b['name']) return 1;
+                        if (a['name'] < b['name']) return -1;
+                        return 0;
+                    });
+                }
+            }
+        },
     });
     // vueMap.update_hourly(); // loops forever, something wrong with vue + settimeout?
     // vueMap.load(0);

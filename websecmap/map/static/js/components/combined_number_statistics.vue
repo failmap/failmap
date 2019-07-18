@@ -341,110 +341,102 @@ Vue.component('combined_number_statistics', {
 
     methods: {
         load: function (weeknumber=0) {
-
-                if (!this.country || !this.layer)
-                    return;
-
-                let self = this;
-                $.getJSON(`/data/stats/${this.country}/${this.layer}/${weeknumber}`, function (data) {
-                    self.data = data;
-
-                    self.endpoints_now = data.data.now['endpoints'];
-
-                    self.services = [];
-
-                    for(let i=0; i<data.data.now['endpoint'].length; i++){
-                        let z = data.data.now['endpoint'][i][1];
-                        self.services.push({
-                            'amount': z.amount,
-                            'ip_version': z.ip_version,
-                            'protocol': z.protocol,
-                            'port': z.port})
-                    }
-                });
-            },
-            perc: function (data, amount, total) {
-                return (!data) ? "0%" :
-                    roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
-            },
-            translate: function(string){
-                return gettext(string);
-            },
-            sortBy: function (key) {
-                this.sortKey = key;
-                this.sortOrders[key] = this.sortOrders[key] * -1;
-            }
+            fetch(`/data/stats/${this.state.country}/${this.state.layer}/${weeknumber}`).then(response => response.json()).then(data => {
+                this.data = data;
+                this.endpoints_now = data.data.now['endpoints'];
+                this.services = [];
+                for(let i=0; i<data.data.now['endpoint'].length; i++){
+                    let z = data.data.now['endpoint'][i][1];
+                    this.services.push({
+                        'amount': z.amount,
+                        'ip_version': z.ip_version,
+                        'protocol': z.protocol,
+                        'port': z.port})
+                }
+            }).catch((fail) => {console.log('An error occurred in explains: ' + fail)});
+        },
+        perc: function (data, amount, total) {
+            return (!data) ? "0%" :
+                roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
+        },
+        translate: function(string){
+            return gettext(string);
+        },
+        sortBy: function (key) {
+            this.sortKey = key;
+            this.sortOrders[key] = this.sortOrders[key] * -1;
+        }
     },
     computed: {
-            issue_categories: function() {
-                // this delivers duplicates, but given the number of issues is low, it's fine.
-                // otherway: arrayx = [array1, array2]
-                let _categories = [];
-                this.issues.forEach(function(issue){
-                    // console.log(_categories);
-                    _categories = _categories.concat(issue['category'])
-                });
-                return _categories;
-            },
-            goodpercentage: function () {
-                return this.perc(this.data.data, "good", "total_organizations");
-            },
-
-            highpercentage: function () {
-                return this.perc(this.data.data, "high", "total_organizations");
-            },
-
-            mediumpercentage: function () {
-                if (this.data.data) {
-                    let score = 100 -
-                        roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
-                        roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
-                    return roundTo(score, 2) + "%";
-                }
-                return 0
-            },
-            unknownpercentage: function () {
-                return this.perc(this.data.data, "no_rating", "total_organizations");
-            },
-            goodurlpercentage: function () {
-                return this.perc(this.data.data, "good_urls", "total_urls");
-            },
-
-            highurlpercentage: function () {
-                return this.perc(this.data.data, "high_urls", "total_urls");
-            },
-
-            mediumurlpercentage: function () {
-                if (this.data.data) {
-                    let score = 100 -
-                        roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                        roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
-                    return roundTo(score, 2) + "%";
-                }
-                return 0
-            },
-            filteredData: function () {
-                let sortKey = this.sortKey;
-                let filterKey = this.filterKey && this.filterKey.toLowerCase();
-                let order = this.sortOrders[sortKey] || 1;
-                let data = this.services;
-                if (filterKey) {
-                    data = data.filter(function (row) {
-                        return Object.keys(row).some(function (key) {
-                            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
-                        })
-                    })
-                }
-                if (sortKey) {
-                    data = data.slice().sort(function (a, b) {
-                        a = a[sortKey];
-                        b = b[sortKey];
-                        return (a === b ? 0 : a > b ? 1 : -1) * order
-                    })
-                }
-                return data
-            }
+        issue_categories: function() {
+            // this delivers duplicates, but given the number of issues is low, it's fine.
+            // otherway: arrayx = [array1, array2]
+            let _categories = [];
+            this.issues.forEach(function(issue){
+                // console.log(_categories);
+                _categories = _categories.concat(issue['category'])
+            });
+            return _categories;
         },
+        goodpercentage: function () {
+            return this.perc(this.data.data, "good", "total_organizations");
+        },
+
+        highpercentage: function () {
+            return this.perc(this.data.data, "high", "total_organizations");
+        },
+
+        mediumpercentage: function () {
+            if (this.data.data) {
+                let score = 100 -
+                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
+                return roundTo(score, 2) + "%";
+            }
+            return 0
+        },
+        unknownpercentage: function () {
+            return this.perc(this.data.data, "no_rating", "total_organizations");
+        },
+        goodurlpercentage: function () {
+            return this.perc(this.data.data, "good_urls", "total_urls");
+        },
+
+        highurlpercentage: function () {
+            return this.perc(this.data.data, "high_urls", "total_urls");
+        },
+
+        mediumurlpercentage: function () {
+            if (this.data.data) {
+                let score = 100 -
+                    roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                    roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                return roundTo(score, 2) + "%";
+            }
+            return 0
+        },
+        filteredData: function () {
+            let sortKey = this.sortKey;
+            let filterKey = this.filterKey && this.filterKey.toLowerCase();
+            let order = this.sortOrders[sortKey] || 1;
+            let data = this.services;
+            if (filterKey) {
+                data = data.filter(function (row) {
+                    return Object.keys(row).some(function (key) {
+                        return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+                    })
+                })
+            }
+            if (sortKey) {
+                data = data.slice().sort(function (a, b) {
+                    a = a[sortKey];
+                    b = b[sortKey];
+                    return (a === b ? 0 : a > b ? 1 : -1) * order
+                })
+            }
+            return data
+        }
+    },
 });
 </script>

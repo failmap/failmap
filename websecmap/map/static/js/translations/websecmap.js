@@ -3,6 +3,29 @@
 
 const messages = {
     en: {
+        // new translations
+        back_to_map: "Back to the map",
+        municipalities: "Municipalities",
+        provinces: "Provinces",
+        regions: "Regions",
+
+        municipality: 'Municipalities',
+        cyber: 'Cyber',
+        unknown: 'Unknown',
+        water_board: 'Water boards',
+        province: 'Provinces',
+        country: 'Country',
+        region: 'Region',
+        county: 'County',
+        district: 'District',
+        government: 'Government',
+        healthcare: 'Healthcare',
+        finance: 'Finance',
+        state: 'State',
+        education: 'Education',
+
+
+
         // fallback
         administrative_region: 'administative region',
         administrative_regions: 'administrative regions',
@@ -55,7 +78,7 @@ const messages = {
         what_do_i_see: 'About this website',
         whats_do_i_see_explained: 'This website displays how well security is applied by the government. The quality is displayed using a traffic light system: red means bad, green means great. Our goal is to improve security and privacy for everyone. Therefore this site only displays the simplest and cheapest tier of security issues. This should all be fine... right?',
         this_website_is_run_by_responsible_organization_names_to_submit_new_domains_or_ask_questions_contact_us_via_project_issue_mails: 'This website is run by %(RESPONSIBLE_ORGANIZATION_NAME)s. To submit new domains, or ask questions, contact us via: %(PROJECT_ISSUE_MAIL)s.',
-        back_to_map: 'back to the map',
+
         chart_introduction: 'These are the best and worst organizations at this moment.',
         report: '',
         show_report_for_organization: '',
@@ -238,21 +261,7 @@ const messages = {
         dmarc_missing: '',
         dane_available: '',
         dane_missing: '',
-        category_menu_municipality: 'Municipalities',
-        category_menu_cyber: 'Cyber',
-        category_menu_unknown: 'Unknown',
-        category_menu_water_board: 'Water boards',
-        category_menu_province: 'Provinces',
-        category_menu_hacking: 'Hackers',
-        category_menu_country: 'Country',
-        category_menu_region: 'Region',
-        category_menu_county: 'County',
-        category_menu_district: 'District',
-        category_menu_government: 'Government',
-        category_menu_healthcare: 'Healthcare',
-        category_menu_finance: 'Finance',
-        category_menu_state: 'State',
-        category_menu_school: 'Schools',
+
         http_security_header_strict_transport_security: 'Strict-Transport-Security Header (HSTS)',
         http_security_header_x_frame_options: 'X-Frame-Options Header (clickjacking)',
         http_security_header_x_content_type_options: 'X-Content-Type-Options header',

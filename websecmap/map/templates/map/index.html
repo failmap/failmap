@@ -120,10 +120,15 @@
     <!-- Instead of @import... -->
     {% include "map/static/js/components/changes.vue" %}
     {% include "map/static/js/components/improvements.vue" %}
+    {% include "map/static/js/components/report.vue" %}
+    {% include "map/static/js/components/report_content.vue" %}
+    {% include "map/static/js/components/datasets.vue" %}
     {% include "map/static/js/components/graphs.vue" %}
     {% include "map/static/js/components/combined_number_statistics.vue" %}
     {% include "map/static/js/components/comply_or_explain.vue" %}
     {% include "map/static/js/components/scan_schedule.vue" %}
+    {% include "map/static/js/components/charts.vue" %}
+    {% include "map/static/js/components/chart.vue" %}
 
     <link rel="manifest" href="/manifest.json">
 </head>
@@ -316,102 +321,46 @@
 </section>
 {% endif %}
 
-{% if config.SHOW_CHARTS %}
-<section>
-   <div class="container">
-
-       <div id="charts">
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="charts" class="jumptonav"></a>
-                <h2>
-                    <svg class="svg-inline--fa fa-list-ol fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="list-ol" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
-                    {% trans "Charts" %}</h2>
-                <p>{% trans "Chart introduction" %}</p>
-                <p></p>
-            </div>
-            <div class="row">
-                {% include "map/topfail.html" %}
-            </div>
-            <div class="row">
-                {% include "map/topwin.html" %}
-            </div>
-        </div>
-  </div>
-</section>
-{% endif %}
-
-<section name="report">
-    <div class="container">
-        <div class="page-header" id="report">
-
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="reports" id="report-anchor" class="jumptonav"></a>
-                <h2><span class="organization_points"></span>
-                    <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
-                    {% trans "Report" %}</h2>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    {% trans "Show report for organization" %}:
-                    {% verbatim %}
-                    <v-select label="name" v-model="selected" :options="organizations"></v-select>
-                    <span v-if='loading'><div class="loader"></div></span>
-                    {% endverbatim %}
-                    <br />
-                </div>
-            </div>
-
-            <br style="clear: both;">
-            <br style="clear: both;">
-            <br style="clear: both;">
-
-            <div class="page-header" v-if="name">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="reports" id="report-anchor" class="jumptonav"></a>
-                <h2>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h2>
-                <p>{% trans "Data from" %}: {% verbatim %}{{ humanize(when) }}{% endverbatim %}.</p>
-                <p v-if="promise" id="promise"><strong>*</strong> {% trans "Promise message" %}</p>
-            </div>
-
-            <div class="row" v-if="name" style="margin-bottom: 30px;">
-                <div  class="col-md-3">
-                    <a @click="closereport()" class="btn btn-danger" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="" class="svg-inline--fa fa-times fa-w-12"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg> {% trans "close report" %}</a>
-                </div>
-                <div  class="col-md-3">
-                    <a @click="printreport('report')" class="btn btn-primary" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="print" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-print fa-w-16"><path fill="currentColor" d="M464 192h-16V81.941a24 24 0 0 0-7.029-16.97L383.029 7.029A24 24 0 0 0 366.059 0H88C74.745 0 64 10.745 64 24v168H48c-26.51 0-48 21.49-48 48v132c0 6.627 5.373 12 12 12h52v104c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V384h52c6.627 0 12-5.373 12-12V240c0-26.51-21.49-48-48-48zm-80 256H128v-96h256v96zM128 224V64h192v40c0 13.2 10.8 24 24 24h40v96H128zm304 72c-13.254 0-24-10.746-24-24s10.746-24 24-24 24 10.746 24 24-10.746 24-24 24z"></path></svg> {% trans "print report" %}</a>
-                </div>
-                <div  class="col-md-3">
-                    <a :href="'/data/updates_on_organization_feed/' + selected.id" target="_blank" class="btn btn-warning" style="color:white;  width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="rss" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-rss fa-w-14"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg> {% trans "rss feed" %}</a>
-                </div>
-                <div  class="col-md-3">
-                    <a class="btn btn-success" style="color:white; width: 100%" :href="'mailto:{{ config.PROJECT_ISSUE_MAIL }}?subject={% trans "Report ask domains subject" %}' + name + '&body={% trans "Report ask domains body" %}'">{% trans "Report ask sendin domains" %}</a>
-                </div>
-            </div>
-
-            {% include "map/shared_report_contents.html" %}
-        </div>
-    </div>
-</section>
-
 
 <div id="app">
+    {% if config.SHOW_CHARTS %}
+    <section>
+       <div class="container">
+           <charts :state="state"></charts>
+      </div>
+    </section>
+    {% endif %}
+
+    <section id="report">
+        <div class="container">
+            <report :organizations="organizations" ></report>
+            <report_content
+                :issues="issues"
+                :state="state"
+                :organization="organization"
+                :color_scheme="color_scheme"
+                :incorrect_finding_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"
+                :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"
+                :send_in_email_address="'{{ config.PROJECT_ISSUE_MAIL }}'"
+                :comply_or_explain_email_address="'{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}'">
+            </report_content>
+        </div>
+    </section>
+
     {% if config.SHOW_EXTENSIVE_STATISTICS %}
-    <section name="extensive_statistics">
+    <section id="extensive_statistics">
         <div class="container">
             {% if config.SHOW_STATS_NUMBERS %}
-                <combined_number_statistics :issues="issues" :state="{'country': country, 'layer': layer}" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
+                <combined_number_statistics :issues="issues" :state="state" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
             {% endif %}
             {% if config.SHOW_STATS_IMPROVEMENTS %}
-                <improvements :issues="issues" :state="{'country': country, 'layer': layer}"></improvements>
+                <improvements :issues="issues" :state="state"></improvements>
             {% endif %}
             {% if config.SHOW_STATS_GRAPHS %}
-                <graphs :issues="issues" :state="{'country': country, 'layer': layer}" :color_scheme="color_scheme"></graphs>
+                <graphs :issues="issues" :state="state" :color_scheme="color_scheme"></graphs>
             {% endif %}
             {% if config.SHOW_STATS_CHANGES %}
-                <changes :issues="issues" :state="{'country': country, 'layer': layer}"></changes>
+                <changes :issues="issues" :state="state"></changes>
             {% endif %}
         </div>
     </section>
@@ -419,113 +368,35 @@
 
     {% if config.SHOW_COMPLY_OR_EXPLAIN %}
         <!-- todo: get this to work, it is not tested yet... -->
-    <section name="comply_or_explain_info">
+    <section id="comply_or_explain_info">
         <div class="container">
-            <comply_or_explain :state="{'country': country, 'layer': layer}"></comply_or_explain>
+            <comply_or_explain :state="state"></comply_or_explain>
         </div>
     </section>
     {% endif %}
 
     {% if config.SHOW_SCAN_SCHEDULE %}
-    <section name="scan_schedule">
+    <section id="scan_schedule">
         <div class="container">
             <scan_schedule></scan_schedule>
         </div>
     </section>
     {% endif %}
 
+    {% if config.SHOW_DATASETS %}
+        <section id="datasets">
+        <div class="container">
+            <datasets :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
+        </div>
+    </section>
+    {% endif %}
 </div>
 
 
-{% if config.SHOW_DATASETS %}
-<section name="datasets">
-    <div class="container">
-        <div id="export">
-            <div class="page-header">
-                <a href="#" class="backtomap">{% trans "back to map" %} ↑</a>
-                <a name="datasets" class="jumptonav"></a>
-                <h2>
-                    <svg class="svg-inline--fa fa-download fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="download" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg>
-                    {% trans "Datasets" %}</h2>
-                {% trans "Datasets explanation" %}
-                <p></p>
-            </div>
-            <div class="row">
-                <div class="col-md-4" v-for="layer in layers">
-                    <table style="width:100%" class="table table-striped" v-if="supported_formats">
-                        <thead>
-                            <tr>
-                                <th colspan="2"><h3>
-                                    <svg aria-hidden="true" data-prefix="fas" data-icon="chart-pie" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg="" class="svg-inline--fa fa-chart-pie fa-w-18"><path fill="currentColor" d="M288 12.3V240h227.7c6.9 0 12.3-5.8 12-12.7-6.4-122.4-104.5-220.6-227-227-6.9-.3-12.7 5.1-12.7 12zM552.7 288c6.9 0 12.3 5.8 12 12.7-2.8 53.2-23.2 105.6-61.2 147.8-4.6 5.1-12.6 5.4-17.5.5L325 288h227.7zM401 433c4.8 4.8 4.7 12.8-.4 17.3-42.6 38.4-99 61.7-160.8 61.7C107.6 511.9-.2 403.8 0 271.5.2 143.4 100.8 38.9 227.3 32.3c6.9-.4 12.7 5.1 12.7 12V272l161 161z"></path></svg>
-                                    {% verbatim %}{{ translate("category_menu_" + layer) }}{% endverbatim %}</h3></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <svg aria-hidden="true" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-list-ul fa-w-16"><path fill="currentColor" d="M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
-                                    {% trans "Only urls" %}</th>
-                                <td>⬇️
-                                    <span v-for="format in supported_formats">
-                                        <a :href="create_link(layer, 'urls_only', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>,
-                                    </span>
-                                </td>
-                            </tr><tr>
-                                <th>
-                                    <svg aria-hidden="true" data-prefix="fas" data-icon="list-ul" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-list-ul fa-w-16"><path fill="currentColor" d="M96 96c0 26.51-21.49 48-48 48S0 122.51 0 96s21.49-48 48-48 48 21.49 48 48zM48 208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm0 160c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm96-236h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
-                                    {% trans "Organization types" %}*</th>
-                                <td>⬇️
-                                    <span v-for="format in supported_formats">
-                                        <a :href="create_link(layer, 'organization_types', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>,
-                                    </span>
-                                </td>
-                            </tr><tr>
-                                <th>
-                                    <svg aria-hidden="true" data-prefix="fas" data-icon="building" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-building fa-w-14"><path fill="currentColor" d="M436 480h-20V24c0-13.255-10.745-24-24-24H56C42.745 0 32 10.745 32 24v456H12c-6.627 0-12 5.373-12 12v20h448v-20c0-6.627-5.373-12-12-12zM128 76c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12V76zm0 96c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40zm52 148h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40c0 6.627-5.373 12-12 12zm76 160h-64v-84c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v84zm64-172c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40zm0-96c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12v-40c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40zm0-96c0 6.627-5.373 12-12 12h-40c-6.627 0-12-5.373-12-12V76c0-6.627 5.373-12 12-12h40c6.627 0 12 5.373 12 12v40z"></path></svg>
-                                    {% trans "Organizations" %}*</th>
-                                <td>⬇️
-                                    <span v-for="format in supported_formats">
-                                        <a :href="create_link(layer, 'organizations', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>,
-                                    </span>
-                                </td>
-                            </tr><tr>
-                                <th>
-                                    <svg class="svg-inline--fa fa-map-marker-alt fa-w-12" aria-hidden="true" data-prefix="fas" data-icon="map-marker-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path></svg>
-                                    {% trans "Map Data" %}*</th>
-                                <td>⬇️
-                                    <span v-for="format in supported_formats">
-                                        <a :href="create_link(layer, 'coordinates', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>,
-                                    </span>
-                            </tr><tr>
-                                <th>
-                                    <svg aria-hidden="true" data-prefix="far" data-icon="compass" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-compass fa-w-16"><path fill="currentColor" d="M256 8C119.033 8 8 119.033 8 256s111.033 248 248 248 248-111.033 248-248S392.967 8 256 8zm0 448c-110.532 0-200-89.451-200-200 0-110.531 89.451-200 200-200 110.532 0 200 89.451 200 200 0 110.532-89.451 200-200 200zm91.326-312.131l-33.359 137.779a24.005 24.005 0 0 1-6.772 11.729l-102.64 97.779c-17.104 16.293-45.56.434-39.88-23.024l33.359-137.779a23.997 23.997 0 0 1 6.772-11.729l102.642-97.779c17.285-16.47 45.494-.175 39.878 23.024zM256 224c-17.673 0-32 14.327-32 32s14.327 32 32 32 32-14.327 32-32-14.327-32-32-32z"></path></svg>
-                                    {% trans "Urls" %}*</th>
-                                <td>⬇️
-                                    <span v-for="format in supported_formats">
-                                        <a :href="create_link(layer, 'urls', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>,
-                                    </span>
-                            </tr>
-                            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                                <tr>
-                                    <th><svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg>  {% trans "Explanations" %}</th>
-                                    <td>⬇️
-                                    <span v-for="format in ['json']">
-                                        <a :href="create_link(layer, 'explains', format)">{% verbatim %}{{ format }}{% endverbatim %}</a>
-                                    </span>
 
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                    <br /><br />
-                    <p>* = {% trans "export_map_compatible_explained" %}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-{% endif %}
+
+
+
 
 
 <section id="lastrow">

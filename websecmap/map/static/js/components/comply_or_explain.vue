@@ -106,20 +106,14 @@ Vue.component('comply_or_explain', {
             return moment(date).fromNow();
         },
         load: function() {
-
-            if (!this.country || !this.layer)
-                return;
-
-            fetch(`/data/explained/${this.country}/${this.layer}/`).then(response => response.json()).then(explains => {
+            fetch(`/data/explained/${this.state.country}/${this.state.layer}/`).then(response => response.json()).then(explains => {
                 this.more_explains = explains.slice(3);
                 this.explains = explains.slice(0, 3);
 
                 if (this.more_explains.length === 0)
                     this.more_available = false;
 
-            }).catch((fail) => {
-                console.log('An error occurred in explains: ' + fail)
-            });
+            }).catch((fail) => {console.log('An error occurred in explains: ' + fail)});
         },
         showreport(organization_id){
             location.href = '#report';

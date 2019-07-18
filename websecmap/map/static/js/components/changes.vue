@@ -87,12 +87,7 @@ Vue.component('changes', {
 
     methods: {
         load: function(){
-
-            if (!this.country || !this.layer) {
-                return;
-            }
-
-            fetch(`/data/all_latest_scans/${this.country}/${this.layer}/`).then(response => response.json()).then(data => {
+            fetch(`/data/all_latest_scans/${this.state.country}/${this.state.layer}/`).then(response => response.json()).then(data => {
                     this.scans = data.scans;
                     // because some nested keys are used (results[x['bla']), updates are not handled correctly.
                     this.$forceUpdate();
