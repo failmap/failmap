@@ -2,8 +2,8 @@
 <template type="x-template" id="websecmap_template">
 
     <!-- :zoom="initial_location(state.country).zoomlevel" -->
-    <l-map style="height: 100%; width: 100%; min-height: 600px;" touchZoom="true"
-    :options="{ dragging: false, touchZoom: true, tap: true, zoomSnap: 0.2}">
+    <l-map style="height: 100%; width: 100%; min-height: 600px;"
+           touchZoom="true" dragging="false" tap="true" zoomSnap="0.2" :zoom="6" :center="this.initial_location().coordinates">
 
         <l-tile-layer
             :url="this.tile_uri()"
@@ -55,11 +55,11 @@
         <l-control position="bottomright">
             <div class="info legend table-light">
                 <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
-                <i class="map_polygon_good">{{ $t("map.legend.good") }}</i>
-                <i class="map_polygon_low">{{ $t("map.legend.low") }}</i>
-                <i class="map_polygon_medium">{{ $t("map.legend.mediocre") }}</i>
-                <i class="map_polygon_high">{{ $t("map.legend.bad") }}</i>
-                <i class="map_polygon_unknown">{{ $t("map.legend.unknown") }}</i>
+                <i class="map_polygon_good"></i> {{ $t("map.legend.good") }}<br>
+                <i class="map_polygon_low"></i> {{ $t("map.legend.low") }}<br>
+                <i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}<br>
+                <i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}<br>
+                <i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}<br>
             </div>
         </l-control>
 
@@ -103,9 +103,9 @@
             </div>
         </l-control>
 
-        <l-control position="bottomright">
+        <l-control position="topleft">
             <div>
-            <span @click="show_all_map_data()" title='Zoom to show all data on this map.'
+                <span @click="show_all_map_data()" title='Zoom to show all data on this map.'
                   style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>
             </div>
         </l-control>
