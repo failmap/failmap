@@ -2,7 +2,7 @@
 <template type="x-template" id="websecmap_template">
 
     <!-- :zoom="initial_location(state.country).zoomlevel" -->
-    <l-map style="height: 100%; width: 100%; min-height: 200px; min-width: 300px;" touchZoom="true"
+    <l-map style="height: 100%; width: 100%; min-height: 600px;" touchZoom="true"
     :options="{ dragging: false, touchZoom: true, tap: true, zoomSnap: 0.2}">
 
         <l-tile-layer
@@ -54,12 +54,12 @@
 
         <l-control position="bottomright">
             <div class="info legend table-light">
-                <span class='legend_title'>{{ $t("legend.title") }}</span><br>
-                <i class="map_polygon_good">{{ $t("legend.good") }}</i>
-                <i class="map_polygon_low">{{ $t("legend.low") }}</i>
-                <i class="map_polygon_medium">{{ $t("legend.mediocre") }}</i>
-                <i class="map_polygon_high">{{ $t("legend.bad") }}</i>
-                <i class="map_polygon_unknown">{{ $t("legend.unknown") }}</i>
+                <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
+                <i class="map_polygon_good">{{ $t("map.legend.good") }}</i>
+                <i class="map_polygon_low">{{ $t("map.legend.low") }}</i>
+                <i class="map_polygon_medium">{{ $t("map.legend.mediocre") }}</i>
+                <i class="map_polygon_high">{{ $t("map.legend.bad") }}</i>
+                <i class="map_polygon_unknown">{{ $t("map.legend.unknown") }}</i>
             </div>
         </l-control>
 
@@ -67,20 +67,27 @@
             <div class="info table-light">
                 <div style='max-width: 300px;'>
                     <!-- todo: add map_item_hover -->
-                    <div id='infobox'></div><br /><br />
+                    <div v-if="hover_info.properties.organization_name">
+                        <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" :style="{width:high}"></div>
+                            <div class="progress-bar bg-warning" :style="{width:medium}"></div>
+                            <div class="progress-bar bg-success" :style="{width:low}"></div>
+                            <div class="progress-bar bg-success" :style="{width:perfect}"></div>
+                        </div>
+                    </div>
 
                     <div id="domainlist">
-                        <div v-if="domainlist_urls.length > 1" v-cloak>
+                        <div v-if="domainlist_urls.length > 1">
                             <table width='100%'>
                                 <thead>
                                     <tr>
-                                        <th style='min-width: 20px; width: 20px;'>{% trans "H" %}</th>
-                                        <th style='min-width: 20px; width: 20px;'>{% trans "M" %}</th>
-                                        <th style='min-width: 20px; width: 20px;'>{% trans "L" %}</th>
-                                        <th>{% trans "Url" %}</th>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.high") }}</th>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.medium") }}</th>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.low") }}</th>
+                                        <th>{{ $t("map.domainlist.url") }}</th>
                                     </tr>
                                 </thead>
-                                {% verbatim %}
                                 <tbody>
                                     <tr v-for="url in domainlist_urls">
                                         <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
@@ -89,7 +96,6 @@
                                         <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
                                     </tr>
                                 </tbody>
-                                {% endverbatim %}
                             </table>
                         </div>
                     </div>
@@ -111,6 +117,7 @@
 
 <script>
 Vue.component('websecmap', {
+    name: "websecmap",
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -136,6 +143,13 @@ Vue.component('websecmap', {
                         mediocre: "Mediocre",
                         bad: "Bad",
                         unknown: "No data available",
+                    },
+
+                    domainlist: {
+                        high: "H",
+                        medium: "M",
+                        low: "L",
+                        url: "Url",
                     },
 
                 }
@@ -164,10 +178,12 @@ Vue.component('websecmap', {
 
             displayed_issue: "",
 
+            // things that get rendered on the map
             polygons: [],
+            markers: [],
 
             // domainlist:
-            domainlist_urls: []
+            domainlist_urls: [],
 
             // hover_info:
             hover_info: {
