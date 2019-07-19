@@ -440,10 +440,12 @@ const new_state_mixin = {
 
     methods: {
 
-        // make sure the first state set is as atomic as possible.
+        // make sure the first state set is as atomic as possible. If you would set them individually, there
+        // would be multiple load-events.
         set_state: function(country, layer, week=0) {
+            console.log("app state is being set.");
             // atomic change:
-            this.state = {'country': country, 'week': week, 'layer': layer};
+            this.state = {'country': country, 'layer': layer, 'week': week};
        }
     },
     watch: {
@@ -848,7 +850,7 @@ const data_loader_mixin = {
             fetch(url)
                     .then(response => response.json()).then(data => {
                         this.data = data;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred in data loader mixin: ' + fail)});
         }
     }
 };
@@ -1039,6 +1041,9 @@ function views(autoload_default_map_data=true) {
         name: "fullscreenreport",
         el: '#fullscreenreport',
         mixins: [state_mixin, report_mixin, translation_mixin],
+        data: {
+            visible: false,
+        },
         methods: {
             show: function () {
                 this.visible = true;
@@ -1131,8 +1136,6 @@ function views(autoload_default_map_data=true) {
                 } else {
                     vueMap.show_week();
                 }
-
-                app.set_state(this.country, this.layer);
 
                 vueDomainlist.set_state(this.country, this.layer);
                 vueTicker.set_state(this.country, this.layer);
@@ -1256,8 +1259,9 @@ function views(autoload_default_map_data=true) {
                     // countries are already loaded in the django template for faster menus
                     // then load this as fast as you can.
                     this.get_layers();
+                    app.set_state(this.selected_country, this.selected_layer);
                     vueMap.set_state(this.selected_country, this.selected_layer, true);
-                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+                }).catch((fail) => {console.log('An error occurred in mapstatebar: ' + fail)});
             },
             get_countries: function() {
                 fetch('/data/countries/').then(response => response.json()).then(countries => {
@@ -1266,7 +1270,7 @@ function views(autoload_default_map_data=true) {
 
                     // this is async, therefore you cannot call countries and then layers. You can only do while...
                     this.get_layers();
-                }).catch((fail) => {console.log('An error occurred: ' + fail)});
+                }).catch((fail) => {console.log('An error occurred in get_countries: ' + fail)});
             },
             get_layers: function() {
                 fetch('/data/layers/' + this.selected_country + '/').then(response => response.json()).then(layers => {
@@ -1286,15 +1290,21 @@ function views(autoload_default_map_data=true) {
                         this.layers = layers;
                         this.selected_layer = layers[0];
                         vueMap.set_state(this.selected_country, this.selected_layer);
+                        app.set_state(this.selected_country, this.selected_layer);
                     } else {
                         this.layers = [""];
                         vueMap.set_state(this.selected_country, this.selected_layer);
+                        app.set_state(this.selected_country, this.selected_layer);
                     }
                 });
             },
             set_layer: function(layer_name){
                 this.selected_layer = layer_name;
                 vueMap.set_state(this.selected_country, this.selected_layer);
+                app.set_state(this.selected_country, this.selected_layer);
+            },
+            load: function() {
+                console.log("Load function of mapstatebar called, but why?")
             }
         }
     });
@@ -1376,7 +1386,7 @@ function views(autoload_default_map_data=true) {
 
         // expected by state_mixin
         methods: {
-          load: function(){}
+            load: function(){}
         },
 
         mounted: function(){

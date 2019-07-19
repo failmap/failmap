@@ -3,22 +3,28 @@
 
     <!-- :zoom="initial_location(state.country).zoomlevel" -->
     <l-map style="height: 100%; width: 100%; min-height: 600px;"
-           touchZoom="true" dragging="false" tap="true" zoomSnap="0.2" :zoom="6" :center="this.initial_location().coordinates">
+           :zoom="6"
+           :center="[52.1007899, 5.28144793]"
+           :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': false, 'touchZoom': true}">
 
         <l-tile-layer
+            :style="'light-v9'"
             :url="this.tile_uri()"
             :token="mapbox_token"
+            :accessToken="mapbox_token"
+            :access-token="mapbox_token"
             :max-zoom="18"
             :attribution="'tbd'"
             :visible="true"
             :id="'mapbox.light'"
             :tile-size="512"
             :zoom-offset="-1"
+            :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
         ></l-tile-layer>
 
         <l-geo-json :geojson="polygons"></l-geo-json>
 
-        <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25">
+        <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25" ref="clusterRef">
             <v-marker v-for="m in markers" v-if="c.location !== null" :lat-lng="c.latlng">
 
             </v-marker>
@@ -245,45 +251,23 @@ Vue.component('websecmap', {
             this.displayed_issue = "";
         },
         // slowly moving the map into a vue. NOPE. denied.
-        load: function (week) {
-            if (week === undefined)
-                week = 0;
+        load: function () {
+            // todo: make sure that when the app loads, the correct state is available in the app, to reduce complexity
+            // we also then don't need a map_default call.
 
-            this.loading = true;
-
-            if (this.preview){
-                this.show_data(`/data/map/${this.country}/${this.layer}/${week * 7}/${this.displayed_issue}/`);
-                return;
-            }
-
-            // the first time the map defaults are loaded, this saves a trip to the server of what the defaults are
-            // it's possible that this is slower than the rest of the code, and thus a normal map is loaded.
-            // it is possible to override the default using the initial_map_data_url parameter.
-            if (!this.country || !this.layer) {
-                if (initial_map_data_url !== undefined && initial_map_data_url !== '') {
-                    this.show_data(initial_map_data_url);
-                } else {
-                    this.show_data(`/data/map_default/${week * 7}/${this.displayed_issue}/`);
-                }
-                return;
-            }
-
-            this.show_data(`/data/map/${this.country}/${this.layer}/${week * 7}/${this.displayed_issue}/`);
-
-        },
-        show_data: function(url) {
-            console.log(`Loading map data from: ${url}`);
+            let url = `/data/map/${this.state.country}/${this.state.layer}/${this.state.week * 7}/${this.displayed_issue}/`;
             fetch(url).then(response => response.json()).then(data => {
+                console.log(`Loading map data from: ${url}`);
                 this.loading = true;
 
                 // Don't need to zoom out when the filters change, only when the layer/country changes.
                 let fitBounds = false;
-                if (this.previously_loaded_country !== this.country || this.previously_loaded_layer !== this.layer)
+                if (this.previously_loaded_country !== this.state.country || this.previously_loaded_layer !== this.state.layer)
                     fitBounds = true;
 
                 this.plotdata(data, fitBounds);
-                this.previously_loaded_country = this.country;
-                this.previously_loaded_layer = this.layer;
+                this.previously_loaded_country = this.state.country;
+                this.previously_loaded_layer = this.state.layer;
 
                 // make map features (organization data) available to other vues
                 // do not update this attribute if an empty list is returned as currently
@@ -293,7 +277,7 @@ Vue.component('websecmap', {
                 }
                 this.loading = false;
             }).catch((fail) => {
-                console.log('A map error occurred: ' + fail);
+                console.log('A map loading error occurred: ' + fail);
                 // allow you to load again:
                 this.loading = false;
             });

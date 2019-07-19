@@ -79,7 +79,7 @@
         <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/leaflet.markercluster.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/Vue2LeafletMarkercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -98,7 +98,7 @@
         <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/leaflet.markercluster.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet-markercluster@3.0.0/Vue2LeafletMarkercluster.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/map.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/views.js' %}"></script>
         <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
@@ -125,8 +125,9 @@
     Vue.component('l-map', window.Vue2Leaflet.LMap);
     Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
     Vue.component('l-control', window.Vue2Leaflet.LControl);
+    Vue.component('l-geo-json', window.Vue2Leaflet.LGeoJson);
     Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
-    Vue.component('v-marker-cluster', window.Vue2LeafletMarkerCluster);
+    Vue.component('v-marker-cluster', window.Vue2LeafletMarkercluster.Vue2LeafletMarkercluster);
 
 
     </script>
@@ -323,85 +324,91 @@
 
 <div id="app">
 
-    <section>
-        <websecmap :state="state" :issues="issues" :mapbox_token="'{{ config.MAPBOX_ACCESS_TOKEN }}'" :debug="{{ debug | lower }}"></websecmap>
-    </section>
+    <template v-if="state.country && state.layer">
+
+        <section>
+            <websecmap :state="state" :issues="issues" :mapbox_token="'{{ config.MAPBOX_ACCESS_TOKEN }}'" :debug="{{ debug | lower }}"></websecmap>
+        </section>
 
 
-    {% if config.SHOW_INTRO %}
-    <section>
-        <intro :organization="'{{ config.RESPONSIBLE_ORGANIZATION_NAME }}'" :organization_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"></intro>
-    </section>
-    {% endif %}
+        {% if config.SHOW_INTRO %}
+        <section>
+            <intro :organization="'{{ config.RESPONSIBLE_ORGANIZATION_NAME }}'" :organization_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"></intro>
+        </section>
+        {% endif %}
 
 
-    {% if config.SHOW_CHARTS %}
-    <section>
-       <div class="container">
-           <charts :state="state"></charts>
-      </div>
-    </section>
-    {% endif %}
+        {% if config.SHOW_CHARTS %}
+        <section>
+           <div class="container">
+               <charts :state="state"></charts>
+          </div>
+        </section>
+        {% endif %}
 
-    <section id="report">
-        <div class="container">
-            <report :organizations="organizations" ></report>
-            <report_content
-                :issues="issues"
-                :state="state"
-                :organization="organization"
-                :color_scheme="color_scheme"
-                :incorrect_finding_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"
-                :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"
-                :send_in_email_address="'{{ config.PROJECT_ISSUE_MAIL }}'"
-                :comply_or_explain_email_address="'{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}'">
-            </report_content>
-        </div>
-    </section>
+        <section id="report">
+            <div class="container">
+                <report :organizations="organizations" ></report>
+                <report_content
+                    :issues="issues"
+                    :state="state"
+                    :organization="organization"
+                    :color_scheme="color_scheme"
+                    :incorrect_finding_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"
+                    :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"
+                    :send_in_email_address="'{{ config.PROJECT_ISSUE_MAIL }}'"
+                    :comply_or_explain_email_address="'{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}'">
+                </report_content>
+            </div>
+        </section>
 
-    {% if config.SHOW_EXTENSIVE_STATISTICS %}
-    <section id="extensive_statistics">
-        <div class="container">
-            {% if config.SHOW_STATS_NUMBERS %}
-                <combined_number_statistics :issues="issues" :state="state" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
-            {% endif %}
-            {% if config.SHOW_STATS_IMPROVEMENTS %}
-                <improvements :issues="issues" :state="state"></improvements>
-            {% endif %}
-            {% if config.SHOW_STATS_GRAPHS %}
-                <graphs :issues="issues" :state="state" :color_scheme="color_scheme"></graphs>
-            {% endif %}
-            {% if config.SHOW_STATS_CHANGES %}
-                <changes :issues="issues" :state="state"></changes>
-            {% endif %}
-        </div>
-    </section>
-    {% endif %}
+        {% if config.SHOW_EXTENSIVE_STATISTICS %}
+        <section id="extensive_statistics">
+            <div class="container">
+                {% if config.SHOW_STATS_NUMBERS %}
+                    <combined_number_statistics :issues="issues" :state="state" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
+                {% endif %}
+                {% if config.SHOW_STATS_IMPROVEMENTS %}
+                    <improvements :issues="issues" :state="state"></improvements>
+                {% endif %}
+                {% if config.SHOW_STATS_GRAPHS %}
+                    <graphs :issues="issues" :state="state" :color_scheme="color_scheme"></graphs>
+                {% endif %}
+                {% if config.SHOW_STATS_CHANGES %}
+                    <changes :issues="issues" :state="state"></changes>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
 
-    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-        <!-- todo: get this to work, it is not tested yet... -->
-    <section id="comply_or_explain_info">
-        <div class="container">
-            <comply_or_explain :state="state"></comply_or_explain>
-        </div>
-    </section>
-    {% endif %}
+        {% if config.SHOW_COMPLY_OR_EXPLAIN %}
+            <!-- todo: get this to work, it is not tested yet... -->
+        <section id="comply_or_explain_info">
+            <div class="container">
+                <comply_or_explain :state="state"></comply_or_explain>
+            </div>
+        </section>
+        {% endif %}
 
-    {% if config.SHOW_SCAN_SCHEDULE %}
-    <section id="scan_schedule">
-        <div class="container">
-            <scan_schedule></scan_schedule>
-        </div>
-    </section>
-    {% endif %}
+        {% if config.SHOW_SCAN_SCHEDULE %}
+        <section id="scan_schedule">
+            <div class="container">
+                <scan_schedule></scan_schedule>
+            </div>
+        </section>
+        {% endif %}
 
-    {% if config.SHOW_DATASETS %}
-        <section id="datasets">
-        <div class="container">
-            <datasets :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
-        </div>
-    </section>
-    {% endif %}
+        {% if config.SHOW_DATASETS %}
+            <section id="datasets">
+            <div class="container">
+                <datasets :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
+            </div>
+        </section>
+        {% endif %}
+    </template>
+    <template v-if="!state.country || !state.layer">
+        <p>Loading app state...</p>
+    </template>
 </div>
 
 

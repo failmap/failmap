@@ -57,7 +57,7 @@ Vue.component('scan_schedule', {
                 this.next = data.next;
                 this.previous = data.previous;
             }).catch((fail) => {
-                console.log('An error occurred: ' + fail)
+                console.log('An error occurred on scan schedule: ' + fail)
             });
         },
     },

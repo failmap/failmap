@@ -360,7 +360,7 @@ Vue.component('report_content', {
             // first update the graphs, doing this around, the graph will show the previous data, not the current stuff
             fetch('/data/organization_vulnerability_timeline/' + this.organization + '/' + this.state.layer + '/' + this.state.country).then(response => response.json()).then(timelinedata => {
                 this.timeline = timelinedata;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 
             fetch('/data/report/' + this.state.country + '/' + this.state.layer + '/' + this.organization + '/' + weeks_ago)
                 .then(response => response.json()).then(data => {
@@ -381,7 +381,7 @@ Vue.component('report_content', {
                 history.replaceState({}, '', '#' + newHash);
 
                 this.loading = false;
-            }).catch((fail) => {console.log('An error occurred: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
         },
         total_summary_row: function(url){
 

@@ -34,7 +34,7 @@
         // todo: add timer that repeats this query every 10 seconds or so.
         fetch('/game/data/contest/').then(response => response.json()).then(data => {
             failmap.plotdata(data);
-        }).catch((fail) => {console.log('An error occurred: ' + fail)});
+        }).catch((fail) => {console.log('An error occurred on map: ' + fail)});
     });
     </script>
 
