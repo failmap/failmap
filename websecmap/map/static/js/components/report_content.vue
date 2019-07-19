@@ -313,6 +313,7 @@ Vue.component('report_content', {
 
     props: {
         issues: Array,
+        url_issue_names: Array,
         state: Object,
         organization: [String, Number],
         color_scheme: Object,
@@ -387,8 +388,8 @@ Vue.component('report_content', {
 
             let worst = {};
 
-            ordered_issues.forEach(function (issue) {
-                if (url_issue_names.includes(issue['name']))
+            this.issues.forEach(function (issue) {
+                if (this.url_issue_names.includes(issue['name']))
                     worst[issue['name']] = this.worstof(issue['name'], [url]);
                 else
                     worst[issue['name']] = this.worstof(issue['name'], url.endpoints);
@@ -398,7 +399,7 @@ Vue.component('report_content', {
 
             let findings = "";
 
-            ordered_issues.forEach(function (issue) {
+            this.issues.forEach(function (issue) {
                 findings += `<td class='text-center ${worst[issue['name']].bgclass}'>${worst[issue['name']].text}</td>`;
             });
 

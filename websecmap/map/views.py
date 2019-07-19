@@ -133,7 +133,44 @@ def export_explains(request, country: str = DEFAULT_COUNTRY, organization_type=D
 
 @cache_page(one_hour)
 def index(request):
+
+    # todo...
+    def countries_and_layers():
+        confs = Configuration.objects.all().filter(
+            is_displayed=True
+        ).order_by('display_order').values_list('country', 'layer')
+
+        # returns this:
+        countries = {
+            'EN': {
+                'name': "",
+                'flag': "",
+                'code': "",
+                'layers': [],
+            },
+        }
+
+        # use django countries to augment this infromation based on the current prefered language,
+        # which unfortunately doesn't change when switching language, but ok... for now it's fine.
+        countries = []
+        for conf in confs:
+            if conf['country'] not in countries:
+                countries = {**countries, **{
+                    'code': conf['country'],
+                    'name': "",
+                    'flag': '',
+                    'layers': [conf['layer']]}
+                             }
+            else:
+                countries[conf['country']]['layers'].append(conf['layer'])
+
+        return countries
+
     initial_countries = get_initial_countries()
+
+    navigation = get_initial_countries()
+
+    map_defaults = get_defaults()
 
     # a number of variables are injected so they can be used inside javascript.
     return render(request, 'map/index.html', {
@@ -146,6 +183,10 @@ def index(request):
         'timestamp': datetime.now(pytz.UTC).isoformat(),
         'initial_map_data_url': '',
         'initial_countries': initial_countries,
+        'countries_and_layers': countries_and_layers,
+        'default_country': map_defaults['country'],
+        'default_layer': map_defaults['layer'],
+        'default_week': 0,
         'number_of_countries': len(initial_countries)
     })
 
