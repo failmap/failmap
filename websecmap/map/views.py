@@ -138,31 +138,32 @@ def index(request):
     def countries_and_layers():
         confs = Configuration.objects.all().filter(
             is_displayed=True
-        ).order_by('display_order').values_list('country', 'layer')
+        ).order_by('display_order')
 
-        # returns this:
+        # returns this, translated according to the preferred locale, this should be JS in the future:
         countries = {
             'EN': {
                 'name': "",
                 'flag': "",
-                'code': "",
+                'code': "EN",
                 'layers': [],
             },
         }
 
         # use django countries to augment this infromation based on the current prefered language,
         # which unfortunately doesn't change when switching language, but ok... for now it's fine.
-        countries = []
+        countries = {}
         for conf in confs:
-            if conf['country'] not in countries:
+            print(conf.country)
+            if conf.country.code not in countries:
                 countries = {**countries, **{
-                    'code': conf['country'],
-                    'name': "",
-                    'flag': '',
-                    'layers': [conf['layer']]}
+                    'code': conf.country.code,
+                    'name': conf.country.name,
+                    'flag': conf.country.flag,
+                    'layers': [conf.organization_type.name]}
                              }
             else:
-                countries[conf['country']]['layers'].append(conf['layer'])
+                countries[conf.country]['layers'].append(conf.organization_type.name)
 
         return countries
 
@@ -183,7 +184,7 @@ def index(request):
         'timestamp': datetime.now(pytz.UTC).isoformat(),
         'initial_map_data_url': '',
         'initial_countries': initial_countries,
-        'countries_and_layers': countries_and_layers,
+        'countries_and_layers': countries_and_layers(),
         'default_country': map_defaults['country'],
         'default_layer': map_defaults['layer'],
         'default_week': 0,

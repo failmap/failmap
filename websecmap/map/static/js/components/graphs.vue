@@ -61,7 +61,7 @@ Vue.component('graphs', {
         },
     },
     template: "#graphs_template",
-    mixins: [new_state_mixin, translation_mixin, data_loader_mixin],
+    mixins: [new_state_mixin, translation_mixin],
 
     mounted: function () {
         this.load(0)
