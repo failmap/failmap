@@ -357,7 +357,7 @@ Vue.component('combined_number_statistics', {
         },
         perc: function (data, amount, total) {
             return (!data) ? "0%" :
-                roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
+                this.roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
         },
         translate: function(string){
             return gettext(string);
@@ -365,6 +365,17 @@ Vue.component('combined_number_statistics', {
         sortBy: function (key) {
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1;
+        },
+        // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
+        roundTo: function(n, digits) {
+            if (digits === undefined) {
+                digits = 0;
+            }
+
+            let multiplicator = Math.pow(10, digits);
+            n = parseFloat((n * multiplicator).toFixed(11));
+            let test = (Math.round(n) / multiplicator);
+            return +(test.toFixed(digits));
         }
     },
     computed: {
@@ -389,10 +400,10 @@ Vue.component('combined_number_statistics', {
         mediumpercentage: function () {
             if (this.data.data) {
                 let score = 100 -
-                    roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
-                return roundTo(score, 2) + "%";
+                    this.roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    this.roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
+                    this.roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
+                return this.roundTo(score, 2) + "%";
             }
             return 0
         },
@@ -410,9 +421,9 @@ Vue.component('combined_number_statistics', {
         mediumurlpercentage: function () {
             if (this.data.data) {
                 let score = 100 -
-                    roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                    roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
-                return roundTo(score, 2) + "%";
+                    this.roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
+                    this.roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
+                return this.roundTo(score, 2) + "%";
             }
             return 0
         },

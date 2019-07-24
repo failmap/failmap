@@ -1,4 +1,4 @@
-<!DOCTYPE html>{% load static %} {% load i18n %} {% load compress %} {% load countries %}
+<!DOCTYPE html>{% load compress %}
 <html lang="{{ language }}">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -13,170 +13,252 @@
             - {{ config.PROJECT_TAGLINE }}
             {% endif %}
         </title>
-    {% else %}
-        <title>{% trans "Site Title" %}</title>
     {% endif %}
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <meta name="format-detection" content="telephone=no">
 
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicons/favicon.ico' %}"/>
-    <link rel="apple-touch-icon" href="{% static 'favicons/apple-icon.png' %}">
-    <link rel="apple-touch-icon" sizes="57x57" href="{% static 'favicons/apple-icon-57x57.png' %}">
-    <link rel="apple-touch-icon" sizes="60x60" href="{% static 'favicons/apple-icon-60x60.png' %}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'favicons/apple-icon-72x72.png' %}">
-    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'favicons/apple-icon-76x76.png' %}">
-    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'favicons/apple-icon-114x114.png' %}">
-    <link rel="apple-touch-icon" sizes="120x120" href="{% static 'favicons/apple-icon-120x120.png' %}">
-    <link rel="apple-touch-icon" sizes="144x144" href="{% static 'favicons/apple-icon-144x144.png' %}">
-    <link rel="apple-touch-icon" sizes="152x152" href="{% static 'favicons/apple-icon-152x152.png' %}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicons/apple-icon-180x180.png' %}">
-    <link rel="icon" type="image/png" sizes="192x192"  href="{% static 'favicons/android-icon-192x192.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicons/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicons/favicon-96x96.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicons/favicon-16x16.png' %}">
+    <link rel="shortcut icon" type="image/png" href="/static/favicons/favicon.ico"/>
+    <link rel="apple-touch-icon" href="/static//static/favicons/apple-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/static/favicons/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/favicons/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png">
     <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="{% static 'favicons/ms-icon-144x144.png' %}">
+    <meta name="msapplication-TileImage" content="/static/favicons/ms-icon-144x144.png">
 
     <!-- This stylesheet is changed on the fly using themes. -->
-    <link rel="stylesheet" type="text/css" id="active_theme" href="{% static 'css/vendor/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" type="text/css" id="active_theme" href="/static/css/vendor/bootstrap.min.css"/>
     <!-- Allow various color schemes -->
-    <link id="colorscheme" href="{% static '/css/colors.trafficlight.css' %}" rel="stylesheet" />
+    <link id="colorscheme" href="/static//css/colors.trafficlight.css" rel="stylesheet" />
 
     {% compress css %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.css' %}"/>
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/leaflet.fullscreen.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/fa-svg-with-js.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/vendor/MarkerCluster.css' %}">
-        <link rel="stylesheet" type="text/css" href="{% static 'css/overrides.css' %}">
+        <link rel="stylesheet" type="text/css" href="/static/css/vendor/leaflet.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/css/vendor/leaflet.fullscreen.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/vendor/MarkerCluster.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
     {% endcompress %}
 
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% if debug %}
-        <script type="text/javascript" src="{% static 'js/vendor/vue.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue-select-2.6.0.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/bootstrap.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/leaflet-src.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster-src.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.js' %}" charset="UTF-8"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/Chart.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue-select-2.6.0.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/jquery-3.2.1.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/bootstrap.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/leaflet-src.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/Leaflet.fullscreen.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/leaflet.markercluster-src.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/lazyload-custom.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/moment-with-locales.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/static/js/vendor/Chart.js"></script>
+        <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue-i18n@8.9.0/vue-i18n.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js"></script>
     {% else %}{% compress js %}
-        <script type="text/javascript" src="{% static 'js/vendor/vue.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue-select-2.6.0.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/jquery-3.2.1.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/leaflet.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/Leaflet.fullscreen.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/leaflet.markercluster.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/lazyload-custom.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/raven.min.vue.3.19.1.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/moment-with-locales.min.js' %}" charset="UTF-8"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/Chart.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/translations/websecmap.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue-i18n@8.9.0/vue-i18n.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js' %}"></script>
-        <script type="text/javascript" src="{% static 'js/script.js' %}"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue-select-2.6.0.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/leaflet.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/Leaflet.fullscreen.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/leaflet.markercluster.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/lazyload-custom.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/moment-with-locales.min.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/static/js/vendor/Chart.min.js"></script>
+        <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue-i18n@8.9.0/vue-i18n.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js"></script>
     {% endcompress %}{% endif %}
 
     <script>
         // Registry Sentry for error reporting
-        let sentry_token = document.head.querySelector("[name=sentry_token]").getAttribute('content');
-        let version = document.head.querySelector("[name=version]").getAttribute('content');
-        let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
-        let debug = document.head.querySelector("[name=debug]").getAttribute('content');
         {% if sentry_token %}
             Raven.config({{ sentry_token }}, {release: {{ version }}).install();
         {%  endif %}
 
-        function debounce(func, wait, immediate) {
-    let timeout;
-    return function () {
-        let context = this, args = arguments;
-        clearTimeout(timeout);
-        timeout = setTimeout(function () {
-            timeout = null;
-            if (!immediate) func.apply(context, args);
-        }, wait);
-        if (immediate && !timeout) func.apply(context, args);
-    };
-}
+        // support for week numbers in javascript
+        // https://stackoverflow.com/questions/7765767/show-week-number-with-javascript
+        Date.prototype.getWeek = function () {
+            let onejan = new Date(this.getFullYear(), 0, 1);
+            return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+        };
+
+        // support for an intuitive timestamp in weeks...
+        Date.prototype.humanTimeStamp = function () {
+            return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
+        };
+
+        // fallback to django translations in javascript, still used for literal sentence translations...
+
+        // https://stackoverflow.com/questions/7625991/
+        // how-to-properly-add-entries-for-computed-values-to-the-django-internationalizati
+        var dynamic_translations = function(){
+            // statistics
+            gettext('2 weeks ago');
+            gettext('3 weeks ago');
+            gettext('1 month ago');
+            gettext('2 months ago');
+            gettext('3 months ago');
+            gettext('7 days ago');
+            gettext('now');
+
+            // system vulnerability messages
+            gettext("Has a secure equivalent, which wasn't so in the past.");
+            // todo: equalize these messages so it's always the same.
+            gettext('Site does not redirect to secure url, and has no secure alternative on a standard port.');
+            gettext('Redirects to a secure site, while a secure counterpart on the standard port is missing.');
+            gettext('Broken Transport Security, rated F');
+            gettext('Certificate not valid for domain name.');
+            gettext('Less than optimal Transport Security, rated C.');
+            gettext('Less than optimal Transport Security, rated B.');
+            gettext('Good Transport Security, rated A-.');
+            gettext('Good Transport Security, rated A.');
+            gettext('Perfect Transport Security, rated A+.');
+            gettext('X-Content-Type-Options header present.');
+            gettext('Missing X-Content-Type-Options header.');
+            gettext('X-XSS-Protection header present.');
+            gettext('Missing X-XSS-Protection header.');
+            gettext('X-Frame-Options header present.');
+            gettext('Missing X-Frame-Options header.');
+            gettext('Strict-Transport-Security header present.');
+            gettext('Missing Strict-Transport-Security header.');
+            gettext('Missing Strict-Transport-Security header. Offers no insecure alternative service.');
+            gettext('DNSSEC is incorrectly or not configured (errors found).');
+            gettext('DNSSEC seems to be implemented sufficiently.');
+            gettext('FTP Server only supports insecure SSL protocol.');
+            gettext('FTP Server does not configured to show if encryption is available.');
+            gettext('FTP Server supports TLS encryption protocol.');
+            gettext('FTP Server does not support encrypted transport or has protocol issues.');
+            gettext('An FTP connection could not be established properly. Not possible to verify encryption.');
+            gettext('not trusted');
+            gettext('trusted');
+            gettext('Certificate is not trusted.');
+            gettext('Certificate is trusted.');
+            gettext('Content-Security-Policy header found, which covers the security aspect of the X-Frame-Options header.');
+            gettext('Content-Security-Policy header found, which covers the security aspect of the X-XSS-Protection header.');
+            gettext('STARTTLS Available');
+            gettext('STARTTLS Missing');
+            gettext('SPF Available');
+            gettext('SPF Missing');
+            gettext('DKIM Available');
+            gettext('DKIM Missing');
+            gettext('DMARC Available');
+            gettext('DMARC Missing');
+            gettext('DANE Available');
+            gettext('DANE Missing');
+
+            // some categories:
+            gettext('category_menu_municipality');
+            gettext('category_menu_cyber');
+            gettext('category_menu_unknown');
+            gettext('category_menu_water_board');
+            gettext('category_menu_province');
+            gettext('category_menu_hacking');
+            gettext('category_menu_country');
+            gettext('category_menu_region');
+            gettext('category_menu_county');
+            gettext('category_menu_district');
+            gettext('category_menu_government');
+            gettext('category_menu_healthcare');
+            gettext('category_menu_finance');
+            gettext('category_menu_state');
+            gettext('category_menu_school');
+
+            // scan types
+            gettext('Strict-Transport-Security');
+            gettext('X-Content-Type-Options');
+            gettext('X-Frame-Options');
+            gettext('X-XSS-Protection');
+            gettext('plain_https');
+            gettext('tls_qualys');
+            gettext('DNSSEC');
+            gettext('ftp');
+            gettext('tls_qualys_encryption_quality');
+            gettext('tls_qualys_certificate_trusted');
+            gettext('http_security_header_strict_transport_security');
+            gettext('http_security_header_x_frame_options');
+            gettext('http_security_header_x_content_type_options');
+            gettext('http_security_header_x_xss_protection');
+            gettext('internet_nl_mail_starttls_tls_available');
+            gettext('internet_nl_mail_auth_spf_exist');
+            gettext('internet_nl_mail_auth_dkim_exist');
+            gettext('internet_nl_mail_auth_dmarc_exist');
+
+            gettext('Stats hasn\'t');
+            gettext('Stats has');
+            gettext('Broken');
+            gettext('TLS rated C');
+            gettext('TLS rated B');
+            gettext('TLS rated A');
+            gettext('TLS rated A-');
+            gettext('TLS rated A+');
+            gettext('Not at all');
+            gettext('Redirect from unsafe address');
+            gettext('FTP Insecure');
+            gettext('FTP');
+            gettext('Redirect from unsafe address');
 
 
-    // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
-    function roundTo(n, digits) {
-        if (digits === undefined) {
-            digits = 0;
-        }
+            // and germany
+            gettext('category_menu_bundesland');
+            gettext('category_menu_regierungsbezirk');
+            gettext('category_menu_landkreis_kreis_kreisfreie_stadt');
+            gettext('category_menu_samtgemeinde_verwaltungsgemeinschaft');
+            gettext('category_menu_stadt_gemeinde');
+            gettext('category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung');
+            gettext('category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung');
 
-        let multiplicator = Math.pow(10, digits);
-        n = parseFloat((n * multiplicator).toFixed(11));
-        let test = (Math.round(n) / multiplicator);
-        return +(test.toFixed(digits));
-    }
+            // historycontrol
+            gettext('One week earlier');
+            gettext('One week later');
+            gettext('Moment');
+            gettext('Risks');
+        };
 
-
-    // support for week numbers in javascript
-    // https://stackoverflow.com/questions/7765767/show-week-number-with-javascript
-    Date.prototype.getWeek = function () {
-        let onejan = new Date(this.getFullYear(), 0, 1);
-        return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-    };
-
-    // support for an intuitive timestamp
-    // translation?
-    Date.prototype.humanTimeStamp = function () {
-        return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
-    };
-
-    // fallback to django translations in javascript, still used for literal sentence translations...
-    const translation_mixin = {
-        methods: {
-            translate: function (string) {
-                return gettext(string);
+        const translation_mixin = {
+            methods: {
+                translate: function (string) {
+                    return gettext(string);
+                }
             }
-        }
-    };
+        };
 
-    const new_state_mixin = {
-        // new state mixin that is pure functional, and does not depend on html elements
-        // todo: move this to vuex(!)
-        data: {
-            state: {
-                // this is now inserted by django on the first load. We want to do this via url parameters too in the future.
-                'country': "{{ default_country }}",
-                'layer': "{{ default_layer }}",
-                'week': {{ default_week }},
+        const new_state_mixin = {
+            // new state mixin that is pure functional, and does not depend on html elements
+            // todo: move this to vuex(!)
+            data: {
+                state: {
+                    // this is now inserted by django on the first load. We want to do this via url parameters too in the future.
+                    'country': "{{ default_country }}",
+                    'layer': "{{ default_layer }}",
+                    'week': {{ default_week }},
+                },
             },
-        },
 
-        // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
-        // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
+            // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
+            // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
 
-        methods: {
+            methods: {
 
-            set_state: function(country, layer, week=0) {
-                // important:
-                // Accessing or manipulating individual fields (in vue js editor etc) does not have effect,
-                // you need to update the entire state in one operation. Otherwise you'll see no effect of your change.
-                // this is on purpose, to prevent load events for small changes.
-                this.state = {'country': country, 'layer': layer, 'week': week};
-           }
-        },
-        watch: {
-            state: function(new_value){
-                this.load()
+                set_state: function(country, layer, week=0) {
+                    // important:
+                    // Accessing or manipulating individual fields (in vue js editor etc) does not have effect,
+                    // you need to update the entire state in one operation. Otherwise you'll see no effect of your change.
+                    // this is on purpose, to prevent load events for small changes.
+                    this.state = {'country': country, 'layer': layer, 'week': week};
+               }
+            },
+            watch: {
+                state: function(new_value){
+                    this.load()
+                }
             }
-        }
-    };
+        };
 
     let document_ready = function() {
 
@@ -204,6 +286,7 @@
                         graphs: {{ config.SHOW_STATS_GRAPHS | lower }},
                         changes: {{ config.SHOW_STATS_CHANGES | lower }},
                         ticker: {{ config.SHOW_TICKER | lower }},
+                        services: {{ config.SHOW_SERVICES | lower }},
                     },
                     responsible_organization: {
                         name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
@@ -233,6 +316,8 @@
 
                     debug: {{ debug | lower }},
                     admin: {{ admin | lower }},
+
+                    mapbox_token: '{{ config.MAPBOX_ACCESS_TOKEN }}',
 
                     // issues: this could be calculated depending on issues.
                     /*issues: {
@@ -645,15 +730,6 @@
                 }
             },
 
-            // todo: fix computed. Example:
-            /*
-            *   computed: {
-    mergedOptions: function mergedOptions () {
-      return optionsMerger(Object.assign({}, this.layerGroupOptions,
-        {style: this.optionsStyle}), this);
-    }
-  },
-            * */
             computed: {
                 // this is the correctly ordered set with issues. in an easy list.
                 issues: function() {
@@ -776,11 +852,11 @@
         </section>
 
         <section>
-            <websecmap :L="L" :state="state" :issues="issues" :mapbox_token="'{{ config.MAPBOX_ACCESS_TOKEN }}'" :debug="{{ debug | lower }}"></websecmap>
+            <websecmap :L="L" :state="state" :issues="issues" :mapbox_token="config.mapbox_token" :debug="config.debug"></websecmap>
         </section>
 
         <section v-if="config.show.intro">
-            <intro :organization="'{{ config.RESPONSIBLE_ORGANIZATION_NAME }}'" :organization_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"></intro>
+            <intro :organization="config.responsible_organization.name" :organization_mail="config.project.issue_mail"></intro>
         </section>
 
         <section v-if="config.show.charts">
@@ -818,24 +894,14 @@
             </div>
         </section>
 
-        {% if config.SHOW_EXTENSIVE_STATISTICS %}
-        <section id="extensive_statistics" >
+        <section id="extensive_statistics" v-if="config.show.statistics">
             <div class="container">
-                {% if config.SHOW_STATS_NUMBERS %}
-                    <combined_number_statistics :issues="issues" :state="state" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
-                {% endif %}
-                {% if config.SHOW_STATS_IMPROVEMENTS %}
-                    <improvements :issues="issues" :state="state"></improvements>
-                {% endif %}
-                {% if config.SHOW_STATS_GRAPHS %}
-                    <graphs :issues="issues" :state="state" :color_scheme="colors_used_for_charts"></graphs>
-                {% endif %}
-                {% if config.SHOW_STATS_CHANGES %}
-                    <changes :issues="issues" :state="state"></changes>
-                {% endif %}
+                <combined_number_statistics v-if="config.show.numbers" :issues="issues" :state="state" :show_services="config.show.services"></combined_number_statistics>
+                <improvements v-if="config.show.improvements" :issues="issues" :state="state"></improvements>
+                <graphs v-if="config.show.graphs" :issues="issues" :state="state" :color_scheme="colors_used_for_charts"></graphs>
+                <changes v-if="config.show.changes" :issues="issues" :state="state"></changes>
             </div>
         </section>
-        {% endif %}
 
         <!-- todo: get this to work, it is not tested yet... -->
         <section id="comply_or_explain_info" v-if="config.show.comply_or_explain">
@@ -852,7 +918,7 @@
 
         <section id="datasets">
             <div class="container">
-                <datasets v-if="config.show.datasets" :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
+                <datasets v-if="config.show.datasets" :state="state" :layers="layers" :show_comply_or_explain="config.show.comply_or_explain"></datasets>
             </div>
         </section>
 

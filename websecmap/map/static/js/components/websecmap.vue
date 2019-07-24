@@ -516,22 +516,34 @@ Vue.component('websecmap', {
                 this.load_domains(layer.feature.properties.organization_id, this.state.week);
             }, 300);
         },
-        load_domains: debounce(function (organization_id, weeks_back) {
+        debounce: function(func, wait, immediate) {
+            let timeout;
+            return function () {
+                let context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    timeout = null;
+                    if (!immediate) func.apply(context, args);
+                }, wait);
+                if (immediate && !timeout) func.apply(context, args);
+            };
+        },
+        load_domains: function() {this.debounce(function (organization_id, weeks_back) {
+                if (!weeks_back)
+                    weeks_back = 0;
 
-            if (!weeks_back)
-                weeks_back = 0;
+                if (!this.country || !this.layer)
+                    return;
 
-            if (!this.country || !this.layer)
-                return;
+                // symptom of state mixing loads this even though it's not needed (and doesn't have the right arguments)
+                if (!organization_id)
+                    return;
 
-            // symptom of state mixing loads this even though it's not needed (and doesn't have the right arguments)
-            if (!organization_id)
-                return;
-
-            $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_back, function (data) {
-                this.domainlist_urls = data.calculation["organization"]["urls"];
-            });
-        }, 42),
+                $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_back, function (data) {
+                    this.domainlist_urls = data.calculation["organization"]["urls"];
+                });
+            }, 42)
+        },
 
         // from hover info
         perc: function (amount, total) {
@@ -668,6 +680,17 @@ Vue.component('websecmap', {
                 this.markers.refreshClusters();
             }
         },
+        // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
+        roundTo: function(n, digits) {
+            if (digits === undefined) {
+                digits = 0;
+            }
+
+            let multiplicator = Math.pow(10, digits);
+            n = parseFloat((n * multiplicator).toFixed(11));
+            let test = (Math.round(n) / multiplicator);
+            return +(test.toFixed(digits));
+        }
     },
     computed: {
         visibleweek: function () {
