@@ -26,6 +26,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicons/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="/static/favicons/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/static/favicons/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+
     <meta name="msapplication-TileColor" content="#ffffff">
     <meta name="msapplication-TileImage" content="/static/favicons/ms-icon-144x144.png">
 
@@ -98,18 +100,9 @@
         // https://stackoverflow.com/questions/7625991/
         // how-to-properly-add-entries-for-computed-values-to-the-django-internationalizati
         var dynamic_translations = function(){
-            // statistics
-            gettext('2 weeks ago');
-            gettext('3 weeks ago');
-            gettext('1 month ago');
-            gettext('2 months ago');
-            gettext('3 months ago');
-            gettext('7 days ago');
-            gettext('now');
 
             // system vulnerability messages
             gettext("Has a secure equivalent, which wasn't so in the past.");
-            // todo: equalize these messages so it's always the same.
             gettext('Site does not redirect to secure url, and has no secure alternative on a standard port.');
             gettext('Redirects to a secure site, while a secure counterpart on the standard port is missing.');
             gettext('Broken Transport Security, rated F');
@@ -152,23 +145,6 @@
             gettext('DANE Available');
             gettext('DANE Missing');
 
-            // some categories:
-            gettext('category_menu_municipality');
-            gettext('category_menu_cyber');
-            gettext('category_menu_unknown');
-            gettext('category_menu_water_board');
-            gettext('category_menu_province');
-            gettext('category_menu_hacking');
-            gettext('category_menu_country');
-            gettext('category_menu_region');
-            gettext('category_menu_county');
-            gettext('category_menu_district');
-            gettext('category_menu_government');
-            gettext('category_menu_healthcare');
-            gettext('category_menu_finance');
-            gettext('category_menu_state');
-            gettext('category_menu_school');
-
             // scan types
             gettext('Strict-Transport-Security');
             gettext('X-Content-Type-Options');
@@ -188,7 +164,6 @@
             gettext('internet_nl_mail_auth_spf_exist');
             gettext('internet_nl_mail_auth_dkim_exist');
             gettext('internet_nl_mail_auth_dmarc_exist');
-
             gettext('Stats hasn\'t');
             gettext('Stats has');
             gettext('Broken');
@@ -203,29 +178,6 @@
             gettext('FTP');
             gettext('Redirect from unsafe address');
 
-
-            // and germany
-            gettext('category_menu_bundesland');
-            gettext('category_menu_regierungsbezirk');
-            gettext('category_menu_landkreis_kreis_kreisfreie_stadt');
-            gettext('category_menu_samtgemeinde_verwaltungsgemeinschaft');
-            gettext('category_menu_stadt_gemeinde');
-            gettext('category_menu_stadtbezirk_gemeindeteil_mit_selbstverwaltung');
-            gettext('category_menu_stadtteil_gemeindeteil_ohne_selbstverwaltung');
-
-            // historycontrol
-            gettext('One week earlier');
-            gettext('One week later');
-            gettext('Moment');
-            gettext('Risks');
-        };
-
-        const translation_mixin = {
-            methods: {
-                translate: function (string) {
-                    return gettext(string);
-                }
-            }
         };
 
         const new_state_mixin = {
@@ -260,526 +212,549 @@
             }
         };
 
-    let document_ready = function() {
+        let document_ready = function() {
 
-        const app = new Vue({
-            i18n,
-            el: '#app',
-            name: 'app',
-            mixins: [new_state_mixin],
+            const app = new Vue({
+                i18n,
+                el: '#app',
+                name: 'app',
+                mixins: [new_state_mixin],
 
-            data: {
+                data: {
 
-            // this converts the django state (constance) values to javascript.
-            // available from app only, and distributed sparsingly on need to know basis to prevent a web of things.
-                config: {
-                    show: {
-                        intro: {{ config.SHOW_INTRO | lower }},
-                        charts: {{ config.SHOW_CHARTS | lower }},
-                        comply_or_explain: {{ config.SHOW_COMPLY_OR_EXPLAIN | lower }},
-                        scan_schedule :{{ config.SHOW_SCAN_SCHEDULE | lower }},
-                        datasets: {{ config.SHOW_DATASETS | lower }},
-                        announcement: {{ config.SHOW_ANNOUNCEMENT | lower }},
-                        statistics: {{ config.SHOW_EXTENSIVE_STATISTICS | lower }},
-                        numbers: {{ config.SHOW_STATS_NUMBERS | lower }},
-                        improvements: {{ config.SHOW_STATS_IMPROVEMENTS | lower }},
-                        graphs: {{ config.SHOW_STATS_GRAPHS | lower }},
-                        changes: {{ config.SHOW_STATS_CHANGES | lower }},
-                        ticker: {{ config.SHOW_TICKER | lower }},
-                        services: {{ config.SHOW_SERVICES | lower }},
+                // this converts the django state (constance) values to javascript.
+                // available from app only, and distributed sparsingly on need to know basis to prevent a web of things.
+                    config: {
+                        show: {
+                            intro: {{ config.SHOW_INTRO | lower }},
+                            charts: {{ config.SHOW_CHARTS | lower }},
+                            comply_or_explain: {{ config.SHOW_COMPLY_OR_EXPLAIN | lower }},
+                            scan_schedule :{{ config.SHOW_SCAN_SCHEDULE | lower }},
+                            datasets: {{ config.SHOW_DATASETS | lower }},
+                            announcement: {{ config.SHOW_ANNOUNCEMENT | lower }},
+                            statistics: {{ config.SHOW_EXTENSIVE_STATISTICS | lower }},
+                            numbers: {{ config.SHOW_STATS_NUMBERS | lower }},
+                            improvements: {{ config.SHOW_STATS_IMPROVEMENTS | lower }},
+                            graphs: {{ config.SHOW_STATS_GRAPHS | lower }},
+                            changes: {{ config.SHOW_STATS_CHANGES | lower }},
+                            ticker: {{ config.SHOW_TICKER | lower }},
+                            services: {{ config.SHOW_SERVICES | lower }},
+                        },
+                        responsible_organization: {
+                            name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
+                            promo_text: "{{ config.RESPONSIBLE_ORGANIZATION_PROMO_TEXT}}",
+                            website: "{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE}}",
+                            mail: "{{ config.RESPONSIBLE_ORGANIZATION_MAIL}}",
+                            twitter: "{{ config.RESPONSIBLE_ORGANIZATION_TWITTER}}",
+                            facebook: "{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK}}",
+                            linkedin: "{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN}}",
+                            whatsapp: "{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP}}",
+                            phone: "{{ config.RESPONSIBLE_ORGANIZATION_PHONE}}",
+
+                        },
+                        project: {
+                            name: "{{ config.PROJECT_NAME }}",
+                            tagline: "{{ config.PROJECT_TAGLINE }}",
+                            country: "{{ config.PROJECT_COUNTRY }}",
+                            mail: "{{ config.PROJECT_MAIL }}",
+                            issue_mail: "{{ config.PROJECT_ISSUE_MAIL }}",
+                            twitter: "{{ config.PROJECT_TWITTER }}",
+                            facebook: "{{ config.PROJECT_FACEBOOK }}",
+                        },
+                        comply_or_explain: {
+                            forum_link: "{{ config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
+                            email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRES }}",
+                        },
+
+                        debug: {{ debug | lower }},
+                        admin: {{ admin | lower }},
+
+                        mapbox_token: '{{ config.MAPBOX_ACCESS_TOKEN }}',
+
+                        // issues: this could be calculated depending on issues.
+                        /*issues: {
+                            tls_qualys: {{ config.SHOW_DNSSEC }},
+                            missing_tls: {{ config.tls_qualys_certificate_trusted }},
+                            ftp: {{ config.tls_qualys_encryption_quality }},
+                            dnssec: {{ config.plain_https }},
+                            headers_hsts: {{ config.SHOW_HTTP_HEADERS_HSTS }},
+                            headers_xfo: {{ config.SHOW_HTTP_HEADERS_XFO }},
+                            headers_x_content: {{ config.SHOW_HTTP_HEADERS_X_CONTENT }},
+                            headers_x_xss: {{ config.SHOW_HTTP_HEADERS_X_XSS }},
+                        }*/
+
                     },
-                    responsible_organization: {
-                        name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
-                        promo_text: "{{ config.RESPONSIBLE_ORGANIZATION_PROMO_TEXT}}",
-                        website: "{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE}}",
-                        mail: "{{ config.RESPONSIBLE_ORGANIZATION_MAIL}}",
-                        twitter: "{{ config.RESPONSIBLE_ORGANIZATION_TWITTER}}",
-                        facebook: "{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK}}",
-                        linkedin: "{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN}}",
-                        whatsapp: "{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP}}",
-                        phone: "{{ config.RESPONSIBLE_ORGANIZATION_PHONE}}",
+
+                    // excellent code injection point :)
+                    map_configuration: {{ countries_and_layers | safe }},
+
+                    // A reference to leaflet, so we can call leaflet functions.
+                    L: L,
+
+                    // These are all issues in websecmap that can be shown in the front end. Randomly ordered:
+                    all_issues: {
+
+                        "DNSSEC": {
+                            "name": "DNSSEC",
+                            "second opinion links": [{
+                                "url": "https://zonemaster.iis.se/",
+                                "language": "EN",
+                                "provider": "Zonemaster"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions",
+                                "language": "EN",
+                                "provider": "Wikipedia",
+                            }],
+                            "relevant impacts": ["high"],
+                            "statistics": {
+                                "good": [
+                                    {
+                                        'label': i18n.t('DNSSEC correct'), 'explanation': 'DNSSEC seems to be implemented sufficiently.'
+                                    }],
+                                "medium": [],
+                                "bad": [{'label': 'DNSSEC incorrect', 'explanation': 'DNSSEC is incorrectly or not configured (errors found).'}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "tls_qualys_certificate_trusted": {
+                            "name": "tls_qualys_certificate_trusted",
+                            "second opinion links": [{
+                                "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+                                "language": "EN",
+                                "provider": "Qualys"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high"],
+                            "statistics": {
+                                "good": [{'label': "Trust", 'explanation': 'Certificate is trusted.'}],
+                                "medium": [],
+                                "bad": [{'label': "No trust", 'explanation': 'Certificate is not trusted.'}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "tls_qualys_encryption_quality": {
+                            "name": "tls_qualys_encryption_quality",
+                            "second opinion links": [{
+                                "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+                                "language": "EN",
+                                "provider": "Qualys"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high", "low"],
+                            "statistics": {
+                                "good": [{'label': "TLS rated A-", 'explanation': 'Good Transport Security, rated A-.'},
+                                    {'label': "TLS rated A", 'explanation': 'Good Transport Security, rated A.'},
+                                    {'label': "TLS rated A+", 'explanation': 'Perfect Transport Security, rated A+.'}],
+                                "medium": [{'label': "TLS rated C", 'explanation': 'Less than optimal Transport Security, rated C.'},
+                                {'label': "TLS rated B", 'explanation': 'Less than optimal Transport Security, rated B.'}],
+                                "bad": [{'label': "Broken", 'explanation': 'Broken Transport Security, rated F'}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "plain_https": {
+                            "name": "plain_https",
+                            "second opinion links": [{
+                                "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
+                                "language": "EN",
+                                "provider": "Qualys"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high", "medium"],
+                            "statistics": {
+                                "good": [],
+                                "medium": [{'label': i18n.t("Redirect from unsafe address"), 'explanation': i18n.t('Redirects to a secure site, while a secure counterpart on the standard port is missing.')}],
+                                "bad": [{'label': i18n.t("Not at all"), 'explanation': i18n.t('Site does not redirect to secure url, and has nosecure alternative on a standard port.')},
+                                {'label': i18n.t("Not at all"), 'explanation': i18n.t('Site does not redirect to secure url, and has no secure alternative on a standard port.')}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "ftp": {
+                            "name": "ftp",
+                            "second opinion links": [{
+                                "url": "https://ftptest.net/",
+                                "language": "EN",
+                                "provider": "ftptest.net"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/FTPS",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high", "medium"],
+                            "statistics": {
+                                "good": [{'label': "FTP secure", 'explanation': 'FTP Server supports TLS encryption protocol.'}],
+                                "medium": [],
+                                "bad": [{'label': "FTP insecure", 'explanation': 'FTP Server does not support encrypted transport or has protocol issues.'},
+                                {'label': "FTP outdated", 'explanation': 'FTP Server only supports insecure SSL protocol.'}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "http_security_header_strict_transport_security": {
+                            "name": "http_security_header_strict_transport_security",
+                            "second opinion links": [{
+                                "url": "https://securityheaders.io/?q=${url.url}",
+                                "language": "EN",
+                                "provider": "Securityheaders.io"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high", "medium"],
+                            "statistics": {
+                                "good": [{'label': "Stats has", 'explanation': 'Strict-Transport-Security header present.'}],
+                                "medium": [{'label': "Stats hasn't", 'explanation': 'Missing Strict-Transport-Security header.'}],
+                                "bad": []
+                            },
+                            "category": ['website']
+                        },
+
+                        "http_security_header_x_frame_options": {
+                            "name": "http_security_header_x_frame_options",
+                            "second opinion links": [{
+                                "url": "https://securityheaders.io/?q=${url.url}",
+                                "language": "EN",
+                                "provider": "Securityheaders.io"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Clickjacking",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["medium"],
+                            "statistics": {
+                                "good": [{'label': "Stats has", 'explanation': 'X-Frame-Options header present.'}],
+                                "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Frame-Options header.'}],
+                                "bad": []
+                            },
+                            "category": ['website']
+                        },
+
+                        "http_security_header_x_content_type_options": {
+                            "name": "http_security_header_x_content_type_options",
+                            "second opinion links": [{
+                                "url": "https://securityheaders.io/?q=${url.url}",
+                                "language": "EN",
+                                "provider": "Securityheaders.io"
+                            }],
+                            "documentation links": [{
+                                "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto",
+                                "language": "EN",
+                                "provider": "OWASP"
+                            }],
+                            "relevant impacts": ["low"],
+                            "statistics": {
+                                "good": [{'label': "Stats has", 'explanation': 'X-Content-Type-Options header present.'}],
+                                "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Content-Type-Options header.'}],
+                                "bad": []
+                            },
+                            "category": ['website']
+                        },
+
+                        "http_security_header_x_xss_protection": {
+                            "name": "http_security_header_x_xss_protection",
+                            "second opinion links": [{
+                                "url": "https://securityheaders.io/?q=${url.url}",
+                                "language": "EN",
+                                "provider": "Securityheaders.io"
+                            }],
+                            "documentation links": [{
+                                "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp",
+                                "language": "EN",
+                                "provider": "OWASP"
+                            }],
+                            "relevant impacts": ["low"],
+                            "statistics": {
+                                "good": [{'label': "Stats has", 'explanation': 'X-XSS-Protection header present.'}],
+                                "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-XSS-Protection header.'}],
+                                "bad": []
+                            },
+                            "category": ['website']
+                        },
+
+                        "internet_nl_mail_starttls_tls_available": {
+                            "name": "internet_nl_mail_starttls_tls_available",
+                            "second opinion links": [{
+                                "url": "https://internet.nl/mail/${url.url}/",
+                                "language": "EN",
+                                "provider": "Internet.nl"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Opportunistic_TLS",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["high"],
+                            "statistics": {
+                                "good": [{'label': "STARTTLS Available", 'explanation': 'STARTTLS Available'},
+                                {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+                                "medium": [],
+                                "bad": [{'label': "STARTTLS Missing", 'explanation': 'STARTTLS Missing'}]
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "internet_nl_mail_auth_spf_exist": {
+                            "name": "internet_nl_mail_auth_spf_exist",
+                            "second opinion links": [{
+                                "url": "https://internet.nl/mail/${url.url}/",
+                                "language": "EN",
+                                "provider": "Internet.nl"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/Sender_Policy_Framework",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["medium"],
+                            "statistics": {
+                                "good": [{'label': "SPF Available", 'explanation': 'SPF Available'},
+                                {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+                                "medium": [{'label': "SPF Missing", 'explanation': 'SPF Missing'}],
+                                "bad": []
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "internet_nl_mail_auth_dkim_exist": {
+                            "name": "internet_nl_mail_auth_dkim_exist",
+                            "second opinion links": [{
+                                "url": "https://internet.nl/mail/${url.url}/",
+                                "language": "EN",
+                                "provider": "Internet.nl"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["medium"],
+                            "statistics": {
+                                "good": [{'label': "DKIM Available", 'explanation': 'DKIM Available'},
+                                {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+                                "medium": [{'label': "DKIM Missing", 'explanation': 'DKIM Missing'}],
+                                "bad": []
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
+
+                        "internet_nl_mail_auth_dmarc_exist": {
+                            "name": "internet_nl_mail_auth_dmarc_exist",
+                            "second opinion links": [{
+                                "url": "https://internet.nl/mail/${url.url}/",
+                                "language": "EN",
+                                "provider": "Internet.nl"
+                            }],
+                            "documentation links": [{
+                                "url": "https://en.wikipedia.org/wiki/DMARC",
+                                "language": "EN",
+                                "provider": "Wikipedia"
+                            }],
+                            "relevant impacts": ["medium"],
+                            "statistics": {
+                                "good": [{'label': "DMARC Available", 'explanation': 'DMARC Available'},
+                                {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
+                                "medium": [{'label': "DMARC Missing", 'explanation': 'DMARC Missing'}],
+                                "bad": []
+                            },
+                            "category": ['confidentiality', 'integrity']
+                        },
 
                     },
-                    project: {
-                        name: "{{ config.PROJECT_NAME }}",
-                        tagline: "{{ config.PROJECT_TAGLINE }}",
-                        country: "{{ config.PROJECT_COUNTRY }}",
-                        mail: "{{ config.PROJECT_MAIL }}",
-                        issue_mail: "{{ config.PROJECT_ISSUE_MAIL }}",
-                        twitter: "{{ config.PROJECT_TWITTER }}",
-                        facebook: "{{ config.PROJECT_FACEBOOK }}",
-                    },
-                    comply_or_explain: {
-                        forum_link: "{{ config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
-                        email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRES }}",
+
+                    available_color_schemes: {
+                        trafficlight: "/static/css/colors.trafficlight.css",
+                        pink: "/static/css/colors.trafficlight.css",
+                        deutranopia: "/static/css/colors.deutranopia.css",
                     },
 
-                    debug: {{ debug | lower }},
-                    admin: {{ admin | lower }},
+                    active_color_scheme: "trafficlight",
+                    colors_used_for_charts: {
+                        'high_background': 'rgba(255, 99, 132, 0.2)',
+                        'high_border': 'rgba(255, 99, 132, 0.2)',
+                        'medium_background': 'rgba(255, 102, 0, 0.2)',
+                        'medium_border': 'rgba(255,102,0,1)',
+                        'low_background': 'rgba(255, 255, 0, 0.2)',
+                        'low_border': 'rgba(255,255,0,1)',
+                        'good_background': 'rgba(50, 255, 50, 0.2)',
+                        'good_border': 'rgba(50, 255, 50, 1)',
+                        'addresses_background': 'rgba(0, 0, 0, 0.2)',
+                        'addresses_border': 'rgba(0,0,0,1)',
+                        'services_background': 'rgba(0, 40, 255, 0.2)',
+                        'services_border': 'rgba(0,40,255,1)',
+                    },
 
-                    mapbox_token: '{{ config.MAPBOX_ACCESS_TOKEN }}',
+                    available_themes: {
+                        default: {css: "/static/css/vendor/bootstrap.min.css", map_tilelayer: 'light'},
+                        darkly: {css: "/static/css/vendor/bootstrap-darkly.min.css", map_tilelayer: 'dark'},
+                    },
 
-                    // issues: this could be calculated depending on issues.
-                    /*issues: {
-                        tls_qualys: {{ config.SHOW_DNSSEC }},
-                        missing_tls: {{ config.tls_qualys_certificate_trusted }},
-                        ftp: {{ config.tls_qualys_encryption_quality }},
-                        dnssec: {{ config.plain_https }},
-                        headers_hsts: {{ config.SHOW_HTTP_HEADERS_HSTS }},
-                        headers_xfo: {{ config.SHOW_HTTP_HEADERS_XFO }},
-                        headers_x_content: {{ config.SHOW_HTTP_HEADERS_X_CONTENT }},
-                        headers_x_xss: {{ config.SHOW_HTTP_HEADERS_X_XSS }},
-                    }*/
+                    layers: [],
 
+                    // todo: this should come FROM websecmap and should be then avialble in reports.. or we
+                    // should let the reports method get all options itself. This is now a placeholder.
+                    organizations: [],
+
+                    // the app state is leading for the rest. So we should have a state value here, and when that is changed,
+                    // it is reflected through the app. (probably already so, but not explicit enough.)
+
+                    organization: 0
                 },
 
-                // excellent code injection point :)
-                map_configuration: {{ countries_and_layers | safe }},
 
-                // A reference to leaflet, so we can call leaflet functions.
-                L: L,
+                methods: {
+                    // expected by state_mixin
+                    load: function(){},
 
-                // These are all issues in websecmap that can be shown in the front end. Randomly ordered:
-                all_issues: {
+                    // switch themes
+                    // http://jsfiddle.net/82AsF/
 
-                    "DNSSEC": {
-                        "name": "DNSSEC",
-                        "second opinion links": [{
-                            "url": "https://zonemaster.iis.se/",
-                            "language": "EN",
-                            "provider": "Zonemaster"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions",
-                            "language": "EN",
-                            "provider": "Wikipedia",
-                        }],
-                        "relevant impacts": ["high"],
-                        "statistics": {
-                            "good": [
-                                {
-                                    'label': 'DNSSEC correct', 'explanation': 'DNSSEC seems to be implemented sufficiently.'
-                                }],
-                            "medium": [],
-                            "bad": [{'label': 'DNSSEC incorrect', 'explanation': 'DNSSEC is incorrectly or not configured (errors found).'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
+                    set_theme: function(theme_name) {
+                        let possible_themes = Object.keys(this.available_themes);
+                        if (!possible_themes.includes(theme_name)) {
+                            console.log(`Theme not available. Available schemes are: ${possible_themes}.`)
+                        }
+
+                        let theme_link = 'link[href="'+$('link#active_theme').attr('href') + '"]';
+                        $(theme_link).attr('href', this.available_themes.theme_name.css);
                     },
 
-                    "tls_qualys_certificate_trusted": {
-                        "name": "tls_qualys_certificate_trusted",
-                        "second opinion links": [{
-                            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
-                            "language": "EN",
-                            "provider": "Qualys"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high"],
-                        "statistics": {
-                            "good": [{'label': "Trust", 'explanation': 'Certificate is trusted.'}],
-                            "medium": [],
-                            "bad": [{'label': "No trust", 'explanation': 'Certificate is not trusted.'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
+                    set_color_scheme: function(scheme_name) {
+                        let schemes = Object.keys(this.available_color_schemes);
+                        if (!schemes.includes(scheme_name)){
+                            console.log(`Color scheme not available. Available schemes are: ${schemes}.`)
+                        }
+                        this.active_color_scheme = scheme_name;
+
+                        // this overrides the <link id="colorscheme" in the body to point to a new stylesheet.
+                        // this change is supported by most browsers and takes some time to process...
+                        let colorscheme_link = 'link[href="'+$('link#colorscheme').attr('href') + '"]';
+                        $(colorscheme_link).attr('href', `/static/css/colors.${scheme_name}.css`);
+
+                        setTimeout(this.set_graph_colorscheme, 2000);
+                        return true;
                     },
 
-                    "tls_qualys_encryption_quality": {
-                        "name": "tls_qualys_encryption_quality",
-                        "second opinion links": [{
-                            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
-                            "language": "EN",
-                            "provider": "Qualys"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high", "low"],
-                        "statistics": {
-                            "good": [{'label': "TLS rated A-", 'explanation': 'Good Transport Security, rated A-.'},
-                                {'label': "TLS rated A", 'explanation': 'Good Transport Security, rated A.'},
-                                {'label': "TLS rated A+", 'explanation': 'Perfect Transport Security, rated A+.'}],
-                            "medium": [{'label': "TLS rated C", 'explanation': 'Less than optimal Transport Security, rated C.'},
-                            {'label': "TLS rated B", 'explanation': 'Less than optimal Transport Security, rated B.'}],
-                            "bad": [{'label': "Broken", 'explanation': 'Broken Transport Security, rated F'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
+                    set_graph_colorscheme: function(){
+                        // This is a terrible solution to retrieve the active colors from an 'inkpot' on the body of the page.
+                        // The inkpot contains the colors of the currently active CSS file.
+                        // It is not possible to obtain these color reference in javascript by querying the CSS file...
+                        let charts_high = $('.charts_high');
+                        let charts_medium = $('.charts_medium');
+                        let charts_low = $('.charts_low');
+                        let charts_good = $('.charts_good');
+                        let charts_connectivity_internet_adresses = $('.charts_connectivity_internet_adresses');
+                        let charts_connectivity_services = $('.charts_connectivity_services');
 
-                    "plain_https": {
-                        "name": "plain_https",
-                        "second opinion links": [{
-                            "url": "https://www.ssllabs.com/ssltest/analyze.html?d=${url.url}&hideResults=on&latest",
-                            "language": "EN",
-                            "provider": "Qualys"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Transport_Layer_Security",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high", "medium"],
-                        "statistics": {
-                            "good": [],
-                            "medium": [{'label': "Redirect from unsafe address", 'explanation': 'Redirects to a secure site, while a secure counterpart on the standard port is missing.'}],
-                            "bad": [{'label': "Not at all", 'explanation': 'Site does not redirect to secure url, and has nosecure alternative on a standard port.'},
-                            {'label': "Not at all", 'explanation': 'Site does not redirect to secure url, and has no secure alternative on a standard port.'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                    "ftp": {
-                        "name": "ftp",
-                        "second opinion links": [{
-                            "url": "https://ftptest.net/",
-                            "language": "EN",
-                            "provider": "ftptest.net"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/FTPS",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high", "medium"],
-                        "statistics": {
-                            "good": [{'label': "FTP secure", 'explanation': 'FTP Server supports TLS encryption protocol.'}],
-                            "medium": [],
-                            "bad": [{'label': "FTP insecure", 'explanation': 'FTP Server does not support encrypted transport or has protocol issues.'},
-                            {'label': "FTP outdated", 'explanation': 'FTP Server only supports insecure SSL protocol.'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                    "http_security_header_strict_transport_security": {
-                        "name": "http_security_header_strict_transport_security",
-                        "second opinion links": [{
-                            "url": "https://securityheaders.io/?q=${url.url}",
-                            "language": "EN",
-                            "provider": "Securityheaders.io"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high", "medium"],
-                        "statistics": {
-                            "good": [{'label': "Stats has", 'explanation': 'Strict-Transport-Security header present.'}],
-                            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing Strict-Transport-Security header.'}],
-                            "bad": []
-                        },
-                        "category": ['website']
-                    },
-
-                    "http_security_header_x_frame_options": {
-                        "name": "http_security_header_x_frame_options",
-                        "second opinion links": [{
-                            "url": "https://securityheaders.io/?q=${url.url}",
-                            "language": "EN",
-                            "provider": "Securityheaders.io"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Clickjacking",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["medium"],
-                        "statistics": {
-                            "good": [{'label': "Stats has", 'explanation': 'X-Frame-Options header present.'}],
-                            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Frame-Options header.'}],
-                            "bad": []
-                        },
-                        "category": ['website']
-                    },
-
-                    "http_security_header_x_content_type_options": {
-                        "name": "http_security_header_x_content_type_options",
-                        "second opinion links": [{
-                            "url": "https://securityheaders.io/?q=${url.url}",
-                            "language": "EN",
-                            "provider": "Securityheaders.io"
-                        }],
-                        "documentation links": [{
-                            "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xcto",
-                            "language": "EN",
-                            "provider": "OWASP"
-                        }],
-                        "relevant impacts": ["low"],
-                        "statistics": {
-                            "good": [{'label': "Stats has", 'explanation': 'X-Content-Type-Options header present.'}],
-                            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-Content-Type-Options header.'}],
-                            "bad": []
-                        },
-                        "category": ['website']
-                    },
-
-                    "http_security_header_x_xss_protection": {
-                        "name": "http_security_header_x_xss_protection",
-                        "second opinion links": [{
-                            "url": "https://securityheaders.io/?q=${url.url}",
-                            "language": "EN",
-                            "provider": "Securityheaders.io"
-                        }],
-                        "documentation links": [{
-                            "url": "https://www.owasp.org/index.php/OWASP_Secure_Headers_Project#xxxsp",
-                            "language": "EN",
-                            "provider": "OWASP"
-                        }],
-                        "relevant impacts": ["low"],
-                        "statistics": {
-                            "good": [{'label': "Stats has", 'explanation': 'X-XSS-Protection header present.'}],
-                            "medium": [{'label': "Stats hasn't", 'explanation': 'Missing X-XSS-Protection header.'}],
-                            "bad": []
-                        },
-                        "category": ['website']
-                    },
-
-                    "internet_nl_mail_starttls_tls_available": {
-                        "name": "internet_nl_mail_starttls_tls_available",
-                        "second opinion links": [{
-                            "url": "https://internet.nl/mail/${url.url}/",
-                            "language": "EN",
-                            "provider": "Internet.nl"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Opportunistic_TLS",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["high"],
-                        "statistics": {
-                            "good": [{'label': "STARTTLS Available", 'explanation': 'STARTTLS Available'},
-                            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
-                            "medium": [],
-                            "bad": [{'label': "STARTTLS Missing", 'explanation': 'STARTTLS Missing'}]
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                    "internet_nl_mail_auth_spf_exist": {
-                        "name": "internet_nl_mail_auth_spf_exist",
-                        "second opinion links": [{
-                            "url": "https://internet.nl/mail/${url.url}/",
-                            "language": "EN",
-                            "provider": "Internet.nl"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/Sender_Policy_Framework",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["medium"],
-                        "statistics": {
-                            "good": [{'label': "SPF Available", 'explanation': 'SPF Available'},
-                            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
-                            "medium": [{'label': "SPF Missing", 'explanation': 'SPF Missing'}],
-                            "bad": []
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                    "internet_nl_mail_auth_dkim_exist": {
-                        "name": "internet_nl_mail_auth_dkim_exist",
-                        "second opinion links": [{
-                            "url": "https://internet.nl/mail/${url.url}/",
-                            "language": "EN",
-                            "provider": "Internet.nl"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["medium"],
-                        "statistics": {
-                            "good": [{'label': "DKIM Available", 'explanation': 'DKIM Available'},
-                            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
-                            "medium": [{'label': "DKIM Missing", 'explanation': 'DKIM Missing'}],
-                            "bad": []
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                    "internet_nl_mail_auth_dmarc_exist": {
-                        "name": "internet_nl_mail_auth_dmarc_exist",
-                        "second opinion links": [{
-                            "url": "https://internet.nl/mail/${url.url}/",
-                            "language": "EN",
-                            "provider": "Internet.nl"
-                        }],
-                        "documentation links": [{
-                            "url": "https://en.wikipedia.org/wiki/DMARC",
-                            "language": "EN",
-                            "provider": "Wikipedia"
-                        }],
-                        "relevant impacts": ["medium"],
-                        "statistics": {
-                            "good": [{'label': "DMARC Available", 'explanation': 'DMARC Available'},
-                            {'label': "Not relevant anymore", 'explanation': 'Not relevant. This address does not receive mail anymore.'}],
-                            "medium": [{'label': "DMARC Missing", 'explanation': 'DMARC Missing'}],
-                            "bad": []
-                        },
-                        "category": ['confidentiality', 'integrity']
-                    },
-
-                },
-
-                available_color_schemes: {
-                    trafficlight: "/static/css/colors.trafficlight.css",
-                    pink: "/static/css/colors.trafficlight.css",
-                    deutranopia: "/static/css/colors.deutranopia.css",
-                },
-
-                active_color_scheme: "trafficlight",
-                colors_used_for_charts: {
-                    'high_background': 'rgba(255, 99, 132, 0.2)',
-                    'high_border': 'rgba(255, 99, 132, 0.2)',
-                    'medium_background': 'rgba(255, 102, 0, 0.2)',
-                    'medium_border': 'rgba(255,102,0,1)',
-                    'low_background': 'rgba(255, 255, 0, 0.2)',
-                    'low_border': 'rgba(255,255,0,1)',
-                    'good_background': 'rgba(50, 255, 50, 0.2)',
-                    'good_border': 'rgba(50, 255, 50, 1)',
-                    'addresses_background': 'rgba(0, 0, 0, 0.2)',
-                    'addresses_border': 'rgba(0,0,0,1)',
-                    'services_background': 'rgba(0, 40, 255, 0.2)',
-                    'services_border': 'rgba(0,40,255,1)',
-                },
-
-                available_themes: {
-                    default: {css: "/static/css/vendor/bootstrap.min.css", map_tilelayer: 'light'},
-                    darkly: {css: "/static/css/vendor/bootstrap-darkly.min.css", map_tilelayer: 'dark'},
-                },
-
-                layers: [],
-
-                // todo: this should come FROM websecmap and should be then avialble in reports.. or we
-                // should let the reports method get all options itself. This is now a placeholder.
-                organizations: [],
-
-                // the app state is leading for the rest. So we should have a state value here, and when that is changed,
-                // it is reflected through the app. (probably already so, but not explicit enough.)
-
-                organization: 0
-            },
-
-
-            methods: {
-                // expected by state_mixin
-                load: function(){},
-
-                // switch themes
-                // http://jsfiddle.net/82AsF/
-
-                set_theme: function(theme_name) {
-                    let possible_themes = Object.keys(this.available_themes);
-                    if (!possible_themes.includes(theme_name)) {
-                        console.log(`Theme not available. Available schemes are: ${possible_themes}.`)
+                        this.colors_used_for_charts = {
+                            'high_background': charts_high.css('background-color'),
+                            'high_border': charts_high.css('background-color'),
+                            'medium_background': charts_medium.css('background-color'),
+                            'medium_border': charts_medium.css('background-color'),
+                            'low_background': charts_low.css('background-color'),
+                            'low_border': charts_low.css('background-color'),
+                            'good_background': charts_good.css('background-color'),
+                            'good_border': charts_good.css('background-color'),
+                            'addresses_background': charts_connectivity_internet_adresses.css('background-color'),
+                            'addresses_border': charts_connectivity_internet_adresses.css('background-color'),
+                            'services_background': charts_connectivity_services.css('background-color'),
+                            'services_border': charts_connectivity_services.css('background-color'),
+                        };
                     }
-
-                    let theme_link = 'link[href="'+$('link#active_theme').attr('href') + '"]';
-                    $(theme_link).attr('href', this.available_themes.theme_name.css);
                 },
 
-                set_color_scheme: function(scheme_name) {
-                    let schemes = Object.keys(this.available_color_schemes);
-                    if (!schemes.includes(scheme_name)){
-                        console.log(`Color scheme not available. Available schemes are: ${schemes}.`)
+                computed: {
+                    // this is the correctly ordered set with issues. in an easy list.
+                    issues: function() {
+                        if (this.all_issues === undefined)
+                            return [];
+
+                        return [
+                            this.all_issues['DNSSEC'],
+                            this.all_issues["tls_qualys_certificate_trusted"],
+                            this.all_issues["tls_qualys_encryption_quality"],
+                            this.all_issues["plain_https"],
+                            this.all_issues["ftp"],
+                            this.all_issues["internet_nl_mail_starttls_tls_available"],
+                            this.all_issues["internet_nl_mail_auth_spf_exist"],
+                            this.all_issues["internet_nl_mail_auth_dkim_exist"],
+                            this.all_issues["internet_nl_mail_auth_dmarc_exist"],
+                            this.all_issues["http_security_header_strict_transport_security"],
+                            this.all_issues["http_security_header_x_frame_options"],
+                            this.all_issues["http_security_header_x_content_type_options"],
+                            this.all_issues["http_security_header_x_xss_protection"],
+                        ]
+                    },
+
+                    // These issues are specific for the URL level, others are on endpoint level.
+                    url_issue_names: function() {
+                        if (this.all_issues === undefined)
+                            return [];
+
+                        return [this.all_issues['DNSSEC']['name']]
                     }
-                    this.active_color_scheme = scheme_name;
-
-                    // this overrides the <link id="colorscheme" in the body to point to a new stylesheet.
-                    // this change is supported by most browsers and takes some time to process...
-                    let colorscheme_link = 'link[href="'+$('link#colorscheme').attr('href') + '"]';
-                    $(colorscheme_link).attr('href', `/static/css/colors.${scheme_name}.css`);
-
-                    setTimeout(this.set_graph_colorscheme, 2000);
-                    return true;
                 },
 
-                set_graph_colorscheme: function(){
-                    // This is a terrible solution to retrieve the active colors from an 'inkpot' on the body of the page.
-                    // The inkpot contains the colors of the currently active CSS file.
-                    // It is not possible to obtain these color reference in javascript by querying the CSS file...
-                    let charts_high = $('.charts_high');
-                    let charts_medium = $('.charts_medium');
-                    let charts_low = $('.charts_low');
-                    let charts_good = $('.charts_good');
-                    let charts_connectivity_internet_adresses = $('.charts_connectivity_internet_adresses');
-                    let charts_connectivity_services = $('.charts_connectivity_services');
-
-                    this.colors_used_for_charts = {
-                        'high_background': charts_high.css('background-color'),
-                        'high_border': charts_high.css('background-color'),
-                        'medium_background': charts_medium.css('background-color'),
-                        'medium_border': charts_medium.css('background-color'),
-                        'low_background': charts_low.css('background-color'),
-                        'low_border': charts_low.css('background-color'),
-                        'good_background': charts_good.css('background-color'),
-                        'good_border': charts_good.css('background-color'),
-                        'addresses_background': charts_connectivity_internet_adresses.css('background-color'),
-                        'addresses_border': charts_connectivity_internet_adresses.css('background-color'),
-                        'services_background': charts_connectivity_services.css('background-color'),
-                        'services_border': charts_connectivity_services.css('background-color'),
-                    };
-                }
-            },
-
-            computed: {
-                // this is the correctly ordered set with issues. in an easy list.
-                issues: function() {
-                    if (this.all_issues === undefined)
-                        return [];
-
-                    return [
-                        this.all_issues['DNSSEC'],
-                        this.all_issues["tls_qualys_certificate_trusted"],
-                        this.all_issues["tls_qualys_encryption_quality"],
-                        this.all_issues["plain_https"],
-                        this.all_issues["ftp"],
-                        this.all_issues["internet_nl_mail_starttls_tls_available"],
-                        this.all_issues["internet_nl_mail_auth_spf_exist"],
-                        this.all_issues["internet_nl_mail_auth_dkim_exist"],
-                        this.all_issues["internet_nl_mail_auth_dmarc_exist"],
-                        this.all_issues["http_security_header_strict_transport_security"],
-                        this.all_issues["http_security_header_x_frame_options"],
-                        this.all_issues["http_security_header_x_content_type_options"],
-                        this.all_issues["http_security_header_x_xss_protection"],
-                    ]
+                mounted: function(){
+                    console.log("App loaded...")
                 },
+            });
 
-                // These issues are specific for the URL level, others are on endpoint level.
-                url_issue_names: function() {
-                    if (this.all_issues === undefined)
-                        return [];
+            lazyload(); // allow for lazy loading of images
 
-                    return [this.all_issues['DNSSEC']['name']]
-                }
-            },
+            // date and time to the current locale, whatever it may be:
+            moment.locale(window.navigator.userLanguage || window.navigator.language);
 
-            mounted: function(){
-                console.log("App loaded...")
-            },
+            // if browser contains report anchor with organization id load that organization
+            let match = RegExp('report-([a-z-]+)').exec(location.hash);
+            if (match) {
+                let organization_name = match[1];
+                location.href = '#report';
+                vueReport.selected = organization_name;
+            }
+        };
+
+        const i18n = new VueI18n({
+            locale: window.navigator.language,
+            fallbackLocale: 'en',
+            // it's required this is called messages.
+            messages,
         });
 
-        lazyload(); // allow for lazy loading of images
+        const translation_mixin = {
+            methods: {
+                translate: function (string) {
+                    return i18n.t(string);
+                    // return gettext(string);
+                }
+            }
+        };
 
-        // date and time to the current locale, whatever it may be:
-        moment.locale(window.navigator.userLanguage || window.navigator.language);
-
-        // if browser contains report anchor with organization id load that organization
-        let match = RegExp('report-([a-z-]+)').exec(location.hash);
-        if (match) {
-            let organization_name = match[1];
-            location.href = '#report';
-            vueReport.selected = organization_name;
-        }
-    };
+        Vue.component('l-map', window.Vue2Leaflet.LMap);
+        Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+        Vue.component('l-control', window.Vue2Leaflet.LControl);
+        Vue.component('l-geo-json', window.Vue2Leaflet.LGeoJson);
+        Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
+        Vue.component('v-select', VueSelect.VueSelect);
     </script>
 
     {% if config.GITTER_CHAT_ENABLE and config.GITTER_CHAT_CHANNEL %}
@@ -790,22 +765,6 @@
         </script>
         <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
     {% endif %}
-
-    <script>
-        const i18n = new VueI18n({
-            locale: window.navigator.language,
-            fallbackLocale: 'en',
-            // it's required this is called messages.
-            messages,
-        });
-
-        Vue.component('l-map', window.Vue2Leaflet.LMap);
-        Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
-        Vue.component('l-control', window.Vue2Leaflet.LControl);
-        Vue.component('l-geo-json', window.Vue2Leaflet.LGeoJson);
-        Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
-        Vue.component('v-select', VueSelect.VueSelect);
-    </script>
 
     <!-- Instead of @import... -->
     {% include "map/static/js/components/graph.vue" %}
@@ -827,7 +786,6 @@
     {% include "map/static/js/components/footer.vue" %}
     {% include "map/static/js/components/mainmenu.vue" %}
     {% include "map/static/js/components/debugmenu.vue" %}
-    <link rel="manifest" href="/manifest.json">
 </head>
 
 <body role="document" onload="document_ready();">
