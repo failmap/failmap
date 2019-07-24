@@ -359,9 +359,6 @@ Vue.component('combined_number_statistics', {
             return (!data) ? "0%" :
                 this.roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
         },
-        translate: function(string){
-            return gettext(string);
-        },
         sortBy: function (key) {
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1;

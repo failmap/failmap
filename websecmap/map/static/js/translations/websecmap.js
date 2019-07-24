@@ -37,6 +37,7 @@ const messages = {
         website: "Website",
 
         // issues, are used at various places, the original value comes from the database stored as scan results.
+        // this is an issue with a spelling error :)
         "Site does not redirect to secure url, and has nosecure alternative on a standard port.": "--test--",
 
         "Site does not redirect to secure url, and has no secure alternative on a standard port.": "--test--",
@@ -111,7 +112,6 @@ const messages = {
         "Redirect from unsafe address": "--test--",
         "FTP Insecure": "--test--",
         "FTP": "--test--",
-
     },
     nl: {
 
