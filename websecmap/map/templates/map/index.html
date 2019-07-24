@@ -7,16 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, minimal-ui">
     <meta name="theme-color" content="Tomato"/>
 
-    <!-- export variables to javascript from server configuration -->
-    <meta name="mailto" content="{{ config.PROJECT_MAIL }}">
-    <meta name="issue_mailto" content="{{ config.PROJECT_ISSUE_MAIL }}">
-    <meta name="sentry_token" content="{{ sentry_token }}">
-    <meta name="version" content="{{ version }}">
-    <meta name="country" content="{{ country }}">
-    <meta name="debug" content="{{ debug }}">
-    <meta name="mapbox_token" content="{{ config.MAPBOX_ACCESS_TOKEN }}">
-    <meta name="initial_map_data_url" content="{{ initial_map_data_url }}">
-
     {% if config.PROJECT_NAME  %}
         <title>{{ config.PROJECT_NAME }}
         {% if config.PROJECT_TAGLINE %}
@@ -103,9 +93,9 @@
         let version = document.head.querySelector("[name=version]").getAttribute('content');
         let mapbox_token = document.head.querySelector("[name=mapbox_token]").getAttribute('content');
         let debug = document.head.querySelector("[name=debug]").getAttribute('content');
-        if (sentry_token) {
-            Raven.config(sentry_token, {release: version}).install();
-        }
+        {% if sentry_token %}
+            Raven.config({{ sentry_token }}, {release: {{ version }}).install();
+        {%  endif %}
 
         function debounce(func, wait, immediate) {
     let timeout;
@@ -156,40 +146,39 @@
         }
     };
 
+    const new_state_mixin = {
+        // new state mixin that is pure functional, and does not depend on html elements
+        // todo: move this to vuex(!)
+        data: {
+            state: {
+                // this is now inserted by django on the first load. We want to do this via url parameters too in the future.
+                'country': "{{ default_country }}",
+                'layer': "{{ default_layer }}",
+                'week': {{ default_week }},
+            },
+        },
+
+        // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
+        // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
+
+        methods: {
+
+            set_state: function(country, layer, week=0) {
+                // important:
+                // Accessing or manipulating individual fields (in vue js editor etc) does not have effect,
+                // you need to update the entire state in one operation. Otherwise you'll see no effect of your change.
+                // this is on purpose, to prevent load events for small changes.
+                this.state = {'country': country, 'layer': layer, 'week': week};
+           }
+        },
+        watch: {
+            state: function(new_value){
+                this.load()
+            }
+        }
+    };
 
     let document_ready = function() {
-
-        const new_state_mixin = {
-            // new state mixin that is pure functional, and does not depend on html elements
-            // todo: move this to vuex(!)
-            data: {
-                state: {
-                    // this is now inserted by django on the first load. We want to do this via url parameters too in the future.
-                    'country': "{{ default_country }}",
-                    'layer': "{{ default_layer }}",
-                    'week': {{ default_week }},
-                },
-            },
-
-            // watchers have implicit behaviour: if code is depending on two variables, setting each one seperately
-            // causes wathchers to execute the code twice. Therefore the watcher has been replaced by a function.
-
-            methods: {
-
-                set_state: function(country, layer, week=0) {
-                    // important:
-                    // Accessing or manipulating individual fields (in vue js editor etc) does not have effect,
-                    // you need to update the entire state in one operation. Otherwise you'll see no effect of your change.
-                    // this is on purpose, to prevent load events for small changes.
-                    this.state = {'country': country, 'layer': layer, 'week': week};
-               }
-            },
-            watch: {
-                state: function(new_value){
-                    this.load()
-                }
-            }
-        };
 
         const app = new Vue({
             i18n,
@@ -215,19 +204,48 @@
                         graphs: {{ config.SHOW_STATS_GRAPHS | lower }},
                         changes: {{ config.SHOW_STATS_CHANGES | lower }},
                         ticker: {{ config.SHOW_TICKER | lower }},
+                    },
+                    responsible_organization: {
+                        name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
+                        promo_text: "{{ config.RESPONSIBLE_ORGANIZATION_PROMO_TEXT}}",
+                        website: "{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE}}",
+                        mail: "{{ config.RESPONSIBLE_ORGANIZATION_MAIL}}",
+                        twitter: "{{ config.RESPONSIBLE_ORGANIZATION_TWITTER}}",
+                        facebook: "{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK}}",
+                        linkedin: "{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN}}",
+                        whatsapp: "{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP}}",
+                        phone: "{{ config.RESPONSIBLE_ORGANIZATION_PHONE}}",
 
-                        // issues: this could be calculated depending on issues.
-                        /*issues: {
-                            tls_qualys: {{ config.SHOW_DNSSEC }},
-                            missing_tls: {{ config.tls_qualys_certificate_trusted }},
-                            ftp: {{ config.tls_qualys_encryption_quality }},
-                            dnssec: {{ config.plain_https }},
-                            headers_hsts: {{ config.SHOW_HTTP_HEADERS_HSTS }},
-                            headers_xfo: {{ config.SHOW_HTTP_HEADERS_XFO }},
-                            headers_x_content: {{ config.SHOW_HTTP_HEADERS_X_CONTENT }},
-                            headers_x_xss: {{ config.SHOW_HTTP_HEADERS_X_XSS }},
-                        }*/
-                    }
+                    },
+                    project: {
+                        name: "{{ config.PROJECT_NAME }}",
+                        tagline: "{{ config.PROJECT_TAGLINE }}",
+                        country: "{{ config.PROJECT_COUNTRY }}",
+                        mail: "{{ config.PROJECT_MAIL }}",
+                        issue_mail: "{{ config.PROJECT_ISSUE_MAIL }}",
+                        twitter: "{{ config.PROJECT_TWITTER }}",
+                        facebook: "{{ config.PROJECT_FACEBOOK }}",
+                    },
+                    comply_or_explain: {
+                        forum_link: "{{ config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
+                        email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRES }}",
+                    },
+
+                    debug: {{ debug | lower }},
+                    admin: {{ admin | lower }},
+
+                    // issues: this could be calculated depending on issues.
+                    /*issues: {
+                        tls_qualys: {{ config.SHOW_DNSSEC }},
+                        missing_tls: {{ config.tls_qualys_certificate_trusted }},
+                        ftp: {{ config.tls_qualys_encryption_quality }},
+                        dnssec: {{ config.plain_https }},
+                        headers_hsts: {{ config.SHOW_HTTP_HEADERS_HSTS }},
+                        headers_xfo: {{ config.SHOW_HTTP_HEADERS_XFO }},
+                        headers_x_content: {{ config.SHOW_HTTP_HEADERS_X_CONTENT }},
+                        headers_x_xss: {{ config.SHOW_HTTP_HEADERS_X_XSS }},
+                    }*/
+
                 },
 
                 // excellent code injection point :)
@@ -639,27 +657,33 @@
             computed: {
                 // this is the correctly ordered set with issues. in an easy list.
                 issues: function() {
+                    if (this.all_issues === undefined)
+                        return [];
+
                     return [
-                    this.all_issues['DNSSEC'],
-                    this.all_issues["tls_qualys_certificate_trusted"],
-                    this.all_issues["tls_qualys_encryption_quality"],
-                    this.all_issues["plain_https"],
-                    this.all_issues["ftp"],
-                    this.all_issues["internet_nl_mail_starttls_tls_available"],
-                    this.all_issues["internet_nl_mail_auth_spf_exist"],
-                    this.all_issues["internet_nl_mail_auth_dkim_exist"],
-                    this.all_issues["internet_nl_mail_auth_dmarc_exist"],
-                    this.all_issues["http_security_header_strict_transport_security"],
-                    this.all_issues["http_security_header_x_frame_options"],
-                    this.all_issues["http_security_header_x_content_type_options"],
-                    this.all_issues["http_security_header_x_xss_protection"],
-                ]
+                        this.all_issues['DNSSEC'],
+                        this.all_issues["tls_qualys_certificate_trusted"],
+                        this.all_issues["tls_qualys_encryption_quality"],
+                        this.all_issues["plain_https"],
+                        this.all_issues["ftp"],
+                        this.all_issues["internet_nl_mail_starttls_tls_available"],
+                        this.all_issues["internet_nl_mail_auth_spf_exist"],
+                        this.all_issues["internet_nl_mail_auth_dkim_exist"],
+                        this.all_issues["internet_nl_mail_auth_dmarc_exist"],
+                        this.all_issues["http_security_header_strict_transport_security"],
+                        this.all_issues["http_security_header_x_frame_options"],
+                        this.all_issues["http_security_header_x_content_type_options"],
+                        this.all_issues["http_security_header_x_xss_protection"],
+                    ]
                 },
 
                 // These issues are specific for the URL level, others are on endpoint level.
-                url_issue_names: [
-                    this.all_issues['DNSSEC']['name'],
-                ],
+                url_issue_names: function() {
+                    if (this.all_issues === undefined)
+                        return [];
+
+                    return [this.all_issues['DNSSEC']['name']]
+                }
             },
 
             mounted: function(){
@@ -680,24 +704,6 @@
             vueReport.selected = organization_name;
         }
     };
-
-    window.vueFullScreenReport = new Vue({
-        name: "fullscreenreport",
-        el: '#fullscreenreport',
-        mixins: [new_state_mixin, translation_mixin],
-        data: {
-            visible: false,
-        },
-        methods: {
-            show: function () {
-                this.visible = true;
-            },
-            hide: function () {
-                this.visible = false;
-            },
-            load: function (){}
-        }
-    });
     </script>
 
     {% if config.GITTER_CHAT_ENABLE and config.GITTER_CHAT_CHANNEL %}
@@ -710,22 +716,19 @@
     {% endif %}
 
     <script>
-    const i18n = new VueI18n({
-        locale: window.navigator.language,
-        fallbackLocale: 'en',
-        // it's required this is called messages.
-        messages,
-    });
+        const i18n = new VueI18n({
+            locale: window.navigator.language,
+            fallbackLocale: 'en',
+            // it's required this is called messages.
+            messages,
+        });
 
-
-    Vue.component('l-map', window.Vue2Leaflet.LMap);
-    Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
-    Vue.component('l-control', window.Vue2Leaflet.LControl);
-    Vue.component('l-geo-json', window.Vue2Leaflet.LGeoJson);
-    Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
-    Vue.component('v-select', VueSelect.VueSelect);
-
-
+        Vue.component('l-map', window.Vue2Leaflet.LMap);
+        Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);
+        Vue.component('l-control', window.Vue2Leaflet.LControl);
+        Vue.component('l-geo-json', window.Vue2Leaflet.LGeoJson);
+        Vue.component('l-control-scale', window.Vue2Leaflet.LControlScale);
+        Vue.component('v-select', VueSelect.VueSelect);
     </script>
 
     <!-- Instead of @import... -->
@@ -735,6 +738,7 @@
     {% include "map/static/js/components/improvements.vue" %}
     {% include "map/static/js/components/report.vue" %}
     {% include "map/static/js/components/report_content.vue" %}
+    {% include "map/static/js/components/fullscreenreport.vue" %}
     {% include "map/static/js/components/datasets.vue" %}
     {% include "map/static/js/components/graphs.vue" %}
     {% include "map/static/js/components/combined_number_statistics.vue" %}
@@ -744,122 +748,23 @@
     {% include "map/static/js/components/chart.vue" %}
     {% include "map/static/js/components/intro.vue" %}
     {% include "map/static/js/components/websecmap.vue" %}
-
+    {% include "map/static/js/components/footer.vue" %}
+    {% include "map/static/js/components/mainmenu.vue" %}
+    {% include "map/static/js/components/debugmenu.vue" %}
     <link rel="manifest" href="/manifest.json">
-
 </head>
 
 <body role="document" onload="document_ready();">
-
-<nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
-    <div class="container">
-    <a class="navbar-brand" href="#">
-        <svg class="svg-inline--fa fa-map-marker-alt fa-w-12" aria-hidden="true" data-prefix="fas" data-icon="map-marker-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path></svg>
-        {% trans "Map" %}</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav mr-auto">
-
-            {% if config.SHOW_INTRO %}
-            <li class="nav-item"><a class="nav-link" href="#info">
-                <svg class="svg-inline--fa fa-info-circle fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="info-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"></path></svg>
-                {% trans "Info" %}</a></li>
-            {% endif %}
-
-            {% if config.SHOW_CHARTS %}
-            <li class="nav-item"><a class="nav-link" href="#charts">
-                <svg class="svg-inline--fa fa-list-ol fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="list-ol" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M3.263 139.527c0-7.477 3.917-11.572 11.573-11.572h15.131V88.078c0-5.163.534-10.503.534-10.503h-.356s-1.779 2.67-2.848 3.738c-4.451 4.273-10.504 4.451-15.666-1.068l-5.518-6.231c-5.342-5.341-4.984-11.216.534-16.379l21.72-19.938C32.815 33.602 36.732 32 42.785 32H54.89c7.656 0 11.749 3.916 11.749 11.572v84.384h15.488c7.655 0 11.572 4.094 11.572 11.572v8.901c0 7.477-3.917 11.572-11.572 11.572H14.836c-7.656 0-11.573-4.095-11.573-11.572v-8.902zM2.211 304.591c0-47.278 50.955-56.383 50.955-69.165 0-7.18-5.954-8.755-9.28-8.755-3.153 0-6.479 1.051-9.455 3.852-5.079 4.903-10.507 7.004-16.111 2.451l-8.579-6.829c-5.779-4.553-7.18-9.805-2.803-15.409C13.592 201.981 26.025 192 47.387 192c19.437 0 44.476 10.506 44.476 39.573 0 38.347-46.753 46.402-48.679 56.909h39.049c7.529 0 11.557 4.027 11.557 11.382v8.755c0 7.354-4.028 11.382-11.557 11.382h-67.94c-7.005 0-12.083-4.028-12.083-11.382v-4.028zM5.654 454.61l5.603-9.28c3.853-6.654 9.105-7.004 15.584-3.152 4.903 2.101 9.63 3.152 14.359 3.152 10.155 0 14.358-3.502 14.358-8.23 0-6.654-5.604-9.106-15.934-9.106h-4.728c-5.954 0-9.28-2.101-12.258-7.88l-1.05-1.926c-2.451-4.728-1.226-9.806 2.801-14.884l5.604-7.004c6.829-8.405 12.257-13.483 12.257-13.483v-.35s-4.203 1.051-12.608 1.051H16.685c-7.53 0-11.383-4.028-11.383-11.382v-8.755c0-7.53 3.853-11.382 11.383-11.382h58.484c7.529 0 11.382 4.027 11.382 11.382v3.327c0 5.778-1.401 9.806-5.079 14.183l-17.509 20.137c19.611 5.078 28.716 20.487 28.716 34.845 0 21.363-14.358 44.126-48.503 44.126-16.636 0-28.192-4.728-35.896-9.455-5.779-4.202-6.304-9.805-2.626-15.934zM144 132h352c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h352c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H144c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"></path></svg>
-                {% trans "Charts" %}</a></li>
-            {% endif %}
-
-            <li class="nav-item"><a class="nav-link" href="#reports">
-                <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
-                {% trans "Reports" %}</a></li>
-
-            {% if config.SHOW_EXTENSIVE_STATISTICS %}
-            <li class="nav-item"><a class="nav-link" href="#extensive_statistics">
-                <svg class="svg-inline--fa fa-chart-area fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="chart-area" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M500 384c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v308h436zM372.7 159.5L288 216l-85.3-113.7c-5.1-6.8-15.5-6.3-19.9 1L96 248v104h384l-89.9-187.8c-3.2-6.5-11.4-8.7-17.4-4.7z"></path></svg>
-                {% trans "Statistics" %}</a></li>
-            {% endif %}
-
-            {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-            <li class="nav-item"><a class="nav-link" href="#comply_or_explain_info">
-                <svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg>
-                {% trans "Comply or explain" %}</a></li>
-            {% endif %}
-
-            {% if config.SHOW_SCAN_SCHEDULE %}
-            <li class="nav-item"><a class="nav-link" href="#schedule">
-                <svg class="svg-inline--fa fa-clock fa-w-16" aria-hidden="true" data-prefix="far" data-icon="clock" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm61.8-104.4l-84.9-61.7c-3.1-2.3-4.9-5.9-4.9-9.7V116c0-6.6 5.4-12 12-12h32c6.6 0 12 5.4 12 12v141.7l66.8 48.6c5.4 3.9 6.5 11.4 2.6 16.8L334.6 349c-3.9 5.3-11.4 6.5-16.8 2.6z"></path></svg>
-                {% trans "Scan schedule" %}</a></li>
-            {%  endif %}
-
-            {% if config.SHOW_DATASETS %}
-            <li class="nav-item"><a class="nav-link" href="#datasets">
-                <svg class="svg-inline--fa fa-download fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="download" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M216 0h80c13.3 0 24 10.7 24 24v168h87.7c17.8 0 26.7 21.5 14.1 34.1L269.7 378.3c-7.5 7.5-19.8 7.5-27.3 0L90.1 226.1c-12.6-12.6-3.7-34.1 14.1-34.1H192V24c0-13.3 10.7-24 24-24zm296 376v112c0 13.3-10.7 24-24 24H24c-13.3 0-24-10.7-24-24V376c0-13.3 10.7-24 24-24h146.7l49 49c20.1 20.1 52.5 20.1 72.6 0l49-49H488c13.3 0 24 10.7 24 24zm-124 88c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20zm64 0c0-11-9-20-20-20s-20 9-20 20 9 20 20 20 20-9 20-20z"></path></svg>
-                {% trans "Datasets" %}</a></li>
-            {% endif %}
-        </ul>
-        {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
-        <ul class="navbar-nav navbar-right ml-auto">
-            <li class="nav-item nav-link" style="padding-right:20px;">
-                <a href="https://websecuritymap.org"><img src="{% static 'images/web-security-map-logo-small.png' %}" alt="logo" width="34px" class="d-inline-block align-top"/></a>
-            </li>
-            <li class="nav-item nav-link" style="padding-right:20px;">
-                <a href="https://gitlab.com/internet-cleanup-foundation/web-security-map/"><img src="{% static 'images/gitlab_logo_small.png' %}" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
-            </li>
-        </ul>
-    </div>
-    </div>
-</nav>
-
-{% if debug or admin %}
-    <nav class="navbar navbar-expand-md navbar-light">
-        <div class="container">
-            Debug
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        <div class="collapse navbar-collapse" id="adminbarcollapse">
-            <ul class="navbar-nav mr-auto">
-
-                {% if debug %}
-                <li class="nav-item nav-link"><span class='btn btn-danger btn-sm'>{% trans "DEBUG" %}</span></li>
-                {% endif %}
-
-            </ul>
-            {% comment %}nav-link does not have a "padding only" variant, even the content examples everything sticks together, which is ugly/chaotic.{% endcomment %}
-            <ul class="navbar-nav navbar-right ml-auto">
-            {% if admin %}
-                <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                <li class="nav-item"><a class="nav-link" href="/grafana/">{% trans "Monitoring" %}</a></li>
-                <li class="nav-item"><a class="nav-link" onclick="map.loadTiles()">{% trans "Load Tiles" %}</a></li>
-                <!-- This allows testing different themes -->
-                <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Theme<span class="caret"></span></a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
-                            <a href="#" data-theme="default" class="dropdown-item theme-link">Default</a>
-                            <a href="#" data-theme="darkly" class="dropdown-item theme-link">Darkly</a>
-                        </div>
-                    </li>
-            {% endif %}
-            </ul>
-        </div>
-        </div>
-    </nav>
-{% endif %}
 
 <div id="app">
 
     <template v-if="state.country !== '' && state.layer !== ''">
 
+        <mainmenu :config="config"></mainmenu>
+        <debugmenu :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>
         <mapstatebar :state="state" :map_configuration="map_configuration"></mapstatebar>
 
-        {% if config.SHOW_ANNOUNCEMENT and config.ANNOUNCEMENT %}
-        <section class="announcement">
+        <section class="announcement" v-if="config.show.announcement">
            <div class="container">
                 <div class="row">
                     <div class="col-md-12">
@@ -869,27 +774,20 @@
                 </div>
             </div>
         </section>
-        {% endif %}
 
         <section>
             <websecmap :L="L" :state="state" :issues="issues" :mapbox_token="'{{ config.MAPBOX_ACCESS_TOKEN }}'" :debug="{{ debug | lower }}"></websecmap>
         </section>
 
-
-        {% if config.SHOW_INTRO %}
-        <section>
+        <section v-if="config.show.intro">
             <intro :organization="'{{ config.RESPONSIBLE_ORGANIZATION_NAME }}'" :organization_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"></intro>
         </section>
-        {% endif %}
 
-
-        {% if config.SHOW_CHARTS %}
-        <section>
+        <section v-if="config.show.charts">
            <div class="container">
                <charts :state="state"></charts>
           </div>
         </section>
-        {% endif %}
 
         <section id="report">
             <div class="container">
@@ -900,16 +798,28 @@
                     :state="state"
                     :organization="organization"
                     :color_scheme="colors_used_for_charts"
-                    :incorrect_finding_mail="'{{ config.PROJECT_ISSUE_MAIL }}'"
-                    :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"
-                    :send_in_email_address="'{{ config.PROJECT_ISSUE_MAIL }}'"
-                    :comply_or_explain_email_address="'{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}'">
+                    :incorrect_finding_mail="config.project.issue_mail"
+                    :show_comply_or_explain="config.show.comply_or_explain"
+                    :send_in_email_address="config.project.issue_mail"
+                    :comply_or_explain_email_address="config.comply_or_explain.email_address">
                 </report_content>
+
+                <fullscreenreport
+                    :issues="issues"
+                    :url_issue_names="url_issue_names"
+                    :state="state"
+                    :organization="organization"
+                    :color_scheme="colors_used_for_charts"
+                    :incorrect_finding_mail="config.project.issue_mail"
+                    :show_comply_or_explain="config.show.comply_or_explain"
+                    :send_in_email_address="config.project.issue_mail"
+                    :comply_or_explain_email_address="config.comply_or_explain.email_address">
+                </fullscreenreport>
             </div>
         </section>
 
         {% if config.SHOW_EXTENSIVE_STATISTICS %}
-        <section id="extensive_statistics">
+        <section id="extensive_statistics" >
             <div class="container">
                 {% if config.SHOW_STATS_NUMBERS %}
                     <combined_number_statistics :issues="issues" :state="state" :show_services="{{ config.SHOW_SERVICES | lower }}"></combined_number_statistics>
@@ -927,229 +837,38 @@
         </section>
         {% endif %}
 
-        {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-            <!-- todo: get this to work, it is not tested yet... -->
-        <section id="comply_or_explain_info">
+        <!-- todo: get this to work, it is not tested yet... -->
+        <section id="comply_or_explain_info" v-if="config.show.comply_or_explain">
             <div class="container">
                 <comply_or_explain :state="state"></comply_or_explain>
             </div>
         </section>
-        {% endif %}
 
-        {% if config.SHOW_SCAN_SCHEDULE %}
-        <section id="scan_schedule">
+        <section id="scan_schedule" v-if="config.show.scan_schedule">
             <div class="container">
                 <scan_schedule></scan_schedule>
             </div>
         </section>
-        {% endif %}
 
-        {% if config.SHOW_DATASETS %}
         <section id="datasets">
             <div class="container">
-                <datasets :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
+                <datasets v-if="config.show.datasets" :state="state" :layers="layers" :show_comply_or_explain="{{ config.SHOW_COMPLY_OR_EXPLAIN | lower }}"></datasets>
             </div>
         </section>
-        {% endif %}
 
+        <section id="lastrow">
+            <div class="container">
+                <foot :config="config"></foot>
+            </div>
+        </section>
 
-        <ticker v-if="{{ config.SHOW_TICKER | lower }}"></ticker>
-
+        <ticker v-if="config.show.ticker"></ticker>
 
     </template>
     <template v-if="!state.country || !state.layer">
         <p>Loading app state...</p>
     </template>
 </div>
-
-
-
-<section id="lastrow">
-    <div class="container">
-        <div class="row">
-            <a name="footer" class="jumptonav"></a>
-
-            <div class="col-md-3">
-
-                {% if config.PROJECT_NAME %}
-                    <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank"><b>{{ config.PROJECT_NAME }}</b></a><br />
-                {% endif %}
-                {% if config.PROJECT_TAGLINE %}
-                    <i>{{ config.PROJECT_TAGLINE }}</i><br />
-                {% endif %}
-
-                {% if config.SHOW_DONATION %}
-                    <a class="btn btn-success btn-lg btn-block" href="https://useplink.com/payment/qaCyn8t6Tar7c5zVS6Fa/" target="_blank">{% trans "Support us, donate here!" %}</a>
-                {% endif %}
-
-                <ul>
-                    <li>{% trans "General inquiry e-mail" %}: <a href="mailto:{{ config.PROJECT_MAIL }}" target="_blank">
-                        <svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
-                    <li>{% trans "Issues e-mail" %}: <a href="mailto:{{ config.PROJECT_ISSUE_MAIL }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
-                    {% if config.SHOW_COMPLY_OR_EXPLAIN %}
-                        <li>{% trans "Comply or explain" %}: <a href="mailto:{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a></li>
-                    {%  endif %}
-
-                    <li>
-                        {% if config.PROJECT_TWITTER or config.PROJECT_FACEBOOK %}
-                            {% trans "Also on social media" %}:
-
-                            {% if config.PROJECT_TWITTER %}
-                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><svg class="svg-inline--fa fa-twitter-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="twitter-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"></path></svg></a>
-                            {% endif %}
-
-                            {% if config.PROJECT_FACEBOOK %}
-                            <a href="{{ config.PROJECT_TWITTER }}" target="_blank"><svg class="svg-inline--fa fa-facebook-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="facebook-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M448 80v352c0 26.5-21.5 48-48 48h-85.3V302.8h60.6l8.7-67.6h-69.3V192c0-19.6 5.4-32.9 33.5-32.9H384V98.7c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9H184v67.6h60.9V480H48c-26.5 0-48-21.5-48-48V80c0-26.5 21.5-48 48-48h352c26.5 0 48 21.5 48 48z"></path></svg></a>
-                            {% endif %}
-
-                        {% endif %}
-                    </li>
-                </ul>
-
-            </div>
-
-            <div class="col-md-3">
-                <b>{% trans "About this website" %}</b>
-                <ul>
-                    <li>⬇️ <a href="https://gitlab.com/internet-cleanup-foundation/" target="_blank" rel="noopener">{% trans "Get the sourcecode" %}</a></li>
-                    <li>📖 <a href="https://docs.failmap.org" target="_blank" rel="noopener">{% trans "Documentation" %}</a></li>
-                </ul>
-                {% if config.SHOW_TICKER %}
-                <ul>
-                    <li><a onclick="vueTicker.toggleVisibility();">{% trans "Show / Hide Ticker" %}</a></li>
-                </ul>
-                {% endif %}
-            </div>
-
-            <div class="col-md-3">
-                <b>{% trans "Made possible by" %}</b>
-                <ul>
-                    <li>🗺️ <a href="https://internetcleanup.foundation" target="_blank" rel="noopener">Internet Cleanup Foundation</a></li>
-                    <li>ℹ️ <a href="https://www.sidnfonds.nl/" target="_blank" rel="noopener">SIDN fonds</a></li>
-                </ul>
-            </div>
-
-            <div class="col-md-3">
-                {% if config.RESPONSIBLE_ORGANIZATION_NAME %}
-                <b>{% trans "This website is run by" %}</b>
-                {% endif %}
-
-                <ul>
-                    {% if config.RESPONSIBLE_ORGANIZATION_WEBSITE %}
-                    <li>🖥️ <a href="{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE }}" target="_blank" rel="noopener">{{ config.RESPONSIBLE_ORGANIZATION_NAME }}</a></li>
-                    {% endif %}
-
-                    <li>{% trans "Contact" %}:
-                        {% if config.RESPONSIBLE_ORGANIZATION_MAIL %}
-                        <a href="mailto:{{ config.RESPONSIBLE_ORGANIZATION_MAIL }}" target="_blank"><svg class="svg-inline--fa fa-envelope-square fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="envelope-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM178.117 262.104C87.429 196.287 88.353 196.121 64 177.167V152c0-13.255 10.745-24 24-24h272c13.255 0 24 10.745 24 24v25.167c-24.371 18.969-23.434 19.124-114.117 84.938-10.5 7.655-31.392 26.12-45.883 25.894-14.503.218-35.367-18.227-45.883-25.895zM384 217.775V360c0 13.255-10.745 24-24 24H88c-13.255 0-24-10.745-24-24V217.775c13.958 10.794 33.329 25.236 95.303 70.214 14.162 10.341 37.975 32.145 64.694 32.01 26.887.134 51.037-22.041 64.72-32.025 61.958-44.965 81.325-59.406 95.283-70.199z"></path></svg></a>
-                        {% endif %}
-
-                        {% if config.RESPONSIBLE_ORGANIZATION_TWITTER %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_TWITTER }}" target="_blank" rel="noopener"><svg class="svg-inline--fa fa-twitter-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="twitter-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-48.9 158.8c.2 2.8.2 5.7.2 8.5 0 86.7-66 186.6-186.6 186.6-37.2 0-71.7-10.8-100.7-29.4 5.3.6 10.4.8 15.8.8 30.7 0 58.9-10.4 81.4-28-28.8-.6-53-19.5-61.3-45.5 10.1 1.5 19.2 1.5 29.6-1.2-30-6.1-52.5-32.5-52.5-64.4v-.8c8.7 4.9 18.9 7.9 29.6 8.3a65.447 65.447 0 0 1-29.2-54.6c0-12.2 3.2-23.4 8.9-33.1 32.3 39.8 80.8 65.8 135.2 68.6-9.3-44.5 24-80.6 64-80.6 18.9 0 35.9 7.9 47.9 20.7 14.8-2.8 29-8.3 41.6-15.8-4.9 15.2-15.2 28-28.8 36.1 13.2-1.4 26-5.1 37.8-10.2-8.9 13.1-20.1 24.7-32.9 34z"></path></svg></a>
-                        {% endif %}
-
-                        {% if config.RESPONSIBLE_ORGANIZATION_FACEBOOK %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK }}" target="_blank" rel="noopener"><svg class="svg-inline--fa fa-facebook-square fa-w-14" aria-hidden="true" data-prefix="fab" data-icon="facebook-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M448 80v352c0 26.5-21.5 48-48 48h-85.3V302.8h60.6l8.7-67.6h-69.3V192c0-19.6 5.4-32.9 33.5-32.9H384V98.7c-6.2-.8-27.4-2.7-52.2-2.7-51.6 0-87 31.5-87 89.4v49.9H184v67.6h60.9V480H48c-26.5 0-48-21.5-48-48V80c0-26.5 21.5-48 48-48h352c26.5 0 48 21.5 48 48z"></path></svg></a>
-                        {% endif %}
-
-                        {% if config.RESPONSIBLE_ORGANIZATION_LINKEDIN %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="linkedin" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-linkedin fa-w-14"><path fill="currentColor" d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z" class=""></path></svg></a>
-                        {% endif %}
-
-                        {% if config.RESPONSIBLE_ORGANIZATION_WHATSAPP %}
-                        <a href="{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fab" data-icon="whatsapp-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-whatsapp-square fa-w-14"><path fill="currentColor" d="M224 122.8c-72.7 0-131.8 59.1-131.9 131.8 0 24.9 7 49.2 20.2 70.1l3.1 5-13.3 48.6 49.9-13.1 4.8 2.9c20.2 12 43.4 18.4 67.1 18.4h.1c72.6 0 133.3-59.1 133.3-131.8 0-35.2-15.2-68.3-40.1-93.2-25-25-58-38.7-93.2-38.7zm77.5 188.4c-3.3 9.3-19.1 17.7-26.7 18.8-12.6 1.9-22.4.9-47.5-9.9-39.7-17.2-65.7-57.2-67.7-59.8-2-2.6-16.2-21.5-16.2-41s10.2-29.1 13.9-33.1c3.6-4 7.9-5 10.6-5 2.6 0 5.3 0 7.6.1 2.4.1 5.7-.9 8.9 6.8 3.3 7.9 11.2 27.4 12.2 29.4s1.7 4.3.3 6.9c-7.6 15.2-15.7 14.6-11.6 21.6 15.3 26.3 30.6 35.4 53.9 47.1 4 2 6.3 1.7 8.6-1 2.3-2.6 9.9-11.6 12.5-15.5 2.6-4 5.3-3.3 8.9-2 3.6 1.3 23.1 10.9 27.1 12.9s6.6 3 7.6 4.6c.9 1.9.9 9.9-2.4 19.1zM400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zM223.9 413.2c-26.6 0-52.7-6.7-75.8-19.3L64 416l22.5-82.2c-13.9-24-21.2-51.3-21.2-79.3C65.4 167.1 136.5 96 223.9 96c42.4 0 82.2 16.5 112.2 46.5 29.9 30 47.9 69.8 47.9 112.2 0 87.4-72.7 158.5-160.1 158.5z" class=""></path></svg></a>
-                        {% endif %}
-
-                        {% if config.RESPONSIBLE_ORGANIZATION_PHONE %}
-                        <a href="sip://{{ config.RESPONSIBLE_ORGANIZATION_PHONE }}" target="_blank" rel="noopener"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="phone-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-phone-square fa-w-14"><path fill="currentColor" d="M400 32H48C21.49 32 0 53.49 0 80v352c0 26.51 21.49 48 48 48h352c26.51 0 48-21.49 48-48V80c0-26.51-21.49-48-48-48zM94 416c-7.033 0-13.057-4.873-14.616-11.627l-14.998-65a15 15 0 0 1 8.707-17.16l69.998-29.999a15 15 0 0 1 17.518 4.289l30.997 37.885c48.944-22.963 88.297-62.858 110.781-110.78l-37.886-30.997a15.001 15.001 0 0 1-4.289-17.518l30-69.998a15 15 0 0 1 17.16-8.707l65 14.998A14.997 14.997 0 0 1 384 126c0 160.292-129.945 290-290 290z" class=""></path></svg></a>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</section>
-
-</body>
-
-<script type="x-template" id="fullscreenreport">
-    <div class="page-header" id="fullscreenreport" v-if="visible">
-        <div v-if="name" class="fullscreenlayout">
-            <p class="closebutton" onclick="vueFullScreenReport.hide()">
-                [ x ]
-            </p>
-
-            <h3>{% trans "Report for" %} {% verbatim %}{{ name }}{% endverbatim %}</h3>
-            <br />
-            <a onclick="vueFullScreenReport.hide()" class="btn btn-primary" style="color:white;"><svg aria-hidden="true" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="" class="svg-inline--fa fa-times fa-w-12"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg> {% trans "close report" %}</a>
-            <a @click="printreport('reportcontent')" class="btn btn-success" style="color:white;"><svg aria-hidden="true" data-prefix="fas" data-icon="print" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-print fa-w-16"><path fill="currentColor" d="M464 192h-16V81.941a24 24 0 0 0-7.029-16.97L383.029 7.029A24 24 0 0 0 366.059 0H88C74.745 0 64 10.745 64 24v168H48c-26.51 0-48 21.49-48 48v132c0 6.627 5.373 12 12 12h52v104c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V384h52c6.627 0 12-5.373 12-12V240c0-26.51-21.49-48-48-48zm-80 256H128v-96h256v96zM128 224V64h192v40c0 13.2 10.8 24 24 24h40v96H128zm304 72c-13.254 0-24-10.746-24-24s10.746-24 24-24 24 10.746 24 24-10.746 24-24 24z"></path></svg> {% trans "print report" %}</a>
-            <br /><br />
-            {% include "map/shared_report_contents.html" %}
-        </div>
-    </div>
-</script>
-<script type="x-template" id="historycontrol_template">
-    <div id="historycontrol" style="max-width: 300px; overflow:hidden;">
-        <h4>{% trans "Moment" %}</h4>
-        <h5>{% verbatim %}{{ visibleweek }}{% endverbatim %} <span v-if='loading'><div class="loader"></div></span></h5>
-        <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
-        <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' value='&lt; {% trans "One week earlier" %}'/>
-        <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' value='{% trans "One week later" %} &gt;'/>
-        <br /><br />
-
-        <h4>{% trans "Risk filter" %}</h4>
-
-        <div v-for="issue in issues" style="white-space: nowrap;">
-                <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
-                <label :for="issue.name" v-html="translate(issue.name)"></label>
-        </div>
-
-        <button type="button" class="btn btn-success btn-sm" @click="clear_filter()" v-show="displayed_issue">{% trans "Clear Filter" %}</button><br />
-
-    </div>
-</script>
-
-<script type="x-template" id="domainlist_template">
-    <div id="domainlist">
-        <div v-if="urls.length > 1" v-cloak>
-            <table width='100%'>
-                <thead>
-                    <tr>
-                        <th style='min-width: 20px; width: 20px;'>{% trans "H" %}</th>
-                        <th style='min-width: 20px; width: 20px;'>{% trans "M" %}</th>
-                        <th style='min-width: 20px; width: 20px;'>{% trans "L" %}</th>
-                        <th>{% trans "Url" %}</th>
-                    </tr>
-                </thead>
-                {% verbatim %}
-                <tbody>
-                    <tr v-for="url in urls">
-                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
-                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
-                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
-                        <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
-                    </tr>
-                </tbody>
-                {% endverbatim %}
-            </table>
-        </div>
-    </div>
-</script>
-{% verbatim %}
-<script type="x-template" id="map_item_hover">
-    <div id="map_hover_info_contents">
-        <div v-if="properties.organization_name" v-cloak>
-            <h4><a @click="showreport(properties.organization_id)">{{ properties.organization_name }}</a></h4>
-            <div class="progress">
-                <div class="progress-bar bg-danger" :style="{width:high}"></div>
-                <div class="progress-bar bg-warning" :style="{width:medium}"></div>
-                <div class="progress-bar bg-success" :style="{width:low}"></div>
-                <div class="progress-bar bg-success" :style="{width:perfect}"></div>
-            </div>
-        </div>
-    </div>
-</script>
-{% endverbatim %}
 
 <!-- These elements are added so they can be accessed from a jquery selector. You can't directly access css classes. -->
 <div id="inkpot" style="visibility: hidden;">
@@ -1161,7 +880,8 @@
     <div class="charts_connectivity_services"></div>
 </div>
 
-<iframe name="print_frame" title="Print frame, used to load reports when clicking print." width="0" height="0" frameborder="0" src="about:blank"></iframe>
+</body>
+
 </html>
 <!--
 This page was generated with MSPAINT.EXE on {{ timestamp }} in over 9000 seconds, version: {{ version }}.

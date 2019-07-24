@@ -15,9 +15,9 @@
                     <ul class="navbar-nav mr-auto">
 
                         <template v-for="country in countries">
-                        <li class="nav-item" :class="[this.state.country === country.code ? 'selected_country' : '']">
-                            <a  class="nav-link" v-on:click="set_country('{{ country.code }}')">
-                                <img src="{{ country.flag }}" width="16" height="10">
+                        <li class="nav-item" :class="[state.country === country.code ? 'selected_country' : '']">
+                            <a  class="nav-link" v-on:click="set_country(country.code)">
+                                <img :src="country.flag" width="16" height="10">
                                 {{ country.name }}</a>
                         </li>
                         </template>
@@ -39,7 +39,7 @@
 
                 <div class="collapse navbar-collapse" id="layercollapse">
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item" v-for="layer in layers" :class="[this.state.layer === layer ? 'selected_layer' : '']">
+                        <li class="nav-item" v-for="layer in layers" :class="[state.layer === layer ? 'selected_layer' : '']">
                             <a class="nav-link" v-on:click="set_layer(layer)">
                                 {{ $t(layer) }}
                             </a>
@@ -97,31 +97,37 @@ Vue.component('mapstatebar', {
         load: function(){},
 
         set_country: function(country_code) {
+            // There is always at least one layer for every country.
+            this.layers = this.map_configuration[country_code].layers;
+            this.selected_country = country_code;
 
-            this.layers = map_configuration[country_code].layers;
-            app.set_state(this.countrycode, this.layers[0]);
-
-
-            // the first layer of the country is the default. Load the map and set that one.
-            fetch('/data/layers/' + this.selected_country + '/').then(response => response.json()).then(layers => {
-                // yes, there are layers.
-                if (layers.length) {
-                    this.layers = layers;
-                    this.selected_layer = layers[0];
-
-                    // todo, use vuex to update this state.
-
-                } else {
-                    this.layers = [""];
-                    app.set_state(this.selected_country, this.selected_layer);
-                }
-            });
+            // todo: use vuex
+            app.set_state(country_code, this.layers[0]);
         },
         set_layer: function(layer_name){
-            this.selected_layer = layer_name;
-            app.set_state(this.selected_country, this.selected_layer);
+            app.set_state(this.selected_country, layer_name);
         },
-
     },
+
+    computed: {
+        countries: function() {
+            let available_countries = [];
+
+            // basic dict to list, what would be the generic approach?
+            let country_codes = Object.keys(this.map_configuration);
+            let self = this;
+            country_codes.forEach(function(country_code){
+                available_countries.push(self.map_configuration[country_code])
+            });
+
+            return available_countries;
+        }
+    },
+
+    mounted: function() {
+        let first = Object.keys(this.map_configuration);
+        this.layers = this.map_configuration[first[0]].layers;
+    },
+
 });
 </script>

@@ -16,6 +16,7 @@
                 <br />
             </div>
         </div>
+        <iframe name="print_frame" title="Print frame, used to load reports when clicking print." width="0" height="0" frameborder="0" src="about:blank"></iframe>
     </div>
 </template>
 {% endverbatim %}

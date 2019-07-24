@@ -156,20 +156,18 @@ def index(request):
         for conf in confs:
             print(conf.country)
             if conf.country.code not in countries:
-                countries = {**countries, **{
+                countries = {**countries, **{conf.country.code: {
                     'code': conf.country.code,
                     'name': conf.country.name,
                     'flag': conf.country.flag,
                     'layers': [conf.organization_type.name]}
-                             }
+                             }}
             else:
                 countries[conf.country]['layers'].append(conf.organization_type.name)
 
         return countries
 
     initial_countries = get_initial_countries()
-
-    navigation = get_initial_countries()
 
     map_defaults = get_defaults()
 
