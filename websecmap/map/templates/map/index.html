@@ -47,6 +47,7 @@
     <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% if debug %}
         <script type="text/javascript" src="/static/js/vendor/vue.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vuex@3.1.1/vuex.js"></script>
         <script type="text/javascript" src="/static/js/vendor/vue-select-2.6.0.js"></script>
         <script type="text/javascript" src="/static/js/vendor/jquery-3.2.1.js"></script>
         <script type="text/javascript" src="/static/js/vendor/bootstrap.js"></script>
@@ -62,6 +63,7 @@
         <script type="text/javascript" src="/static/js/vendor/vue2-leaflet@2.1.1/vue2-leaflet.min.js"></script>
     {% else %}{% compress js %}
         <script type="text/javascript" src="/static/js/vendor/vue.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/vuex@3.1.1/vuex.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/vue-select-2.6.0.js"></script>
         <script type="text/javascript" src="/static/js/vendor/jquery-3.2.1.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/bootstrap.min.js"></script>
@@ -127,10 +129,28 @@
             }
         };
 
+        Vue.use(Vuex);
+
+        const store = new Vuex.Store({
+            state: {
+                country: "{{ default_country }}",
+                layer: "{{ default_layer }}",
+                week: {{ default_week }},
+            },
+            mutations: {
+                // https://stackoverflow.com/questions/47239694/vuex-how-mutate-multiple-properties-in-store-like-in-redux#47240340
+                // this.$store.commit('change', {country: 'NL', layer: 'municipality'})
+                change (state, payload) {
+                  state = Object.assign(state, payload)
+                },
+            }
+        });
+
         let document_ready = function() {
 
             const app = new Vue({
                 i18n,
+                store,
 
                 // vuex state sharing:
                 // store,

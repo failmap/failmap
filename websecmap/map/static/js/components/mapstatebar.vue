@@ -15,7 +15,7 @@
                     <ul class="navbar-nav mr-auto">
 
                         <template v-for="country in countries">
-                        <li class="nav-item" :class="[state.country === country.code ? 'selected_country' : '']">
+                        <li class="nav-item" :class="[$store.state.country === country.code ? 'selected_country' : '']">
                             <a  class="nav-link" v-on:click="set_country(country.code)">
                                 <img :src="country.flag" width="16" height="10">
                                 {{ country.name }}</a>
@@ -39,7 +39,7 @@
 
                 <div class="collapse navbar-collapse" id="layercollapse">
                     <ul class="navbar-nav mr-auto">
-                        <li class="nav-item" v-for="layer in layers" :class="[state.layer === layer ? 'selected_layer' : '']">
+                        <li class="nav-item" v-for="layer in layers" :class="[$store.state.layer === layer ? 'selected_layer' : '']">
                             <a class="nav-link" v-on:click="set_layer(layer)">
                                 {{ $t(layer) }}
                             </a>
@@ -55,13 +55,14 @@
 {% endverbatim %}
 
 <script>
-Vue.component('mapstatebar', {
+Vue.component('Mapstatebar', {
+    store,
+
     // This is the most important driver for state changes in websecmap.
     // This bar shows all available options and will allow visitors to switch.
     // Instead of translating every country into every language, we use django's content.
     // So this is just non-auto-updating menu... which is much simpler than it was.
     // no dynamic content, but faster load times :)
-
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -79,7 +80,6 @@ Vue.component('mapstatebar', {
         },
     },
     template: "#mapstatebar_template",
-    mixins: [new_state_mixin, translation_mixin],
 
     data: function () {
         return {
@@ -102,10 +102,10 @@ Vue.component('mapstatebar', {
             this.selected_country = country_code;
 
             // todo: use vuex
-            app.set_state(country_code, this.layers[0]);
+            store.commit('change', {country: country_code, layer: this.layers[0]});
         },
         set_layer: function(layer_name){
-            app.set_state(this.selected_country, layer_name);
+            store.commit('change', {country: this.selected_country, layer: layer_name});
         },
     },
 
