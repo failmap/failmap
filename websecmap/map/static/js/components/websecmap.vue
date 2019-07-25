@@ -515,7 +515,6 @@ Vue.component('websecmap', {
 
                 url = `/data/report/${this.state.country}/${this.state.layer}/${layer.feature.properties.organization_id}/${this.state.week}`;
                 fetch(url).then(response => response.json()).then(data => {
-                    console.log(data.calculation["organization"]["urls"]);
                     this.domainlist_urls = data.calculation["organization"]["urls"];
                 }).catch((fail) => {console.log('A domainlist loading error occurred: ' + fail);});
 
