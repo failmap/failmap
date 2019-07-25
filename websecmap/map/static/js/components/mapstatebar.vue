@@ -129,6 +129,7 @@ Vue.component('Mapstatebar', {
     mounted: function() {
         let first = Object.keys(this.map_configuration);
         this.layers = this.map_configuration[first[0]].layers;
+        this.selected_country = this.map_configuration[first[0]].code;
     },
 
 });

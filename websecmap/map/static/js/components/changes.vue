@@ -83,7 +83,6 @@ Vue.component('changes', {
 
     props: {
         issues: Array,
-        state: Object,
     },
 
     methods: {

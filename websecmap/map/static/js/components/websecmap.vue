@@ -9,10 +9,8 @@
             :style="'light-v9'"
             :url="this.tile_uri()"
             :token="mapbox_token"
-            :accessToken="mapbox_token"
-            :access-token="mapbox_token"
             :max-zoom="18"
-            :attribution="'tbd'"
+            :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
             :visible="true"
             :id="'mapbox.light'"
             :tile-size="512"
@@ -23,15 +21,15 @@
         <!-- The actual data on the map is manipulated by reference, as there are several complex methods that require
         a lot of thought to rewrite to the new approach. The goal was mainly to have all the controls declarative.
         For example: i have no clue how searching and updating / recoloring and filtering would work otherwise.
-        It's probably not too hard, as this entire operation has been a breeze til so far. -->
+        It's probably not too hard, as this entire operation has been a breeze so far. -->
         <!-- <l-geo-json :geojson="polygons"></l-geo-json> -->
 
-        <!-- <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25" ref="clusterRef">
+        <!-- Including marker-cluster in a 'classic' web project was not easy, and the code doesn't match yet. See above.
+         <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25" ref="clusterRef">
             <v-marker v-for="m in markers" v-if="c.location !== null" :lat-lng="c.latlng">
 
             </v-marker>
         </v-marker-cluster> -->
-
 
         <l-control-scale position="bottomleft" :imperial="true" :metric="true"></l-control-scale>
 
@@ -42,24 +40,29 @@
         </l-control>
 
         <l-control position="topright">
-            <div id="new_historycontrol" style="max-width: 300px; overflow:hidden;" class="info table-light">
+            <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                 <h4>{{ $t("map.history.title") }}</h4>
                 <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
                 <h5>{{ visibleweek }} <span v-if='loading'><div class="loader" style="width: 200px; height: 200px;"></div></span></h5>
-                <input id='history' type='range' v-on:change='show_week' :value='week' min='0' max='52' step='1' :disabled='loading'/><br />
+                <input id='history' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/><br />
                 <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' :value="'<' + $t('map.history.previous')"/>
                 <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' :value="'>' + $t('map.history.next')"/>
-                <br /><br />
+            </div>
+        </l-control>
 
+        <l-control position="topright">
+            <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                 <h4>{{ $t("map.filter.title") }}</h4>
+                <template v-if="issues.length > 1">
+                    <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
+                    <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
+                </template>
                 <div v-for="issue in issues" style="white-space: nowrap;">
                     <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
                     <label :for="issue.name" v-html="translate(issue.name)"></label>
                 </div>
-                <button type="button" class="btn btn-success btn-sm" @click="clear_filter()" v-show="displayed_issue">{{ $t("map.filter.clear") }}</button><br />
             </div>
         </l-control>
-
 
         <l-control position="bottomright">
             <div class="info legend table-light">
@@ -73,53 +76,51 @@
         </l-control>
 
         <l-control position="topright">
-            <div class="info table-light">
-                <div style='max-width: 300px;'>
-                    <!-- todo: add map_item_hover -->
-                    <div v-if="hover_info.properties.organization_name">
-                        <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
-                        <div class="progress">
-                            <div class="progress-bar bg-danger" :style="{width:high}"></div>
-                            <div class="progress-bar bg-warning" :style="{width:medium}"></div>
-                            <div class="progress-bar bg-success" :style="{width:low}"></div>
-                            <div class="progress-bar bg-success" :style="{width:perfect}"></div>
-                        </div>
-                    </div>
+            <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
-                    <div id="domainlist">
-                        <div v-if="domainlist_urls.length > 1">
-                            <table width='100%'>
-                                <thead>
-                                    <tr>
-                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.high") }}</th>
-                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.medium") }}</th>
-                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.low") }}</th>
-                                        <th>{{ $t("map.domainlist.url") }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="url in domainlist_urls">
-                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
-                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
-                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
-                                        <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <div>
+                    <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" :style="{width:high}"></div>
+                        <div class="progress-bar bg-warning" :style="{width:medium}"></div>
+                        <div class="progress-bar bg-success" :style="{width:low}"></div>
+                        <div class="progress-bar bg-success" :style="{width:perfect}"></div>
                     </div>
                 </div>
+
+                <div>
+                    <div v-if="domainlist_urls.length > 1">
+                        <table width='100%'>
+                            <thead>
+                                <tr>
+                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.high") }}</th>
+                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.medium") }}</th>
+                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.low") }}</th>
+                                    <th>{{ $t("map.domainlist.url") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="url in domainlist_urls">
+                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
+                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
+                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
+                                    <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
         </l-control>
 
         <l-control position="topleft">
             <div>
-                <span @click="show_all_map_data()" title='Zoom to show all data on this map.'
+                <span @click="show_all_map_data()" :title='$t("map.zoombutton")'
                   style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>
             </div>
         </l-control>
-
-  </l-map>
+    </l-map>
 
 </template>
 {% endverbatim %}
@@ -143,8 +144,8 @@ Vue.component('websecmap', {
                     },
 
                     filter: {
-                        title: "Risk filter",
-                        clear: 'Clear filter',
+                        title: "Filter on issue",
+                        show_everything: 'Show all data',
                     },
 
                     legend: {
@@ -162,6 +163,8 @@ Vue.component('websecmap', {
                         low: "L",
                         url: "Url",
                     },
+
+                    zoombutton: "Zoom to show all data on this map.",
 
                 }
             },
@@ -229,34 +232,34 @@ Vue.component('websecmap', {
             }
         ),
 
-            // domainlist:
-            domainlist_urls: [],
+        // domainlist:
+        domainlist_urls: [],
 
-            // direct refrence to the leaflet map that is being used to display data.
-            // this.$refs.lmap.mapObject
-            map: this.$refs,
+        // direct refrence to the leaflet map that is being used to display data.
+        // this.$refs.lmap.mapObject
+        map: this.$refs,
 
-            possibleIconSeverities: ["unknown", "good", "low", "medium", "high"],
+        possibleIconSeverities: ["unknown", "good", "low", "medium", "high"],
 
-            // search functionality:
-            searchquery: "",
+        // search functionality:
+        searchquery: "",
 
-            // only show information when the mouse is more than 0.1 second.
-            timer: 0,
+        // only show information when the mouse is more than 0.1 second.
+        timer: 0,
 
-            // hover_info:
-            hover_info: {
-                properties: {
-                    organization_name: "",
-                    high: 0,
-                    medium: 0,
-                    low: 0,
-                    high_urls: 0,
-                    medium_urls: 0,
-                    low_urls: 0,
-                    total_urls: 0
-                }
+        // hover_info:
+        hover_info: {
+            properties: {
+                organization_name: "",
+                high: 0,
+                medium: 0,
+                low: 0,
+                high_urls: 0,
+                medium_urls: 0,
+                low_urls: 0,
+                total_urls: 0
             }
+        }
         }
     },
 
@@ -276,6 +279,7 @@ Vue.component('websecmap', {
             // The whole view is rendered, so I can safely access or query
             // the DOM. ¯\_(ツ)_/¯
             this.map = this.$refs.lmap.mapObject;
+            this.load();
         })
 
     },
@@ -292,8 +296,8 @@ Vue.component('websecmap', {
             let bounds = this.polygons.getBounds();
             bounds.extend(this.markers.getBounds());
 
-            this.map.fitBounds(bounds,
-                {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
+            if (Object.keys(bounds).length !== 0)
+                this.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
         },
 
         tile_uri: function() {
@@ -358,8 +362,8 @@ Vue.component('websecmap', {
                 this.add_new_layers_remove_non_used(geodata.polygons, this.polygons, "polygons");
 
                 // update existing layers (and add ones with the same name)
-                this.polygons.eachLayer(function (layer) {this.recolormap(mapdata.features, layer)});
-                this.markers.eachLayer(function (layer) {this.recolormap(mapdata.features, layer)});
+                this.polygons.eachLayer((layer) => {this.recolormap(mapdata.features, layer)});
+                this.markers.eachLayer((layer) => {this.recolormap(mapdata.features, layer)});
 
                 // colors could have changed
                 this.markers.refreshClusters();
@@ -380,12 +384,15 @@ Vue.component('websecmap', {
 
             let bounds = this.polygons.getBounds();
             bounds.extend(this.markers.getBounds());
-            this.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+
+            // it could be the map is empty, then there are no bounds, and calling fitbounds would result in an error.
+            if (Object.keys(bounds).length !== 0)
+                this.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
         },
         recolormap: function (features, layer) {
             let existing_feature = layer.feature;
 
-            features.forEach(function (new_feature){
+            features.forEach((new_feature) => {
 
                 if (existing_feature.properties.organization_name !== new_feature.properties.organization_name) {
                     return;
@@ -447,7 +454,7 @@ Vue.component('websecmap', {
             });
 
             // add layers to the map that are only in the new dataset (new)
-            shapeset.forEach(function (shape){
+            shapeset.forEach((shape) => {
                 // polygons has addData, but MarkedCluster doesn't. You can't blindly do addlayer on points.
                 if (!target_names.includes(shape.properties.organization_name)){
                     if (layer_type === "polygons") {
@@ -466,37 +473,28 @@ Vue.component('websecmap', {
             });
         },
         next_week: function () {
-            if (this.week > 0) {
-                this.week -= 1;
-                this.show_week();
+            if (this.state.week > 0) {
+                store.commit('change', {week: this.state.week -= 1});
             }
         },
         previous_week: function () {
-            // caused 1, 11, 111 :) lol
-            if (this.week <= 52) {
-                this.week += 1;
-                this.show_week();
+            if (this.state.week <= 52) {
+                store.commit('change', {week: this.state.week += 1});
             }
         },
         show_week: function (e) {
             if (e) {
-                this.week = parseInt(e.target.value);
+                store.commit('change', {week: parseInt(e.target.value)});
             }
-
-            this.load(this.week);
 
             // nobody understands that when you drag the map slider, the rest
             // of the site and all reports are also old.
             // so don't. Add matching UI elsewhere...
 
-            if (this.selected_organization > -1) {
-                // console.log(selected_organization);
-                // todo: requests the "report" page 3x.
-                // due to asyncronous it's hard to just "copy" results.
-                // vueReport.load(vueMap.selected_organization, this.week);
-                // vueFullScreenReport.load(vueMap.selected_organization, this.week);
-                this.load_domains(this.selected_organization, this.week);
-            }
+            // todo: this should be state. It also affects reports...
+            // if (this.selected_organization > -1) {
+            //     this.load_domains(this.selected_organization, this.week);
+            // }
         },
         colorize: function (high, medium, low) {
             if (high > 0) return "high";
@@ -505,7 +503,7 @@ Vue.component('websecmap', {
         },
 
         highlightFeature: function (e) {
-            this.timer = setTimeout(function(){
+            this.timer = setTimeout(() => {
                 let layer = e.target;
 
                 layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
@@ -514,41 +512,19 @@ Vue.component('websecmap', {
                 }
 
                 this.hover_info.properties = layer.feature.properties;
-                this.load_domains(layer.feature.properties.organization_id, this.state.week);
-            }, 300);
-        },
-        debounce: function(func, wait, immediate) {
-            let timeout;
-            return function () {
-                let context = this, args = arguments;
-                clearTimeout(timeout);
-                timeout = setTimeout(function () {
-                    timeout = null;
-                    if (!immediate) func.apply(context, args);
-                }, wait);
-                if (immediate && !timeout) func.apply(context, args);
-            };
-        },
-        load_domains: function() {this.debounce(function (organization_id, weeks_back) {
-                if (!weeks_back)
-                    weeks_back = 0;
 
-                if (!this.country || !this.layer)
-                    return;
-
-                // symptom of state mixing loads this even though it's not needed (and doesn't have the right arguments)
-                if (!organization_id)
-                    return;
-
-                $.getJSON('/data/report/' + this.country + '/' + this.layer + '/' + organization_id + '/' + weeks_back, function (data) {
+                url = `/data/report/${this.state.country}/${this.state.layer}/${layer.feature.properties.organization_id}/${this.state.week}`;
+                fetch(url).then(response => response.json()).then(data => {
+                    console.log(data.calculation["organization"]["urls"]);
                     this.domainlist_urls = data.calculation["organization"]["urls"];
-                });
-            }, 42)
+                }).catch((fail) => {console.log('A domainlist loading error occurred: ' + fail);});
+
+            }, 300);
         },
 
         // from hover info
         perc: function (amount, total) {
-            return (!amount || !total) ? "0%" : roundTo(amount / total * 100, 2) + "%";
+            return (!amount || !total) ? "0%" : this.roundTo(amount / total * 100, 2) + "%";
         },
         // from hover info
         showreport: function(e) {
@@ -585,7 +561,7 @@ Vue.component('websecmap', {
             //     onEachFeature: map.onEachFeature
             // }).addTo(map.map);
             self = this;
-            points.forEach(function(point){
+            points.forEach((point) => {
                 // points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
                 // https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
                 let pointlayer = this.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
@@ -651,25 +627,24 @@ Vue.component('websecmap', {
             query = this.searchquery.toLowerCase();
             if ((query === "") || (!query)) {
                 // reset
-                this.polygons.eachLayer(function (layer) {
-                    this.setStyle(this.style(layer.feature));
+                this.polygons.eachLayer((layer) => {
+                    layer.setStyle(this.style(layer.feature));
                 });
-                this.markers.eachLayer(function (layer) {
+                this.markers.eachLayer((layer) => {
                     layer.setStyle(this.style(layer.feature));
                 });
                 this.markers.refreshClusters();
             } else {
                 // text match
                 // todo: is there a faster, native search option?
-                this.polygons.eachLayer(function (layer) {
+                this.polygons.eachLayer((layer) => {
                     if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                         layer.setStyle(this.searchResultStyle(layer.feature));
                     } else {
                         layer.setStyle(this.style(layer.feature));
                     }
                 });
-                this.markers.eachLayer(function (layer) {
-
+                this.markers.eachLayer((layer) => {
                     if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
                         layer.setStyle(this.searchResultStyle(layer.feature));
                     } else {
