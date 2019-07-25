@@ -23,6 +23,7 @@
 
 <script>
 Vue.component('report', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {

@@ -246,6 +246,7 @@
 
 <script>
 Vue.component('combined_number_statistics', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -335,7 +336,6 @@ Vue.component('combined_number_statistics', {
 
     props: {
         issues: Array,
-        state: Object,
         show_services: Boolean,
     },
 

@@ -89,12 +89,14 @@ Vue.component('Mapstatebar', {
     },
 
     props: {
-        state: Object,
         map_configuration: Object,
     },
 
     methods: {
-        load: function(){},
+        load: function(){
+            console.log("Load called automatically")
+
+        },
 
         set_country: function(country_code) {
             // There is always at least one layer for every country.

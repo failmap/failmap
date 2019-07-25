@@ -97,7 +97,7 @@
             return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
         };
 
-        const new_state_mixin = {
+        const new_state_mixin_ = {
             // new state mixin that is pure functional, and does not depend on html elements
             // todo: move this to vuex(!)
             data: {
@@ -122,9 +122,20 @@
                     this.state = {'country': country, 'layer': layer, 'week': week};
                }
             },
+            getters: {
+                status: state => state.status,
+            },
+        };
+
+        const new_state_mixin = {
+            computed: {
+                state: function(){
+                    return {country: store.state.country, layer: store.state.layer, week: store.state.week}
+                }
+            },
             watch: {
-                state: function(new_value){
-                    this.load()
+                state: function() {
+                    this.load();
                 }
             }
         };
@@ -143,7 +154,7 @@
                 change (state, payload) {
                   state = Object.assign(state, payload)
                 },
-            }
+            },
         });
 
         let document_ready = function() {
@@ -737,7 +748,7 @@
 
         <mainmenu :config="config"></mainmenu>
         <debugmenu :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>
-        <mapstatebar :state="state" :map_configuration="map_configuration"></mapstatebar>
+        <mapstatebar :map_configuration="map_configuration"></mapstatebar>
 
         <section class="announcement" v-if="config.show.announcement">
            <div class="container">
@@ -751,7 +762,7 @@
         </section>
 
         <section>
-            <websecmap :L="L" :state="state" :issues="issues" :mapbox_token="config.mapbox_token" :debug="config.debug"></websecmap>
+            <websecmap :L="L"  :issues="issues" :mapbox_token="config.mapbox_token" :debug="config.debug"></websecmap>
         </section>
 
         <section v-if="config.show.intro">
@@ -760,7 +771,7 @@
 
         <section v-if="config.show.charts">
            <div class="container">
-               <charts :state="state"></charts>
+               <charts></charts>
           </div>
         </section>
 
@@ -770,7 +781,7 @@
                 <report_content
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-                    :state="state"
+
                     :organization="organization"
                     :color_scheme="colors_used_for_charts"
                     :incorrect_finding_mail="config.project.issue_mail"
@@ -782,7 +793,7 @@
                 <fullscreenreport
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-                    :state="state"
+
                     :organization="organization"
                     :color_scheme="colors_used_for_charts"
                     :incorrect_finding_mail="config.project.issue_mail"
@@ -795,17 +806,17 @@
 
         <section id="extensive_statistics" v-if="config.show.statistics">
             <div class="container">
-                <combined_number_statistics v-if="config.show.numbers" :issues="issues" :state="state" :show_services="config.show.services"></combined_number_statistics>
-                <improvements v-if="config.show.improvements" :issues="issues" :state="state"></improvements>
-                <graphs v-if="config.show.graphs" :issues="issues" :state="state" :color_scheme="colors_used_for_charts"></graphs>
-                <changes v-if="config.show.changes" :issues="issues" :state="state"></changes>
+                <combined_number_statistics v-if="config.show.numbers" :issues="issues"  :show_services="config.show.services"></combined_number_statistics>
+                <improvements v-if="config.show.improvements" :issues="issues" ></improvements>
+                <graphs v-if="config.show.graphs" :issues="issues"  :color_scheme="colors_used_for_charts"></graphs>
+                <changes v-if="config.show.changes" :issues="issues" ></changes>
             </div>
         </section>
 
         <!-- todo: get this to work, it is not tested yet... -->
         <section id="comply_or_explain_info" v-if="config.show.comply_or_explain">
             <div class="container">
-                <comply_or_explain :state="state"></comply_or_explain>
+                <comply_or_explain ></comply_or_explain>
             </div>
         </section>
 
@@ -817,7 +828,7 @@
 
         <section id="datasets">
             <div class="container">
-                <datasets v-if="config.show.datasets" :state="state" :layers="layers" :show_comply_or_explain="config.show.comply_or_explain"></datasets>
+                <datasets v-if="config.show.datasets" :layers="layers" :show_comply_or_explain="config.show.comply_or_explain"></datasets>
             </div>
         </section>
 

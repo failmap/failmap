@@ -12,11 +12,11 @@
         </div>
         <div class="row">
             <h3>{{ $t("charts.top_fail.title") }}</h3>
-            <chart :state="state" :data_url="'/data/topfail/'"></chart>
+            <chart :data_url="'/data/topfail/'"></chart>
         </div>
         <div class="row">
             <h3>{{ $t("charts.top_win.title") }}</h3>
-            <chart :state="state" :data_url="'/data/topwin/'"></chart>
+            <chart :data_url="'/data/topwin/'"></chart>
         </div>
     </div>
 </template>
@@ -24,6 +24,7 @@
 
 <script>
 Vue.component('charts', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -53,7 +54,6 @@ Vue.component('charts', {
     },
 
     props: {
-        state: Object,
     },
 
     methods: {

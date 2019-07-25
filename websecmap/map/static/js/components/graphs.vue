@@ -43,6 +43,7 @@
 
 <script>
 Vue.component('graphs', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -75,7 +76,6 @@ Vue.component('graphs', {
 
     props: {
         issues: Array,
-        state: Object,
         color_scheme: Object,
     },
 

@@ -62,6 +62,7 @@
 
 <script>
 Vue.component('chart', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -106,7 +107,6 @@ Vue.component('chart', {
     },
 
     props: {
-        state: Object,
         data_url: String,
     },
     methods: {

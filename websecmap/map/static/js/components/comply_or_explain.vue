@@ -68,6 +68,7 @@
 
 <script>
 Vue.component('comply_or_explain', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -96,7 +97,6 @@ Vue.component('comply_or_explain', {
     },
 
     props: {
-        state: Object,
         show_discussion: Boolean,
     },
 

@@ -188,6 +188,7 @@
 
 <script>
 Vue.component('report_content', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -314,7 +315,6 @@ Vue.component('report_content', {
     props: {
         issues: Array,
         url_issue_names: Array,
-        state: Object,
         organization: [String, Number],
         color_scheme: Object,
         incorrect_finding_mail: String,

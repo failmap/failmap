@@ -55,6 +55,7 @@
 
 <script>
 Vue.component('improvements', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -98,7 +99,6 @@ Vue.component('improvements', {
 
     props: {
         issues: Array,
-        state: Object,
     },
 
     methods: {

@@ -126,6 +126,8 @@
 
 <script>
 Vue.component('websecmap', {
+    store,
+
     name: "websecmap",
     i18n: { // `i18n` option, setup locale info for component
         messages: {
@@ -260,7 +262,6 @@ Vue.component('websecmap', {
 
     props: {
         issues: Array,
-        state: Object,
         debug: Number,
         mapbox_token: String,
 

@@ -17,7 +17,6 @@
             <report_content
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-                    :state="state"
                     :organization="organization"
                     :color_scheme="color_scheme"
                     :incorrect_finding_mail="incorrect_finding_mail"
@@ -33,6 +32,7 @@
 
 <script>
 Vue.component('fullscreenreport', {
+    store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -61,7 +61,6 @@ Vue.component('fullscreenreport', {
         // is there a pass through option? Or should this all be state?
         issues: Array,
         url_issue_names: Array,
-        state: Object,
         organization: [String, Number],
         color_scheme: Object,
         incorrect_finding_mail: String,
