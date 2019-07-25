@@ -17,7 +17,6 @@
             <report_content
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-                    :organization="organization"
                     :color_scheme="color_scheme"
                     :incorrect_finding_mail="incorrect_finding_mail"
                     :show_comply_or_explain="show_comply_or_explain"
@@ -61,7 +60,6 @@ Vue.component('fullscreenreport', {
         // is there a pass through option? Or should this all be state?
         issues: Array,
         url_issue_names: Array,
-        organization: [String, Number],
         color_scheme: Object,
         incorrect_finding_mail: String,
         show_comply_or_explain: Boolean,

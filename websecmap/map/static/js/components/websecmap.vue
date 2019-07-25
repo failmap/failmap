@@ -527,10 +527,14 @@ Vue.component('websecmap', {
         },
         // from hover info
         showreport: function(e) {
-            let organization_id = e.target.feature.properties['organization_id'];
-            this.showreport_direct(organization_id);
+            // give both name and id as separate identifiers.
+            store.commit('change', {reported_organization: {
+                id: e.target.feature.properties['organization_id'],
+                name: e.target.feature.properties['organization_name'],
+            }});
+            this.showreport_direct();
         },
-        showreport_direct: function (organization_id) {
+        showreport_direct: function () {
             if (this.map.isFullscreen()) {
                 console.log("Not yet implemented");
                 // var layer = e.target;
@@ -545,7 +549,6 @@ Vue.component('websecmap', {
                 // trigger load of organization data and jump to Report view.
                 // the app should take care about fullscreen things
                 location.href = '#report';
-                app.organization = organization_id;
             }
         },
         pointToLayer: function (geoJsonPoint, latlng) {

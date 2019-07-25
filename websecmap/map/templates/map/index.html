@@ -131,6 +131,9 @@
             computed: {
                 state: function(){
                     return {country: store.state.country, layer: store.state.layer, week: store.state.week}
+                },
+                reported_organization: () => {
+                    return store.state.reported_organization;
                 }
             },
             watch: {
@@ -147,11 +150,16 @@
                 country: "{{ default_country }}",
                 layer: "{{ default_layer }}",
                 week: {{ default_week }},
+                reported_organization: {id: null, name: null},
             },
+
             mutations: {
                 // https://stackoverflow.com/questions/47239694/vuex-how-mutate-multiple-properties-in-store-like-in-redux#47240340
                 // this.$store.commit('change', {country: 'NL', layer: 'municipality'})
                 change (state, payload) {
+                  state = Object.assign(state, payload)
+                },
+                organization (state, payload) {
                   state = Object.assign(state, payload)
                 },
             },
@@ -563,14 +571,10 @@
 
                     layers: [],
 
+                    // add to state? Or what should we do. We can also download the possible orgnizations...
                     // todo: this should come FROM websecmap and should be then avialble in reports.. or we
                     // should let the reports method get all options itself. This is now a placeholder.
                     organizations: [],
-
-                    // the app state is leading for the rest. So we should have a state value here, and when that is changed,
-                    // it is reflected through the app. (probably already so, but not explicit enough.)
-
-                    organization: 0
                 },
 
 
@@ -781,8 +785,6 @@
                 <report_content
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-
-                    :organization="organization"
                     :color_scheme="colors_used_for_charts"
                     :incorrect_finding_mail="config.project.issue_mail"
                     :show_comply_or_explain="config.show.comply_or_explain"
@@ -793,8 +795,6 @@
                 <fullscreenreport
                     :issues="issues"
                     :url_issue_names="url_issue_names"
-
-                    :organization="organization"
                     :color_scheme="colors_used_for_charts"
                     :incorrect_finding_mail="config.project.issue_mail"
                     :show_comply_or_explain="config.show.comply_or_explain"

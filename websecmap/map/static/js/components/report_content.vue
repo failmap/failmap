@@ -2,8 +2,7 @@
 <template type="x-template" id="report_content_template">
     <div id="report_content">
         <template v-if='loading'><div class="loader" style="width: 100px; height: 100px;"></div></template>
-        <template v-if='!loading && organization'>
-
+        <template v-if='!loading && reported_organization'>
 
             <div class="row report_controls" style="margin-bottom: 30px;">
                 <div  class="col-md-3">
@@ -223,6 +222,7 @@ Vue.component('report_content', {
 
                     report: {
                         title: "Complete report",
+                        report_incorrect_finding: "Report incorrect finding",
                         incorrect_finding_mail: {
                             title: 'Incorrect finding on {0}',
                             body: 'Notice: be aware that everything is scanned and updated routinely. This can take a few days.\n\n\n' +
@@ -333,9 +333,10 @@ Vue.component('report_content', {
 
     methods: {
         closereport: function(){
-            // todo: this should be handled in the component, in some way. ANd be re-visible when another organization
-            // is selected (???)
-            app.organization = null;
+            store.commit('change', {reported_organization: {
+                id: null,
+                name: null,
+            }});
         },
         printreport: function(divId){
             css1 = '<link href="/static/css/vendor/bootstrap.min.css" rel="stylesheet" type="text/css">';
@@ -350,20 +351,22 @@ Vue.component('report_content', {
             window.frames["print_frame"].window.print();
         },
 
-        load: function (weeks_ago=0) {
+        load: function () {
             // against symptom of autoloading when setting state, this doesn't have the right parameters.
-            if (!this.organization)
+            console.log(`Loading report for ${this.reported_organization}.`);
+            if (!this.reported_organization.id)
+                // todo: clear this thing if there is nothing reported......
                 return;
 
             this.loading = true;
             this.name = null;
 
             // first update the graphs, doing this around, the graph will show the previous data, not the current stuff
-            fetch('/data/organization_vulnerability_timeline/' + this.organization + '/' + this.state.layer + '/' + this.state.country).then(response => response.json()).then(timelinedata => {
+            fetch(`/data/organization_vulnerability_timeline/${this.reported_organization.id}/${this.state.layer}/${this.state.country}`).then(response => response.json()).then(timelinedata => {
                 this.timeline = timelinedata;
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 
-            fetch('/data/report/' + this.state.country + '/' + this.state.layer + '/' + this.organization + '/' + weeks_ago)
+            fetch(`/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.id}/${this.state.week}`)
                 .then(response => response.json()).then(data => {
                 this.urls = data.calculation["organization"]["urls"];
                 this.points = data.rating;
@@ -388,14 +391,15 @@ Vue.component('report_content', {
 
             let worst = {};
 
-            this.issues.forEach(function (issue) {
-                if (this.url_issue_names.includes(issue['name']))
+            self = this;
+            this.issues.forEach((issue) => {
+                if (self.url_issue_names.includes(issue['name']))
                     worst[issue['name']] = this.worstof(issue['name'], [url]);
                 else
                     worst[issue['name']] = this.worstof(issue['name'], url.endpoints);
             });
 
-            let text = `<td><b><a href="#report_url_${url.url}">${url.url}</a></b></td>`;
+            let text = `<td><b><a href="#report_url_${url.url}">🔎 ${url.url}</a></b></td>`;
 
             let findings = "";
 
@@ -481,11 +485,18 @@ Vue.component('report_content', {
         },
         second_opinion_links: function (rating, url) {
 
-            let selected_issue = issues[rating.type];
+            // todo: no documentation links are found...
+            // console.log(this.issues);
+            let selected_issue = this.issues[rating.type];
+
+            if (!selected_issue) {
+                return ""
+            }
 
             let links = "";
 
             // todo: take in account language.
+            // todo: this should be part of the template, not a weird function...
             selected_issue['second opinion links'].forEach(function (item){
                 let filled_url = item.url;
                 filled_url = filled_url.replace("${url.url}", url.url);
@@ -535,7 +546,7 @@ Vue.component('report_content', {
     },
 
     watch: {
-        organization: function () {
+        reported_organization: function () {
             // load selected organization id
             this.load()
         }
