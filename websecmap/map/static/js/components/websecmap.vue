@@ -5,16 +5,14 @@
     <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
            :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true}">
 
+        <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
         <l-tile-layer
             :style="'light-v9'"
             :url="this.tile_uri()"
             :token="mapbox_token"
             :max-zoom="18"
             :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
-            :visible="true"
-            :id="'mapbox.light'"
-            :tile-size="512"
-            :zoom-offset="-1"
+
             :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
         ></l-tile-layer>
 
@@ -319,9 +317,6 @@ Vue.component('websecmap', {
         },
         // slowly moving the map into a vue. NOPE. denied.
         load: function () {
-            // todo: make sure that when the app loads, the correct state is available in the app, to reduce complexity
-            // we also then don't need a map_default call.
-
             let url = `/data/map/${this.state.country}/${this.state.layer}/${this.state.week * 7}/${this.displayed_issue}/`;
             fetch(url).then(response => response.json()).then(data => {
                 console.log(`Loading websecmap data from: ${url}`);
