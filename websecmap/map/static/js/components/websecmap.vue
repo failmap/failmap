@@ -301,6 +301,7 @@ Vue.component('websecmap', {
         },
 
         tile_uri: function() {
+            // osm: http://{s}.tile.osm.org/{z}/{x}/{y}.png
             let tile_uri_base = 'https://api.mapbox.com/styles/v1/mapbox/{style}/tiles/{z}/{x}/{y}/';
             let tile_uri_params = 'access_token={accessToken}';
             let tile_uri = tile_uri_base + '?' + tile_uri_params;
