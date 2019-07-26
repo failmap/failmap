@@ -2,7 +2,7 @@
 <template type="x-template" id="report_content_template">
     <div id="report_content">
         <template v-if='loading'><div class="loader" style="width: 100px; height: 100px;"></div></template>
-        <template v-if='!loading && reported_organization'>
+        <template v-if='!loading && (reported_organization.id || reported_organization.name)'>
 
             <div class="row report_controls" style="margin-bottom: 30px;">
                 <div  class="col-md-3">
@@ -210,7 +210,7 @@ Vue.component('report_content', {
 
                     report_of: "Report of",
                     data_from: "Data from",
-                    high_risk: "high_risk",
+                    high_risk: "High risk",
                     medium_risk: "Medium risk",
                     low_risk: "Low risk",
                     timeline: {
@@ -354,9 +354,35 @@ Vue.component('report_content', {
         load: function () {
             // against symptom of autoloading when setting state, this doesn't have the right parameters.
             console.log(`Loading report for ${this.reported_organization}.`);
-            if (!this.reported_organization.id)
+            if (!this.reported_organization.id && !this.reported_organization.name) {
+                // reset:
+                this.timeline = null;
+
+                this.calculation = '';
+                this.rating = 0;
+                this.points = 0;
+                this.high = 0;
+                this.medium = 0;
+                this.low = 0;
+                this.when = 0;
+                this.twitter_handle = '';
+                this.name = "";
+                this.urls = Array;
+                this.selected = {'id': null, 'label': null, 'name': null};
+                this.loading = false;
+                this.visible = false;  // fullscreenreport
+                this.promise = false;
+
+                // so they can be destroyed and re-initialized, is this really needed?
+                this.myChart = null;
+                this.myChart2 = null;
+                this.timeline = [];
+
                 // todo: clear this thing if there is nothing reported......
+                    // todo: make reset function.
+                console.log("report cleared");
                 return;
+            }
 
             this.loading = true;
             this.name = null;
@@ -528,7 +554,7 @@ Vue.component('report_content', {
         },
         awarded_points: function (high, medium, low) {
             let marker = this.make_marker(high, medium, low);
-            return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">+ ' + marker + '</span>'
+            return '<span class="awarded_points_' + this.colorize(high, medium, low) + '">' + marker + '</span>'
         },
         make_marker: function (high, medium, low) {
             if (high === 0 && medium === 0 && low === 0)

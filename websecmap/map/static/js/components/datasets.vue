@@ -11,7 +11,7 @@
             <p>{{ $t("datasets.intro") }}</p>
         </div>
         <div class="row">
-            <div class="col-md-4" v-for="layer in layers">
+            <div class="col-md-4" v-for="layer in $store.state.layers">
                 <table style="width:100%" class="table table-striped" v-if="supported_formats">
                     <thead>
                         <tr>
@@ -133,7 +133,6 @@ Vue.component('datasets', {
     },
 
     props: {
-        layers: Array,
         show_comply_or_explain: Boolean
     },
 

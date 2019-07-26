@@ -96,12 +96,12 @@ const messages = {
 
         // plain_https
         "plain_https": "Missing transport encryption (HTTP only)",
-        "Redirect from unsafe address": "--test--",
-        "Site does not redirect to secure url, and has no secure alternative on a standard port.": "--test--",
-        "Has a secure equivalent, which wasn't so in the past.": "--test--",
-        "Redirects to a secure site, while a secure counterpart on the standard port is missing.": "--test--",
+        "Redirect from unsafe address": "Redirect from unsafe address",
+        "Site does not redirect to secure url, and has no secure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
+        "Has a secure equivalent, which wasn't so in the past.": "Has a secure equivalent, which wasn't so in the past.",
+        "Redirects to a secure site, while a secure counterpart on the standard port is missing.": "Redirects to a secure site, while a secure counterpart on the standard port is missing.",
         // this is an issue with a spelling error :)
-        "Site does not redirect to secure url, and has nosecure alternative on a standard port.": "--test--",
+        "Site does not redirect to secure url, and has nosecure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
         "Not at all": "--test--",
 
 

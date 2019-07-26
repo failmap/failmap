@@ -82,9 +82,17 @@ Vue.component('changes', {
         issues: Array,
     },
 
+    mounted: function () {
+        this.load()
+    },
+
     methods: {
         load: function(){
-            fetch(`/data/all_latest_scans/${this.state.country}/${this.state.layer}/`).then(response => response.json()).then(data => {
+            let url = `/data/all_latest_scans/${this.state.country}/${this.state.layer}/`;
+            console.log(`Loading latest scans from ${url}`);
+
+            fetch(url).then(response => response.json()).then(data => {
+                console.log("Latest scans loaded");
                     this.scans = data.scans;
                     // because some nested keys are used (results[x['bla']), updates are not handled correctly.
                     this.$forceUpdate();

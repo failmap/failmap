@@ -101,6 +101,8 @@ Vue.component('Mapstatebar', {
         set_country: function(country_code) {
             // There is always at least one layer for every country.
             this.layers = this.map_configuration[country_code].layers;
+            store.commit('change', {layers: this.layers});
+
             this.selected_country = country_code;
 
             // todo: use vuex
@@ -129,6 +131,7 @@ Vue.component('Mapstatebar', {
     mounted: function() {
         let first = Object.keys(this.map_configuration);
         this.layers = this.map_configuration[first[0]].layers;
+        store.commit('change', {layers: this.layers});
         this.selected_country = this.map_configuration[first[0]].code;
     },
 

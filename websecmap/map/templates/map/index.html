@@ -41,6 +41,7 @@
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/leaflet.fullscreen.css">
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/MarkerCluster.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/vendor/vue-select@3.1.0/vue-select.css">
         <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
     {% endcompress %}
 
@@ -134,6 +135,9 @@
                 },
                 reported_organization: () => {
                     return store.state.reported_organization;
+                },
+                layers: () => {
+                    return store.state.layers;
                 }
             },
             watch: {
@@ -151,6 +155,8 @@
                 layer: "{{ default_layer }}",
                 week: {{ default_week }},
                 reported_organization: {id: null, name: null},
+                // layers is filled by mapstatebar, and is used for export, or wherever...
+                layers: [],
             },
 
             mutations: {
@@ -569,8 +575,6 @@
                         darkly: {css: "/static/css/vendor/bootstrap-darkly.min.css", map_tilelayer: 'dark'},
                     },
 
-                    layers: [],
-
                     // add to state? Or what should we do. We can also download the possible orgnizations...
                     // todo: this should come FROM websecmap and should be then avialble in reports.. or we
                     // should let the reports method get all options itself. This is now a placeholder.
@@ -828,7 +832,7 @@
 
         <section id="datasets">
             <div class="container">
-                <datasets v-if="config.show.datasets" :layers="layers" :show_comply_or_explain="config.show.comply_or_explain"></datasets>
+                <datasets v-if="config.show.datasets" :show_comply_or_explain="config.show.comply_or_explain"></datasets>
             </div>
         </section>
 
