@@ -170,6 +170,10 @@
     background-color: #f7e400;
 }
 
+.good {
+    background-color: rgb(48, 195, 20);
+}
+
 .high_text {
     color: #f70000;
 }

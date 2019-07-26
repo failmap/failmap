@@ -10,14 +10,10 @@
             <p>{{ $t("charts.intro") }}</p>
             <p></p>
         </div>
-        <div class="row">
-            <h3>{{ $t("charts.top_fail.title") }}</h3>
-            <chart :data_url="'/data/topfail/'"></chart>
-        </div>
-        <div class="row">
-            <h3>{{ $t("charts.top_win.title") }}</h3>
-            <chart :data_url="'/data/topwin/'"></chart>
-        </div>
+
+        <chart :data_url="'/data/topfail/'" :title="$t('charts.top_fail.title')"></chart>
+        <chart :data_url="'/data/topwin/'" :title="$t('charts.top_win.title')"></chart>
+
     </div>
 </template>
 {% endverbatim %}
