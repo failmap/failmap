@@ -568,6 +568,7 @@ def upgrade_api_response(views):
             requirement_levels['mail_starttls_dane_rollover'] = 'not_applicable'
             requirement_levels['mail_legacy_start_tls'] = 'not_applicable'
             requirement_levels['mail_legacy_start_tls_ncsc'] = 'not_applicable'
+            requirement_levels['mail_legacy_dane'] = 'not_applicable'
 
             # ipv6 + legacy
             requirement_levels['mail_ipv6_mx_address'] = 'not_applicable'
@@ -618,6 +619,7 @@ def upgrade_api_response(views):
                                     'mail_starttls_cert_domain', 'mail_starttls_dane_exist',
                                     'mail_starttls_dane_valid', 'mail_starttls_dane_rollover',
                                     'mail_legacy_start_tls', 'mail_legacy_start_tls_ncsc',
+                                    'mail_legacy_dane'
                                     ]
 
             explanations['mail_starttls_tls_available'] = 'Not All MX’s testable, '
