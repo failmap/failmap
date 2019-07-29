@@ -103,11 +103,106 @@ def has_soa(url: Url):
     The SOA records is the primary check for internet.nl mail. If there is a SOA
     record, you can run a mail scan. It's unclear at the time of writing why this is.
     This is used on internet.nl dashboard
+
+    internet.nl uses unbound do perform this check, which is very heavy and does a lot of things probably
+    a lot cleaner and better. The build instructions are here:
+    https://github.com/NLnetLabs/Internet.nl/blob/5f56202848e7a71d1a7dd8204d39b8f1246bbe34/docker/Dockerfile
+
+    But still, since the queries are so simple, we prefer not to use it.
+
+    In "https://github.com/NLnetLabs/Internet.nl/blob/cece8255ac7f39bded137f67c94a10748970c3c7/checks/views/shared.py"
+    we see get_valid_domain_mai using unbound with RR_TYPE_SOA. This means not only SOA on the current subdomain,
+    but getting ANY soa record back is fine.
+
+    The domain itself does not need to be authoritive for them. Which means basically scan everything.
+    Can we find a domain that does not have a SOA record?
+
+    This is OK;  casdasdasdvdr.overheid.nl  as dig  casdasdasdvdr.overheid.nl SOA returns overheid.nl as one of it's
+    results.
+
+    asdkansdkansdkl.blockchainpilots.nl is not ok. as it has only the nl. in authority section.
+
+    Is there an option in dnspython's resolver.query that might emulate this behavior?
+    We can't blindly use the parents domain, as that is not how DNS works :)
+
+    We're simulating:
+    cb_data = ub_resolve_with_timeout(
+        dname, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN, timeout)
+
+    in DNSPython:
+    def query(qname, rdtype=dns.rdatatype.A, rdclass=dns.rdataclass.IN,
+          tcp=False, source=None, raise_on_no_answer=True,
+          source_port=0, lifetime=None):
+
+    Comparison:
+
+                    unbound                 | dnspython
+    domain_name |   dname                   | qname
+    type:       |   unbound.RR_TYPE_SOA     |  "SOA" (could differ)
+    rdclass:    |   unbound.RR_CLASS_IN     | dns.rdataclass.IN (default)
+
+    Our best bet is that "SOA" is not the same as RR_TYPE_SOA, or dns.rdatatype.SOA... so let's try that.
+    dns.rdatatype.SOA and "SOA" deliver the same result: it does not exist. So why does it exist on internet.nl?
+
+    internet.nl does use get_valid_domain_mail to validate and perform the resolving function...
+    https://github.com/NLnetLabs/Internet.nl/blob/9f0cfb5baffbe76b4e28cda297093b0e0aef8fae/checks/batch/util.py
+
+    The difference in internet.nl is dat the resolve DOES get something back, even if its not a SOA...
+
+    "
+    def get_valid_domain_mail(mailaddr, timeout=5):
+    dname = validate_dname(mailaddr)
+    if dname is None:
+        return None
+
+    cb_data = ub_resolve_with_timeout(
+        dname, unbound.RR_TYPE_SOA, unbound.RR_CLASS_IN, timeout)
+
+    if cb_data.get("nxdomain") and cb_data["nxdomain"]:
+        return None
+
+    return dname
+    "
+
+    If we look at vars((resolver.query("data.overheid.nl", "SOA", raise_on_no_answer=False).response))
+    then we see there is an authority section. Since unbound is a recursive dns resolver, it might just attempt
+    to retrieve the answer from the authority.
+
+    In this example we see that this is happening, and the NXdomain check is also performed. Thus the
+    recursivity is the actual thing that differs.
+    https://stackoverflow.com/questions/4066614/how-can-i-find-the-authoritative-dns-server-for-a-domain-using-dnspython
+
+    Of course, we're not going to write recursive code, as this is a very common problem, and a solution
+    is likely waiting for us.
+
+    Internet.nl uses this specific version of unbound:
+    https://github.com/ralphdolmans/unbound/blob/internetnl/README.md
+
+    The real difference it seems is that we do accept "no answer", but do not accept "nxdomain" issues. We can
+    also see this when looking at get_valid_domain_web, that seems to really look at the data.
+
+    Test it like this:
+    from websecmap.organizations.models import Url
+    from websecmap.scanners.scanner import dns_endpoints
+    dns_endpoints.has_soa(Url(url="www.arnhem.nl"))
+
+    The answer returned does not evaluate as True or False.
+
+    So the check is not really 'IF' there is a SOA record, because there is not at data.overheid.nl. But
+    that you get an answer, and any answer is basically fine.
+
     :param url:
     :return:
     """
-    if get_dns_records(url, 'SOA'):
+
+    answer = get_dns_records_accepting_no_answer(url, 'SOA')
+    if answer is None:
+        return False
+
+    if answer.response:
         return True
+
+    # fail safely for all other edge cases that might exist.
     return False
 
 
@@ -183,6 +278,28 @@ def get_dns_records(url, record_type):
         return resolver.query(url.url, record_type)
     except NoAnswer:
         log.debug("The DNS response does not contain an answer to the question. %s %s " % (url.url, record_type))
+        return None
+    except NXDOMAIN:
+        log.debug("dns query name does not exist. %s %s" % (url.url, record_type))
+        return None
+    except NoNameservers:
+        log.debug("Pausing, or add more DNS servers...")
+        sleep(20)
+
+
+@retry(wait=wait_exponential(multiplier=1, min=0, max=10),
+       stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
+def get_dns_records_accepting_no_answer(url, record_type):
+    try:
+        # a little delay to be friendly towards the server
+        # this doesn't really help with parallel requests from the same server. Well, a little bit.
+        sleep(0.03)
+        answer = resolver.query(url.url, record_type, raise_on_no_answer=False)
+        log.debug("dns query returned an answer %s %s" % (url.url, record_type))
+        return answer
+    except NoAnswer:
+        # this will never happen, as we explicitly say OK. This means that only domains that really
+        # do not return ANY answer *where NXDOMAIN is returned* will be false.
         return None
     except NXDOMAIN:
         log.debug("dns query name does not exist. %s %s" % (url.url, record_type))
