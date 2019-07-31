@@ -186,7 +186,10 @@ def index(request):
         'default_country': map_defaults['country'],
         'default_layer': map_defaults['layer'],
         'default_week': 0,
-        'number_of_countries': len(initial_countries)
+        'number_of_countries': len(initial_countries),
+        # jsonresponse encodes all python values to meaningful data.
+        'initial_map_data': JsonResponse(get_map_data(map_defaults['country'], map_defaults['layer'], 0, ''),
+                                         encoder=JSEncoder).content.decode('UTF-8')
     })
 
 

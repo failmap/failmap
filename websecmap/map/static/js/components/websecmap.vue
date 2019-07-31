@@ -234,37 +234,39 @@ Vue.component('websecmap', {
                         className: classname,
                         iconSize: [40, 40] });
                 }
-            }
-        ),
+            }),
 
-        // domainlist:
-        domainlist_urls: [],
+            // domainlist:
+            domainlist_urls: [],
 
-        // direct refrence to the leaflet map that is being used to display data.
-        // this.$refs.lmap.mapObject
-        map: this.$refs,
+            // direct refrence to the leaflet map that is being used to display data.
+            // this.$refs.lmap.mapObject
+            map: this.$refs,
 
-        possibleIconSeverities: ["unknown", "good", "low", "medium", "high"],
+            possibleIconSeverities: ["unknown", "good", "low", "medium", "high"],
 
-        // search functionality:
-        searchquery: "",
+            // search functionality:
+            searchquery: "",
 
-        // only show information when the mouse is more than 0.1 second.
-        timer: 0,
+            // only show information when the mouse is more than 0.1 second.
+            timer: 0,
 
-        // hover_info:
-        hover_info: {
-            properties: {
-                organization_name: "",
-                high: 0,
-                medium: 0,
-                low: 0,
-                high_urls: 0,
-                medium_urls: 0,
-                low_urls: 0,
-                total_urls: 0
-            }
-        }
+            // hover_info:
+            hover_info: {
+                properties: {
+                    organization_name: "",
+                    high: 0,
+                    medium: 0,
+                    low: 0,
+                    high_urls: 0,
+                    medium_urls: 0,
+                    low_urls: 0,
+                    total_urls: 0
+                }
+            },
+
+            // this makes the "initial map data" work:
+            load_counter: 0,
         }
     },
 
@@ -275,6 +277,9 @@ Vue.component('websecmap', {
 
         // Leaflet reference, so we can do things with leaflet directly, as i'm not sure it will be possible differently
         L: Object,
+
+        // the initial data saves a load. This is not very beautiful but it makes the site respond a lot faster.
+        initial_map_data: Object,
     },
 
     mounted: function(){
@@ -567,52 +572,64 @@ Vue.component('websecmap', {
         },
 
         load: function () {
+
+            if (this.load_counter === 0 && this.initial_map_data !== undefined){
+                this.handle_map_data(this.initial_map_data);
+                this.load_counter += 1;
+                return;
+            }
+
             this.loading = true;
             let url = `/data/map/${this.state.country}/${this.state.layer}/${this.state.week * 7}/${this.displayed_issue}/`;
+            console.log(`Loading websecmap data from: ${url}`);
             fetch(url).then(response => response.json()).then(data => {
-                console.log(`Loading websecmap data from: ${url}`);
-                // Don't need to zoom out when the filters change, only when the layer/country changes.
-                let fitBounds = false;
-                if (this.previously_loaded_country !== this.state.country || this.previously_loaded_layer !== this.state.layer)
-                    fitBounds = true;
-                    // this.locationsuggestion();
-
-                this.plotdata(data, fitBounds);
-                this.previously_loaded_country = this.state.country;
-                this.previously_loaded_layer = this.state.layer;
-
-                // make map features (organization data) available to other vues
-                // do not update this attribute if an empty list is returned as currently
-                // the map does not remove organizations for these kind of responses.
-                if (data.features.length > 0) {
-                    this.features = data.features;
-                }
-
-                // update organizations for use in select box:
-                let organizations = [];
-                data.features.forEach((feature) => {
-                    let props = feature.properties;
-                    organizations.push({
-                        id: props.organization_id,
-                        name: props.organization_name,
-                        slug: props.organization_slug,
-                        high: props.high,
-                        medium: props.medium,
-                        low: props.low,
-                        total_urls: props.total_urls,
-                        data_from: props.data_from,
-                        severity: props.severity,
-                    })
-                });
-
-                store.commit('change', {organizations: organizations});
-
-                this.loading = false;
+                this.handle_map_data(data);
             }).catch((fail) => {
                 console.log('A map loading error occurred: ' + fail);
                 // allow you to load again:
                 this.loading = false;
             });
+        },
+
+        handle_map_data: function(data){
+
+            // Don't need to zoom out when the filters change, only when the layer/country changes.
+            let fitBounds = false;
+            if (this.previously_loaded_country !== this.state.country || this.previously_loaded_layer !== this.state.layer)
+                fitBounds = true;
+                // this.locationsuggestion();
+
+            this.plotdata(data, fitBounds);
+            this.previously_loaded_country = this.state.country;
+            this.previously_loaded_layer = this.state.layer;
+
+            // make map features (organization data) available to other vues
+            // do not update this attribute if an empty list is returned as currently
+            // the map does not remove organizations for these kind of responses.
+            if (data.features.length > 0) {
+                this.features = data.features;
+            }
+
+            // update organizations for use in select box:
+            let organizations = [];
+            data.features.forEach((feature) => {
+                let props = feature.properties;
+                organizations.push({
+                    id: props.organization_id,
+                    name: props.organization_name,
+                    slug: props.organization_slug,
+                    high: props.high,
+                    medium: props.medium,
+                    low: props.low,
+                    total_urls: props.total_urls,
+                    data_from: props.data_from,
+                    severity: props.severity,
+                })
+            });
+
+            this.loading = false;
+
+            store.commit('change', {organizations: organizations});
         },
 
         plotdata: function (mapdata, fitbounds=true) {

@@ -582,6 +582,10 @@
                         darkly: {css: "/static/css/vendor/bootstrap-darkly.min.css", map_tilelayer: 'dark'},
                     },
 
+                    // This is the first data for the map, so no first initial query is needed.
+                    // this saves a round trip to the server and shows the map in full completely instantly.
+                    initial_map_data: {{ initial_map_data | safe }},
+
                 },
 
 
@@ -779,7 +783,11 @@
         </section>
 
         <section>
-            <websecmap :L="L"  :issues="issues" :mapbox_token="config.mapbox_token" :debug="config.debug"></websecmap>
+            <websecmap :L="L"
+                       :issues="issues"
+                       :mapbox_token="config.mapbox_token"
+                       :debug="config.debug"
+                       :initial_map_data="initial_map_data"></websecmap>
         </section>
 
         <section v-if="config.show.intro">
