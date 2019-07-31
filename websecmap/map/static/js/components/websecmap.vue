@@ -586,7 +586,27 @@ Vue.component('websecmap', {
                 // the map does not remove organizations for these kind of responses.
                 if (data.features.length > 0) {
                     this.features = data.features;
+
+                    // update organizations for use in select box:
+                    let organizations = [];
+                    this.features.forEach((feature) => {
+                        let props = feature.properties;
+                        organizations.push({
+                            id: props.organization_id,
+                            name: props.organization_name,
+                            slug: props.organization_slug,
+                            high: props.high,
+                            medium: props.medium,
+                            low: props.low,
+                            total_urls: props.total_urls,
+                            data_from: props.data_from,
+                            severity: props.severity,
+                        })
+                    });
+
+                    store.commit('change', {organizations: organizations});
                 }
+
                 this.loading = false;
             }).catch((fail) => {
                 console.log('A map loading error occurred: ' + fail);

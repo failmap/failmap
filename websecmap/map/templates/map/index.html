@@ -138,6 +138,9 @@
                 },
                 layers: () => {
                     return store.state.layers;
+                },
+                organizations: () => {
+                    return store.state.organizations;
                 }
             },
             watch: {
@@ -157,6 +160,10 @@
                 reported_organization: {id: null, name: null},
                 // layers is filled by mapstatebar, and is used for export, or wherever...
                 layers: [],
+
+                // organizations, a list of all organizations on the map including some metatadata.
+                // this is useful for select boxes and such. The charts might also be populated from this data...
+                organizations: [],
             },
 
             mutations: {
@@ -575,10 +582,6 @@
                         darkly: {css: "/static/css/vendor/bootstrap-darkly.min.css", map_tilelayer: 'dark'},
                     },
 
-                    // add to state? Or what should we do. We can also download the possible orgnizations...
-                    // todo: this should come FROM websecmap and should be then avialble in reports.. or we
-                    // should let the reports method get all options itself. This is now a placeholder.
-                    organizations: [],
                 },
 
 
@@ -785,7 +788,7 @@
 
         <section id="report">
             <div class="container">
-                <report :organizations="organizations" ></report>
+                <report></report>
                 <report_content
                     :issues="issues"
                     :url_issue_names="url_issue_names"

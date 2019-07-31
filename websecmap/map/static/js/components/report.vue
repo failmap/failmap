@@ -12,7 +12,7 @@
         <div class="row">
             <div class="col-md-12">
                 {{ $t("report.select_organization") }}
-                <v-select label="name" v-model="selected" :options="organizations"></v-select>
+                <v-select label="name" v-model="selected" :options="$store.state.organizations"></v-select>
                 <br />
             </div>
         </div>
@@ -48,15 +48,16 @@ Vue.component('report', {
         }
     },
 
-    props: {
-        organizations: Array,
-    },
-
     watch: {
+        organizations: () => {
+
+        },
+
         selected: function () {
-            // load selected organization id, we should do this in a less cluttered way.
-            // todo: this should probably be an emit (!)
-            app.organization = this.selected.id;
+            store.commit('change', {reported_organization: {
+                id: this.selected.id,
+                name: this.selected.name,
+            }});
         }
     }
 });
