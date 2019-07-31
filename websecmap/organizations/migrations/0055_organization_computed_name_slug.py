@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organization',
             name='computed_name_slug',
-            field=models.SlugField(default='', help_text='Computed value, a slug translation of the organization name, which can be used in urls.', max_length=250),
+            field=models.SlugField(
+                default='', help_text='Computed value, a slug translation of the organization name, which can be used in urls.', max_length=250),
         ),
     ]

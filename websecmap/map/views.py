@@ -161,7 +161,7 @@ def index(request):
                     'name': conf.country.name,
                     'flag': conf.country.flag,
                     'layers': [conf.organization_type.name]}
-                             }}
+                }}
             else:
                 countries[conf.country]['layers'].append(conf.organization_type.name)
 
