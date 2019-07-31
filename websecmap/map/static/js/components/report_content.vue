@@ -390,7 +390,16 @@ Vue.component('report_content', {
                 this.timeline = timelinedata;
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 
-            fetch(`/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.id}/${this.state.week}`)
+            let url = "";
+            if (this.reported_organization.name){
+                url = `/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.name}/${this.state.week}`;
+            }
+            if (this.reported_organization.id){
+                url = `/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.id}/${this.state.week}`;
+            }
+
+            console.log(`Retrieving report data from ${url}.`);
+            fetch(url)
                 .then(response => response.json()).then(data => {
                 this.urls = data.calculation["organization"]["urls"];
                 this.points = data.rating;

@@ -270,7 +270,7 @@ class ActionMixin:
 # for many values in the admin interface... for example endpoints.
 @admin.register(Organization)
 class OrganizationAdmin(ActionMixin, ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('name_details', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
+    list_display = ('name_details', 'computed_name_slug', 'type', 'country', 'wikidata_', 'wikipedia_', 'created_on', 'is_dead')
     search_fields = (['name', 'country', 'type__name'])
     list_filter = ['type__name', 'country', 'created_on', 'is_dead', 'is_dead_since'][::-1]
 

@@ -67,11 +67,11 @@
         <l-control position="bottomright">
             <div class="info legend table-light">
                 <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
-                <i class="map_polygon_good"></i> {{ $t("map.legend.good") }}<br>
-                <i class="map_polygon_low"></i> {{ $t("map.legend.low") }}<br>
-                <i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}<br>
-                <i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}<br>
-                <i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}<br>
+                <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
+                <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
+                <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
+                <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
+                <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
             </div>
         </l-control>
 
@@ -590,7 +590,7 @@ Vue.component('websecmap', {
 
                 // update organizations for use in select box:
                 let organizations = [];
-                this.features.forEach((feature) => {
+                data.features.forEach((feature) => {
                     let props = feature.properties;
                     organizations.push({
                         id: props.organization_id,

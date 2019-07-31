@@ -8,6 +8,7 @@ import pytz
 import tldextract
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from djgeojson.fields import GeoJSONField
@@ -40,7 +41,14 @@ class Organization(models.Model):
         OrganizationType,
         on_delete=models.PROTECT,
         default=1)
+
     name = models.CharField(max_length=250, db_index=True)
+
+    computed_name_slug = models.SlugField(
+        max_length=250,
+        help_text="Computed value, a slug translation of the organization name, which can be used in urls.",
+        default="",
+    )
 
     internal_notes = models.TextField(
         max_length=2500,
@@ -132,6 +140,12 @@ class Organization(models.Model):
         # then add it to the organization
         url.organization.add(self)
         url.save()
+
+    def save(self, *args, **kwarg):
+
+        # handle computed values
+        self.computed_name_slug = slugify(self.name)
+        super(Organization, self).save(*args, **kwarg)
 
 
 GEOJSON_TYPES = (

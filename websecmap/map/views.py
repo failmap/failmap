@@ -295,7 +295,8 @@ def organization_report_by_name(request, country: str = DEFAULT_COUNTRY, organiz
         return empty_response()
 
     report = get_organization_report_by_name(
-        organization_name, country, organization_type, weeks_back)
+        organization_name=organization_name, country=country, organization_type=organization_type,
+        weeks_back=weeks_back)
     return JsonResponse(report, safe=False, encoder=JSEncoder)
 
 

@@ -15,13 +15,13 @@ def get_organization_report_by_name(country: str = DEFAULT_COUNTRY, organization
                                     organization_name=None, weeks_back=0):
 
     organization = Organization.objects.filter(
-        name__iexact=organization_name,
+        computed_name_slug=slugify(organization_name),
         country=get_country(country),
         type=get_organization_type(organization_type),
         is_dead=False
     ).first()
 
-    log.debug("%s %s %s " % (organization_name, get_country(country), get_organization_type(organization_type)))
+    log.debug("- %s %s %s " % (organization_name, get_country(country), get_organization_type(organization_type)))
 
     if not organization:
         return {}

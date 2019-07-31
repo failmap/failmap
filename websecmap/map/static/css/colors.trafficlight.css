@@ -248,11 +248,14 @@
 
 /* These are the colors of bootstrap. We'll switch it lateron i guess... */
 .bg-primary {
-    background-color: inherit;
+    /* Inherit does not show the default bootstrap color. */
+    /* background-color: inherit; */
 }
 
 .btn-info {
-    background-color: inherit;
+
+    /* Inherit does not show the default bootstrap color. */
+    /*background-color: inherit;*/
 }
 
 a, a:hover, a:visited {
