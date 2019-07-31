@@ -18,7 +18,7 @@
                         <span class="sr-only">{{ $t("statistics.progress_bars.good") }}</span>
                     </div>
                     <div class="progress-bar bg-warning" :style="{width:mediumpercentage}">
-                        <span class="sr-only">{{ $t("statistics.progress_bars.average") }}</span>
+                        <span class="sr-only">{{ $t("statistics.progress_bars.medium") }}</span>
                     </div>
                     <div class="progress-bar bg-danger" :style="{width:highpercentage}">
                         <span class='sr-only'>{{ $t("statistics.progress_bars.bad") }}</span>
@@ -35,14 +35,14 @@
                             <th width="25%">{{ $t("statistics.progress_bars.when") }}</th>
                             <th width="5%">{{ $t("statistics.progress_bars.number") }}</th>
                             <th width="20%">{{ $t("statistics.progress_bars.good") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.average") }}</th>
+                            <th width="20%">{{ $t("statistics.progress_bars.medium") }}</th>
                             <th width="20%">{{ $t("statistics.progress_bars.bad") }}</th>
                         </tr>
                         </thead>
                         <tbody v-if="data.data">
 
                         <tr v-for="(x, key) in data.data">
-                            <td>{{ translate(key) }}</td>
+                            <td>{{ $t("statistics.progress_bars." + key.replace(/ /g, "_")) }}</td>
                             <td>{{ x["included_organizations"] }}</td>
                             <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good percentage'] + '%, transparent ' + x['good percentage'] + '%, transparent 100%);'">
                                 {{ x["good"] }}
@@ -84,14 +84,14 @@
                             <th width="25%">{{ $t("statistics.progress_bars.when") }}</th>
                             <th width="5%">{{ $t("statistics.progress_bars.number") }}</th>
                             <th width="20%">{{ $t("statistics.progress_bars.good") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.average") }}</th>
+                            <th width="20%">{{ $t("statistics.progress_bars.medium") }}</th>
                             <th width="20%">{{ $t("statistics.progress_bars.bad") }}</th>
                         </tr>
                         </thead>
                         <tbody v-if="data.data">
 
                         <tr v-for="(x, key) in data.data">
-                            <td>{{ translate(key) }}</td>
+                            <td>{{ $t("statistics.progress_bars." + key.replace(/ /g, "_")) }}</td>
                             <td>{{ x["total_urls"] }}</td>
                             <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good url percentage'] + '%, transparent ' + x['good url percentage'] + '%, transparent 100%);'">
                                 {{ x["good_urls"] }}
@@ -263,18 +263,22 @@ Vue.component('combined_number_statistics', {
                             title: "Internet addresses",
                             intro: "A security status has been determined for all below addresses.",
                         },
+
+                        // // statistics.progress_bars.3 weeks ago
                         now: "now",
-                        seven_days_ago: "7 days ago",
-                        two_weeks_ago: "2 weeks ago",
-                        three_weeks_ago: "3 weeks ago",
-                        one_month_ago: "1 month ago",
-                        two_months_ago: "2 months ago",
-                        three_months_ago: "3 months ago",
+                        '7_days_ago': "7 days ago",
+                        "2_weeks_ago": "2 weeks ago",
+                        "3_weeks_ago": "3 weeks ago",
+
+                        // due to python library workings, the 1 months ago is a bit off in translation...
+                        "1_months_ago": "1 month ago",
+                        "2_months_ago": "2 months ago",
+                        "3_months_ago": "3 months ago",
 
                         when: "When",
                         number: "Number",
                         good: "Good",
-                        average: "Average",
+                        medium: "Medium",
                         bad: "Bad",
                         unknown: "Unknown",
                     },
@@ -342,6 +346,12 @@ Vue.component('combined_number_statistics', {
     methods: {
         load: function (weeknumber=0) {
             fetch(`/data/stats/${this.state.country}/${this.state.layer}/${weeknumber}`).then(response => response.json()).then(data => {
+
+                // empty
+                if (Object.keys(data.data).length < 1){
+                    return;
+                }
+
                 this.data = data;
                 this.endpoints_now = data.data.now['endpoints'];
                 this.services = [];

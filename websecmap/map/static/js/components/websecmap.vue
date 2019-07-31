@@ -7,11 +7,11 @@
             :center="initial_location(this.state.country).coordinates" :zoom="initial_location(this.state.country).zoomlevel">
 
         <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
+        <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
         <l-tile-layer
             :style="'light-v9'"
             :url="this.tile_uri()"
             :token="mapbox_token"
-            :max-zoom="18"
             :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
 
             :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
@@ -586,26 +586,26 @@ Vue.component('websecmap', {
                 // the map does not remove organizations for these kind of responses.
                 if (data.features.length > 0) {
                     this.features = data.features;
-
-                    // update organizations for use in select box:
-                    let organizations = [];
-                    this.features.forEach((feature) => {
-                        let props = feature.properties;
-                        organizations.push({
-                            id: props.organization_id,
-                            name: props.organization_name,
-                            slug: props.organization_slug,
-                            high: props.high,
-                            medium: props.medium,
-                            low: props.low,
-                            total_urls: props.total_urls,
-                            data_from: props.data_from,
-                            severity: props.severity,
-                        })
-                    });
-
-                    store.commit('change', {organizations: organizations});
                 }
+
+                // update organizations for use in select box:
+                let organizations = [];
+                this.features.forEach((feature) => {
+                    let props = feature.properties;
+                    organizations.push({
+                        id: props.organization_id,
+                        name: props.organization_name,
+                        slug: props.organization_slug,
+                        high: props.high,
+                        medium: props.medium,
+                        low: props.low,
+                        total_urls: props.total_urls,
+                        data_from: props.data_from,
+                        severity: props.severity,
+                    })
+                });
+
+                store.commit('change', {organizations: organizations});
 
                 this.loading = false;
             }).catch((fail) => {

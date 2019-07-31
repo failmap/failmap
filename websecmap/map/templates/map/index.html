@@ -693,13 +693,19 @@
             if (match) {
                 let organization_name = match[1];
                 location.href = '#report';
-                vueReport.selected = organization_name;
+                store.commit('change', {reported_organization: {
+                    id: null,
+                    name: organization_name,
+                }});
             }
         };
 
         const i18n = new VueI18n({
             locale: window.navigator.language,
             fallbackLocale: 'en',
+            // with component locales, a warning is still given the global locale is used,
+            // which is strange. Translations themselves work fine.
+            silentFallbackWarn: true,
             // it's required this is called messages.
             messages,
         });

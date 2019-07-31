@@ -144,11 +144,10 @@ Vue.component('chart', {
             location.hash = "#loading";
             location.hash = "#report";
 
-            app.organization = organization_id;
-
-            // todo: will be autoloaded as part of app, as the organization changes.
-            app.week = vueMap.week;
-            vueDomainlist.load(organization_id, vueMap.week);
+            store.commit('change', {reported_organization: {
+                id: organization_id,
+                name: "",
+            }});
         },
         humanize: function (date) {
             return new Date(date).humanTimeStamp()

@@ -353,7 +353,6 @@ Vue.component('report_content', {
 
         load: function () {
             // against symptom of autoloading when setting state, this doesn't have the right parameters.
-            console.log(`Loading report for ${this.reported_organization}.`);
             if (!this.reported_organization.id && !this.reported_organization.name) {
                 // reset:
                 this.timeline = null;
@@ -370,7 +369,7 @@ Vue.component('report_content', {
                 this.urls = Array;
                 this.selected = {'id': null, 'label': null, 'name': null};
                 this.loading = false;
-                this.visible = false;  // fullscreenreport
+                this.visible = false;
                 this.promise = false;
 
                 // so they can be destroyed and re-initialized, is this really needed?
@@ -379,8 +378,7 @@ Vue.component('report_content', {
                 this.timeline = [];
 
                 // todo: clear this thing if there is nothing reported......
-                    // todo: make reset function.
-                console.log("report cleared");
+                // todo: make reset function.
                 return;
             }
 

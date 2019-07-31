@@ -2,7 +2,7 @@
 <template type="x-template" id="comply_or_explain_template">
     <div>
         <div class="page-header">
-            <a href="#" class="backtomap">{{ $t("comply_or_explain.back_to_map") }} ↑</a>
+            <a href="#" class="backtomap">{{ $t("back_to_map") }} ↑</a>
             <a name="comply_or_explain_info" class="jumptonav"></a>
             <h2><svg class="svg-inline--fa fa-comments fa-w-18" aria-hidden="true" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" data-fa-i2svg=""><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z"></path></svg>
                 {{ $t("comply_or_explain.title") }}</h2>
@@ -74,13 +74,18 @@ Vue.component('comply_or_explain', {
             en: {
                 comply_or_explain: {
                     title: "Comply or explain",
-                    intro: "Comply or explain allows organizations to explain certain results on this website. In some edge cases, our finding may be technically correct but does not represent any danger. Below is a list of the latest explained issues. Organizations can explain issues using the 'explain' link per finding. You can download the entire dataset for further analysis in the datasets section. ",
+                    intro: "Comply or explain allows organizations to explain certain results on this website. In some edge cases, our finding may be technically correct but does not represent any danger. Below is a list of the latest explained issues. Organizations can explain issues using the 'explain' link per finding.",
+                    no_explanations_yet: "No explanations yet...",
+                    show_more: "Show more...",
 
                 }
             },
             nl: {
                 changes: {
                     title: "Pas toe of leg uit",
+                    intro: "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard worden. In bijzondere gevallen is de bevinding op deze site technisch juist, maar veroorzaakt het geen gevaar. Hieronder staat een lijst met de meest recente 'pas toe of leg uit' verklaringen. De organisaties die worden genoemd op deze site kunnen zelf een bevinding verklaren door op 'leg uit' te klikken bij een bevinding.",
+                    no_explanations_yet: "Nog geen verklaringen verwerkt...",
+                    show_more: "Toon meer...",
                 }
             }
         },
@@ -117,8 +122,10 @@ Vue.component('comply_or_explain', {
         },
         showreport(organization_id){
             location.href = '#report';
-            // todo: interaction between components...
-            vueReport.selected = {'id': organization_id};
+            store.commit('change', {reported_organization: {
+                id: organization_id,
+                name: organization_name,
+            }});
         },
         showmore(){
             if (this.more_explains.length > 3) {

@@ -6,10 +6,12 @@ const chart_mixin = {
         axis: {type: Array, required: false},
         color_scheme: {type: Object, required: false}
     },
-    data: {
+    data: function() {
         // [Vue warn]: The "data" option should be a function that returns a per-instance value in component definitions.
         // so what should i use then? No suggestion?
-        chart: {}
+        return {
+            chart: {}
+        }
     },
     render: function(createElement) {
         return createElement(
