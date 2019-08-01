@@ -772,7 +772,9 @@
     <template v-if="state.country !== '' && state.layer !== ''">
 
         <mainmenu :config="config"></mainmenu>
+        {% if admin_instance %}
         <debugmenu :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>
+        {% endif %}
         <mapstatebar :map_configuration="map_configuration"></mapstatebar>
 
         <section class="announcement" v-if="config.show.announcement">
