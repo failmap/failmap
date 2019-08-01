@@ -83,7 +83,7 @@
     <script>
         // Registry Sentry for error reporting
         {% if sentry_token %}
-            Raven.config({{ sentry_token }}, {release: {{ version }}).install();
+            Raven.config('{{ sentry_token }}', {release: '{{ version }}'}).install();
         {%  endif %}
 
         // support for week numbers in javascript

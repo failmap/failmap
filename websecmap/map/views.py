@@ -177,7 +177,7 @@ def index(request):
         'admin': settings.ADMIN,
         'sentry_token': settings.SENTRY_TOKEN,
         'country': config.PROJECT_COUNTRY,
-        'debug': settings.DEBUG,
+        'debug': True if settings.DEBUG else False,
         'language': request.LANGUAGE_CODE,
         'timestamp': datetime.now(pytz.UTC).isoformat(),
         'initial_map_data_url': '',
