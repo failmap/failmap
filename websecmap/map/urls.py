@@ -19,9 +19,6 @@ register_converter(converters.JsonConverter, 'json')
 
 urlpatterns = [
     path('', views.index),
-    path('map_only/', views.map_only),
-    path('map_only/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/', views.map_only),
-    path('map_only/<c:country>/<slug:organization_type>/<d:days_back>//', views.map_only),
     path('security.txt', views.security_txt),
     path('robots.txt', views.robots_txt),
     path('manifest.json', views.manifest_json),

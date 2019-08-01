@@ -195,6 +195,7 @@
 
                 // this converts the django state (constance) values to javascript.
                 // available from app only, and distributed sparsingly on need to know basis to prevent a web of things.
+                    // todo: refactor, each variable read is a single query(!) i mean... can we do it all in once?
                     config: {
                         show: {
                             intro: {{ config.SHOW_INTRO | lower }},
@@ -210,6 +211,21 @@
                             changes: {{ config.SHOW_STATS_CHANGES | lower }},
                             ticker: {{ config.SHOW_TICKER | lower }},
                             services: {{ config.SHOW_SERVICES | lower }},
+                            issues: {
+                                ftp: {{ config.SHOW_FTP | lower }},
+                                plain_https: {{ config.SHOW_PLAIN_HTTPS | lower }},
+                                dnssec: {{ config.SHOW_DNSSEC | lower }},
+                                http_security_header_strict_transport_security: {{ config.SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY| lower }},
+                                http_security_header_x_content_type_options: {{ config.SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS| lower }},
+                                http_security_header_x_frame_options: {{ config.SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS| lower }},
+                                http_security_header_x_xss_protection: {{ config.SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION| lower }},
+                                tls_qualys_certificate_trusted: {{ config.SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED| lower }},
+                                tls_qualys_encryption_quality: {{ config.SHOW_TLS_QUALYS_ENCRYPTION_QUALITY| lower }},
+                                internet_nl_mail_starttls_tls_available: {{ config.SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE| lower }},
+                                internet_nl_mail_auth_spf_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST| lower }},
+                                internet_nl_mail_auth_dkim_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST| lower }},
+                                internet_nl_mail_auth_dmarc_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST| lower }},
+                            },
                         },
                         responsible_organization: {
                             name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
@@ -234,25 +250,13 @@
                         },
                         comply_or_explain: {
                             forum_link: "{{ config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
-                            email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRES }}",
+                            email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}",
                         },
 
                         debug: {{ debug | lower }},
                         admin: {{ admin | lower }},
 
                         mapbox_token: '{{ config.MAPBOX_ACCESS_TOKEN }}',
-
-                        // issues: this could be calculated depending on issues.
-                        /*issues: {
-                            tls_qualys: {{ config.SHOW_DNSSEC }},
-                            missing_tls: {{ config.tls_qualys_certificate_trusted }},
-                            ftp: {{ config.tls_qualys_encryption_quality }},
-                            dnssec: {{ config.plain_https }},
-                            headers_hsts: {{ config.SHOW_HTTP_HEADERS_HSTS }},
-                            headers_xfo: {{ config.SHOW_HTTP_HEADERS_XFO }},
-                            headers_x_content: {{ config.SHOW_HTTP_HEADERS_X_CONTENT }},
-                            headers_x_xss: {{ config.SHOW_HTTP_HEADERS_X_XSS }},
-                        }*/
 
                     },
 

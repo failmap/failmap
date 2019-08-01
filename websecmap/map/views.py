@@ -1,8 +1,8 @@
+import json
 import logging
 from datetime import datetime
 
 import django_excel as excel
-import iso3166
 import pytz
 from constance import config
 from django.conf import settings
@@ -187,30 +187,8 @@ def index(request):
         'default_layer': map_defaults['layer'],
         'default_week': 0,
         'number_of_countries': len(initial_countries),
-        # jsonresponse encodes all python values to meaningful data.
-        'initial_map_data': JsonResponse(get_map_data(map_defaults['country'], map_defaults['layer'], 0, ''),
-                                         encoder=JSEncoder).content.decode('UTF-8')
-    })
-
-
-def map_only(request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER, days_back: int = 0,
-             displayed_issue: str = None):
-
-    # build an initial data URL, which overrides the standard default data url for the map.
-
-    country = DEFAULT_COUNTRY if country not in iso3166.countries_by_alpha2 else country
-
-    initial_map_data_url = "/data/map/%s/%s/%s/%s/" % (country, organization_type, days_back, displayed_issue)
-
-    return render(request, 'map/map_only.html', {
-        'version': __version__,
-        'admin': settings.ADMIN,
-        'sentry_token': settings.SENTRY_TOKEN,
-        'country': config.PROJECT_COUNTRY,
-        'debug': settings.DEBUG,
-        'language': request.LANGUAGE_CODE,
-        'timestamp': datetime.now(pytz.UTC).isoformat(),
-        'initial_map_data_url': initial_map_data_url
+        'initial_map_data': json.dumps(get_map_data(map_defaults['country'],
+                                                    map_defaults['layer'], 0, ''), default=str),
     })
 
 
