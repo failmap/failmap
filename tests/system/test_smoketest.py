@@ -22,4 +22,4 @@ def test_frontend(websecmap):
 
 def test_frontend_no_admin_url(websecmap):
     """Frontend frontpage should not serve admin urls."""
-    assert websecmap.get_frontend('/admin/login/?next=/admin/')[0].status == 404
+    assert websecmap.get_frontend('/admin/login/?next=/admin/').code == 404
