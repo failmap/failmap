@@ -39,16 +39,19 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
         return {}
 
     ratings = organization.filter(organizationreport__at_when__lte=when)
-    values = ratings.values(
-        'organizationreport__calculation',
-        'organizationreport__at_when',
-        'name',
-        'pk',
-        'twitter_handle',
-        'organizationreport__high',
-        'organizationreport__medium',
-        'organizationreport__low'
-    ).latest('organizationreport__at_when')
+    try:
+        values = ratings.values(
+            'organizationreport__calculation',
+            'organizationreport__at_when',
+            'name',
+            'pk',
+            'twitter_handle',
+            'organizationreport__high',
+            'organizationreport__medium',
+            'organizationreport__low'
+        ).latest('organizationreport__at_when')
+    except Organization.DoesNotExist:
+        return {}
 
     # get the most recent non-expired 'promise'
     promise = get_last_promise(organization_id)
