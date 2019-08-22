@@ -588,6 +588,7 @@ Vue.component('websecmap', {
                 console.log('A map loading error occurred: ' + fail);
                 // allow you to load again:
                 this.loading = false;
+                throw fail;
             });
         },
 
