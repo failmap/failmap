@@ -105,11 +105,16 @@ Vue.component('Mapstatebar', {
 
             this.selected_country = country_code;
 
-            // todo: use vuex
             store.commit('change', {country: country_code, layer: this.layers[0]});
+
+            // remove the current loaded report:
+            store.commit('change', {reported_organization: {id: 0, name: ""}});
         },
         set_layer: function(layer_name){
             store.commit('change', {country: this.selected_country, layer: layer_name});
+
+            // remove the current loaded report:
+            store.commit('change', {reported_organization: {id: 0, name: ""}});
         },
     },
 
