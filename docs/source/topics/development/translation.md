@@ -1,34 +1,30 @@
 # Translation
 
-Web Security Map uses the Django translation system.
+Translating should be straightforward. It does not require a running installation of websecmap, but it's practical
+to actually see the results before committing them to the repository.
 
-We've tried to automate most of the quirks this system has to make translations straightforward.
 
-This tutorial assumes you've got a working installation, follow the [quickstart](getting_started.md)
+## Translating components and general texts:
+Translations are loaded based on the user agent (will be changed to cookie setting).
 
-## Adding a language
-A list of languages is stored in /websecmap/settings.py. You can modify the LANGUAGES variable to add your language. We
-prefer that you use the 2-letter ISO country codes where possible, but we already break from that with some languages.
+There are two locations where translations are stored. Messages used in a lot of places, such as scanner 
+results, are stored here:
 
-To change Web Security Map to the language you're working on, set the LANGUAGE_CODE to your language and run Web Security Map.
+https://gitlab.com/internet-cleanup-foundation/web-security-map/blob/master/websecmap/map/static/js/translations/websecmap.js
 
-Once your language has been added and you've changed the default language, run:
 
-```
-websecmap translate
-```
+Other translations are done "per component". You'll find a translation section on each component here:
+https://gitlab.com/internet-cleanup-foundation/web-security-map/tree/master/websecmap/map/static/js/components
 
-This will create the language files for your languages here:
-* /websecmap/map/locale/'iso code'/django.po
-* /websecmap/map/locale/'iso code'/djangojs.po
 
-And for other "django apps" like "map" accordingly.
+For example, the intro text is defined in the intro component, here:
+https://gitlab.com/internet-cleanup-foundation/web-security-map/blob/master/websecmap/map/static/js/components/intro.vue
 
-You can edit the .po files, they will be converted to those .mo files for some reason.
 
-After you're done editing, run:
-```
-websecmap translate
-```
+You can add translations using the vue-i18n format. This has a lot of options and is documented here:
+https://kazupon.github.io/vue-i18n/
 
-Translations should then shown up on the website.
+
+Adding your language should be straightforward, as examples are given in English and Dutch. Just copy and 
+paste your own language under it and create a pull request.
+
