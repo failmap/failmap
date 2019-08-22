@@ -48,17 +48,18 @@
                 </div>
 
             </div>
+
+            <div class="row" v-if="more_explains.length">
+                <div class="col-md-12 text-center">
+                    <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{{ $t("comply_or_explain.show_more") }}</button>
+                </div>
+            </div>
+
         </template>
 
         <div class="row" v-if="!explains.length">
             <div class="col-md-12">
                 {{ $t("comply_or_explain.no_explanations_yet") }}
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{{ $t("comply_or_explain.show_more") }}</button>
             </div>
         </div>
 
@@ -77,7 +78,7 @@ Vue.component('comply_or_explain', {
                     intro: "Comply or explain allows organizations to explain certain results on this website. In some edge cases, our finding may be technically correct but does not represent any danger. Below is a list of the latest explained issues. Organizations can explain issues using the 'explain' link per finding.",
                     no_explanations_yet: "No explanations yet...",
                     show_more: "Show more...",
-
+                    view_report: "View report",
                 }
             },
             nl: {
@@ -86,6 +87,7 @@ Vue.component('comply_or_explain', {
                     intro: "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard worden. In bijzondere gevallen is de bevinding op deze site technisch juist, maar veroorzaakt het geen gevaar. Hieronder staat een lijst met de meest recente 'pas toe of leg uit' verklaringen. De organisaties die worden genoemd op deze site kunnen zelf een bevinding verklaren door op 'leg uit' te klikken bij een bevinding.",
                     no_explanations_yet: "Nog geen verklaringen verwerkt...",
                     show_more: "Toon meer...",
+                    view_report: "Bekijk rapport",
                 }
             }
         },
@@ -105,13 +107,20 @@ Vue.component('comply_or_explain', {
         show_discussion: Boolean,
     },
 
+    mounted: function () {
+        this.load()
+    },
+
     methods: {
         humanize: function (date) {
             // It's better to show how much time was between the last scan and now. This is easier to understand.
             return moment(date).fromNow();
         },
         load: function() {
-            fetch(`/data/explained/${this.state.country}/${this.state.layer}/`).then(response => response.json()).then(explains => {
+            console.log("Loading explain");
+            let url = `/data/explained/${this.state.country}/${this.state.layer}/`;
+
+            fetch(url).then(response => response.json()).then(explains => {
                 this.more_explains = explains.slice(3);
                 this.explains = explains.slice(0, 3);
 
@@ -122,6 +131,8 @@ Vue.component('comply_or_explain', {
         },
         showreport(organization_id){
             location.href = '#report';
+
+            let organization_name = "";
             store.commit('change', {reported_organization: {
                 id: organization_id,
                 name: organization_name,
