@@ -41,19 +41,19 @@ const messages = {
 
         // DNSSEC
         "DNSSEC": "Domain name security (DNSSEC)",
-        "DNSSEC is incorrectly or not configured (errors found).": "--test--",
-        "DNSSEC seems to be implemented sufficiently.": "--test--",
+        "DNSSEC is incorrectly or not configured (errors found).": "DNSSEC is incorrectly or not configured (errors found).",
+        "DNSSEC seems to be implemented sufficiently.": "DNSSEC seems to be implemented sufficiently.",
 
 
         // FTP
         "ftp": "File transfer (FTP)",
-        "FTP": "--test--", // not used?
-        "FTP Insecure": "--test--",
-        "FTP Server only supports insecure SSL protocol.": "--test--",
-        "FTP Server does not configured to show if encryption is available.": "--test--",
-        "FTP Server supports TLS encryption protocol.": "--test--",
-        "FTP Server does not support encrypted transport or has protocol issues.": "--test--",
-        "An FTP connection could not be established properly. Not possible to verify encryption.": "--test--",
+        "FTP": "File transfer (FTP)", // not used?
+        "FTP Insecure": "FTP insecure",
+        "FTP Server only supports insecure SSL protocol.": "FTP Server only supports insecure SSL protocol.",
+        "FTP Server does not configured to show if encryption is available.": "FTP Server does not configured to show if encryption is available.",
+        "FTP Server supports TLS encryption protocol.": "FTP Server supports TLS encryption protocol.",
+        "FTP Server does not support encrypted transport or has protocol issues.": "FTP Server does not support encrypted transport or has protocol issues.",
+        "An FTP connection could not be established properly. Not possible to verify encryption.": "An FTP connection could not be established properly. Not possible to verify encryption.",
 
 
         // used at security headers
@@ -63,17 +63,17 @@ const messages = {
 
         // http_security_header_strict_transport_security
         "http_security_header_strict_transport_security": "Website: Strict-Transport-Security Header (HSTS)",
-        "Strict-Transport-Security": "--test--", // not used?
-        "Strict-Transport-Security header present.": "--test--",
-        "Missing Strict-Transport-Security header.": "--test--",
-        "Missing Strict-Transport-Security header. Offers no insecure alternative service.": "--test--",
+        "Strict-Transport-Security": "Strict-Transport-Security", // not used?
+        "Strict-Transport-Security header present.": "Strict-Transport-Security header present.",
+        "Missing Strict-Transport-Security header.": "Missing Strict-Transport-Security header.",
+        "Missing Strict-Transport-Security header. Offers no insecure alternative service.": "Missing Strict-Transport-Security header. Offers no insecure alternative service.",
 
 
         // http_security_header_x_frame_options
         "http_security_header_x_frame_options": "Website: X-Frame-Options Header (Clickjacking)",
-        "X-Frame-Options": "--test--",
-        "Missing X-Frame-Options header.": "--test--",
-        "X-Frame-Options header present.": "--test--",
+        "X-Frame-Options": "X-Frame-Options",
+        "Missing X-Frame-Options header.": "Missing X-Frame-Options header.",
+        "X-Frame-Options header present.": "X-Frame-Options header present.",
 
         "Content-Security-Policy header found, which covers the security aspect of the X-Frame-Options Header.": "--test--",
 
@@ -81,17 +81,17 @@ const messages = {
         // http_security_header_x_xss_protection
         "http_security_header_x_xss_protection": "Website: X-XSS-Protection Header",
         "X-XSS-Protection": "--test--",
-        "X-XSS-Protection header present.": "--test--",
-        "Missing X-XSS-Protection header.": "--test--",
+        "X-XSS-Protection header present.": "X-XSS-Protection header present.",
+        "Missing X-XSS-Protection header.": "Missing X-XSS-Protection header.",
 
         "Content-Security-Policy header found, which covers the security aspect of the X-XSS-Protection header.": "--test--",
 
 
         // http_security_header_x_content_type_options
         "http_security_header_x_content_type_options": "Website: X-Content-Type-Options Header",
-        "X-Content-Type-Options": "--test--", // not used?
-        "X-Content-Type-Options header present.": "--test--",
-        "Missing X-Content-Type-Options header.": "--test--",
+        "X-Content-Type-Options": "X-Content-Type-Options", // not used?
+        "X-Content-Type-Options header present.": "X-Content-Type-Options header present.",
+        "Missing X-Content-Type-Options header.": "Missing X-Content-Type-Options header.",
 
 
         // plain_https
@@ -102,56 +102,56 @@ const messages = {
         "Redirects to a secure site, while a secure counterpart on the standard port is missing.": "Redirects to a secure site, while a secure counterpart on the standard port is missing.",
         // this is an issue with a spelling error :)
         "Site does not redirect to secure url, and has nosecure alternative on a standard port.": "Site does not redirect to secure url, and has no secure alternative on a standard port.",
-        "Not at all": "--test--",
+        "Not at all": "Not at all",
 
 
         // tls_qualys_encryption_quality
         "tls_qualys_encryption_quality": "Encryption Quality (HTTPS)",
-        "Broken Transport Security, rated F": "--test--",
-        "Certificate not valid for domain name.": "--test--",
-        "Less than optimal Transport Security, rated C.": "--test--",
-        "Less than optimal Transport Security, rated B.": "--test--",
-        "Good Transport Security, rated A-.": "--test--",
-        "Good Transport Security, rated A.": "--test--",
-        "Perfect Transport Security, rated A+.": "--test--",
-        "TLS rated C": "--test--",
-        "TLS rated B": "--test--",
-        "TLS rated A": "--test--",
-        "TLS rated A-": "--test--",
-        "TLS rated A+": "--test--",
-        "Broken": "--test--",
+        "Broken Transport Security, rated F": "Broken Transport Security, rated F",
+        "Certificate not valid for domain name.": "Certificate not valid for domain name.",
+        "Less than optimal Transport Security, rated C.": "Less than optimal Transport Security, rated C.",
+        "Less than optimal Transport Security, rated B.": "Less than optimal Transport Security, rated B.",
+        "Good Transport Security, rated A-.": "Good Transport Security, rated A-.",
+        "Good Transport Security, rated A.": "Good Transport Security, rated A.",
+        "Perfect Transport Security, rated A+.": "Perfect Transport Security, rated A+.",
+        "TLS rated C": "TLS rated C",
+        "TLS rated B": "TLS rated B",
+        "TLS rated A": "TLS rated A",
+        "TLS rated A-": "TLS rated A-",
+        "TLS rated A+": "TLS rated A+",
+        "Broken": "Broken (completely insecure)",
 
 
         // tls_qualys_certificate_trusted
         "tls_qualys_certificate_trusted": "Trust in certificate (HTTPS)",
-        "not trusted": "--test--",
-        "trusted": "--test--",
-        "Certificate is not trusted.": "--test--",
-        "Certificate is trusted.": "--test--",
+        "not trusted": "Not trusted",
+        "trusted": "Trusted",
+        "Certificate is not trusted.": "Certificate is not trusted.",
+        "Certificate is trusted.": "Certificate is trusted.",
 
 
         // internet_nl_mail_starttls_tls_available
         "internet_nl_mail_starttls_tls_available": "E-Mail: Encrypted transport (STARTTLS)",
-        "STARTTLS Available": "--test--",
-        "STARTTLS Missing": "--test--",
+        "STARTTLS Available": "STARTTLS Available",
+        "STARTTLS Missing": "STARTTLS Missing",
 
 
         // internet_nl_mail_auth_spf_exist
         "internet_nl_mail_auth_spf_exist": "E-Mail: Sender Policy Framework (SPF)",
-        "SPF Available": "--test--",
-        "SPF Missing": "--test--",
+        "SPF Available": "SPF Available",
+        "SPF Missing": "SPF Missing",
 
 
         // internet_nl_mail_auth_dkim_exist
         "internet_nl_mail_auth_dkim_exist": "E-Mail: DomainKeys Identified Mail (DKIM)",
-        "DKIM Available": "--test--",
-        "DKIM Missing": "--test--",
+        "DKIM Available": "DKIM Available",
+        "DKIM Missing": "DKIM Missing",
 
 
         // internet_nl_mail_auth_dmarc_exist
         "internet_nl_mail_auth_dmarc_exist": "E-Mail: Domain-based Message Auth (DMAR",
-        "DMARC Available": "--test--",
-        "DMARC Missing": "--test--",
+        "DMARC Available": "DMARC Available",
+        "DMARC Missing": "DMARC Missing",
     },
     nl: {
 
