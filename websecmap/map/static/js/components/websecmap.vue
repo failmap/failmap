@@ -272,7 +272,7 @@ Vue.component('websecmap', {
 
     props: {
         issues: Array,
-        debug: Number,
+        debug: Boolean,
         mapbox_token: String,
 
         // Leaflet reference, so we can do things with leaflet directly, as i'm not sure it will be possible differently
