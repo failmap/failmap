@@ -1,33 +1,10 @@
 {% extends 'pro/base.html' %}{% load humanize %}
 {% block content %}
+    <div id="main">
+      <account></account>
+    </div>
 
-    <h1>Account</h1>
-
-    <h2>Credits</h2>
-    <p>This account currently has {{ credits }} credits.</p>
-
-    <h2>Transactions</h2>
-    <table class="table table-sm table-striped table-bordered table-hover">
-    <thead>
-        <tr>
-        <th>Transaction ID</th>
-        <th>Description</th>
-        <th>When</th>
-        <th>Mutation</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for transaction in transactions %}
-        <tr>
-        <td>{{ transaction.id }}</td>
-        <td>{{ transaction.goal }}</td>
-        <td><span title="{{ transaction.when }}">{{ transaction.when | naturaltime }}</span></td>
-        <td>{{ transaction.credit_mutation }}</td>
-        </tr>
-    {% empty %}
-        <tr><td colspan="4">No transactions found.</td></tr>
-    {% endfor %}
-    </tbody>
-    </table>
-
+    <script>
+    new Vue({ el: '#main' })
+    </script>
 {% endblock %}

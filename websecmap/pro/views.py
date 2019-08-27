@@ -13,7 +13,7 @@ from django.utils.text import slugify
 
 from websecmap.app.common import JSEncoder
 from websecmap.pro.forms import MailSignupForm
-from websecmap.pro.logic.shared import get_account
+from websecmap.pro.logic.shared import get_account, has_account
 from websecmap.pro.models import (Account, CreditMutation, ProUser, RescanRequest, UrlList,
                                   UrlListReport)
 from websecmap.reporting.severity import get_severity
@@ -22,15 +22,19 @@ from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
 
+LOGIN_URL = '/pro/login/?next=/pro/'
 
-# Create your views here.
-@login_required(login_url='/pro/login/?next=/pro/')
+
+@login_required(login_url=LOGIN_URL)
 def dummy(request):
     return JsonResponse({'hello': 'world'}, encoder=JSEncoder)
 
 
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def home(request):
+    if not has_account(request):
+        return render(request, 'pro/error.html', {'message': "This user does not have a pro account associated."})
+
     account = get_account(request)
 
     user = User.objects.all().filter(pk=request.user.id).first()
@@ -198,7 +202,7 @@ def issue_data(request, list_name: str = ""):
     return JsonResponse({'issues': all_scans_view}, encoder=JSEncoder, safe=False)
 
 
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def issues(request):
     this_account = get_account(request)
 
@@ -206,7 +210,7 @@ def issues(request):
                                                'credits': this_account.credits})
 
 
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def account(request):
     this_account = get_account(request)
 
@@ -216,7 +220,7 @@ def account(request):
                                                 'credits': this_account.credits})
 
 
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def portfolio(request):
     account = get_account(request)
     return render(request, 'pro/portfolio.html', {'account': account})
@@ -281,7 +285,7 @@ def portfolio_data(request):
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def mail(request):
     return render(request, 'pro/urls.html', {})
 
@@ -291,7 +295,7 @@ def mail(request):
 # todo: how to prevent re-queue-ing? How to log a scan request / follow a performed scan?
 # todo: create a "rescan all" option.
 # todo: check if scan already is requested.
-@login_required(login_url='/pro/login/?next=/pro/')
+@login_required(login_url=LOGIN_URL)
 def rescan_request(request, scan_type, scan_id):
 
     account = get_account(request)
