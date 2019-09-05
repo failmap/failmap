@@ -147,7 +147,7 @@
                            target="_blank"
                            :title="'Visit ' + endpoint.protocol + '://' + url.url + ':' + endpoint.port">
                             <img src="data:image/gif;base64,R0lGODdhAQABAPAAAMPDwwAAACwAAAAAAQABAAACAkQBADs="
-                                 class="img-fluid rounded lazyload clippedimage" :data-src="'/static/images/screenshots/' + endpoint.id + '_latest.png'"
+                                 class="img-fluid rounded lazyload clippedimage" :data-src="'/images/screenshot/' + endpoint.id + '/'"
                                 :alt="'Latest screenshot of '+ endpoint.protocol + idize(url.url) + endpoint.port"
                             />
                         </a>

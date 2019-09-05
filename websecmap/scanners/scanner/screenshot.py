@@ -19,6 +19,8 @@ http://screenshot_v6:1337
 """
 
 import logging
+import tempfile
+from django.core.files import File
 import urllib.parse
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -135,23 +137,22 @@ def save_screenshot(response, endpoint):
                   f"This is business as usual. Not saving.")
         return False
 
-    i = Image.open(BytesIO(response.content))
-    size = 320, 240
-    i.thumbnail(size, Image.ANTIALIAS)
+    try:
 
-    # Save the tumbnails
-    output_dir = settings.TOOLS['screenshot_scanner']['output_dir']
-    now = datetime.now()
-    save_as_today = f"{output_dir}{endpoint.id}_{now.year}{now.month}{now.day}.png"
-    save_as_latest = f"{output_dir}{endpoint.id}_latest.png"
-    i.save(save_as_today, "PNG")
-    i.save(save_as_latest, "PNG")
-    log.debug(f"Created screenshot and thumbnail at {save_as_today}")
+        i = Image.open(BytesIO(response.content))
+        size = 320, 240
+        i.thumbnail(size, Image.ANTIALIAS)
+        filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint.id}_latest.png"
+        i.save(filename, "PNG")
 
-    scr = Screenshot()
-    scr.created_on = datetime.now(pytz.utc).date()
-    scr.endpoint = endpoint
-    scr.filename = save_as_today
-    scr.width_pixels = 320
-    scr.height_pixels = 240
-    scr.save()
+        scr = Screenshot()
+        scr.created_on = datetime.now(pytz.utc).date()
+        scr.endpoint = endpoint
+        scr.image = File(open(filename, 'rb'))
+        scr.filename = filename
+        log.debug("swag")
+        scr.save()
+        log.debug(f"Saved in databased as {scr.pk}")
+    except Exception as e:
+        log.debug(e)
+
