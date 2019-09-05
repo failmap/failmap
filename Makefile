@@ -123,7 +123,7 @@ test_integration: ${app}
 
 test_system:
 	# run system tests
-	${env} pytest tests/system ${testargs}
+	${env} pytest --setup-show tests/system ${testargs}
 
 test_datasets: ${app}
 	${env} /bin/sh -ec "find websecmap -path '*/fixtures/*.yaml' -print0 | \

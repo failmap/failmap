@@ -10,7 +10,7 @@ import pytest
 
 log = logging.getLogger(__name__)
 
-TIMEOUT = timedelta(seconds=int(os.environ.get('SYSTEM_TEST_TIMEOUT', 30)))
+TIMEOUT = timedelta(seconds=int(os.environ.get('SYSTEM_TEST_TIMEOUT', 60)))
 INTERVAL = timedelta(seconds=5)
 
 
@@ -28,9 +28,12 @@ def websecmap(docker_ip, docker_services):
             with urllib.request.urlopen(self.admin_url + path) as f:
                 return (f, f.read().decode('utf-8'))
 
-        def get_frontend(self, path):
-            with urllib.request.urlopen(self.frontend_url + path) as f:
-                return (f, f.read().decode('utf-8'))
+        def get_frontend(self, path, return_errors=False):
+            try:
+                with urllib.request.urlopen(self.frontend_url + path) as f:
+                    return (f, f.read().decode('utf-8'))
+            except urllib.error.HTTPError as e:
+                return e
 
     return Websecmap()
 

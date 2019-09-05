@@ -135,7 +135,7 @@ RUN /pyenv/bin/websecmap collectstatic
 # Compress JS/CSS before serving, using django-compressor, run after collectstatic
 # COMPRESS=1 is a hack to disable django_uwsgi app as it currently conflicts with compressor
 # https://github.com/django-compressor/django-compressor/issues/881
-RUN env COMPRESS=1 /pyenv/bin/websecmap compress
+RUN env APPLICATION_MODE=admin COMPRESS=1 /pyenv/bin/websecmap compress
 
 EXPOSE 8000
 
