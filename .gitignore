@@ -12,7 +12,7 @@ websecmap/map/static/CACHE/*
 websecmap/map/static/images/screenshots/*
 websecmap/scanners/resources/wordlists/knownsubdomains.txt
 websecmap/scanners/resources/wordlists/nonsense.txt
-dist/
+/dist/
 build/
 code.json
 codeclimate.json

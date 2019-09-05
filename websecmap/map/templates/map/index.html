@@ -36,15 +36,15 @@
     <!-- Allow various color schemes -->
     <link id="colorscheme" href="/static//css/colors.trafficlight.css" rel="stylesheet" />
 
-
+    {% compress css %}
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet/dist/leaflet.css"/>
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css">
 
-
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
         <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
+    {% endcompress %}
 
     {% if debug %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.js"></script>
