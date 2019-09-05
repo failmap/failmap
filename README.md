@@ -167,6 +167,12 @@ You can also visit the docker website and get the link using the time tested Ora
 https://hub.docker.com/editions/community/docker-ce-desktop-mac
 
 
+### Manage NPM modules for the map
+
+npm install --prefix websecmap/map/static/js/vendor [packagename]
+
+The --prefix is the key, and allows for multiple repositories.
+
 
 ## Documentation
 

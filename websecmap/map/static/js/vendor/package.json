@@ -1,0 +1,50 @@
+{
+  "name": "websecmap",
+  "version": "1.0.0",
+  "description": "Web Security Map",
+  "main": "index.js",
+  "directories": {
+    "doc": "../../../../../docs",
+    "test": "../../../../../tests"
+  },
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "chart.js": "^2.8.0",
+    "chartjs-plugin-datalabels": "^0.6.0",
+    "jquery": "^3.4.1",
+    "lazyload": "^2.0.0-rc.2",
+    "leaflet": "^1.5.1",
+    "leaflet-fullscreen": "^1.0.2",
+    "leaflet.markercluster": "^1.4.1",
+    "moment": "^2.24.0",
+    "patternomaly": "^1.3.2",
+    "popper.js": "^1.15.0",
+    "select2": "^4.0.10",
+    "vue": "^2.6.10",
+    "vue-i18n": "^8.14.0",
+    "vue-multiselect": "^2.1.6",
+    "vue-select": "^3.1.0",
+    "vue2-leaflet": "^2.2.1",
+    "vue2-leaflet-markercluster": "^3.0.0",
+    "vuex": "^3.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/internet-cleanup-foundation/web-security-map.git"
+  },
+  "keywords": [
+    "Web",
+    "Security",
+    "Map"
+  ],
+  "author": "Internet Cleanup Foundation",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://gitlab.com/internet-cleanup-foundation/web-security-map/issues"
+  },
+  "homepage": "https://gitlab.com/internet-cleanup-foundation/web-security-map#README"
+}

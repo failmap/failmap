@@ -847,21 +847,8 @@ Vue.component('websecmap', {
             this.showreport_direct();
         },
         showreport_direct: function () {
-            if (this.map.isFullscreen()) {
-                console.log("Not yet implemented");
-                // var layer = e.target;
-                // todo: fix fullscreen view, or drop it completely.
-                //vueFullScreenReport.load(organization_id, vueMap.week);
-                //vueFullScreenReport.show();
-
-                // Load the report for when you leave fullscreen
-                // perhaps this should be in the leave fullscreen event handler
-                //vueReport.load(organization_id, vueMap.week);
-            } else {
-                // trigger load of organization data and jump to Report view.
-                // the app should take care about fullscreen things
-                location.href = '#report';
-            }
+            // fullscreen state is not supported for now...
+            location.href = '#report';
         },
         pointToLayer: function (geoJsonPoint, latlng) {
             return L.circleMarker(latlng, this.style(geoJsonPoint));

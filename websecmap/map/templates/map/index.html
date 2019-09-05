@@ -37,48 +37,51 @@
     <link id="colorscheme" href="/static//css/colors.trafficlight.css" rel="stylesheet" />
 
     {% compress css %}
-        <link rel="stylesheet" type="text/css" href="/static/css/vendor/leaflet.css"/>
-        <link rel="stylesheet" type="text/css" href="/static/css/vendor/leaflet.fullscreen.css">
+        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet/dist/leaflet.css"/>
+        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
+        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
+        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css">
+
+
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
-        <link rel="stylesheet" type="text/css" href="/static/css/vendor/MarkerCluster.css">
-        <link rel="stylesheet" type="text/css" href="/static/css/vendor/vue-select@3.1.0/vue-select.css">
         <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
     {% endcompress %}
 
-    <script type="text/javascript" src="{% url 'javascript-catalog' %}"></script>
     {% if debug %}
-        <script type="text/javascript" src="/static/js/vendor/vuejs@2.6.8/vue.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vuex@3.1.1/vuex.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue-select@3.1.0/vue-select.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/jquery@3.4.0/jquery-3.4.0.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/bootstrap@4.1.3/bootstrap.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/leaflet@1.5.1/leaflet-src.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/Leaflet.fullscreen.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/leaflet.markercluster@1.4.1/leaflet.markercluster-src.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/lazyload-custom.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue-select/dist/vue-select.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/jquery/dist/jquery.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/bootstrap/dist/js/bootstrap.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet/dist/leaflet.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-fullscreen/dist/Leaflet.fullscreen.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/lazyload/lazyload.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
+
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/momentjs@2.24.0/moment-with-locales.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="/static/js/vendor/chartjs@2.8.0/Chart.js"></script>
-        <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue-i18n@8.9.0/vue-i18n.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue2-leaflet@2.2.1/vue2-leaflet.min.js"></script>
     {% else %}{% compress js %}
-        <script type="text/javascript" src="/static/js/vendor/vuejs@2.6.8/vue.min.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vuex@3.1.1/vuex.min.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue-select@3.1.0/vue-select.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/jquery@3.4.0/jquery-3.4.0.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/bootstrap@4.1.3/bootstrap.min.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/leaflet@1.5.1/leaflet.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/Leaflet.fullscreen.min.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/leaflet.markercluster@1.4.1/leaflet.markercluster.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/lazyload-custom.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue-select/dist/vue-select.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet/dist/leaflet.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/lazyload/lazyload.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.min.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
+
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/momentjs@2.24.0/moment-with-locales.min.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="/static/js/vendor/chartjs@2.8.0/Chart.min.js"></script>
-        <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue-i18n@8.9.0/vue-i18n.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/vue2-leaflet@2.2.1/vue2-leaflet.min.js"></script>
     {% endcompress %}{% endif %}
+
+    <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
 
     <script>
         // Registry Sentry for error reporting
@@ -95,7 +98,7 @@
 
         // support for an intuitive timestamp in weeks...
         Date.prototype.humanTimeStamp = function () {
-            return this.getFullYear() + " " + gettext("week") + " " + this.getWeek();
+            return this.getFullYear() + " " + i18n.t("week") + " " + this.getWeek();
         };
 
         const new_state_mixin_ = {

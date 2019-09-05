@@ -5,6 +5,7 @@ const messages = {
     en: {
         // new translations
         back_to_map: "Back to the map",
+        week: "week",
 
         // layers
         municipality: 'Municipalities',
@@ -154,7 +155,22 @@ const messages = {
         "DMARC Missing": "DMARC Missing",
     },
     nl: {
+        back_to_map: "Terug naar de kaart",
 
+        municipality: 'Gemeenten',
+        cyber: 'Cyber',
+        unknown: 'Onbekend',
+        water_board: 'Waterschappen',
+        province: 'Provincies',
+        country: 'Land',
+        region: 'Gebied',
+        county: 'County',
+        district: 'District',
+        government: 'Overheid',
+        healthcare: 'Gezondheidszorg',
+        finance: 'Financiën',
+        state: 'Staat',
+        education: 'Scholen',
 
     }
 };
