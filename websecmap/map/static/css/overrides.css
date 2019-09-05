@@ -218,7 +218,7 @@ div#report {
     border-radius: 4px;
 }
 
-.total_awarded_points_orange {
+.total_awarded_points_medium {
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
@@ -226,7 +226,7 @@ div#report {
     margin-left: 5px;
 }
 
-.total_awarded_points_red {
+.total_awarded_points_high {
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
@@ -234,7 +234,7 @@ div#report {
     margin-left: 5px;
 }
 
-.total_awarded_points_green {
+.total_awarded_points_good {
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
