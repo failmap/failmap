@@ -549,8 +549,10 @@ Vue.component('websecmap', {
             let bounds = this.polygons.getBounds();
             bounds.extend(this.markers.getBounds());
 
-            if (Object.keys(bounds).length !== 0)
-                this.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]})
+            if (Object.keys(bounds).length !== 0) {
+                this.map.fitBounds(bounds, {paddingTopLeft: [0, 0], paddingBottomRight: [paddingToLeft, 0]});
+                console.log("Fit bounds on all map data");
+            }
         },
 
         tile_uri: function() {
@@ -688,18 +690,22 @@ Vue.component('websecmap', {
         },
 
         show_everything_on_map: function(){
+            console.log("Show everything on map.");
+
             // determine if we need to pad the map to the left due to controls being visible.
             // they are invisible on small viewports (see css)
             let paddingToLeft = 0;
-            if (document.documentElement.clientWidth > 768)
-                paddingToLeft=320;
+            if (document.documentElement.clientWidth > 768) {
+                paddingToLeft = 320;
+            }
 
             let bounds = this.polygons.getBounds();
             bounds.extend(this.markers.getBounds());
 
             // it could be the map is empty, then there are no bounds, and calling fitbounds would result in an error.
-            if (Object.keys(bounds).length !== 0)
-                this.map.fitBounds(bounds, {paddingTopLeft: [0,0], paddingBottomRight: [paddingToLeft, 0]});
+            if (Object.keys(bounds).length !== 0) {
+                this.map.fitBounds(bounds, {paddingTopLeft: [0, 0], paddingBottomRight: [paddingToLeft, 0]});
+            }
         },
         recolormap: function (features, layer) {
             let existing_feature = layer.feature;
