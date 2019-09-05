@@ -9,16 +9,9 @@
 
 ## Why Web Security Map
 
-We believe privacy and information integrity are the basics of a resilient information society.
+Use Web Security Map to create a tangible view on how well security and privacy practices are applied.
 
-By providing unprecedented transparency on the most basic levels of information security, insight in
-the quality and capability of organizations regarding their responsibilities is displayed.
-
-Web Security Map uses the complexity of a traffic light anyone is able to determine if organizations that are responsible
-for safeguarding information are doing what they are supposed to do.
-
-It is perfectly possible to run Web Security Map software for yourself, allowing you to independently verify the
-state of information security basics. All our products are open source.
+Anyone can understand this map, and is motivated to solve issues.
 
 ## What is it
 
@@ -27,9 +20,29 @@ best practices at (governmental) organizations.
 
 This repository contains the mapping application fo Web Security Map: the public frontend, an administrative interface and scanners.
 
+Web Security Map uses data from Open Streetmaps and Wikidata to create the initial report of a country.
+
 ![screenshot](docs/screenshot.png)
 
 ![screenshot](docs/admin_interface.png)
+
+## Installation and training videos
+
+To run a full installation of this software, please use the below videos. 
+
+For time indexes on these videos, visit: https://monitoryourgovernment.org/
+
+- How To: Installation: https://youtu.be/yhx0b1k_Ag0
+- How To: Import Countries: https://youtu.be/esv6G8hmwpE
+- Exploring the admin interface: https://youtu.be/Yjq5klYbQww
+- Configuration options: https://youtu.be/LX5_lHgljxY
+- Add organizations using Data sets: https://youtu.be/YvK79QGaHTY
+
+For all server and deployment related topics, visit: https://gitlab.com/internet-cleanup-foundation/server/
+
+
+The source repository you're watching right now will only get you a development setup.
+
 
 ## Getting started
 
