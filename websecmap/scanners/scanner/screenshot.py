@@ -19,8 +19,6 @@ http://screenshot_v6:1337
 """
 
 import logging
-import tempfile
-from django.core.files import File
 import urllib.parse
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -30,6 +28,7 @@ import requests
 from celery import Task, group
 from constance import config
 from django.conf import settings
+from django.core.files import File
 from django.db.models import Q
 from PIL import Image
 
@@ -155,4 +154,3 @@ def save_screenshot(response, endpoint):
         log.debug(f"Saved in databased as {scr.pk}")
     except Exception as e:
         log.debug(e)
-

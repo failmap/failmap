@@ -1,13 +1,13 @@
 import json
 import logging
-import os
 from datetime import datetime
+from wsgiref.util import FileWrapper
 
 import django_excel as excel
 import pytz
 from constance import config
 from django.conf import settings
-from django.http import JsonResponse, HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
@@ -36,8 +36,6 @@ from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization
 from websecmap.scanners.models import Screenshot
-from wsgiref.util import FileWrapper
-import mimetypes
 
 log = logging.getLogger(__package__)
 
