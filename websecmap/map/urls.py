@@ -81,6 +81,8 @@ urlpatterns = [
 
     path('data/upcoming_and_past_scans/', views.upcoming_and_past_scans),
 
+    path('images/screenshot/<int:endpoint_id>/', views.screenshot),
+
     # Proxy maptile requests,
     # In production this can be done by caching proxy, this makes sure it works for dev. as well.
     url(r'^proxy/(?P<url>https://api.mapbox.com/styles/v1/mapbox/.*./$)',

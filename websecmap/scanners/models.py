@@ -572,6 +572,8 @@ class Screenshot(models.Model):
     endpoint = models.ForeignKey(
         Endpoint, null=True, blank=True, on_delete=models.CASCADE)
     filename = models.CharField(max_length=255)
+    image = models.ImageField(upload_to="screenshots/", height_field="height_pixels", width_field="width_pixels",
+                              default=None, null=True)
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)

@@ -1,12 +1,13 @@
 import json
 import logging
+import os
 from datetime import datetime
 
 import django_excel as excel
 import pytz
 from constance import config
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
@@ -34,6 +35,9 @@ from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
 from websecmap.map.models import Configuration
 from websecmap.organizations.models import Organization
+from websecmap.scanners.models import Screenshot
+from wsgiref.util import FileWrapper
+import mimetypes
 
 log = logging.getLogger(__package__)
 
@@ -393,3 +397,20 @@ def organization_autcomplete(request, country: str = DEFAULT_COUNTRY, organizati
 def upcoming_and_past_scans(request):
     data = get_next_and_last_scans()
     return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+@cache_page(one_day)
+def screenshot(request, endpoint_id=0):
+    # get the latest screenshot from an endpoint.
+
+    screenshot = Screenshot.objects.all().filter(endpoint=endpoint_id).order_by('-created_on').first()
+
+    if not screenshot:
+        return HttpResponse()
+
+    if not screenshot.image:
+        return HttpResponse()
+
+    wrapper = FileWrapper(screenshot.image.file.open('rb'))
+    response = HttpResponse(wrapper, content_type="image/PNG")
+    return response

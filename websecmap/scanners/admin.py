@@ -116,8 +116,8 @@ class ScreenshotAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('endpoint', 'created_on', 'filename')
     search_fields = ('endpoint__url__url', 'created_on', 'filename')
     list_filter = ['endpoint', 'created_on', 'filename'][::-1]
-    fields = ('endpoint', 'created_on', 'filename', 'width_pixels', 'height_pixels')
-    readonly_fields = ['created_on']
+    fields = ('endpoint', 'image', 'created_on', 'filename', 'width_pixels', 'height_pixels')
+    readonly_fields = ['created_on', 'image']
 
 
 @admin.register(models.EndpointGenericScan)

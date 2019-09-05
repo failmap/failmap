@@ -44,8 +44,7 @@ def websecmap_menu_items():
             # tlsqualysscans have been merged with endpointgenericscans
             # {'name': 'tlsqualysscan', 'permissions': ['scanners.change_tlsqualysscan']},
             {'name': 'scanproxy', 'permissions': ['scanners.scanproxy'], 'label': 'Scan Proxies'},
-            # screenshots are not working yet
-            # {'name': 'screenshot', 'permissions': ['admin']},
+            {'name': 'screenshot'},
             # UrlIP's are not used currently, they are stored but have no value.
             # {'name': 'urlip', 'permissions': ['admin']},
             {'name': 'tlsqualysscratchpad', 'permissions': ['admin'], 'label': 'Qualys Scans Debug'},
