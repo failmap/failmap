@@ -88,6 +88,12 @@
                         <template v-for="url in urls" >
                             <tr v-html="total_summary_row(url)"></tr>
                         </template>
+                        <template v-if="!urls.length">
+                            <tr>
+                                <td>-</td>
+                                <td colspan="100">{{ $t("report_content.risksummary.no_data") }}</td>
+                            </tr>
+                        </template>
                         </tbody>
                     </table>
                     </div>
@@ -102,6 +108,9 @@
                 </div>
             </div>
 
+            <div v-if="!urls.length" class="perurl" :class="colorizebg(0, 0, 0)">
+                {{ $t("report_content.report.no_data") }}
+            </div>
 
             <div v-if="name" v-for="url in urls" class="perurl" :class="colorizebg(url.high, url.medium, url.low)">
 
@@ -240,12 +249,15 @@ Vue.component('report_content', {
                     timeline: {
                         title: "Timeline of risks and available services",
                     },
+
                     risksummary: {
-                        title: "Risk summary table"
+                        title: "Risk summary table",
+                        no_data: "This report contains no data / urls.",
                     },
 
                     report: {
                         title: "Complete report",
+                        no_data: "This report contains no data / urls.",
                         report_incorrect_finding: "Report incorrect finding",
                         incorrect_finding_mail: {
                             title: 'Incorrect finding on {0}',
