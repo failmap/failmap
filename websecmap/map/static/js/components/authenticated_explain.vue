@@ -35,6 +35,7 @@
                 <h4>Canned Explanation:</h4>
                 <select v-model="explanation" size="4" style="width: 100%">
                     <option :value='$t("explain.canned_explanations.device_only_certificate")'>{{ $t("explain.canned_explanations.device_only_certificate") }}</option>
+                    <option :value='$t("explain.canned_explanations.device_only_certificate")'>{{ $t("explain.canned_explanations.for_devices_only_not_browsers") }}</option>
                     <option :value='$t("explain.canned_explanations.fix_in_progress")'>{{ $t("explain.canned_explanations.fix_in_progress") }}</option>
                     <option :value='$t("explain.canned_explanations.scanner_bug")'>{{ $t("explain.canned_explanations.scanner_bug") }}</option>
                 </select>
@@ -83,6 +84,7 @@ Vue.component('explain', {
                     title: "Explain this finding",
                     canned_explanations: {
                         device_only_certificate: "The certificate is used on specific devices exclusively, these trust this certificate specifically.",
+                        for_devices_only_not_browsers: "This domain is for devices only, not browsers. These devices does not need this requirement.",
                         fix_in_progress: "The issue is being fixed by the supplier, a new version will be delivered soon.",
                         scanner_bug: "A bug in the scanner caused this issue. Manual testing has shown this issue does not occur.",
                     }
@@ -93,6 +95,7 @@ Vue.component('explain', {
                     title: "Verklaar deze bevinding",
                     canned_explanations: {
                         device_only_certificate: "Dit certificaat wordt op specifieke apparatuur gebruikt. Deze apparatuur vertrouwd alleen dit certificaat.",
+                        for_devices_only_not_browsers: "Dit domein wordt voor specifieke apparatuur gebruikt. Deze apparatuur heeft geen noodzaak voor deze beveiligingseis.",
                         fix_in_progress: "Dit probleem wordt op dit moment opgelost door de leverancier. Een nieuwe versie zal binnenkort beschikbaar zijn.",
                         scanner_bug: "Een bug in de scanner zorgt voor een verkeerde beoordeling. Een handmatige test toont aan dat dit probleem hier niet voorkomt.",
                     }
