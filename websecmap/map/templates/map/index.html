@@ -61,7 +61,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% else %}{% compress js %}
+    {% else %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-select/dist/vue-select.js"></script>
@@ -76,7 +76,7 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% endcompress %}{% endif %}
+    {% endif %}
 
     <!-- leaflet is not correctly compressed, so serve it separately -->
     <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
