@@ -59,7 +59,6 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.js" charset="UTF-8"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
     {% else %}{% compress js %}
@@ -75,11 +74,12 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.min.js" charset="UTF-8"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.min.js"></script>
-        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
     {% endcompress %}{% endif %}
 
+    <!-- leaflet is not correctly compressed, so serve it separately -->
+    <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
     <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
 
     <script>
