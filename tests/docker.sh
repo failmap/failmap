@@ -40,7 +40,8 @@ curl -s "http://$host:$port" |grep MSPAINT.EXE
 # static files
 curl -sI "http://$host:$port/static/images/fail_logo.png" |grep 200\ OK
 # compressed static files
-curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/manifest.json"|sed -n 's,.*\(CACHE/js/.*js\).*,\1,p'|head -n1)"|grep 200\ OK
+# compressed static files have been disabled for now due to compilation errors
+# curl -sI "http://$host:$port/static/$(curl -s "http://$host:$port/static/CACHE/manifest.json"|sed -n 's,.*\(CACHE/js/.*js\).*,\1,p'|head -n1)"|grep 200\ OK
 
 # admin login
 # tests disabled due to:
