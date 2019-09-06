@@ -507,8 +507,8 @@ def service_provider_scan_via_api_with_limits(proxy, domain):
     payload = {
         'host': domain,  # host that will be scanned for tls
         'publish': "off",  # will not be published on the front page of the ssllabs site
-        'startNew': "off",  # that's done automatically when needed by service provider
-        'fromCache': "on",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
+        'startNew': "on",  # that's done automatically when needed by service provider
+        'fromCache': "off",  # cache can have mismatches, but is ignored when startnew. We prefer cache as the cache on
         # qualys is not long lived. We prefer it because it might give back a result faster.
         'ignoreMismatch': "on",  # continue a scan, even if the certificate is for another domain
         'all': "done"  # ?
