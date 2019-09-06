@@ -150,7 +150,7 @@ const messages = {
 
 
         // internet_nl_mail_auth_dmarc_exist
-        "internet_nl_mail_auth_dmarc_exist": "E-Mail: Domain-based Message Auth (DMAR",
+        "internet_nl_mail_auth_dmarc_exist": "E-Mail: Domain-based Message Auth (DMARC)",
         "DMARC Available": "DMARC Available",
         "DMARC Missing": "DMARC Missing",
     },
