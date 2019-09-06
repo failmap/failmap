@@ -543,7 +543,13 @@ Vue.component('report_content', {
 
             // todo: no documentation links are found...
             // console.log(this.issues);
-            let selected_issue = this.issues[rating.type];
+            let selected_issue = {};
+            this.issues.forEach((issue) => {
+                if (issue.name === rating.type){
+                    selected_issue = issue;
+                    console.log("Issue found...")
+                }
+            });
 
             if (!selected_issue) {
                 return ""
@@ -553,16 +559,17 @@ Vue.component('report_content', {
 
             // todo: take in account language.
             // todo: this should be part of the template, not a weird function...
+            self = this;
             selected_issue['second opinion links'].forEach(function (item){
                 let filled_url = item.url;
                 filled_url = filled_url.replace("${url.url}", url.url);
                 links += `<a href="${filled_url}" target="_blank" class="btn-sm"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="clipboard-check" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="svg-inline--fa fa-clipboard-check fa-w-12"><path fill="currentColor" d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM192 40c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm121.2 231.8l-143 141.8c-4.7 4.7-12.3 4.6-17-.1l-82.6-83.3c-4.7-4.7-4.6-12.3.1-17L99.1 285c4.7-4.7 12.3-4.6 17 .1l46 46.4 106-105.2c4.7-4.7 12.3-4.6 17 .1l28.2 28.4c4.7 4.8 4.6 12.3-.1 17z" class=""></path></svg>&nbsp;` +
-                    this.$t("report_content.report.second_opinion") + ` (${item.provider}) </a> `;
+                    self.$t("report_content.report.second_opinion") + ` (${item.provider}) </a> `;
             });
 
             selected_issue['documentation links'].forEach(function (item){
                 links += `<a href="${item.url}" target="_blank" class="btn-sm"><svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-book fa-w-14"><path fill="currentColor" d="M448 360V24c0-13.3-10.7-24-24-24H96C43 0 0 43 0 96v320c0 53 43 96 96 96h328c13.3 0 24-10.7 24-24v-16c0-7.5-3.5-14.3-8.9-18.7-4.2-15.4-4.2-59.3 0-74.7 5.4-4.3 8.9-11.1 8.9-18.6zM128 134c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm0 64c0-3.3 2.7-6 6-6h212c3.3 0 6 2.7 6 6v20c0 3.3-2.7 6-6 6H134c-3.3 0-6-2.7-6-6v-20zm253.4 250H96c-17.7 0-32-14.3-32-32 0-17.6 14.4-32 32-32h285.4c-1.9 17.1-1.9 46.9 0 64z" class=""></path></svg>&nbsp;` +
-                    this.$t("report_content.report.documentation") + ` (${item.provider})</a> `;
+                    self.$t("report_content.report.documentation") + ` (${item.provider})</a> `;
             });
 
             return links;
