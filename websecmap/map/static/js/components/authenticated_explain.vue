@@ -1,7 +1,7 @@
 {% verbatim %}
 <template type="x-template" id="explain_template">
-    <div>
-        <a role="button" class="btn btn-danger btn-sm" @click="start_explaining()">[admin] Add explanation</a>
+    <span>
+        <a class='btn-sm' @click="start_explaining()" v-if="rating.high || rating.medium || rating.low">[admin] explain</a>
         <modal v-if="show_explanation" @close="stop_explaining()">
             <h3 slot="header">{{ $t("explain.title") }}</h3>
 
@@ -69,7 +69,7 @@
                 </template>
             </div>
         </modal>
-    </div>
+    </span>
 </template>
 {% endverbatim %}
 
