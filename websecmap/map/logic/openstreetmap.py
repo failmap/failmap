@@ -21,10 +21,9 @@ from rdp import rdp
 
 from websecmap.app.progressbar import print_progress_bar
 from websecmap.celery import app
-from websecmap.map.logic.wikidata import (ISO3316_2_COUNTRY_CODE, OFFICIAL_WEBSITE, ISO3316_2_COUNTY_SUBDIVISION_CODE,
-                                          get_property_from_code)
-from websecmap.map.models import AdministrativeRegion, MapDataCache, Configuration
-from websecmap.map.report import default_organization_rating
+from websecmap.map.logic.wikidata import (ISO3316_2_COUNTRY_CODE, ISO3316_2_COUNTY_SUBDIVISION_CODE,
+                                          OFFICIAL_WEBSITE, get_property_from_code)
+from websecmap.map.models import AdministrativeRegion
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType
 
 log = logging.getLogger(__package__)

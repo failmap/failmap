@@ -21,6 +21,7 @@
                     :incorrect_finding_mail="incorrect_finding_mail"
                     :show_comply_or_explain="show_comply_or_explain"
                     :send_in_email_address="send_in_email_address"
+                    :authenticated="authenticated"
                     :comply_or_explain_email_address="comply_or_explain_email_address">
             </report_content>
 
@@ -64,6 +65,7 @@ Vue.component('fullscreenreport', {
         incorrect_finding_mail: String,
         show_comply_or_explain: Boolean,
         comply_or_explain_email_address: String,
+        authenticated: Boolean,
         send_in_email_address: String,
     },
 

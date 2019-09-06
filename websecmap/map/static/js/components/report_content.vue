@@ -143,6 +143,7 @@
                                 <div class="finding_references">
                                     <span v-html="second_opinion_links(rating, url)"> </span>
                                     <span v-if="show_comply_or_explain" class="explain_link" v-html="explain_link(comply_or_explain_email_address, rating, url)"></span>
+                                    <explain v-if="authenticated" :url="url" :rating="rating"></explain>
                                 </div>
                             </div>
                         </div>
@@ -181,6 +182,7 @@
                                     <div class="finding_references">
                                         <span v-html="second_opinion_links(rating, url)"> </span>
                                         <span v-if="show_comply_or_explain" class="explain_link" v-html="explain_link(comply_or_explain_email_address, rating, url)"></span>
+                                        <explain v-if="authenticated" :endpoint="endpoint" :rating="rating"></explain>
                                     </div>
 
                                 </div>
@@ -335,6 +337,8 @@ Vue.component('report_content', {
         show_comply_or_explain: Boolean,
         comply_or_explain_email_address: String,
         send_in_email_address: String,
+
+        authenticated: Boolean,
     },
 
     // https://vuejs.org/v2/api/#updated

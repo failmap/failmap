@@ -17,7 +17,8 @@ from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.map.logic import datasets
 from websecmap.map.logic.datasets import create_filename
-from websecmap.map.logic.explain import get_all_explains, get_recent_explains
+from websecmap.map.logic.explain import (explain, get_all_explains, get_recent_explains,
+                                         remove_explanation)
 from websecmap.map.logic.improvements import get_improvements
 from websecmap.map.logic.latest import get_all_latest_scans
 from websecmap.map.logic.map import get_map_data
@@ -412,3 +413,28 @@ def screenshot(request, endpoint_id=0):
     wrapper = FileWrapper(screenshot.image.file.open('rb'))
     response = HttpResponse(wrapper, content_type="image/PNG")
     return response
+
+
+def get_json_body(request):
+
+    try:
+        user_input = json.loads(request.body)
+    except json.JSONDecodeError:
+        user_input = {}
+
+    return user_input
+
+
+def _explain(request):
+    request = get_json_body(request)
+
+    data = explain(request.get('scan_id'), request.get('scan_type'),
+                   request.get('explanation'), request.get('explained_by'), request.get('validity'))
+
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+def _remove_explain(request):
+    request = get_json_body(request)
+    data = remove_explanation(request.get('scan_id'), request.get('scan_type'))
+    return JsonResponse(data, encoder=JSEncoder, safe=False)

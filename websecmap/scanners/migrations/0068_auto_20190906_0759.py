@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='screenshot',
             name='image',
-            field=models.ImageField(default=None, height_field='height_pixels', null=True, upload_to='screenshots/', width_field='width_pixels'),
+            field=models.ImageField(default=None, height_field='height_pixels', null=True,
+                                    upload_to='screenshots/', width_field='width_pixels'),
         ),
     ]

@@ -153,8 +153,7 @@ class EndpointGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
-    readonly_fields = ['endpoint', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment',
-                       'rating_determined_on', 'is_the_latest_scan']
+    readonly_fields = ['last_scan_moment', 'rating_determined_on']
 
 
 @admin.register(models.UrlGenericScan)
@@ -191,8 +190,7 @@ class UrlGenericScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def explain(self, object):
         return format_html("<a href='./{}/change/#/tab/module_1/'>Explain</a>", object.pk)
 
-    readonly_fields = ['url', 'type', 'rating', 'explanation', 'evidence', 'last_scan_moment', 'rating_determined_on',
-                       'is_the_latest_scan']
+    readonly_fields = ['last_scan_moment', 'rating_determined_on']
 
 
 @admin.register(models.EndpointGenericScanScratchpad)

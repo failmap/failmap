@@ -89,6 +89,11 @@ urlpatterns = [
         proxy.views.proxy_view,
         {"requests_args": {"params": {"access_token": config.MAPBOX_ACCESS_TOKEN}}}),
 
+    # Below functions only work in a live environment. You cannot post anything on the public version of this
+    # software. It will only work on authenticated domains.
+    path('data/explain/explain/', views._explain),
+    path('data/explain/remove/', views._remove_explain),
+
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/
     # cache_page(86400, key_prefix='js18n')

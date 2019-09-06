@@ -283,12 +283,12 @@ vueIssues = new Vue({
                             <div v-if="scan.comply_or_explain_is_explained">
                                 <!-- Todo: <button type="button" class="btn btn-warning" @click="extend_explanation()">Extend validity with N days. ⭐{{ explain_costs }}</button> -->
                                 <button type="button" class="btn btn-danger" @click="remove_explanation()">Remove</button>
-                                <button class="btn btn-primary" @click="try_explain()"><i class="fas fa-coins"></i> Explain</button>
+                                <button class="btn btn-primary" @click="explain()"><i class="fas fa-coins"></i> Explain</button>
                             </div>
 
                             <!-- Only first explanation and extension have costs, alterations are free. -->
                             <div v-if="!scan.comply_or_explain_is_explained">
-                            <button class="btn btn-primary" @click="try_explain()">Explain ⭐{{ explain_costs }}</button>
+                            <button class="btn btn-primary" @click="explain()">Explain ⭐{{ explain_costs }}</button>
                             </div>
                         </slot>
                     </div>
@@ -389,7 +389,7 @@ vueExplain = new Vue({
                 this.showModal = true;
             }).catch((fail) => {console.log('A loading error occurred: ' + fail);});
         },
-        try_explain(){
+        explain(){
             // todo: post.
             fetch(`/pro/data/explain/try_explain/${this.scan_id}/${this.scan_type}/${this.explanation}/`).then(response => response.json()).then(data => {
                 this.result = data;
