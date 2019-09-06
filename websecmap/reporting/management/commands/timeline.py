@@ -19,7 +19,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if not options['url_addresses']:
-            print("Specify url using -u")
+            print("Specify url using -u. timeline -u example.com")
+            exit()
 
         # create a case-insensitive filter to match organizations by name
         regex = '^(' + '|'.join(options['url_addresses']) + ')$'
