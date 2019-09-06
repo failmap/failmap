@@ -88,7 +88,7 @@ def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, d
 
     scan = get_scan(scan_id, scan_type)
     if not scan:
-        return {'error': True, 'success': False, 'message': 'Could not find scan. It\s only possible to add '
+        return {'error': True, 'success': False, 'message': 'Could not find scan. It\'s only possible to add '
                                                             'explanations to the latest scan.'}
 
     if not explanation:

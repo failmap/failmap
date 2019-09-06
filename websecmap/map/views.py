@@ -426,6 +426,9 @@ def get_json_body(request):
 
 
 def _explain(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({}, encoder=JSEncoder, safe=False)
+
     request = get_json_body(request)
 
     data = explain(request.get('scan_id'), request.get('scan_type'),
@@ -435,6 +438,10 @@ def _explain(request):
 
 
 def _remove_explain(request):
+
+    if not request.user.is_authenticated:
+        return JsonResponse({}, encoder=JSEncoder, safe=False)
+
     request = get_json_body(request)
     data = remove_explanation(request.get('scan_id'), request.get('scan_type'))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
