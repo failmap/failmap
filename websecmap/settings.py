@@ -730,7 +730,7 @@ CONSTANCE_CONFIG = {
         '<a href="https://docs.mapbox.com/help/how-mapbox-works/access-tokens/" target="_blank">here</a>.', str),
 
     'WAMBACHERS_OSM_CLIKEY': (
-        '',
+        'c0e3473f-6ba2-4571-9331-4b3084022021',
         'Using this key replaces import from Open Street Maps with a specialized service. Using this serivce you will '
         'have nicer looking maps. The big difference is that all major waters and seas have been cut out, so only '
         'land mass is visible. This will make your country more recognizable if your country is near a sea or contains '
