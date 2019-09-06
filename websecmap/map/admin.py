@@ -46,7 +46,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                          | import_from_scratch.si([str(region.country)], [region.organization_type.name])
                          | add_configuration.si(region.country, region.organization_type)
                          | set_imported.si(region)
-                         | report_country.si(organization_filter))
+                         | report_country.si(organization_filter)
+                         | prepare_map.si(region.country, region.organization_type))
 
         task_name = "%s (%s) " % ("Import region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -68,7 +69,8 @@ class AdministrativeRegionAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             tasks.append(start_import.si(region)
                          | update_coordinates.si([str(region.country)], [region.organization_type.name])
                          | set_imported.si(region)
-                         | report_country.si(organization_filter))
+                         | report_country.si(organization_filter)
+                         | prepare_map(region.country, region.organization_type))
 
         task_name = "%s (%s) " % ("Update region", ','.join(map(str, list(queryset))))
         task = group(tasks)
@@ -90,6 +92,13 @@ def start_import(region: models.AdministrativeRegion):
 def set_imported(region: models.AdministrativeRegion):
     region.imported = True
     region.save(update_fields=['imported'])
+
+
+@app.task(queue='storage')
+def prepare_map(country, organization_type):
+    # when the reports are created, we still probably have some map cache, as the admin probably looked
+    # at that page before...
+    MapDataCache.objects.all().filter(organization_type__name=organization_type, country=country).delete()
 
 
 @app.task(queue='storage')

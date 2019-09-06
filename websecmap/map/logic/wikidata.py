@@ -8,6 +8,7 @@ log = logging.getLogger(__package__)
 
 OFFICIAL_WEBSITE: str = "P856"
 ISO3316_2_COUNTRY_CODE: str = "P297"
+ISO3316_2_COUNTY_SUBDIVISION_CODE: str = "P300"
 
 
 def get_property_from_code(wikidata_code: str, property_code: str):

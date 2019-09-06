@@ -15,14 +15,16 @@ import tldextract
 from constance import config
 from django.conf import settings
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from iso3166 import countries
 from rdp import rdp
 
 from websecmap.app.progressbar import print_progress_bar
 from websecmap.celery import app
-from websecmap.map.logic.wikidata import (ISO3316_2_COUNTRY_CODE, OFFICIAL_WEBSITE,
+from websecmap.map.logic.wikidata import (ISO3316_2_COUNTRY_CODE, OFFICIAL_WEBSITE, ISO3316_2_COUNTY_SUBDIVISION_CODE,
                                           get_property_from_code)
-from websecmap.map.models import AdministrativeRegion
+from websecmap.map.models import AdministrativeRegion, MapDataCache, Configuration
+from websecmap.map.report import default_organization_rating
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType
 
 log = logging.getLogger(__package__)
@@ -115,7 +117,11 @@ def import_from_scratch(countries: List[str] = None, organization_types: List[st
                 store_import_message(country, organization_type, message)
 
                 # can't do multiprocessing.pool, given non global functions.
-            store_import_message(country, organization_type, "Import complete")
+            store_import_message(country, organization_type, "Import complete. To view your import, go to "
+                                                             "<a href='../configuration/'>map configuration</a> "
+                                                             "and set this to display. Reports are generated in "
+                                                             "the background. On first import everything imported"
+                                                             " will look gray.")
 
     log.info("Import finished.")
 
@@ -131,7 +137,7 @@ def store_import_message(country, organization_type, message):
         country=country,
         organization_type__name=organization_type).first()
 
-    region.import_message = str(message)[0:240]
+    region.import_message = mark_safe(str(message)[0:240])
     region.save(update_fields=['import_message'])
 
 
@@ -255,7 +261,13 @@ def store_new(feature: Dict, country: str = "NL", organization_type: str = "muni
     if "wikidata" in properties:
         iso3316_2_country_code = get_property_from_code(properties['wikidata'], ISO3316_2_COUNTRY_CODE)
 
-        if country.upper() != iso3316_2_country_code.upper():
+        # some regions are marked by their subdivision code. This is LU-... The first two letters are the country code.
+        if not iso3316_2_country_code:
+            iso3316_2_country_code = get_property_from_code(properties['wikidata'], ISO3316_2_COUNTY_SUBDIVISION_CODE)
+            if iso3316_2_country_code:
+                iso3316_2_country_code = iso3316_2_country_code[0:2]
+
+        if iso3316_2_country_code and country.upper() != iso3316_2_country_code.upper():
             log.debug(f"According to wikidata the imported region is not in {country} but in {iso3316_2_country_code}.")
             log.debug('Going to save the region under the new country. You probably got too much data back from OSM')
             country = iso3316_2_country_code.upper()
