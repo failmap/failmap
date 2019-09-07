@@ -279,8 +279,8 @@ Vue.component('websecmap', {
 
 
                         // upgrade severity until you find the highest risk issue.
-                        if (this.map.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
-                            selected_severity = this.map.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                        if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
+                            selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
                             css_class = point.feature.properties.severity;
                         }
                     }
