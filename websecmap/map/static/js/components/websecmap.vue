@@ -64,17 +64,6 @@
             </div>
         </l-control>
 
-        <l-control position="bottomright">
-            <div class="info legend table-light">
-                <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
-                <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
-                <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
-                <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
-                <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
-                <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
-            </div>
-        </l-control>
-
         <l-control position="topright">
             <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
@@ -111,6 +100,17 @@
                     </div>
                 </div>
 
+            </div>
+        </l-control>
+
+        <l-control position="bottomright">
+            <div class="info legend table-light">
+                <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
+                <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
+                <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
+                <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
+                <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
+                <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
             </div>
         </l-control>
 
@@ -830,9 +830,13 @@ Vue.component('websecmap', {
                 let layer = e.target;
 
                 layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
-                if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                    layer.bringToFront();
-                }
+
+                // because of the "bring to front" the timer of this feature is called again. Thus, again after timeout
+                // a new timer is started and then again requests a report. It's not really clear why this code is
+                // here in the first place. Disabled it until further notice. We don't have overlapping polygons...
+                //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                //    layer.bringToFront();
+                //}
 
                 this.hover_info.properties = layer.feature.properties;
 
@@ -892,6 +896,7 @@ Vue.component('websecmap', {
             this.map.addLayer(this.markers);
         },
         add_polygons_to_map: function(polygons){
+            console.log("Adding polygons to map");
             this.polygons = L.geoJson(polygons, {
                 style: this.style,
                 pointToLayer: this.pointToLayer,
