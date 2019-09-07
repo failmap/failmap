@@ -202,39 +202,7 @@ Vue.component('websecmap', {
             polygons: L.geoJson(),
 
             // leafletmarkercluster is not supported for 'old school' approaches like this
-            markers: L.markerClusterGroup(
-            {
-                maxClusterRadius: 25,
-
-                iconCreateFunction: function(cluster){
-                    let css_class = "unknown";
-
-                    let childmarkers = cluster.getAllChildMarkers();
-
-                    let selected_severity = 0;
-
-                    // doesn't even need to be an array, as it just matters if the text matches somewhere
-                    let searchedfor = false;
-                    for (let point of childmarkers) {
-                        if (point.options.fillOpacity === 0.7)
-                            searchedfor = true;
-
-
-                        // upgrade severity until you find the highest risk issue.
-                        if (map.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
-                            selected_severity = map.possibleIconSeverities.indexOf(point.feature.properties.severity);
-                            css_class = point.feature.properties.severity;
-                        }
-                    }
-
-                    let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
-
-                    return L.divIcon({
-                        html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-                        className: classname,
-                        iconSize: [40, 40] });
-                }
-            }),
+            markers: null,
 
             // domainlist:
             domainlist_urls: [],
@@ -289,6 +257,43 @@ Vue.component('websecmap', {
             // The whole view is rendered, so I can safely access or query
             // the DOM. ¯\_(ツ)_/¯
             this.map = this.$refs.lmap.mapObject;
+
+            // now that we have a map, we can create an iconcreatefunction
+
+            this.markers = L.markerClusterGroup(
+            {
+                maxClusterRadius: 25,
+
+                iconCreateFunction: (cluster) => {
+                    let css_class = "unknown";
+
+                    let childmarkers = cluster.getAllChildMarkers();
+
+                    let selected_severity = 0;
+
+                    // doesn't even need to be an array, as it just matters if the text matches somewhere
+                    let searchedfor = false;
+                    for (let point of childmarkers) {
+                        if (point.options.fillOpacity === 0.7)
+                            searchedfor = true;
+
+
+                        // upgrade severity until you find the highest risk issue.
+                        if (this.map.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
+                            selected_severity = this.map.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                            css_class = point.feature.properties.severity;
+                        }
+                    }
+
+                    let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
+
+                    return L.divIcon({
+                        html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                        className: classname,
+                        iconSize: [40, 40] });
+                }
+            });
+
             this.load();
         })
 
