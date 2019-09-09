@@ -33,9 +33,11 @@
 
             <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
             <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
+            <!-- replaced the mapbox gray layer with a colored one, :url="this.tile_uri()", which instantly fixes the tile size bug -->
             <l-tile-layer
                 :style="'light-v9'"
-                :url="this.tile_uri()"
+                :url="'http://{s}.tile.osm.org/{z}/{x}/{y}.png'"
+
                 :token="mapbox_token"
                 :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
 
