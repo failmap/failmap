@@ -4,11 +4,11 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
-from websecmap.map.models import OrganizationReport, UrlReport
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
+from websecmap.map.models import OrganizationReport
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, Dataset
+from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                       Screenshot, TlsQualysScratchpad, TlsScan, UrlGenericScan,
-                                       UrlIp)
+                                       Screenshot, UrlGenericScan, InternetNLScan, ScanProxy)
 
 log = logging.getLogger(__package__)
 
@@ -58,17 +58,16 @@ def and_its_gone():
     UrlReport.objects.all().delete()
 
     # scanners
-    EndpointGenericScanScratchpad.objects.all().delete()
+    InternetNLScan.objects.all().delete()
+    ScanProxy.objects.all().delete()
     UrlGenericScan.objects.all().delete()
-    TlsQualysScratchpad.objects.all().delete()
     Screenshot.objects.all().delete()
+    EndpointGenericScanScratchpad.objects.all().delete()
     EndpointGenericScan.objects.all().delete()
     Endpoint.objects.all().delete()
-    UrlIp.objects.all().delete()
-    TlsScan.objects.all().delete()
 
     # organizations
-    Promise.objects.all().delete()
+    Dataset.objects.all().delete()
     Url.objects.all().delete()
     Coordinate.objects.all().delete()
     Organization.objects.all().delete()
