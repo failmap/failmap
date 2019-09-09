@@ -56,16 +56,17 @@ class Command(DumpDataCommand):
         "organizations.Organization",
         "organizations.Coordinate",
         "organizations.Url",
-        "organizations.Promise",
+        "organizations.Dataset",
         "scanners.Endpoint",
-        "scanners.TlsScan",
         "scanners.EndpointGenericScan",
         "scanners.UrlGenericScan",
-        "scanners.UrlIp",
+        "scanners.InternetNLScan",
+        "scanners.scanproxy",
         "map.Configuration",
         "map.AdministrativeRegion",
         "game",
-        "django_celery_beat"
+        "django_celery_beat",
+
     )
 
     def handle(self, *app_labels, **options):
