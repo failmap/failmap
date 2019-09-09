@@ -5,10 +5,10 @@ from django.core.management.base import BaseCommand
 
 from websecmap.game.models import Contest, OrganizationSubmission, Team, UrlSubmission
 from websecmap.map.models import OrganizationReport
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url, Dataset
+from websecmap.organizations.models import Coordinate, Dataset, Organization, OrganizationType, Url
 from websecmap.reporting.models import UrlReport
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad,
-                                       Screenshot, UrlGenericScan, InternetNLScan, ScanProxy)
+                                       InternetNLScan, ScanProxy, Screenshot, UrlGenericScan)
 
 log = logging.getLogger(__package__)
 
