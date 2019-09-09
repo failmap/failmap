@@ -49528,7 +49528,7 @@
 - model: map.configuration
   pk: 1
   fields: {country: NL, organization_type: 1, is_displayed: true, is_the_default_option: true,
-    display_order: 0, is_scanned: true}
+    display_order: 0, is_scanned: true, is_reported: true}
 - model: map.configuration
   pk: 2
   fields: {country: DE, organization_type: 7, is_displayed: false, is_the_default_option: false,

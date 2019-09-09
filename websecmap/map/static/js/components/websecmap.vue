@@ -1,148 +1,171 @@
 {% verbatim %}
 <template type="x-template" id="websecmap_template">
+    <div>
+        <!-- :zoom="initial_location(state.country).zoomlevel" -->
+        <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
+               :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true,
+               contextmenu: true,
+                    contextmenuWidth: 140,
+                    contextmenuItems: [
+                    {
+                        text: 'Show coordinates',
+                        callback: this.showCoordinates
+                    },
+                    {
+                        text: 'Center map here',
+                        callback: this.centerMap
+                    },
+                    '-',
+                    {
+                        text: 'Zoom in',
+                        icon: 'static/images/zoom-in.png',
+                        callback: this.zoomIn
+                    }, {
+                        text: 'Zoom out',
+                        icon: 'static/images/zoom-out.png',
+                        callback: this.zoomOut
+                    }, {
+                        text: 'Show everything',
+                        callback: this.show_all_map_data,
+                    }
+                    ]}"
+                :center="initial_location(this.state.country).coordinates" :zoom="initial_location(this.state.country).zoomlevel">
 
-    <!-- :zoom="initial_location(state.country).zoomlevel" -->
-    <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
-           :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true,
-           contextmenu: true,
-                contextmenuWidth: 140,
-                contextmenuItems: [{
-                      text: 'Show coordinates',
-                      callback: this.showCoordinates
-                  }, {
-                      text: 'Center map here',
-                      callback: this.centerMap
-                  }, '-', {
-                      text: 'Zoom in',
-                      icon: 'static/images/zoom-in.png',
-                      callback: this.zoomIn
-                  }, {
-                      text: 'Zoom out',
-                      icon: 'static/images/zoom-out.png',
-                      callback: this.zoomOut
-                }]}"
-            :center="initial_location(this.state.country).coordinates" :zoom="initial_location(this.state.country).zoomlevel">
+            <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
+            <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
+            <l-tile-layer
+                :style="'light-v9'"
+                :url="this.tile_uri()"
+                :token="mapbox_token"
+                :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
 
-        <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
-        <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
-        <l-tile-layer
-            :style="'light-v9'"
-            :url="this.tile_uri()"
-            :token="mapbox_token"
-            :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
+                :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
+            ></l-tile-layer>
 
-            :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
-        ></l-tile-layer>
+            <!-- The actual data on the map is manipulated by reference, as there are several complex methods that require
+            a lot of thought to rewrite to the new approach. The goal was mainly to have all the controls declarative.
+            For example: i have no clue how searching and updating / recoloring and filtering would work otherwise.
+            It's probably not too hard, as this entire operation has been a breeze so far. -->
+            <!-- <l-geo-json :geojson="polygons"></l-geo-json> -->
 
-        <!-- The actual data on the map is manipulated by reference, as there are several complex methods that require
-        a lot of thought to rewrite to the new approach. The goal was mainly to have all the controls declarative.
-        For example: i have no clue how searching and updating / recoloring and filtering would work otherwise.
-        It's probably not too hard, as this entire operation has been a breeze so far. -->
-        <!-- <l-geo-json :geojson="polygons"></l-geo-json> -->
+            <!-- Including marker-cluster in a 'classic' web project was not easy, and the code doesn't match yet. See above.
+             <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25" ref="clusterRef">
+                <v-marker v-for="m in markers" v-if="c.location !== null" :lat-lng="c.latlng">
 
-        <!-- Including marker-cluster in a 'classic' web project was not easy, and the code doesn't match yet. See above.
-         <v-marker-cluster :iconCreateFunction="marker_cluster_iconcreatefunction" :maxClusterRadius="25" ref="clusterRef">
-            <v-marker v-for="m in markers" v-if="c.location !== null" :lat-lng="c.latlng">
+                </v-marker>
+            </v-marker-cluster> -->
 
-            </v-marker>
-        </v-marker-cluster> -->
+            <l-control-scale position="bottomleft" :imperial="true" :metric="true"></l-control-scale>
 
-        <l-control-scale position="bottomleft" :imperial="true" :metric="true"></l-control-scale>
-
-        <l-control position="topright">
-            <div class="info table-light">
-                <input id='searchbar' type='text' v-model="searchquery" :placeholder="$t('map.search.placeholder')"/>
-            </div>
-        </l-control>
-
-        <l-control position="topright">
-            <div style="max-width: 300px; overflow:hidden;" class="info table-light">
-                <h4>{{ $t("map.history.title") }} </h4>
-                <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
-                <h5 v-if="!loading">{{ visibleweek }}</h5>
-                <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
-                <input id='history' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/><br />
-                <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' :value="'<' + $t('map.history.previous')"/>
-                <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' :value="'>' + $t('map.history.next')"/>
-            </div>
-        </l-control>
-
-        <l-control position="topright">
-            <div style="max-width: 300px; overflow:hidden;" class="info table-light">
-                <h4>{{ $t("map.filter.title") }}</h4>
-                <template v-if="issues.length > 1">
-                    <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
-                    <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
-                </template>
-                <div v-for="issue in issues" style="white-space: nowrap;">
-                    <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
-                    <label :for="issue.name" v-html="translate(issue.name)"></label>
+            <l-control position="topright">
+                <div class="info table-light">
+                    <input id='searchbar' type='text' v-model="searchquery" :placeholder="$t('map.search.placeholder')"/>
                 </div>
-            </div>
-        </l-control>
+            </l-control>
 
-        <l-control position="topright">
-            <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
+            <l-control position="topright">
+                <div style="max-width: 300px; overflow:hidden;" class="info table-light">
+                    <h4>{{ $t("map.history.title") }} </h4>
+                    <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
+                    <h5 v-if="!loading">{{ visibleweek }}</h5>
+                    <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
+                    <input id='history' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/><br />
+                    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' :value="'<' + $t('map.history.previous')"/>
+                    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' :value="'>' + $t('map.history.next')"/>
+                </div>
+            </l-control>
 
-                <div>
-                    <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
-                    <div class="progress">
-                        <div class="progress-bar bg-danger" :style="{width:high}"></div>
-                        <div class="progress-bar bg-warning" :style="{width:medium}"></div>
-                        <div class="progress-bar bg-success" :style="{width:low}"></div>
-                        <div class="progress-bar bg-success" :style="{width:perfect}"></div>
+            <l-control position="topright">
+                <div style="max-width: 300px; overflow:hidden;" class="info table-light">
+                    <h4>{{ $t("map.filter.title") }}</h4>
+                    <template v-if="issues.length > 1">
+                        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
+                        <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
+                    </template>
+                    <div v-for="issue in issues" style="white-space: nowrap;">
+                        <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
+                        <label :for="issue.name" v-html="translate(issue.name)"></label>
                     </div>
                 </div>
+            </l-control>
 
-                <div>
-                    <div v-if="domainlist_urls.length > 1">
-                        <table width='100%'>
-                            <thead>
-                                <tr>
-                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.high") }}</th>
-                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.medium") }}</th>
-                                    <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.low") }}</th>
-                                    <th>{{ $t("map.domainlist.url") }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="url in domainlist_urls">
-                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
-                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
-                                    <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
-                                    <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <l-control position="topright">
+                <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
+
+                    <div>
+                        <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" :style="{width:high}"></div>
+                            <div class="progress-bar bg-warning" :style="{width:medium}"></div>
+                            <div class="progress-bar bg-success" :style="{width:low}"></div>
+                            <div class="progress-bar bg-success" :style="{width:perfect}"></div>
+                        </div>
                     </div>
+
+                    <div>
+                        <div v-if="domainlist_urls.length > 1">
+                            <table width='100%'>
+                                <thead>
+                                    <tr>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.high") }}</th>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.medium") }}</th>
+                                        <th style='min-width: 20px; width: 20px;'>{{ $t("map.domainlist.low") }}</th>
+                                        <th>{{ $t("map.domainlist.url") }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="url in domainlist_urls">
+                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.high }}</span></td>
+                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.medium }}</span></td>
+                                        <td><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.low }}</span></td>
+                                        <td nowrap><span :class="colorize(url.high, url.medium, url.low)+'_text'">{{ url.url }}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div>
+            </l-control>
 
-            </div>
-        </l-control>
+            <l-control position="bottomright">
+                <div class="info legend table-light">
+                    <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
+                    <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
+                    <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
+                    <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
+                    <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
+                    <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
+                </div>
+            </l-control>
 
-        <l-control position="bottomright">
-            <div class="info legend table-light">
-                <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
-                <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
-                <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
-                <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
-                <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
-                <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
-            </div>
-        </l-control>
+            <l-control position="topleft">
+                <div>
+                    <span @click="show_all_map_data()" :title='$t("map.zoombutton")'
+                      style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>
+                </div>
+            </l-control>
+            <l-control position="topleft" v-if="loading">
+                <div style='margin-top: 34px; font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>
+                    <span v-if='loading'><div class="loader" style="width: 18px; height: 18px;"></div></span>
+                </div>
+            </l-control>
+        </l-map>
 
-        <l-control position="topleft">
-            <div>
-                <span @click="show_all_map_data()" :title='$t("map.zoombutton")'
-                  style='font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>🗺️</span>
+        <modal v-if="show_add_domains" @close="stop_adding_domains()">
+            <h3 slot="header">Add Domains...</h3>
+
+            <div slot="body">
+                <server-response :response="add_domains_server_response"></server-response>
+                <h4>New domains</h4>
+                <textarea style="width: 100%; height: 140px" v-model="new_domains" placeholder="Every domain on a new line, or separated with comma's."></textarea>
             </div>
-        </l-control>
-        <l-control position="topleft" v-if="loading">
-            <div style='margin-top: 34px; font-size: 1.4em; background-color: white; border: 2px solid rgba(0,0,0,0.35); border-radius: 4px; padding: 6px; height: 34px; position: absolute; width: 34px; text-align: center; line-height: 1.2;'>
-                <span v-if='loading'><div class="loader" style="width: 18px; height: 18px;"></div></span>
+            <div slot="footer">
+                <button type="button" class="btn btn-secondary" @click="stop_adding_domains()">Close</button>
+                <button class="btn btn-primary" @click="add_domains()">Add</button>
             </div>
-        </l-control>
-    </l-map>
+        </modal>
+    </div>
 
 </template>
 {% endverbatim %}
@@ -202,6 +225,10 @@ Vue.component('websecmap', {
 
     data: function () {
         return {
+            // # adding domains, should be it's own component...
+            show_add_domains: false,
+            add_domains_server_response: "",
+
             // # historyslider
             loading: false,
             week: 0,
@@ -323,6 +350,22 @@ Vue.component('websecmap', {
 
 
     methods: {
+
+        start_adding_domains: function(){
+            this.new_domains = "";
+            this.show_add_domains = true;
+        },
+
+        stop_adding_domains: function(){
+            this.show_add_domains = false;
+            this.new_domains = "";
+        },
+
+        add_domains: function(){
+            alert('not yet implemented!')
+        },
+
+
         initial_location: function(country_code) {
             // you might want to set the zoomlevel
             // data from: https://worldmap.harvard.edu/data/geonode:country_centroids_az8
@@ -952,6 +995,7 @@ Vue.component('websecmap', {
             if (this.authenticated){
                 menuItems.push({
                         text: "Add url(s)",
+                        callback: this.start_adding_domains,
                         index: 2
                     },
                     {
