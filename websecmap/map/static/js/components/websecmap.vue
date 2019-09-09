@@ -3,7 +3,24 @@
 
     <!-- :zoom="initial_location(state.country).zoomlevel" -->
     <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
-           :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true}"
+           :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true,
+           contextmenu: true,
+                contextmenuWidth: 140,
+                contextmenuItems: [{
+                      text: 'Show coordinates',
+                      callback: this.showCoordinates
+                  }, {
+                      text: 'Center map here',
+                      callback: this.centerMap
+                  }, '-', {
+                      text: 'Zoom in',
+                      icon: 'static/images/zoom-in.png',
+                      callback: this.zoomIn
+                  }, {
+                      text: 'Zoom out',
+                      icon: 'static/images/zoom-out.png',
+                      callback: this.zoomOut
+                }]}"
             :center="initial_location(this.state.country).coordinates" :zoom="initial_location(this.state.country).zoomlevel">
 
         <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
@@ -202,7 +219,39 @@ Vue.component('websecmap', {
             polygons: L.geoJson(),
 
             // leafletmarkercluster is not supported for 'old school' approaches like this
-            markers: null,
+            markers: L.markerClusterGroup(
+            {
+                maxClusterRadius: 25,
+
+                iconCreateFunction: (cluster) => {
+                    let css_class = "unknown";
+
+                    let childmarkers = cluster.getAllChildMarkers();
+
+                    let selected_severity = 0;
+
+                    // doesn't even need to be an array, as it just matters if the text matches somewhere
+                    let searchedfor = false;
+                    for (let point of childmarkers) {
+                        if (point.options.fillOpacity === 0.7)
+                            searchedfor = true;
+
+
+                        // upgrade severity until you find the highest risk issue.
+                        if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
+                            selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                            css_class = point.feature.properties.severity;
+                        }
+                    }
+
+                    let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
+
+                    return L.divIcon({
+                        html: '<div><span>' + cluster.getChildCount() + '</span></div>',
+                        className: classname,
+                        iconSize: [40, 40] });
+                }
+            }),
 
             // domainlist:
             domainlist_urls: [],
@@ -235,6 +284,8 @@ Vue.component('websecmap', {
 
             // this makes the "initial map data" work:
             load_counter: 0,
+
+            clicked_map_object: null,
         }
     },
 
@@ -242,6 +293,7 @@ Vue.component('websecmap', {
         issues: Array,
         debug: Boolean,
         mapbox_token: String,
+        authenticated: Boolean,
 
         // Leaflet reference, so we can do things with leaflet directly, as i'm not sure it will be possible differently
         L: Object,
@@ -258,46 +310,17 @@ Vue.component('websecmap', {
             // the DOM. ¯\_(ツ)_/¯
             this.map = this.$refs.lmap.mapObject;
 
-            // now that we have a map, we can create an iconcreatefunction
-
-            this.markers = L.markerClusterGroup(
-            {
-                maxClusterRadius: 25,
-
-                iconCreateFunction: (cluster) => {
-                    let css_class = "unknown";
-
-                    let childmarkers = cluster.getAllChildMarkers();
-
-                    let selected_severity = 0;
-
-                    // doesn't even need to be an array, as it just matters if the text matches somewhere
-                    let searchedfor = false;
-                    for (let point of childmarkers) {
-                        if (point.options.fillOpacity === 0.7)
-                            searchedfor = true;
-
-
-                        // upgrade severity until you find the highest risk issue.
-                        if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
-                            selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
-                            css_class = point.feature.properties.severity;
-                        }
-                    }
-
-                    let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
-
-                    return L.divIcon({
-                        html: '<div><span>' + cluster.getChildCount() + '</span></div>',
-                        className: classname,
-                        iconSize: [40, 40] });
-                }
+            // https://github.com/aratcliffe/Leaflet.contextmenu/issues/32
+            this.map.on('contextmenu.show', (event) => {
+                // alert('swag'); Gets fired twice, once with null...
+                if (event.relatedTarget !== undefined)
+                    this.clicked_map_object = event.relatedTarget;
             });
 
             this.load();
         })
-
     },
+
 
     methods: {
         initial_location: function(country_code) {
@@ -861,6 +884,18 @@ Vue.component('websecmap', {
             }});
             this.showreport_direct();
         },
+
+        showreportfromcontextmenu: function(e) {
+            console.log(e);
+            console.log(this.clicked_map_object);
+            // give both name and id as separate identifiers.
+            store.commit('change', {reported_organization: {
+                id: this.clicked_map_object.feature.properties['organization_id'],
+                name: this.clicked_map_object.feature.properties['organization_name'],
+            }});
+            this.showreport_direct();
+        },
+
         showreport_direct: function () {
             // fullscreen state is not supported for now...
             location.href = '#report';
@@ -900,16 +935,63 @@ Vue.component('websecmap', {
             this.polygons = L.geoJson(polygons, {
                 style: this.style,
                 pointToLayer: this.pointToLayer,
-                onEachFeature: this.onEachFeature
+                onEachFeature: this.onEachFeature,
             }).addTo(this.map);
         },
         onEachFeature: function (feature, layer) {
+
+            let menuItems = [{
+                        text: layer.feature.properties['organization_name'],
+                        index: 0
+                    },
+                    {
+                        text: "Show report",
+                        callback: this.showreportfromcontextmenu,
+                        index: 1,
+                    }];
+            if (this.authenticated){
+                menuItems.push({
+                        text: "Add url(s)",
+                        index: 2
+                    },
+                    {
+                        separator: true,
+                        index: 3
+                    })
+            } else {
+                menuItems.push({
+                        separator: true,
+                        index: 2
+                    })
+            }
+
+            // see geojson data: https://github.com/aratcliffe/Leaflet.contextmenu
+            layer.bindContextMenu({
+                contextmenu: true,
+                contextmenuItems: menuItems
+            });
+
             layer.on({
                 mouseover: this.highlightFeature,
                 mouseout: this.resetHighlight,
-                click: this.showreport
+                click: this.showreport,
             });
         },
+
+        showCoordinates: function(e) {
+            alert(e.latlng);
+        },
+        centerMap:function (e) {
+            this.map.panTo(e.latlng);
+        },
+         zoomIn:function (e) {
+            this.map.zoomIn();
+        },
+        zoomOut: function (e) {
+            this.map.zoomOut();
+        },
+
+
         style: function (feature) {
             return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.7,
                 fillColor: this.getColorCode(feature.properties.severity),

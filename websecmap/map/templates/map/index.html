@@ -41,6 +41,7 @@
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet.markercluster/dist/MarkerCluster.css">
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/vue-select/dist/vue-select.css">
         <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-fullscreen/dist/leaflet.fullscreen.css">
+        <link rel="stylesheet" type="text/css" href="/static/js/vendor/node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.css">
 
         <link rel="stylesheet" type="text/css" href="/static/css/vendor/fa-svg-with-js.css">
         <link rel="stylesheet" type="text/css" href="/static/css/overrides.css">
@@ -53,33 +54,35 @@
         <script type="text/javascript" src="/static/js/vendor/node_modules/jquery/dist/jquery.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/bootstrap/dist/js/bootstrap.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet/dist/leaflet.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-fullscreen/dist/Leaflet.fullscreen.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/lazyload/lazyload.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.js" charset="UTF-8"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% else %}
+    {% else %}{% compress js %}
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue/dist/vue.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vuex/dist/vuex.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-select/dist/vue-select.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/jquery/dist/jquery.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet/dist/leaflet.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-contextmenu/dist/leaflet.contextmenu.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/lazyload/lazyload.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/moment/min/moment-with-locales.min.js" charset="UTF-8"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/chart.js/dist/Chart.min.js"></script>
         <script type="text/javascript" src="/static/js/vendor/node_modules/vue-i18n/dist/vue-i18n.min.js"></script>
+        <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
 
         <script type="text/javascript" src="/static/js/vendor/raven.min.vue.3.19.1.js"></script>
-    {% endif %}
+    {% endcompress %}{% endif %}
 
-    <!-- leaflet is not correctly compressed, so serve it separately -->
-    <script type="text/javascript" src="/static/js/vendor/node_modules/vue2-leaflet/dist/vue2-leaflet.min.js"></script>
     <script type="text/javascript" src="/static/js/translations/websecmap.js"></script>
 
     <script>
@@ -910,6 +913,7 @@
                        :issues="issues"
                        :mapbox_token="config.mapbox_token"
                        :debug="config.debug"
+                       :authenticated="config.admin"
                        :initial_map_data="initial_map_data"></websecmap>
         </section>
 
