@@ -117,6 +117,7 @@ django-admin-sortable2 = "*"  # nice sorting in the admin, used in map configura
 
 pyexcel-text = "^0.2.7"
 # game team colors
+validators = "^0.14.0"
 django-colorful = "*"
 
 # game, add multiple urls in one go.

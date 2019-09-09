@@ -156,9 +156,11 @@
             <h3 slot="header">Add Domains...</h3>
 
             <div slot="body">
+                <p>Adding urls to {{clicked_map_object.feature.properties['organization_name']}}.</p>
+                <p><i>Note: the urls will be onboarded and scanned afterwards. It will be only be visible when endpoints are found that we understand. The url will only be visible after a new report has been created with aforementioned data. This can take a day.</i></p>
                 <server-response :response="add_domains_server_response"></server-response>
                 <h4>New domains</h4>
-                <textarea style="width: 100%; height: 140px" v-model="new_domains" placeholder="Every domain on a new line, or separated with comma's."></textarea>
+                <textarea style="width: 100%; height: 140px" v-model="new_domains" placeholder="example.com, test.nl, Every domain on a new line, or separated with comma's."></textarea>
             </div>
             <div slot="footer">
                 <button type="button" class="btn btn-secondary" @click="stop_adding_domains()">Close</button>
@@ -221,13 +223,14 @@ Vue.component('websecmap', {
         },
     },
     template: "#websecmap_template",
-    mixins: [new_state_mixin, translation_mixin],
+    mixins: [new_state_mixin, translation_mixin, http_mixin],
 
     data: function () {
         return {
             // # adding domains, should be it's own component...
             show_add_domains: false,
             add_domains_server_response: "",
+            new_domains: "",
 
             // # historyslider
             loading: false,
@@ -362,7 +365,20 @@ Vue.component('websecmap', {
         },
 
         add_domains: function(){
-            alert('not yet implemented!')
+
+            let data = {
+                organization_id: this.clicked_map_object.feature.properties['organization_id'],
+                urls: this.new_domains,
+            };
+
+            this.asynchronous_json_post(
+                `/data/admin/urls/add/`, data, (server_response) => {
+                this.add_domains_server_response = server_response;
+
+                if (server_response.data){
+                    this.new_domains = server_response.data.invalid_domains.join(", ");
+                }
+            });
         },
 
 

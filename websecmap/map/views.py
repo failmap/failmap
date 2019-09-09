@@ -16,6 +16,7 @@ from django.views.decorators.cache import cache_page
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.map.logic import datasets
+from websecmap.map.logic.admin import add_urls
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import (explain, get_all_explains, get_recent_explains,
                                          remove_explanation)
@@ -444,4 +445,14 @@ def _remove_explain(request):
 
     request = get_json_body(request)
     data = remove_explanation(request.get('scan_id'), request.get('scan_type'))
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+def _add_urls(request):
+
+    if not request.user.is_authenticated:
+        return JsonResponse({}, encoder=JSEncoder, safe=False)
+
+    request = get_json_body(request)
+    data = add_urls(request.get('organization_id'), request.get('urls'))
     return JsonResponse(data, encoder=JSEncoder, safe=False)

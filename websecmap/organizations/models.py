@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from djgeojson.fields import GeoJSONField
 from jsonfield import JSONField
+from validators import domain
 
 log = logging.getLogger(__package__)
 
@@ -434,17 +435,35 @@ class Url(models.Model):
         return u
 
     @staticmethod
-    def add(url: str):
-        # todo: check if resolves (default true, for example: skip_resolve, for semi-reliable datasources)
-        # todo: validate content of url, same method as dashboard
+    def is_valid_url(url: str):
 
-        # all urls are always lowercase.
-        url = url.lower()
+        # empty strings, etc
+        if not url:
+            return False
 
         extract = tldextract.extract(url)
-
         if not extract.suffix:
-            raise ValueError("Added url does not have a suffix. Only DNS names are allowed, not IP addresses.")
+            return False
+
+        # Validators catches 'most' invalid urls, but there are some issues and exceptions that are not really likely
+        # to cause any major issues in our software. The other alternative is another library with other quircks.
+        # see: https://github.com/kvesteri/validators/
+        # Note that this library does not account for 'idna' / punycode encoded domains, so you have to convert
+        # them yourself. luckily:
+        # 'аренда.орг' -> 'xn--80aald4bq.xn--c1avg'
+        # 'google.com' -> 'google.com'
+        valid_domain = domain(url.encode('idna').decode())
+        if valid_domain is not True:
+            return False
+
+        return True
+
+    @staticmethod
+    def add(url: str):
+
+        if not Url.is_valid_url(url):
+            raise ValueError("Url is not valid. It does not follow idna spec or does not have a valid suffix. "
+                             "IP Addresses are not valid at this moment.")
 
         existing_url = Url.objects.all().filter(url=url, is_dead=False).first()
         if not existing_url:
@@ -454,14 +473,6 @@ class Url(models.Model):
             return new_url
 
         return existing_url
-
-
-# are open ports based on IP adresses.
-# adresses might change (and thus an endpoint changes).
-# for the list of endpoints, you want to know what endpoints don't exist
-# so they are not used anymore.
-# class Port(models.Model):
-#    url = models.ForeignKey(Url, on_delete=models.PROTECT)
 
 
 def seven_days_in_the_future():

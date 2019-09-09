@@ -1797,6 +1797,18 @@ version = "2.0.18"
 
 [[package]]
 category = "main"
+description = "Python Data Validation for Humans™."
+name = "validators"
+optional = false
+python-versions = "*"
+version = "0.14.0"
+
+[package.dependencies]
+decorator = ">=3.4.0"
+six = ">=1.4.0"
+
+[[package]]
+category = "main"
 description = "Promises, promises, promises."
 name = "vine"
 optional = false
@@ -1863,7 +1875,7 @@ version = "0.5.1"
 deploy = ["mysqlclient", "psycopg2", "uwsgi"]
 
 [metadata]
-content-hash = "5935382ffef3e270ed2443f7289d46b0be07e7bb27fb7cd3d8ed265f8e674939"
+content-hash = "93bc70783fcbc1d7dbdeb52116bac38c3e0f02b2313b212f526d920463357f39"
 python-versions = ">=3.6, <=3.8"
 
 [metadata.hashes]
@@ -2041,6 +2053,7 @@ traitlets = ["9c4bd2d267b7153df9152698efb1050a5d84982d3384a37b2c1f7723ba3e7835",
 typing = ["4027c5f6127a6267a435201981ba156de91ad0d1d98e9ddc2aa173453453492d", "57dcf675a99b74d64dacf6fba08fb17cf7e3d5fdff53d4a30ea2a5e7e52543d4", "a4c8473ce11a65999c8f59cb093e70686b6c84c98df58c1dae9b3b196089858a"]
 urllib3 = ["b246607a25ac80bedac05c6f282e3cdaf3afb65420fd024ac94435cabe6e18d1", "dbe59173209418ae49d485b87d1681aefa36252ee85884c31346debd19463232"]
 uwsgi = ["4972ac538800fb2d421027f49b4a1869b66048839507ccf0aa2fda792d99f583"]
+validators = ["f0ac832212e3ee2e9b10e156f19b106888cf1429c291fbc5297aae87685014ae"]
 vine = ["133ee6d7a9016f177ddeaf191c1f58421a1dcc6ee9a42c58b34bed40e1d2cd87", "ea4947cc56d1fd6f2095c8d543ee25dad966f78692528e68b4fada11ba3f98af"]
 watchdog = ["965f658d0732de3188211932aeb0bb457587f04f63ab4c1e33eab878e9de961d"]
 wcwidth = ["3df37372226d6e63e1b1e1eda15c594bca98a22d33a23832a90998faa96bc65e", "f4ebe71925af7b40a864553f761ed559b43544f8f71746c2d756c7fe788ade7c"]
