@@ -7,6 +7,7 @@ from typing import List
 import pytz
 from celery import group
 from deepdiff import DeepDiff
+from django.db.models import Count
 
 from websecmap.celery import Task, app
 from websecmap.map.logic.map import get_map_data
@@ -64,9 +65,12 @@ def compose_task(
     # be rebuild.
 
     tasks = []
-
     for organization in organizations:
-        urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter)
+        # todo: organizations that have no endpoints could get a default rating, which is much quicker
+        #  than iterating all organizations. But it does not save too much time...
+        urls = Url.objects.filter(q_configurations_to_report(), organization=organization, **urls_filter
+                                  # To save time, only acccept urls that have at least one endpoint.
+                                  ).annotate(n_endpoints=Count('endpoint')).filter(n_endpoints__gt=0)
         if not urls:
             # can still add an empty organization rating even though there is nothing to show. Will create an
             # empty gray region.
@@ -85,17 +89,6 @@ def compose_task(
         log.debug("organizations to display: %s" % q_configurations_to_report('organization'))
         return group()
 
-    # when trying to report on a specific url or organization (so not everything) also don't rebuild all caches
-    # from the past. This saves a lot of rebuild time, making results visible in a "fixing state" and the entire rebuild
-    # will happen at a scheduled interval to make sure the rest is up to date.
-    if organizations_filter or urls_filter:
-        days = 2
-    else:
-        # no, you always want to have a pretty quick update. If you want to revise the entire dataset, you might
-        # have adjusted the value of the ratings somewhere. Then that would be a special operation to recalculate
-        # the entire database. So this can just be two days as well.
-        days = 2
-
     log.debug("Number of tasks: %s" % len(tasks))
 
     # finally, rebuild the graphs (which can mis-matchi a bit if the last reports aren't in yet. Will have to do for now
@@ -110,10 +103,9 @@ def compose_task(
         tasks.append(calculate_map_data.si(1, [organizations_filter['country']]))
         tasks.append(calculate_high_level_stats.si(1, [organizations_filter['country']]))
     else:
-        # 2 days if you have altered stuff a day before etc...
-        tasks.append(calculate_vulnerability_statistics.si(days))
-        tasks.append(calculate_map_data.si(days))
-        tasks.append(calculate_high_level_stats.si(days))
+        tasks.append(calculate_vulnerability_statistics.si(1))
+        tasks.append(calculate_map_data.si(1))
+        tasks.append(calculate_high_level_stats.si(1))
 
     task = group(tasks)
 
