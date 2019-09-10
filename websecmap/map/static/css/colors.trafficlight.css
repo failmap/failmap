@@ -139,7 +139,7 @@
 }
 
 .grayrow, .unknownrow {
-    color: darkgray;
+    color: rgba(0, 88, 255, 0.6);
 }
 
 .improvements_good, .improvements_neutral {
@@ -242,8 +242,8 @@
 
 .map_polygon_unknown
 {
-    fill: #c1bcbb;
-    background-color: #c1bcbb;
+    fill: rgba(56, 99, 204, 0.6);
+    background-color: rgba(56, 99, 204, 0.6);
 }
 
 /* These are the colors of bootstrap. We'll switch it lateron i guess... */
