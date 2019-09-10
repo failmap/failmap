@@ -112,7 +112,7 @@ run-broker:  ## only run broker
 
 testcase: ${app}
 	# run specific testcase
-	# example: make test_testcase testargs=test_openstreetmaps
+	# example: make testcase case=test_openstreetmaps
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
 		${env} pytest -k ${case}
 
