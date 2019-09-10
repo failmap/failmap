@@ -142,7 +142,7 @@ Vue.component('datasets', {
             // values are set via another vue, which is not very nice, but it works...
         },
         create_link: function(layer, linktype, filetype="json"){
-            return `/data/export/${linktype}/${this.country}/${layer}/${filetype}/`;
+            return `/data/export/${linktype}/${this.state.country}/${layer}/${filetype}/`;
         },
     },
 });
