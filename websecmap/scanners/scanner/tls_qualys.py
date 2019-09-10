@@ -22,7 +22,7 @@ https://github.com/ssllabs/ssllabs-scan/blob/stable/ssllabs-api-docs.md
 import ipaddress
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from http.client import BadStatusLine
 from multiprocessing.pool import ThreadPool
 from time import sleep
@@ -41,7 +41,7 @@ from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
 from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
-from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
+from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.http import store_url_ips
 
 # There is a balance between network timeout and qualys result cache.
@@ -69,15 +69,6 @@ def compose_task(
     **kwargs
 ) -> Task:
 
-    # for some reason declaring the chunks function outside of this function does not resolve. I mean... why?
-    # https://chrisalbon.com/python/data_wrangling/break_list_into_chunks_of_equal_size/
-    # Create a function called "chunks" with two arguments, l and n:
-    def chunks(l, n):
-        # For item i in a range that is a length of l,
-        for i in range(0, len(l), n):
-            # Create an index range for l of n items:
-            yield l[i:i + n]
-
     if not allowed_to_scan("tls_qualys"):
         return group()
 
@@ -100,9 +91,10 @@ def compose_task(
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            organization__in=organizations,  # whem empty, no results...
-            **urls_filter)
+            organization__in=organizations,  # when empty, no results...
+            **urls_filter).order_by('-last_scan_moment')
     else:
+        # use order by to get a few of the most outdated results...
         urls = Url.objects.filter(
             q_configurations_to_scan(),
             is_dead=False,
@@ -110,15 +102,7 @@ def compose_task(
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            **urls_filter)
-
-    # exclude everything that has been scanned in the last N days
-    # this is a separate filter, given you cannot perform date logic in json (aka code injection)
-    if kwargs.get('exclude_urls_scanned_in_the_last_n_days', 0):
-        days = int(kwargs.get('exclude_urls_scanned_in_the_last_n_days', 0))
-        log.debug("Skipping everything that has been scanned in the last %s days." % days)
-        urls = urls.exclude(
-            endpoint__tlsqualysscan__last_scan_moment__gte=datetime.now(tz=pytz.utc) - timedelta(days=days))
+            **urls_filter).order_by('-last_scan_moment')
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
@@ -137,7 +121,7 @@ def compose_task(
     # ScanProxy. We'll try to get a valid proxy first, this might take a few minutes. Then at most once every 5 minutes
     # an new set of scans (of 25 urls) is run on the proxy. While not very elegant, we had just a few days to migrate.
 
-    chunks = list(chunks(urls, 25))
+    chunks = list(chunks2(urls, 25))
 
     # a bulk scan of 25 urls takes about 45 minutes.
     tasks = []

@@ -208,3 +208,13 @@ def url_filters(query, organizations_filter, urls_filter, endpoints_filter):
         query = query.filter(pk__in=urls)
 
     return query
+
+
+# https://chrisalbon.com/python/data_wrangling/break_list_into_chunks_of_equal_size/
+# Create a function called "chunks" with two arguments, l and n: list and number_of_desired_items
+# function could not be named chunks, as that is a reserved word or something.
+def chunks2(l, n):
+    # For item i in a range that is a length of l,
+    for i in range(0, len(l), n):
+        # Create an index range for l of n items:
+        yield l[i:i + n]
