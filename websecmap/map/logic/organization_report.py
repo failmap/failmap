@@ -1,12 +1,11 @@
 import logging
 
 import simplejson as json
-from django.utils import timezone
 from django.utils.text import slugify
 
 from websecmap.map.logic.map_defaults import (DEFAULT_COUNTRY, DEFAULT_LAYER, get_country,
                                               get_organization_type, get_when)
-from websecmap.organizations.models import Organization, Promise
+from websecmap.organizations.models import Organization
 
 log = logging.getLogger(__package__)
 
@@ -53,9 +52,6 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
     except Organization.DoesNotExist:
         return {}
 
-    # get the most recent non-expired 'promise'
-    promise = get_last_promise(organization_id)
-
     report = {
         "name": values['name'],
         "slug": slugify(values['name']),
@@ -66,18 +62,10 @@ def get_organization_report_by_id(organization_id: int, weeks_back: int = 0):
         # fixing json being presented and escaped as a string, this makes it a lot slowr
         # had to do this cause we use jsonfield, not django_jsonfield, due to rendering map widgets in admin
         "calculation": json.loads(values['organizationreport__calculation']),
-        "promise": promise,
+        "promise": "",
         "high": values['organizationreport__high'],
         "medium": values['organizationreport__medium'],
         "low": values['organizationreport__low'],
     }
 
     return report
-
-
-def get_last_promise(organization_id):
-
-    promise = Promise.objects.filter(organization_id=organization_id, expires_on__gt=timezone.now())
-    promise = promise.order_by('-expires_on')
-    promise = promise.values('created_on', 'expires_on')
-    return promise.first()

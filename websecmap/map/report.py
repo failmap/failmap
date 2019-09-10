@@ -17,10 +17,22 @@ from websecmap.reporting.report import (START_DATE, aggegrate_url_rating_scores,
                                         get_allowed_to_report, get_latest_urlratings_fast,
                                         recreate_url_reports, relevant_urls_at_timepoint,
                                         significant_moments)
-from websecmap.scanners import ALL_SCAN_TYPES, ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
+from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 from websecmap.scanners.scanner.__init__ import q_configurations_to_report
 
 log = logging.getLogger(__package__)
+
+# websecmap.scanners.ALL_SCAN_TYPES is too much, as some providers give dozens of results.
+# What we want to show is a lot less,
+# and therefore this is used. The published scan_types are listed at index.html, in javascript.
+# This should be made into python and then exported to JS (nearly the same syntax).
+# Look at index.html...
+PUBLISHED_SCAN_TYPES = ['ftp', 'plain_https', 'dnssec', 'http_security_header_strict_transport_security',
+                        'http_security_header_x_content_type_options', 'http_security_header_x_frame_options',
+                        'http_security_header_x_xss_protection', 'tls_qualys_certificate_trusted',
+                        'tls_qualys_encryption_quality', 'internet_nl_mail_starttls_tls_available',
+                        'internet_nl_mail_auth_spf_exist', 'internet_nl_mail_auth_dkim_exist',
+                        'internet_nl_mail_auth_dmarc_exist']
 
 
 def compose_task(
@@ -347,7 +359,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                     vs.ok_urls = measurement[scan_type]['ok_urls']
                     vs.ok_endpoints = measurement[scan_type]['ok_endpoints']
 
-                    if scan_type in ALL_SCAN_TYPES:
+                    if scan_type in PUBLISHED_SCAN_TYPES:
                         vs.urls = measurement[scan_type]['applicable_urls']
                         vs.endpoints = measurement[scan_type]['applicable_endpoints']
                     else:
@@ -380,7 +392,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     # the "all" filter will retrieve all layers at once
-    scan_types = ALL_SCAN_TYPES + ["all"]
+    scan_types = PUBLISHED_SCAN_TYPES + ["all"]
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
