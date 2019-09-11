@@ -48,14 +48,13 @@
                 </div>
 
             </div>
-
-            <div class="row" v-if="more_explains.length">
-                <div class="col-md-12 text-center">
-                    <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{{ $t("comply_or_explain.show_more") }}</button>
-                </div>
-            </div>
-
         </template>
+
+        <div class="row" v-if="more_explains.length">
+            <div class="col-md-12 text-center">
+                <button type="button" class="btn btn-primary" @click="showmore()" v-show="more_available">{{ $t("comply_or_explain.show_more") }}</button>
+            </div>
+        </div>
 
         <div class="row" v-if="!explains.length">
             <div class="col-md-12">
@@ -121,8 +120,8 @@ Vue.component('comply_or_explain', {
             let url = `/data/explained/${this.state.country}/${this.state.layer}/`;
 
             fetch(url).then(response => response.json()).then(explains => {
-                this.more_explains = explains.slice(3);
-                this.explains = explains.slice(0, 3);
+                this.more_explains = explains.slice(10);
+                this.explains = explains.slice(0, 10);
 
                 if (this.more_explains.length === 0)
                     this.more_available = false;
@@ -139,7 +138,7 @@ Vue.component('comply_or_explain', {
             }});
         },
         showmore(){
-            if (this.more_explains.length > 3) {
+            if (this.more_explains.length > 10) {
                 this.explains.push(this.more_explains.shift());
                 this.explains.push(this.more_explains.shift());
                 this.explains.push(this.more_explains.shift());
