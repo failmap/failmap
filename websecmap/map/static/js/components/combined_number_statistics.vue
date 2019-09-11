@@ -2,7 +2,7 @@
 <template type="x-template" id="combined_number_statistics_template">
     <div v-cloak>
         <div class="page-header">
-            <a href="#" class="backtomap">{{ $t("statistics.back_to_map") }} ↑</a>
+            <a href="#" class="backtomap">{{ $t("back_to_map") }} ↑</a>
             <a name="extensive_statistics" class="jumptonav"></a>
             <h2><svg class="svg-inline--fa fa-chart-area fa-w-16" aria-hidden="true" data-prefix="fas" data-icon="chart-area" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M500 384c6.6 0 12 5.4 12 12v40c0 6.6-5.4 12-12 12H12c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v308h436zM372.7 159.5L288 216l-85.3-113.7c-5.1-6.8-15.5-6.3-19.9 1L96 248v104h384l-89.9-187.8c-3.2-6.5-11.4-8.7-17.4-4.7z"></path></svg>
                 {{ $t("statistics.title") }}
@@ -252,7 +252,6 @@ Vue.component('combined_number_statistics', {
             en: {
                 statistics: {
                     title: "Extensive statistics",
-                    back_to_map: "back to the map",
                     progress_bars: {
 
                         organizations: {
@@ -313,7 +312,63 @@ Vue.component('combined_number_statistics', {
             },
             nl: {
                 statistics: {
-                    title: "",
+                    title: "Uitgebreide statistieken",
+                    progress_bars: {
+
+                        organizations: {
+                            title: "Organisaties",
+                            intro: "Een organisatie heeft vaak een veelvoud aan websites en online diensten. Dit is de samenvatting van hoe de organisatie het doet.",
+                        },
+                        internet_addresses: {
+                            title: "Internet adressen",
+                            intro: "Een opsomming van hoe alle diensten en sites het doen.",
+                        },
+
+                        // // statistics.progress_bars.3 weeks ago
+                        now: "now",
+                        '7_days_ago': "7 dagen geleden",
+                        "2_weeks_ago": "2 weken geleden",
+                        "3_weeks_ago": "3 weken geleden",
+
+                        // due to python library workings, the 1 months ago is a bit off in translation...
+                        "1_months_ago": "1 maand geleden",
+                        "2_months_ago": "2 maanden geleden",
+                        "3_months_ago": "3 maanden geleden",
+
+                        when: "Tijd",
+                        number: "Aantal",
+                        good: "Goed",
+                        medium: "Midden",
+                        bad: "Slecht",
+                        unknown: "Onbekend",
+                    },
+                    numbers: {
+                        integrity_and_confidentiality: {
+                            title: "Integriteit en vertrouwlijkheid",
+                            intro: "Alle afzonderlijke bevindingen rondom integriteit en vertrouwelijkheid.",
+                        },
+
+                        website_content_security: {
+                            title: "Website veiligheids instellingen",
+                            intro: "Een overzicht van diverse instellingen die websites kunnen gebruiken om veiligheid te verhogen",
+                        },
+
+                        technology: "Techniek",
+                        result: "Resultaat",
+                        total: "Totaal",
+
+                    },
+                    services: {
+                        title: 'Dienst',
+                        intro: 'Een enkel adres kan meerdere diensten hebben, denk aan bestandsoverdracht, een website en e-mail.',
+                        number_of_service_checked: 'In totaal werden {0} verschillende diensten gescand.',
+
+                        ip_version: "IP Versie",
+                        protocol: "Protocol",
+                        port: "Poort",
+                        amount: "Aantal",
+                        percentage: "Percentage",
+                    }
                 }
             }
         },

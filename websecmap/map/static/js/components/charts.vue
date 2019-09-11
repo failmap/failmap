@@ -28,16 +28,23 @@ Vue.component('charts', {
                     title: "Charts",
                     intro: "These are the best and worst organizations at this moment.",
                     top_fail:{
-                        title: "Top Fail"
+                        title: "Top Fail",
                     },
                     top_win: {
-                        title: "Top Win"
+                        title: "Top Win",
                     }
                 }
             },
             nl: {
                 charts: {
-                    title: "",
+                    title: "Hitlijsten",
+                    intro: "Dit zijn de hitlijsten van de beste en slechtst presterende organisaties van dit moment.",
+                    top_fail:{
+                        title: "De slechtste",
+                    },
+                    top_win: {
+                        title: "De beste",
+                    }
                 }
             }
         },

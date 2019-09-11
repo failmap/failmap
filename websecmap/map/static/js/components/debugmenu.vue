@@ -94,7 +94,6 @@ Vue.component('debugmenu', {
                     flower: "task monitoring",
                     grafana: "activity monitoring",
                     add_proxies: "Add proxies",
-                    monitoring: "monitoring",
                     alter_state: "Alter state",
                 }
             },
@@ -102,6 +101,11 @@ Vue.component('debugmenu', {
                 menu: {
                     // jokes are allowed
                     debug: "ongediertebestrijdingsmodus",
+                    admin: "beheer",
+                    flower: "taak overzicht",
+                    grafana: "activiteiten overzicht",
+                    add_proxies: "Proxies toevoegen",
+                    alter_state: "Staat wijzigen",
                 }
             }
         },

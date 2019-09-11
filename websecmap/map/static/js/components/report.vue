@@ -29,12 +29,13 @@ Vue.component('report', {
             en: {
                 report: {
                     title: "Report",
-                    select_organization: "Show report for organization",
+                    select_organization: "Show report for organization...",
                 }
             },
             nl: {
                 report: {
                     title: "Rapport",
+                    select_organization: "Toon rapport van organisatie...",
                 }
             }
         },

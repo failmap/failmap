@@ -72,7 +72,14 @@ Vue.component('mainmenu', {
             },
             nl: {
                 menu: {
-
+                    map: "Kaart",
+                    info: "Info",
+                    charts: "Hitlijst",
+                    reports: "Rapporten",
+                    statistics: "Statistieken",
+                    comply_or_explain: "Pas toe of leg uit",
+                    datasets: "Gegevens",
+                    scan_schedule: "Scan schema",
                 }
             }
         },

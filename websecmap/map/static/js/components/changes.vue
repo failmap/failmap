@@ -28,7 +28,7 @@
                                 </thead>
                                 <tbody v-for="scan in scans[issue['name']]">
                                 <tr :class="rowclass(scan)">
-                                    <td class="date">{{ scan.last_scan_humanized }}</td>
+                                    <td class="date">{{ humanize_relative_date(scan.last_scan_moment) }}</td>
                                     <td class="url">{{ scan.url }}</td>
                                 </tr>
                                 <tr>
@@ -65,12 +65,17 @@ Vue.component('changes', {
             nl: {
                 changes: {
                     title: "Laatste wijzigingen",
+                    intro: "Dit is een overzicht van de meest recente wijzigingen. Dit laat zien dat er e.e.a. veranderd en verbeterd, nog voordat het in een rapport komt te staan. Deze bevindingen worden dagelijks samengevat in een rapport.",
+                    scan_moment: "Scan moment",
+                    url: "Domein",
+                    rss_feed_teaser: "Blijf op de hoogte van de laatste scans, gebruik deze ",
+                    rss_feed: "RSS feed",
                 }
             }
         },
     },
     template: "#changes_template",
-    mixins: [new_state_mixin, translation_mixin],
+    mixins: [new_state_mixin, translation_mixin, humanize_mixin],
 
     data: function () {
         return {

@@ -88,7 +88,24 @@ Vue.component('foot', {
             },
             nl: {
                 footer: {
+                    // 1st column
+                    donate: "Steun dit project, doneer hier!",
+                    general_inquiry: "Algemene contactgegevens",
+                    feedback: "Vragen / klachten / opmerkingen / suggesties",
+                    social_media: "Ook op social media",
+                    comply_or_explain: "Pas toe of leg uit",
 
+                    // 2nd column
+                    about_this_website: "Over deze site",
+                    get_source: "Download de broncode",
+                    documentation: "Documentatie",
+
+                    // 3rd column
+                    made_possible_by: "Mogelijk gemaakt door",
+
+                    // 4th column
+                    contact: "Contact",
+                    website_run_by: "Deze site wordt gedraaid door:"
                 }
             }
         },

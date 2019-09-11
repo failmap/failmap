@@ -81,7 +81,7 @@ Vue.component('comply_or_explain', {
                 }
             },
             nl: {
-                changes: {
+                comply_or_explain: {
                     title: "Pas toe of leg uit",
                     intro: "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard worden. In bijzondere gevallen is de bevinding op deze site technisch juist, maar veroorzaakt het geen gevaar. Hieronder staat een lijst met de meest recente 'pas toe of leg uit' verklaringen. De organisaties die worden genoemd op deze site kunnen zelf een bevinding verklaren door op 'leg uit' te klikken bij een bevinding.",
                     no_explanations_yet: "Nog geen verklaringen verwerkt...",

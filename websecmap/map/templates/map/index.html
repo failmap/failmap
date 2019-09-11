@@ -698,8 +698,10 @@
 
             lazyload(); // allow for lazy loading of images
 
+            current_language = get_cookie('preferred_language') ? get_cookie('preferred_language') : window.navigator.language;
+
             // date and time to the current locale, whatever it may be:
-            moment.locale(window.navigator.userLanguage || window.navigator.language);
+            moment.locale(current_language);
 
             // if browser contains report anchor with organization id load that organization
             let match = RegExp('report-([a-z-]+)').exec(location.hash);
@@ -714,7 +716,7 @@
         };
 
         const i18n = new VueI18n({
-            locale: window.navigator.language,
+            locale: get_cookie('preferred_language'),
             fallbackLocale: 'en',
             // with component locales, a warning is still given the global locale is used,
             // which is strange. Translations themselves work fine.
@@ -723,10 +725,45 @@
             messages,
         });
 
+        function set_language(language_code){
+            document.cookie = "preferred_language=" + (language_code || "en") + "; path=/";
+            location.reload();
+        }
+
         const translation_mixin = {
             methods: {
                 translate: function (string) {
                     return i18n.t(string);
+                }
+            }
+        };
+
+        const humanize_mixin = {
+            methods: {
+
+                // todo: can we change the locale for moment.js on the fly?
+                humanize_date: function (date) {
+                    // Uses localized date and time format with day name, which is pretty advanced and complete
+                    return moment(date).format('LLLL');
+                },
+                humanize_date_date_only: function (date) {
+                    // Uses localized date and time format with day name, which is pretty advanced and complete
+                    return moment(date).format('LL');
+                },
+                humanize_relative_date: function (date) {
+                    // says things like 'days ago'...
+                    return moment(date).fromNow();
+                },
+                humanize_duration: function(duration_in_milliseconds) {
+                    return moment.duration(duration_in_milliseconds).humanize()
+                },
+                humanize_filesize: function(size_in_bytes, decimals=0){
+                    if(size_in_bytes === 0) return '0 Bytes';
+                    let k = 1024,
+                        dm = decimals <= 0 ? 0 : decimals || 2,
+                        sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+                        i = Math.floor(Math.log(size_in_bytes) / Math.log(k));
+                    return parseFloat((size_in_bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
                 }
             }
         };
@@ -748,9 +785,6 @@
                     '</div>',
             });
         {% endverbatim %}
-
-
-
 
         Vue.component('l-map', window.Vue2Leaflet.LMap);
         Vue.component('l-tile-layer', window.Vue2Leaflet.LTileLayer);

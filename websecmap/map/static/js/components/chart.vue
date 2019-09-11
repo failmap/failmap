@@ -6,7 +6,7 @@
             <h3>{{ title }} {{humanize(metadata.data_from_time) }}</h3>
 
             <div class="table-responsive" v-if="!filteredData.length">
-                No data found.
+                {{ $t("chart.no_data_found") }}<br><br>
             </div>
         </div>
     </div>
@@ -105,11 +105,24 @@ Vue.component('chart', {
                     relative_score: "Relative",
                     view_report: "view report",
                     connectivity: "connectivity",
+                    no_data_found: "No data found... this list is empty.",
                 }
             },
             nl: {
                 chart: {
-
+                    data_from: "Gegevens van: ",
+                    expand_list: "Lijst in- / uitklappen",
+                    rank: "#",
+                    organization: "Organisatie",
+                    urls: "Adressen",
+                    services: "Diensten",
+                    high_risk: "Hoog risico",
+                    medium_risk: "Midden risico",
+                    low_risk: "Laag risico",
+                    relative_score: "Relatief",
+                    view_report: "bekijk rapport",
+                    connectivity: "Diensten",
+                    no_data_found: "Geen gegevens gevonden... deze lijst is leeg.",
                 }
             }
         },

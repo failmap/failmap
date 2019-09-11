@@ -136,6 +136,18 @@ def export_explains(request, country: str = DEFAULT_COUNTRY, organization_type=D
     return response
 
 
+def inject_default_language_cookie(request, response) -> HttpResponse:
+    # If you visit any of the main pages, this is set to the desired language your browser emits.
+    # This synchronizes the language between javascript (OS language) and browser (Accept Language).
+    if 'preferred_language' not in request.COOKIES:
+        # Get the accept language,
+        # Add the cookie to render.
+        accept_language = request.LANGUAGE_CODE
+        response.set_cookie(key='preferred_language', value=accept_language)
+
+    return response
+
+
 @cache_page(one_hour)
 def index(request):
 
@@ -177,7 +189,7 @@ def index(request):
     map_defaults = get_defaults()
 
     # a number of variables are injected so they can be used inside javascript.
-    return render(request, 'map/index.html', {
+    return inject_default_language_cookie(request, render(request, 'map/index.html', {
         'version': __version__,
         'admin': settings.ADMIN,
         'sentry_token': settings.SENTRY_TOKEN,
@@ -194,7 +206,7 @@ def index(request):
         'number_of_countries': len(initial_countries),
         'initial_map_data': json.dumps(get_map_data(map_defaults['country'],
                                                     map_defaults['layer'], 0, ''), default=str),
-    })
+    }))
 
 
 @cache_page(one_day)

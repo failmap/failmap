@@ -12,7 +12,7 @@
         </div>
         <div class="row schedule_row" v-for="next_item in next">
             <div class="col-md-3 schedule_item">
-                {{ next_item.human_date }}
+                {{ humanize_relative_date(next_item.date) }}
             </div>
             <div class="col-md-9 schedule_item" v-html="next_item.name">
             </div>
@@ -33,12 +33,14 @@ Vue.component('scan_schedule', {
             },
             nl: {
                 scan_schedule: {
-                    title: "",
+                    title: "Scan schema",
+                    intro: "Dit is een schema van alle aankomende scans. De scantijd verschilt per scan, bij grote hoeveelheden urls kan dit langer duren. De bevindingen worden bij het creëren van een nieuwe rapportage meegenomen.",
                 }
             }
         },
     },
     template: "#scan_schedule_templates",
+    mixins: [humanize_mixin],
 
     data: function () {
         return {

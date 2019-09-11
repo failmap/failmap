@@ -219,7 +219,37 @@ Vue.component('websecmap', {
             },
             nl: {
                 map: {
+                    search: {
+                        placeholder: "Zoeken",
+                    },
+                    history:{
+                        title: "Gegevens van:",
+                        next: '+1 week',
+                        previous: '-1 week',
+                    },
 
+                    filter: {
+                        title: "Filter op onderwerp",
+                        show_everything: 'Toon alles',
+                    },
+
+                    legend: {
+                        title: "Legenda",
+                        good: "Goed",
+                        low: "Kleine issues",
+                        mediocre: "Matig",
+                        bad: "Slecht",
+                        unknown: "Geen gegevens beschikbaar",
+                    },
+
+                    domainlist: {
+                        high: "H",
+                        medium: "M",
+                        low: "L",
+                        url: "Url",
+                    },
+
+                    zoombutton: "Toon de hele kaart",
                 }
             }
         },

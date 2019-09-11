@@ -295,8 +295,90 @@ Vue.component('report_content', {
             },
             nl: {
                 report_content: {
-                    title: "Rapport",
-                    intro: "",
+                    explain: {
+                        explain: "Verklaar",
+                        subject: "Verklaring",
+                        body: "Beste,\n" +
+                            "\n" +
+                            "Ik wil graag een verklaring geven over onderstaande bevinding.\n" +
+                            "\n" +
+                            "Adres: %{url}\n" +
+                            "Scan soort: %{scan_type}\n" +
+                            "Scan nummer: %{scan_id}\n" +
+                            "Impact: Hoog: %{high}, Midden %{medium}, Laag: %{low}.\n" +
+                            "\n" +
+                            "Deze bevinding is incorrect omdat:\n" +
+                            "[...  vul hier uw verklaring in  ...]\n" +
+                            "\n" +
+                            "Ik ga er mee akkoord dat deze verklaring gepubliceerd mag worden onder de naam van mijn organisatie.\n" +
+                            "\n" +
+                            "tip: graag verwijzen naar documentatie, standaarden, second opinions etc. Een verklaring is meestal gelding voor een jaar. \n" +
+                            "\n" +
+                            "Met vriendelijke groet,\n" +
+                            "",
+                    },
+
+                    controls: {
+                        close_report: "Sluiten",
+                        print_report: "Printen",
+                        rss_feed: "RSS feed",
+                        send_in_domains: "Domeinen insturen",
+
+                        send_in_mail: {
+                            subject: "Nieuwe domeinen voor ...",
+                            body: "Beste,\n\n" +
+                                "Graag de onderstaande domeinen toevoegen aan de kaart:\n\n" +
+                                "Tip: geef aan voor welke organisatie(s) de domeinen relevant zijn..\n\n" +
+                                "Met vriendelijke groet,\n\n",
+                        }
+                    },
+
+                    report_of: "Rapportage van",
+                    data_from: "Gegevens van",
+                    high_risk: "Hoog risico",
+                    medium_risk: "Midden risico",
+                    low_risk: "Laag risico",
+                    timeline: {
+                        title: "Tijdlijn van risico's en beschikbare diensten in het afgelopen jaar",
+                    },
+
+                    risksummary: {
+                        title: "Risico opsomming",
+                        no_data: "Dit verslag bevat geen gegevens.",
+                    },
+
+                    report: {
+                        title: "Uitgebreid verslag",
+                        no_data: "Dit verslag bevat geen gegevens.",
+                        report_incorrect_finding: "Meld incorrecte bevinding",
+                        incorrect_finding_mail: {
+                            title: 'Incorrecte bevinding op {0}',
+                            body: 'Belangrijk: Er wordt automatisch regelmatig opnieuw gescand. Dit kan een paar dagen duren.\n\n\n' +
+                                'Beste,\n\n' +
+                                'Het lijkt dat de volgende bevinding niet juist is:\n\n' +
+                                '1: ...\n' +
+                                '2: ...\n' +
+                                '3: ...\n' +
+                                '\n\n' +
+                                'Tip: graag verwijzen naar documentatie, standaarden, second opinions waar mogelijk.\n\n\n' +
+                                'Met vriendelijke groet,\n' +
+                                '',
+                        },
+                        url_level_findings: "Algemene bevindingen bij dit adres",
+                        service: "Dienst",
+                        since: "Sinds",
+                        explained_on: "Verklaard op",
+                        last_check: "Laatst getest op",
+                        explained: "Verklaard",
+                        explanation_expires: "Verklaring vervalt op",
+
+                        score_perfect: "perfect",
+                        score_high: "hoog",
+                        score_medium: "midden",
+                        score_low: "laag",
+                        second_opinion: "Second opinion",
+                        documentation: "Documentatie",
+                    },
                 }
             }
         },
