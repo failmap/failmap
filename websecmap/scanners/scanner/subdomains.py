@@ -87,6 +87,8 @@ def compose_discover_task(organizations_filter: dict = dict(),
     # Remove all urls that should not have
     urls = [url for url in urls if not url.do_not_find_subdomains]
 
+    urls = list(set(urls))
+
     if not urls:
         log.debug('No urls found for subdomain discovery.')
 
