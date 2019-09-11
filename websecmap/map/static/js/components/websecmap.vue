@@ -29,8 +29,7 @@
                     text: 'Show everything',
                     callback: this.show_all_map_data,
                 }
-                ]}"
-               :zoom="initial_location(this.state.country).zoomlevel">
+                ]}">
 
             <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
             <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
