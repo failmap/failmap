@@ -94,6 +94,7 @@ urlpatterns = [
     path('data/explain/explain/', views._explain),
     path('data/explain/remove/', views._remove_explain),
     path('data/admin/urls/add/', views._add_urls),
+    path('data/admin/proxy/add/', views._add_proxies),
 
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/

@@ -1,9 +1,16 @@
 
+import ipaddress
+import re
 from typing import Dict
 
 from django.utils import timezone
 
 from websecmap.organizations.models import Organization, Url
+from websecmap.scanners.models import ScanProxy
+
+
+def user_is_staff_member(user):
+    return user.is_active and (user.is_staff or user.is_superuser)
 
 
 def operation_response(error: bool = False, success: bool = False, message: str = "", data: Dict = None):
@@ -52,3 +59,61 @@ def add_urls(organization_id, urls: str):
         )
     else:
         return operation_response(success=True, message=f'{len(valid)} urls have been added.')
+
+
+def add_proxies(proxies: str):
+
+    # urls is basically garbage input on multiple lines with spaces and comma's and all kinds of unicode.
+    # here we try to break up this garbage into small pieces text, some are a url, some are garbage...
+    proxies = proxies.replace(",", " ")
+    proxies = proxies.replace("\n", " ")
+    proxies = proxies.split(" ")
+    proxies = [re.sub("[^0-9.:]", "", u) for u in proxies]
+
+    not_valid = []
+    valid = []
+    for proxy in proxies:
+        if not is_valid_ip_address_and_port(proxy):
+            not_valid.append(proxy)
+        else:
+            valid.append(proxy)
+    if not valid:
+        return operation_response(error=True, message='No valid proxy found.')
+
+    for proxy in valid:
+        ScanProxy.add_address(proxy)
+
+    if not_valid:
+        return operation_response(
+            success=True,
+            message=f'{len(valid)} proxies have been added.',
+            data={'invalid_proxies': not_valid}
+        )
+    else:
+        return operation_response(
+            success=True,
+            message=f'{len(valid)} proxies have been added. They will be validated before use.')
+
+
+def is_valid_ip_address_and_port(address):
+
+    if ":" not in address:
+        return False
+
+    ip_address, port = address.split(":")
+
+    try:
+        ipaddress.ip_address(ip_address)
+    except ValueError:
+        return False
+
+    try:
+        port = int(port)
+    except BaseException:
+        # cannot cast? okbye
+        return False
+
+    if not 65535 > int(port) > 0:
+        return False
+
+    return True

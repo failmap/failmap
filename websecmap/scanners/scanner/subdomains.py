@@ -15,8 +15,7 @@ from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.scanner.__init__ import (allowed_to_discover_urls, q_configurations_to_scan,
-                                                 url_filters)
+from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
 from websecmap.scanners.scanner.http import get_ips
 
 # Include DNSRecon code from an external dependency. This is cloned recursively and placed outside the django app.
@@ -57,9 +56,6 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                       urls_filter: dict = dict(),
                       endpoints_filter: dict = dict(), **kwargs) -> Task:
 
-    if not allowed_to_discover_urls("nsec_compose_task"):
-        return group()
-
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
@@ -72,9 +68,6 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
                                           urls_filter: dict = dict(),
                                           endpoints_filter: dict = dict(), **kwargs) -> Task:
 
-    if not allowed_to_discover_urls("certificate_transparency_compose_task"):
-        return group()
-
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
@@ -86,11 +79,6 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
 def compose_discover_task(organizations_filter: dict = dict(),
                           urls_filter: dict = dict(),
                           endpoints_filter: dict = dict(), **kwargs) -> Task:
-
-    # these approaches have the highest chance of getting new subdomains.
-    if not allowed_to_discover_urls("dns"):
-        log.info("Not allowed to scan using this scanner.")
-        return group()
 
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,

@@ -92,7 +92,7 @@ def compose_task(
             endpoint__port=443,
             endpoint__is_dead=False,
             organization__in=organizations,  # when empty, no results...
-            **urls_filter).order_by('-last_scan_moment')
+            **urls_filter).order_by('-endpoint__endpointgenericscan__latest_scan_moment')
     else:
         # use order by to get a few of the most outdated results...
         urls = Url.objects.filter(
@@ -102,7 +102,7 @@ def compose_task(
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            **urls_filter).order_by('-last_scan_moment')
+            **urls_filter).order_by('-endpoint__endpointgenericscan__latest_scan_moment')
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.

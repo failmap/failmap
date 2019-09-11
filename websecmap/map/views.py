@@ -7,6 +7,7 @@ import django_excel as excel
 import pytz
 from constance import config
 from django.conf import settings
+from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.text import slugify
@@ -16,7 +17,7 @@ from django.views.decorators.cache import cache_page
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.map.logic import datasets
-from websecmap.map.logic.admin import add_urls
+from websecmap.map.logic.admin import add_proxies, add_urls, user_is_staff_member
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import (explain, get_all_explains, get_recent_explains,
                                          remove_explanation)
@@ -438,21 +439,22 @@ def _explain(request):
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
+@user_passes_test(user_is_staff_member)
 def _remove_explain(request):
-
-    if not request.user.is_authenticated:
-        return JsonResponse({}, encoder=JSEncoder, safe=False)
-
     request = get_json_body(request)
     data = remove_explanation(request.get('scan_id'), request.get('scan_type'))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
+@user_passes_test(user_is_staff_member)
 def _add_urls(request):
-
-    if not request.user.is_authenticated:
-        return JsonResponse({}, encoder=JSEncoder, safe=False)
-
     request = get_json_body(request)
     data = add_urls(request.get('organization_id'), request.get('urls'))
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+@user_passes_test(user_is_staff_member)
+def _add_proxies(request):
+    request = get_json_body(request)
+    data = add_proxies(request.get('proxies'))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
