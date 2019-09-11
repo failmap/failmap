@@ -74,7 +74,7 @@ def compose_task(
     v6_service = config.SCREENSHOT_API_URL_V6
 
     log.info(f"Trying to make {len(endpoints)} screenshots.")
-    log.info(f"Screenshots will be stored at: {settings.TOOLS['screenshot_scanner']['output_dir']}")
+    log.info(f"Screenshots will be stored at: {settings.MEDIA_ROOT}screenshots/")
     log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
     tasks = [make_screenshot.si(v4_service, endpoint.uri_url())
              | save_screenshot.s(endpoint) for endpoint in endpoints if endpoint.ip_version == 4]
@@ -149,7 +149,6 @@ def save_screenshot(response, endpoint):
         scr.endpoint = endpoint
         scr.image = File(open(filename, 'rb'))
         scr.filename = filename
-        log.debug("swag")
         scr.save()
         log.debug(f"Saved in databased as {scr.pk}")
     except Exception as e:

@@ -408,10 +408,6 @@ TOOLS_DIR = os.environ.get('TOOLS_DIR', os.path.abspath(os.path.dirname(__file__
 # Our vendor directory contains a number of small tools that are hard to install otherwise.
 
 TOOLS = {
-    # Chrome and firefox are special cases: they install very easily and therefore don't need further grouping.
-    'screenshot_scanner': {
-        'output_dir': OUTPUT_DIR + os.environ.get('SCREENSHOT_OUTPUT_DIR', 'map/static/images/screenshots/')
-    },
     'theHarvester': {
         'executable': VENDOR_DIR + os.environ.get('THEHARVESTER_EXECUTABLE', "theHarvester/theHarvester.py"),
         'output_dir': OUTPUT_DIR + os.environ.get('THEHARVESTER_OUTPUT_DIR', "scanners/resources/output/theHarvester/"),
