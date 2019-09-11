@@ -96,7 +96,7 @@
     background-color: red;
 }
 
-.awarded_points_low, .awarded_points_perfect {
+.awarded_points_low, .awarded_points_good {
     border: 1px solid green;
     background-color: lightgreen;
 }

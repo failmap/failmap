@@ -190,51 +190,14 @@ div#report {
     font-size: 17px;
 }
 
-.awarded_points_orange, .awarded_points_medium {
+.awarded_points_medium, .awarded_points_low, .awarded_points_good, .awarded_points_high, .awarded_points_explained {
     padding: 0 3px;
     font-weight: bold;
     font-size: 11px;
     border-radius: 4px;
 }
 
-.awarded_points_red, .awarded_points_high {
-    padding: 0 3px;
-    font-weight: bold;
-    font-size: 11px;
-    border-radius: 4px;
-}
-
-.awarded_points_green, .awarded_points_low, .awarded_points_perfect {
-    padding: 0 3px;
-    font-weight: bold;
-    font-size: 11px;
-    border-radius: 4px;
-}
-
-.awarded_points_explained {
-    padding: 0 3px;
-    font-weight: bold;
-    font-size: 11px;
-    border-radius: 4px;
-}
-
-.total_awarded_points_medium {
-    padding: 1px 4px;
-    font-weight: bold;
-    border-radius: 6px;
-    margin-right: 5px;
-    margin-left: 5px;
-}
-
-.total_awarded_points_high {
-    padding: 1px 4px;
-    font-weight: bold;
-    border-radius: 6px;
-    margin-right: 5px;
-    margin-left: 5px;
-}
-
-.total_awarded_points_good {
+.total_awarded_points_medium, .total_awarded_points_high, .total_awarded_points_good {
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
