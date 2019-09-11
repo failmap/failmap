@@ -75,6 +75,7 @@ def compose_task(
 
     log.info(f"Trying to make {len(endpoints)} screenshots.")
     log.info(f"Screenshots will be stored at: {settings.MEDIA_ROOT}screenshots/")
+    log.info("Saved images are renamed and stored in the same directory. The used storage backend is the filesystem.")
     log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
     tasks = [make_screenshot.si(v4_service, endpoint.uri_url())
              | save_screenshot.s(endpoint) for endpoint in endpoints if endpoint.ip_version == 4]
@@ -137,12 +138,12 @@ def save_screenshot(response, endpoint):
         return False
 
     try:
-
         i = Image.open(BytesIO(response.content))
         size = 320, 240
         i.thumbnail(size, Image.ANTIALIAS)
         filename = f"{settings.MEDIA_ROOT}screenshots/{endpoint.id}_latest.png"
         i.save(filename, "PNG")
+        log.debug(f'Image saved as: {filename}.')
 
         scr = Screenshot()
         scr.created_on = datetime.now(pytz.utc).date()
@@ -150,6 +151,6 @@ def save_screenshot(response, endpoint):
         scr.image = File(open(filename, 'rb'))
         scr.filename = filename
         scr.save()
-        log.debug(f"Saved in databased as {scr.pk}")
+        log.debug(f"Saved in databased as id:{scr.pk} filename:{scr.filename}.")
     except Exception as e:
         log.debug(e)
