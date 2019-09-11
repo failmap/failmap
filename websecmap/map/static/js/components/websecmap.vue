@@ -3,33 +3,34 @@
     <div>
         <!-- :zoom="initial_location(state.country).zoomlevel" -->
         <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
-               :options="{'scrollWheelZoom': false, 'tap': true, 'zoomSnap': 0.2, 'dragging': !L.Browser.mobile, 'touchZoom': true,
+               :options="{
+               scrollWheelZoom: false, tap: true, zoomSnap: 0.2, dragging: !L.Browser.mobile, touchZoom: true,
                contextmenu: true,
-                    contextmenuWidth: 140,
-                    contextmenuItems: [
-                    {
-                        text: 'Show coordinates',
-                        callback: this.showCoordinates
-                    },
-                    {
-                        text: 'Center map here',
-                        callback: this.centerMap
-                    },
-                    '-',
-                    {
-                        text: 'Zoom in',
-                        icon: 'static/images/zoom-in.png',
-                        callback: this.zoomIn
-                    }, {
-                        text: 'Zoom out',
-                        icon: 'static/images/zoom-out.png',
-                        callback: this.zoomOut
-                    }, {
-                        text: 'Show everything',
-                        callback: this.show_all_map_data,
-                    }
-                    ]}"
-                :center="initial_location(this.state.country).coordinates" :zoom="initial_location(this.state.country).zoomlevel">
+                contextmenuWidth: 140,
+                contextmenuItems: [
+                {
+                    text: 'Show coordinates',
+                    callback: this.showCoordinates
+                },
+                {
+                    text: 'Center map here',
+                    callback: this.centerMap
+                },
+                '-',
+                {
+                    text: 'Zoom in',
+                    icon: 'static/images/zoom-in.png',
+                    callback: this.zoomIn
+                }, {
+                    text: 'Zoom out',
+                    icon: 'static/images/zoom-out.png',
+                    callback: this.zoomOut
+                }, {
+                    text: 'Show everything',
+                    callback: this.show_all_map_data,
+                }
+                ]}"
+               :zoom="initial_location(this.state.country).zoomlevel">
 
             <!-- If you supply invalid parameters, the map will wrap around only to show the US etc. -->
             <!-- Todo: tile layer is mapped as 512 instead of 256. Therefore: Will-change memory consumption is too high. Budget limit is the document surface area multiplied by 3 (686699 px).-->
