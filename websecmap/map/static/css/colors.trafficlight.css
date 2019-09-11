@@ -1,9 +1,9 @@
 .marker-cluster-unknown {
-    background-color: rgba(115, 157, 226, 0.6);
+    background-color: rgba(173, 177, 177, 0.6);
 }
 
 .marker-cluster-unknown div {
-    background-color: rgba(56, 99, 204, 0.6);
+    background-color: rgba(124, 123, 121, 0.6);
 }
 
 .marker-cluster-white {
@@ -139,7 +139,7 @@
 }
 
 .grayrow, .unknownrow {
-    color: rgba(0, 88, 255, 0.6);
+    color: #8b8987;
 }
 
 .improvements_good, .improvements_neutral {
@@ -212,8 +212,8 @@
 
 .leaflet-marker-unknown
 {
-    background-color: rgba(0, 88, 255, 0.6);
-    border: 2px solid rgba(0, 68, 179, 0.5);
+    background-color: rgba(155, 159, 159, 0.6);
+    border: 2px solid rgba(146, 145, 142, 0.6);
 }
 
 .map_polygon_high, .bg-danger, .btn-danger
@@ -242,8 +242,8 @@
 
 .map_polygon_unknown
 {
-    fill: rgba(56, 99, 204, 0.6);
-    background-color: rgba(56, 99, 204, 0.6);
+    fill: rgba(151, 154, 154, 0.6);
+    background-color: rgba(103, 102, 100, 0.6);
 }
 
 /* These are the colors of bootstrap. We'll switch it lateron i guess... */
@@ -268,7 +268,7 @@ a, a:hover, a:visited {
 
 .charts_high {
     background-color: rgba(255, 99, 132, 0.2);
-    border-color: rgba(255,99,132,1);
+    border-color: rgba(255, 19, 31, 0.82);
 }
 
 .charts_medium {

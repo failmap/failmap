@@ -1093,7 +1093,7 @@ Vue.component('websecmap', {
 
         // todo: make dynamic. Get this from the color palette...
         getColorCode: function(d){
-            return d === "high" ? '#bd383c' : d === "medium" ? '#fc9645' : d === "low" ? '#d3fc6a' : d === "good" ? '#62fe69' : '#3863CC';
+            return d === "high" ? '#bd383c' : d === "medium" ? '#fc9645' : d === "low" ? '#d3fc6a' : d === "good" ? '#62fe69' : '#aaaeae';
         },
         resetHighlight: function (e) {
             clearTimeout(this.timer);
