@@ -55,6 +55,8 @@ def compose_task(
         log.warning('Applied filters resulted in no urls, thus no plain http tasks!')
         return group()
 
+    urls = list(set(urls))
+
     tasks = []
     for url in urls:
         complete_endpoints, incomplete_endpoints = get_endpoints_with_missing_encryption(url)

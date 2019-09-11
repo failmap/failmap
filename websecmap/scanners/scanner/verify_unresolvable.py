@@ -26,6 +26,8 @@ def compose_verify_task(organizations_filter: dict = dict(),
     if not urls:
         log.debug('No urls found for (sub)domain verification.')
 
+    urls = list(set(urls))
+
     log.info("Will verify DNS resolvability of %s urls" % len(urls))
 
     task = group(url_resolves.si(url) | handle_resolves.s(url) for url in urls)

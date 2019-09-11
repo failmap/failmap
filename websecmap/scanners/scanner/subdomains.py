@@ -60,6 +60,8 @@ def nsec_compose_task(organizations_filter: dict = dict(),
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
 
+    urls = list(set(urls))
+
     task = group(nsec_scan.si([url]) for url in urls)
     return task
 
@@ -71,6 +73,8 @@ def certificate_transparency_compose_task(organizations_filter: dict = dict(),
     urls = url_by_filters(organizations_filter=organizations_filter,
                           urls_filter=urls_filter,
                           endpoints_filter=endpoints_filter)
+
+    urls = list(set(urls))
 
     task = group(certificate_transparency_scan.si([url]) for url in urls)
     return task
@@ -111,6 +115,8 @@ def compose_verify_task(organizations_filter: dict = dict(),
 
     if not urls:
         log.debug('No urls found for (sub)domain verification.')
+
+    urls = list(set(urls))
 
     log.info("Will verify DNS resolvability of %s urls" % len(urls))
 
