@@ -215,6 +215,12 @@ Vue.component('websecmap', {
 
                     zoombutton: "Zoom to show all data on this map.",
 
+                    popup: {
+                        view_report: "View report",
+                        urls: "Urls",
+                        services: "Services",
+                    }
+
                 }
             },
             nl: {
@@ -250,6 +256,12 @@ Vue.component('websecmap', {
                     },
 
                     zoombutton: "Toon de hele kaart",
+
+                    popup: {
+                        view_report: "Bekijk rapport",
+                        urls: "Adressen",
+                        services: "Diensten",
+                    }
                 }
             }
         },
@@ -943,6 +955,8 @@ Vue.component('websecmap', {
             this.timer = setTimeout(() => {
                 let layer = e.target;
 
+                layer.openPopup();
+
                 layer.setStyle({weight: 1, color: '#ccc', dashArray: '0', fillOpacity: 0.7});
 
                 // because of the "bring to front" the timer of this feature is called again. Thus, again after timeout
@@ -977,12 +991,18 @@ Vue.component('websecmap', {
         },
 
         showreportfromcontextmenu: function(e) {
-            console.log(e);
-            console.log(this.clicked_map_object);
             // give both name and id as separate identifiers.
             store.commit('change', {reported_organization: {
                 id: this.clicked_map_object.feature.properties['organization_id'],
                 name: this.clicked_map_object.feature.properties['organization_name'],
+            }});
+            this.showreport_direct();
+        },
+
+        showreport_frompopup: function(organization_id, organization_name) {
+            store.commit('change', {reported_organization: {
+                id: organization_id,
+                name: organization_name,
             }});
             this.showreport_direct();
         },
@@ -1040,6 +1060,21 @@ Vue.component('websecmap', {
                     contextmenuItems: menuItems
                 });
 
+                let props = point.properties;
+
+                let popup = L.popup({minWidth: 200});
+                popup.setContent(`
+                    <b>${props['organization_name']}</b><br>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
+                        <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
+                        <div class="progress-bar bg-success" style="width:${props['percentages']['low_urls']}%"></div>
+                        <div class="progress-bar bg-success" style="width:${props['percentages']['good_urls']}%"></div>
+                    </div>
+                `);
+
+                pointlayer.bindPopup(popup).openPopup();
+
                 pointlayer.on({
                     mouseover: this.highlightFeature,
                     mouseout: this.resetHighlight,
@@ -1094,6 +1129,23 @@ Vue.component('websecmap', {
                 contextmenu: true,
                 contextmenuItems: menuItems
             });
+
+            let props = layer.feature.properties;
+
+            let popup = L.popup({minWidth: 200});
+            popup.setContent(`
+                <b>${props['organization_name']}</b><br>
+                <div class="progress">
+                    <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
+                    <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
+                    <div class="progress-bar bg-success" style="width:${props['percentages']['low_urls']}%"></div>
+                    <div class="progress-bar bg-success" style="width:${props['percentages']['good_urls']}%"></div>
+                </div>
+            `);
+
+            // ${props['total_urls']} ${this.$t('map.popup.urls')}<br>
+            // <a onclick="showreport_frompopup(${props['organization_id']}, '${props['organization_name']}')">${this.$t('map.popup.view_report')}</a><br>
+            layer.bindPopup(popup).openPopup();
 
             layer.on({
                 mouseover: this.highlightFeature,

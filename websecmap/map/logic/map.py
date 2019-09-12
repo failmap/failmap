@@ -236,6 +236,27 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                 }
         }
 
+        # calculate some statistics, so the frontends do not have to...
+        # prevent division by zero
+        if i[11]:
+            total_urls = int(i[11])
+            high_urls = int(i[12])
+            medium_urls = int(i[13])
+            low_urls = int(i[14])
+            dataset['properties']['percentages'] = {
+                "high_urls": round(high_urls / total_urls, 2) * 100,
+                "medium_urls": round(medium_urls / total_urls, 2) * 100,
+                "low_urls": round(low_urls / total_urls, 2) * 100,
+                "good_urls": round(total_urls - (high_urls + medium_urls + low_urls) / total_urls, 2) * 100,
+            }
+        else:
+            dataset['properties']['percentages'] = {
+                "high_urls": 0,
+                "medium_urls": 0,
+                "low_urls": 0,
+                "good_urls": 0,
+            }
+
         data["features"].append(dataset)
 
     return data
