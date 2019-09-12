@@ -142,8 +142,15 @@ Vue.component('comply_or_explain', {
                 this.explains.push(this.more_explains.shift());
                 this.explains.push(this.more_explains.shift());
                 this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
+                this.explains.push(this.more_explains.shift());
             } else if (this.more_explains.length > 1) {
-                for (i=0; i<this.more_explains.length; i++){
+                for (let i=0; i<this.more_explains.length; i++){
                     this.explains.push(this.more_explains.shift());
                 }
                 this.more_available = false;
