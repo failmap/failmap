@@ -1039,3 +1039,5 @@ else:
 
 # Allow file uploads in datasets:
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/uploads/')
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
