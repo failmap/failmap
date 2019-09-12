@@ -75,7 +75,6 @@ def compose_task(
 
     log.info(f"Trying to make {len(endpoints)} screenshots.")
     log.info(f"Screenshots will be stored at: {settings.MEDIA_ROOT}screenshots/")
-    log.info("Saved images are renamed and stored in the same directory. The used storage backend is the filesystem.")
     log.info(f"IPv4 screenshot service: {v4_service}, IPv6 screenshot service: {v6_service}")
     tasks = [make_screenshot.si(v4_service, endpoint.uri_url())
              | save_screenshot.s(endpoint) for endpoint in endpoints if endpoint.ip_version == 4]
@@ -110,9 +109,7 @@ def make_screenshot_with_u2p(screenshot_service, url):
         # gives only the first 'screen' of the page, not the entire page.
         'screenshot.fullPage': False,
     }
-
     api_call = f"{screenshot_service}/api/render?{urllib.parse.urlencode(get_parameters)}"
-
     # https://2.python-requests.org/en/latest/user/quickstart/#binary-response-content
     return requests.get(api_call)
 
@@ -153,4 +150,4 @@ def save_screenshot(response, endpoint):
         scr.save()
         log.debug(f"Saved in databased as id:{scr.pk} filename:{scr.filename}.")
     except Exception as e:
-        log.debug(e)
+        log.exception(e)
