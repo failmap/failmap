@@ -105,7 +105,7 @@
                     </div>
 
                     <div>
-                        <div v-if="domainlist_urls.length > 1">
+                        <div v-if="domainlist_urls.length > 0">
                             <table width='100%'>
                                 <thead>
                                     <tr>
