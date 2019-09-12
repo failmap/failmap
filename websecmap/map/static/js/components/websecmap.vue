@@ -1008,6 +1008,38 @@ Vue.component('websecmap', {
                 // https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
                 let pointlayer = this.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
 
+                let menuItems = [{
+                            text: point.properties['organization_name'],
+                            index: 0
+                        },
+                        {
+                            text: "Show report",
+                            callback: this.showreportfromcontextmenu,
+                            index: 1,
+                        }];
+                if (this.authenticated){
+                    menuItems.push({
+                            text: "Add url(s)",
+                            callback: this.start_adding_domains,
+                            index: 2
+                        },
+                        {
+                            separator: true,
+                            index: 3
+                        })
+                } else {
+                    menuItems.push({
+                            separator: true,
+                            index: 2
+                        })
+                }
+
+                // see geojson data: https://github.com/aratcliffe/Leaflet.contextmenu
+                pointlayer.bindContextMenu({
+                    contextmenu: true,
+                    contextmenuItems: menuItems
+                });
+
                 pointlayer.on({
                     mouseover: this.highlightFeature,
                     mouseout: this.resetHighlight,
