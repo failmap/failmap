@@ -36,7 +36,7 @@
             <!-- replaced the mapbox gray layer with a colored one, :url="this.tile_uri()", which instantly fixes the tile size bug -->
             <l-tile-layer
                 :style="'light-v9'"
-                :url="'http://{s}.tile.osm.org/{z}/{x}/{y}.png'"
+                :url="'https://{s}.tile.osm.org/{z}/{x}/{y}.png'"
 
                 :token="mapbox_token"
                 :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
