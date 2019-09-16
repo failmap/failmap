@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 
 import pytz
+from django.conf import settings
 
 log = logging.getLogger(__package__)
 
@@ -257,13 +258,41 @@ def internet_nl_generic_boolean_value(scan):
     return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=1, medium=0, low=0)
 
 
+def change_internet_nl_severity_to_websecmap_severity(scan, original_requirement_level):
+    # Only affected when in settings APPLICATION_NAME = "websecmap", since other apps use
+    # other setting files, this would work.
+    # how does this code quickly recognize being a standalone websecmap, and not something else.
+    # it relies on the APPLICATION_NAME field in settings.py.
+    if not hasattr(settings, 'APPLICATION_NAME'):
+        return original_requirement_level
+
+    if settings.APPLICATION_NAME != 'websecmap':
+        return original_requirement_level
+
+    if scan.type in ['internet_nl_mail_auth_spf_exist', 'internet_nl_mail_auth_dkim_exist',
+                     'internet_nl_mail_auth_dmarc_exist']:
+        # we see starttls as being the most important mail setting.
+        return "recommended"
+
+    return original_requirement_level
+
+
 def internet_nl_requirement_tilde_value_format(scan):
     """
     See documentation of upgrade_api_response to learn how this parsing works.
+
+    sept 2019:
+    Storing the requirement level seems odd. Why wouldn't you just parse that at the moment severity is
+    added to the mix? Why is that stored at the moment of scanning? -> This is done because you need the
+    entire set of results to determine the severity for internet.nl. Without the entire set, the severity cannot
+    be set. Which means the means of retrieving data would be completely different.
+
     :param scan:
     :return:
     """
     requirement_level, scan_value = scan.rating.split('~')
+
+    requirement_level = change_internet_nl_severity_to_websecmap_severity(scan, requirement_level)
 
     explanation = f"Test {scan.type} resulted in {scan_value}."
     if len(scan.explanation) > 5:

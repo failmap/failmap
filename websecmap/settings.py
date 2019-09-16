@@ -1041,3 +1041,8 @@ else:
 MEDIA_ROOT = os.environ.get('MEDIA_ROOT', os.path.abspath(os.path.dirname(__file__)) + '/uploads/')
 
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+# this parameter is used in severity calculation to determine if this is a websecmap installation or
+# something else, like an internet.nl dashboard. In case of websecmap, severities are adjusted.
+# This flag will probably not be present in other installations by default.
+APPLICATION_NAME = 'websecmap'
