@@ -130,6 +130,8 @@ const messages = {
         "Certificate is not trusted.": "Certificate is not trusted.",
         "Certificate is trusted.": "Certificate is trusted.",
 
+        // Mail
+        "dns_mx_no_cname": "E-Mail Server",
 
         // internet_nl_mail_starttls_tls_available
         "internet_nl_mail_starttls_tls_available": "E-Mail: Encrypted transport (STARTTLS)",
@@ -153,6 +155,10 @@ const messages = {
         "internet_nl_mail_auth_dmarc_exist": "E-Mail: Domain-based Message Auth (DMARC)",
         "DMARC Available": "DMARC Available",
         "DMARC Missing": "DMARC Missing",
+
+
+        "Test internet_nl_mail_auth_dmarc_exist resultated in failed": "Detection and prevention of spoofing not enabled.",
+
     },
     nl: {
         back_to_map: "Terug naar de kaart",
@@ -271,6 +277,8 @@ const messages = {
         "Certificate is not trusted.": "Het certificaat wordt niet vertrouwd.",
         "Certificate is trusted.": "Het certificaat wordt vertrouwd.",
 
+        // email checks:
+        "dns_mx_no_cname": "E-Mail Server",
 
         // internet_nl_mail_starttls_tls_available
         "internet_nl_mail_starttls_tls_available": "E-Mail: Versleuteld transport (STARTTLS)",
@@ -294,6 +302,8 @@ const messages = {
         "internet_nl_mail_auth_dmarc_exist": "E-Mail: Domain-based Message Auth (DMARC)",
         "DMARC Available": "DMARC Available",
         "DMARC Missing": "DMARC Missing",
+
+        "Test internet_nl_mail_auth_dmarc_exist resultated in failed": "Herkenning en preventie van namaak e-mails niet ingeschakeld.",
 
     }
 };
