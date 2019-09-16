@@ -384,7 +384,7 @@ def calculate_map_data(days: int = 366, countries: List = None, organization_typ
     map_configurations = filter_map_configs(countries=countries, organization_types=organization_types)
 
     # the "all" filter will retrieve all layers at once
-    scan_types = PUBLISHED_SCAN_TYPES + ["all"]
+    scan_types = ["all"] + PUBLISHED_SCAN_TYPES
 
     for map_configuration in map_configurations:
         for days_back in list(reversed(range(0, days))):
