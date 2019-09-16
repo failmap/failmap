@@ -71,22 +71,30 @@
                     <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
                     <h5 v-if="!loading">{{ visibleweek }}</h5>
                     <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
-                    <input id='history' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/><br />
-                    <input id='previous_week' type='button' v-on:click='previous_week()' :disabled='loading' :value="'<' + $t('map.history.previous')"/>
-                    <input id='next_week' type='button' v-on:click='next_week()' :disabled='loading' :value="'>' + $t('map.history.next')"/>
+                    <button v-if='state.week !== 52' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
+
+                    <input id='history' class='slider' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
+
+                    <button v-if='state.week !== 0' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
+
                 </div>
             </l-control>
 
-            <l-control position="topright">
+            <l-control position="topright"  v-if="issues.length > 1">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
-                    <h4>{{ $t("map.filter.title") }}</h4>
-                    <template v-if="issues.length > 1">
-                        <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
-                        <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
-                    </template>
-                    <div v-for="issue in issues" style="white-space: nowrap;">
-                        <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
-                        <label :for="issue.name" v-html="translate(issue.name)"></label>
+                    <button class="btn btn-secondary btn-small" style='width: 100%' type="button" data-toggle="collapse" data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseExample">
+                        <template v-if="['clear_filter_option', ''].includes(displayed_issue)">{{ $t("map.filter.title") }}</template>
+                        <template v-if="displayed_issue !== 'clear_filter_option'">{{ $t(displayed_issue) }}</template>
+                    </button>
+                    <div class="collapse" id="collapseFilters">
+                        <template>
+                            <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
+                            <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
+                        </template>
+                        <div v-for="issue in issues" style="white-space: nowrap;">
+                            <input type='radio' v-model="displayed_issue" name="displayed_issue" :value="issue.name" :id="issue.name">
+                            <label :for="issue.name" v-html="translate(issue.name)"></label>
+                        </div>
                     </div>
                 </div>
             </l-control>
@@ -188,12 +196,12 @@ Vue.component('websecmap', {
                     },
                     history:{
                         title: "Moment",
-                        next: '+1 week',
-                        previous: '-1 week',
+                        next: '+1',
+                        previous: '-1',
                     },
 
                     filter: {
-                        title: "Filter on issue",
+                        title: "Filter: Show Everything",
                         show_everything: 'Show all data',
                     },
 
@@ -230,12 +238,12 @@ Vue.component('websecmap', {
                     },
                     history:{
                         title: "Gegevens van:",
-                        next: '+1 week',
-                        previous: '-1 week',
+                        next: '+1',
+                        previous: '-1',
                     },
 
                     filter: {
-                        title: "Filter op onderwerp",
+                        title: "Filter: Toon alles",
                         show_everything: 'Toon alles',
                     },
 
