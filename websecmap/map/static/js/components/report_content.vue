@@ -599,7 +599,7 @@ Vue.component('report_content', {
         colorize: function (high, medium, low) {
             if (high > 0) return "high";
             if (medium > 0) return "medium";
-            if (low > 0) return "medium";
+            if (low > 0) return "low";
             return "good";
         },
         colorizebg: function (high, medium, low) {
