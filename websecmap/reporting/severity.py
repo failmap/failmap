@@ -88,6 +88,10 @@ def get_security_header_calculation(scan):
     }[scan.type]
 
     # We add what is done well, so it's more obvious it's checked.
+    if scan.rating == "Unreachable":
+        return standard_calculation(scan, "Web server content became unreachable. No HTTP content present.",
+                                    high, medium, low)
+
     if scan.rating == "True":
         explanation = header + " header present."
     elif scan.rating == "Using CSP":

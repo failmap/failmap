@@ -13,12 +13,17 @@ from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Ti
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScanScratchpad
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.scanner.http import get_random_user_agent
 
 log = logging.getLogger(__name__)
+
+SECURITY_HEADER_SCAN_TYPES = ['http_security_header_strict_transport_security',
+                              'http_security_header_x_content_type_options',
+                              'http_security_header_x_frame_options',
+                              'http_security_header_x_xss_protection']
 
 
 def compose_task(
@@ -79,7 +84,45 @@ def analyze_headers(result: requests.Response, endpoint):
 
     # if scan task failed, ignore the result (exception) and report failed status
     if isinstance(result, Exception):
-        return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+        """
+        There could be many reason the parent failed. Some issues however are created by mandated certificate use.
+        In this case a "ConnectionError", "('Connection aborted.', OSError(\"(104, 'ECONNRESET')\",)) is received.
+        An active connection reset indicates that you'll not be ever able to update scan results.
+
+        This is a nice edge case, since the endpoint still exist and the certificate is also valid. But the
+        headers cannot ever be retrieved. This causes header information to be outdated for months or years.
+
+        For this case another state had been defined: unreachable. This is a header state that is seen as good. It
+        will be applied to all existing headers of this endpoint, in order to clean up what is already there.
+
+        (nothing has been returned, so we have no clue what header scans already exist...)
+        """
+
+        existing_header_scans = EndpointGenericScan.objects.all().filter(
+            endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+
+        if not existing_header_scans:
+            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+
+        # We only accept connection resets
+        if not isinstance(result, OSError):
+            log.exception("Connection failed, but headers currently exist. Please investigate the cause and "
+                          "add a cleanup exception to the code for this specific case. (Not an OSError)")
+            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+
+        # Only on active connection resets, where we know there is a server, but the server
+        # does not want to talk with us.
+        # 104 = Connection reset (includes ECONNRESET)
+        # 54 = Connection aborted (includes ECONNRESET)
+        if "ECONNRESET" not in str(result):
+            log.exception("Connection failed, but headers currently exist. Please investigate the cause and "
+                          "add a cleanup exception to the code for this specific case. (Not a CONNECTION RESET).")
+            return ParentFailed('Skipping http header result parsing because scan failed.', cause=result)
+
+        for scan in existing_header_scans:
+            store_endpoint_scan_result(scan.type, endpoint, 'Unreachable', "Address became unreachable.")
+
+        return {'status': 'success'}
 
     response = result
 
