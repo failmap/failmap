@@ -5,8 +5,8 @@ import pytz
 from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
-from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp, UrlGenericScan
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlGenericScan
 
 log = logging.getLogger(__package__)
 
