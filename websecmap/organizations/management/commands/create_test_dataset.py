@@ -6,7 +6,7 @@ from django.core.management.commands.dumpdata import Command as DumpDataCommand
 from django.core.serializers import serialize
 
 from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Promise, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp
+from websecmap.scanners.models import Endpoint, EndpointGenericScan, UrlIp, UrlGenericScan
 
 log = logging.getLogger(__package__)
 
@@ -16,7 +16,7 @@ class Command(DumpDataCommand):
     help = "The test-dataset exports 20 organizations, with their minimal information such as scans. Log info" \
            "will not be attached."
 
-    FILENAME = "failmap_test_dataset_{}.{options[format]}"
+    FILENAME = "websecmap_test_dataset_{}.{options[format]}"
 
     APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat')
 
@@ -39,14 +39,13 @@ class Command(DumpDataCommand):
 
                                 Included
         Organization:
-        - OrganizationType      Yes         Foreign Keys
-        - Organizations         Yes         Hard to gather
-        - Coordinates           Yes         Hard to create, is not scripted yet
-        - Urls                  Yes         Even harder to gather
+        - OrganizationType      Yes
+        - Organizations         Yes
+        - Coordinates           Yes
+        - Urls                  Yes
 
         Scanners:
-        - Endpoints             Yes         Needed for rebuild ratings, hard to gather
-        - TLS Qualys Scans      Yes         Needed for rebuild ratings
+        - Endpoints             Yes
         - Generic Scans         Yes
         """
 
@@ -81,11 +80,8 @@ class Command(DumpDataCommand):
         endpointgenericscans = EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
         objects += endpointgenericscans
 
-        promises = Promise.objects.all().filter(organization__in=organizations)
-        objects += promises
-
-        urlips = UrlIp.objects.all().filter(url__in=urls)
-        objects += urlips
+        urlgenericscans = UrlGenericScan.objects.all().filter(url__in=urls)
+        objects += urlgenericscans
 
         with open(filename, "w") as f:
             f.write(serialize(self.FORMAT, objects))
