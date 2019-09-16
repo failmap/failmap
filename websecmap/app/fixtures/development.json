@@ -993,5 +993,30 @@
       "date_changed": "2019-01-24T03:02:35Z",
       "description": ""
     }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 27,
+    "fields": {
+      "name": "&#x1F52C; Scan HTTPS encryption quality using Qualys on new addresses",
+      "task": "websecmap.app.models.create_job",
+      "interval": null,
+      "crontab": 35,
+      "solar": null,
+      "args": "[\"websecmap.scanners.scanner.tls_qualys_periodic_task_zero_scans\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "priority": null,
+      "expires": null,
+      "one_off": false,
+      "start_time": null,
+      "enabled": false,
+      "last_run_at": "2019-01-24T00:00:00Z",
+      "total_run_count": 42,
+      "date_changed": "2019-01-24T00:01:45Z",
+      "description": ""
+    }
   }
 ]
