@@ -103,7 +103,7 @@ def explain(scan_id: int, scan_type: str, explanation: str, explained_by: str, d
     scan.comply_or_explain_is_explained = True
     scan.comply_or_explain_explained_by = explained_by
     scan.comply_or_explain_explained_on = timezone.now()
-    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=days)
+    scan.comply_or_explain_explanation_valid_until = timezone.now() + timedelta(days=int(days))
     scan.comply_or_explain_explanation = explanation
     scan.comply_or_explain_case_handled_by = 'Logged in user...'
     scan.save()
