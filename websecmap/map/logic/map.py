@@ -212,6 +212,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     "organization_type": i[2],
                     "organization_name": i[1],
                     "organization_slug": slugify(i[1]),
+                    "additional_keywords": extract_domains(calculation),
                     "high": high,
                     "medium": medium,
                     "low": low,
@@ -260,3 +261,30 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         data["features"].append(dataset)
 
     return data
+
+
+def extract_domains(calculation):
+    """
+    Extracts a list of domains and subdomains from a calculation, which is then compressed to a simple version.
+
+    For example:
+    data.websecmap.example
+    mysite.websecmap.example
+    websecmap.example
+    testsite.lan
+    anothersite.testsite.lan
+
+    will become a set of words, like this:
+    data websecmap example mysite testsite lan anothersite
+    """
+
+    words = []
+
+    for url in calculation['organization']['urls']:
+        words += url['url'].split(".")
+
+    # unique words only.
+    words = list(set(words))
+
+    # returned as a single string that can be searched through...
+    return " ".join(words).lower()

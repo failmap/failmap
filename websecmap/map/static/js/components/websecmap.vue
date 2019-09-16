@@ -1182,7 +1182,8 @@ Vue.component('websecmap', {
         resetHighlight: function (e) {
             clearTimeout(this.timer);
 
-            if (this.isSearchedFor(e.target.feature))
+            let query = document.getElementById('searchbar').value;
+            if (this.isSearchedFor(e.target.feature, query.toLowerCase()))
                 e.target.setStyle(this.searchResultStyle(e.target.feature));
             else
                 e.target.setStyle(this.style(e.target.feature));
@@ -1190,12 +1191,15 @@ Vue.component('websecmap', {
         searchResultStyle: function (feature) {
             return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.1};
         },
-        isSearchedFor: function (feature) {
-            let x = document.getElementById('searchbar').value;
-            x = x.toLowerCase();
-            if (!x || x === "")
+        isSearchedFor: function (feature, query) {
+            if (!query || query === "")
                 return false;
-            return (feature.properties.organization_name.toLowerCase().indexOf(x) === -1)
+
+            if (query.length < 4)
+                return (feature.properties.organization_name.toLowerCase().indexOf(query) === -1);
+
+            return (feature.properties.organization_name.toLowerCase().indexOf(query) === -1 &&
+                    feature.properties.additional_keywords.toLowerCase().indexOf(query) === -1);
         },
 
         search: function () {
@@ -1212,24 +1216,27 @@ Vue.component('websecmap', {
             } else {
                 // text match
                 // todo: is there a faster, native search option?
-                this.polygons.eachLayer((layer) => {
-                    if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
-                        layer.setStyle(this.searchResultStyle(layer.feature));
-                    } else {
-                        layer.setStyle(this.style(layer.feature));
-                    }
-                });
-                this.markers.eachLayer((layer) => {
-                    if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1) {
-                        layer.setStyle(this.searchResultStyle(layer.feature));
-                    } else {
-                        layer.setStyle(this.style(layer.feature));
-                    }
-                });
-
+                this.polygons.eachLayer((layer) => {this.handleSearchQuery(layer, query)});
+                this.markers.eachLayer((layer) => {this.handleSearchQuery(layer, query)});
                 // check in the clusters if there are any searched for. Is done based on style.
                 this.markers.refreshClusters();
             }
+        },
+
+        handleSearchQuery(layer, query){
+            // organization names require one letter, additional properties three: to speed up searching
+            if (query.length < 4) {
+                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1)
+                    layer.setStyle(this.searchResultStyle(layer.feature));
+                else
+                    layer.setStyle(this.style(layer.feature));
+            }
+
+            if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1 &&
+                layer.feature.properties.additional_keywords.toLowerCase().indexOf(query) === -1)
+                layer.setStyle(this.searchResultStyle(layer.feature));
+            else
+                layer.setStyle(this.style(layer.feature));
         },
         // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
         roundTo: function(n, digits) {
