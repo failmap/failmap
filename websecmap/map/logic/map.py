@@ -211,6 +211,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     "organization_id": i[5],
                     "organization_type": i[2],
                     "organization_name": i[1],
+                    "organization_name_lowercase": i[1].lower(),
                     "organization_slug": slugify(i[1]),
                     "additional_keywords": extract_domains(calculation),
                     "high": high,

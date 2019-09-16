@@ -1195,11 +1195,11 @@ Vue.component('websecmap', {
             if (!query || query === "")
                 return false;
 
-            if (query.length < 4)
-                return (feature.properties.organization_name.toLowerCase().indexOf(query) === -1);
+            if (query.length < 3)
+                return (feature.properties.organization_name_lowercase.indexOf(query) === -1);
 
-            return (feature.properties.organization_name.toLowerCase().indexOf(query) === -1 &&
-                    feature.properties.additional_keywords.toLowerCase().indexOf(query) === -1);
+            return (feature.properties.organization_name_lowercase.indexOf(query) === -1 &&
+                    feature.properties.additional_keywords.indexOf(query) === -1);
         },
 
         search: function () {
@@ -1225,18 +1225,19 @@ Vue.component('websecmap', {
 
         handleSearchQuery(layer, query){
             // organization names require one letter, additional properties three: to speed up searching
-            if (query.length < 4) {
-                if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1)
+            if (query.length < 3) {
+                if (layer.feature.properties.organization_name_lowercase.indexOf(query) === -1)
+                    layer.setStyle(this.searchResultStyle(layer.feature));
+                else
+                    layer.setStyle(this.style(layer.feature));
+            } else {
+
+                if (layer.feature.properties.organization_name_lowercase.indexOf(query) === -1 &&
+                    layer.feature.properties.additional_keywords.indexOf(query) === -1)
                     layer.setStyle(this.searchResultStyle(layer.feature));
                 else
                     layer.setStyle(this.style(layer.feature));
             }
-
-            if (layer.feature.properties.organization_name.toLowerCase().indexOf(query) === -1 &&
-                layer.feature.properties.additional_keywords.toLowerCase().indexOf(query) === -1)
-                layer.setStyle(this.searchResultStyle(layer.feature));
-            else
-                layer.setStyle(this.style(layer.feature));
         },
         // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
         roundTo: function(n, digits) {
