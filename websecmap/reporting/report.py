@@ -992,11 +992,11 @@ def aggegrate_url_rating_scores(url_ratings: List, only_include_issues: List[str
 
         # url can only be in one category (otherwise there are urls in multiple categories which makes it
         # hard to display)
-        if calculation['high_endpoints']:
+        if calculation['high_endpoints'] or calculation['url_issues_high']:
             scores['high_urls'] += 1
-        elif calculation['medium_endpoints']:
+        elif calculation['medium_endpoints'] or calculation['url_issues_medium']:
             scores['medium_urls'] += 1
-        elif calculation['low_endpoints']:
+        elif calculation['low_endpoints'] or calculation['url_issues_low']:
             scores['low_urls'] += 1
 
     scores['total_issues'] = scores['high'] + scores['medium'] + scores['low']
