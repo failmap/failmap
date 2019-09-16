@@ -214,29 +214,69 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                         map_organizationreport.low_urls
                     FROM map_organizationreport
                     INNER JOIN
-                      (SELECT id as stacked_organization_id
+
+
+                      (SELECT stacked_organization.id as stacked_organization_id
                       FROM organization stacked_organization
-                      WHERE (stacked_organization.created_on <= '%(when)s' AND stacked_organization.is_dead = 0)
+                      WHERE (
+                        stacked_organization.created_on <= '%(when)s'
+                        AND stacked_organization.is_dead = 0
+                        AND stacked_organization.type_id=%(OrganizationTypeId)s
+                        AND stacked_organization.country='%(country)s'
+                        )
                       OR (
                       '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
-                      AND stacked_organization.is_dead = 1)) as organization_stack
+                        AND stacked_organization.is_dead = 1
+                        AND stacked_organization.type_id=%(OrganizationTypeId)s
+                        AND stacked_organization.country='%(country)s'
+                      )) as organization_stack
                       ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
+
+
                     INNER JOIN
                       organization on organization.id = stacked_organization_id
                     INNER JOIN
                       organizations_organizationtype on organizations_organizationtype.id = organization.type_id
                     INNER JOIN
-                      (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
+
+
+
+                      (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, organization_id
                       FROM coordinate stacked_coordinate
-                      WHERE (stacked_coordinate.created_on <= '%(when)s' AND stacked_coordinate.is_dead = 0)
+                      INNER JOIN organization filter_organization
+                        ON (stacked_coordinate.organization_id = filter_organization.id)
+                      WHERE (
+                        stacked_coordinate.created_on <= '%(when)s'
+                        AND stacked_coordinate.is_dead = 0
+                        AND filter_organization.country='%(country)s'
+                        AND filter_organization.type_id=%(OrganizationTypeId)s
+                        )
                       OR
-                      ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
-                      AND stacked_coordinate.is_dead = 1) GROUP BY area, organization_id) as coordinate_stack
+                        ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
+                        AND stacked_coordinate.is_dead = 1
+                        AND filter_organization.country='%(country)s'
+                        AND filter_organization.type_id=%(OrganizationTypeId)s
+                        ) GROUP BY area, organization_id
+                      ) as coordinate_stack
                       ON coordinate_stack.organization_id = map_organizationreport.organization_id
+
+
                     INNER JOIN
-                      (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
-                      WHERE at_when <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
+
+
+                      (SELECT MAX(map_organizationreport.id) as stacked_organizationrating_id
+                      FROM map_organizationreport
+                      INNER JOIN organization filter_organization2
+                        ON (filter_organization2.id = map_organizationreport.organization_id)
+                      WHERE at_when <= '%(when)s'
+                      AND filter_organization2.country='%(country)s'
+                      AND filter_organization2.type_id=%(OrganizationTypeId)s
+                      GROUP BY organization_id
+                      ) as stacked_organizationrating
                       ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
+
+
+
                     INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
                     WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
@@ -437,7 +477,7 @@ def filter_map_configs(countries: List = None, organization_types: List = None):
         configs = configs.filter(organization_type__name__in=organization_types)
 
     return configs.order_by('display_order').values('country', 'organization_type__name',
-                                                    'organization_type',)
+                                                    'organization_type', 'organization_type__id')
 
 
 @app.task(queue='storage')
@@ -463,15 +503,24 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
             sql = """SELECT * FROM
                            map_organizationreport
                        INNER JOIN
-                       (SELECT MAX(id) as id2 FROM map_organizationreport or2
-                       WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
+
+
+                       (SELECT MAX(or2.id) as id2
+                       FROM map_organizationreport or2
+                       INNER JOIN organization as filter_organization
+                         ON (filter_organization.id = or2.organization_id)
+                       WHERE at_when <= '%(when)s'
+                        AND filter_organization.country='%(country)s'
+                        AND filter_organization.type_id=%(OrganizationTypeId)s
+                       GROUP BY organization_id
+                       ) as x
+
+
                        ON x.id2 = map_organizationreport.id
                        INNER JOIN organization ON map_organizationreport.organization_id = organization.id
-                       INNER JOIN organizations_organizationtype ON
-                       (organization.type_id = organizations_organizationtype.id)
-                       WHERE organizations_organizationtype.name = '%(OrganizationType)s'
+                       WHERE organization.type_id = '%(OrganizationTypeId)s'
                        AND organization.country = '%(country)s'
-                       """ % {"when": when, "OrganizationType": map_configuration['organization_type__name'],
+                       """ % {"when": when, "OrganizationTypeId": map_configuration['organization_type__id'],
                               "country": map_configuration['country']}
 
             # log.debug(sql)

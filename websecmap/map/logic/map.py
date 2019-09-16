@@ -108,29 +108,72 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             coordinate_stack.stacked_coordinate_id
         FROM map_organizationreport
         INNER JOIN
-          (SELECT id as stacked_organization_id
+
+
+
+          (SELECT stacked_organization.id as stacked_organization_id
           FROM organization stacked_organization
-          WHERE (stacked_organization.created_on <= '%(when)s' AND stacked_organization.is_dead = 0)
+          WHERE (
+            stacked_organization.created_on <= '%(when)s'
+            AND stacked_organization.is_dead = 0
+            AND stacked_organization.type_id=%(OrganizationTypeId)s
+            AND stacked_organization.country='%(country)s'
+            )
           OR (
           '%(when)s' BETWEEN stacked_organization.created_on AND stacked_organization.is_dead_since
-          AND stacked_organization.is_dead = 1)) as organization_stack
+            AND stacked_organization.is_dead = 1
+            AND stacked_organization.type_id=%(OrganizationTypeId)s
+            AND stacked_organization.country='%(country)s'
+          )) as organization_stack
           ON organization_stack.stacked_organization_id = map_organizationreport.organization_id
+
+
         INNER JOIN
           organization on organization.id = stacked_organization_id
         INNER JOIN
           organizations_organizationtype on organizations_organizationtype.id = organization.type_id
         INNER JOIN
-          (SELECT MAX(id) as stacked_coordinate_id, area, geoJsonType, organization_id
+
+
+
+          (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, organization_id
           FROM coordinate stacked_coordinate
-          WHERE (stacked_coordinate.created_on <= '%(when)s' AND stacked_coordinate.is_dead = 0)
+          INNER JOIN organization filter_organization
+            ON (stacked_coordinate.organization_id = filter_organization.id)
+          WHERE (
+            stacked_coordinate.created_on <= '%(when)s'
+            AND stacked_coordinate.is_dead = 0
+            AND filter_organization.country='%(country)s'
+            AND filter_organization.type_id=%(OrganizationTypeId)s
+            )
           OR
-          ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
-          AND stacked_coordinate.is_dead = 1) GROUP BY organization_id) as coordinate_stack
+            ('%(when)s' BETWEEN stacked_coordinate.created_on AND stacked_coordinate.is_dead_since
+            AND stacked_coordinate.is_dead = 1
+            AND filter_organization.country='%(country)s'
+            AND filter_organization.type_id=%(OrganizationTypeId)s
+            ) GROUP BY area, organization_id
+          ) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
+
+
+
         INNER JOIN
-          (SELECT MAX(id) as stacked_organizationrating_id FROM map_organizationreport
-          WHERE at_when <= '%(when)s' GROUP BY organization_id) as stacked_organizationrating
+
+
+
+          (SELECT MAX(map_organizationreport.id) as stacked_organizationrating_id
+          FROM map_organizationreport
+          INNER JOIN organization filter_organization2
+            ON (filter_organization2.id = map_organizationreport.organization_id)
+          WHERE at_when <= '%(when)s'
+          AND filter_organization2.country='%(country)s'
+          AND filter_organization2.type_id=%(OrganizationTypeId)s
+          GROUP BY organization_id
+          ) as stacked_organizationrating
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
+
+
+
         INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
