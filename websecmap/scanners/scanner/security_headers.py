@@ -4,6 +4,7 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 """
 import logging
 from datetime import datetime
+from typing import List
 
 import pytz
 import requests
@@ -77,6 +78,30 @@ def compose_task(
     return group(tasks)
 
 
+def discover_service_type(headers: List = None):
+    """
+    Try to discover some meaning of the webserver headers, because some HTTP servers are used for entirely different
+    purposes than hosting web pages. For example SOAP is used for XML messages and has their own security paradigm.
+
+    :param headers:
+    :return:
+    """
+    if not headers:
+        log.debug('No headers present, falling back to service type HTTP.')
+        return "HTTP"
+
+    # Soap messages, they don't need any standard http web headers at all.
+    # known are: X-WSSecurity-Enabled, X-WSSecurity-For, X-OAuth-Enabled, WWW-Authenticate
+    # We trust that this header is not just set to circumvent HTTP security checks in the meanwhile.
+    # Soap security checks are harder, and headers are much harder to implement correctly.
+    if "X-SOAP-Enabled" in headers:
+        log.debug('Service type to be discovered as: SOAP.')
+        return "SOAP"
+
+    log.debug('Service type to be discovered as: HTTP.')
+    return "HTTP"
+
+
 @app.task(queue="storage")
 def analyze_headers(result: requests.Response, endpoint):
     # todo: remove code paths, and make a more clear case per header type. That's easier to understand edge cases.
@@ -133,6 +158,41 @@ def analyze_headers(result: requests.Response, endpoint):
     egss.type = "security headers"
     egss.save()
 
+    # determine what kind of service we're dealing with.
+    service_type = discover_service_type(response.headers)
+
+    if service_type == "HTTP":
+        return analyze_website_headers(endpoint, response)
+    if service_type == "SOAP":
+        return analyze_soap_headers(endpoint, response)
+
+
+def analyze_soap_headers(endpoint, response):
+    """
+    We currently have no implementation for SOAP headers, but we do know that previously discovered non-soap headers
+    can be overwritten as being SOAP headers and not being relevant anymore.
+
+    There is no implementation for checking the security of soap headers, although a soap service should be using
+    some of the following: X-WSSecurity-Enabled, X-WSSecurity-For, X-OAuth-Enabled, WWW-Authenticate
+
+    A next iteration of websecmap could/should contain this validation that certain headers are mandated for SOAP.
+
+    :param endpoint:
+    :param response:
+    :return:
+    """
+
+    # clean up existing web headers and set them to being not relevant for soap:
+    existing_header_scans = EndpointGenericScan.objects.all().filter(
+        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+
+    for scan in existing_header_scans:
+        store_endpoint_scan_result(scan.type, endpoint, 'SOAP', "Header not relevant for SOAP service.")
+
+    return {'status': 'success'}
+
+
+def analyze_website_headers(endpoint, response):
     """
     #125: CSP can replace X-XSS-Protection and X-Frame-Options. Thus if a (more modern) CSP header is present, assume
     that decisions have been made about what's in it and ignore the previously mentioned headers.
@@ -318,6 +378,13 @@ def get_headers_request(uri_url):
                             allow_redirects=True,
                             verify=False,
                             headers={'User-Agent': get_random_user_agent()})
+
+    # redirects are followed, this gives an indication on how many redirects are followed, and what url the
+    # headers are taken from:
+    for index, resp in enumerate(response.history):
+        log.debug(f"- Redirect {index}: {resp.url}.")
+
+    log.debug(f'- You are now at {response.url}.')
 
     # Removed: only continue for valid responses (eg: 200)
     # Error pages, such as 404 are super fancy, with forms and all kinds of content.
