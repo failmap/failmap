@@ -1,6 +1,7 @@
 # coding=UTF-8
 # from __future__ import unicode_literals
 
+import hashlib
 import logging
 from datetime import datetime, timedelta
 
@@ -178,6 +179,19 @@ class Coordinate(models.Model):
                   "preference."
     )
 
+    # 9e107d9d372bb6826bd81d3542a419d6 (16 bytes, or a string of 32 characters)
+    calculated_area_hash = models.CharField(
+        max_length=32,
+        blank=True,
+        null=True,
+        help_text="Automatically calculated hash of the area field using the MD5 algorithm. This is used to"
+                  " try and optimize grouping on area (which is a very long text field, which is slow). The "
+                  " hope is that this field will increase the speed of which grouping happens. If it doesn't, "
+                  " we could calculate an even simpler hash by using the date + organization name."
+                  " Note that if only one field is used for an organization (multipolygon, etc) "
+                  "this field is not required... We still developed it because we forgot what we made..."
+    )
+
     edit_area = GeoJSONField(
         max_length=10000,
         null=True,
@@ -211,6 +225,11 @@ class Coordinate(models.Model):
         blank=True,
         null=True
     )
+
+    def save(self, *args, **kwarg):
+        # handle computed values
+        self.calculated_area_hash = hashlib.md5(str(self.area).encode('utf-8')).hexdigest()
+        super(Coordinate, self).save(*args, **kwarg)
 
     class Meta:
         managed = True

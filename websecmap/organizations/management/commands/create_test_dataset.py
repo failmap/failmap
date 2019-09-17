@@ -20,8 +20,7 @@ class Command(DumpDataCommand):
 
     APP_LABELS = ('organizations', 'scanners', 'map', 'django_celery_beat')
 
-    # for testing it is nice to have a human editable serialization language
-    FORMAT = 'yaml'
+    FORMAT = 'json'
 
     def add_arguments(self, parser):
         """Add arguments."""
@@ -65,23 +64,19 @@ class Command(DumpDataCommand):
 
         objects += OrganizationType.objects.all()
 
-        organizations = Organization.objects.all().filter(name__istartswith='A')[0:options['count']]
+        # this MUST be a list for mysql, otherwise the ORM will create a query that is not supported by mysql:
+        # (1235, "This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'")
+        organizations = list(Organization.objects.all().filter(name__istartswith='A')[0:options['count']])
         objects += organizations
 
-        coordinates = Coordinate.objects.all().filter(organization__in=organizations)
-        objects += coordinates
-
+        objects += Coordinate.objects.all().filter(organization__in=organizations)
         urls = Url.objects.all().filter(organization__in=organizations)
         objects += urls
-
         endpoints = Endpoint.objects.all().filter(url__in=urls)
         objects += endpoints
 
-        endpointgenericscans = EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
-        objects += endpointgenericscans
-
-        urlgenericscans = UrlGenericScan.objects.all().filter(url__in=urls)
-        objects += urlgenericscans
+        objects += EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
+        objects += UrlGenericScan.objects.all().filter(url__in=urls)
 
         with open(filename, "w") as f:
             f.write(serialize(self.FORMAT, objects))

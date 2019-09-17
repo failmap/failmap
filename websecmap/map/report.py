@@ -256,7 +256,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                         AND stacked_coordinate.is_dead = 1
                         AND filter_organization.country='%(country)s'
                         AND filter_organization.type_id=%(OrganizationTypeId)s
-                        ) GROUP BY area, organization_id
+                        ) GROUP BY calculated_area_hash, organization_id
                       ) as coordinate_stack
                       ON coordinate_stack.organization_id = map_organizationreport.organization_id
 

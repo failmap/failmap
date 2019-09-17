@@ -565,7 +565,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
         'DEFAULT_ZOOM': 4
     }
 
-    list_display = ('id', 'organization', 'geojsontype', 'created_on', 'is_dead', 'area')
+    list_display = ('id', 'organization', 'geojsontype', 'created_on', 'is_dead', 'calculated_area_hash')
     search_fields = ('organization__name', 'geojsontype')
     list_filter = ['organization__type', 'organization__country', 'organization', 'geojsontype', 'created_on',
                    'is_dead', 'is_dead_since'][::-1]
@@ -580,7 +580,7 @@ class CoordinateAdmin(LeafletGeoAdminMixin, ImportExportModelAdmin):
                            "If you want to move the coordinate, preferably do so by creating a new one and setting the"
                            " current one as dead (+date etc). Then the map will show coordinates over time, which is "
                            "pretty neat.",
-            'fields': ('organization', 'geojsontype', 'area', 'edit_area', 'creation_metadata')
+            'fields': ('organization', 'geojsontype', 'area', 'edit_area', 'calculated_area_hash', 'creation_metadata')
         }),
 
         ('Life cycle', {

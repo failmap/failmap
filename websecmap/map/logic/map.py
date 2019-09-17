@@ -151,7 +151,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             AND stacked_coordinate.is_dead = 1
             AND filter_organization.country='%(country)s'
             AND filter_organization.type_id=%(OrganizationTypeId)s
-            ) GROUP BY area, organization_id
+            ) GROUP BY calculated_area_hash, organization_id
           ) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
 
@@ -191,6 +191,11 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     # print(sql)
 
     # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
+
+    # sept 2019: grou pby area is the difference between a query that is 0.8 seconds or 90 seconds.
+    # we can try using a short indexed hash (eg md5 or something simple), instead of the whole field.
+    # given that all multiple regions are now in a single multipoligon, i wonder why we should group by
+    # area in the first place. Or that we actually need hashing.
     cursor.execute(sql)
 
     rows = cursor.fetchall()
