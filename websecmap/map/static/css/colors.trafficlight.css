@@ -46,7 +46,7 @@
     background-color: rgba(241, 40, 37, 0.6);
 }
 
-.good_text {
+.good_text, .low_text {
     color: #00ff00;
 }
 
@@ -55,7 +55,7 @@
 }
 
 .high_text {
-    color: #ff0000;
+    color: #f70000;
 }
 
 .report_background_high, .high_background_light {
@@ -172,18 +172,6 @@
 
 .good {
     background-color: rgb(48, 195, 20);
-}
-
-.high_text {
-    color: #f70000;
-}
-
-.medium_text {
-    color: #f78900;;
-}
-
-.low_text {
-    color: #f7e400;
 }
 
 .leaflet-marker-high

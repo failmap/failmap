@@ -190,7 +190,7 @@ div#report {
     border-radius: 4px;
 }
 
-.total_awarded_points_medium, .total_awarded_points_high, .total_awarded_points_good {
+.total_awarded_points_medium, .total_awarded_points_high, .total_awarded_points_low, .total_awarded_points_good {
     padding: 1px 4px;
     font-weight: bold;
     border-radius: 6px;
