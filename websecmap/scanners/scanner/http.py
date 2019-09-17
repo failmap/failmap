@@ -709,6 +709,9 @@ def check_network(code_location=""):
 def redirects_to_safety(endpoint: Endpoint):
     """
     Also includes the ip-version of the endpoint. Implies that the endpoint resolves.
+    Any safety over any network is accepted now, both A and AAAA records.
+
+    To enable debugging: logging.basicConfig(level=logging.DEBUG)
 
     :param endpoint:
     :return:
@@ -716,26 +719,39 @@ def redirects_to_safety(endpoint: Endpoint):
     import requests
     from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 
-    (ipv4, ipv6) = get_ips(endpoint.url.url)
+    # The worker (should) only resolve domain names only over ipv4 or ipv6. (A / AAAA).
+    # Currenlty docker does not support that. Which means a lot of network rewriting for dealing with
+    # all edge cases of HTTP.
+    uri = endpoint.uri_url()
 
-    if endpoint.ip_version == 4:
-        uri = "%s://%s:%s" % ("http", ipv4, "80")
-    else:
-        uri = "%s://[%s]:%s" % ("http", ipv6, "80")
+    # A feature of requests is to send any headers you've sent when there are redirects.
+    # This becomes problematic when you set the Host header. This prevents
 
     try:
-        response = requests.get(uri,
-                                timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),  # allow for insane network lag
-                                allow_redirects=True,  # point is: redirects to safety
-                                verify=False,  # certificate validity is checked elsewhere, having some https > none
-                                headers={'Host': endpoint.url.url,
-                                         'User-Agent': get_random_user_agent()})
+        session = requests.Session()
+        response = session.get(
+            uri,
+            timeout=(CONNECT_TIMEOUT, READ_TIMEOUT),  # allow for insane network lag
+            allow_redirects=True,  # point is: redirects to safety
+            verify=False,  # certificate validity is checked elsewhere, having some https > none
+
+            # redirects do NOT overwrite the host headers. Meaning that following a redirect, the
+            # host header is set, which is incorrect. The Host header should only be set in the first
+            # request, and should be overwritten by all subsequent requests.
+            # The reason we set the host header explicitly, is because we want to contact the webserver
+            # via the IP address, so we can explicitly contect IPv4 and IPv6 addresses of this domain.
+            # issue was logged here: https://github.com/psf/requests/issues/5196
+            headers={'User-Agent': get_random_user_agent(),
+                     # Give some instructions that we want a secure address...
+                     'Upgrade-Insecure-Requests': "1"})
+
         if response.history:
             log.debug("Request was redirected, there is hope. Redirect path:")
-            for resp in response.history:
-                log.debug("%s: %s" % (resp.status_code, resp.url))
+            for index, resp in enumerate(response.history):
+                log.debug(f"- Redirect {index}: {resp.url}.")
             log.debug("Final destination:")
-            log.debug("%s: %s" % (response.status_code, response.url))
+            log.debug(f"{response.status_code}: {response.url}")
+
             if response.url.startswith("https://"):
                 log.debug("Url starts with https, so it redirects to safety.")
                 return True
@@ -744,8 +760,10 @@ def redirects_to_safety(endpoint: Endpoint):
         else:
             log.debug("Request was not redirected, so not going to a safe url.")
             return False
-    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects):
+    except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, requests.exceptions.TooManyRedirects
+            ) as e:
         log.debug("Request resulted into an error, it's not redirecting properly.")
+        log.debug(f"The error retrieved was: {e}")
         return False
 
 
