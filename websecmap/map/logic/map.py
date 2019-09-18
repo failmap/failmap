@@ -11,6 +11,24 @@ from websecmap.map.models import MapDataCache
 from websecmap.scanners import ENDPOINT_SCAN_TYPES, URL_SCAN_TYPES
 
 
+def get_reports_by_ids(ids):
+    if not ids:
+        return {}
+
+    reports = {}
+    cursor = connection.cursor()
+
+    # noinspection SqlNoDataSourceInspection
+    # The number of values in the IN() list is only limited by the max_allowed_packet value.
+    report_sql = f"SELECT id, calculation FROM map_organizationreport WHERE id IN ({','.join(ids)})"
+    cursor.execute(report_sql)
+    report_rows = cursor.fetchall()
+    for row in report_rows:
+        reports[row[0]] = row[1]
+
+    return reports
+
+
 def get_map_data(country: str = "NL", organization_type: str = "municipality", days_back: int = 0,
                  displayed_issue: str = None):
 
@@ -77,17 +95,9 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
 
     cursor = connection.cursor()
 
-    # instant answer, 0.16 sec answer (mainly because of the WHEN <= date subquery.
-    # This could be added to a standerd django query manager, with an extra join. It's fast.
-    # sometimes 0.01 second :) And also works in sqlite. Hooray.
-
-    # ID Order should not matter, esp in async rebuild situations. It does now.
-
-    # The calculation is being grabbed in a separate join to speed up MySQL: the calculation field is a longtext
-    # that forces mysql to use disk cache as the result set is matched on to temporary tables etc.
-    # So, therefore we're joining in the calculation on the last moment. Then the query just takes two seconds (still
-    # slower than sqlite), but by far more acceptable than 68 seconds. This is about or3. This approach makes sqllite
-    # a bit slower it seems, but still well within acceptable levels.
+    # Sept 2019: MySQL has an issue with mediumtext fields. When joined, and the query is not optimized, the
+    # result will take 2 minutes to complete. Would you not select the mediumtext field, the query finishes in a second.
+    # That is why there are two queries to retrieve map data from the database.
     sql = """
         SELECT
             map_organizationreport.low,
@@ -96,7 +106,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             coordinate_stack.area,
             coordinate_stack.geoJsonType,
             organization.id,
-            or3.calculation,
+            map_organizationreport.id as organization_report_id,
             map_organizationreport.high,
             map_organizationreport.medium,
             map_organizationreport.low,
@@ -108,7 +118,6 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             coordinate_stack.stacked_coordinate_id
         FROM map_organizationreport
         INNER JOIN
-
 
 
           (SELECT stacked_organization.id as stacked_organization_id
@@ -135,7 +144,6 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         INNER JOIN
 
 
-
           (SELECT MAX(stacked_coordinate.id) as stacked_coordinate_id, area, geoJsonType, organization_id
           FROM coordinate stacked_coordinate
           INNER JOIN organization filter_organization
@@ -151,14 +159,12 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
             AND stacked_coordinate.is_dead = 1
             AND filter_organization.country='%(country)s'
             AND filter_organization.type_id=%(OrganizationTypeId)s
-            ) GROUP BY calculated_area_hash, organization_id
+            ) GROUP BY area, organization_id
           ) as coordinate_stack
           ON coordinate_stack.organization_id = map_organizationreport.organization_id
 
 
-
         INNER JOIN
-
 
 
           (SELECT MAX(map_organizationreport.id) as stacked_organizationrating_id
@@ -173,32 +179,21 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
           ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
 
-
-        INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
         WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
         GROUP BY coordinate_stack.area, organization.name
         ORDER BY map_organizationreport.at_when ASC
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
-    # coordinate_stack was also grouped by area, which doesn't help if there are updates: if the type of shape changes
-    # then the area is selected for each type of shape (since the filter is both true for now and the past). Thus
-    # removing area grouping will make sure that the share type can change without delivering double results.
-    # You can test this with dutch provinces, who where imported as a different type suddenly. When loading the data
-    # the map showed old and new coordinates on and off, meaning the result was semi-random somewhere. This was due to
-    # area being in the stack. See change on issue #130. All maps seemed to be correct over time after this change still
-
-    # print(sql)
-
-    # with the new solution, you only get just ONE area result per organization... -> nope, group by area :)
-
-    # sept 2019: grou pby area is the difference between a query that is 0.8 seconds or 90 seconds.
-    # we can try using a short indexed hash (eg md5 or something simple), instead of the whole field.
-    # given that all multiple regions are now in a single multipoligon, i wonder why we should group by
-    # area in the first place. Or that we actually need hashing.
     cursor.execute(sql)
-
     rows = cursor.fetchall()
+
+    needed_reports = []
+    for i in rows:
+        # prevent sequence item 0: expected str instance, int found
+        needed_reports.append(str(i[6]))
+
+    reports = get_reports_by_ids(needed_reports)
 
     # todo: http://www.gadzmo.com/python/using-pythons-dictcursor-in-mysql-to-return-a-dict-with-keys/
     # unfortunately numbered results are used. There is no decent solution for sqlite and the column to dict
@@ -221,7 +216,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         # It's actually reasonably fast.
         high, medium, low, ok = 0, 0, 0, 0
 
-        calculation = json.loads(i[6])
+        calculation = json.loads(reports[i[6]])
 
         for url in calculation['organization']['urls']:
             for url_rating in url['ratings']:

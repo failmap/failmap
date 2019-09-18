@@ -5,12 +5,13 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pytz
+import simplejson as json
 from celery import group
 from deepdiff import DeepDiff
 from django.db.models import Count
 
 from websecmap.celery import Task, app
-from websecmap.map.logic.map import get_map_data
+from websecmap.map.logic.map import get_map_data, get_reports_by_ids
 from websecmap.map.models import (Configuration, HighLevelStatistic, MapDataCache,
                                   OrganizationReport, VulnerabilityStatistic)
 from websecmap.organizations.models import Organization, OrganizationType, Url
@@ -198,20 +199,7 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
 
             sql = """
                     SELECT
-                        organization.name,
-                        organizations_organizationtype.name,
-                        coordinate_stack.area,
-                        coordinate_stack.geoJsonType,
-                        organization.id,
-                        or3.calculation,
-                        map_organizationreport.high,
-                        map_organizationreport.medium,
-                        map_organizationreport.low,
-                        map_organizationreport.total_issues,
-                        map_organizationreport.total_urls,
-                        map_organizationreport.high_urls,
-                        map_organizationreport.medium_urls,
-                        map_organizationreport.low_urls
+                        map_organizationreport.id
                     FROM map_organizationreport
                     INNER JOIN
 
@@ -275,9 +263,6 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                       ) as stacked_organizationrating
                       ON stacked_organizationrating.stacked_organizationrating_id = map_organizationreport.id
 
-
-
-                    INNER JOIN map_organizationreport as or3 ON or3.id = map_organizationreport.id
                     WHERE organization.type_id = '%(OrganizationTypeId)s' AND organization.country= '%(country)s'
                     GROUP BY coordinate_stack.area, organization.name
                     ORDER BY map_organizationreport.at_when ASC
@@ -285,21 +270,30 @@ def calculate_vulnerability_statistics(days: int = 366, countries: List = None, 
                            "country": country}
 
             organizationratings = OrganizationReport.objects.raw(sql)
+
+            needed_reports = []
+            for organizationrating in organizationratings:
+                needed_reports.append(str(organizationrating.pk))
+
+            reports = get_reports_by_ids(needed_reports)
+
+            direct_reports = []
+            for report in reports:
+                direct_reports.append(json.loads(reports[report]))
+
             number_of_endpoints = 0
             number_of_urls = 0
             # log.debug(sql)
 
-            log.info("Nr of urlratings: %s" % len(list(organizationratings)))
-
             # some urls are in multiple organizaitons, make sure that it's only shown once.
             processed_urls = []
 
-            for organizationrating in organizationratings:
+            for direct_report in direct_reports:
 
                 # log.debug("Processing rating of %s " %
                 #     organizationrating.calculation["organization"].get("name", "UNKOWN"))
 
-                urlratings = organizationrating.calculation["organization"].get("urls", [])
+                urlratings = direct_report["organization"].get("urls", [])
 
                 number_of_urls += len(urlratings)
 
@@ -500,7 +494,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                            "endpoint": OrderedDict(), "explained": {}}
 
             # todo: filter out dead organizations and make sure it's the correct layer.
-            sql = """SELECT * FROM
+            sql = """SELECT
+                        map_organizationreport.id,
+                        map_organizationreport.medium,
+                        map_organizationreport.high
+                     FROM
                            map_organizationreport
                        INNER JOIN
 
@@ -527,6 +525,12 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             ratings = OrganizationReport.objects.raw(sql)
 
+            needed_reports = []
+            for organizationrating in ratings:
+                needed_reports.append(str(organizationrating.id))
+
+            reports = get_reports_by_ids(needed_reports)
+
             noduplicates = []
             for rating in ratings:
 
@@ -541,6 +545,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                     measurement["high"] += 1
                 elif rating.medium:
                     measurement["medium"] += 1
+                    # low does not impact any score.
                 else:
                     measurement["good"] += 1
 
@@ -548,7 +553,7 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                 # it will double the urls that are shared between organizations.
                 # that is not really bad, it distorts a little.
                 # we're forced to load each item separately anyway, so why not read it?
-                calculation = rating.calculation
+                calculation = json.loads(reports[rating.id])
                 measurement["total_urls"] += len(calculation['organization']['urls'])
 
                 measurement["good_urls"] += sum([l['high'] == 0 and l['medium'] == 0

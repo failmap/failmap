@@ -49,11 +49,14 @@ class Command(DumpDataCommand):
         organizations = list(Organization.objects.all().filter(name__iregex=regex))
         objects += organizations
         objects += Coordinate.objects.all().filter(organization__in=organizations)
+
         urls = Url.objects.all().filter(organization__in=organizations)
+        objects += urls
+        objects += UrlGenericScan.objects.all().filter(url__in=urls)
+
         endpoints = Endpoint.objects.all().filter(url__in=urls)
         objects += endpoints
         objects += EndpointGenericScan.objects.all().filter(endpoint__in=endpoints)
-        objects += UrlGenericScan.objects.all().filter(url__in=urls)
 
         with open(filename, "w") as f:
             f.write(serialize(self.FORMAT, objects))
