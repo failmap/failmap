@@ -73,7 +73,7 @@
                     <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
                     <button v-if='state.week !== 52' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
 
-                    <input id='history' class='slider' type='range' v-on:change='show_week' :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
+                    <input id='history' class='slider' type='range' v-on:change='show_week' v-on:input="update_visible_week" :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
 
                     <button v-if='state.week !== 0' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
 
@@ -279,6 +279,9 @@ Vue.component('websecmap', {
 
     data: function () {
         return {
+            // The information shown at the top of the map, live updates when changing the slider.
+            visibleweek: "",
+
             // # adding domains, should be it's own component...
             show_add_domains: false,
             add_domains_server_response: "",
@@ -400,6 +403,7 @@ Vue.component('websecmap', {
             });
 
             this.load();
+            this.update_visible_week();
         })
     },
 
@@ -1257,14 +1261,22 @@ Vue.component('websecmap', {
             n = parseFloat((n * multiplicator).toFixed(11));
             let test = (Math.round(n) / multiplicator);
             return +(test.toFixed(digits));
-        }
+        },
+
+        update_visible_week: function(e){
+            let show_week = 0;
+            if (!e) {
+                show_week = this.state.week;
+            } else {
+                show_week = parseInt(e.target.value);
+            }
+            console.log("updating week...");
+            let x = new Date();
+            x.setDate(x.getDate() - show_week * 7);
+            this.visibleweek = x.humanTimeStamp();
+        },
     },
     computed: {
-        visibleweek: function () {
-            let x = new Date();
-            x.setDate(x.getDate() - this.week * 7);
-            return x.humanTimeStamp();
-        },
         high: function () {
             return this.perc(this.hover_info.properties.high_urls, this.hover_info.properties.total_urls);
         },
