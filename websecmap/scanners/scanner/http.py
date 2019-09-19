@@ -54,6 +54,7 @@ log = logging.getLogger(__package__)
 # don't contact http/443 and https/80. You can, but that is 99.99 waste data.
 STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
+PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
 
 
 """
@@ -136,16 +137,31 @@ def compose_discover_task(
     for ip_version in ip_versions:
         queue = "ipv4" if ip_version == 4 else "ipv6"
 
-        for port in STANDARD_HTTP_PORTS:
-            for url in urls:
-                tasks.append(can_connect.si(protocol="http", url=url, port=port, ip_version=ip_version).set(queue=queue)
-                             | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version))
+        for port in PREFERRED_PORT_ORDER:
 
-        for port in STANDARD_HTTPS_PORTS:
-            for url in urls:
-                tasks.append(can_connect.si(protocol="https", url=url, port=port, ip_version=ip_version
-                                            ).set(queue=queue)
-                             | connect_result.s(protocol="https", url=url, port=port, ip_version=ip_version))
+            if port in STANDARD_HTTP_PORTS:
+                for url in urls:
+                    tasks.append(
+                        can_connect.si(
+                            protocol="http",
+                            url=url,
+                            port=port,
+                            ip_version=ip_version
+                        ).set(queue=queue)
+                        | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version)
+                    )
+
+            if port in STANDARD_HTTPS_PORTS:
+                for url in urls:
+                    tasks.append(
+                        can_connect.si(
+                            protocol="https",
+                            url=url,
+                            port=port,
+                            ip_version=ip_version
+                        ).set(queue=queue)
+                        | connect_result.s(protocol="https", url=url, port=port, ip_version=ip_version)
+                    )
 
     return group(tasks)
 
