@@ -121,7 +121,7 @@
                     <div class="col-md-8">
                         <a :name="'report_url_'+url.url"></a>
                         <span v-html="total_awarded_points(url.high, url.medium, url.low)"> </span>
-                        <span :class="'faildomain ' + colorize(url.high, url.medium, url.low)+'_text'" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
+                        <span :class="'faildomain report_' + colorize(url.high, url.medium, url.low)+'_text'" :data-tooltip-content="idizetag(url.url)">{{ url.url }}</span><br/>
                         <a :href="'mailto:' + incorrect_finding_mail + '?subject=' + encodeURIComponent($t('report_content.report.incorrect_finding_mail.title', [url.url])) + '&body=' + encodeURIComponent($t('report_content.report.incorrect_finding_mail.body'))" class="btn btn-secondary btn-sm" style="margin-top: 11px;" role="button">
                             {{ $t("report_content.report.report_incorrect_finding") }}</a>
                     </div>
