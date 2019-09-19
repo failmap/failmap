@@ -1,3 +1,4 @@
+import logging
 from math import ceil
 
 from django.db import connection
@@ -5,25 +6,40 @@ from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type, get_when, remark
 
+log = logging.getLogger(__name__)
+
 
 def get_top_win_data(country: str = "NL", organization_type="municipality", weeks_back=0):
+    """
+    Can't use the object.raw syntax of django. OperationalError: near "%": syntax error...
+    Probably not supported, although the manual says so. Maybe because we use a multiline string?
 
+    https://code.djangoproject.com/ticket/10070
+    Dictionary params are not supported with the SQLite backend; with this backend, you must pass parameters as a list.
+
+    When doing it right, the exception happens: format requires a mapping. Then just rely on the checks we do.
+    :param country:
+    :param organization_type:
+    :param weeks_back:
+    :return:
+    """
     when = get_when(weeks_back)
 
     cursor = connection.cursor()
     sql = '''
             SELECT
-                low,
-                organization.name,
-                organizations_organizationtype.name,
-                organization.id,
-                at_when,
-                organization.twitter_handle,
-                high,
-                medium,
-                low,
-                total_urls,
-                total_endpoints
+              low,
+              organization.name,
+              organizations_organizationtype.name,
+              organization.id,
+              at_when,
+              organization.twitter_handle,
+              high,
+              medium,
+              low,
+              total_urls,
+              total_endpoints,
+              organization.is_dead
             FROM map_organizationreport
             INNER JOIN
               organization on organization.id = map_organizationreport.organization_id
@@ -31,19 +47,34 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
               organizations_organizationtype on organizations_organizationtype.id = organization.type_id
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
-          INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationreport or2
-              WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = map_organizationreport.id
-            WHERE organization.type_id = '%(OrganizationTypeId)s'
-            AND organization.country = '%(country)s'
-            AND total_urls > 0
+            INNER JOIN
+              (
+                SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
+                INNER JOIN organization as org2 ON org2.id = or2.organization_id
+                WHERE at_when <= '%(when)s'
+                  AND org2.country = '%(country)s'
+                  AND org2.type_id = '%(OrganizationTypeId)s'
+                GROUP BY organization_id
+              ) as stacked_organization_report
+            ON stacked_organization_report.id2 = map_organizationreport.id
+            WHERE
+              (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+               AND organization.is_dead = 1
+               ) OR (
+               organization.created_on <= '%(when)s'
+               AND organization.is_dead = 0
+              ))
+              AND organization.type_id = '%(OrganizationTypeId)s'
+              AND organization.country = '%(country)s'
+              AND total_urls > 0
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, total_endpoints DESC, organization.name ASC
             LIMIT 500
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
+
+    # log.debug(sql)
     cursor.execute(sql)
     rows = cursor.fetchall()
     return rows_to_dataset(rows, when)
@@ -75,12 +106,25 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
             INNER JOIN
               coordinate ON coordinate.organization_id = organization.id
             INNER JOIN
-              (SELECT MAX(id) as id2 FROM map_organizationreport or2
-              WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
-              ON x.id2 = map_organizationreport.id
-            WHERE organization.type_id = '%(OrganizationTypeId)s'
-            AND organization.country = '%(country)s'
-            AND total_urls > 0
+              (
+                SELECT MAX(or2.id) as id2 FROM map_organizationreport or2
+                INNER JOIN organization as org2 ON org2.id = or2.organization_id
+                WHERE at_when <= '%(when)s'
+                  AND org2.country = '%(country)s'
+                  AND org2.type_id = '%(OrganizationTypeId)s'
+                GROUP BY organization_id
+              ) as stacked_organization_report
+            ON stacked_organization_report.id2 = map_organizationreport.id
+            WHERE
+              (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+               AND organization.is_dead = 1
+               ) OR (
+               organization.created_on <= '%(when)s'
+               AND organization.is_dead = 0
+              ))
+              AND organization.type_id = '%(OrganizationTypeId)s'
+              AND organization.country = '%(country)s'
+              AND total_urls > 0
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY high DESC, medium DESC, medium DESC, organization.name ASC
@@ -88,6 +132,7 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
 
+    # log.debug(sql)
     cursor.execute(sql)
     rows = cursor.fetchall()
     return rows_to_dataset(rows, when)

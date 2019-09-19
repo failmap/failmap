@@ -17,7 +17,7 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Management<span class="caret"></span></a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown1">
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown1" style="z-index: 100000">
                             <a class="dropdown-item" :href="admin_url">{{ $t("menu.admin") }}</a>
                             <a class="dropdown-item" href="/grafana/">{{ $t("menu.grafana") }}</a>
                             <a class="dropdown-item" href="/flower/">{{ $t("menu.flower") }}</a>
@@ -26,9 +26,10 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown3" style="z-index: 100000">
                             <a class="dropdown-item" @click="start_alter_state">{{ $t("menu.alter_state") }}</a>
                             <a class="dropdown-item" @click="start_add_proxies">{{ $t("menu.add_proxies") }}</a>
+                            <a class="dropdown-item" @click="toggle_ticker">{{ $t("menu.ticker") }}</a>
                         </div>
                     </li>
 
@@ -95,6 +96,7 @@ Vue.component('debugmenu', {
                     grafana: "activity monitoring",
                     add_proxies: "Add proxies",
                     alter_state: "Alter state",
+                    ticker: "Toggle Ticker",
                 }
             },
             nl: {
@@ -106,6 +108,7 @@ Vue.component('debugmenu', {
                     grafana: "activiteiten overzicht",
                     add_proxies: "Proxies toevoegen",
                     alter_state: "Staat wijzigen",
+                    ticker: "Ticker aan/uitzetten",
                 }
             }
         },
@@ -141,6 +144,11 @@ Vue.component('debugmenu', {
         stop_add_proxies: function(){
             this.show_add_proxies = false;
             this.new_proxies = "";
+        },
+
+        toggle_ticker: function(){
+            // evil workaround, as the config of the app is not stored in vuex yet:
+            app.config.show.ticker = !app.config.show.ticker;
         },
 
         add_proxies: function(){

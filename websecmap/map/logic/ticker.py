@@ -27,16 +27,39 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
     # compare the first urlrating to the last urlrating
     # but do not include urls that don't exist.
 
-    # the query is INSTANT!
-    sql = """SELECT map_organizationreport.id as id, name, high, medium, low FROM
-               map_organizationreport
-           INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_organizationreport or2
-           WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = map_organizationreport.id
-           INNER JOIN organization ON map_organizationreport.organization_id = organization.id
-            WHERE organization.type_id = '%(OrganizationTypeId)s'
-            AND organization.country = '%(country)s'
+    sql = """
+        SELECT
+            map_organizationreport.id as id,
+            name,
+            high,
+            medium,
+            low
+        FROM
+            map_organizationreport
+        INNER JOIN
+           (
+                SELECT MAX(or2.id) as id2
+                FROM map_organizationreport or2
+                INNER JOIN organization as filter_organization
+                ON (filter_organization.id = or2.organization_id)
+                WHERE
+                    at_when <= '%(when)s'
+                    AND filter_organization.country='%(country)s'
+                    AND filter_organization.type_id=%(OrganizationTypeId)s
+               GROUP BY organization_id
+            ) as stacked_organizationreport
+        ON stacked_organizationreport.id2 = map_organizationreport.id
+        INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+        WHERE
+        (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+           AND organization.is_dead = 1
+           ) OR (
+           organization.created_on <= '%(when)s'
+           AND organization.is_dead = 0
+        ))
+        AND organization.type_id = '%(OrganizationTypeId)s'
+        AND organization.country = '%(country)s'
+        AND total_urls > 0
         """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}
 
@@ -44,15 +67,39 @@ def get_ticker_data(country: str = "NL", organization_type: str = "municipality"
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """SELECT map_organizationreport.id as id, name, high, medium, low FROM
+    sql = """
+        SELECT
+            map_organizationreport.id as id,
+            name,
+            high,
+            medium,
+            low
+        FROM
                map_organizationreport
-           INNER JOIN
-           (SELECT MAX(id) as id2 FROM map_organizationreport or2
-           WHERE at_when <= '%(when)s' GROUP BY organization_id) as x
-           ON x.id2 = map_organizationreport.id
-           INNER JOIN organization ON map_organizationreport.organization_id = organization.id
-            WHERE organization.type_id = '%(OrganizationTypeId)s'
-            AND organization.country = '%(country)s'
+        INNER JOIN
+            (
+                SELECT MAX(or2.id) as id2
+                FROM map_organizationreport or2
+                INNER JOIN organization as filter_organization
+                ON (filter_organization.id = or2.organization_id)
+                WHERE
+                    at_when <= '%(when)s'
+                    AND filter_organization.country='%(country)s'
+                    AND filter_organization.type_id=%(OrganizationTypeId)s
+               GROUP BY organization_id
+            ) as stacked_organizationreport
+        ON stacked_organizationreport.id2 = map_organizationreport.id
+        INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+        WHERE
+        (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+               AND organization.is_dead = 1
+               ) OR (
+               organization.created_on <= '%(when)s'
+               AND organization.is_dead = 0
+        ))
+        AND organization.type_id = '%(OrganizationTypeId)s'
+        AND organization.country = '%(country)s'
+        AND total_urls > 0
         """ % {"when": when - timedelta(days=(weeks_duration * 7)),
                "OrganizationTypeId": get_organization_type(organization_type),
                "country": get_country(country)}

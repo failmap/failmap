@@ -493,33 +493,45 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
                            'included_organizations': 0, 'endpoints': 0,
                            "endpoint": OrderedDict(), "explained": {}}
 
-            # todo: filter out dead organizations and make sure it's the correct layer.
-            sql = """SELECT
-                        map_organizationreport.id,
-                        map_organizationreport.medium,
-                        map_organizationreport.high
-                     FROM
-                           map_organizationreport
-                       INNER JOIN
-
-
-                       (SELECT MAX(or2.id) as id2
-                       FROM map_organizationreport or2
-                       INNER JOIN organization as filter_organization
-                         ON (filter_organization.id = or2.organization_id)
-                       WHERE at_when <= '%(when)s'
+            sql = """
+                SELECT
+                    map_organizationreport.id,
+                    map_organizationreport.medium,
+                    map_organizationreport.high,
+                    map_organizationreport.total_urls
+                FROM
+                    map_organizationreport
+                INNER JOIN
+                    (
+                    SELECT MAX(or2.id) as id2
+                    FROM map_organizationreport or2
+                    INNER JOIN organization as filter_organization
+                    ON (filter_organization.id = or2.organization_id)
+                    WHERE
+                        at_when <= '%(when)s'
                         AND filter_organization.country='%(country)s'
                         AND filter_organization.type_id=%(OrganizationTypeId)s
-                       GROUP BY organization_id
-                       ) as x
-
-
-                       ON x.id2 = map_organizationreport.id
-                       INNER JOIN organization ON map_organizationreport.organization_id = organization.id
-                       WHERE organization.type_id = '%(OrganizationTypeId)s'
-                       AND organization.country = '%(country)s'
-                       """ % {"when": when, "OrganizationTypeId": map_configuration['organization_type__id'],
-                              "country": map_configuration['country']}
+                   GROUP BY organization_id
+                ) as stacked_organizationreport
+                ON stacked_organizationreport.id2 = map_organizationreport.id
+                INNER JOIN organization ON map_organizationreport.organization_id = organization.id
+                WHERE
+                    /* Only include organizations that are alive now... */
+                    (('%(when)s' BETWEEN organization.created_on AND organization.is_dead_since
+                    AND organization.is_dead = 1
+                    ) OR (
+                    organization.created_on <= '%(when)s'
+                    AND organization.is_dead = 0
+                    ))
+                    AND organization.type_id = '%(OrganizationTypeId)s'
+                    AND organization.country = '%(country)s'
+                    /* Remove organizations with zero urls, otherwise they would be good or bad automatically. */
+                    AND total_urls > 0
+            """ % {
+                "when": when,
+                "OrganizationTypeId": map_configuration['organization_type__id'],
+                "country": map_configuration['country']
+            }
 
             # log.debug(sql)
 
@@ -533,11 +545,6 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             noduplicates = []
             for rating in ratings:
-
-                # do not create stats over empty organizations. That would count empty organizations.
-                # you can't really filter them out above? todo: Figure that out at a next release.
-                # if rating.rating == -1:
-                #    continue
 
                 measurement["total_organizations"] += 1
 

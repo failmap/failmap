@@ -183,9 +183,11 @@
             },
         });
 
+        let app = null;
+
         let document_ready = function() {
 
-            const app = new Vue({
+            app = new Vue({
                 i18n,
                 store,
 
@@ -917,6 +919,7 @@
     {% include "map/static/js/components/footer.vue" %}
     {% include "map/static/js/components/mainmenu.vue" %}
     {% include "map/static/js/components/debugmenu.vue" %}
+    {% include "map/static/js/components/ticker.vue" %}
 </head>
 
 <body role="document" onload="document_ready();">

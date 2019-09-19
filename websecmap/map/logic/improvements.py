@@ -23,38 +23,52 @@ def get_improvements(country, organization_type, weeks_back, weeks_duration):
     # compare the first urlrating to the last urlrating
     # but do not include urls that don't exist.
 
-    sql = """SELECT reporting_urlreport.id as id, calculation FROM
-                   reporting_urlreport
-               INNER JOIN
-               (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-               WHERE at_when <= '%(when)s' GROUP BY url_id) as x
-               ON x.id2 = reporting_urlreport.id
-               INNER JOIN url ON reporting_urlreport.url_id = url.id
-               INNER JOIN url_organization on url.id = url_organization.url_id
-               INNER JOIN organization ON url_organization.organization_id = organization.id
-                WHERE organization.type_id = '%(OrganizationTypeId)s'
-                AND organization.country = '%(country)s'
-            """ % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
+    sql = """
+        SELECT
+            reporting_urlreport.id as id,
+            calculation
+        FROM
+            reporting_urlreport
+        INNER JOIN
+            (
+                SELECT MAX(id) as id2 FROM reporting_urlreport or2
+                WHERE at_when <= '%(when)s' GROUP BY url_id
+            ) as x
+        ON x.id2 = reporting_urlreport.id
+        INNER JOIN url ON reporting_urlreport.url_id = url.id
+        INNER JOIN url_organization on url.id = url_organization.url_id
+        INNER JOIN organization ON url_organization.organization_id = organization.id
+        WHERE organization.type_id = '%(OrganizationTypeId)s'
+        AND organization.country = '%(country)s'
+            """ % {
+        "when": when,
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country)
+    }
 
     newest_urlratings = UrlReport.objects.raw(sql)
 
     # this of course doesn't work with the first day, as then we didn't measure
     # everything (and the ratings for several issues are 0...
-    sql = """SELECT reporting_urlreport.id as id, calculation FROM
-                   reporting_urlreport
-               INNER JOIN
-               (SELECT MAX(id) as id2 FROM reporting_urlreport or2
-               WHERE at_when <= '%(when)s' GROUP BY url_id) as x
-               ON x.id2 = reporting_urlreport.id
-               INNER JOIN url ON reporting_urlreport.url_id = url.id
-               INNER JOIN url_organization on url.id = url_organization.url_id
-               INNER JOIN organization ON url_organization.organization_id = organization.id
-                WHERE organization.type_id = '%(OrganizationTypeId)s'
-                AND organization.country = '%(country)s'
-            """ % {"when": when - timedelta(days=(weeks_duration * 7)),
-                   "OrganizationTypeId": get_organization_type(organization_type),
-                   "country": get_country(country)}
+    sql = """
+        SELECT reporting_urlreport.id as id, calculation FROM
+            reporting_urlreport
+        INNER JOIN
+            (
+                SELECT MAX(id) as id2 FROM reporting_urlreport or2
+                WHERE at_when <= '%(when)s' GROUP BY url_id
+            ) as x
+        ON x.id2 = reporting_urlreport.id
+        INNER JOIN url ON reporting_urlreport.url_id = url.id
+        INNER JOIN url_organization on url.id = url_organization.url_id
+        INNER JOIN organization ON url_organization.organization_id = organization.id
+        WHERE organization.type_id = '%(OrganizationTypeId)s'
+        AND organization.country = '%(country)s'
+            """ % {
+        "when": when - timedelta(days=(weeks_duration * 7)),
+        "OrganizationTypeId": get_organization_type(organization_type),
+        "country": get_country(country)
+    }
 
     oldest_urlratings = UrlReport.objects.raw(sql)
 

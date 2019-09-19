@@ -37,6 +37,10 @@ Vue.component('ticker', {
         }
     },
 
+    mounted: function () {
+        this.load()
+    },
+
     methods: {
         setMarqueeSpeed: function (){
             // Time = Distance/Speed
@@ -69,11 +73,11 @@ Vue.component('ticker', {
         },
         arrow: function(value, rank){
             if (value > 0)
-                return "<a class='high'>▲</a>+"+ value + " ";
+                return "<a class='high'>▼</a>+"+ value + " ";
             if (value === 0)
-                return "▶0";
+                return "▶-";
             if (value < 0)
-                return "<a class='good'>▼</a>-" + (value * -1) + " ";
+                return "<a class='good'>▲</a>-" + (value * -1) + " ";
         },
         get_tickertext: function() {
             // weird that this should be a function...
@@ -81,11 +85,10 @@ Vue.component('ticker', {
         },
         load: function () {
 
-            if (!this.country || !this.layer)
+            if (!this.state.country || !this.state.layer)
                 return;
 
-
-            fetch('/data/ticker/' + this.country + '/' + this.layer + '/0/0').then(response => response.json()).then(data => {
+            fetch(`/data/ticker/${this.state.country}/${this.state.layer}/0/0`).then(response => response.json()).then(data => {
 
                 // reset the text for the new data.
                 this.tickertext = "";
