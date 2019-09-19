@@ -39,7 +39,7 @@
                 :url="'https://{s}.tile.osm.org/{z}/{x}/{y}.png'"
 
                 :token="mapbox_token"
-                :attribution="'Geography (c) <a href=\'http://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Imagery (c) <a href=\'http://mapbox.com\'>Mapbox</a>, Measurements <a href=\'https://websecuritymap.org/\'>Web Security Map</a> et al <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-NC-BY-SA</a>'"
+                :attribution="'Geography and Imagery(c) <a href=\'https://openstreetmap.org\'>OpenStreetMap</a> contributors, <a href=\'http://creativecommons.org/licenses/by-sa/2.0/\'>CC-BY-SA</a>, Map data created with <a href=\'https://websecuritymap.org/\'>Web Security Map</a>.'"
 
                 :options="{'style': 'light-v9', 'accessToken': mapbox_token}"
             ></l-tile-layer>
@@ -142,7 +142,6 @@
                 <div class="info legend table-light">
                     <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
                     <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
-                    <div style="height: 20px"><i class="map_polygon_low"></i> {{ $t("map.legend.low") }}</div>
                     <div style="height: 20px"><i class="map_polygon_medium"></i> {{ $t("map.legend.mediocre") }}</div>
                     <div style="height: 20px"><i class="map_polygon_high"></i> {{ $t("map.legend.bad") }}</div>
                     <div style="height: 20px"><i class="map_polygon_unknown"></i> {{ $t("map.legend.unknown") }}</div>
@@ -1189,7 +1188,7 @@ Vue.component('websecmap', {
 
         // todo: make dynamic. Get this from the color palette...
         getColorCode: function(d){
-            return d === "high" ? '#bd383c' : d === "medium" ? '#fc9645' : d === "low" ? '#d3fc6a' : d === "good" ? '#62fe69' : '#aaaeae';
+            return d === "high" ? '#bd383c' : d === "medium" ? '#fc9645' : d === "low" ? '#62fe69' : d === "good" ? '#62fe69' : '#aaaeae';
         },
         resetHighlight: function (e) {
             clearTimeout(this.timer);
