@@ -1,366 +1,236 @@
-.. highlight:: bash
-
 ======================
 Command Line Interface
 ======================
 
-When Web Security Map is installed, the Web Security Map command is available to perform all kinds of scans and other (more developer oriented)
-tasks on the command line.
+The WebSecMap commandline interface allows for scanning and adding urls. It is most useful in day to day application
+management as it provides swift access to scanners. Paired with using the web interface and admin pages, you'll be able
+to accomplish everything quickly.
 
-Note that in general you don't need to use the command line as scans and configurations are all available in the admin interface. But
-for those who want to dig deeper this guide might be of use.
 
-.. code-block:: bash
+Note that the websecmap command runs the application only. There are other commands available during development, mostly
+via make. This help page will not go into those.
 
-    elger@stitchbook /A/X/x/h/f/a/docs> websecmap
+After installing a development installation or production installation of WebSecMap, you will be able to call the
+websecmap command. It will show a plethora of options and features, some of which are used for development or 'one-shot'
+upgrades of older websecmap installations.
 
-    Type 'Web Security Map help <subcommand>' for help on a specific subcommand.
+This guide will go over the most useful commands and details them a bit.
+
+Note that many of these tasks are also automatically performed. This is done using periodic tasks. These can be
+seen and enabled in the admin web interface.
+
+
+.. code-block:: sh
+
+    user@computer:~# websecmap
+
+    Type 'websecmap help <subcommand>' for help on a specific subcommand.
 
     Available subcommands:
+
+    [adminsortable2]
+        reorder
+
+    [app]
+        celery
+        crashtest
+        devserver
+        one_shot_failmap_to_websecmap
     ...
-    [map]
-        import_coordinates
-        rebuild_ratings
-
-    [organizations]
-        create_dataset
-        docs
-        load_dataset
-
-    [scanners]
-        check_network
-        discover
-        scan
-
-A lot more commands are available, mostly for development purposes. You can play around with the risk of deleting or
-corrupting your installation or database. Caution is advised. Please check the help and or the source of the other commands
-before trying.
 
 
-Scanning
---------
-Performing scans with Web Security Map is pretty easy. I'll explain the following command, so you can play with it yourself.
+Importing map data
+-------------------
+To get you started with a new installation, data from open streetmaps and wikidata can be downloaded and imported.
 
-Examples:
+Everything that can be imported is listed in the "AdministrativeRegion" second in the admin interface. A standard
+installation of websecmap comes prepared with a large list of regions that can be imported. Do note that this list
+is by no means complete, and in the admin interface you will find instructions to how to add more.
 
-Distributed dnssec scan on a specific url:
+To list all regions that can be imported via the command line, use the following command:
 
-.. code-block:: bash
-   
+.. code-block:: sh
 
-   websecmap scan dnssec -u arnhem.nl -m async
-
-
-Local header scan on a specific organization:
-
-.. code-block:: bash
-   
-
-   websecmap scan headers -o Arnhem
+    # list all regions that can be imported
+    websecmap import_coordinates --list
 
 
-Local ftp scan on all organizations:
+For example, let's import all Dutch municipalities. This can be done with the following command:
 
-.. code-block:: bash
-   
+.. code-block:: sh
 
-   websecmap scan ftp
+    # import all dutch municipalities
+    websecmap import_coordinates --country=NL --region=municipality
 
-If you need to debug scan permissions and configurations, you can do so using:
+    # It's also possible to update coordinates, it will not import new organizations, only change the borders
+    # websecmap update_coordinates --country=NL --region=municipality
 
-.. code-block:: bash
-   
 
-   websecmap scan debug -u arnhem.nl
+Importing can take a while. It will download information from open streetmaps and wikidata. If you have set a OSM key
+in the admin webinterface, you'll be able to download even better mapping information from a server that already has
+removed larger water-bodies from the map: this is useful for coastal countries.
 
-Which results in a report showing what endpoints / urls will be scanned. This might be helpful when debugging:
+Next to geographical data, organization names and some first urls are automatically added as well.
 
-.. code-block:: bash
+After importing all regions, a report will automatically be created. After a while your local map will have a number
+of gray areas on them in the shape of the Netherlands. This means your import was successful.
 
-    2018-09-17 13:33	INFO     - Database settings: django.db.backends.sqlite3, db.sqlite3, ,
-    2018-09-17 13:33	INFO     - Debug info for scanners:
-    2018-09-17 13:33	INFO     -
-    2018-09-17 13:33	INFO     - Scan permissions:
-    2018-09-17 13:33	INFO     - Can be adjusted in the admin interface at Configuration
-    2018-09-17 13:33	INFO     - SCAN_AT_ALL                   : True
-    2018-09-17 13:33	INFO     - SCAN_DNS_DNSSEC               : True
-    2018-09-17 13:33	INFO     - SCAN_FTP                      : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_HEADERS_HSTS        : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_HEADERS_XFO         : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_HEADERS_X_CONTENT   : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_HEADERS_X_XSS       : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_MISSING_TLS         : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_TLS_OSAFT           : True
-    2018-09-17 13:33	INFO     - SCAN_HTTP_TLS_QUALYS          : True
-    2018-09-17 13:33	INFO     -
-    2018-09-17 13:33	INFO     - Scan configurations (regions set allowed to be scanned)
-    2018-09-17 13:33	INFO     - Can be adjusted in the admin interface at __MAP__ Configuration
-    2018-09-17 13:33	INFO     - Empty means nothing will be scanned (basically exceptions)
-    2018-09-17 13:33	INFO     - Organizations: (OR: (AND: ), (AND: ('country', 'NL'), ('type', 1)))
-    2018-09-17 13:33	INFO     - Urls: (OR: (AND: ), (AND: ('organization__country', 'NL'), ('organization__type', 1)))
-    2018-09-17 13:33	INFO     - Endpoints: (OR: (AND: ), (AND: ('url__organization__country', 'NL'), ('url__organization__type', 1)))
-    2018-09-17 13:33	INFO     -
-    2018-09-17 13:33	INFO     - Endpoints that are selected based on parameters:
-    2018-09-17 13:33	INFO     - Other filters may apply depending on selected scanner. For example: scan ftp only selects ftp endpoints
-    2018-09-17 13:33	INFO     - NL  Arnhem               arnhem.nl                     : IPv4 https/443
-    2018-09-17 13:33	INFO     - NL  Arnhem               arnhem.nl                     : IPv4 http/80
-    2018-09-17 13:33	INFO     - NL  Arnhem               arnhem.nl                     : IPv4 http/80
-    2018-09-17 13:33	INFO     - NL  Arnhem               arnhem.nl                     : IPv4 https/443
-    2018-09-17 13:33	INFO     -
-    2018-09-17 13:33	INFO     - End of scan debug
-    2018-09-17 13:33	INFO     -
-    2018-09-17 13:33	INFO     - Executing task directly.
+
+Adding URLs
+------------
+
+URLs are uniquely stored addresses. They can be shared amongst organizations that have been imported before. The
+tooling for adding urls are limited via the command line. It is only possible to add urls to existing organizations.
+The tool will guide you to add urls and find the organizations these urls should be tied to.
+
+.. code-block:: sh
+
+   websecmap add_urls -u url.example.com anotherurl.example.com
 
 
 
-To find the complete syntax of the scan command:
+Discovery, verification and scanning
+----------------------------------------
 
-.. code-block:: bash
-   
+The real meat of the websecmap command line tools is scanning. Before we can actually scan, we need something that can
+be scanned. These can be one of two things: endpoints and urls (only DNSSEC).
 
-   websecmap help scan
+Both urls and endpoints can be discovered and verified, the same way a scan is called. They all share the same general
+syntax that allows for somewhat flexible actions.
 
-Which results in:
+Let's go over the process of finding endpoints, and running a few scans on them. In our example, we use six domains:
 
-.. code-block:: bash
+- example.com
+- subdomain.example.com
+- evildoma.in
+- mydomain.evildoma.in
+- proc.live
+- reverse.proc.live
 
-    usage: websecmap scan [-h] [--version] [-v {0,1,2,3}] [--settings SETTINGS]
-                        [--pythonpath PYTHONPATH] [--traceback] [--no-color]
-                        [-m {direct,sync,async}] [-i INTERVAL]
-                        [-t TASK_ID | -o [ORGANIZATION_NAMES [ORGANIZATION_NAMES ...]]
-                        | -u [URL_ADDRESSES [URL_ADDRESSES ...]]]
-                        {dnssec,headers,plain,endpoints,tls,tlsq,ftp,screenshot,onboard,dummy,debug}
+All commands regarding scanning, discovery and verification can be run on a separate worker: a separate process that
+performs these actions. A live installation will have these workers running for you. Developers may have to start a development
+worker with "make run_broker" and "make run_worker". A worker is multithreaded (=faster), while local scans are single threaded.
 
-    Can perform a host of scans. Run like: Web Security Map scan [scanner_name] and then
-    options.
+Commands are performed locally unless specified they should be run on a worker. To run a scan on a worker, add ' -m async' to the command.
 
-    positional arguments:
-      {dnssec,headers,plain,endpoints,tls,tlsq,ftp,screenshot,onboard,dummy}
-                            The scanner you want to use.
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      --version             show program's version number and exit
-      -v {0,1,2,3}, --verbosity {0,1,2,3}
-                            Verbosity level; 0=minimal output, 1=normal output,
-                            2=verbose output, 3=very verbose output
-      --settings SETTINGS   The Python path to a settings module, e.g.
-                            "myproject.settings.main". If this isn't provided, the
-                            DJANGO_SETTINGS_MODULE environment variable will be
-                            used.
-      --pythonpath PYTHONPATH
-                            A directory to add to the Python path, e.g.
-                            "/home/djangoprojects/myproject".
-      --traceback           Raise on CommandError exceptions
-      --no-color            Don't colorize the command output.
-      -m {direct,sync,async}, --method {direct,sync,async}
-                            Execute the task directly or on remote workers.
-      -i INTERVAL, --interval INTERVAL
-                            Interval between status reports (sync only).
-      -t TASK_ID, --task_id TASK_ID
-                            Report status for task ID and return result (if
-                            available).
-      -o [ORGANIZATION_NAMES [ORGANIZATION_NAMES ...]], --organization_names [ORGANIZATION_NAMES [ORGANIZATION_NAMES ...]]
-                            Perform scans on these organizations (default is all).
-      -u [URL_ADDRESSES [URL_ADDRESSES ...]], --url_addresses [URL_ADDRESSES [URL_ADDRESSES ...]]
-                            Perform scans on these urls (default is all).
+.. code-block:: sh
+
+    # let's extend the amount of subdomains, by scanning for them:
+    websecmap discover subdomains
+
+    # let's discover HTTP endpoints for these domains:
+    websecmap discover http
+
+    # let's also discover FTP servers, locally:
+    websecmap discover ftp
+
+    # then, let's see if we can find mail endpoints suitable for internet.nl scans
+    websecmap discover dns_endpoints
+
+    # all other options are in the help of websecmap:
+    # websecmap discover --help
+
+
+It's possible to perform even more complex operations on all these commands. For example to discover things on a certain domain.
+Here are some examples that are run on two domains, or even a wildcard:
+
+
+.. code-block:: sh
+
+    # discover http endpoints on two domains:
+    websecmap discover http -u example.com evaildoma.in
+
+    # discover ftp on a wildcard url:
+    websecmap discover ftp -u *.domain.*
+
+    # discover ftp on all urls that start with test
+    websecmap discover ftp -u "test.*"
+
+
+It is also possible to filter on organizations names or even entire map layer types using the -o or -y switches:
+
+
+.. code-block:: sh
+
+    # discover http endpoints on everything by Evil Corp:
+    websecmap discover http -o "Evil Corp"
+
+    # discover http on all municipalities and test layers:
+    websecmap discover http -y municipality test
+
+
+Scanning and verification works pretty much the same way. Verification is a way to check if the discovered items (endpoints and urls)
+are still there. It is more efficient than discovering them again. Here are some examples:
+
+.. code-block:: sh
+
+    # Scan TLS at Qualys for all domains
+    websecmap scan tlsq
+
+    # scan FTP at evil corp:
+    websecmap scan ftp -o "Evil Corp"
+
+    # figure out all scanning options, note that for some you need access keys via the admin interface.
+    websecmap scan --help
+
+    # verify that HTTP services are still up
+    websecmap verify http -u example.com
 
 
 Reporting
 ---------
-Reports can be updated with the following command:
 
-.. code-block:: bash
+After scanning, we want to add some color to the map. We can do that using the report function. The report command
+works pretty much like the discovery, scan and verify commands: it allows the same filters, which makes updating a
+specific organization or url easy.
 
-   websecmap report
+Creating a report is an extensive process and can take a while. It will rebuild all url data first, and then
+will create reports on them on specific moments: every day something changed a report will be created.
 
-This command also takes in the organization and url filters. Filtering always updates the entire organization over the entire
-timespan. This means it can take a while before the command has finished.
+In order to make the map render quickly, these reports are cached. At the end of the report process, the map and
+statistics caches are updated with the latest values based on all of todays changes.
 
-
-.. code-block:: bash
-
-   websecmap report -o Arnhem
-
-See Web Security Map help report for more info.
+Here are some example report commands:
 
 
-Endpoint discovery and verification
------------------------------------
+.. code-block:: sh
 
-.. code-block:: bash
+    # Create a report for everything in the system
+    websecmap report
 
-    websecmap discover http -o Texel
-    websecmap verify http -u www.texel.nl
-    websecmap verify ftp -o Apeldoorn
+    # Create a report that only updates one organization, and only rebuilds the caches afterwards.
+    websecmap report -o "Evil Corp"
 
-See Web Security Map help verify
-
-Subdomain discovery
--------------------
-(doesn't work atm)
-
-.. code-block:: bash
-
-    websecmap discover subdomains -o Texel
+    # Or create a report that only updates on url (and all bound organizations), and rebuilds the caches afterwards:
+    websecmap report -u proc.live
 
 
-Running a development server
------------------------------
-
-To start a development server, that does not tamper with any data, and accepts connections from anywhere (which are then
-filtered by settings.py), run:
-
-.. code-block:: bash
-
-   websecmap devserver --no-backend --no-data 0.0.0.0:8000
-
-
-Importing coordinates
----------------------
-
-Downloads map data from Open Streetmaps (...), simplifies it and adds it to the database. In order for imports to work,
-region information has to be added in the database. This is because OSM uses admin_levels for various types of regions
-and these need to be translated into something sensible. An extensive set of these regions are available at a default
-installation. They can also be loaded from a fixture that is included (don't know which one currently). For this command
-to work you need an active internet connection.
-
-To import Dutch municipalities, you'll run the following command:
-
-.. code-block:: bash
-   
-
-   websecmap import_coordinates --country=NL --region=municipality
-
-
-This translates to admin_level 8, and all imported data is added to the database a being in NL and the OrganizationType
-municipality. The list of regions that can be requested with the --list command, like so:
-
-.. code-block:: bash
-   
-
-   websecmap import_coordinates --list
+Reports contain all issues that are enabled to be reported on. These are settings that can be altered in the admin
+interface in the "Configuration" section. There are a lot of things that can be reported, the default is everything.
 
 
 
-.. code-block:: bash
+Development / Debugging command highlights
+-------------------------------------------
 
-    usage: websecmap import_coordinates [-h] [--version] [-v {0,1,2,3}]
-                                      [--settings SETTINGS]
-                                      [--pythonpath PYTHONPATH] [--traceback]
-                                      [--no-color] [--country COUNTRY]
-                                      [--region REGION] [--date DATE]
+These are the highlights of the command line interface. There are many other command line tools available, yet most
+of these are created for development and debugging purposes.
 
-    Connects to OSM and gets a set of coordinates. Example:Web Security Map
-    import_coordinates --country=SE --region=municipality --date=2018-01-01
+.. code-block:: sh
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      --version             show program's version number and exit
-      -v {0,1,2,3}, --verbosity {0,1,2,3}
-                            Verbosity level; 0=minimal output, 1=normal output,
-                            2=verbose output, 3=very verbose output
-      --settings SETTINGS   The Python path to a settings module, e.g.
-                            "myproject.settings.main". If this isn't provided, the
-                            DJANGO_SETTINGS_MODULE environment variable will be
-                            used.
-      --pythonpath PYTHONPATH
-                            A directory to add to the Python path, e.g.
-                            "/home/djangoprojects/myproject".
-      --traceback           Raise on CommandError exceptions
-      --no-color            Don't colorize the command output.
-      --country COUNTRY     Country code. Eg: NL, DE, EN
-      --region REGION       Region: municipality, province, water\ board ...
-      --date DATE           Date since when the import should be effective. -
-                            format YYYY-MM-DD
+    # load testdata:
+    websecmap loaddata production
+    websecmap loaddata testdata
 
+    # export organizations, to import on a development machine:
+    websecmap export_organization --organization_name Arnhem Zutphen "Evil Corp"
 
-Loading datasets / fixtures
----------------------------
+    # remove short endpoint outages
+    websecmap clean_short_outages
 
-You can load a fixture with the following command:
+    # access the django shell
+    websecmap shell
 
-.. code-block:: bash
-   
-
-    websecmap load_dataset dataset_24_juli_2018.json
-
-A list of possible fixtures is in the fixtures directory of each django app. For example: /organizations/fixtures/
-
-Loading a fixture can take a while, depending on it's size and format. Be somewhat patient.
-
-
-
-Creating new datasets / exporting data
---------------------------------------
-
-To create a new dataset
-
-
-To create a new dataset from a production environment, take in account you're working with docker containers. As root
-you can run the following command to retrieve data from the database:
-
-.. code-block:: bash
-   
-
-   websecmap create_dataset -o -> dataset_24_juli_2018.json
-
-
-As with django, create dataset allows all kinds of options. Some defaults are chosen when running create_dataset over
-using the django command.
-
-
-.. code-block:: bash
-   
-
-    usage: websecmap create_dataset [-h] [--version] [-v {0,1,2,3}]
-                                  [--settings SETTINGS] [--pythonpath PYTHONPATH]
-                                  [--traceback] [--no-color] [--format FORMAT]
-                                  [--indent INDENT] [--database DATABASE]
-                                  [-e EXCLUDE] [--natural-foreign]
-                                  [--natural-primary] [-a] [--pks PRIMARY_KEYS]
-                                  [-o OUTPUT]
-                                  [app_label[.ModelName] [app_label[.ModelName]
-                                  ...]]
-
-    Create a near complete export for testing and migrating to another server.
-
-    positional arguments:
-      app_label[.ModelName]
-                            Restricts dumped data to the specified app_label or
-                            app_label.ModelName.
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      --version             show program's version number and exit
-      -v {0,1,2,3}, --verbosity {0,1,2,3}
-                            Verbosity level; 0=minimal output, 1=normal output,
-                            2=verbose output, 3=very verbose output
-      --settings SETTINGS   The Python path to a settings module, e.g.
-                            "myproject.settings.main". If this isn't provided, the
-                            DJANGO_SETTINGS_MODULE environment variable will be
-                            used.
-      --pythonpath PYTHONPATH
-                            A directory to add to the Python path, e.g.
-                            "/home/djangoprojects/myproject".
-      --traceback           Raise on CommandError exceptions
-      --no-color            Don't colorize the command output.
-      --format FORMAT       Specifies the output serialization format for
-                            fixtures.
-      --indent INDENT       Specifies the indent level to use when pretty-printing
-                            output.
-      --database DATABASE   Nominates a specific database to dump fixtures from.
-                            Defaults to the "default" database.
-      -e EXCLUDE, --exclude EXCLUDE
-                            An app_label or app_label.ModelName to exclude (use
-                            multiple --exclude to exclude multiple apps/models).
-      --natural-foreign     Use natural foreign keys if they are available.
-      --natural-primary     Use natural primary keys if they are available.
-      -a, --all             Use Django's base manager to dump all models stored in
-                            the database, including those that would otherwise be
-                            filtered or modified by a custom manager.
-      --pks PRIMARY_KEYS    Only dump objects with given primary keys. Accepts a
-                            comma-separated list of keys. This option only works
-                            when you specify one model.
-      -o OUTPUT, --output OUTPUT
-                            Specifies file to which the output is written.
+    # show a timeline of all events on an url, useful for debugging reports:
+    websecmap timeline -u example.com
