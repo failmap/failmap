@@ -54,12 +54,13 @@
             <div slot="body">
                 <p>You can use this to alter the state of the map beyond what is shown in the menu.</p>
                 <h4>Country</h4>
-                <input v-model.lazy="$store.state.country">
+                <input v-model="alter_state_country">
                 <h4>Layer</h4>
-                <input v-model.lazy="$store.state.layer">
+                <input v-model="alter_state_layer">
             </div>
             <div slot="footer">
                 <button type="button" class="btn btn-secondary" @click="stop_alter_state()">Close</button>
+                <button type="button" class="btn btn-primary" @click="do_alter_state()">Alter</button>
             </div>
         </modal>
         <modal v-if="show_add_proxies" @close="stop_add_proxies()">
@@ -86,6 +87,8 @@
 
 <script>
 Vue.component('debugmenu', {
+    store,
+
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -120,6 +123,8 @@ Vue.component('debugmenu', {
         return {
             // # adding domains, should be it's own component...
             show_alter_state: false,
+            alter_state_country: this.$store.state.country,
+            alter_state_layer: this.$store.state.layer,
 
             // add proxies gui:
             show_add_proxies: false,
@@ -134,6 +139,12 @@ Vue.component('debugmenu', {
         },
         stop_alter_state: function(){
             this.show_alter_state = false;
+        },
+
+        do_alter_state: function() {
+            store.commit('change', {country: this.alter_state_country, layer: this.alter_state_layer});
+            // remove the current loaded report:
+            store.commit('change', {reported_organization: {id: 0, name: ""}});
         },
 
         start_add_proxies: function(){
