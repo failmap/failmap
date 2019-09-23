@@ -73,11 +73,11 @@ Vue.component('ticker', {
         },
         arrow: function(value, rank){
             if (value > 0)
-                return "<a class='high'>▼</a>+"+ value + " ";
+                return "<a class='highrow'>▼</a>+"+ value + " ";
             if (value === 0)
                 return "▶-";
             if (value < 0)
-                return "<a class='good'>▲</a>-" + (value * -1) + " ";
+                return "<a class='goodrow'>▲</a>-" + (value * -1) + " ";
         },
         get_tickertext: function() {
             // weird that this should be a function...
