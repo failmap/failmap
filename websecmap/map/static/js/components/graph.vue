@@ -4,7 +4,8 @@ const chart_mixin = {
     props: {
         data: {type: Array, required: true},
         axis: {type: Array, required: false},
-        color_scheme: {type: Object, required: false}
+        color_scheme: {type: Object, required: false},
+        translation: {type: Object, required: false},
     },
     data: function() {
         // [Vue warn]: The "data" option should be a function that returns a per-instance value in component definitions.
@@ -21,6 +22,17 @@ const chart_mixin = {
             },
         )
     },
+    methods: {
+        translate: function(key) {
+            if (this.translation === undefined)
+                return "";
+
+            if (Object.keys(this.translation).length === 0)
+                return "";
+
+            return this.translation[key];
+        }
+    },
     mounted: function () {
         this.buildChart();
         this.renderData();
@@ -33,6 +45,10 @@ const chart_mixin = {
         // Supports changing the colors of this graph ad-hoc.
         // charts.js is not reactive.
         color_scheme: function(newsetting, oldsetting){
+            this.renderData();
+        },
+
+        translation: function(newsetting, oldsetting){
             this.renderData();
         },
     }
@@ -58,7 +74,7 @@ Vue.component('vulnerability-chart', {
                     maintainAspectRatio: false,
                     title: {
                         display: true,
-                        text: 'Risks over time'
+                        text: this.translate('title')
                     },
                     tooltips: {
                         mode: 'index',
@@ -78,7 +94,7 @@ Vue.component('vulnerability-chart', {
                             },
                             scaleLabel: {
                                 display: false,
-                                labelString: 'Month'
+                                labelString: this.translate('xAxis_label'),
                             }
                         }],
                         yAxes: [{
@@ -86,7 +102,7 @@ Vue.component('vulnerability-chart', {
                             stacked: true,
                             scaleLabel: {
                                 display: false,
-                                labelString: 'Value'
+                                labelString: this.translate('yAxis_label'),
                             }
                         }]
                     }
@@ -101,17 +117,19 @@ Vue.component('vulnerability-chart', {
             let high = Array();
             let medium = Array();
             let low = Array();
+            let good = Array();
 
             for(let i=0; i<data.length; i++){
                 labels.push(data[i].date);
                 high.push(data[i].high);
                 medium.push(data[i].medium);
                 low.push(data[i].low);
+                good.push(data[i].good);
             }
 
             this.chart.data.labels = labels;
             this.chart.data.datasets = [{
-                        label: '# High risk',
+                        label: this.translate('amount_high'),
                         data: high,
                         backgroundColor: this.color_scheme.high_background,
                         borderColor: this.color_scheme.high_border,
@@ -120,7 +138,7 @@ Vue.component('vulnerability-chart', {
                         hidden: !this.axis.includes('high')
                     },
                     {
-                        label: '# Medium risk',
+                        label: this.translate('amount_medium'),
                         data: medium,
                         backgroundColor: this.color_scheme.medium_background,
                         borderColor: this.color_scheme.medium_border,
@@ -129,13 +147,22 @@ Vue.component('vulnerability-chart', {
                         hidden: !this.axis.includes('medium')
                     },
                     {
-                        label: '# Low risk',
+                        label: this.translate('amount_low'),
                         data: low,
                         backgroundColor: this.color_scheme.low_background,
                         borderColor: this.color_scheme.low_border,
                         borderWidth: 1,
                         lineTension: 0,
                         hidden: !this.axis.includes('low')
+                    },
+                    {
+                        label: this.translate('amount_good'),
+                        data: good,
+                        backgroundColor: this.color_scheme.good_background,
+                        borderColor: this.color_scheme.good_border,
+                        borderWidth: 1,
+                        lineTension: 0,
+                        hidden: !this.axis.includes('good')
                     },
                 ];
 
@@ -167,7 +194,7 @@ Vue.component('vulnerability-donut', {
                     maintainAspectRatio: false,
                     title: {
                         display: true,
-                        text: "Today's risk overview",
+                        text: this.translate('title'),
                     },
                     tooltips: {
                         mode: 'index',
@@ -202,27 +229,27 @@ Vue.component('vulnerability-donut', {
             if (this.axis.includes('high')){
                 backgroundColor.push(this.color_scheme.high_background);
                 borderColor.push(this.color_scheme.high_border);
-                labels.push('# High risk');
+                labels.push(this.translate('amount_high'));
                 chartdata.push(high);
             }
             if (this.axis.includes('medium')){
                 backgroundColor.push(this.color_scheme.medium_background);
                 borderColor.push(this.color_scheme.medium_border);
-                labels.push('# Medium risk');
+                labels.push(this.translate('amount_medium'));
                 chartdata.push(medium);
 
             }
             if (this.axis.includes('low')){
                 backgroundColor.push(this.color_scheme.low_background);
                 borderColor.push(this.color_scheme.low_border);
-                labels.push('# Low risk');
+                labels.push(this.translate('amount_low'));
                 chartdata.push(low);
             }
 
             // Only include OK in the donuts, not the graphs. Otherwise the graphs become unreadable (too much data)
             backgroundColor.push(this.color_scheme.good_background);
             borderColor.push(this.color_scheme.good_border);
-            labels.push('# No risk');
+            labels.push(this.translate('amount_good'));
             chartdata.push(ok);
 
             this.chart.data.labels = labels;
@@ -230,7 +257,7 @@ Vue.component('vulnerability-donut', {
                 data: chartdata,
                 backgroundColor: backgroundColor,
                 borderColor: borderColor,
-                borderWidth: 1,
+                borderWidth: 2,
                 lineTension: 0,
             }];
 
@@ -317,7 +344,7 @@ Vue.component('connectivity-chart', {
                 data: urls,
                 backgroundColor: this.color_scheme.addresses_background,
                 borderColor: this.color_scheme.addresses_border,
-                borderWidth: 1,
+                borderWidth: 2,
                 lineTension: 0
             },
             {
@@ -325,7 +352,7 @@ Vue.component('connectivity-chart', {
                 data: endpoints,
                 backgroundColor: this.color_scheme.services_background,
                 borderColor: this.color_scheme.services_border,
-                borderWidth: 1,
+                borderWidth: 2,
                 lineTension: 0
             }];
 

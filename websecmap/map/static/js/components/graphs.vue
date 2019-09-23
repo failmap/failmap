@@ -9,7 +9,12 @@
             <div class="col-md-12">
                 <h4>{{ $t("graphs.overall") }}</h4>
                 <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
-                    <vulnerability-chart :color_scheme="color_scheme" :data="data.total" :axis="['high', 'medium', 'low']"></vulnerability-chart>
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="data.total"
+                        :axis="['high', 'medium', 'low']"
+                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                    ></vulnerability-chart>
                 </div>
                 <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
                     <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
@@ -26,12 +31,22 @@
 
                 <div class="col-md-6"  v-if="data[issue['name']]" style="margin-bottom: 30px;">
                     <div class="chart-container" style="position: relative; height:400px; width:100%">
-                        <vulnerability-donut :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-donut>
+                        <vulnerability-donut
+                            :color_scheme="color_scheme"
+                            :data="data[issue['name']]"
+                            :axis="issue['relevant impacts']"
+                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_donut"
+                        ></vulnerability-donut>
                     </div>
                 </div>
                 <div class="col-md-6"  v-if="data[issue['name']]">
                     <div class="chart-container" style="position: relative; height:400px; width:100%">
-                        <vulnerability-chart :color_scheme="color_scheme" :data="data[issue['name']]" :axis="issue['relevant impacts']"></vulnerability-chart>
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="data[issue['name']]"
+                            :axis="issue['relevant impacts']"
+                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                        ></vulnerability-chart>
                     </div>
                 </div>
             </template>
@@ -49,14 +64,53 @@ Vue.component('graphs', {
             en: {
                 graphs: {
                     title: "Graphs",
-                    overall: "Summed up"
+                    overall: "Summed up",
 
-                }
+                    vulnerability_graph: {
+                        title: "Total amount of issues over time",
+                        xAxis_label: "Month",
+                        yAxis_label: "Risk",
+                        amount_high: "# High Risk",
+                        amount_medium: "# Medium Risk",
+                        amount_low: "# Low Risk",
+                        amount_good: "# Good",
+                    },
+
+                    vulnerability_donut: {
+                        title: "Today's issue in this category",
+                        xAxis_label: "Month",
+                        yAxis_label: "Risk",
+                        amount_high: "# High Risk",
+                        amount_medium: "# Medium Risk",
+                        amount_low: "# Low Risk",
+                        amount_good: "# Good",
+                    },
+                },
             },
             nl: {
                 graphs: {
                     title: "Grafieken",
-                    overall: "Alles bij elkaar"
+                    overall: "Alles bij elkaar",
+
+                    vulnerability_graph: {
+                        title: "Totaal aantal risico's over tijd.",
+                        xAxis_label: "Maand",
+                        yAxis_label: "Risico",
+                        amount_high: "# Hoog risico",
+                        amount_medium: "# Midden risico",
+                        amount_low: "# Laag risico",
+                        amount_good: "# Goed",
+                    },
+
+                    vulnerability_donut: {
+                        title: "Actuele risico's in deze categorie",
+                        xAxis_label: "Maand",
+                        yAxis_label: "Risico",
+                        amount_high: "# Hoog risico",
+                        amount_medium: "# Midden risico",
+                        amount_low: "# Laag risico",
+                        amount_good: "# Goed",
+                    },
                 }
             }
         },

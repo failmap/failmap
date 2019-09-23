@@ -574,18 +574,18 @@
 
                     active_color_scheme: "trafficlight",
                     colors_used_for_charts: {
-                        'high_background': 'rgba(255, 99, 132, 0.2)',
-                        'high_border': 'rgba(255, 99, 132, 0.2)',
-                        'medium_background': 'rgba(255, 102, 0, 0.2)',
-                        'medium_border': 'rgba(255,102,0,1)',
-                        'low_background': 'rgba(255, 255, 0, 0.2)',
-                        'low_border': 'rgba(255,255,0,1)',
-                        'good_background': 'rgba(50, 255, 50, 0.2)',
-                        'good_border': 'rgba(50, 255, 50, 1)',
-                        'addresses_background': 'rgba(0, 0, 0, 0.2)',
-                        'addresses_border': 'rgba(0,0,0,1)',
-                        'services_background': 'rgba(0, 40, 255, 0.2)',
-                        'services_border': 'rgba(0,40,255,1)',
+                        'high_background': '#f76a5f',
+                        'high_border': '#f70000',
+                        'medium_background': '#f7ae58',
+                        'medium_border': '#f78900',
+                        'low_background': '#f7e561',
+                        'low_border': '#f7e400',
+                        'good_background': '#9cff94',
+                        'good_border': '#30c314',
+                        'addresses_background': '#818bff',
+                        'addresses_border': '#101fff',
+                        'services_background': '#bcbcba',
+                        'services_border': '#70706f',
                     },
 
                     available_themes: {
@@ -993,7 +993,7 @@
 
         <section id="extensive_statistics" v-if="config.show.statistics">
             <div class="container">
-                <combined_number_statistics v-if="config.show.numbers" :issues="issues"  :show_services="config.show.services"></combined_number_statistics>
+                <combined_number_statistics v-if="config.show.numbers" :color_scheme="colors_used_for_charts" :issues="issues"  :show_services="config.show.services"></combined_number_statistics>
                 <improvements v-if="config.show.improvements" :issues="issues" ></improvements>
                 <graphs v-if="config.show.graphs" :issues="issues"  :color_scheme="colors_used_for_charts"></graphs>
                 <changes v-if="config.show.changes" :issues="issues" ></changes>

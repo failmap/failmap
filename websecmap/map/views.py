@@ -313,7 +313,7 @@ def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_L
 @cache_page(one_hour)
 def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     reports = get_stats(country, organization_type, weeks_back)
-    return JsonResponse({"data": reports}, encoder=JSEncoder)
+    return JsonResponse(reports, encoder=JSEncoder)
 
 
 @cache_page(one_hour)

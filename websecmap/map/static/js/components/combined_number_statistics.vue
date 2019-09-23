@@ -8,112 +8,40 @@
                 {{ $t("statistics.title") }}
             </h2>
         </div>
-        <div class="row">
-            <div class="col-md-6">
+        <div class="row" v-if="organization_stats.length">
+
+            <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.organizations.title") }}</h3>
                 <p>{{ $t("statistics.progress_bars.organizations.intro") }}</p>
-
-                <div class="progress">
-                    <div class="progress-bar bg-success" :style="{width:goodpercentage}">
-                        <span class="sr-only">{{ $t("statistics.progress_bars.good") }}</span>
-                    </div>
-                    <div class="progress-bar bg-warning" :style="{width:mediumpercentage}">
-                        <span class="sr-only">{{ $t("statistics.progress_bars.medium") }}</span>
-                    </div>
-                    <div class="progress-bar bg-danger" :style="{width:highpercentage}">
-                        <span class='sr-only'>{{ $t("statistics.progress_bars.bad") }}</span>
-                    </div>
-                    <div class="progress-bar bg-basic" :style="{width:unknownpercentage}">
-                        <span class='sr-only'>{{ $t("statistics.progress_bars.unknown") }}</span>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th width="25%">{{ $t("statistics.progress_bars.when") }}</th>
-                            <th width="5%">{{ $t("statistics.progress_bars.number") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.good") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.medium") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.bad") }}</th>
-                        </tr>
-                        </thead>
-                        <tbody v-if="data.data">
-
-                        <tr v-for="(x, key) in data.data">
-                            <td>{{ $t("statistics.progress_bars." + key.replace(/ /g, "_")) }}</td>
-                            <td>{{ x["included_organizations"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good percentage'] + '%, transparent ' + x['good percentage'] + '%, transparent 100%);'">
-                                {{ x["good"] }}
-                                <small>({{ x["good percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium percentage'] + '%, transparent ' + x['medium percentage'] + '%, transparent 100%);'">
-                                {{ x["medium"] }}
-                                <small>({{ x["medium percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high percentage'] + '%, transparent ' + x['high percentage'] + '%, transparent 100%);'">
-                                {{ x["high"] }}
-                                <small>({{ x["high percentage"] }}%)</small>
-                            </td>
-                        </tr>
-
-                        </tbody>
-                    </table>
+                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="organization_stats"
+                        :axis="['high', 'medium', 'good']"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                    ></vulnerability-chart>
                 </div>
             </div>
-            <div class="col-md-6">
+
+        </div>
+        <div class="row" v-if="url_stats.length">
+
+            <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.internet_addresses.title") }}</h3>
                 <p>{{ $t("statistics.progress_bars.internet_addresses.intro") }}</p>
-
-                <div class="progress">
-                    <div class="progress-bar bg-success" :style="{width:goodurlpercentage}">
-                        <span class="sr-only">{{ $t("statistics.progress_bars.good") }}</span>
-                    </div>
-                    <div class="progress-bar bg-warning" :style="{width:mediumurlpercentage}">
-                        <span class="sr-only">{{ $t("statistics.progress_bars.medium") }}</span>
-                    </div>
-                    <div class="progress-bar bg-danger" :style="{width:highurlpercentage}">
-                        <span class='sr-only'>{{ $t("statistics.progress_bars.bad") }}</span>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                        <tr>
-                            <th width="25%">{{ $t("statistics.progress_bars.when") }}</th>
-                            <th width="5%">{{ $t("statistics.progress_bars.number") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.good") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.medium") }}</th>
-                            <th width="20%">{{ $t("statistics.progress_bars.bad") }}</th>
-                        </tr>
-                        </thead>
-                        <tbody v-if="data.data">
-
-                        <tr v-for="(x, key) in data.data">
-                            <td>{{ $t("statistics.progress_bars." + key.replace(/ /g, "_")) }}</td>
-                            <td>{{ x["total_urls"] }}</td>
-                            <td :style="'background: linear-gradient(0deg, rgba(93, 255, 42, 0.2) 0%, rgba(93, 255, 42, 0.2) ' + x['good url percentage'] + '%, transparent ' + x['good url percentage'] + '%, transparent 100%);'">
-                                {{ x["good_urls"] }}
-                                <small>({{ x["good url percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 211, 134, 0.19) 0%, rgba(255, 211, 134, 0.19) ' + x['medium url percentage'] + '%, transparent ' + x['medium url percentage'] + '%, transparent 100%);'">
-                                {{ x["medium_urls"] }}
-                                <small>({{ x["medium url percentage"] }}%)</small>
-                            </td>
-                            <td :style="'background: linear-gradient(0deg, rgba(255, 42, 42, 0.2) 0%, rgba(255, 42, 42, 0.2) ' + x['high url percentage'] + '%, transparent ' + x['high url percentage'] + '%, transparent 100%);'">
-                                {{ x["high_urls"] }}
-                                <small>({{ x["high url percentage"] }}%)</small>
-                            </td>
-                        </tr>
-
-                        </tbody>
-                    </table>
+                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="url_stats"
+                        :axis="['high', 'medium', 'good']"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                    ></vulnerability-chart>
                 </div>
             </div>
+
         </div>
 
-        <div class="row" v-if="issue_categories.includes('integrity') || issue_categories.includes('website')">
+        <div class="row" v-if="Object.keys(explained).length && issue_categories.includes('integrity') || issue_categories.includes('website')">
             <div class="col-md-6" v-if="issue_categories.includes('integrity')">
                 <h4>{{ $t("statistics.numbers.integrity_and_confidentiality.title") }}</h4>
                 <p>{{ $t("statistics.numbers.integrity_and_confidentiality.intro") }}</p>
@@ -123,11 +51,11 @@
                 <p>{{ $t("statistics.numbers.website_content_security.intro") }}</p>
             </div>
         </div>
-        <div class="row" v-if="data.data && (issue_categories.includes('integrity') || issue_categories.includes('website'))">
+        <div class="row" v-if="Object.keys(explained).length && (issue_categories.includes('integrity') || issue_categories.includes('website'))">
             <div class="col-md-6">
-                <div v-for="(x, key) in data.data" v-if="key === 'now'">
+                <div>
                     <div class="table-responsive">
-                        <table class="table" v-if="x['explained']">
+                        <table class="table">
                             <thead>
                             <tr>
                                 <th width="10%">{{ $t("statistics.numbers.technology") }}</th>
@@ -135,24 +63,24 @@
                                 <th width="40%">{{ $t("statistics.numbers.total") }}</th>
                             </tr>
                             </thead>
-                            <tbody v-for="issue in issues" v-if="issue.category.includes('integrity') && Object.keys(x.explained).includes(issue.name)">
+                            <tbody v-for="issue in issues" v-if="issue.category.includes('integrity') && Object.keys(explained).includes(issue.name)">
                                 <tr>
                                     <td colspan="3" v-html="translate(issue['name'])"></td>
                                 </tr>
                                 <tr class="highrow" v-for="grade in issue.statistics.bad">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                                 <tr class="mediumrow" v-for="grade in issue.statistics.medium">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                                 <tr class="goodrow" v-for="grade in issue.statistics.good">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -160,9 +88,9 @@
                 </div>
             </div>
             <div class="col-md-6">
-                <div v-for="(x, key) in data.data" v-if="key === 'now'">
+                <div>
                     <div class="table-responsive">
-                        <table class="table" v-if="x['explained']">
+                        <table class="table">
                             <thead>
                             <tr>
                                 <th width="10%">{{ $t("statistics.numbers.technology") }}</th>
@@ -170,24 +98,24 @@
                                 <th width="40%">{{ $t("statistics.numbers.total") }}</th>
                             </tr>
                             </thead>
-                            <tbody v-for="issue in issues" v-if="issue.category.includes('website') && Object.keys(x.explained).includes(issue.name)">
+                            <tbody v-for="issue in issues" v-if="issue.category.includes('website') && Object.keys(explained).includes(issue.name)">
                                 <tr>
                                     <td colspan="3" v-html="translate(issue['name'])"></td>
                                 </tr>
                                 <tr class="highrow" v-for="grade in issue.statistics.bad">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                                 <tr class="mediumrow" v-for="grade in issue.statistics.medium">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                                 <tr class="goodrow" v-for="grade in issue.statistics.good">
                                     <td></td>
                                     <td v-html="translate(grade.explanation)">:</td>
-                                    <td>{{ x.explained[issue.name][grade.explanation] }}</td>
+                                    <td>{{ explained[issue.name][grade.explanation] }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -196,11 +124,11 @@
             </div>
         </div>
 
-        <div class="row" v-if="show_services">
-            <div class="col-md-12" v-for="(x, key) in data.data" v-if="key === 'now'">
+        <div class="row" v-if="show_services && filteredData.length">
+            <div class="col-md-12">
                 <h3>{{ $t("statistics.services.title") }}</h3>
                 <p>{{ $t("statistics.services.intro") }}</p>
-                    <p>{{ $t("statistics.services.number_of_service_checked", [x['endpoints']]) }}</p>
+                    <p>{{ $t("statistics.services.number_of_service_checked", [endpoints_now]) }}</p>
                     <div class="table-responsive">
                         <table class="table table-striped" id="services_table">
                             <thead>
@@ -231,7 +159,7 @@
                                     <td>{{ service['protocol'] }}</td>
                                     <td>{{ service['port'] }}</td>
                                     <td>{{ service['amount'] }}</td>
-                                    <td>{{ ((service['amount']/endpoints_now) * 100).toFixed(2) }}%</td>
+                                    <td>{{ ((service['amount'] / endpoints_now) * 100).toFixed(2) }}%</td>
                                 </tr>
 
                             </tbody>
@@ -256,23 +184,33 @@ Vue.component('combined_number_statistics', {
 
                         organizations: {
                             title: "Organizations",
-                            intro: "Organizations often have an extensive online presence with several websites and other services. The sum of the security of all of these services defines if the organization is secure or not.",
+                            intro: "This graph shows the quality of all organizations combined over time, for the maximum of one year. It determines the state by looking at the highest risk issue per organization, in all internet addresses and endpoints. The organization is awarded the grade and color of the highest risk.",
                         },
+
+                        organization_graph: {
+                            title: "Total amount and quality of organizations over time.",
+                            xAxis_label: "Month",
+                            yAxis_label: "Risk",
+                            amount_high: "# High Risk",
+                            amount_medium: "# Medium Risk",
+                            amount_low: "# Low Risk",
+                            amount_good: "# Good",
+                        },
+
                         internet_addresses: {
                             title: "Internet addresses",
-                            intro: "A security status has been determined for all below addresses.",
+                            intro: "This graph shows the quality of all urls combined over time, for the maximum of one year. It determines the state by looking at the highest risk issue per url.",
                         },
 
-                        // // statistics.progress_bars.3 weeks ago
-                        now: "now",
-                        '7_days_ago': "7 days ago",
-                        "2_weeks_ago": "2 weeks ago",
-                        "3_weeks_ago": "3 weeks ago",
-
-                        // due to python library workings, the 1 months ago is a bit off in translation...
-                        "1_months_ago": "1 month ago",
-                        "2_months_ago": "2 months ago",
-                        "3_months_ago": "3 months ago",
+                        internet_graph: {
+                            title: "Total amount and quality of internet addresses over time.",
+                            xAxis_label: "Month",
+                            yAxis_label: "Risk",
+                            amount_high: "# High Risk",
+                            amount_medium: "# Medium Risk",
+                            amount_low: "# Low Risk",
+                            amount_good: "# Good",
+                        },
 
                         when: "When",
                         number: "Number",
@@ -317,23 +255,33 @@ Vue.component('combined_number_statistics', {
 
                         organizations: {
                             title: "Organisaties",
-                            intro: "Een organisatie heeft vaak een veelvoud aan websites en online diensten. Dit is de samenvatting van hoe de organisatie het doet.",
+                            intro: "Deze grafiek toont de kwaliteit van alle organizaties over tijd, tot maximaal een jaar geleden. De beoordeling wordt gedaan door te kijken welke bevinding het hoogste risico heeft van alle adressen en endpoints. De organisatie krijgt het oordeel en kleur op basis van het hoogste risico.",
                         },
+
+                        organization_graph: {
+                            title: "Totaal aantal en kwaliteit van organisaties over tijd.",
+                            xAxis_label: "Maand",
+                            yAxis_label: "Risico",
+                            amount_high: "# Hoog risico",
+                            amount_medium: "# Midden risico",
+                            amount_low: "# Laag risico",
+                            amount_good: "# Goed",
+                        },
+
                         internet_addresses: {
                             title: "Internet adressen",
-                            intro: "Een opsomming van hoe alle diensten en sites het doen.",
+                            intro: "Deze grafiek toont de kwaliteit van alle internet adressen (urls) over tijd, tot een maximum van een jaar. Er wordt gekeken wat het hoogste risico is per adres, de kleur en beoordeling hangt daar vanaf.",
                         },
 
-                        // // statistics.progress_bars.3 weeks ago
-                        now: "now",
-                        '7_days_ago': "7 dagen geleden",
-                        "2_weeks_ago": "2 weken geleden",
-                        "3_weeks_ago": "3 weken geleden",
-
-                        // due to python library workings, the 1 months ago is a bit off in translation...
-                        "1_months_ago": "1 maand geleden",
-                        "2_months_ago": "2 maanden geleden",
-                        "3_months_ago": "3 maanden geleden",
+                        internet_graph: {
+                            title: "Totaal aantal en kwaliteit internet adressen over tijd.",
+                            xAxis_label: "Maand",
+                            yAxis_label: "Risico",
+                            amount_high: "# Hoog risico",
+                            amount_medium: "# Midden risico",
+                            amount_low: "# Laag risico",
+                            amount_good: "# Goed",
+                        },
 
                         when: "Tijd",
                         number: "Aantal",
@@ -385,6 +333,11 @@ Vue.component('combined_number_statistics', {
             data: Array,
             services: [],
             endpoints_now: 0,
+            explained: [],
+
+            //
+            organization_stats: [],
+            url_stats: [],
 
             // sorting
             columns: ['ip_version', 'protocol', 'port', 'amount'],
@@ -396,6 +349,7 @@ Vue.component('combined_number_statistics', {
     props: {
         issues: Array,
         show_services: Boolean,
+        color_scheme: Object,
     },
 
     methods: {
@@ -403,42 +357,40 @@ Vue.component('combined_number_statistics', {
             fetch(`/data/stats/${this.state.country}/${this.state.layer}/${weeknumber}`).then(response => response.json()).then(data => {
 
                 // empty
-                if (Object.keys(data.data).length < 1){
+                if (Object.keys(data).length < 1){
+                    this.data = [];
+                    this.endpoints_now = 0;
+                    this.explained = [];
+                    this.organization_stats= [];
+                    this.url_stats = [];
+                    this.services = [];
                     return;
                 }
 
                 this.data = data;
-                this.endpoints_now = data.data.now['endpoints'];
+                this.organization_stats = data.organizations;
+                this.url_stats = data.urls;
+                this.explained = data.explained;
+                this.endpoints_now = data.endpoints_now;
+
                 this.services = [];
-                for(let i=0; i<data.data.now['endpoint'].length; i++){
-                    let z = data.data.now['endpoint'][i][1];
+                for(let i=0; i<data.endpoint.length; i++){
+                    let z = data.endpoint[i][1];
                     this.services.push({
                         'amount': z.amount,
                         'ip_version': z.ip_version,
                         'protocol': z.protocol,
                         'port': z.port})
                 }
-            }).catch((fail) => {console.log('An error occurred in combined number statistics: ' + fail)});
+            }).catch((fail) => {console.log('An error occurred in combined number statistics: ' + fail); throw fail});
         },
-        perc: function (data, amount, total) {
-            return (!data) ? "0%" :
-                this.roundTo(data.now[amount] / data.now[total] * 100, 2) + "%";
-        },
+
         sortBy: function (key) {
             this.sortKey = key;
             this.sortOrders[key] = this.sortOrders[key] * -1;
         },
         // https://stackoverflow.com/questions/15762768/javascript-math-round-to-two-decimal-places
-        roundTo: function(n, digits) {
-            if (digits === undefined) {
-                digits = 0;
-            }
 
-            let multiplicator = Math.pow(10, digits);
-            n = parseFloat((n * multiplicator).toFixed(11));
-            let test = (Math.round(n) / multiplicator);
-            return +(test.toFixed(digits));
-        }
     },
     computed: {
         issue_categories: function() {
@@ -451,44 +403,7 @@ Vue.component('combined_number_statistics', {
             });
             return _categories;
         },
-        goodpercentage: function () {
-            return this.perc(this.data.data, "good", "total_organizations");
-        },
 
-        highpercentage: function () {
-            return this.perc(this.data.data, "high", "total_organizations");
-        },
-
-        mediumpercentage: function () {
-            if (this.data.data) {
-                let score = 100 -
-                    this.roundTo(this.data.data.now["no_rating"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    this.roundTo(this.data.data.now["high"] / this.data.data.now["total_organizations"] * 100, 2) -
-                    this.roundTo(this.data.data.now["good"] / this.data.data.now["total_organizations"] * 100, 2);
-                return this.roundTo(score, 2) + "%";
-            }
-            return 0
-        },
-        unknownpercentage: function () {
-            return this.perc(this.data.data, "no_rating", "total_organizations");
-        },
-        goodurlpercentage: function () {
-            return this.perc(this.data.data, "good_urls", "total_urls");
-        },
-
-        highurlpercentage: function () {
-            return this.perc(this.data.data, "high_urls", "total_urls");
-        },
-
-        mediumurlpercentage: function () {
-            if (this.data.data) {
-                let score = 100 -
-                    this.roundTo(this.data.data.now["high_urls"] / this.data.data.now["total_urls"] * 100, 2) -
-                    this.roundTo(this.data.data.now["good_urls"] / this.data.data.now["total_urls"] * 100, 2);
-                return this.roundTo(score, 2) + "%";
-            }
-            return 0
-        },
         filteredData: function () {
             let sortKey = this.sortKey;
             let filterKey = this.filterKey && this.filterKey.toLowerCase();

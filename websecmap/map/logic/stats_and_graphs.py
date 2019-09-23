@@ -116,7 +116,7 @@ def stats_determine_when(stat, weeks_back=0):
     return dt
 
 
-def get_stats(country, organization_type, weeks_back):
+def get_stats_outdated(country, organization_type, weeks_back):
     """
     Stats are calculated using websecmap calculate_high_level_statistics
 
@@ -143,5 +143,43 @@ def get_stats(country, organization_type, weeks_back):
         # no stats before a certain date, or database empty.
         if stats:
             reports[stat] = stats.report
+
+    return reports
+
+
+def get_stats(country, organization_type, weeks_back):
+    """
+    Stats are calculated using websecmap calculate_high_level_statistics
+
+    :param country:
+    :param organization_type:
+    :param weeks_back:
+    :return:
+    """
+
+    when = datetime.now(pytz.utc) - relativedelta(days=int(weeks_back*7))
+
+    # seven queryies, but __never__ a missing result.
+    stats = HighLevelStatistic.objects.all().filter(
+        country=country,
+        organization_type=get_organization_type(organization_type),
+        at_when__lte=when
+    ).order_by('-at_when')[0:366]
+
+    reports = {'organizations': [], 'urls': [], 'explained': {}, 'endpoints_now': 0, 'endpoint': []}
+
+    for stat in stats:
+        r = stat.report
+        reports['organizations'].append({'high': r['high'], 'medium': r['medium'], 'good': r['good'],
+                                        'date': stat.at_when.isoformat()})
+        reports['urls'].append({'high': r['high_urls'], 'medium': r['medium_urls'], 'good': r['good_urls'],
+                                'date': stat.at_when.isoformat()})
+
+    first = stats.first()
+    if first:
+        r = first.report
+        reports['endpoint'] = r['endpoint']
+        reports['explained'] = r['explained']
+        reports['endpoints_now'] = r['endpoints']
 
     return reports
