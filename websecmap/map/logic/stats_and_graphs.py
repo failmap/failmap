@@ -171,7 +171,7 @@ def get_stats(country, organization_type, weeks_back):
     for stat in stats:
         r = stat.report
         reports['organizations'].append({'high': r['high'], 'medium': r['medium'], 'good': r['good'],
-                                        'date': stat.at_when.isoformat()})
+                                         'date': stat.at_when.isoformat()})
         reports['urls'].append({'high': r['high_urls'], 'medium': r['medium_urls'], 'good': r['good_urls'],
                                 'date': stat.at_when.isoformat()})
 
