@@ -93,7 +93,8 @@ def significant_moments(urls: List[Url] = None, reported_scan_types: List[str] =
     # qualys_rating=0 means "Unable to connect to the server" and is not returned with a score. This happens in old
     # datasets.
     # we don't store tls_qualys scans in a separate table anymore
-
+    # SEPT 2019: sqlite is affected by SQLITE_LIMIT_VARIABLE_NUMBER with IN queries. For larger datasets
+    # This approach will fail during development.
     endpoint_scans = EndpointGenericScan.objects.all().filter(type__in=reported_scan_types, endpoint__url__in=urls).\
         prefetch_related("endpoint").defer("endpoint__url")
     endpoint_scans = latest_rating_per_day_only(endpoint_scans)

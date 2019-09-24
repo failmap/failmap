@@ -492,6 +492,11 @@ def calculate_high_level_stats(days: int = 1, countries: List = None, organizati
 
             when = datetime.now(pytz.utc) - timedelta(days=days_back)
 
+            # prevent double high level stats
+            HighLevelStatistic.objects.all().filter(
+                at_when=when, country=map_configuration['country'],
+                organization_type=OrganizationType(pk=map_configuration['organization_type__id'])).delete()
+
             measurement = {'high': 0, 'medium': 0, 'good': 0,
                            'total_organizations': 0, 'total_score': 0, 'no_rating': 0,
                            'total_urls': 0, 'high_urls': 0, 'medium_urls': 0, 'good_urls': 0,
