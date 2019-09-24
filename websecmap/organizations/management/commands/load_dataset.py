@@ -2,6 +2,7 @@ import logging
 import warnings
 
 from django.core.management.commands.loaddata import Command as LoadDataCommand
+from django.db import connection
 
 from websecmap import settings
 
@@ -20,6 +21,12 @@ class Command(LoadDataCommand):
             'ignore', r"DateTimeField .* received a naive datetime",
             RuntimeWarning, r'django\.db\.models\.fields',
         )
+
+        # disable foreign key checks, as they currently don't work with create_dataset.
+        # and because the exception is garbage: django.db.utils.IntegrityError: FOREIGN KEY constraint failed
+        # -> WHAT foreign key constraint, on what line, between what models? We now have nothing and 25 megs of data...
+        with connection.cursor() as cursor:
+            cursor.execute("PRAGMA foreign_keys = OFF;")
 
         # Setting USE_TZ to false during import weirdly DOES NOT suppress the yaml errors.
         settings.USE_TZ = False

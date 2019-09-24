@@ -29,12 +29,17 @@ log = logging.getLogger(__package__)
 # and therefore this is used. The published scan_types are listed at index.html, in javascript.
 # This should be made into python and then exported to JS (nearly the same syntax).
 # Look at index.html...
-PUBLISHED_SCAN_TYPES = ['ftp', 'plain_https', 'dnssec', 'http_security_header_strict_transport_security',
-                        'http_security_header_x_content_type_options', 'http_security_header_x_frame_options',
-                        'http_security_header_x_xss_protection', 'tls_qualys_certificate_trusted',
-                        'tls_qualys_encryption_quality', 'internet_nl_mail_starttls_tls_available',
-                        'internet_nl_mail_auth_spf_exist', 'internet_nl_mail_auth_dkim_exist',
-                        'internet_nl_mail_auth_dmarc_exist']
+
+PUBLISHED_ENDPOINT_SCAN_TYPES = ['ftp', 'plain_https', 'http_security_header_strict_transport_security',
+                                 'http_security_header_x_content_type_options', 'http_security_header_x_frame_options',
+                                 'http_security_header_x_xss_protection', 'tls_qualys_certificate_trusted',
+                                 'tls_qualys_encryption_quality', 'internet_nl_mail_starttls_tls_available',
+                                 'internet_nl_mail_auth_spf_exist', 'internet_nl_mail_auth_dkim_exist',
+                                 'internet_nl_mail_auth_dmarc_exist']
+
+PUBLISHED_URL_SCAN_TYPES = ['DNSSEC']
+
+PUBLISHED_SCAN_TYPES = PUBLISHED_ENDPOINT_SCAN_TYPES + PUBLISHED_URL_SCAN_TYPES
 
 
 def compose_task(

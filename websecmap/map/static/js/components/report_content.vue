@@ -630,7 +630,6 @@ Vue.component('report_content', {
             this.issues.forEach((issue) => {
                 if (issue.name === rating.type){
                     selected_issue = issue;
-                    console.log("Issue found...")
                 }
             });
 
@@ -639,6 +638,10 @@ Vue.component('report_content', {
             }
 
             let links = "";
+
+            // all extra issues that can be created / selected, but are not supported yet...
+            if (selected_issue['second opinion links'] === undefined)
+                return "";
 
             // todo: take in account language.
             // todo: this should be part of the template, not a weird function...

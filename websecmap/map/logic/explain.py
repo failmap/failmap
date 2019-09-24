@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Any, Dict, Union
 
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import get_country, get_organization_type
@@ -26,14 +27,50 @@ def get_all_explains(country, organization_type, limit=0):
     country = get_country(country)
     organization_type = get_organization_type(organization_type)
 
-    ugss = UrlGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                               url__organization__country=country,
-                                               url__organization__type_id=organization_type
-                                               ).order_by('comply_or_explain_explained_on')[0:limit]
-    egss = EndpointGenericScan.objects.all().filter(comply_or_explain_is_explained=True,
-                                                    endpoint__url__organization__country=country,
-                                                    endpoint__url__organization__type_id=organization_type
-                                                    ).order_by('comply_or_explain_explained_on')[0:limit]
+    # some urls are used by a lot of organizations, we only need the distinct explanation, and
+    # the organizations will be matched later.
+    # https://stackoverflow.com/questions/30752268/how-to-filter-objects-for-count-annotation-in-django
+
+    # we're currently not taking into account what endpoint, URL's and organizations are alive at a certain point.
+    # in that sense we're not taking history in account... Only what is relevant _NOW_
+    # This should change, adding some nice complex Q conditions for checking a certain date.
+    # something like: & (  Q(url__organization__is_dead=False, created_on__lte=some_date)
+    #                    | Q(is_dead=True,  created_on__lte=some_date, is_dead_since__gte=some_date)
+    #
+    #                 & (  Q(is_dead=False, created_on__lte=some_date)
+    #                    | Q(is_dead=True,  created_on__lte=some_date, is_dead_since__gte=some_date)
+    ugss = UrlGenericScan.objects.all().filter(
+        comply_or_explain_is_explained=True,
+        is_the_latest_scan=True,
+    ).annotate(
+        n_urls=Count(
+            'url',
+            filter=Q(
+                url__organization__is_dead=False,
+                url__organization__country=country,
+                url__organization__type_id=organization_type,
+                url__is_dead=False,
+                url__not_resolvable=False,
+            )
+        )
+    ).filter(n_urls=1).order_by('-comply_or_explain_explained_on')[0:limit]
+
+    egss = EndpointGenericScan.objects.all().filter(
+        comply_or_explain_is_explained=True,
+        is_the_latest_scan=True,
+    ).annotate(
+        n_urls=Count(
+            'endpoint',
+            filter=Q(
+                endpoint__is_dead=False,
+                endpoint__url__not_resolvable=False,
+                endpoint__url__is_dead=False,
+                endpoint__url__organization__is_dead=False,
+                endpoint__url__organization__country=country,
+                endpoint__url__organization__type_id=organization_type
+            )
+        )
+    ).filter(n_urls__gte=1).order_by('-comply_or_explain_explained_on')[0:limit]
 
     explains = []
 
