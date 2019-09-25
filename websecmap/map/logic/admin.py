@@ -5,7 +5,8 @@ from typing import Dict
 
 from django.utils import timezone
 
-from websecmap.organizations.models import Organization, Url
+from websecmap.map.logic.coordinates import switch_latlng
+from websecmap.organizations.models import Coordinate, Organization, Url
 from websecmap.scanners.models import ScanProxy
 
 
@@ -21,6 +22,20 @@ def operation_response(error: bool = False, success: bool = False, message: str 
             'data': data,
             'timestamp': timezone.now()
             }
+
+
+def switch_lattitude_and_longitude(organization_id):
+    # get the coordinate, only for point. Multipoint is not yet supported. We assume 1 alive point at a time
+    # per organization.
+    coord = Coordinate.objects.all().filter(
+        organization__id=organization_id, geojsontype="Point", is_dead=False).first()
+
+    if coord:
+        switch_latlng(coord)
+        return operation_response(success=True, message='Latitude and longitude are switched. Will be visible in the'
+                                                        ' next report.')
+
+    return operation_response(error=True, message="Could not find any attached coordinate that is still alive.")
 
 
 def add_urls(organization_id, urls: str):

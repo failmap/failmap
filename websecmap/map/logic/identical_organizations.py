@@ -1,7 +1,8 @@
+import logging
 from typing import List
 
 from websecmap.organizations.models import Organization, Url
-import logging
+
 log = logging.getLogger(__package__)
 
 """
@@ -48,4 +49,3 @@ def triage_identical():
 def delete_organizations(ids: List):
     deleted = Organization.objects.all().filter(id__in=ids).delete()
     print(f"Deleted: {deleted}.")
-

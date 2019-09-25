@@ -826,6 +826,11 @@ Vue.component('websecmap', {
                             index: 2
                         },
                         {
+                            text: "Switch Latitude & Longitude",
+                            callback: this.switch_lattitude_and_longitude,
+                            index: 2
+                        },
+                        {
                             separator: true,
                             index: 3
                         })
@@ -949,6 +954,15 @@ Vue.component('websecmap', {
             this.map.zoomOut();
         },
 
+        switch_lattitude_and_longitude: function(){
+            let url = `/data/admin/map/switch_lat_lng/${this.clicked_map_object.feature.properties['organization_id']}/`;
+            fetch(url).then(response => response.json()).then(data => {
+                alert(data.message)
+            }).catch((fail) => {
+                console.log('A lat long switching error occurred: ' + fail);
+                throw fail;
+            });
+        },
 
         style: function (feature) {
             return {weight: 1, opacity: 1, color: 'white', dashArray: '0', fillOpacity: 0.7,

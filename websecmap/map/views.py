@@ -17,7 +17,8 @@ from django.views.decorators.cache import cache_page
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
 from websecmap.map.logic import datasets
-from websecmap.map.logic.admin import add_proxies, add_urls, user_is_staff_member
+from websecmap.map.logic.admin import (add_proxies, add_urls, switch_lattitude_and_longitude,
+                                       user_is_staff_member)
 from websecmap.map.logic.datasets import create_filename
 from websecmap.map.logic.explain import (explain, get_all_explains, get_recent_explains,
                                          remove_explanation)
@@ -470,3 +471,8 @@ def _add_proxies(request):
     request = get_json_body(request)
     data = add_proxies(request.get('proxies'))
     return JsonResponse(data, encoder=JSEncoder, safe=False)
+
+
+@user_passes_test(user_is_staff_member)
+def _switch_lattitude_and_longitude(request, organization_id=0):
+    return JsonResponse(switch_lattitude_and_longitude(organization_id), encoder=JSEncoder, safe=False)
