@@ -314,20 +314,33 @@ Vue.component('websecmap', {
                     let selected_severity = 0;
 
                     // doesn't even need to be an array, as it just matters if the text matches somewhere
-                    let searchedfor = false;
+                    let search_active = false;
                     for (let point of childmarkers) {
-                        if (point.options.fillOpacity === 0.7)
-                            searchedfor = true;
-
-
+                        // we can figure this out another way.
+                        if (point.options.fillOpacity === 0.7) {
+                            search_active = true;
+                        }
+                    }
+                    for (let point of childmarkers) {
                         // upgrade severity until you find the highest risk issue.
-                        if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity){
-                            selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
-                            css_class = point.feature.properties.severity;
+                        if (search_active) {
+                            // filter down only on items that are actually seached for...
+                            if (point.options.fillOpacity === 0.7) {
+                                if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity) {
+                                    selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                                    css_class = point.feature.properties.severity;
+                                }
+                            }
+                        } else {
+                            // do not take in account the possible difference in search results.
+                            if (this.possibleIconSeverities.indexOf(point.feature.properties.severity) > selected_severity) {
+                                selected_severity = this.possibleIconSeverities.indexOf(point.feature.properties.severity);
+                                css_class = point.feature.properties.severity;
+                            }
                         }
                     }
 
-                    let classname = searchedfor ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
+                    let classname = search_active ? 'marker-cluster marker-cluster-' + css_class : 'marker-cluster marker-cluster-white';
 
                     return L.divIcon({
                         html: '<div><span>' + cluster.getChildCount() + '</span></div>',
