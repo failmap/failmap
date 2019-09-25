@@ -31,11 +31,11 @@
 }
 
 .marker-cluster-low {
-    background-color: rgba(241, 237, 75, 0.6);
+    background-color: rgba(181, 226, 140, 0.6);
 }
 
 .marker-cluster-low div {
-    background-color: rgba(255, 249, 30, 0.6);
+    background-color: rgba(110, 204, 57, 0.6);
 }
 
 .marker-cluster-high {
@@ -211,8 +211,8 @@
 
 .leaflet-marker-low
 {
-    background-color: rgba(253, 255, 5, 0.6);
-    border: 2px solid rgba(179, 172, 0, 0.5);
+    background-color: rgba(32, 255, 0, 0.6);
+    border: 2px solid rgba(0, 162, 2, 0.50);
 }
 
 .leaflet-marker-unknown
