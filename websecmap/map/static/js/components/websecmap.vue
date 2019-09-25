@@ -801,6 +801,9 @@ Vue.component('websecmap', {
                 this.add_points_to_map(geodata.points);
             }
 
+            // apply the current search criteria to the new plot
+            this.search();
+
             if (fitbounds)
                 this.show_everything_on_map();
         },
