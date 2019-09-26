@@ -121,6 +121,33 @@ class Configuration(models.Model):
         verbose_name_plural = _('configurations')
         ordering = ('display_order', )
 
+    def __str__(self):
+        return '%s/%s' % (self.country, self.organization_type,)
+
+
+class LandingPage(models.Model):
+
+    map_configuration = models.ForeignKey(
+        Configuration,
+        on_delete=models.CASCADE,
+        help_text="To what map configuration this landing page is relevant.")
+
+    directory = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        db_index=True,
+        help_text="A directory to this landing page. For example: municipality/ or gemeente/ or preview/ etc."
+                  " This directory will be added to your map urls. Do not use things like /admin/, as that will "
+                  "conflict with existing urls and your application might not boot without manual database edits."
+                  " Do not use a beginning slash."
+    )
+
+    enabled = models.BooleanField(
+        help_text="If this directory is enabled. You may need to restart the application when changing this.",
+        default=False
+    )
+
 
 class MapDataCache(models.Model):
 

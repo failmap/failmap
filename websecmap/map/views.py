@@ -150,7 +150,7 @@ def inject_default_language_cookie(request, response) -> HttpResponse:
 
 
 @cache_page(one_hour)
-def index(request):
+def index(request, map_configuration=None):
 
     # todo...
     def countries_and_layers():
@@ -187,7 +187,10 @@ def index(request):
 
     initial_countries = get_initial_countries()
 
-    map_defaults = get_defaults()
+    if map_configuration:
+        map_defaults = {'country': map_configuration.country, 'layer': map_configuration.organization_type.name}
+    else:
+        map_defaults = get_defaults()
 
     # a number of variables are injected so they can be used inside javascript.
     return inject_default_language_cookie(request, render(request, 'map/index.html', {

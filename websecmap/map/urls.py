@@ -2,14 +2,16 @@
 import proxy.views
 from constance import config
 from django.conf.urls import url
+from django.db import connection
 from django.urls import path, register_converter
 from django.views.i18n import JavaScriptCatalog
 
 import websecmap.map.logic.rss_feeds
 from websecmap import converters
 from websecmap.map import views
-
 # todo: organization type converter doesn't work yet... using slug as an alternative.
+from websecmap.map.models import LandingPage
+
 register_converter(converters.OrganizationTypeConverter, 'ot')
 register_converter(converters.WeeksConverter, 'w')
 register_converter(converters.DaysConverter, 'd')
@@ -17,7 +19,7 @@ register_converter(converters.CountryConverter, 'c')
 register_converter(converters.OrganizationIdConverter, 'oid')
 register_converter(converters.JsonConverter, 'json')
 
-urlpatterns = [
+static_urlpatterns = [
     path('', views.index),
     path('security.txt', views.security_txt),
     path('robots.txt', views.robots_txt),
@@ -102,3 +104,16 @@ urlpatterns = [
     # cache_page(86400, key_prefix='js18n')
     url(r'^jsi18n/map/$', JavaScriptCatalog.as_view(packages=['websecmap.map']), name='javascript-catalog'),
 ]
+
+# See if we already have access to this database object. If not, then skip this: map_landingpage,
+# otherwise it will block migrations etc... Perhaps there is a smarter way to do this that is not blocking...
+dynamic_urlpatterns = []
+if "map_landingpage" in connection.introspection.table_names():
+    # To enable landing pages, reset the application(!)
+    landingpages = LandingPage.objects.all().filter(enabled=True)
+    for landingpage in landingpages:
+        dynamic_urlpatterns.append(
+            path(landingpage.directory, views.index, {'map_configuration': landingpage.map_configuration})
+        )
+
+urlpatterns = static_urlpatterns + dynamic_urlpatterns

@@ -401,6 +401,14 @@ class HighLevelStatisticAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     actions.append(instant_cache_clear)
 
 
+@admin.register(models.LandingPage)
+class LandingPageAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+
+    list_display = ('map_configuration', 'directory', 'enabled')
+    list_filter = ['map_configuration', 'directory', 'enabled'][::-1]
+    search_fields = (['map_configuration', 'directory', 'enabled'])
+
+
 @admin.register(models.OrganizationReport)
 class OrganizationReportAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 

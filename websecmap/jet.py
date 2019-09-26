@@ -6,6 +6,7 @@ def websecmap_menu_items():
 
         {'label': _('🗺️ Map'), 'items': [
             {'name': 'map.configuration', 'label': _('Map Configuration')},
+            {'name': 'map.landingpage', 'label': _('Landing Pages')},
             {'name': 'map.administrativeregion', 'label': _('Region Importer')},
             {'name': 'map.mapdatacache', 'label': 'Map Data Cache (generated)'},
             {'name': 'map.vulnerabilitystatistic', 'label': 'Statistics (generated)'},
