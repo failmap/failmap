@@ -820,19 +820,24 @@ Vue.component('websecmap', {
                             index: 1,
                         }];
                 if (this.authenticated){
-                    menuItems.push({
+                    menuItems.push(
+                        {
+                            separator: true,
+                            index: 2
+                        },
+                        {
                             text: "Add url(s)",
                             callback: this.start_adding_domains,
-                            index: 2
+                            index: 3
                         },
                         {
                             text: "Switch Latitude & Longitude",
                             callback: this.switch_lattitude_and_longitude,
-                            index: 2
+                            index: 4
                         },
                         {
                             separator: true,
-                            index: 3
+                            index: 5
                         })
                 } else {
                     menuItems.push({
