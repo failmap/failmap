@@ -84,6 +84,18 @@ def repair_corrupted_coordinate(coordinate):
     return coordinate
 
 
+def attach_coordinate(organization, latitude, longitude):
+    coordinate = Coordinate()
+    coordinate.geojsontype = "Point"
+    coordinate.organization = organization
+    coordinate.area = [longitude, latitude]
+    coordinate.edit_area = {
+        "type": "Point",
+        "coordinates": [longitude, latitude]
+    }
+    coordinate.save()
+
+
 def switch_latlng(coordinate):
     validate_point(coordinate)
 

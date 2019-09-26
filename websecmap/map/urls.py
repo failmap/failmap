@@ -98,6 +98,7 @@ static_urlpatterns = [
     path('data/admin/urls/add/', views._add_urls),
     path('data/admin/proxy/add/', views._add_proxies),
     path('data/admin/map/switch_lat_lng/<oid:organization_id>/', views._switch_lattitude_and_longitude),
+    path('data/admin/organization/add/', views._add_organization),
 
     # translations for javascript files. Copied from the manual.
     # https://docs.djangoproject.com/en/2.0/topics/i18n/translation/

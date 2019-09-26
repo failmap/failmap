@@ -5,8 +5,8 @@ from typing import Dict
 
 from django.utils import timezone
 
-from websecmap.map.logic.coordinates import switch_latlng
-from websecmap.organizations.models import Coordinate, Organization, Url
+from websecmap.map.logic.coordinates import attach_coordinate, switch_latlng
+from websecmap.organizations.models import Coordinate, Organization, OrganizationType, Url
 from websecmap.scanners.models import ScanProxy
 
 
@@ -22,6 +22,66 @@ def operation_response(error: bool = False, success: bool = False, message: str 
             'data': data,
             'timestamp': timezone.now()
             }
+
+
+def add_organization(data):
+
+    if not data.get('layer', 0):
+        return operation_response(error=True, message="No layer selected, cannot add organization.")
+
+    if not data.get('country', 0):
+        return operation_response(error=True, message="No country given, cannot add organization.")
+
+    if not data.get('name', 0):
+        return operation_response(error=True, message="No name given, cannot add organization.")
+
+    if not data.get('address', 0):
+        return operation_response(error=True, message="No address given, cannot add organization.")
+
+    if not data.get('latitude', 0):
+        return operation_response(error=True, message="No latitude given, cannot add organization.")
+
+    if not data.get('longitude', 0):
+        return operation_response(error=True, message="No longitude given, cannot add organization.")
+
+    if "domains" not in data:
+        return operation_response(error=True, message="Domains should be present and at least empty.")
+
+    # prevent duplicate organizations
+    if Organization.objects.all().filter(name=data['name'], country=data['country'], type__name=data['layer']).first():
+        return operation_response(error=True, message="Organization with this name already exists in this layer."
+                                                      " Preventing a duplicate.")
+
+    # https://stackoverflow.com/questions/15965166/what-is-the-maximum-length-of-latitude-and-longitude
+    # The valid range of latitude in degrees is -90 and +90 for the southern and northern hemisphere respectively.
+    if float(data['latitude'] < -90 or float(data['latitude']) > 90):
+        return operation_response(error=True, message="Latitude is between -90 and 90.")
+
+    # Longitude is in the range -180 and +180 specifying coordinates west and east of the Prime Meridian, respectively.
+    if float(data['longitude'] < -180 or float(data['longitude']) > 180):
+        return operation_response(error=True, message="Latitude is between -180 and 180.")
+
+    # Create the new organization
+    new_organization = Organization()
+    new_organization.name = data['name']
+    new_organization.address = data['address']
+    new_organization.country = data['country']
+    new_organization.type = OrganizationType.objects.all().filter(name=data['layer']).first()
+    new_organization.internal_notes = "Added via the Map admin interface."
+    new_organization.created_on = timezone.now()
+    new_organization.save()
+
+    # Add a point to it:
+    attach_coordinate(organization=new_organization, latitude=data['latitude'], longitude=data['longitude'])
+
+    # The filter the added urls, and try to add them...
+    if data['domains']:
+        response = add_urls(new_organization.pk, data['domains'])
+        if response['error']:
+            return response
+
+    return operation_response(success=True, message="Organization was added, and will be visible after creating a new"
+                                                    " report.")
 
 
 def switch_lattitude_and_longitude(organization_id):

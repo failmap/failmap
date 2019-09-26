@@ -187,7 +187,7 @@
 
         let document_ready = function() {
 
-            app = new Vue({
+            document.app = new Vue({
                 i18n,
                 store,
 
@@ -694,7 +694,7 @@
                 },
 
                 mounted: function(){
-                    console.log("App loaded...")
+                    console.log("App loaded...");
                 },
             });
 
@@ -715,6 +715,7 @@
                     name: organization_name,
                 }});
             }
+
         };
 
         const i18n = new VueI18n({
@@ -918,8 +919,12 @@
     {% include "map/static/js/components/websecmap.vue" %}
     {% include "map/static/js/components/footer.vue" %}
     {% include "map/static/js/components/mainmenu.vue" %}
+    {% if admin %}
     {% include "map/static/js/components/debugmenu.vue" %}
+    {%  endif %}
     {% include "map/static/js/components/ticker.vue" %}
+
+
 </head>
 
 <body role="document" onload="document_ready();">
@@ -930,7 +935,7 @@
 
         <mainmenu :config="config"></mainmenu>
         {% if admin %}
-        <debugmenu :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>
+        <debugmenu ref="debugmenu" :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>
         {% endif %}
         <mapstatebar :map_configuration="map_configuration"></mapstatebar>
 
@@ -1042,6 +1047,8 @@
     <div class="charts_connectivity_internet_adresses"></div>
     <div class="charts_connectivity_services"></div>
 </div>
+
+
 
 </body>
 
