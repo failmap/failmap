@@ -304,6 +304,7 @@ Vue.component('websecmap', {
             // leafletmarkercluster is not supported for 'old school' approaches like this
             markers: L.markerClusterGroup(
             {
+                // this better matches the shape of a country
                 maxClusterRadius: 25,
 
                 iconCreateFunction: (cluster) => {
