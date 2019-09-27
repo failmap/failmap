@@ -42,10 +42,10 @@
                 </ul>
                 <ul class="navbar-nav navbar-right ml-auto">
                     <li class="nav-item nav-link" style="padding-right:20px;">
-                        <a href="https://websecuritymap.org"><img src="static/images/web-security-map-logo-small.png" alt="logo" width="34px" class="d-inline-block align-top"/></a>
+                        <a href="https://websecuritymap.org"><img src="/static/images/web-security-map-logo-small.png" alt="logo" width="34px" class="d-inline-block align-top"/></a>
                     </li>
                     <li class="nav-item nav-link" style="padding-right:20px;">
-                        <a href="https://gitlab.com/internet-cleanup-foundation/web-security-map/"><img src="static/images/gitlab_logo_small.png" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
+                        <a href="https://gitlab.com/internet-cleanup-foundation/web-security-map/"><img src="/static/images/gitlab_logo_small.png" alt="gitlab logo" width="24px" class="d-inline-block align-top"/></a>
                     </li>
                 </ul>
             </div>
