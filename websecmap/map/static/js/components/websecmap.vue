@@ -1,9 +1,11 @@
 {% verbatim %}
 <template type="x-template" id="websecmap_template">
     <div>
+        <!-- these settings made the map unusable on mobile devices -->
+        <!-- scrollWheelZoom: false, tap: true, zoomSnap: 0.2, dragging: !L.Browser.mobile, touchZoom: true, -->
         <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
                :options="{
-               scrollWheelZoom: false, tap: true, zoomSnap: 0.2, dragging: !L.Browser.mobile, touchZoom: true,
+                scrollWheelZoom: false,
                contextmenu: true,
                 contextmenuWidth: 140,
                 contextmenuItems: [
@@ -857,15 +859,17 @@ Vue.component('websecmap', {
 
                 let popup = L.popup({minWidth: 200});
                 popup.setContent(`
-                    <b>${props['organization_name']}</b><br>
-                    <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">View report</a><br>
-                    <div class="progress">
-                        <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
-                        <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
-                        <div class="progress-bar bg-success" style="width:${props['percentages']['low_urls']}%"></div>
-                        <div class="progress-bar bg-success" style="width:${props['percentages']['good_urls']}%"></div>
-                    </div>
-                `);
+                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
+                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']} 🔍</b>
+                <br>
+                <div class="progress">
+                    <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
+                    <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
+                    <div class="progress-bar bg-success" style="width:${props['percentages']['low_urls']}%"></div>
+                    <div class="progress-bar bg-success" style="width:${props['percentages']['good_urls']}%"></div>
+                </div>
+                </a>
+            `);
 
                 pointlayer.bindPopup(popup).openPopup();
 
@@ -929,14 +933,16 @@ Vue.component('websecmap', {
 
             let popup = L.popup({minWidth: 200});
             popup.setContent(`
-                <b>${props['organization_name']}</b><br>
-                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">View report</a><br>
+                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
+                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']} 🔍</b>
+                <br>
                 <div class="progress">
                     <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
                     <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
                     <div class="progress-bar bg-success" style="width:${props['percentages']['low_urls']}%"></div>
                     <div class="progress-bar bg-success" style="width:${props['percentages']['good_urls']}%"></div>
                 </div>
+                </a>
             `);
 
             // ${props['total_urls']} ${this.$t('map.popup.urls')}<br>
@@ -949,6 +955,14 @@ Vue.component('websecmap', {
                 click: this.highlightFeature,
                 dblclick: this.showreport,
             });
+        },
+
+        determine_book_color: function(percentages){
+            if (percentages['high_urls']) return "📕";
+            if (percentages['medium_urls']) return "📙";
+            if (percentages['low_urls']) return "📗";
+            if (percentages['good_urls']) return "📗";
+            return "📓";
         },
 
         showCoordinates: function(e) {

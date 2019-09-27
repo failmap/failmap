@@ -68,7 +68,7 @@ Vue.component('vulnerability-chart', {
                 },
                 options: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     responsive: true,
                     maintainAspectRatio: false,
@@ -112,59 +112,37 @@ Vue.component('vulnerability-chart', {
 
         renderData: function(){
             let data = this.data;
+            let possible_axis = ['high', 'medium', 'low', 'good'];
 
-            let labels = Array();
-            let high = Array();
-            let medium = Array();
-            let low = Array();
-            let good = Array();
+            let ax_data = {'labels': [], 'high': [], 'medium': [], 'low': [], 'good': []};
 
             for(let i=0; i<data.length; i++){
-                labels.push(data[i].date);
-                high.push(data[i].high);
-                medium.push(data[i].medium);
-                low.push(data[i].low);
-                good.push(data[i].good);
+                ax_data['labels'].push(data[i].date);
+                ax_data['high'].push(data[i].high);
+                ax_data['medium'].push(data[i].medium);
+                ax_data['low'].push(data[i].low);
+                ax_data['good'].push(data[i].good);
             }
 
-            this.chart.data.labels = labels;
-            this.chart.data.datasets = [{
-                        label: this.translate('amount_high'),
-                        data: high,
-                        backgroundColor: this.color_scheme.high_background,
-                        borderColor: this.color_scheme.high_border,
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('high')
-                    },
-                    {
-                        label: this.translate('amount_medium'),
-                        data: medium,
-                        backgroundColor: this.color_scheme.medium_background,
-                        borderColor: this.color_scheme.medium_border,
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('medium')
-                    },
-                    {
-                        label: this.translate('amount_low'),
-                        data: low,
-                        backgroundColor: this.color_scheme.low_background,
-                        borderColor: this.color_scheme.low_border,
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('low')
-                    },
-                    {
-                        label: this.translate('amount_good'),
-                        data: good,
-                        backgroundColor: this.color_scheme.good_background,
-                        borderColor: this.color_scheme.good_border,
-                        borderWidth: 1,
-                        lineTension: 0,
-                        hidden: !this.axis.includes('good')
-                    },
-                ];
+            this.chart.data.labels = ax_data['labels'];
+
+            this.chart.data.datasets = [];
+            possible_axis.forEach((ax) => {
+                    if (this.axis.includes(ax)) {
+                        this.chart.data.datasets.push(
+                            {
+                                label: this.translate(`amount_${ax}`),
+                                data: ax_data[ax],
+                                backgroundColor: this.color_scheme[`${ax}_background`],
+                                borderColor: this.color_scheme[`${ax}_border`],
+                                borderWidth: 1,
+                                lineTension: 0,
+                                hidden: !this.axis.includes(ax)
+                            }
+                        )
+                    }
+                }
+            );
 
             this.chart.update();
         }
@@ -279,7 +257,7 @@ Vue.component('connectivity-chart', {
                 },
                 options: {
                     legend: {
-                        display: false
+                        display: true
                     },
                     responsive: true,
                     maintainAspectRatio: false,

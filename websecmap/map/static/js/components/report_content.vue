@@ -58,7 +58,12 @@
                     <br style="clear: both">
 
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <vulnerability-chart :color_scheme="color_scheme" :data="timeline" :axis="['high', 'medium', 'low']"></vulnerability-chart>
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="timeline"
+                            :axis="['high', 'medium', 'low']"
+                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                        ></vulnerability-chart>
                     </div>
 
                     <br />
@@ -204,6 +209,16 @@ Vue.component('report_content', {
             en: {
                 report_content: {
 
+                    vulnerability_graph: {
+                        title: "Total amount of issues over time",
+                        xAxis_label: "Month",
+                        yAxis_label: "Risk",
+                        amount_high: "# High Risk",
+                        amount_medium: "# Medium Risk",
+                        amount_low: "# Low Risk",
+                        amount_good: "# Good",
+                    },
+
                     explain: {
                         explain: "Explain",
                         subject: "Explanation of finding",
@@ -295,6 +310,17 @@ Vue.component('report_content', {
             },
             nl: {
                 report_content: {
+
+                    vulnerability_graph: {
+                        title: "Totaal aantal risico's over tijd.",
+                        xAxis_label: "Maand",
+                        yAxis_label: "Risico",
+                        amount_high: "# Hoog risico",
+                        amount_medium: "# Midden risico",
+                        amount_low: "# Laag risico",
+                        amount_good: "# Goed",
+                    },
+
                     explain: {
                         explain: "Verklaar",
                         subject: "Verklaring",
