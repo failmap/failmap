@@ -70,7 +70,6 @@ def get_top_win_data(country: str = "NL", organization_type="municipality", week
             GROUP BY organization.name
             HAVING high = 0 AND medium = 0
             ORDER BY low ASC, total_endpoints DESC, organization.name ASC
-            
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
 
@@ -128,7 +127,6 @@ def get_top_fail_data(country: str = "NL", organization_type="municipality", wee
             GROUP BY organization.name
             HAVING high > 0 or medium > 0
             ORDER BY high DESC, medium DESC, medium DESC, organization.name ASC
-            
             ''' % {"when": when, "OrganizationTypeId": get_organization_type(organization_type),
                    "country": get_country(country)}
 
