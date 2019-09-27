@@ -126,7 +126,7 @@ div#report {
 .perurl {
     width: 100%;
     clear: both;
-    display: table;
+    overflow: scroll;
 
     /* alternating rows, taking in account images. */
     padding-top: 15px;
