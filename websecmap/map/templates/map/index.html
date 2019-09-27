@@ -4,8 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="description" content="Security issues of organizations in {{ country }} displayed a map">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, minimal-ui">
-    <meta name="theme-color" content="Tomato"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes, minimal-ui">
+    <meta name="theme-color" content="Cyber"/>
 
     {% if config.PROJECT_NAME  %}
         <title>{{ config.PROJECT_NAME }}
@@ -951,7 +951,7 @@
         </section>
 
         <section>
-            <websecmap :L="L"
+            <websecmap ref="websecmap" :L="L"
                        :issues="issues"
                        :mapbox_token="config.mapbox_token"
                        :debug="config.debug"

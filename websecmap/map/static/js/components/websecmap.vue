@@ -58,13 +58,13 @@
 
             <l-control-scale position="bottomleft" :imperial="true" :metric="true"></l-control-scale>
 
-            <l-control position="topright">
+            <l-control position="topright" class="search-on-map">
                 <div class="info table-light">
                     <input id='searchbar' type='text' v-model="searchquery" :placeholder="$t('map.search.placeholder')"/>
                 </div>
             </l-control>
 
-            <l-control position="topright">
+            <l-control position="topright" class="hide_on_small_screens">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <h4>{{ $t("map.history.title") }} </h4>
                     <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
@@ -79,7 +79,7 @@
                 </div>
             </l-control>
 
-            <l-control position="topright"  v-if="issues.length > 1">
+            <l-control position="topright"  v-if="issues.length > 1" class="hide_on_small_screens">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <button class="btn btn-secondary btn-small" style='width: 100%' type="button" data-toggle="collapse" data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseExample">
                         <template v-if="['clear_filter_option', ''].includes(displayed_issue)">{{ $t("map.filter.title") }}</template>
@@ -98,7 +98,7 @@
                 </div>
             </l-control>
 
-            <l-control position="topright">
+            <l-control position="topright" class="hide_on_small_screens">
                 <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
                     <div>
@@ -137,7 +137,7 @@
                 </div>
             </l-control>
 
-            <l-control position="bottomright">
+            <l-control position="bottomright" class="hide_on_small_screens">
                 <div class="info legend table-light">
                     <span class='legend_title'>{{ $t("map.legend.title") }}</span><br>
                     <div style="height: 20px"><i class="map_polygon_good"></i> {{ $t("map.legend.good") }}</div>
@@ -858,6 +858,7 @@ Vue.component('websecmap', {
                 let popup = L.popup({minWidth: 200});
                 popup.setContent(`
                     <b>${props['organization_name']}</b><br>
+                    <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">View report</a><br>
                     <div class="progress">
                         <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
                         <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
@@ -871,7 +872,8 @@ Vue.component('websecmap', {
                 pointlayer.on({
                     mouseover: this.highlightFeature,
                     mouseout: this.resetHighlight,
-                    click: this.showreport
+                    click: this.highlightFeature,
+                    dblclick: this.showreport,
                 });
 
                 // allow opening of reports and such in the old way.
@@ -928,6 +930,7 @@ Vue.component('websecmap', {
             let popup = L.popup({minWidth: 200});
             popup.setContent(`
                 <b>${props['organization_name']}</b><br>
+                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">View report</a><br>
                 <div class="progress">
                     <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
                     <div class="progress-bar bg-warning" style="width:${props['percentages']['medium_urls']}%"></div>
@@ -943,7 +946,8 @@ Vue.component('websecmap', {
             layer.on({
                 mouseover: this.highlightFeature,
                 mouseout: this.resetHighlight,
-                click: this.showreport,
+                click: this.highlightFeature,
+                dblclick: this.showreport,
             });
         },
 

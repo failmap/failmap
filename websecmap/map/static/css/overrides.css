@@ -21,12 +21,28 @@ body {
     background-clip: padding-box;
 }
 
+#searchbar {
+    width: 100%;
+    font-size: 20px;
+}
+
 /* Hide info boxes on mobile / small resolutions */
 @media screen and (max-width: 768px) {
-    .info {
+    .hide_on_small_screens {
         visibility: hidden;
+        pointer-events: none;
+    }
+
+    #searchbar {
+        width: 80vw;
+    }
+
+    .search-on-map {
+        max-width: 80vw;
     }
 }
+
+
 
 .finding_block{
     margin-left: 20px;
@@ -261,11 +277,6 @@ div#report {
 path {
     -webkit-transition: fill 400ms;
     transition: fill 400ms;
-}
-
-#searchbar {
-    width: 100%;
-    font-size: 20px;
 }
 
 .backtomap {
