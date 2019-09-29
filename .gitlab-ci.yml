@@ -71,6 +71,25 @@ test_postgres: &test_postgres_template
     poetry_args: --extras=deploy
   retry: 1
 
+# functional testing using mariadb as it is default for debian 9
+test_mariadb: &test_mariadb_template
+  <<: *test_template
+  services:
+    - mariadb:latest
+  variables:
+    # configuration for docker mariadb service
+    MYSQL_ROOT_PASSWORD: failmap
+    MYSQL_DATABASE: failmap
+    MYSQL_USER: failmap
+    MYSQL_PASSWORD: failmap
+    # select mysql database settings, all settings default to 'failmap'
+    # so they don't need to be passed explicitly
+    DJANGO_DATABASE: production
+    DB_HOST: mariadb
+    # make poetry install mysql dependencies
+    poetry_args: --extras=deploy
+  retry: 1
+
 # integration tests
 integration:
   <<: *test_template
