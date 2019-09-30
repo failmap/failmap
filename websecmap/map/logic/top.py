@@ -164,13 +164,13 @@ def rows_to_dataset(rows, when):
             "low": i[8],
             "total_urls": i[9],
             "total_endpoints": i[10],
-            "high_div_endpoints": "%s" % ceil((int(i[6]) / int(i[10])) * 100),
-            "mid_div_endpoints": "%s" % ceil((int(i[7]) / int(i[10])) * 100),
-            "low_div_endpoints": "%s" % ceil((int(i[8]) / int(i[10])) * 100),
+            "high_div_endpoints": "%s" % ceil((int(i[6]) / int(i[10])) * 100) if i[10] else 0,
+            "mid_div_endpoints": "%s" % ceil((int(i[7]) / int(i[10])) * 100) if i[10] else 0,
+            "low_div_endpoints": "%s" % ceil((int(i[8]) / int(i[10])) * 100) if i[10] else 0,
 
             # Add all percentages, which is sort of an indication how bad / well the organization is doing overall.
-            "relative": ceil((int(i[6]) / int(i[10])) * 1000) + ceil((int(i[7]) / int(i[10])) * 100) +
-            ceil((int(i[8]) / int(i[10])) * 10)
+            "relative": (ceil((int(i[6]) / int(i[10])) * 1000) + ceil((int(i[7]) / int(i[10])) * 100) +
+                         ceil((int(i[8]) / int(i[10])) * 10)) if i[10] else 0
         }
         rank = rank + 1
 
