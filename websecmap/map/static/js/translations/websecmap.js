@@ -6,6 +6,7 @@ const messages = {
         // new translations
         back_to_map: "Back to the map",
         week: "week",
+        view_report: "View report",
 
         // layers
         municipality: 'Municipalities',
@@ -162,6 +163,7 @@ const messages = {
     },
     nl: {
         back_to_map: "Terug naar de kaart",
+        view_report: "Rapport bekijken",
 
         municipality: 'Gemeenten',
         cyber: 'Cyber',

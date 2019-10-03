@@ -104,7 +104,8 @@
                 <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
                     <div>
-                        <h4><a @click="showreport(hover_info.properties.organization_id)">{{ hover_info.properties.organization_name }}</a></h4>
+                        <h4><a @click="showreport_frompopup(hover_info.properties.organization_id, hover_info.properties.organization_name)">{{ hover_info.properties.organization_name }}</a></h4>
+                        <a @click="showreport_frompopup(hover_info.properties.organization_id, hover_info.properties.organization_name)">🔍 {{ $t("view_report") }}</a><br>
                         <div class="progress">
                             <div class="progress-bar bg-danger" :style="{width:high}"></div>
                             <div class="progress-bar bg-warning" :style="{width:medium}"></div>
@@ -860,7 +861,8 @@ Vue.component('websecmap', {
                 let popup = L.popup({minWidth: 200});
                 popup.setContent(`
                 <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
-                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']} 🔍</b>
+                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']}</b><br>
+                    🔍 ${ i18n.t("view_report") }
                 <br>
                 <div class="progress">
                     <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
@@ -934,7 +936,8 @@ Vue.component('websecmap', {
             let popup = L.popup({minWidth: 200});
             popup.setContent(`
                 <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
-                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']} 🔍</b>
+                    <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']}</b><br>
+                    🔍 ${ i18n.t("view_report") }
                 <br>
                 <div class="progress">
                     <div class="progress-bar bg-danger" style="width:${props['percentages']['high_urls']}%"></div>
