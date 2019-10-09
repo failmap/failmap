@@ -13,7 +13,7 @@ import logging
 from time import sleep
 
 from celery import Task, group
-from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver
+from dns.resolver import NXDOMAIN, NoAnswer, NoNameservers, Resolver, Timeout
 from tenacity import before_log, retry, stop_after_attempt, wait_exponential
 
 from websecmap.celery import app
@@ -199,6 +199,9 @@ def has_soa(url: Url):
     if answer is None:
         return False
 
+    if answer is False:
+        return False
+
     if answer.response:
         return True
 
@@ -285,6 +288,10 @@ def get_dns_records(url, record_type):
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
+    except Timeout:
+        # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
+        log.error(f"Timeout received for DNS query to {url.url}.")
+        return False
 
 
 @retry(wait=wait_exponential(multiplier=1, min=0, max=10),
@@ -307,6 +314,10 @@ def get_dns_records_accepting_no_answer(url, record_type):
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
+    except Timeout:
+        # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
+        log.error(f"Timeout received for DNS query to {url.url}.")
+        return False
 
 
 """

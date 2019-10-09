@@ -70,14 +70,16 @@
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <h4>{{ $t("map.history.title") }} </h4>
                     <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
-                    <h5 v-if="!loading">{{ visibleweek }}</h5>
+                    <template v-if="!loading">
+                        <button :disabled='state.week === 52' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
+                        {{ visibleweek }}
+                        <button :disabled='state.week === 0' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
+                        <br>
+                    </template>
+
                     <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
-                    <button v-if='state.week !== 52' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
 
                     <input id='history' class='slider' type='range' v-on:change='show_week' v-on:input="update_visible_week" :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
-
-                    <button v-if='state.week !== 0' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
-
                 </div>
             </l-control>
 
