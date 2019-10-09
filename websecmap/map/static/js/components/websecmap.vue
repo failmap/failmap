@@ -71,15 +71,15 @@
                     <h4>{{ $t("map.history.title") }} </h4>
                     <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
                     <template v-if="!loading">
-                        <button :disabled='state.week === 52' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
+                        <button :disabled='state.week === 52' style='float: left' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
                         {{ visibleweek }}
-                        <button :disabled='state.week === 0' style='margin-top: -36px;' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
+                        <button :disabled='state.week === 0' style='float: right' class='btn btn-small btn-secondary' @click='next_week' :disabled='loading'>+1</button>
                         <br>
+                        <input id='history' class='slider' type='range' v-on:change='show_week' v-on:input="update_visible_week" :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
                     </template>
 
                     <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
 
-                    <input id='history' class='slider' type='range' v-on:change='show_week' v-on:input="update_visible_week" :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
                 </div>
             </l-control>
 
