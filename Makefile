@@ -58,7 +58,7 @@ test: .make.test	## run test suite
 .make.test: ${pysrc} ${app}
 	# run testsuite
 	DJANGO_SETTINGS_MODULE=${app_name}.settings ${env} coverage run --include '${app_name}/*' \
-		-m pytest -k 'not integration and not system' ${testargs}
+		-m pytest -ra -k 'not integration and not system' ${testargs}
 	# generate coverage
 	${env} coverage report
 	# and pretty html
@@ -117,12 +117,12 @@ testcase: ${app}
 	# run specific testcase
 	# example: make testcase case=test_openstreetmaps
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -k ${case}
+		${env} pytest -ra -k ${case}
 
 test_integration: ${app}
 	# run integration tests
 	${env} DJANGO_SETTINGS_MODULE=${app_name}.settings DB_NAME=test.sqlite3 \
-		${env} pytest -k 'integration' ${testargs}
+		${env} pytest -ra -k 'integration' ${testargs}
 
 test_system:
 	# run system tests
