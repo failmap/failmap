@@ -46,6 +46,7 @@ test_mysql: &test_mysql_template
     # select mysql database settings, all settings default to 'failmap'
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
+    DB_USER: root
     # make poetry install mysql dependencies
     poetry_args: --extras=deploy
   retry: 1
@@ -57,7 +58,7 @@ test_postgres: &test_postgres_template
     # current version in debian jessie
     - postgres:9.4
   variables:
-    # configuration for docker mysql service
+    # configuration for docker postgres service
     POSTGRES_DB: failmap
     POSTGRES_USER: failmap
     POSTGRES_PASSWORD: failmap
