@@ -1,0 +1,117 @@
+django
+django-jet
+django-countries
+django-leaflet
+django-geojson
+jsonfield
+django-import-export
+django-constance
+django-picklefield
+
+pyyaml
+typing
+
+# use mozzila certificate bundle by default
+certifi
+pytz
+
+# task processing framework
+django-celery-beat
+# celery 4.3+: https://github.com/celery/celery/issues/4500#issuecomment-400350526
+celery[redis,eventlet]>=4.3
+# flower < 0.9.3 conflicts with tornado >6.0
+flower>=0.9.3
+
+# https://github.com/pi-bjl/celery-statsd/commit/5d61d7756f115dbf05a7eeb8314495b53ee1955e
+django-statsd-mozilla
+
+# scanner deps
+requests
+
+# dnsrecon / DNS scanning dependencies
+dnspython
+netaddr
+
+# screenshots
+Pillow
+python-resize-image
+
+# url parsing in the database, and several other locations
+tldextract
+
+# logging
+colorlog
+
+# for proxying external requests (mapbox)
+django-proxy
+
+# sentry client
+raven
+
+# allow recursive comparison of dictionaries
+deepdiff
+
+urllib3
+
+# loading json is faster in simplejson
+# https://stackoverflow.com/questions/712791/what-are-the-differences-between-json-and-simplejson-python-modules
+# needed for mapping reasons.
+simplejson
+
+# Remote worker TLS
+pyopenssl
+
+# static file collection/generation
+django_compressor
+csscompressor
+
+retry
+
+# map, to reduce the number of points (Ramer-Douglas-Peucker algorithm)
+rdp
+
+wikidata
+
+django-nested-admin
+
+# game requirements
+django-crispy-forms
+django-autocomplete-light
+
+django-admin-sortable2
+
+pyexcel-text
+# game team colors
+validators
+django-colorful
+
+# game, add multiple urls in one go.
+django-select2
+
+# ISO country code conversion
+iso3166
+
+# generic retry library
+tenacity
+
+# game
+spectra
+markdown
+
+# geocoding organizations from python
+googlemaps
+
+# allowing generic import of these types of files:
+django-excel
+pyexcel-xls
+pyexcel-xlsx
+pyexcel-ods
+
+# database clients
+mysqlclient
+psycopg2
+
+# wsgi server
+uwsgi
+django-uwsgi
+

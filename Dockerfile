@@ -34,20 +34,12 @@ RUN npm install --global osmtogeojson
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 # required because pip 19+ breaks pyproject.toml editable builds: https://github.com/pypa/pip/issues/6434
 ENV PIP_USE_PEP517 false
-RUN /usr/bin/pip3 install --upgrade poetry==0.12.15 virtualenv pip
-RUN virtualenv /pyenv
+RUN python3 -mvenv /pyenv
 ENV VIRTUAL_ENV /pyenv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
 
-COPY pyproject.toml poetry.lock README.md /source/
-COPY websecmap/ /source/websecmap/
-
-WORKDIR /source
-# Install app and dependencies in a artifact-able directory
-# App is installed by linking source into virtualenv. This is against convention
-# but allows the source to be overwritten by a volume during development.
-RUN poetry install -v --no-dev --extras deploy --develop websecmap
-WORKDIR /
+COPY requirements.txt /source/
+RUN pip install -qr /source/requirements.txt
 
 # restart with a clean image
 FROM websecmap/o-saft:latest
@@ -115,6 +107,13 @@ COPY /tools/dnssec.pl /usr/local/bin/dnssec.pl
 
 # copy dependencies that are not in pypi or otherwise not available with ease
 COPY ./vendor/ /source/vendor/
+
+# copy and install websecmap source last, as this changes most often, this improves docker cache
+COPY setup.py README.md /source/
+COPY tools/ /source/tools/
+COPY websecmap/ /source/websecmap/
+WORKDIR /source
+RUN pip install -e .
 
 WORKDIR /
 

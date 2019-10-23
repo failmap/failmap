@@ -1,0 +1,36 @@
+autopep8
+autoflake
+isort
+pylama
+coverage
+pytest
+pytest-cov
+pytest-django
+# counterpart of requests for mock responses
+pytest-responses
+# output logging when test fails
+pytest-logging
+django-coverage
+django-extensions
+django-debug-toolbar
+django-debug-toolbar-request-history
+pytest-mock
+
+# docs / readthedocs.io
+sphinx
+sphinx-autobuild
+recommonmark
+sphinx_rtd_theme
+
+# tests (of scanners)
+httmock
+freezegun
+colorama
+pydotplus
+
+# used to restart celery worker on file changes
+watchdog
+
+ipython
+django-cprofile-middleware
+moviepy
