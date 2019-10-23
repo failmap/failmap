@@ -6,12 +6,7 @@ set -xe
 
 host=${1:-localhost}
 
-if /bin/ls --help 2>&1 | grep BusyBox; then
-  # Busybox shell, use different argument for timeout
-  timeout="timeout -t ${TIMEOUT:-60}"
-else
-  timeout="timeout ${TIMEOUT:-60}"
-fi
+timeout="timeout ${TIMEOUT:-60}"
 
 if [ "$(uname -s)" = Darwin ] && ! command -v timeout;then
   timeout() { perl -e 'alarm shift; exec @ARGV' "$@"; }

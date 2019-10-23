@@ -75,7 +75,7 @@ check: .make.check.py .make.check.sh  ## code quality checks
 
 .make.check.sh: ${shsrc}
 	# shell script checks (if installed)
-	if command -v shellcheck &>/dev/null;then ${env} shellcheck ${shsrc}; fi
+	if command -v shellcheck &>/dev/null;then ${env} shellcheck --version; ${env} shellcheck ${shsrc}; fi
 	@touch $@
 
 autofix fix: .make.fix  ## automatic fix of trivial code quality issues
