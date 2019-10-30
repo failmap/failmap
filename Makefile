@@ -178,7 +178,17 @@ ${VIRTUAL_ENV}/.%.txt.installed: %.txt | ${pip}
 
 # perform 'pip freeze' on first class requirements in .in files.
 requirements.txt requirements-dev.txt: %.txt: %.in | ${pip-compile}
-	${pip-compile} --output-file $@ $<
+	${pip-compile} ${pip_compile_args} --output-file $@ $<
+
+update_requirements: pip_compile_args=--upgrade
+update_requirements: _mark_outdated requirements.txt requirements-dev.txt _commit_update
+
+_mark_outdated:
+	touch requirements*.in
+
+_commit_update: requirements.txt
+	git add requirements*.txt requirements*.in
+	git commit -m "Updated requirements."
 
 ${pip-compile}: | ${pip}
 	${pip} install pip-tools

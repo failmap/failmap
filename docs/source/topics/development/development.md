@@ -124,37 +124,16 @@ If you don't want to use Direnv be sure to source the `.envrc` file manually eve
 
     . .envrc
 
-## Python dependencies managment / Poetry
+## Python dependencies managment
 
-Dependencies and settings for this project are managed using Poetry and a projectfile (`pyproject.toml`), this replaces the traditional `setup.py` and `requirements.txt` files.
+Dependencies and settings for this project are managed using [Pip-tools](https://github.com/jazzband/pip-tools) which is simple tool build on top of Pip and `requirements.txt` files.
 
-With Poetry all project build settings as well as the dependencies are placed in the projectfile. Dependencies can be added manually to the file or using `poetry add <packagename>`.
+Dependencies are added to (or removed from) the `requirements.in` file (`requirements-dev.in` for development dependencies). The `pip-compile` command will then be used to parse this file and generate a list of all (recursive)dependencies to install with exact versions pinnen and put this in the respective `.txt` file.
 
-Package version contraints in the projectfile should be as coarse as possible, preferrably pinned on major release.
+Any update to a `.in` file will automatically trigger a Make target to update `.txt` files and install new dependencies when running Make commands.
 
-After adding/changing dependencies in the projectfile the lockfile (`poetry.lock`) should be updated. This is done using the command `poetry lock` (and is done implicitly by `poetry add`). Locking causes Poetry to resolve dependencies for all packages (best fit to the given version constraints) and record the resolved package versions in the lockfile.
+Version pinning in `.in` files should be kept to a minimum and if it is required should be accompanied by a rationale/deadline comment.
 
-The lockfile is then commited into Git along with the changes in the projectfile. Since only the lockfile is used to install dependencies, every build using this commit with have the exact same versions of packages. But with the constraints in the projectfile it is trivial to update all dependencies (eg: for security) at regular interval.
+To have `pip-compile` check for new versions of all dependencies within the version boundaries of `.in` files run: `make update_requirements`
 
-Poetry splits dependencies into application and development dependencies. Development dependencies are to be used for packages that are only needed in development, like linting tools, debug plugins, etc.
-
-Extra's also work in Poetry. This is done by adding packages as 'optional' and then specifying them in and Extra in the `tool.poetry.extras` section.
-
-For detailed information please refer to: https://github.com/sdispater/poetry
-
-For daily usage:
-
-    poetry add <packagename> # add and install a new package
-    poetry remove <packagename> # remove and install package
-
-    poetry add --dev <packagename> # add and install package but as a development dependency
-
-    poetry install # install all dependencies from lockfile
-
-    poetry install --dev # install only application dependencies (and not development dependencies)
-
-    poetry update # update and install all dependencies to latest version (within their contraints) and update lockfile
-
-    poetry show --tree # show the package dependency tree
-
-    poetry show --outdated # show packages requiring an update
+Both the `.in` and the `.txt` files should be commited to Git. The `.txt` files are used during installation to ensure dependencies are predictable accross environments.

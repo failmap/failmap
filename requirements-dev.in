@@ -1,3 +1,13 @@
+# Dependencies for this project are manager using pip-tools (https://github.com/jazzband/pip-tools).
+# This is a simple management tool to manage version pinnin build on top of Pip and requirements.txt.
+
+# Please also refer to: https://gitlab.com/internet-cleanup-foundation/web-security-map/blob/master/docs/source/topics/development/development.md#python-dependencies-managment
+
+# To keep this file clear and simple:
+# - specify requirements that are needed for Websecmap development.
+# - version pinning only if it is required and explained
+# - only direct requirements, not recursive (requirements of requirements)
+
 autopep8
 autoflake
 isort
