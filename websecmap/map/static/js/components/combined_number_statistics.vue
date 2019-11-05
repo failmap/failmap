@@ -24,6 +24,46 @@
             </div>
 
         </div>
+        <div class="row" v-if="organization_stats.length" style="margin-bottom: 30px;">
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="organization_stats"
+                        :axis="['high']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="organization_stats"
+                        :axis="['medium']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="organization_stats"
+                        :axis="['good']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.organization_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+        </div>
         <div class="row" v-if="url_stats.length">
 
             <div class="col-md-12">
@@ -34,6 +74,49 @@
                         :color_scheme="color_scheme"
                         :data="url_stats"
                         :axis="['high', 'medium', 'good']"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row" v-if="url_stats.length" style="margin-bottom: 30px;">
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="url_stats"
+                        :axis="['high']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="url_stats"
+                        :axis="['medium']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="url_stats"
+                        :axis="['good']"
+                        :display_title="false"
+                        :display_legend="false"
                         :translation="$i18n.messages[$i18n.locale].statistics.progress_bars.internet_graph"
                     ></vulnerability-chart>
                 </div>

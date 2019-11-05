@@ -6,6 +6,8 @@ const chart_mixin = {
         axis: {type: Array, required: false},
         color_scheme: {type: Object, required: false},
         translation: {type: Object, required: false},
+        display_legend: {type: Boolean, required: false, default: true},
+        display_title: {type: Boolean, required: false, default: true},
     },
     data: function() {
         // [Vue warn]: The "data" option should be a function that returns a per-instance value in component definitions.
@@ -68,12 +70,12 @@ Vue.component('vulnerability-chart', {
                 },
                 options: {
                     legend: {
-                        display: true
+                        display: this.display_legend,
                     },
                     responsive: true,
                     maintainAspectRatio: false,
                     title: {
-                        display: true,
+                        display: this.display_title,
                         text: this.translate('title')
                     },
                     tooltips: {
@@ -166,12 +168,12 @@ Vue.component('vulnerability-donut', {
                 },
                 options: {
                     legend: {
-                        display: true
+                        display: this.display_legend,
                     },
                     responsive: true,
                     maintainAspectRatio: false,
                     title: {
-                        display: true,
+                        display: this.display_title,
                         text: this.translate('title'),
                     },
                     tooltips: {
@@ -257,12 +259,12 @@ Vue.component('connectivity-chart', {
                 },
                 options: {
                     legend: {
-                        display: true
+                        display: this.display_legend,
                     },
                     responsive: true,
                     maintainAspectRatio: false,
                     title: {
-                        display: true,
+                        display: this.display_title,
                         text: 'Internet connectivity'
                     },
                     tooltips: {

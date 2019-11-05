@@ -16,12 +16,59 @@
                         :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
                     ></vulnerability-chart>
                 </div>
+            </div>
+        </div>
+        <div class="row" v-if="data">
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="data.total"
+                        :axis="['high']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="data.total"
+                        :axis="['medium']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="chart-container" style="position: relative; height:200px; width:100%">
+                    <vulnerability-chart
+                        :color_scheme="color_scheme"
+                        :data="data.total"
+                        :axis="['low']"
+                        :display_title="false"
+                        :display_legend="false"
+                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                    ></vulnerability-chart>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row" v-if="data">
+            <div class="col-md-12">
                 <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
                     <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
                 </div>
             </div>
         </div>
-
+        
         <div class="row" v-if="data">
 
             <template v-for="issue in issues">

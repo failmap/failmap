@@ -51,12 +51,9 @@
                 </div>
             </div>
 
-            <div class="row" v-if="name" style="margin-bottom: 30px;">
-                <div  class="col-md-12">
+            <div class="row" v-if="name">
+                <div class="col-md-12">
                     <h4>{{ $t("report_content.timeline.title") }}</h4>
-                    <p></p>
-                    <br style="clear: both">
-
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
                         <vulnerability-chart
                             :color_scheme="color_scheme"
@@ -65,13 +62,60 @@
                             :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
                         ></vulnerability-chart>
                     </div>
+                </div>
+            </div>
+            <div class="row" v-if="name" style="margin-bottom: 30px;">
 
-                    <br />
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="timeline"
+                            :axis="['high']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="timeline"
+                            :axis="['medium']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="timeline"
+                            :axis="['low']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row" v-if="name" style="margin-bottom: 30px;">
+                <div  class="col-md-12">
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
                         <connectivity-chart :color_scheme="color_scheme" :data="timeline"></connectivity-chart>
                     </div>
                 </div>
             </div>
+
+
 
             <div class="row" v-if="name" style="margin-bottom: 30px;">
                 <div  class="col-md-12">
