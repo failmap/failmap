@@ -8,6 +8,9 @@
 # - version pinning only if it is required and explained
 # - only direct requirements, not recursive (requirements of requirements)
 
+# make sure there are no version conflicts with requirements.txt
+-c requirements.txt
+
 autopep8
 autoflake
 isort

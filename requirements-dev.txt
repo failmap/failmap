@@ -87,7 +87,7 @@ sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-qthelp==1.0.2  # via sphinx
 sphinxcontrib-serializinghtml==1.1.3  # via sphinx
 sqlparse==0.3.0           # via django, django-debug-toolbar
-tornado==6.0.3            # via livereload, sphinx-autobuild
+tornado==5.1.1            # via livereload, sphinx-autobuild
 tqdm==4.37.0              # via moviepy, proglog
 traitlets==4.3.3          # via ipython
 urllib3==1.25.6           # via requests

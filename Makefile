@@ -23,6 +23,7 @@ env = env PATH=${bin}:$$PATH
 python = ${bin}/python
 pip = ${bin}/pip
 pip-compile = ${bin}/pip-compile
+pip-sync = ${bin}/pip-sync
 
 # application binary
 app = ${bin}/${app_name}
@@ -39,15 +40,23 @@ shsrc = $(shell find * ! -path vendor\* -name *.sh)
 .PHONY: test check setup run fix autofix clean mrproper test_integration
 
 # default action to run
-all: check test
+all: check test setup
 
 # setup entire dev environment
 setup: ${app}	## setup development environment and application
+	@test \! -z "$$PS1" || (echo -ne "Development environment is tested and ready."; \
+	if command -v websecmap &>/dev/null;then \
+		echo -e " Development shell is activated."; \
+	else \
+		echo -e "\n\nTo activate development shell run:"; \
+		echo -e "\n\t. ${VIRTUAL_ENV}/bin/activate$$([[ "$$SHELL" =~ "fish" ]] && echo .fish)\n"; \
+		echo -e "Or refer to Direnv in README.md for automatic activation."; \
+	fi)
 
 # install application and all its (python) dependencies
-${app}: requirements requirements-dev | ${pip}
+${app}: ${VIRTUAL_ENV}/.requirements.installed | ${pip}
 	# install project and its dependencies
-	VIRTUAL_ENV=${VIRTUAL_ENV} ${pip} install -e .
+	${python} setup.py develop --no-deps
 	@test -f $@ && touch $@
 
 test: .make.test	## run test suite
@@ -170,10 +179,8 @@ clean_virtualenv:  ## cleanup virtualenv and installed app/dependencies
 
 mrproper: clean clean_virtualenv ## thorough cleanup, also removes virtualenv
 
-requirements requirements-dev: %: ${VIRTUAL_ENV}/.%.txt.installed
-
-${VIRTUAL_ENV}/.%.txt.installed: %.txt | ${pip}
-	${pip} install --quiet -r $<
+${VIRTUAL_ENV}/.requirements.installed: requirements.txt requirements-dev.txt| ${pip-sync}
+	${pip-sync} $^
 	@touch $@
 
 # perform 'pip freeze' on first class requirements in .in files.
@@ -190,8 +197,8 @@ _commit_update: requirements.txt
 	git add requirements*.txt requirements*.in
 	git commit -m "Updated requirements."
 
-${pip-compile}: | ${pip}
-	${pip} install pip-tools
+${pip-compile} ${pip-sync}: | ${pip}
+	${pip} install --quiet pip-tools
 
 ${python} ${pip}:
 	@if ! command -v python3 &>/dev/null;then \
