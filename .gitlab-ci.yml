@@ -86,6 +86,7 @@ test_mariadb: &test_mariadb_template
     # so they don't need to be passed explicitly
     DJANGO_DATABASE: production
     DB_HOST: mariadb
+    DB_USER: root
     # make poetry install mysql dependencies
     poetry_args: --extras=deploy
   retry: 1
