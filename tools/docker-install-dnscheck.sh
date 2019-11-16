@@ -1,6 +1,6 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-set -e -o pipefail
+set -e
 
 # install dnscheck
 
