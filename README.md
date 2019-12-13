@@ -63,20 +63,20 @@ Please follow these instructions to setup a development environment for Web Secu
 **macOS** via `brew`
 
 ```bash
-brew install git python3 direnv docker shellcheck
+brew install git python3 direnv docker shellcheck mysql
 ```
 
 **Debian Linux** via `apt`
 
 ```bash
-apt-get install -y git python3 direnv docker.io shellcheck
+apt-get install -y git python3 direnv docker.io shellcheck libmariadb-dev
 ```
 
 **Redhat/CentOS Linux** via `yum`
 
 ```bash
 yum install -y epel-release
-yum install -y git python3 direnv docker ShellCheck
+yum install -y git python3 direnv docker ShellCheck mysql-devel
 ```
 
 Or download and install each package separately:

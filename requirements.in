@@ -119,7 +119,7 @@ pyexcel-ods
 
 # database clients
 mysqlclient
-psycopg2
+psycopg2-binary # binary package installs wheel, avoiding compiling
 
 # wsgi server
 uwsgi
