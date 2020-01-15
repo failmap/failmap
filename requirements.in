@@ -8,7 +8,7 @@
 # - version pinning only if it is required and explained
 # - only direct requirements, not recursive (requirements of requirements)
 
-django
+django<3
 django-jet
 django-countries
 django-leaflet
