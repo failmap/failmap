@@ -452,7 +452,10 @@ def create_url_report(timeline, url: Url):
             #
             # To fix this, confusingly, give only one rating to the endpoint. And then add a
             # "repeated" message, so you know a rating is repeated, and didn't get extra points.
-            label = str(moment) + str(endpoint.is_ipv6()) + str(endpoint.port)
+            # january 2020: the protocol was not added in the comparison. In the internet.nl dashboard
+            # the protocol is the thing that makes the difference between endpoints as all endpoints
+            # are on IP version 0 and port 0 (they are semi real endpoints)
+            label = str(moment) + str(endpoint.is_ipv6()) + str(endpoint.port) + str(endpoint.protocol)
             if label not in given_ratings:
                 # todo: this can be a defaultdict
                 given_ratings[label] = []
