@@ -251,7 +251,7 @@ def hash_scan_per_day_and_type(scan):
     else:
         pk = scan.endpoint.pk
 
-    return "%s%s%s" % (pk, scan.type, scan.rating_determined_on.date())
+    return "%s%s%s" % (pk, scan.type, scan.rating_determined_on.replace(second=59, microsecond=999999))
 
 
 def create_timeline(url: Url):
@@ -281,7 +281,7 @@ def create_timeline(url: Url):
 
     # reduce to date only, it's not useful to show 100 things on a day when building history.
     for moment in moments:
-        moment_date = moment.date()
+        moment_date = moment.replace(second=59, microsecond=999999)
         timeline[moment_date] = {}
         timeline[moment_date]['endpoints'] = []
         timeline[moment_date]['endpoint_scans'] = []
@@ -295,7 +295,7 @@ def create_timeline(url: Url):
     # again over time. The scans with only dead endpoints should not be made.
 
     for scan in happenings['endpoint_scans']:
-        some_day = scan.rating_determined_on.date()
+        some_day = scan.rating_determined_on.replace(second=59, microsecond=999999)
 
         # can we create this set in an easier way?
         if "endpoint_scan" not in timeline[some_day]:
@@ -308,7 +308,7 @@ def create_timeline(url: Url):
         timeline[some_day]['endpoint_scans'].append(scan)
 
     for scan in happenings['url_scans']:
-        some_day = scan.rating_determined_on.date()
+        some_day = scan.rating_determined_on.replace(second=59, microsecond=999999)
 
         # can we create this set in an easier way?
         if "url_scan" not in timeline[some_day]:
@@ -323,20 +323,20 @@ def create_timeline(url: Url):
     # Any endpoint from this point on should be removed. If the url becomes alive again, add it again, so you can
     # see there are gaps in using the url over time. Which is more truthful.
     for moment in [not_resolvable_url.not_resolvable_since for not_resolvable_url in happenings['non_resolvable_urls']]:
-        timeline[moment.date()]['url_not_resolvable'] = True
+        timeline[moment.replace(second=59, microsecond=999999)]['url_not_resolvable'] = True
 
     for moment in [dead_url.is_dead_since for dead_url in happenings['dead_urls']]:
-        timeline[moment.date()]['url_is_dead'] = True
+        timeline[moment.replace(second=59, microsecond=999999)]['url_is_dead'] = True
 
     for endpoint in happenings['dead_endpoints']:
-        some_day = endpoint.is_dead_since.date()
+        some_day = endpoint.is_dead_since.replace(second=59, microsecond=999999)
         timeline[some_day]['dead'] = True
         if endpoint not in timeline[some_day]['dead_endpoints']:
             timeline[some_day]['dead_endpoints'].append(endpoint)
 
     # unique endpoints only
     for moment in moments:
-        some_day = moment.date()
+        some_day = moment.replace(second=59, microsecond=999999)
         timeline[some_day]['endpoints'] = list(set(timeline[some_day]['endpoints']))
 
     # try to return dates in chronological order
@@ -344,7 +344,7 @@ def create_timeline(url: Url):
 
 
 def latest_moment_of_datetime(datetime_: datetime):
-    return datetime_.replace(hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+    return datetime_.replace(second=59, microsecond=999999, tzinfo=pytz.utc)
 
 
 def create_url_report(timeline, url: Url):
@@ -712,7 +712,8 @@ def save_url_report(url: Url, date: datetime, calculation):
         u.at_when = datetime.now(pytz.utc)
     else:
         u.at_when = datetime(year=date.year, month=date.month, day=date.day,
-                             hour=23, minute=59, second=59, microsecond=999999, tzinfo=pytz.utc)
+                             hour=date.hour, minute=date.minute,
+                             second=59, microsecond=999999, tzinfo=pytz.utc)
 
     u.total_endpoints = len(calculation['endpoints'])
 
