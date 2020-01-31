@@ -1,8 +1,9 @@
 import logging
 
-from celery import Task, group
+from celery import Task
 
-from websecmap.scanners.scanner.subdomains import compose_verify_task as subdomain_compose_verify_task
+from websecmap.scanners.scanner.subdomains import \
+    compose_verify_task as subdomain_compose_verify_task
 
 log = logging.getLogger(__package__)
 

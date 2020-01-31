@@ -43,6 +43,7 @@ For more documentation, see the tls_qualys.py scanner.
 
 """
 import logging
+import random
 from datetime import datetime, timedelta
 
 import pytz
@@ -51,7 +52,6 @@ from celery import Task, group
 from websecmap.organizations.models import Url
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.tls_qualys import claim_proxy, qualys_scan_bulk, release_proxy
-import random
 
 log = logging.getLogger(__name__)
 

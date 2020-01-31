@@ -20,8 +20,8 @@ We strongly recomend using the docker approach.
 """
 
 import logging
-import subprocess
 import random
+import subprocess
 from typing import List
 
 from celery import Task, group

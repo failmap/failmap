@@ -19,6 +19,7 @@ http://screenshot_v6:1337
 """
 
 import logging
+import random
 import urllib.parse
 from datetime import datetime, timedelta
 from io import BytesIO
@@ -36,7 +37,6 @@ from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
 from websecmap.scanners.timeout import timeout
-import random
 
 log = logging.getLogger(__package__)
 

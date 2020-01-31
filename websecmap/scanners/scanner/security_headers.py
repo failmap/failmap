@@ -3,10 +3,9 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 (useful until browsers do https by default, instead of by choice)
 """
 import logging
-from datetime import datetime
+import random
 from typing import List
 
-import pytz
 import requests
 import urllib3
 from celery import Task, group
@@ -14,11 +13,10 @@ from requests import ConnectionError, ConnectTimeout, HTTPError, ReadTimeout, Ti
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.models import Endpoint, EndpointGenericScan, EndpointGenericScanScratchpad
+from websecmap.scanners.models import Endpoint, EndpointGenericScan
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.scanner.http import get_random_user_agent
-import random
 
 log = logging.getLogger(__name__)
 

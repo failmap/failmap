@@ -116,7 +116,7 @@ def compose_discover_task(organizations_filter: dict = dict(),
                         port,
                         'ftp',
                         ip_version)
-                    )
+                )
 
     return group(tasks)
 
