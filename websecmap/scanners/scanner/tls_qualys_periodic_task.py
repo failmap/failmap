@@ -51,6 +51,7 @@ from celery import Task, group
 from websecmap.organizations.models import Url
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.tls_qualys import claim_proxy, qualys_scan_bulk, release_proxy
+import random
 
 log = logging.getLogger(__name__)
 
@@ -84,10 +85,14 @@ def compose_task(
         # an exclude filter here will not work, as you will exclude so much...
         endpoint__endpointgenericscan__last_scan_moment__lte=datetime.now(tz=pytz.utc) - timedelta(
             days=kwargs.get('exclude_urls_scanned_in_the_last_n_days', 3)),
-        **urls_filter).order_by('-endpoint__endpointgenericscan__latest_scan_moment')
+        **urls_filter
+    ).order_by(
+        '-endpoint__endpointgenericscan__latest_scan_moment'
+    ).only('id', 'url')
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     urls = list(set(urls))
+    random.shuffle(urls)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')

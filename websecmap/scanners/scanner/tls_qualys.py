@@ -43,6 +43,7 @@ from websecmap.scanners.models import Endpoint, ScanProxy, TlsQualysScratchpad
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.http import store_url_ips
+import random
 
 # There is a balance between network timeout and qualys result cache.
 # This is relevant, since the results are not kept in cache for hours. More like 15 minutes.
@@ -65,7 +66,6 @@ New architecture:
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
     **kwargs
 ) -> Task:
 
@@ -92,7 +92,10 @@ def compose_task(
             endpoint__port=443,
             endpoint__is_dead=False,
             organization__in=organizations,  # when empty, no results...
-            **urls_filter).order_by('-endpoint__endpointgenericscan__latest_scan_moment')
+            **urls_filter
+        ).order_by(
+            '-endpoint__endpointgenericscan__latest_scan_moment'
+        ).only('id', 'url')
     else:
         # use order by to get a few of the most outdated results...
         urls = Url.objects.filter(
@@ -102,14 +105,15 @@ def compose_task(
             endpoint__protocol="https",
             endpoint__port=443,
             endpoint__is_dead=False,
-            **urls_filter).order_by('-endpoint__endpointgenericscan__latest_scan_moment')
+            **urls_filter
+        ).order_by(
+            '-endpoint__endpointgenericscan__latest_scan_moment'
+        ).only('id', 'url')
 
     # Urls are ordered randomly.
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     urls = list(set(urls))
-
-    if endpoints_filter:
-        raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
+    random.shuffle(urls)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')

@@ -11,6 +11,7 @@ from django.db.models import Count
 from websecmap.organizations.models import Url
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, chunks2, q_configurations_to_scan
 from websecmap.scanners.scanner.tls_qualys import claim_proxy, qualys_scan_bulk, release_proxy
+import random
 
 log = logging.getLogger(__name__)
 
@@ -38,10 +39,13 @@ def compose_task(
         **urls_filter
     ).annotate(
         nr_of_scans=Count('endpoint__endpointgenericscan')
-    ).filter(nr_of_scans=0)
+    ).filter(
+        nr_of_scans=0
+    ).only('id', 'url')
 
     # Due to filtering on endpoints, the list of URLS is not distinct. We're making it so.
     urls = list(set(urls))
+    random.shuffle(urls)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no tls qualys tasks!')
