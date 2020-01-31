@@ -38,6 +38,7 @@ def compose_task(
     endpoints_filter = {'protocol__in': ['dns_a_aaa']}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = urls.only("id", "url")
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no mail scan tasks!')

@@ -94,6 +94,7 @@ def compose_task(
 
     endpoints_filter = {'is_dead': False, "protocol": 'dns_mx_no_cname'}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = urls.only("id", "url")
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no mail scan tasks!')
