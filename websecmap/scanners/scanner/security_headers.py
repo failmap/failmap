@@ -18,8 +18,11 @@ from websecmap.scanners.models import Endpoint, EndpointGenericScan, EndpointGen
 from websecmap.scanners.scanmanager import store_endpoint_scan_result
 from websecmap.scanners.scanner.__init__ import allowed_to_scan, q_configurations_to_scan
 from websecmap.scanners.scanner.http import get_random_user_agent
+import random
 
 log = logging.getLogger(__name__)
+
+CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
 
 SECURITY_HEADER_SCAN_TYPES = ['http_security_header_strict_transport_security',
                               'http_security_header_x_content_type_options',
@@ -43,37 +46,37 @@ def compose_task(
     # apply filter to urls in organizations (or if no filter, all urls)
     organizations = []
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
+        organizations = Organization.objects.filter(**organizations_filter).only('id')
         urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
-        log.info('Creating header scan task for %s urls for %s organizations.', len(urls), len(organizations))
     else:
         urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
-        log.info('Creating header scan task for %s urls.', len(urls))
+
+    # We only perform an IN query, and need nothing of these urls except the ID:
+    urls = urls.only('id')
 
     # select endpoints to scan based on filters
     endpoints = Endpoint.objects.filter(
         # apply filter to endpoints (or if no filter, all endpoints)
         url__in=urls, **endpoints_filter,
         # also apply mandatory filters to only select valid endpoints for this action
-        is_dead=False, protocol__in=['http', 'https'])
-
-    if not endpoints:
-        log.warning('Security headers: Applied filters resulted in no tasks! organisations_filter %s, '
-                    'URL Filter: %s, endpoints_filter: %s', organizations_filter, urls_filter, endpoints_filter)
-        return group()
+        is_dead=False, protocol__in=['http', 'https']
+    ).only('id', 'port', 'protocol', 'ip_version', 'url__id', 'url__url')
 
     # unique endpoints only
     endpoints = list(set(endpoints))
+    random.shuffle(endpoints)
 
-    log.info('Creating security headers scan task for %s endpoints for %s urls for %s organizations.',
-             len(endpoints), len(urls), len(organizations))
+    log.info(f'Scanning security headers on '
+             f'{len(endpoints)} endpoints, {len(urls)} urls, {len(organizations)} organizations.')
 
     tasks = []
     for endpoint in endpoints:
-        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
-        tasks.append(get_headers.si(endpoint.uri_url()).set(queue=queue) | analyze_headers.s(endpoint))
-
-    log.info("Created %s tasks" % len(tasks))
+        tasks.append(
+            get_headers.si(
+                endpoint.uri_url()
+            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            | analyze_headers.s(endpoint)
+        )
 
     return group(tasks)
 
@@ -152,11 +155,12 @@ def analyze_headers(result: requests.Response, endpoint):
     response = result
 
     # scratch it, for debugging.
-    egss = EndpointGenericScanScratchpad()
-    egss.at_when = datetime.now(pytz.utc)
-    egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
-    egss.type = "security headers"
-    egss.save()
+    # todo: only scratch when debugging, or explicitly instructed. This causes an enormous amount of data.
+    # egss = EndpointGenericScanScratchpad()
+    # egss.at_when = datetime.now(pytz.utc)
+    # egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
+    # egss.type = "security headers"
+    # egss.save()
 
     # determine what kind of service we're dealing with.
     service_type = discover_service_type(response.headers)
