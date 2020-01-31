@@ -11,6 +11,7 @@ from typing import List
 import pytz
 from celery import Task, group
 from django.conf import settings
+from django.db.models import Q
 from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import app
@@ -24,78 +25,30 @@ sys.path.append(settings.VENDOR_DIR + '/dnsrecon/')
 log = logging.getLogger(__package__)
 
 
-def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict(),
-                   endpoints_filter: dict = dict()) -> List:
-    if endpoints_filter:
-        raise NotImplementedError("Endpoints are not yet supported for DNS scans.")
-
-    # todo: check voor toplevel
-    # todo: functional decomposition
-
-    # merge
-    toplevel_filter = {"computed_subdomain": ""}
-
-    # merge using python 3.6 syntax
-    # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
-    urls_filter = {**toplevel_filter, **urls_filter}
-
-    # urls = Url.objects.all()
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+def url_by_filters(organizations_filter: dict = dict(), urls_filter: dict = dict()) -> List:
+    # only include what is allowed to be scanned, and reduce the amount of retrieved fields to a minimum.
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter).only("id", "url")
 
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
-        # when empty no results.
-        urls = urls.filter(organization__in=organizations, **urls_filter)
+        organizations = Organization.objects.filter(**organizations_filter).only('id')
+        urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+                           organization__in=organizations,
+                           do_not_find_subdomains=False)
     else:
-        urls = urls.filter(**urls_filter)
+        urls = urls.filter(Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""), do_not_find_subdomains=False)
 
-    return list(urls)
-
-
-def nsec_compose_task(organizations_filter: dict = dict(),
-                      urls_filter: dict = dict(),
-                      endpoints_filter: dict = dict(), **kwargs) -> Task:
-
-    urls = url_by_filters(organizations_filter=organizations_filter,
-                          urls_filter=urls_filter,
-                          endpoints_filter=endpoints_filter)
-
+    # make sure all urls are unique
     urls = list(set(urls))
 
-    task = group(nsec_scan.si([url]) for url in urls)
-    return task
+    # randomize the endpoints to better spread load over urls.
+    random.shuffle(urls)
+
+    return urls
 
 
-def certificate_transparency_compose_task(organizations_filter: dict = dict(),
-                                          urls_filter: dict = dict(),
-                                          endpoints_filter: dict = dict(), **kwargs) -> Task:
-
-    urls = url_by_filters(organizations_filter=organizations_filter,
-                          urls_filter=urls_filter,
-                          endpoints_filter=endpoints_filter)
-
-    urls = list(set(urls))
-
-    task = group(certificate_transparency_scan.si([url]) for url in urls)
-    return task
-
-
-def compose_discover_task(organizations_filter: dict = dict(),
-                          urls_filter: dict = dict(),
-                          endpoints_filter: dict = dict(), **kwargs) -> Task:
-
-    urls = url_by_filters(organizations_filter=organizations_filter,
-                          urls_filter=urls_filter,
-                          endpoints_filter=endpoints_filter)
-
-    # Remove all urls that should not have
-    urls = [url for url in urls if not url.do_not_find_subdomains]
-
-    urls = list(set(urls))
-
-    if not urls:
-        log.debug('No urls found for subdomain discovery.')
-
+def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(), **kwargs) -> Task:
+    urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
+    log.info(f'Discovering subdomains on {len(urls)} urls.')
     task = group(certificate_transparency_scan.si([url]) | nsec_scan.si([url]) for url in urls)
     return task
 
@@ -108,27 +61,26 @@ def compose_verify_task(organizations_filter: dict = dict(),
     # instead of only checking by domain, just accept the filters as they are handled in any other scenario...
 
     default_filter = {"not_resolvable": False}
-    urls_filter = {**urls_filter, **default_filter}
+    # The urls filter will overwrite the default filter in this case. Used in verify unresolvable
+    urls_filter = {**default_filter, **urls_filter}
 
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'))
-    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
-
-    if not urls:
-        log.debug('No urls found for (sub)domain verification.')
+    urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter).only('id', 'url', 'not_resolvable')
 
     urls = list(set(urls))
+    random.shuffle(urls)
 
-    log.info("Will verify DNS resolvability of %s urls" % len(urls))
+    log.info("Will verify subdomain resolvability via DNS on %s urls" % len(urls))
 
-    task = group(url_resolves.si(url) | handle_resolves.s(url) for url in urls)
+    task = group(url_resolves.si(url.url) | handle_resolves.s(url) for url in urls)
     return task
 
 
 # this is so fast, the overhead on running this elsewhere is insane... requires both ipv4 and 6 capabilities
 @app.task(queue="internet")
-def url_resolves(url):
+def url_resolves(url: str):
 
-    v4, v6 = get_ips(url.url)
+    v4, v6 = get_ips(url)
 
     if not v4 and not v6:
         return False
@@ -453,7 +405,7 @@ def certificate_transparency_scan(urls: List[Url]):
 
         # https://crt.sh/?q=%25.zutphen.nl
         crt_sh_url = "https://crt.sh/?q=%25." + str(url.url)
-        pattern = r"[^\s%>]*\." + str(url.url.replace(".", "\."))  # harder string formatting :)
+        pattern = r"[^\s%>]*\." + str(url.url.replace(".", r"\."))  # harder string formatting :)
 
         response = requests.get(crt_sh_url, timeout=(10, 10), allow_redirects=False)
         matches = re.findall(pattern, response.text)

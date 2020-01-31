@@ -31,17 +31,12 @@ def compose_discover_task(organizations_filter: dict = dict(),
     if not allowed_to_discover_urls("dns_known_subdomains"):
         return group()
 
-    urls = url_by_filters(organizations_filter=organizations_filter,
-                          urls_filter=urls_filter,
-                          endpoints_filter=endpoints_filter)
+    urls = url_by_filters(organizations_filter=organizations_filter, urls_filter=urls_filter)
 
     # a heuristic
     if not urls:
         log.info("Did not get any urls to discover known subdomains.")
         return group()
-
-    # Remove all urls that should not have
-    urls = [url for url in urls if not url.do_not_find_subdomains]
 
     log.debug("Going to scan subdomains for the following %s urls." % len(urls))
 
@@ -50,8 +45,6 @@ def compose_discover_task(organizations_filter: dict = dict(),
 
     # The country is more then enough to get a sort of feasible list of subdomains.
     wordlist = get_subdomains([first_organization.country], None)
-
-    urls = list(set(urls))
 
     # The worker has no way to write / save things. A wordlist can be 10's of thousands of words.
     task = group(wordlist_scan.si([url], wordlist) for url in urls)

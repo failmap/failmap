@@ -51,9 +51,21 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 log = logging.getLogger(__package__)
 
+CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
+
 # don't contact http/443 and https/80. You can, but that is 99.99 waste data.
 STANDARD_HTTP_PORTS = [80, 8008, 8080]
 STANDARD_HTTPS_PORTS = [443, 8443]
+
+# make sure ALL the ports in preferred port order map to a protocol
+PORT_TO_PROTOCOL = {
+    80: 'http',
+    8008: 'http',
+    8080: 'http',
+    443: 'https',
+    8443: 'https'
+}
+
 PREFERRED_PORT_ORDER = [443, 80, 8443, 8080, 8008]
 
 
@@ -76,92 +88,63 @@ between bytes sent from the server. In 99.9% of cases, this is the time before t
 READ_TIMEOUT = 10
 
 
-# Discover Endpoints generic task
-
-# todo: in wildcard scenarios you can add urls that have a deviating IP from the (loadbalanced) wildcard address.
-
-
 def compose_discover_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
     **kwargs
 ) -> Task:
-    """Compose taskset to scan specified endpoints.
+    """Discovers HTTP/HTTPS endpoints by attempting to connect to them.
 
     *This is an implementation of `compose_discover_task`.
     For more documentation about this concept, arguments and concrete
     examples of usage refer to `compose_discover_task` in `types.py`.*
-
     """
 
     if not allowed_to_discover_endpoints("http"):
         return group()
 
+    # ignore administratively dead domains by default.
+    urls_filter = {'is_dead': False} if not urls_filter else urls_filter
+
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
-        # apply filter to urls in organizations (or if no filter, all urls)
-        urls = Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
-        urls = list(set(urls))
-        log.info('Creating http scan task for %s urls for %s organizations.', len(urls), len(organizations))
+        organizations = Organization.objects.filter(**organizations_filter).only('id')
+        log.info(f'Organization filter applied with {len(organizations)} organizations.')
+
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            organization__in=organizations,
+            **urls_filter
+        ).only('id', 'url')
+
     else:
-        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter)
-        urls = list(set(urls))
-        log.info('Creating http scan task for %s urls.', len(urls))
+        urls = Url.objects.filter(q_configurations_to_scan(), **urls_filter).only('id', 'url')
 
-    if endpoints_filter:
-        log.warning("Endpoint filters are not implemented: filter has no effect.")
-
-    # make sure we're dealing with a list for the coming random function
+    # make sure all urls are unique (some are shared between organizations, or a custom query might dupe them)
+    urls = list(set(urls))
+    log.info(f'Discovering HTTP endpoints for {len(urls)} urls.')
 
     # randomize the endpoints to better spread load over urls.
     random.shuffle(urls)
+
     tasks = []
-    ip_versions = [4, 6]
 
-    # even with a randomized url order, still try to add as much time as possible between contacting
-    # the same url, to not disrupt running services.
-
-    # We found we're getting useless endpoints that contain little to no data when
-    # opening non-tls port 443 and tls port 80. We're not doing that anymore.
-
-    # DONE: create separate tasks on different queues determined by IP version. Distribute load per capability.
-    # todo: don't use the canvas model, just fire off the next task from the connection.
-    # The canvas model uses an enormous amount of CPU, which is needed for other things.
-
-    # why do we want to store these at all? They change all the time and well... we don't do anything with this info
-    # so no hoarding and disable this for when we need it.
-    # for url in urls:
-    #     tasks.append(get_ips.si(url.url) | url_lives.s(url))  # See if thing is alive, once.
-
-    for ip_version in ip_versions:
-        queue = "ipv4" if ip_version == 4 else "ipv6"
-
+    for ip_version in [4, 6]:
         for port in PREFERRED_PORT_ORDER:
-
-            if port in STANDARD_HTTP_PORTS:
-                for url in urls:
-                    tasks.append(
-                        can_connect.si(
-                            protocol="http",
-                            url=url,
-                            port=port,
-                            ip_version=ip_version
-                        ).set(queue=queue)
-                        | connect_result.s(protocol="http", url=url, port=port, ip_version=ip_version)
+            for url in urls:
+                tasks.append(
+                    can_connect.si(
+                        protocol=PORT_TO_PROTOCOL[port],
+                        url=url,
+                        port=port,
+                        ip_version=ip_version
+                    ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+                    | connect_result.s(
+                        protocol=PORT_TO_PROTOCOL[port],
+                        url=url,
+                        port=port,
+                        ip_version=ip_version
                     )
-
-            if port in STANDARD_HTTPS_PORTS:
-                for url in urls:
-                    tasks.append(
-                        can_connect.si(
-                            protocol="https",
-                            url=url,
-                            port=port,
-                            ip_version=ip_version
-                        ).set(queue=queue)
-                        | connect_result.s(protocol="https", url=url, port=port, ip_version=ip_version)
-                    )
+                )
 
     return group(tasks)
 
@@ -189,11 +172,19 @@ def compose_verify_task(
 
     tasks = []
     for endpoint in endpoints:
-        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
-        tasks.append(can_connect.si(protocol=endpoint.protocol, url=endpoint.url,
-                                    port=endpoint.port, ip_version=endpoint.ip_version).set(queue=queue)
-                     | connect_result.s(protocol=endpoint.protocol, url=endpoint.url,
-                                        port=endpoint.port, ip_version=endpoint.ip_version))
+        tasks.append(
+            can_connect.si(
+                protocol=endpoint.protocol,
+                url=endpoint.url,
+                port=endpoint.port,
+                ip_version=endpoint.ip_version
+            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            | connect_result.s(
+                protocol=endpoint.protocol,
+                url=endpoint.url,
+                port=endpoint.port,
+                ip_version=endpoint.ip_version)
+        )
     return group(tasks)
 
 
@@ -214,20 +205,7 @@ def url_lives(ips, url):
     store_url_ips(url, ips)
 
     if not any(ips) and not url.not_resolvable:
-        url.not_resolvable = True
-        url.not_resolvable_since = datetime.now(pytz.utc)
-        url.not_resolvable_reason = "No IPv4 or IPv6 address found in http scanner."
-        url.save()
-
-        Endpoint.objects.all().filter(url=url).update(is_dead=True,
-                                                      is_dead_since=datetime.now(pytz.utc),
-                                                      is_dead_reason="Url was killed")
-
-        UrlIp.objects.all().filter(url=url).update(
-            is_unused=True,
-            is_unused_since=datetime.now(pytz.utc),
-            is_unused_reason="Url was killed"
-        )
+        kill_url_task(ips, url)
     else:
         # revive url
         if url.not_resolvable:
