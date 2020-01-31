@@ -20,6 +20,8 @@ from websecmap.scanners.scanner.http import (can_connect, connect_result, redire
 
 log = logging.getLogger(__package__)
 
+CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
+
 # These messages are translated and expected lateron. Don't edit them unless you're also editing them in the reporting
 # etc etc.
 cleaned_up = "Has a secure equivalent, which wasn't so in the past."
@@ -31,7 +33,6 @@ no_https_at_all = "Site does not redirect to secure url, and has no secure alter
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
-    endpoints_filter: dict = dict(),
     **kwargs
 ) -> Task:
 
@@ -40,16 +41,20 @@ def compose_task(
         return group()  # An empty group fits this callable's signature and does not impede celery.
 
     if organizations_filter:
-        organizations = Organization.objects.filter(is_dead=False, **organizations_filter)
-        urls = Url.objects.filter(q_configurations_to_scan(),
-                                  organization__in=organizations, is_dead=False, not_resolvable=False, **urls_filter)
-        log.info('Creating scan task %s urls for %s organizations.', len(urls), len(organizations))
+        organizations = Organization.objects.filter(is_dead=False, **organizations_filter).only('id')
+        urls = Url.objects.filter(
+            q_configurations_to_scan(),
+            organization__in=organizations,
+            is_dead=False,
+            not_resolvable=False,
+            **urls_filter
+        ).only('id', 'url')
+        log.info(f'Creating scan task {len(urls)} urls for {len(organizations)} organizations.')
     else:
-        urls = Url.objects.filter(q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter)
-        log.info('Creating scan plain http task %s urls.', len(urls))
-
-    if endpoints_filter:
-        raise NotImplementedError('This scanner needs to be refactored to scan per endpoint.')
+        urls = Url.objects.filter(
+            q_configurations_to_scan(), is_dead=False, not_resolvable=False, **urls_filter
+        ).only('id', 'url')
+        log.info(f'Creating scan plain http task {len(urls)} urls.')
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no plain http tasks!')
@@ -65,8 +70,11 @@ def compose_task(
             tasks.append(well_done.si(complete_endpoint))
 
         for incomplete_endpoint in incomplete_endpoints:
-            queue = "ipv4" if incomplete_endpoint.ip_version == 4 else "ipv6"
-            tasks.append(scan.si(incomplete_endpoint).set(queue=queue) | store.s(incomplete_endpoint))
+            tasks.append(
+                scan.si(
+                    incomplete_endpoint
+                ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[incomplete_endpoint.ip_version])
+                | store.s(incomplete_endpoint))
 
     return group(tasks)
 
@@ -82,7 +90,11 @@ def get_endpoints_with_missing_encryption(url):
     :return:
     """
 
-    endpoints = Endpoint.objects.all().filter(url=url, is_dead=False)
+    endpoints = Endpoint.objects.all().filter(
+        url=url, is_dead=False
+    ).only(
+        'id', 'protocol', 'port', 'ip_version', 'url__id', 'url__url'
+    )
 
     has_http_v4, has_https_v4, has_http_v6, has_https_v6 = False, False, False, False
     http_v4_endpoint, http_v6_endpoint = None, None
