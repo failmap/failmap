@@ -43,7 +43,7 @@ def compose_discover_task(
 
     default_filter = {"is_dead": False, "not_resolvable": False}
     urls_filter = {**urls_filter, **default_filter}
-    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
+    urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter).only('id', 'url')
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = add_model_filter(urls, **kwargs)
 
@@ -61,11 +61,11 @@ def compose_discover_task(
     # mostly on the url level.
     for url in urls:
         tasks.append(
-            has_mx_without_cname.si(url)
+            has_mx_without_cname.si(url.url)
             | connect_result.s(protocol="dns_mx_no_cname", url=url, port=0, ip_version=0)
-            | has_soa.si(url)
+            | has_soa.si(url.url)
             | connect_result.s(protocol="dns_soa", url=url, port=0, ip_version=0)
-            | has_a_or_aaaa.si(url)
+            | has_a_or_aaaa.si(url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=url, port=0, ip_version=0)
         )
 
@@ -83,22 +83,25 @@ def compose_verify_task(
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only('id', 'url__id', 'url__url')
 
+    endpoints = list(set(endpoints))
+    
     tasks = []
     for endpoint in endpoints:
         tasks.append(
-            has_mx_without_cname.si(endpoint.url)
+            has_mx_without_cname.si(endpoint.url.url)
             | connect_result.s(protocol="dns_mx_no_cname", url=endpoint.url, port=0, ip_version=0)
-            | has_soa.si(endpoint.url)
+            | has_soa.si(endpoint.url.url)
             | connect_result.s(protocol="dns_soa", url=endpoint.url, port=0, ip_version=0)
-            | has_a_or_aaaa.si(endpoint.url)
+            | has_a_or_aaaa.si(endpoint.url.url)
             | connect_result.s(protocol="dns_a_aaaa", url=endpoint.url, port=0, ip_version=0)
         )
     return group(tasks)
 
 
 @app.task(queue="storage")
-def has_soa(url: Url):
+def has_soa(url: str):
     """
     The SOA records is the primary check for internet.nl mail. If there is a SOA
     record, you can run a mail scan. It's unclear at the time of writing why this is.
@@ -210,7 +213,7 @@ def has_soa(url: Url):
 
 
 @app.task(queue="storage")
-def has_mx_without_cname(url: Url) -> bool:
+def has_mx_without_cname(url: str) -> bool:
     """
     If there is an MX record, that is not part of a CNAME, store it as an mx_mail endpoint.
     This is a special endpoint that helps with the life-cycle of sending mail to this address.
@@ -255,7 +258,7 @@ def has_mx_without_cname(url: Url) -> bool:
 
 
 @app.task(queue="storage")
-def has_a_or_aaaa(url: Url) -> bool:
+def has_a_or_aaaa(url: str) -> bool:
     """
     used for internet.nl web scans. The issue with regular endpoint is that you never know
     which one of the four exists. And it can also not be placed on a URL, as that would make url
@@ -273,54 +276,57 @@ def has_a_or_aaaa(url: Url) -> bool:
 
 @retry(wait=wait_exponential(multiplier=1, min=0, max=10),
        stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
-def get_dns_records(url, record_type):
+def get_dns_records(url: str, record_type):
     try:
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
         sleep(0.03)
-        return resolver.query(url.url, record_type)
+        return resolver.query(url, record_type)
     except NoAnswer:
-        log.debug("The DNS response does not contain an answer to the question. %s %s " % (url.url, record_type))
+        log.debug("The DNS response does not contain an answer to the question. %s %s " % (url, record_type))
         return None
     except NXDOMAIN:
-        log.debug("dns query name does not exist. %s %s" % (url.url, record_type))
+        log.debug("dns query name does not exist. %s %s" % (url, record_type))
         return None
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.error(f"Timeout received for DNS query to {url.url}.")
+        log.error(f"Timeout received for DNS query to {url}.")
         return False
 
 
 @retry(wait=wait_exponential(multiplier=1, min=0, max=10),
        stop=stop_after_attempt(3), before=before_log(log, logging.DEBUG))
-def get_dns_records_accepting_no_answer(url, record_type):
+def get_dns_records_accepting_no_answer(url: str, record_type):
     try:
         # a little delay to be friendly towards the server
         # this doesn't really help with parallel requests from the same server. Well, a little bit.
         sleep(0.03)
-        answer = resolver.query(url.url, record_type, raise_on_no_answer=False)
-        log.debug("dns query returned an answer %s %s" % (url.url, record_type))
+        answer = resolver.query(url, record_type, raise_on_no_answer=False)
+        log.debug("dns query returned an answer %s %s" % (url, record_type))
         return answer
     except NoAnswer:
         # this will never happen, as we explicitly say OK. This means that only domains that really
         # do not return ANY answer *where NXDOMAIN is returned* will be false.
         return None
     except NXDOMAIN:
-        log.debug("dns query name does not exist. %s %s" % (url.url, record_type))
+        log.debug("dns query name does not exist. %s %s" % (url, record_type))
         return None
     except NoNameservers:
         log.debug("Pausing, or add more DNS servers...")
         sleep(20)
     except Timeout:
         # some DNS server queries result in a timeout for things that do not exist. This takes 30 seconds.
-        log.error(f"Timeout received for DNS query to {url.url}.")
+        log.error(f"Timeout received for DNS query to {url}.")
         return False
 
 
 """
+# This has been removed because the approach taken is not feasable or relevant for mail.
+# It is still here to learn from it.
+#
 # Given the mail server can be at any location, depending on the MX record, making a list of Mail servers AT
 # a certain url doesn't add much value. Therefore below code is disabled.
 # for ip_version in [4, 6]:
