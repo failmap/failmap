@@ -86,7 +86,7 @@ def compose_verify_task(
     endpoints = endpoints.only('id', 'url__id', 'url__url')
 
     endpoints = list(set(endpoints))
-    
+
     tasks = []
     for endpoint in endpoints:
         tasks.append(

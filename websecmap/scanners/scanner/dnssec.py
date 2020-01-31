@@ -21,10 +21,12 @@ We strongly recomend using the docker approach.
 
 import logging
 import subprocess
+import random
 from typing import List
 
 from celery import Task, group
 from django.conf import settings
+from django.db.models import Q
 
 from websecmap.celery import ParentFailed, app
 from websecmap.organizations.models import Organization, Url
@@ -62,28 +64,31 @@ def compose_task(
     # DNSSEC only works on top level urls
     urls_filter = dict(urls_filter, **{"computed_subdomain": ""})
 
-    urls = []
-
     # gather urls from organizations
     if organizations_filter:
-        organizations = Organization.objects.filter(**organizations_filter)
-        urls += Url.objects.filter(q_configurations_to_scan(), organization__in=organizations, **urls_filter)
+        organizations = Organization.objects.filter(**organizations_filter).only('id')
+        urls = Url.objects.filter(q_configurations_to_scan(),
+                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+                                  organization__in=organizations,
+                                  **urls_filter).only('id', 'url')
     elif endpoints_filter:
         # and now retrieve urls from endpoints
-        endpoints = Endpoint.objects.filter(**endpoints_filter)
-        urls += Url.objects.filter(q_configurations_to_scan(), endpoint__in=endpoints, **urls_filter)
+        endpoints = Endpoint.objects.filter(**endpoints_filter).only('id')
+        urls = Url.objects.filter(q_configurations_to_scan(),
+                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+                                  endpoint__in=endpoints,
+                                  **urls_filter).only('id', 'url')
     else:
         # now urls directly
-        urls += Url.objects.filter(q_configurations_to_scan(), **urls_filter)
+        urls = Url.objects.filter(q_configurations_to_scan(),
+                                  Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
+                                  **urls_filter).only('id', 'url')
 
-    if not urls:
-        log.warning('Applied filters resulted in no urls, thus no tasks!')
-        return group()
-
-    # only unique urls
+    # Optimize: only required values, unique and randomized
     urls = list(set(urls))
+    random.shuffle(urls)
 
-    log.info('Creating DNSSEC scan task for %s urls.', len(urls))
+    log.info(f'Creating DNSSEC scan task for {len(urls)} urls.')
 
     # The number of top level urls is negligible, so randomization is not needed.
 
