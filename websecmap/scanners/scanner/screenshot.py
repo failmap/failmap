@@ -36,6 +36,7 @@ from websecmap.celery import app
 from websecmap.scanners.models import Endpoint, Screenshot
 from websecmap.scanners.scanner.__init__ import endpoint_filters, q_configurations_to_scan
 from websecmap.scanners.timeout import timeout
+import random
 
 log = logging.getLogger(__package__)
 
@@ -52,7 +53,7 @@ def compose_task(
     one_month_ago = datetime.now(pytz.utc) - timedelta(days=31)
 
     # chromium also understands FTP servers and renders those
-    no_screenshots = Endpoint.objects.all().filter(
+    endpoints = Endpoint.objects.all().filter(
         q_configurations_to_scan(level="endpoint"),
         is_dead=False,
         url__not_resolvable=False,
@@ -61,13 +62,17 @@ def compose_task(
         port__in=[80, 443, 8443, 8080, 8888, 21]
     )
     # Without screenshot OR with a screenshot over a month ago
-    no_screenshots = no_screenshots.filter((Q(screenshot__isnull=True) | Q(screenshot__created_on__lt=one_month_ago)))
+    endpoints = endpoints.filter((Q(screenshot__isnull=True) | Q(screenshot__created_on__lt=one_month_ago)))
 
     # It's possible to overwrite the above query also, you can add whatever you want to the normal query.
-    no_screenshots = endpoint_filters(no_screenshots, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+
+    # only retrieve fields we need:
+    endpoints = endpoints.only('id', 'ip_version', 'port', 'protocol', 'url__id', 'url__url')
 
     # unique endpoints only
-    endpoints = list(set(no_screenshots))
+    endpoints = list(set(endpoints))
+    random.shuffle(endpoints)
 
     # prevent constance from looking up the value constantly:
     v4_service = config.SCREENSHOT_API_URL_V4
