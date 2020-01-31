@@ -8,6 +8,7 @@ Scans for missing AUTH TLS / AUTH SSL options in FTP servers.
 """
 
 import logging
+import random
 from ftplib import FTP, error_perm, error_proto, error_reply, error_temp
 
 from celery import Task, group
@@ -29,8 +30,10 @@ RETRY_DELAY = 10
 # after which time (seconds) a pending task should no longer be accepted by a worker
 # can also be a datetime.
 EXPIRES = 3600  # one hour is more then enough
+CELERY_IP_VERSION_QUEUE_NAMES = {4: 'ipv4', 6: 'ipv6'}
 
 
+# todo: rename compose_task to compose_scan_task
 def compose_task(
     organizations_filter: dict = dict(),
     urls_filter: dict = dict(),
@@ -55,6 +58,7 @@ def compose_task(
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only("id", "port", "ip_version", "url__url")
 
     if not endpoints:
         log.warning('Applied filters resulted in no endpoints, thus no ftp tasks!')
@@ -64,64 +68,87 @@ def compose_task(
         log.info("Going to scan: %s" % endpoint)
 
     endpoints = list(set(endpoints))
+    random.shuffle(endpoints)
 
     log.info('Creating ftp scan task for %s endpoints.', len(endpoints))
     tasks = []
 
     for endpoint in endpoints:
-        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
-        tasks.append(scan.si(endpoint.url.url, endpoint.port).set(queue=queue)
-                     | store.s(endpoint))
+        tasks.append(
+            scan.si(
+                endpoint.url.url,
+                endpoint.port
+            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            | store.s(endpoint))
 
     return group(tasks)
 
 
-def compose_discover_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
+def compose_discover_task(organizations_filter: dict = dict(),
+                          urls_filter: dict = dict(),
                           endpoints_filter: dict = dict(), **kwargs) -> Task:
+    # There are only semi-alternative ports, no real alternative ports.
     # ports = [21, 990, 2811, 5402, 6622, 20, 2121, 212121]  # All types different default ports.
-
-    log.debug("discovery")
-    log.debug("o: %s, u: %s, e: %s" % (organizations_filter, urls_filter, endpoints_filter))
 
     ports = [21]
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), not_resolvable=False, is_dead=False)
-
-    # This can deliver 300+ urls if the url is shared over 300+ organizations
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
+    urls = urls.only('id', 'url')
 
-    # to reduce the amount of organizations returned... which doesn't work as the amount of urls can be enormous
-    # which is not supported in an __in command.
     urls = list(set(urls))
+    random.shuffle(urls)
 
-    log.info('Creating ftp discover task for %s urls. %s' % (len(urls), urls))
+    log.info(f'Discovering FTP servers on {len(urls)} urls.')
 
     tasks = []
     for ip_version in [4, 6]:
-        queue = "ipv4" if ip_version == 4 else "ipv6"
         # first iterate through ports, so there is more time between different connection attempts. Which reduces load
         # for the tested server. Also, the first port has the most hits :)
         for port in ports:
             for url in urls:
-                tasks.append(discover.si(url.url, port).set(queue=queue)
-                             | store_when_new_or_kill_if_gone.s(url, port, 'ftp', ip_version))
+                tasks.append(
+                    discover.si(
+                        url.url,
+                        port
+                    ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[ip_version])
+                    | store_when_new_or_kill_if_gone.s(
+                        url,
+                        port,
+                        'ftp',
+                        ip_version)
+                    )
 
     return group(tasks)
 
 
-def compose_verify_task(organizations_filter: dict = dict(), urls_filter: dict = dict(),
+def compose_verify_task(organizations_filter: dict = dict(),
+                        urls_filter: dict = dict(),
                         endpoints_filter: dict = dict(), **kwargs) -> Task:
 
     default_filter = {"protocol": "ftp", "is_dead": False}
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only('id', 'url__id', 'url__url', 'port', 'ip_version')
+
+    endpoints = list(set(endpoints))
+    random.shuffle(endpoints)
+
+    log.info(f'Verifying FTP servers on {len(endpoints)} endpoints.')
 
     tasks = []
 
     for endpoint in endpoints:
-        queue = "ipv4" if endpoint.ip_version == 4 else "ipv6"
-        tasks.append(discover.si(endpoint.url.url, endpoint.port).set(queue=queue)
-                     | store_when_new_or_kill_if_gone.s(endpoint.url, endpoint.port, 'ftp', endpoint.ip_version))
+        tasks.append(
+            discover.si(
+                endpoint.url.url,
+                endpoint.port
+            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+            | store_when_new_or_kill_if_gone.s(
+                endpoint.url,
+                endpoint.port,
+                'ftp',
+                endpoint.ip_version))
 
     return group(tasks)
 
@@ -363,22 +390,26 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
     # get the latest info on this endpoint
     try:
         endpoint = Endpoint.objects.filter(protocol=protocol, port=port, ip_version=ip_version, url=url,
-                                           is_dead=False).latest("discovered_on")
+                                           is_dead=False).only('id', 'is_dead').latest("discovered_on")
     except Endpoint.DoesNotExist:
         doesnotexist = True
 
     # Do not store updates to an endpoint that does not exist. We choose to NOT store endpoints that don't exist.
     # For the simple reason that otherwise 99% of our scans will result in an non existing endpoint, costing incredible
     # amounts of storage space.
-    if doesnotexist and not connected:
-        return
+    if doesnotexist:
+        if not connected:
+            # Not logging all urls over and over again.
+            # log.debug(f"No FTP server is running on {url.url}.")
+            return
 
     # new endpoint! Store this endpoint as existing. Hooray, we found something new to scan.
     # We will not set old endpoints to alive.
-    if doesnotexist and connected:
-        ep = Endpoint(url=url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now())
-        ep.save()
-        return
+        if connected:
+            log.debug(f"New FTP server discovered on {url.url}.")
+            ep = Endpoint(url=url, port=port, protocol=protocol, ip_version=ip_version, discovered_on=timezone.now())
+            ep.save()
+            return
 
     # endpoint was alive and still is. Nothing changed. We don't have a last seen date. So do nothing.
     if not endpoint.is_dead and connected:
@@ -386,6 +417,7 @@ def store_when_new_or_kill_if_gone(connected, url, port, protocol, ip_version):
 
     # endpoint died. Kill it.
     if endpoint.is_dead is False and not connected:
+        log.debug(f"Existing FTP server could not be found anymore on {url.url}, removing.")
         endpoint.is_dead = True
         endpoint.is_dead_reason = "Could not connect"
         endpoint.is_dead_since = timezone.now()
