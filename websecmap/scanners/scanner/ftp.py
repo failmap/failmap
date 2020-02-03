@@ -60,17 +60,10 @@ def compose_task(
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
     endpoints = endpoints.only("id", "port", "ip_version", "url__url")
 
-    if not endpoints:
-        log.warning('Applied filters resulted in no endpoints, thus no ftp tasks!')
-        return group()
-
-    for endpoint in endpoints:
-        log.info("Going to scan: %s" % endpoint)
-
     endpoints = list(set(endpoints))
     random.shuffle(endpoints)
 
-    log.info('Creating ftp scan task for %s endpoints.', len(endpoints))
+    log.info('Scanning FTP servers on %s endpoints.', len(endpoints))
     tasks = []
 
     for endpoint in endpoints:
