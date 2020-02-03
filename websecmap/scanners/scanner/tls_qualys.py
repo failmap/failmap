@@ -201,7 +201,7 @@ def claim_proxy(tracing_label=""):
 
 
 @app.task(queue='storage')
-def release_proxy(proxy, tracing_label=""):
+def release_proxy(proxy: ScanProxy, tracing_label=""):
     """As the claim proxy queue is ALWAYS filled, you cannot insert release proxy commands there..."""
     log.debug(f"Releasing proxy {proxy.id} claimed for {tracing_label} et al...")
     proxy.currently_used_in_tls_qualys_scan = False
@@ -209,11 +209,11 @@ def release_proxy(proxy, tracing_label=""):
 
 
 @app.task(queue='internet')
-def check_proxy(proxy):
+def check_proxy(proxy: ScanProxy):
     # todo: service_provider_status should stop after a certain amount of requests.
     # Note that you MUST USE HTTPS proxies for HTTPS traffic! Otherwise your normal IP is used.
 
-    log.debug("Testing proxy %s" % proxy)
+    log.debug(f"Testing proxy {proxy.id}")
 
     if not config.SCAN_PROXY_TESTING_URL:
         proxy_testing_url = "https://google.com/"
@@ -221,6 +221,7 @@ def check_proxy(proxy):
     else:
         proxy_testing_url = config.SCAN_PROXY_TESTING_URL
 
+    log.debug(f"Attempting to connect to testing url: {proxy_testing_url}")
     # send requests to a known domain to inspect the headers the proxies attach. There has to be something
     # that links various scans to each other.
     try:
@@ -228,35 +229,54 @@ def check_proxy(proxy):
             proxy_testing_url,
             proxies={proxy.protocol: proxy.address},
             timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),
-            headers={'User-Agent': f"Request through proxy {proxy}"}
+            headers={
+                'User-Agent': f"Request through proxy {proxy.id}",
+                'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                'Accept-Language': 'en-US,en;q=0.5',
+                'DNT': '1',
+            }
         )
+
+    # Storage is handled async, because you might not be on the machine that is able to save data.
     except ProxyError:
-        store_check_result.apply_async([proxy, "Proxy does not support https.", True, datetime.now(pytz.utc)])
+        log.debug("ProxyError, Perhaps because: proxy does not support https.")
+        store_check_result.apply_async([proxy, "ProxyError, Perhaps because: proxy does not support https.", True,
+                                        datetime.now(pytz.utc)])
         return False
     except SSLError:
+        log.debug("SSL error received.")
         store_check_result.apply_async([proxy, "SSL error received.", True, datetime.now(pytz.utc)])
         return False
     except ConnectTimeout:
+        log.debug("Connection timeout.")
         store_check_result.apply_async([proxy, "Connection timeout.", True, datetime.now(pytz.utc)])
         return False
     except ConnectionError:
+        log.debug("Connection error.")
         store_check_result.apply_async([proxy, "Connection error.", True, datetime.now(pytz.utc)])
         return False
     except ProtocolError:
+        log.debug("Protocol error.")
         store_check_result.apply_async([proxy, "Protocol error.", True, datetime.now(pytz.utc)])
         return False
     except BadStatusLine:
+        log.debug("Bad status line.")
         store_check_result.apply_async([proxy, "Bad status line.", True, datetime.now(pytz.utc)])
         return False
 
+    log.debug(f"Could connect to test site {proxy_testing_url}. Proxy is functional.")
+
+    log.debug(f"Attempting to connect to the Qualys API.")
     try:
         api_results = service_provider_status(proxy)
     except RetryError:
+        log.debug("Retry error. Could not connect.")
         store_check_result.apply_async([proxy, "Retry error. Could not connect.", True, datetime.now(pytz.utc)])
         return False
 
     # tried a few times, no result. Proxy is dead.
     if not api_results:
+        log.debug("No result, proxy not reachable?")
         store_check_result.apply_async([proxy, "No result, proxy not reachable?", True, datetime.now(pytz.utc)])
         return False
 
@@ -272,11 +292,14 @@ def check_proxy(proxy):
                                  proxies={proxy.protocol: proxy.address},
                                  timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT)
                                  ).elapsed.total_seconds()
+            log.debug("Website retrieved.")
         except ProxyError:
+            log.debug("Could not retrieve website.")
             store_check_result.apply_async([proxy, "Could not retrieve website.", True, datetime.now(pytz.utc),
                                             api_results['current'], api_results['max'], api_results['this-client-max']])
             return False
         except ConnectTimeout:
+            log.debug("Proxy too slow for standard site.")
             store_check_result.apply_async([proxy, "Proxy too slow for standard site.", True, datetime.now(pytz.utc),
                                             api_results['current'], api_results['max'], api_results['this-client-max']])
             return False
@@ -285,10 +308,10 @@ def check_proxy(proxy):
         # requests. Proxies wont work if they are not "elite", aka: not revealing the internet user behind them.
         # otherwise the data will be coupled to a single client.
 
+        log.debug(f"Proxy accessible. Capacity available. {proxy.id}.")
         store_check_result.apply_async([proxy, "Proxy accessible. Capacity available.", False, datetime.now(pytz.utc),
                                         api_results['current'], api_results['max'], api_results['this-client-max'],
                                         int(speed * 1000)])
-        log.debug("Capacity available at proxy %s." % proxy)
         return True
 
 
@@ -506,24 +529,29 @@ def service_provider_scan_via_api_with_limits(proxy, domain):
         "https://api.ssllabs.com/api/v2/analyze",
         params=payload,
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
-        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
+        headers={
+            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
+                          "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
+            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            'Accept-Language': 'en-US,en;q=0.5',
+            'DNT': '1',
+        },
         proxies={proxy.protocol: proxy.address},
         cookies={}
     )
 
     # log.debug(vars(response))  # extreme debugging
-    log.info("Assessments: max: %s, current: %s, this client: %s, this: %s, proxy: %s",
-             response.headers['X-Max-Assessments'],
-             response.headers['X-Current-Assessments'],
-             response.headers['X-ClientMaxAssessments'],
-             domain,
-             proxy
-             )
+    log.debug("Assessments: max: %s, current: %s, this client: %s, this: %s, proxy: %s",
+              response.headers.get('X-Max-Assessments', 25),
+              response.headers.get('X-Current-Assessments', 0),
+              response.headers.get('X-ClientMaxAssessments', 25),
+              domain,
+              proxy
+              )
 
-    return {'max': int(response.headers['X-Max-Assessments']),
-            'current': int(response.headers['X-Current-Assessments']),
-            'this-client-max': int(response.headers['X-ClientMaxAssessments']),
+    return {'max': int(response.headers.get('X-Max-Assessments', 25)),
+            'current': int(response.headers.get('X-Current-Assessments', 0)),
+            'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
             'data': response.json()}
 
 
@@ -535,8 +563,14 @@ def service_provider_status(proxy):
         "https://api.ssllabs.com/api/v2/getStatusCodes",
         params={},
         timeout=(API_NETWORK_TIMEOUT, API_SERVER_TIMEOUT),  # 30 seconds network, 30 seconds server.
-        headers={'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 "
-                               "(KHTML, like Gecko) Version/9.0.2 Safari/601.3.9", },
+        headers={
+            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/79.0.3945.130 Safari/537.36",
+            'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,"
+                      "*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            'Accept-Language': 'en-US,en;q=0.5',
+            'DNT': '1',
+        },
         proxies={proxy.protocol: proxy.address},
         cookies={}
     )
@@ -581,18 +615,19 @@ def service_provider_status(proxy):
      'TESTING_PROTO_3_2': 'Testing TLS 1.1', 'TESTING_PROTO_3_3': 'Testing TLS 1.2', 'TESTING_LONG_HANDSHAKE':
      'Testing Long Handshake (might take a while)'}}
     """
-    # log.debug(response)
 
     # log.debug(vars(response))  # extreme debugging
+    # The x-max-assements etc have been removed from the response headers in december 2019.
+    # always return the max available. And make sure the claiming works as intended.
     log.debug("Status: max: %s, current: %s, this client: %s, proxy: %s",
-              response.headers['X-Max-Assessments'],
-              response.headers['X-Current-Assessments'],
-              response.headers['X-ClientMaxAssessments'],
-              proxy)
+              response.headers.get('X-Max-Assessments', 25),
+              response.headers.get('X-Current-Assessments', 0),
+              response.headers.get('X-ClientMaxAssessments', 25),
+              proxy.id)
 
-    return {'max': int(response.headers['X-Max-Assessments']),
-            'current': int(response.headers['X-Current-Assessments']),
-            'this-client-max': int(response.headers['X-ClientMaxAssessments']),
+    return {'max': int(response.headers.get('X-Max-Assessments', 25)),
+            'current': int(response.headers.get('X-Current-Assessments', 0)),
+            'this-client-max': int(response.headers.get('X-ClientMaxAssessments', 25)),
             'data': response.json()}
 
 
