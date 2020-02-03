@@ -46,7 +46,6 @@ class MyPeriodicTaskForm(PeriodicTaskForm):
     """
 
     def clean(self):
-        print('cleaning')
 
         cleaned_data = super(PeriodicTaskForm, self).clean()
 

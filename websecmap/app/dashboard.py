@@ -110,7 +110,6 @@ class CustomIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
 
 
 class CustomAppIndexDashboard(ResetUserWidgetConfiguration, Dashboard):
-    print(dir(Dashboard))
     columns = 2
 
     def init_with_context(self, context):

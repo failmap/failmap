@@ -21,7 +21,6 @@ import raven.contrib.celery
 from django.utils.translation import gettext_lazy as _
 from pkg_resources import get_distribution
 
-from websecmap.jet import websecmap_menu_items
 from websecmap.scanners.constance import add_scanner_fields, add_scanner_fieldsets
 
 __version__ = get_distribution(__name__.split('.', 1)[0]).version
@@ -978,14 +977,72 @@ CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
 
-    {'label': _('🔧 Configuration'), 'items': [
+    {'label': _('👤 User'), 'items': [
         {'name': 'auth.user'},
-        {'name': 'auth.group'},
-        {'name': 'constance.config', 'label': _('Configuration')},
-    ], 'permissions': ['admin']},
+    ]},
+
+    {'label': _('🎛️ Configuration'), 'items': [
+        {'name': 'constance.config', 'label': 'Site & Scanning Configuration'},
+        {'name': 'map.configuration', 'label': 'Displayed Countries / Areas'},
+        {'name': 'map.landingpage', 'label': 'Landing Pages / Redirects'},
+        {'name': 'django_celery_beat.periodictask', 'label': 'Scheduled Scans & Tasks'},
+        {'name': 'scanners.scanproxy', 'label': 'TLS Scan Proxies'},
+    ]},
+
+    {'label': _('💽 Import New Data'), 'items': [
+        {'name': 'map.administrativeregion', 'label': _('Open Street Map & Wikidata')},
+        {'name': 'dataset', 'label': 'Spreadsheet Import'},
+    ]},
+
+    {'label': _('🌍 Core Data'), 'items': [
+        {'name': 'organizations.organization', 'label': "Organizations"},
+        {'name': 'organizations.url', 'label': 'Urls'},
+        {'name': 'organizations.organizationtype'}
+    ]},
+
+    {'label': _('🤖 Generated Map Data'), 'items': [
+        {'name': 'organizations.coordinate', 'label': 'Imported Map Coordinates'},
+        {'name': 'map.mapdatacache', 'label': 'Map Data Cache'},
+        {'name': 'map.vulnerabilitystatistic', 'label': 'Vulnerability Statistics'},
+        {'name': 'map.highlevelstatistic', 'label': 'Organization statistics'},
+
+    ]},
+
+    {'label': _('🔬 Generated Scans'), 'items': [
+        {'name': 'scanners.endpoint', 'label': 'Endpoints'},
+        {'name': 'scanners.endpointgenericscan', 'label': 'Endpoint Scans & Explanations'},
+        {'name': 'scanners.urlgenericscan', 'label': 'URL Scans'},
+        {'name': 'scanners.internetnlscan', 'label': 'Internet.nl Scan Tasks'},
+        {'name': 'scanners.screenshot', 'label': "Screenshots"},
+    ]},
+
+    {'label': _('📊 Generated Reports'), 'items': [
+        {'name': 'reporting.urlreport'},
+        {'name': 'map.organizationreport'},
+    ]},
+
+    {'label': _('🐞 Debug'), 'items': [
+        {'name': 'app.job', 'label': "Performed scheduled tasks"},
+        {'name': 'scanners.tlsqualysscratchpad', 'label': 'Qualys Scans Debug'},
+        {'name': 'scanners.endpointgenericscanscratchpad', 'label': 'Endpoint Scans Debug'},
+    ]},
+
+    {'label': _('👾️ The Game (beta)'), 'items': [
+        {'name': 'game.contest'},
+        {'name': 'game.team'},
+        {'name': 'game.organizationsubmission'},
+        {'label': _('New organizations'),
+         'url': '/admin/game/organizationsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-5',
+         'url_blank': False},
+        {'name': 'game.urlsubmission'},
+        {'label': _('New urls'),
+         'url': '/admin/game/urlsubmission/?has_been_accepted__exact=0&has_been_rejected__exact=0&o=-6.2.3',
+         'url_blank': False},
+    ]},
+
 ]
 
-JET_SIDE_MENU_ITEMS += websecmap_menu_items()
+JET_SIDE_MENU_COMPACT = True
 
 # end django jet menu configuration
 ########
