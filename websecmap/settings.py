@@ -740,7 +740,7 @@ CONSTANCE_CONFIG = {
         'amount of money is &euro;13.37 or &euro;42.', str),
 
     'RESPONSIBLE_ORGANIZATION_NAME': ('', 'The name of the organization running this project.', str),
-    'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and it\s mission. This text will'
+    'RESPONSIBLE_ORGANIZATION_PROMO_TEXT': ('', 'Some text promoting this organization and its mission. This text will'
                                                 ' not be translated.', str),
     'RESPONSIBLE_ORGANIZATION_WEBSITE': ('', 'The name of the organization running this project.', str),
     'RESPONSIBLE_ORGANIZATION_MAIL': ('', 'The name of the organization running this project.', str),
