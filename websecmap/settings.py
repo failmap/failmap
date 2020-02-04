@@ -1011,6 +1011,9 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
     {'label': _('🔬 Generated Scans'), 'items': [
         {'name': 'scanners.endpoint', 'label': 'Endpoints'},
         {'name': 'scanners.endpointgenericscan', 'label': 'Endpoint Scans & Explanations'},
+        {'label': '- By Last Scan Moment (newest)',
+         'url': '/admin/scanners/endpointgenericscan/?o=-5.-6',
+         'url_blank': False},
         {'name': 'scanners.urlgenericscan', 'label': 'URL Scans'},
         {'name': 'scanners.internetnlscan', 'label': 'Internet.nl Scan Tasks'},
         {'name': 'scanners.screenshot', 'label': "Screenshots"},
