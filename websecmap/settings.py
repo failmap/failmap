@@ -340,9 +340,6 @@ JET_APP_INDEX_DASHBOARD = 'websecmap.app.dashboard.CustomAppIndexDashboard'
 # Customize the Dashboard index page remove unneeded panels (eg: feeds) and add usefull stuff (actions).
 JET_INDEX_DASHBOARD = 'websecmap.app.dashboard.CustomIndexDashboard'
 
-# expand menu items by default for quick access
-JET_SIDE_MENU_COMPACT = False
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -1013,6 +1010,10 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'scanners.endpointgenericscan', 'label': 'Endpoint Scans & Explanations'},
         {'label': '- By Last Scan Moment (newest)',
          'url': '/admin/scanners/endpointgenericscan/?o=-5.-6',
+         'url_blank': False},
+        {'label': '- Possibly outdated scans',
+         'url': '/admin/scanners/endpointgenericscan/'
+                '?endpoint__is_dead__exact=0&endpoint__url__is_dead__exact=0&is_the_latest_scan__exact=1&o=5.-6',
          'url_blank': False},
         {'name': 'scanners.urlgenericscan', 'label': 'URL Scans'},
         {'name': 'scanners.internetnlscan', 'label': 'Internet.nl Scan Tasks'},
