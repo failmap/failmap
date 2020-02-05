@@ -52,6 +52,8 @@ class EndpointAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     @staticmethod
     def visit(inst):
+        if not inst:
+            return "- no url, how?"
         url = "%s://%s:%s/" % (inst.protocol, inst.url.url, inst.port)
         return format_html("<a href='%s' target='_blank'>Visit</a>" % url)
 

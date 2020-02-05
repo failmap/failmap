@@ -169,23 +169,31 @@ def compose_verify_task(
     endpoints_filter = {**endpoints_filter, **default_filter}
     endpoints = Endpoint.objects.all().filter(q_configurations_to_scan(level='endpoint'), **endpoints_filter)
     endpoints = endpoint_filters(endpoints, organizations_filter, urls_filter, endpoints_filter)
+    endpoints = endpoints.only('id', 'url__id', 'ip_version', 'port', 'protocol')
 
-    tasks = []
-    for endpoint in endpoints:
-        tasks.append(
-            can_connect.si(
-                protocol=endpoint.protocol,
-                url=endpoint.url,
-                port=endpoint.port,
-                ip_version=endpoint.ip_version
-            ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
-            | connect_result.s(
-                protocol=endpoint.protocol,
-                url=endpoint.url,
-                port=endpoint.port,
-                ip_version=endpoint.ip_version)
-        )
-    return group(tasks)
+    # query takes 4 seconds in production on 41857 endpoints (htttp = 20000, https = 22465).
+    endpoints = list(set(endpoints))
+    random.shuffle(endpoints)
+
+    log.info(f"Verifying {len(endpoints)} http/https endpoints.")
+
+    tasks = group(
+        can_connect.si(
+            protocol=endpoint.protocol,
+            url=endpoint.url,
+            port=endpoint.port,
+            ip_version=endpoint.ip_version
+        ).set(queue=CELERY_IP_VERSION_QUEUE_NAMES[endpoint.ip_version])
+        | connect_result.s(
+            protocol=endpoint.protocol,
+            url=endpoint.url,
+            port=endpoint.port,
+            ip_version=endpoint.ip_version)
+        for endpoint in endpoints)
+
+    log.info(f"Verification tasks for http/https endpoint created.")
+
+    return tasks
 
 
 @app.task(queue="storage")
