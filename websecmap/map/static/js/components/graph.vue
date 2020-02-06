@@ -114,6 +114,10 @@ Vue.component('vulnerability-chart', {
 
         renderData: function(){
             let data = this.data;
+
+            if (data === undefined)
+                return;
+
             let possible_axis = ['high', 'medium', 'low', 'good'];
 
             let ax_data = {'labels': [], 'high': [], 'medium': [], 'low': [], 'good': []};
@@ -190,6 +194,9 @@ Vue.component('vulnerability-donut', {
         },
         renderData: function(){
             let data = this.data;
+
+            if (data === undefined)
+                return;
 
             let labels = Array();
             let high = Array();
@@ -306,6 +313,9 @@ Vue.component('connectivity-chart', {
 
         renderData: function(){
             let data = this.data;
+
+            if (data === undefined)
+                return;
 
             let labels = Array();
 
