@@ -1,9 +1,7 @@
 {% verbatim %}
-<template type="x-template" id="report_template">
+<template type="x-template" id="report_selection_template">
     <div>
         <div class="page-header">
-            <a href="#" class="backtomap">{{ $t("back_to_map") }} ↑</a>
-            <a name="reports" id="report-anchor" class="jumptonav"></a>
             <h2><span class="organization_points"></span>
                 <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
                 {{ $t("report.title") }}</h2>
@@ -22,7 +20,7 @@
 {% endverbatim %}
 
 <script>
-Vue.component('report', {
+Vue.component('report_selection', {
     store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
@@ -41,7 +39,7 @@ Vue.component('report', {
         },
     },
 
-    template: "#report_template",
+    template: "#report_selection_template",
 
     data: function () {
         return {

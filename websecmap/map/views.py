@@ -149,10 +149,13 @@ def inject_default_language_cookie(request, response) -> HttpResponse:
     return response
 
 
+def emptypage(request):
+    return render(request, 'map/empty.html')
+
+
 @cache_page(one_hour)
 def index(request, map_configuration=None):
 
-    # todo...
     def countries_and_layers():
         confs = Configuration.objects.all().filter(
             is_displayed=True
@@ -172,7 +175,6 @@ def index(request, map_configuration=None):
         # which unfortunately doesn't change when switching language, but ok... for now it's fine.
         countries = {}
         for conf in confs:
-            print(conf.country)
             if conf.country.code not in countries:
                 countries = {**countries, **{conf.country.code: {
                     'code': conf.country.code,

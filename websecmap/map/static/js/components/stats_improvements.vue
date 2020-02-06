@@ -1,6 +1,6 @@
 {% verbatim %}
-<template type="x-template" id="issue_improvements_template">
-    <div class="stats_part" v-cloak>
+<template type="x-template" id="stats_improvements_template">
+    <div class="stats_part container" v-cloak>
         <div class="page-header">
             <h3>{{ $t("improvements.title") }}</h3>
             <p>{{ $t("improvements.intro") }}</p>
@@ -54,7 +54,7 @@
 {% endverbatim %}
 
 <script>
-Vue.component('improvements', {
+const StatsImprovements = Vue.component('stats_improvements', {
     store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
@@ -84,7 +84,7 @@ Vue.component('improvements', {
             }
         },
     },
-    template: "#issue_improvements_template",
+    template: "#stats_improvements_template",
     mixins: [new_state_mixin, translation_mixin],
 
     mounted: function () {

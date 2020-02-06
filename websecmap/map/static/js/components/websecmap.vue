@@ -3,7 +3,7 @@
     <div>
         <!-- these settings made the map unusable on mobile devices -->
         <!-- scrollWheelZoom: false, tap: true, zoomSnap: 0.2, dragging: !L.Browser.mobile, touchZoom: true, -->
-        <l-map style="height: calc(100vh - 55px); width: 100%;" ref="lmap"
+        <l-map style="height: 100vh; width: 100%;" ref="lmap"
                :options="{
                 scrollWheelZoom: false,
                contextmenu: true,
@@ -66,10 +66,11 @@
                 </div>
             </l-control>
 
+            <!--
             <l-control position="topright" class="hide_on_small_screens">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <h4>{{ $t("map.history.title") }} </h4>
-                    <!-- todo: the loader should be placed elsewhere, more visible but not obtrusive, and perhaps WHAT is loading... -->
+
                     <template v-if="!loading">
                         <button :disabled='state.week === 52' style='float: left' class='btn btn-small btn-secondary' @click='previous_week' :disabled='loading'>- 1</button>
                         {{ visibleweek }}
@@ -77,19 +78,21 @@
                         <br>
                         <input id='history' class='slider' type='range' v-on:change='show_week' v-on:input="update_visible_week" :value='state.week' min='0' max='52' step='1' :disabled='loading'/>
                     </template>
-
-                    <h5 v-if="loading"><span v-if='loading'><div class="loader" style="width: 24px; height: 24px;"></div></span></h5>
-
                 </div>
             </l-control>
+            -->
 
             <l-control position="topright"  v-if="issues.length > 1" class="hide_on_small_screens">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
                     <button class="btn btn-secondary btn-small" style='width: 100%' type="button" data-toggle="collapse" data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseExample">
                         <template v-if="['clear_filter_option', ''].includes(displayed_issue)">{{ $t("map.filter.title") }}</template>
-                        <template v-if="displayed_issue !== 'clear_filter_option'">{{ $t(displayed_issue) }}</template>
+                        <template v-if="displayed_issue !== 'clear_filter_option'">
+                            <span v-if='loading'><div class="loader" style="width: 24px; height: 24px; float: left;"></div></span>
+                            {{ $t(displayed_issue) }}
+                        </template>
                     </button>
-                    <div class="collapse" id="collapseFilters">
+
+                    <div class="collapse" id="collapseFilters" style="margin-top:10px;">
                         <template>
                             <input type='radio' v-model="displayed_issue" name="displayed_issue" value="" id="clear_filter_option">
                             <label for="clear_filter_option">{{ $t("map.filter.show_everything") }}</label>
@@ -106,8 +109,8 @@
                 <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
                     <div>
-                        <h4><a @click="showreport_frompopup(hover_info.properties.organization_id, hover_info.properties.organization_name)">{{ hover_info.properties.organization_name }}</a></h4>
-                        <a @click="showreport_frompopup(hover_info.properties.organization_id, hover_info.properties.organization_name)">🔍 {{ $t("view_report") }}</a><br>
+                        <h4><a @click="document.app.direct_navigation_to_report(hover_info.properties.organization_id, hover_info.properties.organization_name)">{{ hover_info.properties.organization_name }}</a></h4>
+                        <a @click="document.app.direct_navigation_to_report(hover_info.properties.organization_id, hover_info.properties.organization_name)">🔍 {{ $t("view_report") }}</a><br>
                         <div class="progress">
                             <div class="progress-bar bg-danger" :style="{width:high}"></div>
                             <div class="progress-bar bg-warning" :style="{width:medium}"></div>
@@ -186,7 +189,7 @@
 {% endverbatim %}
 
 <script>
-Vue.component('websecmap', {
+const WebSecMap = Vue.component('websecmap', {
     store,
 
     name: "websecmap",
@@ -770,35 +773,27 @@ Vue.component('websecmap', {
         },
         // from hover info
         showreport: function(e) {
-            // give both name and id as separate identifiers.
-            store.commit('change', {reported_organization: {
-                id: e.target.feature.properties['organization_id'],
-                name: e.target.feature.properties['organization_name'],
-            }});
-            this.showreport_direct();
+            this.set_and_navigate_to_report(
+                e.target.feature.properties['organization_id'],
+                e.target.feature.properties['organization_name']
+            );
         },
 
         showreportfromcontextmenu: function(e) {
-            // give both name and id as separate identifiers.
-            store.commit('change', {reported_organization: {
-                id: this.clicked_map_object.feature.properties['organization_id'],
-                name: this.clicked_map_object.feature.properties['organization_name'],
-            }});
-            this.showreport_direct();
+            this.set_and_navigate_to_report(
+                this.clicked_map_object.feature.properties['organization_id'],
+                this.clicked_map_object.feature.properties['organization_name']
+            );
         },
 
-        showreport_frompopup: function(organization_id, organization_name) {
+        set_and_navigate_to_report: function(organization_id, organization_name) {
             store.commit('change', {reported_organization: {
                 id: organization_id,
                 name: organization_name,
             }});
-            this.showreport_direct();
+            router.push({ path: '/report' })
         },
 
-        showreport_direct: function () {
-            // fullscreen state is not supported for now...
-            location.href = '#report';
-        },
         pointToLayer: function (geoJsonPoint, latlng) {
             return L.circleMarker(latlng, this.style(geoJsonPoint));
         },
@@ -862,7 +857,7 @@ Vue.component('websecmap', {
 
                 let popup = L.popup({minWidth: 200});
                 popup.setContent(`
-                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
+                <a onClick="document.app.direct_navigation_to_report(${props.organization_id}, '${props.organization_name}')">
                     <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']}</b><br>
                     🔍 ${ i18n.t("view_report") }
                 <br>
@@ -936,8 +931,9 @@ Vue.component('websecmap', {
             let props = layer.feature.properties;
 
             let popup = L.popup({minWidth: 200});
+
             popup.setContent(`
-                <a onClick="app.$refs.websecmap.showreport_frompopup(${props.organization_id}, '${props.organization_name}')">
+                <a onClick="document.app.direct_navigation_to_report(${props.organization_id}, '${props.organization_name}')">
                     <b>${this.determine_book_color(props['percentages'])} ${props['organization_name']}</b><br>
                     🔍 ${ i18n.t("view_report") }
                 <br>

@@ -21,6 +21,7 @@ register_converter(converters.JsonConverter, 'json')
 
 static_urlpatterns = [
     path('', views.index),
+    path('empty', views.emptypage),
     path('security.txt', views.security_txt),
     path('robots.txt', views.robots_txt),
     path('manifest.json', views.manifest_json),

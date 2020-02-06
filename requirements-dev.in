@@ -45,5 +45,4 @@ pydotplus
 watchdog
 
 ipython
-django-cprofile-middleware
 moviepy

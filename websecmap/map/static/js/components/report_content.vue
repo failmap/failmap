@@ -1,7 +1,9 @@
 {% verbatim %}
 <template type="x-template" id="report_content_template">
     <div id="report_content">
-        <template v-if='loading'><div class="loader" style="width: 100px; height: 100px;"></div></template>
+
+        <loading v-if="loading"></loading>
+
         <template v-if='!loading && (reported_organization.id || reported_organization.name)'>
 
             <div class="row report_controls" style="margin-bottom: 30px;">
@@ -25,7 +27,6 @@
 
 
             <div class="page-header" v-if="name">
-                <a href="#" class="backtomap">{{ $t("back_to_map") }} ↑</a>
                 <h3>{{ $t("report_content.report_of") }} {{ name }}</h3>
                 <p>{{ $t("report_content.data_from") }}: {{ humanize(when) }}.</p>
             </div>
@@ -561,7 +562,7 @@ Vue.component('report_content', {
             fetch(`/data/organization_vulnerability_timeline/${org}/${this.state.layer}/${this.state.country}`).then(response => response.json()).then(timelinedata => {
                 if (!$.isEmptyObject(timelinedata)){
                     this.timeline = timelinedata;
-                    console.log("Todo: implement graph return on organization name.")
+                    // console.log("Todo: implement graph return on organization name.")
                 }
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 

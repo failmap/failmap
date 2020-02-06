@@ -7,6 +7,16 @@ body {
     width: 100%;
 }
 
+.router-link-exact-active {
+    color: black;
+    font-weight: bold;
+    border-bottom: 4px solid green;
+}
+
+.page-header {
+    margin-top: 2em;
+}
+
 #next_week {
     float: right;
 }
@@ -96,22 +106,11 @@ body {
     margin: 0 0 5px;
 }
 
-/* bootstrap fixed menu terribleness... always overlaps content. */
-body {
-    padding-top: 56px;
-}
-
 /* prevent dynamic content loading in the div before this element to scroll
 the recently jumped anchor (report) out of view.
 */
 div#report {
     margin-top: 55px;
-}
-
-@media screen and (max-width: 768px) {
-    body {
-        padding-top: 55px;
-    }
 }
 
 /* https://github.com/twbs/bootstrap/issues/1768 */
@@ -429,16 +428,6 @@ path {
     height: 190px;
 }
 
-section {
-    margin-bottom: 87px;
-    padding-bottom: 54px;
-}
-
-section:last-of-type {
-    margin-bottom: 0;
-}
-
-section:nth-child(2n+2) {background-color: rgba(184, 188, 249, 0.1);}
 
 /**
  Sortable Tables
@@ -600,13 +589,10 @@ th.active .arrow {
 
 .announcement
 {
-    margin-top: 20px;
     font-size: 1.5em;
     text-align: center;
-
     margin-bottom: 0;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
 }
 
 .photobar {
@@ -827,4 +813,43 @@ Vue Modal
   height: 25px; /* Slider handle height */
   background: #4CAF50; /* Green background */
   cursor: pointer; /* Cursor on hover */
+}
+
+
+/** Loading indicator, https://loading.io/css/ */
+.lds-dual-ring {
+  display: inline-block;
+  width: 55px;
+  height: 38px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 1px;
+  border-radius: 50%;
+  border: 5px solid #00BFD6;
+  border-color: #00BFD6 transparent #00BFD6 transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading {
+    padding-top: 17px;
+    text-align: center;
+}
+
+.loading span {
+    display: inline-block;
+    height: 64px;
+    font-size: 2em;
+    color: darkgray;
 }

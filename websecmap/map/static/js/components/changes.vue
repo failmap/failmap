@@ -1,10 +1,12 @@
 {% verbatim %}
 <template type="x-template" id="changes_template">
-    <div class="stats_part">
+    <div class="stats_part container">
         <div class="page-header">
             <h3>{{ $t("changes.title") }}</h3>
             <p>{{ $t("changes.intro") }}</p>
         </div>
+
+        <loading v-if="loading"></loading>
 
         <div class="row">
             <template v-for="issue in issues">
@@ -47,16 +49,17 @@
 {% endverbatim %}
 
 <script>
-Vue.component('changes', {
+const Changes = Vue.component('changes', {
     // it does not show all things nothing has been measured / no changes ...
     store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
                 changes: {
-                    title: "Latest changes",
-                    intro: "This is an overview of the most recent changes. These are processed at the end of the day. Because only changes are shown, it can take a while to see new information. Scans are being performed daily.",
-                    scan_moment: "Scan moment",
+                    title: "New Scans",
+                    intro: "This is an overview of the most recent changes based on the latest scans. " +
+                        "These changes will be visible the next time a report is being created.",
+                    scan_moment: "Scan",
                     url: "Domain",
                     rss_feed_teaser: "Stay updated of the latest findings using this ",
                     rss_feed: "RSS feed",
@@ -64,9 +67,11 @@ Vue.component('changes', {
             },
             nl: {
                 changes: {
-                    title: "Laatste wijzigingen",
-                    intro: "Dit is een overzicht van de meest recente wijzigingen. Dit laat zien dat er e.e.a. veranderd en verbeterd, nog voordat het in een rapport komt te staan. Deze bevindingen worden dagelijks samengevat in een rapport.",
-                    scan_moment: "Scan moment",
+                    title: "Nieuwe Scans",
+                    intro: "Dit is een overzicht van de meest recente wijzigingen op basis van de laatste scans. " +
+                        "Dit laat zien dat er e.e.a. veranderd en verbeterd, nog voordat het in een rapport komt te " +
+                        "staan.",
+                    scan_moment: "Scantijd",
                     url: "Domein",
                     rss_feed_teaser: "Blijf op de hoogte van de laatste scans, gebruik deze ",
                     rss_feed: "RSS feed",
@@ -79,7 +84,8 @@ Vue.component('changes', {
 
     data: function () {
         return {
-            scans: {}
+            scans: {},
+            loading: false,
         }
     },
 
@@ -93,12 +99,15 @@ Vue.component('changes', {
 
     methods: {
         load: function(){
+            this.loading = true;
             let url = `/data/all_latest_scans/${this.state.country}/${this.state.layer}/`;
 
             fetch(url).then(response => response.json()).then(data => {
                     this.scans = data.scans;
+                    this.loading = false;
                     // because some nested keys are used (results[x['bla']), updates are not handled correctly.
                     this.$forceUpdate();
+
                 }).catch((fail) => {
                     console.log('An error occurred in changes: ' + fail)
             });

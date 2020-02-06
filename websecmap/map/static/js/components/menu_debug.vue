@@ -1,7 +1,7 @@
 {% verbatim %}
 <template type="x-template" id="debugmenu_template">
     <div>
-        <nav class="navbar navbar-expand-md navbar-light" v-if="config.debug || config.admin">
+        <nav class="navbar navbar-expand-md navbar-light static-top bg-light" v-if="config.debug || config.admin">
             <div class="container">
                 Debug
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">

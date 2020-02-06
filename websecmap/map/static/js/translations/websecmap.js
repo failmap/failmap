@@ -25,11 +25,11 @@ const messages = {
         education: 'Education',
 
         // german layers... sigh... :)
-        bundesland: '',
-        regierungsbezirk: '',
-        landkreis_kreis_kreisfreie_stadt: '',
-        samtgemeinde_verwaltungsgemeinschaft: '',
-        stadt_gemeinde: '',
+        bundesland: 'Bundesland',
+        regierungsbezirk: 'Regierungsbezirk',
+        landkreis_kreis_kreisfreie_stadt: 'landkreis, kreis, kreisfreie stadt',
+        samtgemeinde_verwaltungsgemeinschaft: 'Samtgemeinde / Verwaltungsgemeinschaft',
+        stadt_gemeinde: 'Stadt Gemeinde',
         stadtbezirk_gemeindeteil_mit_selbstverwaltung: '',
         stadtteil_gemeindeteil_ohne_selbstverwaltung: '',
 

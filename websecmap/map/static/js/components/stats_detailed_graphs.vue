@@ -1,13 +1,14 @@
 {% verbatim %}
-<template type="x-template" id="graphs_template">
-    <div class="stats_part" v-cloak>
+<template type="x-template" id="stats_detailed_graphs">
+    <div class="stats_part container" v-cloak v-if="data">
         <div class="page-header">
             <h3>{{ $t("graphs.title") }}</h3>
         </div>
 
-        <div class="row" v-if="data">
+        <loading v-if="loading"></loading>
+
+        <div class="row">
             <div class="col-md-12">
-                <h4>{{ $t("graphs.overall") }}</h4>
                 <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
                     <vulnerability-chart
                         :color_scheme="color_scheme"
@@ -18,7 +19,7 @@
                 </div>
             </div>
         </div>
-        <div class="row" v-if="data">
+        <div class="row">
 
             <div class="col-md-4">
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
@@ -61,7 +62,7 @@
 
         </div>
 
-        <div class="row" v-if="data">
+        <div class="row">
             <div class="col-md-12">
                 <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
                     <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
@@ -69,7 +70,7 @@
             </div>
         </div>
         
-        <div class="row" v-if="data">
+        <div class="row">
 
             <template v-for="issue in issues">
                 <div class="col-md-12"  v-if="data[issue['name']]" style="text-align: center">
@@ -104,14 +105,13 @@
 {% endverbatim %}
 
 <script>
-Vue.component('graphs', {
+const StatsDetailedGraphs = Vue.component('stats_detailed_graphs', {
     store,
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
                 graphs: {
-                    title: "Graphs",
-                    overall: "Summed up",
+                    title: "Individual risks",
 
                     vulnerability_graph: {
                         title: "Total amount of issues over time",
@@ -136,8 +136,7 @@ Vue.component('graphs', {
             },
             nl: {
                 graphs: {
-                    title: "Grafieken",
-                    overall: "Alles bij elkaar",
+                    title: "Individuele risico's",
 
                     vulnerability_graph: {
                         title: "Totaal aantal risico's over tijd.",
@@ -162,7 +161,7 @@ Vue.component('graphs', {
             }
         },
     },
-    template: "#graphs_template",
+    template: "#stats_detailed_graphs",
     mixins: [new_state_mixin, translation_mixin],
 
     mounted: function () {
@@ -171,7 +170,8 @@ Vue.component('graphs', {
 
     data: function () {
         return {
-            data: []
+            data: [],
+            loading: false,
         }
     },
 
@@ -182,8 +182,10 @@ Vue.component('graphs', {
 
     methods: {
         load: function () {
+            this.loading = true;
             fetch(`/data/vulnerability_graphs/${this.state.country}/${this.state.layer}/0`).then(response => response.json()).then(data => {
                 this.data = data;
+                this.loading = false;
             }).catch((fail) => {console.log('An error occurred in graphs: ' + fail)});
         },
     },

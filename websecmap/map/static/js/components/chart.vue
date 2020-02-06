@@ -2,8 +2,8 @@
 <template type="x-template" id="chart_template">
     <div>
     <div class="row">
-        <div class="col-md-12">
-            <h3>{{ title }} {{humanize(metadata.data_from_time) }}</h3>
+        <div class="col-md-12" style="text-align: center;">
+            <h3>{{ title }}</h3>
 
             <div class="table-responsive" v-if="!filteredData.length">
                 {{ $t("chart.no_data_found") }}<br><br>
@@ -11,11 +11,13 @@
         </div>
     </div>
 
+    <loading v-if="loading"></loading>
+
     <div class="row" v-if="filteredData.length">
         <div v-for='(rank, index) in filteredData' v-if="index < 3" class="col-md-4" style="text-align: center;">
             <div style="padding: 25px;">
 
-                <span style="font-size: 150px">#{{rank['rank']}}</span>
+                <span style="font-size: 120px">#{{rank['rank']}}</span>
 
                 <h3>{{ rank['organization_name'] }}</h3>
 
@@ -32,12 +34,12 @@
         </div>
     </div>
 
-    <div class="row" v-if="filteredData.length">
+    <div class="row" v-if="filteredData.length > 2">
         <div class="table-responsive">
 
-            <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()">
+            <span role="button" class="btn btn-info btn-sm" v-on:click="swapFull()" v-if="filteredData.length > 10">
                 <svg aria-hidden="true" data-prefix="fas" data-icon="plus-square" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-plus-square fa-w-14"><path fill="currentColor" d="M400 32H48C21.5 32 0 53.5 0 80v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V80c0-26.5-21.5-48-48-48zm-32 252c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92H92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"></path></svg>
-                {{ $t("chart.expand_list") }}
+                {{ $t("chart.expand_list") }} ({{filteredData.length}})
             </span><br/><br/>
 
             <table class="table table-striped table-hover" id="chart_table">
@@ -140,6 +142,8 @@ Vue.component('chart', {
             metadata: {},
             key: {},
             filterKey: "",
+
+            loading: false,
         }
     },
 
@@ -166,10 +170,12 @@ Vue.component('chart', {
             return new Date(date).humanTimeStamp()
         },
         load: function () {
+            this.loading = true;
             fetch(`${this.data_url}${this.state.country}/${this.state.layer}/${this.state.week}`).then(response => response.json()).then(data => {
                 this.data = data.ranking.slice(0,10);
                 this.fulldata = data.ranking;
                 this.metadata = data.metadata;
+                this.loading = false;
             }).catch((fail) => {console.log('An error occurred in chart: ' + fail)});
         },
         sortBy: function (key) {

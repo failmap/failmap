@@ -39,7 +39,12 @@ def get_all_latest_scans(country, organization_type):
                     endpoint__url__organization__type_id=filtered_organization_type
                 )
             )
-        ).filter(n_urls__gte=1).order_by('-rating_determined_on')[0:6]
+        ).filter(
+            n_urls__gte=1
+        ).order_by(
+            '-rating_determined_on'
+        ).only('endpoint__url__url', 'endpoint__protocol', 'endpoint__port', 'endpoint__ip_version',
+               'rating', 'type', 'explanation')[0:20]
 
         for scan in scans:
             calculation = get_severity(scan)

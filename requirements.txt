@@ -28,6 +28,7 @@ django-compressor==2.3
 django-constance==2.4.0
 django-countries==5.5
 django-crispy-forms==1.8.0
+django-debug-toolbar==2.2
 django-excel==0.0.10
 django-geojson==2.12.0
 django-import-export==1.2.0
@@ -95,7 +96,7 @@ rjsmin==1.1.0             # via django-compressor
 simplejson==3.16.0
 six==1.13.0               # via cryptography, django-appconf, django-countries, django-geojson, django-nested-admin, eventlet, pyopenssl, python-dateutil, python-monkey-business, requests-file, tenacity, validators
 spectra==0.0.11
-sqlparse==0.3.0           # via django
+sqlparse==0.3.0           # via django, django-debug-toolbar
 statsd==3.3.0             # via django-statsd-mozilla
 tablib==0.14.0            # via django-import-export
 tabulate==0.8.5           # via pyexcel-text

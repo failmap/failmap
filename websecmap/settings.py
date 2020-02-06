@@ -169,11 +169,6 @@ if os.environ.get('USE_REMOTE_USER', False):
         'django.contrib.auth.backends.ModelBackend',
     ]
 
-if DEBUG:
-    # usage:
-    # http://localhost:8000/data/vulnstats/NL/municipality/0?prof&count=100000&sort=cumtime
-    MIDDLEWARE += ['django_cprofile_middleware.middleware.ProfilerMiddleware']
-
 ROOT_URLCONF = 'websecmap.urls'
 
 # template needed for admin template
@@ -571,24 +566,26 @@ if not DEBUG:
 
 # enable some features during debug
 if DEBUG:
-    # enable debug toolbar if available
-    try:
-        import debug_toolbar
+    # We expect the debug toolbar always to be available in debug environments.
+    import debug_toolbar
 
-        INSTALLED_APPS.append('debug_toolbar')
-        MIDDLEWARE.append('debug_toolbar.middleware.DebugToolbarMiddleware')
+    INSTALLED_APPS.insert(0, 'debug_toolbar')
 
-        import debug_toolbar.settings
+    # The order of MIDDLEWARE is important. You should include the Debug Toolbar middleware as early as possible
+    # in the list. However, it must come after any other middleware that encodes the response’s content,
+    # such as GZipMiddleware.
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
-        DEBUG_TOOLBAR_PANELS = [
-            'ddt_request_history.panels.request_history.RequestHistoryPanel',
-        ] + debug_toolbar.settings.PANELS_DEFAULTS + [
-            'django_statsd.panel.StatsdPanel',
-        ]
-        # send statsd metrics to debug_toolbar
-        STATSD_CLIENT = 'django_statsd.clients.toolbar'
-    except ImportError:
-        pass
+    import debug_toolbar.settings
+
+    DEBUG_TOOLBAR_PANELS = [
+        'ddt_request_history.panels.request_history.RequestHistoryPanel',
+    ] + debug_toolbar.settings.PANELS_DEFAULTS + [
+        'django_statsd.panel.StatsdPanel',
+    ]
+    # send statsd metrics to debug_toolbar
+    STATSD_CLIENT = 'django_statsd.clients.toolbar'
+
 
 # if sentry DSN is provided register raven to emit events on exceptions
 SENTRY_DSN = os.environ.get('SENTRY_DSN')
@@ -600,7 +597,7 @@ if SENTRY_DSN:
     }
     # add sentry ID to request for inclusion in templates
     # https://docs.sentry.io/clients/python/integrations/django/#message-references
-    MIDDLEWARE.insert(0, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
+    MIDDLEWARE.insert(1, 'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware')
 
     # Celery specific handlers
     client = raven.Client(SENTRY_DSN)
