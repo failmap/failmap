@@ -208,8 +208,7 @@ def index(request, map_configuration=None):
         'default_layer': map_defaults['layer'],
         'default_week': 0,
         'number_of_countries': len(initial_countries),
-        'initial_map_data': json.dumps(get_map_data(map_defaults['country'],
-                                                    map_defaults['layer'], 0, ''), default=str),
+        'initial_map_data': get_map_data(map_defaults['country'], map_defaults['layer'], 0, ''),
     }))
 
 
