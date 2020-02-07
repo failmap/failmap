@@ -7,45 +7,43 @@
         <div class="row" v-if="filteredData.length">
             <div class="col-md-12">
                 <h3>{{ $t("statistics.services.title") }}</h3>
-                <p>{{ $t("statistics.services.intro") }}</p>
-                    <p>{{ $t("statistics.services.number_of_service_checked", [endpoints_now]) }}</p>
-                    <div class="table-responsive">
-                        <table class="table table-striped" id="services_table">
-                            <thead>
-                                <tr>
-                                    <th @click="sortBy('ip_version')" :class="{ active: sortKey === 'ip_version' }">
-                                        {{ $t("statistics.services.ip_version") }}
-                                        <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'"></span>
-                                    </th>
-                                    <th @click="sortBy('protocol')" :class="{ active: sortKey === 'protocol' }">
-                                        {{ $t("statistics.services.protocol") }}
-                                        <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'"></span>
-                                    </th>
-                                    <th @click="sortBy('port')" :class="{ active: sortKey === 'port' }">
-                                        {{ $t("statistics.services.port") }}
-                                        <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'"></span>
-                                    </th>
-                                    <th @click="sortBy('amount')" :class="{ active: sortKey === 'amount' }">
-                                        {{ $t("statistics.services.amount") }}
-                                        <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'"></span>
-                                    </th>
-                                    <th>{{ $t("statistics.services.percentage") }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="services_table">
+                        <thead>
+                            <tr>
+                                <th @click="sortBy('ip_version')" :class="{ active: sortKey === 'ip_version' }">
+                                    {{ $t("statistics.services.ip_version") }}
+                                    <span class="arrow" :class="sortOrders['ip_version'] > 0 ? 'asc' : 'dsc'"></span>
+                                </th>
+                                <th @click="sortBy('protocol')" :class="{ active: sortKey === 'protocol' }">
+                                    {{ $t("statistics.services.protocol") }}
+                                    <span class="arrow" :class="sortOrders['protocol'] > 0 ? 'asc' : 'dsc'"></span>
+                                </th>
+                                <th @click="sortBy('port')" :class="{ active: sortKey === 'port' }">
+                                    {{ $t("statistics.services.port") }}
+                                    <span class="arrow" :class="sortOrders['port'] > 0 ? 'asc' : 'dsc'"></span>
+                                </th>
+                                <th @click="sortBy('amount')" :class="{ active: sortKey === 'amount' }">
+                                    {{ $t("statistics.services.amount") }}
+                                    <span class="arrow" :class="sortOrders['amount'] > 0 ? 'asc' : 'dsc'"></span>
+                                </th>
+                                <th>{{ $t("statistics.services.percentage") }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                                <tr v-for="service in filteredData">
-                                    <td>{{ service['ip_version'] }}</td>
-                                    <td>{{ service['protocol'] }}</td>
-                                    <td>{{ service['port'] }}</td>
-                                    <td>{{ service['amount'] }}</td>
-                                    <td>{{ ((service['amount'] / endpoints_now) * 100).toFixed(2) }}%</td>
-                                </tr>
+                            <tr v-for="service in filteredData">
+                                <td>{{ service['ip_version'] }}</td>
+                                <td>{{ service['protocol'] }}</td>
+                                <td>{{ service['port'] }}</td>
+                                <td>{{ service['amount'] }}</td>
+                                <td>{{ ((service['amount'] / endpoints_now) * 100).toFixed(2) }}%</td>
+                            </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
         </div>
 
     </div>
@@ -60,7 +58,7 @@ const StatsServices = Vue.component('stats_services', {
             en: {
                 statistics: {
                     services: {
-                        title: 'Services',
+                        title: 'Protocols and ports',
                         intro: 'One address can have a plethora of services.',
                         number_of_service_checked: 'A total of {0} services are checked.',
 
@@ -75,7 +73,7 @@ const StatsServices = Vue.component('stats_services', {
             nl: {
                 statistics: {
                     services: {
-                        title: 'Dienst',
+                        title: 'Protocollen en poorten',
                         intro: 'Een enkel adres kan meerdere diensten hebben, denk aan bestandsoverdracht, een website en e-mail.',
                         number_of_service_checked: 'In totaal werden {0} verschillende diensten gescand.',
 

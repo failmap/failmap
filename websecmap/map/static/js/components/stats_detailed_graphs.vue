@@ -7,98 +7,109 @@
 
         <loading v-if="loading"></loading>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
-                    <vulnerability-chart
-                        :color_scheme="color_scheme"
-                        :data="data.total"
-                        :axis="['high', 'medium', 'low']"
-                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
-                    ></vulnerability-chart>
-                </div>
-            </div>
-        </div>
-        <div class="row" v-if="data.total && data.total">
-
-            <div class="col-md-4">
-                <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <vulnerability-chart
-                        :color_scheme="color_scheme"
-                        :data="data.total"
-                        :axis="['high']"
-                        :display_title="false"
-                        :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
-                    ></vulnerability-chart>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <vulnerability-chart
-                        :color_scheme="color_scheme"
-                        :data="data.total"
-                        :axis="['medium']"
-                        :display_title="false"
-                        :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
-                    ></vulnerability-chart>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="chart-container" style="position: relative; height:200px; width:100%">
-                    <vulnerability-chart
-                        :color_scheme="color_scheme"
-                        :data="data.total"
-                        :axis="['low']"
-                        :display_title="false"
-                        :display_legend="false"
-                        :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
-                    ></vulnerability-chart>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="chart-container" style="position: relative; height:300px; width:100%" v-if="data.total">
-                    <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row">
-
-            <template v-for="issue in issues">
-                <div class="col-md-12"  v-if="data[issue['name']]" style="text-align: center">
-                    <h4 v-html="translate(issue.name)"></h4>
-                </div>
-
-                <div class="col-md-6"  v-if="data[issue['name']]" style="margin-bottom: 30px;">
-                    <div class="chart-container" style="position: relative; height:400px; width:100%">
-                        <vulnerability-donut
-                            :color_scheme="color_scheme"
-                            :data="data[issue['name']]"
-                            :axis="issue['relevant impacts']"
-                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_donut"
-                        ></vulnerability-donut>
-                    </div>
-                </div>
-                <div class="col-md-6"  v-if="data[issue['name']]">
-                    <div class="chart-container" style="position: relative; height:400px; width:100%">
+        <template v-if="data.total">
+                
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="chart-container" style="position: relative; height:555px; width:100%">
                         <vulnerability-chart
                             :color_scheme="color_scheme"
-                            :data="data[issue['name']]"
-                            :axis="issue['relevant impacts']"
+                            :data="data.total"
+                            :axis="['high', 'medium', 'low']"
                             :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
                         ></vulnerability-chart>
                     </div>
                 </div>
-            </template>
+            </div>
 
-        </div>
+            <div class="row">
+
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="data.total"
+                            :axis="['high']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="data.total"
+                            :axis="['medium']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="chart-container" style="position: relative; height:200px; width:100%">
+                        <vulnerability-chart
+                            :color_scheme="color_scheme"
+                            :data="data.total"
+                            :axis="['low']"
+                            :display_title="false"
+                            :display_legend="false"
+                            :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                        ></vulnerability-chart>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h3>{{ $t("graphs.per_metric") }}</h3>
+            </div>
+
+            <div class="row">
+                <template v-for="issue in issues">
+                    <div class="col-md-12"  v-if="data[issue['name']]" style="text-align: center">
+                        <h4 v-html="translate(issue.name)"></h4>
+                    </div>
+
+                    <div class="col-md-6"  v-if="data[issue['name']]" style="margin-bottom: 30px;">
+                        <div class="chart-container" style="position: relative; height:400px; width:100%">
+                            <vulnerability-donut
+                                :color_scheme="color_scheme"
+                                :data="data[issue['name']]"
+                                :axis="issue['relevant impacts']"
+                                :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_donut"
+                            ></vulnerability-donut>
+                        </div>
+                    </div>
+                    <div class="col-md-6"  v-if="data[issue['name']]">
+                        <div class="chart-container" style="position: relative; height:400px; width:100%">
+                            <vulnerability-chart
+                                :color_scheme="color_scheme"
+                                :data="data[issue['name']]"
+                                :axis="issue['relevant impacts']"
+                                :translation="$i18n.messages[$i18n.locale].graphs.vulnerability_graph"
+                            ></vulnerability-chart>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+
+            <div class="page-header">
+                <h3>{{ $t("graphs.connectivity") }}</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="chart-container" style="position: relative; height:300px; width:100%">
+                        <connectivity-chart :color_scheme="color_scheme" :data="data.total"></connectivity-chart>
+                    </div>
+                </div>
+            </div>
+        </template>
+
     </div>
 </template>
 {% endverbatim %}
@@ -110,7 +121,9 @@ const StatsDetailedGraphs = Vue.component('stats_detailed_graphs', {
         messages: {
             en: {
                 graphs: {
-                    title: "Individual risks",
+                    title: "Number of issues",
+                    per_metric: "Issue types",
+                    connectivity: "Internet addresses and services",
 
                     vulnerability_graph: {
                         title: "Total amount of issues over time",
@@ -135,7 +148,9 @@ const StatsDetailedGraphs = Vue.component('stats_detailed_graphs', {
             },
             nl: {
                 graphs: {
-                    title: "Individuele risico's",
+                    title: "Aantal risico's",
+                    pet_metric: "Risicotypen",
+                    connectivity: "Internet adressen en diensten",
 
                     vulnerability_graph: {
                         title: "Totaal aantal risico's over tijd.",
