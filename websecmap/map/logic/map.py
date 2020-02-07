@@ -274,10 +274,9 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
 
                     "type": i[4],
                     # Sometimes the data is a string, sometimes it's a list. The admin
-                    # interface might influence this.
-                    "coordinates":
-                        json.loads(i[3]) if isinstance(json.loads(i[3]), list)
-                        else json.loads(json.loads(i[3]))  # hack :)
+                    # interface might influence this. The fastest would be to use a string, instead of
+                    # loading some json.
+                    "coordinates": proper_coordinate(i[3], i[4])
                 }
         }
 
@@ -305,6 +304,19 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
         data["features"].append(dataset)
 
     return data
+
+
+def proper_coordinate(coordinate, geojsontype):
+    # Not all data is as cleanly stored
+    coordinate = json.loads(coordinate) \
+        if isinstance(json.loads(coordinate), list) else json.loads(json.loads(coordinate))
+
+    # Points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
+    # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
+    if geojsontype == "Point":
+        return reversed(coordinate)
+
+    return coordinate
 
 
 def extract_domains(calculation):

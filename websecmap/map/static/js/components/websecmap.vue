@@ -807,9 +807,7 @@ const WebSecMap = Vue.component('websecmap', {
             // }).addTo(map.map);
             self = this;
             points.forEach((point) => {
-                // points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
-                // https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
-                let pointlayer = this.pointToLayer(point, L.latLng(point.geometry.coordinates.reverse()));
+                let pointlayer = this.pointToLayer(point, L.latLng(point.geometry.coordinates));
 
                 let menuItems = [{
                             text: point.properties['organization_name'],
