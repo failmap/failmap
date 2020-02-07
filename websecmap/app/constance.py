@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 import pytz
 from constance import config
@@ -6,10 +7,29 @@ from constance import config
 constance_cache = {}
 
 
+def get_bulk_values(keys: List[str]):
+    """
+    Instead of a single key, this will allow you to get multiple (if not all) values in one go.
+    This saves a ton of individual queries.
+
+    :param keys:
+    :return:
+    """
+    from constance import admin
+
+    # retrieves everything, pretty quickly
+    values = admin.get_values()
+
+    # and now extract the keys we want to have
+    return {k: values[k] for k in keys if k in values}
+
+
 def constance_cached_value(key):
-    # todo: add this to the constance codebase. Constance is highly inefficient: 1 query per value on each access.
     """
     Tries to minimize access to the database for constance. Every time you want a value, you'll get the latest value.
+    This, without running memcached, or using a django cache. The django in memory cache (what this is) is not
+    recommended. You CAN use this cache if you are fine with a variable being retrieved every so often, but not all
+    the time. -> This routine saves about 10.000 roundtrips to the database.
 
     That's great but not really needed: it takes 8 roundtrips per url, which is not slow but still slows things down.
     That means about 5000 * 8 database hits per rebuild. = 40.000, which does have an impact.

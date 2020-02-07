@@ -5,7 +5,6 @@ from wsgiref.util import FileWrapper
 
 import django_excel as excel
 import pytz
-from constance import config
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse, JsonResponse
@@ -16,6 +15,7 @@ from django.views.decorators.cache import cache_page
 
 from websecmap import __version__
 from websecmap.app.common import JSEncoder
+from websecmap.app.constance import get_bulk_values
 from websecmap.map.logic import datasets
 from websecmap.map.logic.admin import (add_organization, add_proxies, add_urls,
                                        switch_lattitude_and_longitude, user_is_staff_member)
@@ -194,12 +194,68 @@ def index(request, map_configuration=None):
     else:
         map_defaults = get_defaults()
 
+    # instead of asking for every config variable, get all of them in one go
+    config = get_bulk_values([
+        "PROJECT_COUNTRY",
+        "PROJECT_NAME",
+        "PROJECT_TAGLINE",
+        "SHOW_INTRO",
+        "SHOW_CHARTS",
+        "SHOW_COMPLY_OR_EXPLAIN",
+        "SHOW_SCAN_SCHEDULE",
+        "SHOW_DATASETS",
+        "SHOW_ANNOUNCEMENT",
+        "SHOW_EXTENSIVE_STATISTICS",
+        "SHOW_STATS_NUMBERS",
+        "SHOW_STATS_IMPROVEMENTS",
+        "SHOW_STATS_GRAPHS",
+        "SHOW_STATS_CHANGES",
+        "SHOW_TICKER",
+        "SHOW_SERVICES",
+        "SHOW_FTP",
+        "SHOW_PLAIN_HTTPS",
+        "SHOW_DNSSEC",
+        "SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY",
+        "SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS",
+        "SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS",
+        "SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION",
+        "SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED",
+        "SHOW_TLS_QUALYS_ENCRYPTION_QUALITY",
+        "SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE",
+        "SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST",
+        "SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST",
+        "SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST",
+        "RESPONSIBLE_ORGANIZATION_NAME",
+        "RESPONSIBLE_ORGANIZATION_PROMO_TEXT",
+        "RESPONSIBLE_ORGANIZATION_WEBSITE",
+        "RESPONSIBLE_ORGANIZATION_MAIL",
+        "RESPONSIBLE_ORGANIZATION_TWITTER",
+        "RESPONSIBLE_ORGANIZATION_FACEBOOK",
+        "RESPONSIBLE_ORGANIZATION_LINKEDIN",
+        "RESPONSIBLE_ORGANIZATION_WHATSAPP",
+        "RESPONSIBLE_ORGANIZATION_PHONE",
+        "PROJECT_NAME",
+        "PROJECT_TAGLINE",
+        "PROJECT_COUNTRY",
+        "PROJECT_MAIL",
+        "PROJECT_ISSUE_MAIL",
+        "PROJECT_TWITTER",
+        "PROJECT_FACEBOOK",
+        "COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK",
+        "COMPLY_OR_EXPLAIN_EMAIL_ADDRESS",
+        "MAPBOX_ACCESS_TOKEN",
+        "GITTER_CHAT_ENABLE",
+        "GITTER_CHAT_CHANNEL",
+        "ANNOUNCEMENT",
+        ])
+
     # a number of variables are injected so they can be used inside javascript.
     return inject_default_language_cookie(request, render(request, 'map/index.html', {
+        'configuration': config,
         'version': __version__,
         'admin': settings.ADMIN,
         'sentry_token': settings.SENTRY_TOKEN,
-        'country': config.PROJECT_COUNTRY,
+        'country': config['PROJECT_COUNTRY'],
         'debug': True if settings.DEBUG else False,
         'language': request.LANGUAGE_CODE,
         'timestamp': datetime.now(pytz.UTC).isoformat(),

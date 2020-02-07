@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes, minimal-ui">
     <meta name="theme-color" content="Cyber"/>
 
-    {% if config.PROJECT_NAME  %}
-        <title>{{ config.PROJECT_NAME }}
-        {% if config.PROJECT_TAGLINE %}
-            - {{ config.PROJECT_TAGLINE }}
+    {% if configuration.PROJECT_NAME  %}
+        <title>{{ configuration.PROJECT_NAME }}
+        {% if configuration.PROJECT_TAGLINE %}
+            - {{ configuration.PROJECT_TAGLINE }}
             {% endif %}
         </title>
     {% endif %}
@@ -242,65 +242,65 @@
                     // todo: refactor, each variable read is a single query(!) i mean... can we do it all in once?
                     config: {
                         show: {
-                            intro: {{ config.SHOW_INTRO | lower }},
-                            charts: {{ config.SHOW_CHARTS | lower }},
-                            comply_or_explain: {{ config.SHOW_COMPLY_OR_EXPLAIN | lower }},
-                            scan_schedule :{{ config.SHOW_SCAN_SCHEDULE | lower }},
-                            datasets: {{ config.SHOW_DATASETS | lower }},
-                            announcement: {{ config.SHOW_ANNOUNCEMENT | lower }},
-                            statistics: {{ config.SHOW_EXTENSIVE_STATISTICS | lower }},
-                            numbers: {{ config.SHOW_STATS_NUMBERS | lower }},
-                            improvements: {{ config.SHOW_STATS_IMPROVEMENTS | lower }},
-                            graphs: {{ config.SHOW_STATS_GRAPHS | lower }},
-                            changes: {{ config.SHOW_STATS_CHANGES | lower }},
-                            ticker: {{ config.SHOW_TICKER | lower }},
-                            services: {{ config.SHOW_SERVICES | lower }},
+                            intro: {{ configuration.SHOW_INTRO | lower }},
+                            charts: {{ configuration.SHOW_CHARTS | lower }},
+                            comply_or_explain: {{ configuration.SHOW_COMPLY_OR_EXPLAIN | lower }},
+                            scan_schedule :{{ configuration.SHOW_SCAN_SCHEDULE | lower }},
+                            datasets: {{ configuration.SHOW_DATASETS | lower }},
+                            announcement: {{ configuration.SHOW_ANNOUNCEMENT | lower }},
+                            statistics: {{ configuration.SHOW_EXTENSIVE_STATISTICS | lower }},
+                            numbers: {{ configuration.SHOW_STATS_NUMBERS | lower }},
+                            improvements: {{ configuration.SHOW_STATS_IMPROVEMENTS | lower }},
+                            graphs: {{ configuration.SHOW_STATS_GRAPHS | lower }},
+                            changes: {{ configuration.SHOW_STATS_CHANGES | lower }},
+                            ticker: {{ configuration.SHOW_TICKER | lower }},
+                            services: {{ configuration.SHOW_SERVICES | lower }},
                             issues: {
-                                ftp: {{ config.SHOW_FTP | lower }},
-                                plain_https: {{ config.SHOW_PLAIN_HTTPS | lower }},
-                                dnssec: {{ config.SHOW_DNSSEC | lower }},
-                                http_security_header_strict_transport_security: {{ config.SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY| lower }},
-                                http_security_header_x_content_type_options: {{ config.SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS| lower }},
-                                http_security_header_x_frame_options: {{ config.SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS| lower }},
-                                http_security_header_x_xss_protection: {{ config.SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION| lower }},
-                                tls_qualys_certificate_trusted: {{ config.SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED| lower }},
-                                tls_qualys_encryption_quality: {{ config.SHOW_TLS_QUALYS_ENCRYPTION_QUALITY| lower }},
-                                internet_nl_mail_starttls_tls_available: {{ config.SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE| lower }},
-                                internet_nl_mail_auth_spf_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST| lower }},
-                                internet_nl_mail_auth_dkim_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST| lower }},
-                                internet_nl_mail_auth_dmarc_exist: {{ config.SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST| lower }},
+                                ftp: {{ configuration.SHOW_FTP | lower }},
+                                plain_https: {{ configuration.SHOW_PLAIN_HTTPS | lower }},
+                                dnssec: {{ configuration.SHOW_DNSSEC | lower }},
+                                http_security_header_strict_transport_security: {{ configuration.SHOW_HTTP_SECURITY_HEADER_STRICT_TRANSPORT_SECURITY| lower }},
+                                http_security_header_x_content_type_options: {{ configuration.SHOW_HTTP_SECURITY_HEADER_X_CONTENT_TYPE_OPTIONS| lower }},
+                                http_security_header_x_frame_options: {{ configuration.SHOW_HTTP_SECURITY_HEADER_X_FRAME_OPTIONS| lower }},
+                                http_security_header_x_xss_protection: {{ configuration.SHOW_HTTP_SECURITY_HEADER_X_XSS_PROTECTION| lower }},
+                                tls_qualys_certificate_trusted: {{ configuration.SHOW_TLS_QUALYS_CERTIFICATE_TRUSTED| lower }},
+                                tls_qualys_encryption_quality: {{ configuration.SHOW_TLS_QUALYS_ENCRYPTION_QUALITY| lower }},
+                                internet_nl_mail_starttls_tls_available: {{ configuration.SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_AVAILABLE| lower }},
+                                internet_nl_mail_auth_spf_exist: {{ configuration.SHOW_INTERNET_NL_MAIL_AUTH_SPF_EXIST| lower }},
+                                internet_nl_mail_auth_dkim_exist: {{ configuration.SHOW_INTERNET_NL_MAIL_AUTH_DKIM_EXIST| lower }},
+                                internet_nl_mail_auth_dmarc_exist: {{ configuration.SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXIST| lower }},
                             },
                         },
                         responsible_organization: {
-                            name: "{{ config.RESPONSIBLE_ORGANIZATION_NAME}}",
-                            promo_text: "{{ config.RESPONSIBLE_ORGANIZATION_PROMO_TEXT}}",
-                            website: "{{ config.RESPONSIBLE_ORGANIZATION_WEBSITE}}",
-                            mail: "{{ config.RESPONSIBLE_ORGANIZATION_MAIL}}",
-                            twitter: "{{ config.RESPONSIBLE_ORGANIZATION_TWITTER}}",
-                            facebook: "{{ config.RESPONSIBLE_ORGANIZATION_FACEBOOK}}",
-                            linkedin: "{{ config.RESPONSIBLE_ORGANIZATION_LINKEDIN}}",
-                            whatsapp: "{{ config.RESPONSIBLE_ORGANIZATION_WHATSAPP}}",
-                            phone: "{{ config.RESPONSIBLE_ORGANIZATION_PHONE}}",
+                            name: "{{ configuration.RESPONSIBLE_ORGANIZATION_NAME}}",
+                            promo_text: "{{ configuration.RESPONSIBLE_ORGANIZATION_PROMO_TEXT}}",
+                            website: "{{ configuration.RESPONSIBLE_ORGANIZATION_WEBSITE}}",
+                            mail: "{{ configuration.RESPONSIBLE_ORGANIZATION_MAIL}}",
+                            twitter: "{{ configuration.RESPONSIBLE_ORGANIZATION_TWITTER}}",
+                            facebook: "{{ configuration.RESPONSIBLE_ORGANIZATION_FACEBOOK}}",
+                            linkedin: "{{ configuration.RESPONSIBLE_ORGANIZATION_LINKEDIN}}",
+                            whatsapp: "{{ configuration.RESPONSIBLE_ORGANIZATION_WHATSAPP}}",
+                            phone: "{{ configuration.RESPONSIBLE_ORGANIZATION_PHONE}}",
 
                         },
                         project: {
-                            name: "{{ config.PROJECT_NAME }}",
-                            tagline: "{{ config.PROJECT_TAGLINE }}",
-                            country: "{{ config.PROJECT_COUNTRY }}",
-                            mail: "{{ config.PROJECT_MAIL }}",
-                            issue_mail: "{{ config.PROJECT_ISSUE_MAIL }}",
-                            twitter: "{{ config.PROJECT_TWITTER }}",
-                            facebook: "{{ config.PROJECT_FACEBOOK }}",
+                            name: "{{ configuration.PROJECT_NAME }}",
+                            tagline: "{{ configuration.PROJECT_TAGLINE }}",
+                            country: "{{ configuration.PROJECT_COUNTRY }}",
+                            mail: "{{ configuration.PROJECT_MAIL }}",
+                            issue_mail: "{{ configuration.PROJECT_ISSUE_MAIL }}",
+                            twitter: "{{ configuration.PROJECT_TWITTER }}",
+                            facebook: "{{ configuration.PROJECT_FACEBOOK }}",
                         },
                         comply_or_explain: {
-                            forum_link: "{{ config.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
-                            email_address: "{{ config.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}",
+                            forum_link: "{{ configuration.COMPLY_OR_EXPLAIN_DISCUSSION_FORUM_LINK }}",
+                            email_address: "{{ configuration.COMPLY_OR_EXPLAIN_EMAIL_ADDRESS }}",
                         },
 
                         debug: {{ debug | lower }},
                         admin: {{ admin | lower }},
 
-                        mapbox_token: '{{ config.MAPBOX_ACCESS_TOKEN }}',
+                        mapbox_token: '{{ configuration.MAPBOX_ACCESS_TOKEN }}',
 
                     },
 
@@ -882,10 +882,10 @@
         };
     </script>
 
-    {% if config.GITTER_CHAT_ENABLE and config.GITTER_CHAT_CHANNEL %}
+    {% if configuration.GITTER_CHAT_ENABLE and configuration.GITTER_CHAT_CHANNEL %}
         <script>
           ((window.gitter = {}).chat = {}).options = {
-            room: '{{ config.GITTER_CHAT_CHANNEL }}'
+            room: '{{ configuration.GITTER_CHAT_CHANNEL }}'
           };
         </script>
         <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
@@ -992,7 +992,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <svg class="svg-inline--fa fa-bell fa-w-14" aria-hidden="true" data-prefix="fas" data-icon="bell" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M433.884 366.059C411.634 343.809 384 316.118 384 208c0-79.394-57.831-145.269-133.663-157.83A31.845 31.845 0 0 0 256 32c0-17.673-14.327-32-32-32s-32 14.327-32 32c0 6.75 2.095 13.008 5.663 18.17C121.831 62.731 64 128.606 64 208c0 108.118-27.643 135.809-49.893 158.059C-16.042 396.208 5.325 448 48.048 448H160c0 35.346 28.654 64 64 64s64-28.654 64-64h111.943c42.638 0 64.151-51.731 33.941-81.941zM224 472a8 8 0 0 1 0 16c-22.056 0-40-17.944-40-40h16c0 13.234 10.766 24 24 24z"></path></svg>
-                            {{ config.ANNOUNCEMENT|safe }}
+                            {{ configuration.ANNOUNCEMENT|safe }}
                         </div>
                     </div>
                 </div>
