@@ -9,7 +9,7 @@
 
         <div class="row">
             <div class="col-md-12">
-                <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total && data.total.length > 1">
+                <div class="chart-container" style="position: relative; height:555px; width:100%" v-if="data.total">
                     <vulnerability-chart
                         :color_scheme="color_scheme"
                         :data="data.total"
@@ -19,7 +19,7 @@
                 </div>
             </div>
         </div>
-        <div class="row" v-if="data.total && data.total.length > 1">
+        <div class="row" v-if="data.total && data.total">
 
             <div class="col-md-4">
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
@@ -59,7 +59,6 @@
                     ></vulnerability-chart>
                 </div>
             </div>
-
         </div>
 
         <div class="row">
