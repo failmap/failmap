@@ -9,7 +9,7 @@
 
         <loading v-if="loading"></loading>
 
-        <div class="row" v-if="organization_stats.length">
+        <div class="row" v-if="organization_stats.length > 1">
 
             <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.organizations.title") }}</h3>
@@ -25,7 +25,7 @@
             </div>
 
         </div>
-        <div class="row" v-if="organization_stats.length" style="margin-bottom: 30px;">
+        <div class="row" v-if="organization_stats.length > 1" style="margin-bottom: 30px;">
 
             <div class="col-md-4">
                 <div class="chart-container" style="position: relative; height:200px; width:100%">
@@ -65,7 +65,7 @@
             </div>
 
         </div>
-        <div class="row" v-if="url_stats.length">
+        <div class="row" v-if="url_stats.length > 1">
 
             <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.internet_addresses.title") }}</h3>
@@ -82,7 +82,7 @@
 
         </div>
 
-        <div class="row" v-if="url_stats.length" style="margin-bottom: 30px;">
+        <div class="row" v-if="url_stats.length > 1" style="margin-bottom: 30px;">
 
             <div class="col-md-4">
                 <div class="chart-container" style="position: relative; height:200px; width:100%">

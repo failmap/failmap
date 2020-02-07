@@ -10,7 +10,10 @@
         <div class="row">
             <div class="col-md-12">
                 {{ $t("report.select_organization") }}
-                <v-select label="name" v-model="selected" :options="$store.state.organizations"></v-select>
+                <v-select label="name"
+                          v-model="selected"
+                          :options="organizations"
+                ></v-select>
                 <br />
             </div>
         </div>
@@ -44,7 +47,22 @@ Vue.component('report_selection', {
     data: function () {
         return {
             selected: {},
+            organizations: [],
         }
+    },
+
+    methods: {
+        load: function (weeknumber=0) {
+            this.loading = true;
+            fetch(`/data/organizations/list/${this.$store.state.country}/${this.$store.state.layer}/`).then(response => response.json()).then(data => {
+                this.organizations = data;
+                this.loading = false;
+            }).catch((fail) => {console.log('An error occurred in combined number statistics: ' + fail); throw fail});
+        },
+    },
+
+    mounted: function(){
+        this.load();
     },
 
     watch: {
@@ -53,6 +71,9 @@ Vue.component('report_selection', {
         },
 
         selected: function () {
+            if (this.selected === undefined)
+                return;
+
             store.commit('change', {reported_organization: {
                 id: this.selected.id,
                 name: this.selected.name,

@@ -463,44 +463,37 @@ th.active .arrow {
     margin-top: 40px;
 }
 
-
 #lastrow {
-    padding-top: 40px;
     left: 0;
     right: 0;
     position: absolute;
-    margin-top: 40px;
-    padding-bottom: 40px;
-}
-
-#lastrow ul {
-    margin-top: 20px;
-    margin-bottom: 20px;
-}
-
-#lastrow ul li {
-    margin-bottom: 12px;
-    list-style: none;
-    margin-left: -40px;
-}
-
-#lastrow a, #lastrow a:hover, #lastrow a:visited {
-    color:white;
-    text-decoration: none;
+    border-top: 4px solid;
+    margin-bottom: 5px;
 }
 
 /* Report printing in chrome / safari, so it looks nice */
 
 @media print {
-    .noprint {display:none !important;}
+    .noprint {
+        display:none !important;
+    }
+
     a:link:after, a:visited:after {
-      display: none;
-      content: "";
+          display: none;
+          content: "";
     }
 
     * {
         -webkit-print-color-adjust: exact !important;   /* Chrome, Safari */
         color-adjust: exact !important;                 /*Firefox*/
+    }
+
+    .svg-inline--fa {
+        display: none !important;
+    }
+
+    .do-not-print {
+        display: none !important;
     }
 }
 

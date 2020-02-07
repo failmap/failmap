@@ -206,6 +206,7 @@
                 { path: '/datasets', component: DataSets },
                 { path: '/scan-monitor', component: Changes },
                 { path: '/report', component: ReportComposition },
+                { path: '/report/:url_report_id', component: ReportComposition, props: true},
 
                     // todo: add footer information to info.
                 { path: '/about', component: Intro },
@@ -220,8 +221,6 @@
                 // does not work, as nested anchors is not a thing (and not reliable). So do this in component.
                 scrollBehavior: function (to) {if (to.hash) {return {selector: to.hash}}},
             });
-
-
 
             document.app = new Vue({
                 router,
@@ -1003,7 +1002,8 @@
 
             {% if admin %}<debugmenu ref="debugmenu" :config="config" :admin_url="'{% url 'admin:index' %}'" :version="'{{ version }}'"></debugmenu>{% endif %}
 
-            <section>
+            <section style="min-height: 100vh">
+
                 <router-view
                     :L="L"
                     :issues="issues"
@@ -1026,9 +1026,16 @@
                     :organization="config.responsible_organization.name"
                     :organization_mail="config.project.issue_mail"
                 ></router-view>
+
             </section>
 
             <ticker v-if="config.show.ticker"></ticker>
+
+            <section id="lastrow">
+                <div class="container">
+                    <foot :config="config"></foot>
+                </div>
+            </section>
 
         </template>
         <template v-else>

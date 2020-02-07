@@ -3,18 +3,17 @@
     <div>
         <nav class="navbar navbar-expand-md navbar-light static-top bg-light" v-if="config.debug || config.admin">
             <div class="container">
-                Debug
+
+                <a class="navbar-brand">
+                    <span class='btn btn-danger btn-xs'>{{ $t("menu.title") }}</span>
+                </a>
+
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminbarcollapse" aria-controls="adminbarcollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             <div class="collapse navbar-collapse" id="adminbarcollapse">
-                <ul class="navbar-nav mr-auto">
-                    <li v-if="config.debug" class="nav-item nav-link"><span class='btn btn-danger btn-sm'>{{ $t("menu.debug") }}</span></li>
-                </ul>
-                <ul class="navbar-nav navbar-right ml-auto" v-if="config.admin">
-                    <!-- These are nice to haves... -->
-                    <li class="nav-item nav-link"><span class="badge badge-secondary">{{ version }}</span></li>
 
+                <ul class="navbar-nav navbar-right ml-auto" v-if="config.admin">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Management<span class="caret"></span></a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown1" style="z-index: 100000">
@@ -148,6 +147,7 @@ Vue.component('debugmenu', {
         messages: {
             en: {
                 menu: {
+                    title: "Admin",
                     debug: "debug",
                     admin: "admin",
                     flower: "task monitoring",
@@ -161,6 +161,7 @@ Vue.component('debugmenu', {
             nl: {
                 menu: {
                     // jokes are allowed
+                    title: "Beheer",
                     debug: "ongediertebestrijdingsmodus",
                     admin: "beheer",
                     flower: "taak overzicht",
@@ -586,7 +587,7 @@ Vue.component('debugmenu', {
 
         toggle_ticker: function(){
             // evil workaround, as the config of the app is not stored in vuex yet:
-            app.config.show.ticker = !app.config.show.ticker;
+            document.app.config.show.ticker = !document.app.config.show.ticker;
         },
 
         start_add_organization: function(){

@@ -30,7 +30,14 @@ def generic_export(queryset, column_names):
 
     :return:
     """
-    data = [column_names] + list(queryset)
+
+    # None values will cause an invalid two dimensional array. So change all the None values to "":
+    # Yes, it's possible to write this as a one liner, which makes the logic unclear and harder to maintain.
+    dataset = []
+    for row in queryset:
+        dataset.append([value if value is not None else "" for value in row])
+
+    data = [column_names] + list(dataset)
 
     book = p.get_book(bookdict={'data': data})
     return book

@@ -4,9 +4,11 @@
 
         <nav class="navbar navbar-expand-md navbar-light static-top bg-light" id="layernavbar" v-cloak>
             <div class="container">
-                <a class="navbar-brand">
-                    {{ $t("mapstatebar.data_selection") }}
-                </a>
+
+                <router-link class="navbar-brand" to="/">
+                <svg class="svg-inline--fa fa-map-marker-alt fa-w-12" aria-hidden="true" data-prefix="fas" data-icon="map-marker-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z"></path></svg>
+                    {{ $t("mapstatebar.map") }}
+                </router-link>
 
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#layercollapse" aria-controls="layercollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -83,6 +85,7 @@ Vue.component('Mapstatebar', {
                     today: "today",
                     data_from: "with data from",
                     data_selection: "Data Selection",
+                    map: "Map",
                 }
             },
             nl: {
@@ -92,6 +95,7 @@ Vue.component('Mapstatebar', {
                     today: "vandaag",
                     data_from: "met gegevens van",
                     data_selection: "Selecteer gegevens",
+                    map: "Kaart",
                 }
             }
         },

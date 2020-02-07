@@ -314,9 +314,9 @@ a, a:hover, a:visited {
 }
 
 #lastrow {
-    background-color: black;
-    border-top: 10px solid lightgreen;
-    color: white;
+    background-color: #313030;
+    border-top-color: #4a4a4a !important;
+    color: #c4c4c4;
 }
 
 .chat_quote_left {

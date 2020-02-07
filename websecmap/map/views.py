@@ -247,7 +247,7 @@ def index(request, map_configuration=None):
         "GITTER_CHAT_ENABLE",
         "GITTER_CHAT_CHANNEL",
         "ANNOUNCEMENT",
-        ])
+    ])
 
     # a number of variables are injected so they can be used inside javascript.
     return inject_default_language_cookie(request, render(request, 'map/index.html', {
@@ -425,6 +425,21 @@ def map_default(request, days_back: int = 0, displayed_issue: str = "all"):
         return map_data(request, DEFAULT_COUNTRY, DEFAULT_LAYER, days_back, displayed_issue)
 
     return map_data(request, defaults['country'], defaults['organization_type__name'], days_back, displayed_issue)
+
+
+@cache_page(one_hour)
+def organization_list(request, country: str = DEFAULT_COUNTRY, organization_type: str = DEFAULT_LAYER):
+    query = Organization.objects.all().filter(
+        country=get_country(country),
+        type=get_organization_type(organization_type),
+        is_dead=False
+    ).values_list(
+        'id', 'name', 'computed_name_slug',
+    )
+
+    data = [{'id': elem[0], 'name': elem[1], 'slug': elem[2]} for elem in query]
+
+    return JsonResponse(data, encoder=JSEncoder, safe=False)
 
 
 @cache_page(four_hours)

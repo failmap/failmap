@@ -10,6 +10,7 @@
             :show_comply_or_explain="show_comply_or_explain"
             :send_in_email_address="send_in_email_address"
             :authenticated="authenticated"
+            :url_report_id="url_report_id"
             :comply_or_explain_email_address="comply_or_explain_email_address">
         </report_content>
     </div>
@@ -32,6 +33,7 @@ const ReportComposition = Vue.component('report_composition', {
         comply_or_explain_email_address: String,
         send_in_email_address: String,
         authenticated: Boolean,
+        url_report_id: String,
     },
 });
 </script>

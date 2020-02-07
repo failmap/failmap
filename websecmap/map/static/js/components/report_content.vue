@@ -1,4 +1,9 @@
 {% verbatim %}
+<style>
+    .report_controls {
+        margin-bottom: 30px;
+    }
+</style>
 <template type="x-template" id="report_content_template">
     <div id="report_content">
 
@@ -6,21 +11,17 @@
 
         <template v-if='!loading && (reported_organization.id || reported_organization.name)'>
 
-            <div class="row report_controls" style="margin-bottom: 30px;">
-                <div  class="col-md-3">
-                    <a @click="closereport()" class="btn btn-danger" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="times" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="" class="svg-inline--fa fa-times fa-w-12"><path fill="currentColor" d="M323.1 441l53.9-53.9c9.4-9.4 9.4-24.5 0-33.9L279.8 256l97.2-97.2c9.4-9.4 9.4-24.5 0-33.9L323.1 71c-9.4-9.4-24.5-9.4-33.9 0L192 168.2 94.8 71c-9.4-9.4-24.5-9.4-33.9 0L7 124.9c-9.4 9.4-9.4 24.5 0 33.9l97.2 97.2L7 353.2c-9.4 9.4-9.4 24.5 0 33.9L60.9 441c9.4 9.4 24.5 9.4 33.9 0l97.2-97.2 97.2 97.2c9.3 9.3 24.5 9.3 33.9 0z"></path></svg>
-                        {{ $t("report_content.controls.close_report") }}</a>
-                </div>
-                <div  class="col-md-3">
+            <div class="row report_controls">
+                <div  class="col-md-4">
                     <a @click="printreport('report_content')" class="btn btn-primary" style="color:white; width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="print" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg="" class="svg-inline--fa fa-print fa-w-16"><path fill="currentColor" d="M464 192h-16V81.941a24 24 0 0 0-7.029-16.97L383.029 7.029A24 24 0 0 0 366.059 0H88C74.745 0 64 10.745 64 24v168H48c-26.51 0-48 21.49-48 48v132c0 6.627 5.373 12 12 12h52v104c0 13.255 10.745 24 24 24h336c13.255 0 24-10.745 24-24V384h52c6.627 0 12-5.373 12-12V240c0-26.51-21.49-48-48-48zm-80 256H128v-96h256v96zM128 224V64h192v40c0 13.2 10.8 24 24 24h40v96H128zm304 72c-13.254 0-24-10.746-24-24s10.746-24 24-24 24 10.746 24 24-10.746 24-24 24z"></path></svg>
                         {{ $t("report_content.controls.print_report") }}</a>
                 </div>
-                <div  class="col-md-3">
+                <div  class="col-md-4">
                     <a :href="'/data/updates_on_organization_feed/' + selected.id" target="_blank" class="btn btn-warning" style="color:white;  width: 100%"><svg aria-hidden="true" data-prefix="fas" data-icon="rss" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg="" class="svg-inline--fa fa-rss fa-w-14"><path fill="currentColor" d="M128.081 415.959c0 35.369-28.672 64.041-64.041 64.041S0 451.328 0 415.959s28.672-64.041 64.041-64.041 64.04 28.673 64.04 64.041zm175.66 47.25c-8.354-154.6-132.185-278.587-286.95-286.95C7.656 175.765 0 183.105 0 192.253v48.069c0 8.415 6.49 15.472 14.887 16.018 111.832 7.284 201.473 96.702 208.772 208.772.547 8.397 7.604 14.887 16.018 14.887h48.069c9.149.001 16.489-7.655 15.995-16.79zm144.249.288C439.596 229.677 251.465 40.445 16.503 32.01 7.473 31.686 0 38.981 0 48.016v48.068c0 8.625 6.835 15.645 15.453 15.999 191.179 7.839 344.627 161.316 352.465 352.465.353 8.618 7.373 15.453 15.999 15.453h48.068c9.034-.001 16.329-7.474 16.005-16.504z"></path></svg>
                         {{ $t("report_content.controls.rss_feed") }}</a>
                 </div>
-                <div  class="col-md-3">
-                    <a class="btn btn-success" style="color:white; width: 100%" :href="'mailto:' + send_in_email_address + '?subject=' + encodeURIComponent($t('report_content.controls.send_in_mail.subject')) + '&body=' + encodeURIComponent($t('report_content.controls.send_in_mail.body'))">
+                <div  class="col-md-4">
+                    <a class="btn btn-secondary" style="color:white; width: 100%" :href="'mailto:' + send_in_email_address + '?subject=' + encodeURIComponent($t('report_content.controls.send_in_mail.subject')) + '&body=' + encodeURIComponent($t('report_content.controls.send_in_mail.body'))">
                     {{ $t("report_content.controls.send_in_domains") }}</a>
                 </div>
             </div>
@@ -52,7 +53,7 @@
                 </div>
             </div>
 
-            <div class="row" v-if="name">
+            <div class="row" v-if="name" style="page-break-before: always;">
                 <div class="col-md-12">
                     <h4>{{ $t("report_content.timeline.title") }}</h4>
                     <div class="chart-container" style="position: relative; height:555px; width:100%">
@@ -65,6 +66,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="row" v-if="name" style="margin-bottom: 30px;">
 
                 <div class="col-md-4">
@@ -118,7 +120,7 @@
 
 
 
-            <div class="row" v-if="name" style="margin-bottom: 30px;">
+            <div class="row" v-if="name" style="margin-bottom: 30px;" style="page-break-before: always;">
                 <div  class="col-md-12">
                     <h4>{{ $t("report_content.risksummary.title") }}</h4>
                     <p></p>
@@ -152,7 +154,7 @@
             </div>
 
 
-            <div class="row" v-if="name">
+            <div class="row" v-if="name" style="page-break-before: always;">
                 <div  class="col-md-12">
                     <h4>{{ $t("report_content.report.title") }}</h4>
                 </div>
@@ -318,7 +320,7 @@ Vue.component('report_content', {
                     },
 
                     report: {
-                        title: "Complete report",
+                        title: "Measurements per domain",
                         no_data: "This report contains no data / urls.",
                         report_incorrect_finding: "Report incorrect finding",
                         incorrect_finding_mail: {
@@ -419,7 +421,7 @@ Vue.component('report_content', {
                     },
 
                     report: {
-                        title: "Uitgebreid verslag",
+                        title: "Metingen per domein",
                         no_data: "Dit verslag bevat geen gegevens.",
                         report_incorrect_finding: "Meld incorrecte bevinding",
                         incorrect_finding_mail: {
@@ -473,10 +475,6 @@ Vue.component('report_content', {
             loading: false,
             visible: false,  // fullscreenreport
             promise: false,
-
-            // so they can be destroyed and re-initialized, is this really needed?
-            myChart: null,
-            myChart2: null,
             timeline: [],
         }
     },
@@ -492,6 +490,9 @@ Vue.component('report_content', {
         send_in_email_address: String,
 
         authenticated: Boolean,
+
+        // When requesting a report directly...
+        url_report_id: String,
     },
 
     // https://vuejs.org/v2/api/#updated
@@ -522,39 +523,34 @@ Vue.component('report_content', {
             window.frames["print_frame"].window.print();
         },
 
+        reset: function() {
+            console.log("Resetting report");
+            this.timeline = null;
+            this.calculation = '';
+            this.rating = 0;
+            this.points = 0;
+            this.high = 0;
+            this.medium = 0;
+            this.low = 0;
+            this.when = 0;
+            this.twitter_handle = '';
+            this.name = null;
+            this.urls = Array;
+            this.selected = {'id': null, 'label': null, 'name': null};
+            this.loading = false;
+            this.visible = false;
+            this.promise = false;
+            this.timeline = [];
+        },
+
         load: function () {
             // against symptom of autoloading when setting state, this doesn't have the right parameters.
             if (!this.reported_organization.id && !this.reported_organization.name) {
-                // reset:
-                this.timeline = null;
-
-                this.calculation = '';
-                this.rating = 0;
-                this.points = 0;
-                this.high = 0;
-                this.medium = 0;
-                this.low = 0;
-                this.when = 0;
-                this.twitter_handle = '';
-                this.name = "";
-                this.urls = Array;
-                this.selected = {'id': null, 'label': null, 'name': null};
-                this.loading = false;
-                this.visible = false;
-                this.promise = false;
-
-                // so they can be destroyed and re-initialized, is this really needed?
-                this.myChart = null;
-                this.myChart2 = null;
-                this.timeline = [];
-
-                // todo: clear this thing if there is nothing reported......
-                // todo: make reset function.
+                this.reset();
                 return;
             }
 
             this.loading = true;
-            this.name = null;
 
             let org = this.reported_organization.id ? this.reported_organization.id : this.reported_organization.name;
 
@@ -562,38 +558,38 @@ Vue.component('report_content', {
             fetch(`/data/organization_vulnerability_timeline/${org}/${this.state.layer}/${this.state.country}`).then(response => response.json()).then(timelinedata => {
                 if (!$.isEmptyObject(timelinedata)){
                     this.timeline = timelinedata;
-                    // console.log("Todo: implement graph return on organization name.")
                 }
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 
             let url = "";
-            if (this.reported_organization.name){
-                url = `/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.name}/${this.state.week}`;
-            }
             if (this.reported_organization.id){
                 url = `/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.id}/${this.state.week}`;
+            } else {
+                url = `/data/report/${this.state.country}/${this.state.layer}/${this.reported_organization.name}/${this.state.week}`;
             }
 
-            console.log(`Retrieving report data from ${url}.`);
+            console.log(`Retrieving report data at ${url}.`);
             fetch(url)
                 .then(response => response.json()).then(data => {
-                this.urls = data.calculation["organization"]["urls"];
-                this.points = data.rating;
-                this.high = data.calculation["organization"]["high"];
-                this.medium = data.calculation["organization"]["medium"];
-                this.low = data.calculation["organization"]["low"];
-                this.when = data.when;
-                this.name = data.name;
-                this.twitter_handle = data.twitter_handle;
-                this.promise = data.promise;
-                this.slug = data.slug;
 
-                // include id in anchor to allow url sharing
-                let newHash = 'report-' + this.slug;
-                $('a#report-anchor').attr('name', newHash);
-                history.replaceState({}, '', '#' + newHash);
+                    this.urls = data.calculation["organization"]["urls"];
+                    this.points = data.rating;
+                    this.high = data.calculation["organization"]["high"];
+                    this.medium = data.calculation["organization"]["medium"];
+                    this.low = data.calculation["organization"]["low"];
+                    this.when = data.when;
+                    this.name = data.name;
+                    this.twitter_handle = data.twitter_handle;
+                    this.promise = data.promise;
+                    this.slug = data.slug;
+                    this.selected = {id: data.id, name: data.slug};
 
-                this.loading = false;
+                    // include id in anchor to allow url sharing
+                    let newHash = '/report/' + data.id;
+                    $('a#report-anchor').attr('name', newHash);
+                    history.replaceState({}, '', '#' + newHash);
+
+                    this.loading = false;
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
         },
         total_summary_row: function(url){
@@ -644,22 +640,22 @@ Vue.component('report_content', {
             let bgclass = "";
 
             if (high){
-                text = "";
+                text = "❌";
                 bgclass = "high_background_light";
             } else if (medium){
-                text = "";
+                text = "⚠️";
                 bgclass = "medium_background_light";
             } else if (low){
-                text = "";
+                text = "✅";
                 bgclass = "low_background_light";
             } else if (risk_found) {
-                text = "";
+                text = "✅";
                 bgclass = "good_background_light";
             }
 
             if (explained) {
                 // if this is a string with "", translations say unterminated string. As ES6 template it's fine.
-                text = `<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="comments" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" class="svg-inline--fa fa-comments fa-w-18"><path fill="currentColor" d="M416 192c0-88.4-93.1-160-208-160S0 103.6 0 192c0 34.3 14.1 65.9 38 92-13.4 30.2-35.5 54.2-35.8 54.5-2.2 2.3-2.8 5.7-1.5 8.7S4.8 352 8 352c36.6 0 66.9-12.3 88.7-25 32.2 15.7 70.3 25 111.3 25 114.9 0 208-71.6 208-160zm122 220c23.9-26 38-57.7 38-92 0-66.9-53.5-124.2-129.3-148.1.9 6.6 1.3 13.3 1.3 20.1 0 105.9-107.7 192-240 192-10.8 0-21.3-.8-31.7-1.9C207.8 439.6 281.8 480 368 480c41 0 79.1-9.2 111.3-25 21.8 12.7 52.1 25 88.7 25 3.2 0 6.1-1.9 7.3-4.8 1.3-2.9.7-6.3-1.5-8.7-.3-.3-22.4-24.2-35.8-54.5z" class=""></path></svg>`;
+                text = "💬";
                 bgclass = "good_background_light";
             }
 
@@ -766,9 +762,25 @@ Vue.component('report_content', {
     },
 
     watch: {
-        reported_organization: function () {
-            // load selected organization id
+        reported_organization: function (new_value, old_value) {
             this.load()
+        }
+    },
+
+    mounted: function(){
+        // when a report is directly requested via the url string
+        if (this.url_report_id)
+            store.commit('change', {reported_organization: {
+                id: parseInt(this.url_report_id),
+                name: null,
+            }});
+
+        this.load();
+    },
+
+    computed: {
+        reported_organization: function() {
+            return store.state.reported_organization
         }
     }
 });

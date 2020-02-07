@@ -10,7 +10,7 @@
 
         <div class="row">
             <template v-for="issue in issues">
-                <template v-if="Object.keys(scans).includes(issue.name) && scans[issue.name].length">
+                <template v-if="Object.keys(scans).includes(issue.name) && scans[issue.name].length > 1">
                     <div class="col-md-6">
                         <h4 v-html="translate(issue.name)"></h4>
                         <p>{{ $t("changes.rss_feed_teaser") }}

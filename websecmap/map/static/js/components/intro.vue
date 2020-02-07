@@ -12,11 +12,6 @@
             </div>
         </div>
 
-        <section id="lastrow">
-            <div class="container">
-                <foot :config="config"></foot>
-            </div>
-        </section>
     </div>
 </template>
 {% endverbatim %}

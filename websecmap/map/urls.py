@@ -31,6 +31,9 @@ static_urlpatterns = [
 
     path('data/map/<c:country>/<slug:organization_type>/<d:days_back>/<slug:displayed_issue>/', views.map_data),
     path('data/map/<c:country>/<slug:organization_type>/<d:days_back>//', views.map_data),
+
+    path('data/organizations/list/<c:country>/<slug:organization_type>/', views.organization_list),
+
     path('data/map_default/<d:days_back>/<slug:displayed_issue>/', views.map_default),
     path('data/map_default/<d:days_back>//', views.map_default),
     path('data/stats/<c:country>/<slug:organization_type>/<w:weeks_back>', views.stats),
