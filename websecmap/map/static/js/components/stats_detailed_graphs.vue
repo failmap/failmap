@@ -8,7 +8,7 @@
         <loading v-if="loading"></loading>
 
         <template v-if="data.total">
-                
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="chart-container" style="position: relative; height:555px; width:100%">

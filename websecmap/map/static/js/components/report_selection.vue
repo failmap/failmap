@@ -13,6 +13,7 @@
                 <v-select label="name"
                           v-model="selected"
                           :options="organizations"
+                          :placeholder="$t('report.select_organization')"
                 ></v-select>
                 <br />
             </div>
