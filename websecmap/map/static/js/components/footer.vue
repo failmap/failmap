@@ -28,13 +28,13 @@
         <div class="col-md-4 info">
             <a v-if="config.project.name.length > 1" target="_blank"><b>{{ config.project.name }}</b></a><br />
             <i v-if="config.project.tagline.length > 1"><a target="_blank">{{ config.project.tagline }}</a></i><br />
-            <i v-if="config.project.mail.length > 1"><a :href="'mailto:'+config.project.mail" target="_blank">📯 {{ config.project.mail }}</a></i>
+            <i v-if="config.project.mail.length > 1"><a :href="'mailto:'+config.project.mail" target="_blank">✉️ {{ config.project.mail }}</a></i>
         </div>
 
         <div class="col-md-4 info">
             <b v-if="config.responsible_organization.name.length > 1"><a :href="config.responsible_organization.website" target="_blank" rel="noopener">{{ config.responsible_organization.name }}</a></b><br />
             <i v-if="config.responsible_organization.website.length > 1"><a :href="config.responsible_organization.website" target="_blank" rel="noopener">{{ config.responsible_organization.website }}</a></i><br />
-            <i v-if="config.responsible_organization.mail.length > 1"><a :href="'mailto:' + config.responsible_organization.mail" target="_blank" rel="noopener">📯{{ config.responsible_organization.mail }}</a></i>
+            <i v-if="config.responsible_organization.mail.length > 1"><a :href="'mailto:' + config.responsible_organization.mail" target="_blank" rel="noopener">✉️{{ config.responsible_organization.mail }}</a></i>
         </div>
         <div class="col-md-3 info" style="text-align: right">
             <a href="https://websecuritymap.org" target="_blank" rel="nofollow" class="banner">
