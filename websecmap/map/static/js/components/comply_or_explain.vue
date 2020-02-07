@@ -8,6 +8,8 @@
 
         </div>
 
+        <loading v-if="loading"></loading>
+
         <template v-for="explain in explains">
             <div class="row">
 
@@ -54,7 +56,7 @@
             </div>
         </div>
 
-        <div class="row" v-if="!explains.length">
+        <div class="row" v-if="!explains.length && !loading">
             <div class="col-md-12">
                 {{ $t("comply_or_explain.no_explanations_yet") }}
             </div>
@@ -97,6 +99,7 @@ const ComplyOrExplain = Vue.component('comply_or_explain', {
             explains: Array(),
             more_explains: Array(),
             more_available: true,
+            loading: false,
         }
     },
 
@@ -114,7 +117,7 @@ const ComplyOrExplain = Vue.component('comply_or_explain', {
             return moment(date).fromNow();
         },
         load: function() {
-            console.log("Loading explain");
+            this.loading = true;
             let url = `/data/explained/${this.state.country}/${this.state.layer}/`;
 
             fetch(url).then(response => response.json()).then(explains => {
@@ -124,6 +127,7 @@ const ComplyOrExplain = Vue.component('comply_or_explain', {
                 if (this.more_explains.length === 0)
                     this.more_available = false;
 
+                this.loading = false;
             }).catch((fail) => {console.log('An error occurred in explains: ' + fail)});
         },
         showreport(organization_id){

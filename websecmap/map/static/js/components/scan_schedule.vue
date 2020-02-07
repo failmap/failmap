@@ -8,6 +8,9 @@
             </h2>
             <p>{{ $t("scan_schedule.intro") }}</p>
         </div>
+
+        <loading v-if="loading"></loading>
+
         <div class="row schedule_row" v-for="next_item in next">
             <div class="col-md-3 schedule_item">
                 {{ humanize_relative_date(next_item.date) }}
@@ -15,7 +18,7 @@
             <div class="col-md-9 schedule_item" v-html="next_item.name">
             </div>
         </div>
-        <div class="row schedule_row" v-if="!next.length">
+        <div class="row schedule_row" v-if="!next.length && !loading">
             {{ $t("scan_schedule.no_scans_scheduled") }}
         </div>
     </div>
@@ -49,6 +52,7 @@ const ScanSchedule = Vue.component('scan_schedule', {
         return {
             next: Array(),
             previous: Array(),
+            loading: false,
         }
     },
 
@@ -58,9 +62,11 @@ const ScanSchedule = Vue.component('scan_schedule', {
 
     methods: {
         load: function() {
+            this.loading = true;
             fetch('/data/upcoming_and_past_scans/').then(response => response.json()).then(data => {
                 this.next = data.next;
                 this.previous = data.previous;
+                this.loading = false;
             }).catch((fail) => {
                 console.log('An error occurred on scan schedule: ' + fail)
             });
