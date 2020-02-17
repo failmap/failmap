@@ -978,6 +978,7 @@
     {% include "map/static/js/components/websecmap.vue" %}
     {% include "map/static/js/components/footer.vue" %}
     {% include "map/static/js/components/ticker.vue" %}
+    {% include "map/static/js/components/donation_drive.vue" %}
 
 </head>
 <body role="document" onload="document_ready();">
@@ -1030,6 +1031,7 @@
             </section>
 
             <ticker v-if="config.show.ticker"></ticker>
+            <donation_drive></donation_drive>
 
             <section id="lastrow">
                 <div class="container">

@@ -431,6 +431,10 @@ class Url(models.Model):
 
         new_url = (subdomain + "." + self.url).lower()
 
+        if not Url.is_valid_url(new_url):
+            log.debug("Subdomain not valid: %s" % new_url)
+            return
+
         if Url.objects.all().filter(url=new_url, organization__in=self.organization.all()).exists():
             log.debug("Subdomain already in the database: %s" % new_url)
             return

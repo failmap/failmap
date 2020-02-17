@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'websecmap.map',
     'websecmap.game',
     'websecmap.pro',
+    'websecmap.api',
     'django_countries',
     'django.contrib.admindocs',
     'django.contrib.humanize',

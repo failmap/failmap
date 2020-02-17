@@ -40,6 +40,7 @@ admin_urls = [
 ]
 frontend_urls = [
     url('', include('websecmap.map.urls')),
+    url(r'^api/', include('websecmap.api.urls')),
     url(r'^game/', include('websecmap.game.urls')),
     url(r'^pro/', include('websecmap.pro.urls')),
     path('pro/', include('django.contrib.auth.urls')),

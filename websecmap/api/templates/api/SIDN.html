@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" id="active_theme" href="/static/css/vendor/bootstrap.min.css"/>
+</head>
+<body>
+    <div class="container">
+
+        <h1>Adding subdomains with the SIDN API</h1>
+        <p>
+            This guide was written while keeping in mind that adding subdomains can be done manually, but also can be
+            automated using the Python Requests library (for example).
+        </p>
+        <h2>Step 0: Authentication</h2>
+        <p>Before you can use the API, you need to authenticate yourself as a valid SIDN user. The authentication screen
+        is located here. Afterwards, you can continue with the following steps.</p>
+        <pre>/api/login/</pre> (<a href="/api/login?next=/api/SIDN/">direct link</a>)
+        <p>The post parameters for this request are:</p>
+        <pre>csrfmiddlewaretoken=[token]&username=[username]&password=[password]</pre>
+        <p><i>It might be possible that sending the csrftoken as a cookie is enough: cookie collection and usage is what the python
+        requests library automates.</i></p>
+
+        <h4>Code example</h4>
+        <code>
+            import requests<br>
+            <br>
+            your_username = "admin"<br>
+            your_password = "faalkaart"<br>
+            your_api_endpoint = "http://127.0.0.1:8000"<br>
+            <br>
+            login_url = your_api_endpoint + "/api/login/"<br>
+            client = requests.session()<br>
+            <br>
+            # retrieve csrf:<br>
+            client.get(login_url)<br>
+            csrftoken = client.cookies['csrftoken']<br>
+            <br>
+            r = client.post(login_url, data={'username': your_username, 'password': your_password, 'csrfmiddlewaretoken': csrftoken})<br>
+            print(r.ok)<br>
+        </code>
+
+        <h2>Step 1: retrieving layers</h2>
+        <p>
+            WebSecMap categorizes data in countries, layers and urls. While not strictly needed to add subdomains,
+            it's helpful to use the first two calls to identify which 2nd level domains already exist in what layer.
+        </p>
+        <p>To retrieve all layers, call:</p>
+        <pre>/api/SIDN/layers/</pre>
+        <p>A response would look like this:</p>
+        <pre>[{"country": "NL", "layer": "municipality"}]</pre>
+
+        <h4>Code example</h4>
+        <code>
+            r = client.get(f"{your_api_endpoint}/api/SIDN/layers/")<br>
+            layers = r.json()<br>
+            print(layers)<br>
+        </code>
+
+        <h2>Step 2: Retrieving second level domains</h2>
+        <p>To retrieve a list of all second level domains in a certain layer, you can perform the following call.
+        Note that you need to use the data from the first call.</p>
+        <pre>/api/SIDN/2nd_level_urls_on_map/[country code]/[layer name]/</pre>
+        <p>For example:</p>
+        <pre>/api/SIDN/2nd_level_urls_on_map/NL/municipality/</pre>
+        <p>A response can be:</p>
+        <pre>["alphen-chaam.nl", "almere.nl", "schermer.nl", "ameland.nl", "aalten.nl", "aalsmeer.nl", "aaenhunze.nl", "apeldoorn.nl", ...</pre>
+
+        <h4>Code example</h4>
+        <code>
+            r = client.get(f"{your_api_endpoint}/api/SIDN/2nd_level_urls_on_map/NL/municipality/")<br>
+            domains = r.json()<br>
+            print(domains[0:10])<br>
+        </code>
+
+
+        <h2>Step 3: Adding subdomains</h2>
+        <p>To add subdomains, make a post call with CSV data to the following location:</p>
+        <pre>/api/SIDN/upload/</pre>
+        <p>The data needs to be in the "data" parameter, additionally your request needs to use the CSRF token given by for example the form below.
+        This token changes every session, or even more often.</p>
+        <p>The data submitted needs to have a very specific format, which is:</p>
+        <pre>,2ndlevel,qname,distinct_asns
+123,arnhem.nl.,*.arnhem.nl.,1
+124,arnhem.nl.,01.arnhem.nl.,1
+163,arnhem.nl.,sdfg.arnhem.nl.,1
+125,arnhem.nl.,03.arnhem.nl.,1</pre>
+        <p>The answer of your call is the number of new and valid subdomains that have been added to the database.</p>
+        <p>Only the second and third values are used, the rest is ignored. After submitting each domain will be validated
+        and tested if the domain resolves. Only if all checks are passed, the domain is added to the database. All
+        organization that share the associated second level domain will also get the new subdomain in their portfolio.</p>
+        <p>It can take a while before an answer is given. If the service times out, try smaller batches as each
+            domain needs to be contacted to verify its resolvability.</p>
+        <p>An example requets looks like this, note the urlencoding of the data, which requests can do for you(!)</p>
+        <pre>csrfmiddlewaretoken=[token]&data=%2C2ndlevel%2Cqname%2Cdistinct_asns%0D%0A123%2Carn...</pre>
+
+        <h4>Code example</h4>
+        <code>
+            csv_information = """,2ndlevel,qname,distinct_asns<br>
+123,arnhem.nl.,*.arnhem.nl.,1<br>
+124,arnhem.nl.,01.arnhem.nl.,1<br>
+163,arnhem.nl.,sdfg.arnhem.nl.,1<br>
+125,arnhem.nl.,03.arnhem.nl.,1"""<br>
+            post_data = {"csrfmiddlewaretoken": csrftoken, "data": csv_information}<br>
+            r = client.post(f"{your_api_endpoint}/api/SIDN/upload/", data=post_data)<br>
+            domains = r.json()<br>
+            print(domains['number_of_added_domains'])<br>
+        </code>
+
+        <h4>Web form example:</h4>
+        <p>The form below can be used to easily create this post request. Sample data is already provided:</p>
+
+            <form method="POST" action="/api/SIDN/upload/">
+                {% csrf_token %}
+                <textarea name="data" style="width: 100%; height: 300px; font-family:courier">,2ndlevel,qname,distinct_asns
+123,arnhem.nl.,*.arnhem.nl.,1
+124,arnhem.nl.,01.arnhem.nl.,1
+163,arnhem.nl.,sdfg.arnhem.nl.,1
+125,arnhem.nl.,03.arnhem.nl.,1</textarea>
+                <input type="submit" value="Try this">
+            </form>
+
+        <h2>Step 4: Sit back and relax</h2>
+        <p>New domains are automatically onboarded, scanned and placed on the map. It can take a day or two before
+        you'll see a potential uptake in domains.</p>
+    </div>
+</body>
+</html>
