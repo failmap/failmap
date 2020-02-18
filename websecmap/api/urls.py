@@ -15,10 +15,12 @@ register_converter(converters.JsonConverter, 'json')
 
 urlpatterns = [
     url(r'^login/$', auth_views.LoginView.as_view(template_name='api/login.html'), name='login'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(template_name='api/login.html'), name='logout'),
 
-    path('', views.show_sidn_upload_),
-    path('SIDN/', views.show_sidn_upload_),
-    path('SIDN/layers/', views.get_map_configuration_),
-    path('SIDN/2nd_level_urls_on_map/<c:country>/<slug:organization_type>/', views.get_2ndlevel_domains_),
-    path('SIDN/upload/', views.sidn_domain_upload_)
+    path('', views.show_apis_),
+    path('SIDN/', views.sidn_show_instructions_),
+    path('SIDN/layers/', views.sidn_get_map_configuration_),
+    path('SIDN/2nd_level_urls_on_map/<c:country>/<slug:organization_type>/', views.sidn_get_2ndlevel_domains_),
+    path('SIDN/upload/', views.sidn_domain_upload_),
+    path('SIDN/uploads/', views.sidn_get_uploads_),
 ]

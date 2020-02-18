@@ -1023,6 +1023,10 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
         {'name': 'map.organizationreport'},
     ]},
 
+    {'label': _('🐒 API'), 'items': [
+        {'name': 'api.sidnupload'},
+    ]},
+
     {'label': _('🐞 Debug'), 'items': [
         {'name': 'app.job', 'label': "Performed scheduled tasks"},
         {'name': 'scanners.tlsqualysscratchpad', 'label': 'Qualys Scans Debug'},

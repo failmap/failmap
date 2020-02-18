@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from websecmap.api.logic import get_2ndlevel_domains, get_map_configuration
+from websecmap.api.logic import get_map_configuration
 
 
 class ApiTest(TestCase):
