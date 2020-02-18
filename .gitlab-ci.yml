@@ -131,7 +131,7 @@ build:
   stage: build
 
   services:
-    - docker:dind
+    - docker:19.03.5-dind
 
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -178,7 +178,7 @@ image_test:
     policy: pull
 
   services:
-    - docker:dind
+    - docker:19.03.5-dind
 
   image: websecmap/ci:docker-git
 
@@ -201,7 +201,7 @@ test_system:
 
   image: websecmap/ci:docker-git
   services:
-  - docker:dind
+  - docker:19.03.5-dind
 
   variables:
     SYSTEM_TEST_TIMEOUT: 120
@@ -222,7 +222,7 @@ staging:
 
   image: websecmap/ci:docker-git
   services:
-  - docker:dind
+  - docker:19.03.5-dind
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
@@ -253,7 +253,7 @@ production:
 
   image: websecmap/ci:docker-git
   services:
-  - docker:dind
+  - docker:19.03.5-dind
 
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
