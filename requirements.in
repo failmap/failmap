@@ -22,9 +22,12 @@ django-jet
 django-countries
 django-leaflet
 django-geojson
-jsonfield
+# jsonfield 3+ breaks django-geojson: https://github.com/makinacorpus/django-geojson/issues/104
+jsonfield<3
 django-import-export
-django-constance
+# version 2.6.0+ breaks functionality, not yet investigated a mitigation:
+# ImportError: cannot import name 'config' from 'constance' (/root/.cache/virtualenvs/web-security-map/lib/python3.7/site-packages/constance/__init__.py)
+django-constance<2.6.0
 django-picklefield
 
 pyyaml
