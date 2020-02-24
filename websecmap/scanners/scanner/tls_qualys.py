@@ -171,7 +171,8 @@ def claim_proxy(tracing_label=""):
                     # first claim to prevent duplicate claims
                     log.debug(f"Proxy {proxy.id} claimed for {tracing_label} et al...")
                     proxy.currently_used_in_tls_qualys_scan = True
-                    proxy.save(update_fields=['currently_used_in_tls_qualys_scan'])
+                    proxy.last_claim_at = datetime.now(pytz.utc)
+                    proxy.save(update_fields=['currently_used_in_tls_qualys_scan', 'last_claim_at'])
 
                     # we can't check for proxy quality here, as that will fill up the strorage with long tasks.
                     # instead run the proxy checking worker every hour or so to make sure the list stays fresh.
@@ -360,14 +361,21 @@ def qualys_scan_bulk(proxy: ScanProxy, urls: List[Url]):
     # Even if qualys is down, it will just wait until it knows you can add more... And the retry is infinite
     # every 30 seconds. So they may be even down for a day and it will continue.
     for url in urls:
-        api_results = service_provider_status(proxy)
-        while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
-            log.debug("Running out of capacity, waiting to start new scan.")
-            sleep(70)
-            api_results = service_provider_status(proxy)
 
-        pool.apply_async(qualys_scan_thread, [proxy, url])
-        sleep(70)
+        try:
+            api_results = service_provider_status(proxy)
+            while api_results['max'] < 20 or api_results['this-client-max'] < 20 or api_results['current'] > 19:
+                log.debug("Running out of capacity, waiting to start new scan.")
+                sleep(70)
+                api_results = service_provider_status(proxy)
+
+            pool.apply_async(qualys_scan_thread, [proxy, url])
+            sleep(70)
+
+        except RetryError:
+            log.debug("Retry error. Could not connect to proxy anymore.")
+            store_check_result.apply_async([proxy, "Retry error. Proxy died while scanning.", True,
+                                            datetime.now(pytz.utc)])
 
     pool.close()
     pool.join()
@@ -392,7 +400,7 @@ def qualys_scan_thread(proxy, url):
             # ex: EOF occurred in violation of protocol (_ssl.c:749)
             log.exception(f"(Network or Server) Error when contacting Qualys for scan on {url.url}.")
             sleep(60)
-            continue
+            # continue
 
         # Store debug data in database (this task has no direct DB access due to scanners queue).
         scratch.apply_async([url, data])
@@ -411,7 +419,8 @@ def qualys_scan_thread(proxy, url):
             else:
                 log.debug(f"Scan on {url.url} has not yet finished. Waiting {waiting_time} seconds before next update.")
                 sleep(waiting_time)
-                continue
+                # Don't break out of the loop...
+                # continue
 
         # The API is in error state, let's see if we can be nice and recover.
         if "errors" in data:
@@ -422,7 +431,8 @@ def qualys_scan_thread(proxy, url):
                 # this happens all the time, so don't raise an exception but just make a log message.
                 log.info(f"Error occurred while scanning {url.url}: qualys is at full capacity, trying later.")
                 sleep(waiting_time)
-                continue
+                # Don't break out of the loop...
+                # continue
 
             # We're going too fast with new assessments. Back off.
             if error_message.startswith("Concurrent assessment limit reached"):
@@ -432,14 +442,14 @@ def qualys_scan_thread(proxy, url):
                 if waiting_time < max_waiting_time:
                     waiting_time += 60
                     sleep(waiting_time)
-                    continue
+                    # continue
 
             if error_message.startswith("Too many concurrent assessments"):
                 log.info(f"Error occurred while scanning {url.url}: Too many concurrent assessments.")
                 if waiting_time < max_waiting_time:
                     waiting_time += 60
                     sleep(waiting_time)
-                    continue
+                    # continue
 
             # All other situations that we did not foresee...
             log.error("Unexpected error from API on %s: %s", url.url, str(data))

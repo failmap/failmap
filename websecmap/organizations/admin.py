@@ -339,7 +339,7 @@ class MyUrlAdminForm(forms.ModelForm):
         if not organizations:
             return
 
-        log.error(self.cleaned_data)
+        # log.error(self.cleaned_data)
         # make sure the URL is not added if it is already alive and matched to the selected organization.
         # except yourself of course...
         # todo: expemt yourself, .exclude(pk=self.cleaned_data.get("pk"))

@@ -100,7 +100,7 @@ run: ${app}  ## run complete application stack (frontend, worker, broker)
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver
 
 run-frontend: ${app}  ## only run frontend component
-	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver
+	DEBUG=1 DJANGO_SETTINGS_MODULE=${app_name}.settings NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver
 
 run-nonlocal-frontend: ${app}  ## only run frontend component
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver 0.0.0.0:8000

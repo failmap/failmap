@@ -218,6 +218,11 @@ class ScanProxy(models.Model):
         null=True
     )
 
+    last_claim_at = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
     request_speed_in_ms = models.IntegerField(
         default=-1,
     )

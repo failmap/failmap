@@ -8,6 +8,15 @@
 # - version pinning only if it is required and explained
 # - only direct requirements, not recursive (requirements of requirements)
 
+# When recompiling for mac: export LDFLAGS=-L/usr/local/opt/openssl/lib
+
+# Get proxies
+# sigh, attrs is bumped to a compatible version later than the latest stable release. Welcome to dephell.
+attrs==19.3.0
+
+git+https://github.com/stitch/ProxyBroker#egg=proxybroker
+# end dephel for proxies
+
 django<3
 django-jet
 django-countries
@@ -124,4 +133,3 @@ psycopg2-binary # binary package installs wheel, avoiding compiling
 # wsgi server
 uwsgi
 django-uwsgi
-
