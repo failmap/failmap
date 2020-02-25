@@ -21,7 +21,7 @@
 
                     <h3>{{ rank['organization_name'] }}</h3>
 
-                    <a v-on:click="showReport(rank.organization_id)">🔍 {{ $t("chart.view_report") }}</a><br><br>
+                    <router-link :to="'/report/'+rank['organization_id']">🔍 {{ $t("chart.view_report") }}</router-link><br><br>
 
                     <div :class="'score ' + (rank['high'] > 0 ? 'high' : 'good')"><span class="score_label">{{ $t("chart.high_risk") }}</span> <br> <span :class="'score_value ' + (rank['high'] ? 'high_text' : 'good_text')">{{ rank['high'] }}</span></div> <br>
                     <div :class="'score ' + (rank['medium'] > 0 ? 'medium' : 'good')"><span :class="'score_value ' + (rank['medium'] ? 'medium_text' : 'good_text')">{{ rank['medium'] }}</span><br> <span class="score_label">{{ $t("chart.medium_risk") }}</span></div> <br>
@@ -73,7 +73,9 @@
 
                         <tr v-for='(rank, index) in filteredData' v-if="index > 2">
                             <td>{{ rank['rank'] }}</td>
-                            <td><a v-on:click="showReport(rank.organization_id)">🔍 {{ rank['organization_name'] }}</a></td>
+                            <td>
+                                <router-link :to="'/report/'+rank.organization_id">🔍 {{ rank.organization_name }}</router-link>
+                            </td>
                             <td>{{ rank['total_urls'] }}</td>
                             <td>{{ rank['total_endpoints'] }}</td>
                             <td>{{ rank['high'] }}</td>
@@ -156,19 +158,6 @@ Vue.component('chart', {
         title: String,
     },
     methods: {
-        showReport: function (organization_id) {
-            // you can only jump once to an anchor, unless you use a dummy
-            location.hash = "#loading";
-            location.hash = "#report";
-
-            store.commit('change', {reported_organization: {
-                id: organization_id,
-                name: "",
-            }});
-        },
-        humanize: function (date) {
-            return new Date(date).humanTimeStamp()
-        },
         load: function () {
             this.loading = true;
             fetch(`${this.data_url}${this.state.country}/${this.state.layer}/${this.state.week}`).then(response => response.json()).then(data => {
