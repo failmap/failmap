@@ -12,7 +12,7 @@
                 {{ $t("report.select_organization") }}
                 <v-select label="name"
                           v-model="selected"
-                          :options="organizations"
+                          :options="available_organizations"
                           :placeholder="$t('report.select_organization')"
                 ></v-select>
                 <br />
@@ -26,6 +26,9 @@
 <script>
 Vue.component('report_selection', {
     store,
+
+    mixins: [new_state_mixin, translation_mixin],
+
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
@@ -48,7 +51,7 @@ Vue.component('report_selection', {
     data: function () {
         return {
             selected: {},
-            organizations: [],
+            available_organizations: [],
         }
     },
 
@@ -56,7 +59,7 @@ Vue.component('report_selection', {
         load: function (weeknumber=0) {
             this.loading = true;
             fetch(`/data/organizations/list/${this.$store.state.country}/${this.$store.state.layer}/`).then(response => response.json()).then(data => {
-                this.organizations = data;
+                this.available_organizations = data;
                 this.loading = false;
             }).catch((fail) => {console.log('An error occurred in combined number statistics: ' + fail); throw fail});
         },
