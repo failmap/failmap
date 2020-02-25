@@ -75,8 +75,8 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
     data = {
         "metadata": {
             "type": "FeatureCollection",
-            "render_date": datetime.now(pytz.utc),
-            "data_from_time": when,
+            "render_date": datetime.now(pytz.utc).isoformat(),
+            "data_from_time": when.isoformat(),
             "remark": remark,
             "applied filter": displayed_issue,
             "layer": organization_type,

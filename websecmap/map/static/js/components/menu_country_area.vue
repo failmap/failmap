@@ -192,6 +192,9 @@ Vue.component('Mapstatebar', {
 
     mounted: function() {
         let first = Object.keys(this.map_configuration);
+        if (first[0] === undefined)
+            return;
+
         this.layers = this.map_configuration[first[0]].layers;
         store.commit('change', {layers: this.layers});
         this.selected_country = this.map_configuration[first[0]].code;
