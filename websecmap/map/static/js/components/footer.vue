@@ -37,8 +37,8 @@
 
 </style>
 <template type="x-template" id="foot_template">
-    <template v-if="config.project.name.length > 1 || config.project.tagline.length > 1 || config.project.mail.length > 1
-    || config.responsible_organization.name.length > 1 || config.responsible_organization.website.length > 1 || config.responsible_organization.mail.length > 1">
+    <div>
+    <template v-if="config.project.name.length > 1 || config.project.tagline.length > 1 || config.project.mail.length > 1 || config.responsible_organization.name.length > 1 || config.responsible_organization.website.length > 1 || config.responsible_organization.mail.length > 1">
     <div class="row footer">
         <div class="col-md-4 info">
             <a v-if="config.project.name.length > 1" target="_blank"><b>{{ config.project.name }}</b></a><br />
@@ -67,6 +67,7 @@
             </a>
         </div>
     </template>
+    </div>
 </template>
 {% endverbatim %}
 

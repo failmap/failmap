@@ -5,6 +5,11 @@
         cursor: wait !important;
     }
 
+    .websecmap a:hover, .websecmap a:active, .websecmap a:visited  {
+        text-decoration: none;
+        color: black;
+    }
+
 </style>
 <template type="x-template" id="websecmap_template">
     <div :class="loading ? 'websecmap map_loading' : 'websecmap'" >
@@ -117,8 +122,8 @@
                 <div class="info table-light" style='max-width: 300px;' v-if="hover_info.properties.organization_name">
 
                     <div>
-                        <h4><a @click="document.app.direct_navigation_to_report(hover_info.properties.organization_id, hover_info.properties.organization_name)">{{ hover_info.properties.organization_name }}</a></h4>
-                        <a @click="document.app.direct_navigation_to_report(hover_info.properties.organization_id, hover_info.properties.organization_name)">🔍 {{ $t("view_report") }}</a><br>
+                        <h4><router-link :to="'/report/' + hover_info.properties.organization_id">{{ hover_info.properties.organization_name }}</router-link></h4>
+                        <router-link :to="'/report/' + hover_info.properties.organization_id">🔍 {{ $t("view_report") }}</router-link><br>
                         <div class="progress">
                             <div class="progress-bar bg-danger" :style="{width:high}"></div>
                             <div class="progress-bar bg-warning" :style="{width:medium}"></div>
@@ -875,6 +880,7 @@ const WebSecMap = Vue.component('websecmap', {
                 </a>
             `);
 
+
                 pointlayer.bindPopup(popup).openPopup();
 
                 pointlayer.on({
@@ -950,6 +956,7 @@ const WebSecMap = Vue.component('websecmap', {
                 </div>
                 </a>
             `);
+
 
             // ${props['total_urls']} ${this.$t('map.popup.urls')}<br>
             // <a onclick="showreport_frompopup(${props['organization_id']}, '${props['organization_name']}')">${this.$t('map.popup.view_report')}</a><br>
