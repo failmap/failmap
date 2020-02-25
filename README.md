@@ -111,6 +111,31 @@ make run
 Now visit the [map website](http://127.0.0.1:8000/) and/or the
 [admin website](http://127.0.0.1:8000/admin/) at http://127.0.0.1:8000 (credentials: admin:faalkaart).
 
+
+To fill up the empty installation with some data, use the data included with the following commands:
+
+```bash
+websecmap loaddata development
+websecmap loaddata testdata
+websecmap report
+```
+
+This will provide some municipalities in the Netherlands with a report and stats.
+
+
+#### Getting started with development
+
+For development purposes it's possible to run the major components of websecmap separately, as they can be rebooted
+as such. After a complete installation, use:
+
+```bash
+make run-frontend  # to run the django website
+make run-broker  # to run redis (when you need to develop tasks)
+make run-worker  # to run a worker that processes tasks from redis
+```
+
+Do not forget to restart your worker after altering tasks.
+
 #### Optional Steps
 
 If your shell support tab completion you can get a complete list of supported commands by tabbing `make`:
@@ -155,6 +180,18 @@ You can update / install xcode tools with the following command:
 ```
 xcode-select --install
 ```
+
+
+Dealing with compiling mysql and other software that uses SSL.
+You can look at the detailed issue here, mostly compilation fails because of a missing environment variable.
+
+The LDFLAGS need to point to your openssl installation, for example:
+ 
+```bash
+set LDFLAGS -L/usr/local/opt/openssl/lib
+```
+
+
 
 ### Missing Docker Daemon (mac users)
 While docker is installed using brew in prior steps, you probably want to have
