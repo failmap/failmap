@@ -1,13 +1,19 @@
 {% verbatim %}
+<style>
+    .map_loading {
+        opacity: 60%;
+    }
+
+</style>
 <template type="x-template" id="websecmap_template">
-    <div>
+    <div :class="loading ? 'websecmap map_loading' : 'websecmap'" >
         <!-- these settings made the map unusable on mobile devices -->
         <!-- scrollWheelZoom: false, tap: true, zoomSnap: 0.2, dragging: !L.Browser.mobile, touchZoom: true, -->
         <l-map style="height: 100vh; width: 100%;" ref="lmap"
                :options="{
                 scrollWheelZoom: false,
                 zoomSnap: 0.1,
-               contextmenu: true,
+                contextmenu: true,
                 contextmenuWidth: 140,
                 contextmenuItems: [
                 {
