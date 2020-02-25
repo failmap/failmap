@@ -6,6 +6,7 @@
         <l-map style="height: 100vh; width: 100%;" ref="lmap"
                :options="{
                 scrollWheelZoom: false,
+                zoomSnap: 0.1,
                contextmenu: true,
                 contextmenuWidth: 140,
                 contextmenuItems: [
