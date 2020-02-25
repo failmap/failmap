@@ -2,6 +2,7 @@
 <style>
     .map_loading {
         opacity: 60%;
+        cursor: wait !important;
     }
 
 </style>

@@ -20,10 +20,25 @@
         padding-top: 5px;
         width: 211px;
         color: #423c3c !important;
+        float: right;
+    }
+
+    .full-banner {
+        background-color: #f2f2f2;
+        border-radius: 40px;
+        text-align: center;
+        padding-top: 5px;
+        color: #423c3c !important;
+        padding-bottom: 5px;
+        padding-left: 9px;
+        font-size: 0.9em;
+        padding-right: 9px;
     }
 
 </style>
 <template type="x-template" id="foot_template">
+    <template v-if="config.project.name.length > 1 || config.project.tagline.length > 1 || config.project.mail.length > 1
+    || config.responsible_organization.name.length > 1 || config.responsible_organization.website.length > 1 || config.responsible_organization.mail.length > 1">
     <div class="row footer">
         <div class="col-md-4 info">
             <a v-if="config.project.name.length > 1" target="_blank"><b>{{ config.project.name }}</b></a><br />
@@ -32,16 +47,26 @@
         </div>
 
         <div class="col-md-4 info">
-            <b v-if="config.responsible_organization.name.length > 1"><a :href="config.responsible_organization.website" target="_blank" rel="noopener">{{ config.responsible_organization.name }}</a></b><br />
+            <b v-if="config.responsible_organization.name.length > 1">{{ config.responsible_organization.name }}</b><br />
             <i v-if="config.responsible_organization.website.length > 1"><a :href="config.responsible_organization.website" target="_blank" rel="noopener">{{ config.responsible_organization.website }}</a></i><br />
             <i v-if="config.responsible_organization.mail.length > 1"><a :href="'mailto:' + config.responsible_organization.mail" target="_blank" rel="noopener">✉️{{ config.responsible_organization.mail }}</a></i>
         </div>
-        <div class="col-md-3 info" style="text-align: right">
+
+        <div class="col-md-3 info">
             <a href="https://websecuritymap.org" target="_blank" rel="nofollow" class="banner">
                 <img src="/static/images/web-security-map-logo-small.png" alt="logo" width="20px"/>️ {{ $t("footer.banner") }}
             </a>
         </div>
     </div>
+    </template>
+    <template v-else>
+        <!-- Simple banner in the center -->
+        <div class="col-md-12 info" style="text-align: center; padding: 10px;">
+            <a href="https://websecuritymap.org" target="_blank" rel="nofollow" class="full-banner">
+                <img src="/static/images/web-security-map-logo-small.png" alt="logo" width="20px"/>️ {{ $t("footer.banner") }}
+            </a>
+        </div>
+    </template>
 </template>
 {% endverbatim %}
 
