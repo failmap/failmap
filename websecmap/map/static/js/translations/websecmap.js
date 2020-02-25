@@ -10,19 +10,24 @@ const messages = {
 
         // layers
         municipality: 'Municipalities',
-        cyber: 'Cyber',
+        cyber: 'Cyber Security Companies',
         unknown: 'Unknown',
         water_board: 'Water boards',
         province: 'Provinces',
-        country: 'Country',
-        region: 'Region',
-        county: 'County',
-        district: 'District',
+        country: 'Countries',
+        region: 'Regions',
+        county: 'Counties',
+        district: 'Districts',
         government: 'Government',
         healthcare: 'Healthcare',
         finance: 'Finance',
-        state: 'State',
+        state: 'States',
         education: 'Education',
+
+        // common
+        organizations: "organizations",
+        "internet addresses": "internet addresses",
+        services: "online services",
 
         // german layers... sigh... :)
         bundesland: 'Bundesland',
@@ -166,18 +171,17 @@ const messages = {
         view_report: "Rapport bekijken",
 
         municipality: 'Gemeenten',
-        cyber: 'Cyber',
+        cyber: 'Cyber Security Bedrijven',
         unknown: 'Onbekend',
         water_board: 'Waterschappen',
         province: 'Provincies',
-        country: 'Land',
-        region: 'Gebied',
-        county: 'County',
-        district: 'District',
+        country: 'Landen',
+        region: 'Gebieden',
+        district: 'Districten',
         government: 'Overheid',
         healthcare: 'Gezondheidszorg',
         finance: 'Financiën',
-        state: 'Staat',
+        state: 'Staten',
         education: 'Scholen',
 
 
@@ -185,6 +189,11 @@ const messages = {
         confidentiality: "Vertrouwelijkheid",
         integrity: "Integriteit",
         website: "Website",
+
+        // common
+        organizations: "organisaties",
+        "internet addresses": "internet adressen",
+        services: "online diensten",
 
 
         // issues, are used at various places, the original value comes from the database stored as scan results.

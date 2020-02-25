@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Dict
 
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -6,7 +7,8 @@ from django.utils import timezone
 
 from websecmap.map.logic.map_defaults import (get_country, get_default_country, get_default_layer,
                                               get_organization_type)
-from websecmap.map.models import HighLevelStatistic, OrganizationReport, VulnerabilityStatistic
+from websecmap.map.models import (Configuration, HighLevelStatistic, OrganizationReport,
+                                  VulnerabilityStatistic)
 from websecmap.organizations.models import Organization
 
 
@@ -183,3 +185,42 @@ def get_stats(country, organization_type, weeks_back):
         reports['endpoints_now'] = r['endpoints']
 
     return reports
+
+
+def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
+    when = datetime.now(pytz.utc) - relativedelta(days=int(weeks_back * 7))
+
+    configurations = Configuration.objects.all().filter(is_displayed=True).order_by('display_order')
+
+    simplestat = {}
+
+    for configuration in configurations:
+
+        stats = HighLevelStatistic.objects.all().filter(
+            country=configuration.country,
+            organization_type=configuration.organization_type,
+            at_when__lte=when
+        ).order_by('-at_when').first()
+
+        if stats:
+            simplestat = {**simplestat, **{
+                configuration.country.code: {
+                    configuration.organization_type.name: {
+                        'country_code': configuration.country.code,
+                        'country_name': configuration.country.name,
+                        'country_flag': configuration.country.flag,
+                        'layer': configuration.organization_type.name,
+                        'organizations': stats.report['total_organizations'],
+                        'urls': stats.report['total_urls'],
+                        'services': stats.report['endpoints'],
+                        "high percentage": stats.report['high percentage'],
+                        "medium percentage": stats.report['medium percentage'],
+                        "good percentage": stats.report['good percentage'],
+                        "high url percentage": stats.report['high url percentage'],
+                        "medium url percentage": stats.report['medium url percentage'],
+                        "good url percentage": stats.report['good url percentage'],
+                    }
+                }
+            }}
+
+    return simplestat

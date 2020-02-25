@@ -79,6 +79,24 @@
                 </div>
             </l-control>
 
+            <l-control position="bottomright" class="hide_on_small_screens" v-if="simplestats">
+                <div style="max-width: 300px; overflow:hidden;" class="info table-light">
+                    <!-- Only if there are stats -->
+                    <template v-if="simplestats[this.state.country][this.state.layer] !== undefined">
+                        <!-- if there are multiple countries -->
+                        <template v-if="Object.keys(simplestats).length > 2">
+                            <h4><img :src="simplestats[this.state.country][this.state.layer].country_flag" />{{simplestats[this.state.country][this.state.layer].country_name}}, {{ $t($store.state.layer) }}</h4>
+                        </template>
+                        <template v-else>
+                            <h4>{{ $t($store.state.layer) }}</h4>
+                        </template>
+                        {{simplestats[this.state.country][this.state.layer].organizations}} {{$t('organizations')}}<br>
+                        {{simplestats[this.state.country][this.state.layer].urls}} {{$t('internet adresses')}}<br>
+                        {{simplestats[this.state.country][this.state.layer].services}} {{$t('services')}}<br>
+                    </template>
+                </div>
+            </l-control>
+
             <!--
             <l-control position="topright" class="hide_on_small_screens">
                 <div style="max-width: 300px; overflow:hidden;" class="info table-light">
@@ -123,7 +141,7 @@
 
                     <div>
                         <h4><router-link :to="'/report/' + hover_info.properties.organization_id">{{ hover_info.properties.organization_name }}</router-link></h4>
-                        <router-link :to="'/report/' + hover_info.properties.organization_id">🔍 {{ $t("view_report") }}</router-link><br>
+                        <router-link :to="'/report/' + hover_info.properties.organization_id">🔍 {{ $t("view_report") }}</router-link><br><br>
                         <div class="progress">
                             <div class="progress-bar bg-danger" :style="{width:high}"></div>
                             <div class="progress-bar bg-warning" :style="{width:medium}"></div>
@@ -401,6 +419,8 @@ const WebSecMap = Vue.component('websecmap', {
             },
 
             clicked_map_object: null,
+
+            simplestats: null,
         }
     },
 
@@ -436,6 +456,8 @@ const WebSecMap = Vue.component('websecmap', {
 
             this.load();
             this.update_visible_week();
+
+            this.get_simplestats();
         })
     },
 
@@ -523,6 +545,12 @@ const WebSecMap = Vue.component('websecmap', {
                 this.loading = false;
                 throw fail;
             });
+        },
+
+        get_simplestats: function() {
+            fetch(`/data/short_and_simple_stats/${this.state.week}/`).then(response => response.json()).then(data => {
+                this.simplestats = data;
+            }).catch((fail) => {console.log('A simplestat loading error occurred: ' + fail)});
         },
 
         handle_map_data: function(data){

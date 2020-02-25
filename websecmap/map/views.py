@@ -33,7 +33,8 @@ from websecmap.map.logic.organization_report import (get_organization_report_by_
 from websecmap.map.logic.rss_feeds import latest_updates
 from websecmap.map.logic.stats_and_graphs import (get_organization_vulnerability_timeline,
                                                   get_organization_vulnerability_timeline_via_name,
-                                                  get_stats, get_vulnerability_graph)
+                                                  get_short_and_simple_stats, get_stats,
+                                                  get_vulnerability_graph)
 from websecmap.map.logic.ticker import get_ticker_data
 from websecmap.map.logic.top import get_top_fail_data, get_top_win_data
 from websecmap.map.logic.upcoming_scans import get_next_and_last_scans
@@ -375,6 +376,12 @@ def top_win(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_L
 def stats(request, country: str = DEFAULT_COUNTRY, organization_type=DEFAULT_LAYER, weeks_back=0):
     reports = get_stats(country, organization_type, weeks_back)
     return JsonResponse(reports, encoder=JSEncoder)
+
+
+@cache_page(one_hour)
+def get_short_and_simple_stats_(request, weeks_back=0):
+    data = get_short_and_simple_stats(weeks_back)
+    return JsonResponse(data, encoder=JSEncoder)
 
 
 @cache_page(one_hour)
