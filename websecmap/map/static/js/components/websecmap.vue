@@ -388,9 +388,6 @@ const WebSecMap = Vue.component('websecmap', {
                 }
             },
 
-            // this makes the "initial map data" work:
-            load_counter: 0,
-
             clicked_map_object: null,
         }
     },
@@ -406,6 +403,8 @@ const WebSecMap = Vue.component('websecmap', {
 
         // the initial data saves a load. This is not very beautiful but it makes the site respond a lot faster.
         initial_map_data: Object,
+        initial_layer: String,
+        initial_country: String,
     },
 
     mounted: function(){
@@ -494,10 +493,10 @@ const WebSecMap = Vue.component('websecmap', {
         },
 
         load: function () {
+            this.loading = true;
 
-            if (this.load_counter === 0 && this.initial_map_data !== undefined){
+            if (this.initial_layer === this.state.layer && this.initial_country === this.state.country && this.state.week === 0 && this.displayed_issue === ""){
                 this.handle_map_data(this.initial_map_data);
-                this.load_counter += 1;
                 return;
             }
 
