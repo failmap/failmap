@@ -53,71 +53,80 @@
                 </div>
             </div>
 
-            <div class="row" v-if="name" style="page-break-before: always;">
-                <div class="col-md-12">
-                    <h4>{{ $t("report_content.timeline.title") }}</h4>
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <vulnerability-chart
-                            :color_scheme="color_scheme"
-                            :data="timeline"
-                            :axis="['high', 'medium', 'low']"
-                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
-                        ></vulnerability-chart>
+            <template v-if="charts_loading">
+                <div class="row" v-if="name" style="page-break-before: always;">
+                    <div class="col-md-12">
+                        <h4>{{ $t("report_content.timeline.title") }}</h4>
+                        <loading></loading>
                     </div>
                 </div>
-            </div>
-
-            <div class="row" v-if="name" style="margin-bottom: 30px;">
-
-                <div class="col-md-4">
-                    <div class="chart-container" style="position: relative; height:200px; width:100%">
-                        <vulnerability-chart
-                            :color_scheme="color_scheme"
-                            :data="timeline"
-                            :axis="['high']"
-                            :display_title="false"
-                            :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
-                        ></vulnerability-chart>
+            </template>
+            <template v-else>
+                <div class="row" v-if="name" style="page-break-before: always;">
+                    <div class="col-md-12">
+                        <h4>{{ $t("report_content.timeline.title") }}</h4>
+                        <div class="chart-container" style="position: relative; height:555px; width:100%">
+                            <vulnerability-chart
+                                :color_scheme="color_scheme"
+                                :data="timeline"
+                                :axis="['high', 'medium', 'low']"
+                                :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                            ></vulnerability-chart>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="chart-container" style="position: relative; height:200px; width:100%">
-                        <vulnerability-chart
-                            :color_scheme="color_scheme"
-                            :data="timeline"
-                            :axis="['medium']"
-                            :display_title="false"
-                            :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
-                        ></vulnerability-chart>
+                <div class="row" v-if="name" style="margin-bottom: 30px;">
+
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:200px; width:100%">
+                            <vulnerability-chart
+                                :color_scheme="color_scheme"
+                                :data="timeline"
+                                :axis="['high']"
+                                :display_title="false"
+                                :display_legend="false"
+                                :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                            ></vulnerability-chart>
+                        </div>
                     </div>
+
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:200px; width:100%">
+                            <vulnerability-chart
+                                :color_scheme="color_scheme"
+                                :data="timeline"
+                                :axis="['medium']"
+                                :display_title="false"
+                                :display_legend="false"
+                                :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                            ></vulnerability-chart>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="chart-container" style="position: relative; height:200px; width:100%">
+                            <vulnerability-chart
+                                :color_scheme="color_scheme"
+                                :data="timeline"
+                                :axis="['low']"
+                                :display_title="false"
+                                :display_legend="false"
+                                :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
+                            ></vulnerability-chart>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="col-md-4">
-                    <div class="chart-container" style="position: relative; height:200px; width:100%">
-                        <vulnerability-chart
-                            :color_scheme="color_scheme"
-                            :data="timeline"
-                            :axis="['low']"
-                            :display_title="false"
-                            :display_legend="false"
-                            :translation="$i18n.messages[$i18n.locale].report_content.vulnerability_graph"
-                        ></vulnerability-chart>
+                <div class="row" v-if="name" style="margin-bottom: 30px;">
+                    <div  class="col-md-12">
+                        <div class="chart-container" style="position: relative; height:555px; width:100%">
+                            <connectivity-chart :color_scheme="color_scheme" :data="timeline"></connectivity-chart>
+                        </div>
                     </div>
                 </div>
-
-            </div>
-
-            <div class="row" v-if="name" style="margin-bottom: 30px;">
-                <div  class="col-md-12">
-                    <div class="chart-container" style="position: relative; height:555px; width:100%">
-                        <connectivity-chart :color_scheme="color_scheme" :data="timeline"></connectivity-chart>
-                    </div>
-                </div>
-            </div>
-
+            </template>
 
 
             <div class="row" v-if="name" style="margin-bottom: 30px;" style="page-break-before: always;">
@@ -473,6 +482,7 @@ Vue.component('report_content', {
             urls: Array,
             selected: {'id': null, 'label': null, 'name': null},
             loading: false,
+            charts_loading: false,
             visible: false,  // fullscreenreport
             promise: false,
             timeline: [],
@@ -538,6 +548,7 @@ Vue.component('report_content', {
             this.urls = Array;
             this.selected = {'id': null, 'label': null, 'name': null};
             this.loading = false;
+            this.charts_loading = false;
             this.visible = false;
             this.promise = false;
             this.timeline = [];
@@ -551,6 +562,7 @@ Vue.component('report_content', {
             }
 
             this.loading = true;
+            this.charts_loading = true;
 
             let org = this.reported_organization.id ? this.reported_organization.id : this.reported_organization.name;
 
@@ -559,6 +571,7 @@ Vue.component('report_content', {
                 if (!$.isEmptyObject(timelinedata)){
                     this.timeline = timelinedata;
                 }
+                this.charts_loading = false;
             }).catch((fail) => {console.log('An error occurred on report content: ' + fail)});
 
             let url = "";
