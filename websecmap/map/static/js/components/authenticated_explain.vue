@@ -34,12 +34,11 @@
 
                 <h4>Canned Explanation:</h4>
                 <select v-model="explanation" size="6" style="width: 100%">
-                    <option :value='$t("explain.canned_explanations.device_only_certificate")'>device_only_certificate: {{ $t("explain.canned_explanations.device_only_certificate") }}</option>
-                    <option :value='$t("explain.canned_explanations.for_devices_only_not_browsers")'>domain_for_device: {{ $t("explain.canned_explanations.for_devices_only_not_browsers") }}</option>
-                    <option :value='$t("explain.canned_explanations.for_specialized_applications_only_not_browsers")'>non_http_application: {{ $t("explain.canned_explanations.for_specialized_applications_only_not_browsers") }}</option>
-                    <option :value='$t("explain.canned_explanations.unencrypted_required")'>unencrypted_required: {{ $t("explain.canned_explanations.unencrypted_required") }}</option>
-                    <option :value='$t("explain.canned_explanations.fix_in_progress")'>supplier_fix_in_progress: {{ $t("explain.canned_explanations.fix_in_progress") }}</option>
-                    <option :value='$t("explain.canned_explanations.scanner_bug")'>scanner_bug: {{ $t("explain.canned_explanations.scanner_bug") }}</option>
+                    <option value='device_only_certificate'>device_only_certificate: {{ $t("explain.canned_explanations.device_only_certificate") }}</option>
+                    <option value='for_devices_only_not_browsers'>domain_for_device: {{ $t("explain.canned_explanations.for_devices_only_not_browsers") }}</option>
+                    <option value='for_specialized_applications_only_not_browsers'>non_http_application: {{ $t("explain.canned_explanations.for_specialized_applications_only_not_browsers") }}</option>
+                    <option value='unencrypted_required'>unencrypted_required: {{ $t("explain.canned_explanations.unencrypted_required") }}</option>
+                    <option value='scanner_bug'>scanner_bug: {{ $t("explain.canned_explanations.scanner_bug") }}</option>
                 </select>
 
                 <h4>Custom explanation</h4>
@@ -89,7 +88,6 @@ Vue.component('explain', {
                         for_devices_only_not_browsers: "This domain is for devices only, not browsers. These devices does not need this requirement.",
                         for_specialized_applications_only_not_browsers: "This domain is being used by specialized applications using their own protocols, which have no need for browser security features.",
                         unencrypted_required: "This domain publishes data that according to best practices must be delivered unencrypted, such as Certificate Revocation Lists. This data is signed and validated by the consumer. Delivering this through an encrypted channel would possibly create technical problems, such as an infinite validation loop.",
-                        fix_in_progress: "The issue is being fixed by the supplier, a new version will be delivered soon.",
                         scanner_bug: "A bug in the scanner caused this issue. Manual testing has shown this issue does not occur.",
                     }
                 },
@@ -102,7 +100,6 @@ Vue.component('explain', {
                         for_devices_only_not_browsers: "Dit domein wordt voor specifieke apparatuur gebruikt. Deze apparatuur heeft geen noodzaak voor deze beveiligingseis.",
                         for_specialized_applications_only_not_browsers: "Dit domein wordt voor specialistische applicaties gebruikt met eigen protocollen. Hierdoor is deze browser beveiligingseis niet relevant.",
                         unencrypted_required: "Dit domein publiceert gegevens die volgens best practices onversleuteld moeten worden aangeboden, bijvoorbeeld Certificate Revocation Lists. Deze gegevens zijn gesigned en worden gevalideerd door de lezer. Het aanbieden van deze gegevens over een versleuteld domein kan technische problemen veroorzaken.",
-                        fix_in_progress: "Dit probleem wordt op dit moment opgelost door de leverancier. Een nieuwe versie zal binnenkort beschikbaar zijn.",
                         scanner_bug: "Een bug in de scanner zorgt voor een verkeerde beoordeling. Een handmatige test toont aan dat dit probleem hier niet voorkomt.",
                     }
                 }

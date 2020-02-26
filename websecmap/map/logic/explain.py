@@ -89,23 +89,29 @@ def get_all_explains(country, organization_type, limit=0):
 def get_explanation(type, scan):
     calculation = get_severity(scan)
 
-    explain = {
-        'organizations': scan.url.organization.name if type == "url" else list(
-            scan.endpoint.url.organization.all().values('id', 'name')),
+    now = timezone.now().isoformat()
+    explained_on = scan.comply_or_explain_explained_on.isoformat() if scan.comply_or_explain_explained_on else now
+
+    this_explain = {
         'scan_type': scan.type,
         'explanation': scan.comply_or_explain_explanation,
         'explained_by': scan.comply_or_explain_explained_by,
-        'explained_on': scan.comply_or_explain_explained_on.isoformat(
-        ) if scan.comply_or_explain_explained_on else timezone.now().isoformat(),
+        'explained_on': explained_on,
         'valid_until': scan.comply_or_explain_explanation_valid_until.isoformat(),
         'original_severity': "high" if calculation['high'] else "medium" if calculation['medium'] else "low",
         'original_explanation': calculation['explanation'],
-        'subject': str("%s %s/%s on IPv%s") % (
-            scan.endpoint.url, scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version
-        ) if type == "endpoint" else str(scan.url.url)
     }
 
-    return explain
+    if type == "url":
+        this_explain['organizations'] = scan.url.organization.name
+        this_explain['subject'] = str(scan.url.url)
+
+    if type == "endpoint":
+        this_explain['organizations'] = list(scan.endpoint.url.organization.all().values('id', 'name'))
+        this_explain['subject'] = str("%s - %s/%s - IPv%s") % (
+            scan.endpoint.url, scan.endpoint.protocol, scan.endpoint.port, scan.endpoint.ip_version)
+
+    return this_explain
 
 
 def get_scan(scan_id: int, scan_type: str) -> Union[EndpointGenericScan, UrlGenericScan, None]:

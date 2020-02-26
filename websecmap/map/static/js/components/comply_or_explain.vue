@@ -14,7 +14,11 @@
             <div class="row">
 
                 <div class="col-md-10">
+                    <h4>{{ explain.subject }}</h4>
+
                     <div class="chat_quote_left">
+
+
                         <del>
                         <span :class="'awarded_points_' + explain.original_severity">
                             {{ translate(explain.original_severity) }}
@@ -26,7 +30,14 @@
                     <br>
                     <blockquote class="blockquote text-right chat_quote_right">
                         <p class="mb-0">
-                            {{ explain.explanation }}
+                            <template v-if="['trusted_on_local_device_with_custom_trust_policy', 'device_only_certificate',
+                            'for_devices_only_not_browsers', 'for_specialized_applications_only_not_browsers', 'unencrypted_required',
+                            'fix_in_progress', 'scanner_bug'].includes(explain.explanation)">
+                                {{ $t("comply_or_explain.standard_explanations." + explain.explanation) }}
+                            </template>
+                            <template v-else>
+                                {{ explain.explanation }}
+                            </template>
                         </p>
                         <footer class="blockquote-footer">
                             {{ explain.explained_by }} <cite title="Source Title">{{ humanize(explain.explained_on) }} </cite>
@@ -39,10 +50,11 @@
                     <small>{{ $t("comply_or_explain.view_report") }}</small>
                     <ul style="padding-left: 0px">
                         <li v-for="organization in explain.organizations" class="explain_reports">
-                            <a @click="showreport(organization.id)" :title="'View report for ' + organization.name">
-                            <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg=""><path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
+                            <router-link :to="'/report/' + organization.id" :title="'View report for ' + organization.name">
+                            <svg class="svg-inline--fa fa-file-alt fa-w-12" aria-hidden="true" data-prefix="far" data-icon="file-alt" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" data-fa-i2svg="">
+                                <path fill="currentColor" d="M288 248v28c0 6.6-5.4 12-12 12H108c-6.6 0-12-5.4-12-12v-28c0-6.6 5.4-12 12-12h168c6.6 0 12 5.4 12 12zm-12 72H108c-6.6 0-12 5.4-12 12v28c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-28c0-6.6-5.4-12-12-12zm108-188.1V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V48C0 21.5 21.5 0 48 0h204.1C264.8 0 277 5.1 286 14.1L369.9 98c9 8.9 14.1 21.2 14.1 33.9zm-128-80V128h76.1L256 51.9zM336 464V176H232c-13.3 0-24-10.7-24-24V48H48v416h288z"></path></svg>
                                 {{ organization.name }}
-                            </a>
+                            </router-link>
                         </li>
                     </ul>
                 </div>
@@ -72,21 +84,45 @@ const ComplyOrExplain = Vue.component('comply_or_explain', {
     i18n: { // `i18n` option, setup locale info for component
         messages: {
             en: {
+                high: 'high',
+                medium: 'medium',
+                low: 'low',
+                ok: 'ok',
                 comply_or_explain: {
                     title: "Comply or explain",
                     intro: "Comply or explain allows organizations to explain certain results on this website. In some edge cases, our finding may be technically correct but does not represent any danger. Below is a list of the latest explained issues. Organizations can explain issues using the 'explain' link per finding.",
                     no_explanations_yet: "No explanations yet...",
                     show_more: "Show more...",
                     view_report: "View report",
+                    standard_explanations: {
+                        trusted_on_local_device_with_custom_trust_policy: 'The certificate is used on specific devices exclusively, these devices are configured to trust this certificate.',
+                        device_only_certificate: "The certificate is used on specific devices exclusively, these devices are configured to trust this certificate.",
+                        for_devices_only_not_browsers: "This domain is for devices only, not browsers. These devices does not need this requirement.",
+                        for_specialized_applications_only_not_browsers: "This domain is being used by specialized applications using their own protocols, which have no need for browser security features.",
+                        unencrypted_required: "This domain publishes data that according to best practices must be delivered unencrypted, such as Certificate Revocation Lists. This data is signed and validated by the consumer. Delivering this through an encrypted channel would possibly create technical problems, such as an infinite validation loop.",
+                        scanner_bug: "A bug in the scanner caused this issue. Manual testing has shown this issue does not occur.",
+                    }
                 }
             },
             nl: {
+                high: 'hoog',
+                medium: 'midden',
+                low: 'laag',
+                ok: 'goed',
                 comply_or_explain: {
                     title: "Pas toe of leg uit",
-                    intro: "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard worden. In bijzondere gevallen is de bevinding op deze site technisch juist, maar veroorzaakt het geen gevaar. Hieronder staat een lijst met de meest recente 'pas toe of leg uit' verklaringen. De organisaties die worden genoemd op deze site kunnen zelf een bevinding verklaren door op 'leg uit' te klikken bij een bevinding.",
+                    intro: "Pas toe of leg uit is een methode waarop bevindingen op deze site verklaard worden. In bijzondere gevallen is de bevinding op deze site technisch juist, maar veroorzaakt het geen gevaar. Hieronder staat een lijst met de meest recente 'pas toe of leg uit' verklaringen.",
                     no_explanations_yet: "Nog geen verklaringen verwerkt...",
                     show_more: "Toon meer...",
                     view_report: "Bekijk rapport",
+                    standard_explanations: {
+                        trusted_on_local_device_with_custom_trust_policy: 'Dit certificaat wordt op specifieke apparatuur gebruikt. Deze apparatuur is ingericht om dit certificaat te vertrouwen.',
+                        device_only_certificate: "Dit certificaat wordt op specifieke apparatuur gebruikt. Deze apparatuur is ingericht om dit certificaat te vertrouwen.",
+                        for_devices_only_not_browsers: "Dit domein wordt voor specifieke apparatuur gebruikt. Deze apparatuur heeft geen noodzaak voor deze beveiligingseis.",
+                        for_specialized_applications_only_not_browsers: "Dit domein wordt voor specialistische applicaties gebruikt met eigen protocollen. Hierdoor is deze browser beveiligingseis niet relevant.",
+                        unencrypted_required: "Dit domein publiceert gegevens die volgens best practices onversleuteld moeten worden aangeboden, bijvoorbeeld Certificate Revocation Lists. Deze gegevens zijn gesigned en worden gevalideerd door de lezer. Het aanbieden van deze gegevens over een versleuteld domein kan technische problemen veroorzaken.",
+                        scanner_bug: "Een bug in de scanner zorgt voor een verkeerde beoordeling. Een handmatige test toont aan dat dit probleem hier niet voorkomt.",
+                    }
                 }
             }
         },

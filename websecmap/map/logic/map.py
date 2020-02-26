@@ -260,7 +260,7 @@ def get_map_data(country: str = "NL", organization_type: str = "municipality", d
                     "high": high,
                     "medium": medium,
                     "low": low,
-                    "data_from": when,
+                    "data_from": when.isoformat(),
                     "severity": severity,
                     "total_urls": i[11],  # = 100%
                     "high_urls": i[12],
