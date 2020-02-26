@@ -3,7 +3,7 @@ import logging
 import iso3166
 from django.core.management.base import BaseCommand
 
-from websecmap.scanners.logic.scanproxy import import_proxies_by_country
+from websecmap.scanners.find_scanproxies import find
 
 log = logging.getLogger(__name__)
 
@@ -21,8 +21,9 @@ class Command(BaseCommand):
     """Imports proxies from openproxy.space"""
 
     def add_arguments(self, parser):
-        parser.add_argument('countries', nargs='*', help='The scanner you want to use.', type=valid_country_code)
+        parser.add_argument('countries', nargs='*', help='From what countries? Country code: NL, BE, ...',
+                            type=valid_country_code)
         super().add_arguments(parser)
 
     def handle(self, *args, **options):
-        import_proxies_by_country(options['countries'])
+        find(options['countries'], amount=50)

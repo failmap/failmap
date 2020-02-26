@@ -1,9 +1,12 @@
 import asyncio
 import logging
+from typing import List
 
 from proxybroker import Broker
 
+from websecmap.celery import app
 from websecmap.scanners.models import ScanProxy
+from websecmap.scanners.scanner.tls_qualys import check_proxy
 
 log = logging.getLogger(__name__)
 
@@ -28,14 +31,32 @@ async def save(proxies):
             log.debug(f"Proxy with address {address} already exists.")
 
 
-def find():
+@app.task(queue='storage')
+def find(countries: List, amount: int = 5, timeout: float = 0.5, **kwargs):
+    # Warning: this will only work with celery 5. This is not released yet.
+
+    if not countries:
+        countries = ['US', 'DE', 'SE', 'FR', 'NL', 'GB', 'ES', 'DK', 'NO', 'FI']
+
     proxies = asyncio.Queue()
     broker = Broker(proxies)
     tasks = asyncio.gather(broker.find(types=['HTTPS'],
-                                       limit=50,
-                                       countries=['US', 'DE', 'SE', 'FR', 'NL', 'GB', 'ES', 'DK', 'NO', 'FI'],
-                                       timeout=0.5,
+                                       limit=amount,
+                                       countries=countries,
+                                       timeout=timeout,
                                        ),
                            save(proxies))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(tasks)
+
+
+@app.task(queue='storage')
+def check_existing_alive_proxies():
+
+    proxies = ScanProxy.objects.all().filter(
+        is_dead=False,
+        manually_disabled=False,
+    )
+
+    for proxy in proxies:
+        check_proxy.apply_async([proxy])
