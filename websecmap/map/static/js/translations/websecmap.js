@@ -26,7 +26,7 @@ const messages = {
 
         // common
         organizations: "organizations",
-        "internet addresses": "internet addresses",
+        internet_adresses: "internet addresses",
         services: "online services",
 
         // german layers... sigh... :)
@@ -192,7 +192,7 @@ const messages = {
 
         // common
         organizations: "organisaties",
-        "internet addresses": "internet adressen",
+        internet_adresses: "internet adressen",
         services: "online diensten",
 
 

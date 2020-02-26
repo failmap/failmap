@@ -91,7 +91,7 @@
                             <h4>{{ $t($store.state.layer) }}</h4>
                         </template>
                         {{simplestats[this.state.country][this.state.layer].organizations}} {{$t('organizations')}}<br>
-                        {{simplestats[this.state.country][this.state.layer].urls}} {{$t('internet adresses')}}<br>
+                        {{simplestats[this.state.country][this.state.layer].urls}} {{$t('internet_adresses')}}<br>
                         {{simplestats[this.state.country][this.state.layer].services}} {{$t('services')}}<br>
                     </template>
                 </div>
