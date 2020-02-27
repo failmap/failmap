@@ -14,7 +14,7 @@
             <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.organizations.title") }}</h3>
                 <p>{{ $t("statistics.progress_bars.organizations.intro") }}</p>
-                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                <div class="chart-container" style="position: relative; height:550px; width:100%">
                     <vulnerability-chart
                         :color_scheme="color_scheme"
                         :data="organization_stats"
@@ -70,7 +70,7 @@
             <div class="col-md-12">
                 <h3>{{ $t("statistics.progress_bars.internet_addresses.title") }}</h3>
                 <p>{{ $t("statistics.progress_bars.internet_addresses.intro") }}</p>
-                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                <div class="chart-container" style="position: relative; height:550px; width:100%">
                     <vulnerability-chart
                         :color_scheme="color_scheme"
                         :data="url_stats"
