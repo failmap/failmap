@@ -361,7 +361,6 @@ class Url(models.Model):
                   "This test is run once.")
 
     onboarded_on = models.DateTimeField(
-        auto_now_add=True,
         blank=True,
         null=True,
         help_text="The moment the onboard process finished."

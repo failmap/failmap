@@ -124,7 +124,10 @@ def compose_task(
 def reset_expired_onboards():
     # If the queues don't finish in 7 days, you have a problem somewhere. This will add to that problem by adding
     # EVEN MORE tasks to the queue. So an unmanaged system will run out of space somewhere sometime :)
-    expired = Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(pytz.utc) - timedelta(days=7))
+    expired = list(Url.objects.all().filter(onboarding_stage_set_on__lte=datetime.now(pytz.utc) - timedelta(days=7)))
+
+    # some older tasks might never have an onboarding stage due to a bug. add those too:
+    expired += list(Url.objects.all().filter(onboarding_stage_set_on__isnull=True))
 
     for url in expired:
         reset_onboarding_status(url)
@@ -172,7 +175,8 @@ def finish_onboarding(url):
     url.onboarded = True
     url.onboarded_on = timezone.now()
     url.onboarding_stage = "onboarded"
-    url.save(update_fields=['onboarded_on', 'onboarded', 'onboarding_stage'])
+    url.onboarding_stage_set_on = datetime.now(pytz.utc)
+    url.save(update_fields=['onboarded_on', 'onboarded', 'onboarding_stage', 'onboarding_stage_set_on'])
     return True
 
 
@@ -182,6 +186,7 @@ def update_stage(urls: List[Url], stage=""):
     for url in urls:
         log.info("Updating onboarding_stage of %s from %s to %s", url, url.onboarding_stage, stage)
         url.onboarding_stage = stage
-        url.save(update_fields=['onboarding_stage'])
+        url.onboarding_stage_set_on = datetime.now(pytz.utc)
+        url.save(update_fields=['onboarding_stage', 'onboarding_stage_set_on'])
 
     return True

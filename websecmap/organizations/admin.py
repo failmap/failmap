@@ -424,7 +424,10 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     fieldsets = (
         (None, {
-            'fields': ('url', 'organization', 'internal_notes', 'created_on', 'onboarded', 'onboarding_stage')
+            'fields': ('url', 'organization', 'internal_notes', 'created_on')
+        }),
+        ('Onboarding', {
+            'fields': ('onboarded', 'onboarding_stage', 'onboarding_stage_set_on', 'onboarded_on'),
         }),
         ('DNS', {
             'fields': ('do_not_find_subdomains', 'uses_dns_wildcard', 'dns_supports_mx', ),
@@ -444,7 +447,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
             'fields': ('computed_subdomain', 'computed_domain', 'computed_suffix')
         })
     )
-    readonly_fields = ['created_on']
+    readonly_fields = ['created_on', 'onboarded_on']
 
     @staticmethod
     def domain(obj):
