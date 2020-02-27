@@ -314,7 +314,7 @@ def proper_coordinate(coordinate, geojsontype):
     # Points in geojson are stored in lng,lat. Leaflet wants to show it the other way around.
     # https://gis.stackexchange.com/questions/54065/leaflet-geojson-coordinate-problem
     if geojsontype == "Point":
-        return reversed(coordinate)
+        return json.dumps(reversed(coordinate))
 
     return coordinate
 
