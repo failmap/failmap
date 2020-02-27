@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict
 
@@ -192,7 +193,7 @@ def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
 
     configurations = Configuration.objects.all().filter(is_displayed=True).order_by('display_order')
 
-    simplestat = {}
+    simplestat = defaultdict(dict)
 
     for configuration in configurations:
 
@@ -203,8 +204,7 @@ def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
         ).order_by('-at_when').first()
 
         if stats:
-            simplestat = {**simplestat, **{
-                configuration.country.code: {
+            simplestat[configuration.country.code][configuration.organization_type.name] = {
                     configuration.organization_type.name: {
                         'country_code': configuration.country.code,
                         'country_name': configuration.country.name,
@@ -221,6 +221,5 @@ def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
                         "good url percentage": stats.report['good url percentage'],
                     }
                 }
-            }}
 
     return simplestat
