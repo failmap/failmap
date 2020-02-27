@@ -171,6 +171,10 @@
                 // organizations, a list of all organizations on the map including some metatadata.
                 // this is useful for select boxes and such. The charts might also be populated from this data...
                 organizations: [],
+
+
+                // donation drive
+                show_donation_drive: false,
             },
 
             mutations: {
@@ -181,6 +185,9 @@
                 },
                 organization (state, payload) {
                   state = Object.assign(state, payload)
+                },
+                show_donation_drive(state, value){
+                    state.show_donation_drive = value;
                 },
             },
         });
@@ -235,6 +242,7 @@
                 mixins: [new_state_mixin],
 
                 data: {
+                    donation_drive_visible: false,
 
                 // this converts the django state (constance) values to javascript.
                 // available from app only, and distributed sparsingly on need to know basis to prevent a web of things.
@@ -648,6 +656,10 @@
                         }});
 
                         router.push({ path: '/report' });
+                    },
+
+                    show_donation_drive: function() {
+                        store.commit("show_donation_drive", true);
                     },
 
                     // switch themes
