@@ -204,22 +204,24 @@ def get_short_and_simple_stats(weeks_back: int = 0) -> Dict:
         ).order_by('-at_when').first()
 
         if stats:
-            simplestat[configuration.country.code][configuration.organization_type.name] = {
-                    configuration.organization_type.name: {
-                        'country_code': configuration.country.code,
-                        'country_name': configuration.country.name,
-                        'country_flag': configuration.country.flag,
-                        'layer': configuration.organization_type.name,
-                        'organizations': stats.report['total_organizations'],
-                        'urls': stats.report['total_urls'],
-                        'services': stats.report['endpoints'],
-                        "high percentage": stats.report['high percentage'],
-                        "medium percentage": stats.report['medium percentage'],
-                        "good percentage": stats.report['good percentage'],
-                        "high url percentage": stats.report['high url percentage'],
-                        "medium url percentage": stats.report['medium url percentage'],
-                        "good url percentage": stats.report['good url percentage'],
-                    }
-                }
+            simplestat[
+                configuration.country.code
+            ][
+                configuration.organization_type.name
+            ] = {
+                'country_code': configuration.country.code,
+                'country_name': configuration.country.name,
+                'country_flag': configuration.country.flag,
+                'layer': configuration.organization_type.name,
+                'organizations': stats.report['total_organizations'],
+                'urls': stats.report['total_urls'],
+                'services': stats.report['endpoints'],
+                "high percentage": stats.report['high percentage'],
+                "medium percentage": stats.report['medium percentage'],
+                "good percentage": stats.report['good percentage'],
+                "high url percentage": stats.report['high url percentage'],
+                "medium url percentage": stats.report['medium url percentage'],
+                "good url percentage": stats.report['good url percentage'],
+            }
 
     return simplestat
