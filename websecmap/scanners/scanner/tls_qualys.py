@@ -391,6 +391,8 @@ def qualys_scan_thread(proxy, url):
     waiting_time = 60  # seconds until retry, can be increased when queues are full. Max = 180
     max_waiting_time = 360
 
+    data = {}
+
     while True:
         try:
             api_result = service_provider_scan_via_api_with_limits(proxy, url.url)

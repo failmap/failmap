@@ -32,7 +32,7 @@ async def save(proxies):
 
 
 @app.task(queue='storage')
-def find(countries: List, amount: int = 5, timeout: float = 0.5, **kwargs):
+def find(countries: List = None, amount: int = 5, timeout: float = 0.5, **kwargs):
     # Warning: this will only work with celery 5. This is not released yet.
 
     if not countries:
