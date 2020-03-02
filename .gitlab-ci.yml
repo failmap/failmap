@@ -6,6 +6,7 @@ include:
   - template: SAST.gitlab-ci.yml
 
 stages:
+  - test
   - build
   - staging
   - production
