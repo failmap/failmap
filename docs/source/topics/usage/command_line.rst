@@ -221,7 +221,9 @@ of these are created for development and debugging purposes.
 
     # load testdata:
     websecmap loaddata production
-    websecmap loaddata testdata
+    websecmap loaddata development_user
+    websecmap loaddata development_periodic_tasks
+    websecmap loaddata development_scandata
 
     # export organizations, to import on a development machine:
     websecmap export_organization --organization_name Arnhem Zutphen "Evil Corp"

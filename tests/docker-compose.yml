@@ -69,7 +69,7 @@ services:
       - "8000"
     volumes:
       - ../websecmap:/source/websecmap
-    command: production --migrate --loaddata development
+    command: production --migrate --loaddata development_user
 
   frontend:
     image: "${IMAGE:-websecmap/websecmap:latest}"
