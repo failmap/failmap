@@ -4,7 +4,7 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 """
 import logging
 import random
-from typing import List, Dict
+from typing import Dict
 
 import requests
 import urllib3

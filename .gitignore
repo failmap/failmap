@@ -44,3 +44,4 @@ venv
 .tox2
 /dataset_*.json
 /websecmap_test_dataset*
+/websecmap_dataset*
