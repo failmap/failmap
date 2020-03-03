@@ -1,9 +1,13 @@
+from django.core.exceptions import MultipleObjectsReturned
 from django.utils.translation import ugettext_lazy as _
 from jet.dashboard import modules
 from jet.dashboard.dashboard import Dashboard
 from jet.dashboard.models import UserDashboardModule
 
 from websecmap.app import dashboard_modules
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class ResetUserWidgetConfiguration:
@@ -20,18 +24,21 @@ class ResetUserWidgetConfiguration:
             column = module.column if module.column is not None else i % self.columns
             order = module.order if module.order is not None else int(i / self.columns)
 
-            obj, created = UserDashboardModule.objects.get_or_create(
-                title=module.title,
-                app_label=self.app_label,
-                user=user.pk,
-                module=module.fullname(),
-                column=column,
-                order=order,
-                settings=module.dump_settings(),
-                children=module.dump_children()
-            )
-            module_models.append(obj)
-            i += 1
+            try:
+                obj, created = UserDashboardModule.objects.get_or_create(
+                    title=module.title,
+                    app_label=self.app_label,
+                    user=user.pk,
+                    module=module.fullname(),
+                    column=column,
+                    order=order,
+                    settings=module.dump_settings(),
+                    children=module.dump_children()
+                )
+                module_models.append(obj)
+                i += 1
+            except MultipleObjectsReturned:
+                log.warning("Dashboard misconfiguration detected. Modules might be duplicated or missing.")
 
         return module_models
 

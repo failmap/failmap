@@ -12,10 +12,15 @@ class Command(BaseCommand):
 
     help = __doc__
 
+    def add_arguments(self, parser):
+        parser.add_argument("--amount", help="amount", nargs='?', type=int, const=1, default=7)
+
+        super().add_arguments(parser)
+
     def handle(self, *args, **options):
 
         try:
-            find_scanproxies.find()
+            find_scanproxies.find(amount=options['amount'])
 
         except KeyboardInterrupt:
             log.info("Received keyboard interrupt. Stopped.")
