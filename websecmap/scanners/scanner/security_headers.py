@@ -4,7 +4,7 @@ Check if the https site uses HSTS to tell the browser the site should only be re
 """
 import logging
 import random
-from typing import List
+from typing import List, Dict
 
 import requests
 import urllib3
@@ -79,7 +79,7 @@ def compose_task(
     return group(tasks)
 
 
-def discover_service_type(headers: List = None):
+def discover_service_type(headers: Dict = None):
     """
     Try to discover some meaning of the webserver headers, because some HTTP servers are used for entirely different
     purposes than hosting web pages. For example SOAP is used for XML messages and has their own security paradigm.
@@ -99,8 +99,18 @@ def discover_service_type(headers: List = None):
         log.debug('Service type to be discovered as: SOAP.')
         return "SOAP"
 
-    log.debug('Service type to be discovered as: HTTP.')
-    return "HTTP"
+    # We're going to ignore all service types, except whatever looks like html/xhtml/etc
+    # So text/plain, text/json and such are ignored.
+    content_type = headers.get('Content-Type', "text/html; charset=UTF-8")
+    html_content_types = ['text/html; charset=utf-8', 'text/html', 'application/xhtml+xml', 'application/xhtml',
+                          'html', 'htm', 'xhtml', 'application/xhtml + xml', 'text/html;charset=utf-8']
+
+    # text/html can have many charsets, such as us-ascii.
+    if content_type.lower() in html_content_types or 'text/html' in content_type.lower():
+        return "HTTP"
+
+    log.debug('Unknown service type discovered.')
+    return "UNKNOWN"
 
 
 @app.task(queue="storage")
@@ -167,6 +177,8 @@ def analyze_headers(result: requests.Response, endpoint):
         return analyze_website_headers(endpoint, response)
     if service_type == "SOAP":
         return analyze_soap_headers(endpoint, response)
+    if service_type == "UNKNOWN":
+        return clean_up_existing_headers(endpoint, response)
 
 
 def analyze_soap_headers(endpoint, response):
@@ -190,6 +202,25 @@ def analyze_soap_headers(endpoint, response):
 
     for scan in existing_header_scans:
         store_endpoint_scan_result(scan.type, endpoint, 'SOAP', "Header not relevant for SOAP service.")
+
+    return {'status': 'success'}
+
+
+def clean_up_existing_headers(endpoint, response):
+    """
+    Unknown headers for a content type we can't handle.
+
+    :param endpoint:
+    :param response:
+    :return:
+    """
+
+    # clean up existing web headers and set them to being not relevant for soap:
+    existing_header_scans = EndpointGenericScan.objects.all().filter(
+        endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
+
+    for scan in existing_header_scans:
+        store_endpoint_scan_result(scan.type, endpoint, 'UNKNOWN', "Unsupported content type found.")
 
     return {'status': 'success'}
 
