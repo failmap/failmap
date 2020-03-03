@@ -139,8 +139,9 @@ Now visit the [map website](http://127.0.0.1:8000/) and/or the
 To fill up the empty installation with some data, use the data included with the following commands:
 
 ```bash
-websecmap loaddata development
-websecmap loaddata testdata
+websecmap load_dataset development_user
+websecmap load_dataset development_periodic_tasks
+websecmap load_dataset development_scandata
 websecmap report
 ```
 

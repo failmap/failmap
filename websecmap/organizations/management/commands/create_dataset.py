@@ -15,41 +15,7 @@ class Command(DumpDataCommand):
     help = "A dataset that is free of things that are easy to recreate. Such things are all logs from scanners," \
            "screenshots and such."
 
-    FILENAME = "failmap_dataset_{}.{options[format]}"
-
-    # Here is a list of what is and is not included.
-    #
-    #                                 Included
-    #         Map:
-    #         - Url Rating            No          Can be rebuild with rebuildratings
-    #         - Organization Rating   No          Can be rebuild with rebuildratings
-    #
-    #         Organization:
-    #         - Coordinates           Yes         Hard to create, is not scripted yet
-    #         - Organizations         Yes         Hard to gather
-    #         - OrganizationType      Yes         Foreign Keys
-    #         - Urls                  Yes         Even harder to gather
-    #         - Promises              Yes         Might contain valuable data
-    #
-    #         Scanners:
-    #         - Endpoints             Yes         Needed for rebuild ratings, hard to gather
-    #         - Screenshots           No          Can be recreated with ease (except history)
-    #         - TLS Scans             Yes
-    #         - TLS Qualys Scans      Yes         Needed for rebuild ratings
-    #         - TLS Qualys Scratchpa  No          This is mainly for debugging
-    #         - Generic Scans         Yes
-    #         - Generic Scans scratch No
-    #         - UrlIp                 Yes         Might contain valuable data
-    #
-    #         Auth:
-    #         - Users                 No          Create this yourself
-    #         - Groups                No          Create this yourself
-    #
-    #         Game:
-    #         - Team                  Yes
-    #         - Contest               Yes
-    #         - OrganizationSubmission Yes        Helps with debugging
-    #         - UrlSubmission         Yes         Helps with debugging
+    FILENAME = "websecmap_dataset_{}.{options[format]}"
 
     APP_LABELS = (
         "organizations.OrganizationType",
@@ -61,24 +27,27 @@ class Command(DumpDataCommand):
         "scanners.EndpointGenericScan",
         "scanners.UrlGenericScan",
         "scanners.InternetNLScan",
-        "scanners.scanproxy",
+        "scanners.ScanProxy",
         "map.Configuration",
         "map.AdministrativeRegion",
+        "map.LandingPage",
+        "api.SIDNUpload",
         "game",
-        "django_celery_beat",
-
+        "constance",
     )
+
+    # celery beat tasks are managed elsehwere(!)
 
     def handle(self, *app_labels, **options):
         """
-        This function will make a YAML export of the data in the database that is not easily
+        This function will make a JSON export of the data in the database that is not easily
         recreateable.
 
         Further docs:
         https://docs.djangoproject.com/en/1.11/ref/django-admin/
         https://stackoverflow.com/questions/20518341/django-dumpdata-from-a-python-script
 
-        :param args:
+        :param app_labels:
         :param options:
         :return:
         """

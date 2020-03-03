@@ -20,7 +20,7 @@ exit_cleanup(){
 # start docker container
 docker run --rm --name websecmap-$$ -e "ALLOWED_HOSTS=$host" -p 8000 -d \
   "${IMAGE:-websecmap/websecmap:latest}" \
-  production --migrate --loaddata development
+  production --migrate --loaddata development_user
 docker logs websecmap-$$ -f 2>&1 | awk '$0="docker: "$0' &
 logs_pid=$!
 trap "exit_cleanup" EXIT INT QUIT HUP TERM ALRM USR1

@@ -22,6 +22,100 @@ websecmap constance set RESPONSIBLE_ORGANIZATION_WEBSITE "https://websecuritymap
 websecmap constance set GITTER_CHAT_ENABLE True
 websecmap constance set SHOW_COMPLY_OR_EXPLAIN True
 websecmap constance set SHOW_SCAN_SCHEDULE True
+
+# the following scan results are not translated yet:
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_IPV6_MX_REACH False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_IPV6_NS_REACH False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_IPV6_NS_ADDRESS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_IPV6_MX_ADDRESS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DNSSEC_MX_EXIST False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DNSSEC_MX_VALID False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DNSSEC_MAILTO_VALID False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DNSSEC_MAILTO_EXIST False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_AUTH_SPF_POLICY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_AUTH_DMARC_POLICY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_KEYEXCHANGE False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_COMPRESS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_CERT_SIG False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_CERT_PUBKEY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_DANE_ROLLOVER False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_SECRENEG False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_DANE_EXIST False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_DANE_VALID False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_CIPHERS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_CLIENTRENEG False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_CERT_CHAIN False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_TLS_VERSION False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_CERT_DOMAIN False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DASHBOARD_TLS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DASHBOARD_AUTH False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DASHBOARD_DNSSEC False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DASHBOARD_IPV6 False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_DASHBOARD_OVERALL_SCORE False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DMARC False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DKIM False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_SPF False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DMARC_POLICY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_SPF_POLICY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_START_TLS False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_START_TLS_NCSC False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DNSSEC_EMAIL_DOMAIN False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DNSSEC_MX False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_DANE False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_IPV6_NAMESERVER False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_LEGACY_IPV6_MAILSERVER False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_NON_SENDING_DOMAIN False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_SERVER_CONFIGURED False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_SERVERS_TESTABLE False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_STARTTLS_DANE_TA False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_AUTH_DMARC_POLICY_ONLY False
+websecmap constance set REPORT_INCLUDE_INTERNET_NL_MAIL_AUTH_DMARC_EXT_DESTINATION False
+websecmap constance set SHOW_INTERNET_NL_MAIL_IPV6_MX_REACH False
+websecmap constance set SHOW_INTERNET_NL_MAIL_IPV6_NS_REACH False
+websecmap constance set SHOW_INTERNET_NL_MAIL_IPV6_NS_ADDRESS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_IPV6_MX_ADDRESS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DNSSEC_MX_EXIST False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DNSSEC_MX_VALID False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DNSSEC_MAILTO_VALID False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DNSSEC_MAILTO_EXIST False
+websecmap constance set SHOW_INTERNET_NL_MAIL_AUTH_SPF_POLICY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_AUTH_DMARC_POLICY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_KEYEXCHANGE False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_COMPRESS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_CERT_SIG False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_CERT_PUBKEY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_DANE_ROLLOVER False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_SECRENEG False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_DANE_EXIST False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_DANE_VALID False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_CIPHERS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_CLIENTRENEG False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_CERT_CHAIN False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_TLS_VERSION False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_CERT_DOMAIN False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DASHBOARD_TLS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DASHBOARD_AUTH False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DASHBOARD_DNSSEC False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DASHBOARD_IPV6 False
+websecmap constance set SHOW_INTERNET_NL_MAIL_DASHBOARD_OVERALL_SCORE False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DMARC False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DKIM False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_SPF False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DMARC_POLICY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_SPF_POLICY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_START_TLS False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_START_TLS_NCSC False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DNSSEC_EMAIL_DOMAIN False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DNSSEC_MX False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_DANE False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_IPV6_NAMESERVER False
+websecmap constance set SHOW_INTERNET_NL_MAIL_LEGACY_IPV6_MAILSERVER False
+websecmap constance set SHOW_INTERNET_NL_MAIL_NON_SENDING_DOMAIN False
+websecmap constance set SHOW_INTERNET_NL_MAIL_SERVER_CONFIGURED False
+websecmap constance set SHOW_INTERNET_NL_MAIL_SERVERS_TESTABLE False
+websecmap constance set SHOW_INTERNET_NL_MAIL_STARTTLS_DANE_TA False
+websecmap constance set SHOW_INTERNET_NL_MAIL_AUTH_DMARC_POLICY_ONLY False
+websecmap constance set SHOW_INTERNET_NL_MAIL_AUTH_DMARC_EXT_DESTINATION False
 ```
 
 Configure what will be shown on the map, we will configure NL and DE manually:
@@ -37,9 +131,9 @@ from websecmap.organizations.models import OrganizationType
 OrganizationType(**{'name': 'government'}).save() 
 
 from websecmap.map.models import Configuration
-Configuration(**{'country': "NL", 'organization_type': OrganizationType.objects.get(name='municipality'), 'is_displayed': True, 'is_the_default_option': True, 'is_scanned': True, 'is_reported': True}).save()
-Configuration(**{'country': "NL", 'organization_type': OrganizationType.objects.get(name='government'), 'is_displayed': True, 'is_the_default_option': False, 'is_scanned': True, 'is_reported': True}).save() 
-Configuration(**{'country': "BE", 'organization_type': OrganizationType.objects.get(name='government'), 'is_displayed': True, 'is_the_default_option': False, 'is_scanned': True, 'is_reported': True}).save() 
+Configuration(**{'country': "NL", 'organization_type': OrganizationType.objects.get(name='municipality'), 'is_displayed': True, 'is_the_default_option': True, 'is_scanned': True, 'is_reported': True, 'order': 1}).save()
+Configuration(**{'country': "NL", 'organization_type': OrganizationType.objects.get(name='government'), 'is_displayed': True, 'is_the_default_option': False, 'is_scanned': True, 'is_reported': True, 'order': 2}).save() 
+Configuration(**{'country': "BE", 'organization_type': OrganizationType.objects.get(name='government'), 'is_displayed': True, 'is_the_default_option': False, 'is_scanned': True, 'is_reported': True, 'order': 3}).save() 
 
 from websecmap.map.models import LandingPage 
 LandingPage(**{'map_configuration': Configuration.objects.get(id=1), 'directory': 'test', 'enabled': True}).save() 
@@ -202,4 +296,15 @@ websecmap check_all_proxies
 Now run this a few times in the next hours:
 ```bash
 websecmap scan onboard -m async
+```
+
+Not all scans might have been performed. Run manual scans:
+```bash
+websecmap scan tlsq
+websecmap discover dns_endpoints -m async
+websecmap scan mail
+websecmap check_running_internet_nl_scans
+
+# some domains will be autoexplained, allowing explains to be more easily developed,
+websecmap autoexplain
 ```
