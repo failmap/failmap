@@ -92,6 +92,16 @@ def get_security_header_calculation(scan):
         return standard_calculation(scan, "Web server content became unreachable. No HTTP content present.",
                                     high, medium, low)
 
+    if scan.rating == "RESTRICTED":
+        return standard_calculation(scan,
+                                    "Web server requires authorization to access, headers are not publicly visible.",
+                                    high, medium, low)
+
+    if scan.rating == "UNKNOWN":
+        return standard_calculation(scan,
+                                    "Non HTTP response found, which does not require HTTP security headers.",
+                                    high, medium, low)
+
     if scan.rating == "SOAP":
         return standard_calculation(scan, "Header not relevant for SOAP service.",
                                     high, medium, low)
