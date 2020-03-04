@@ -186,7 +186,7 @@ def analyze_headers(result: requests.Response, endpoint):
     if service_type == "SOAP":
         return analyze_soap_headers(endpoint, response)
     if service_type == "UNKNOWN":
-        return clean_up_existing_headers(endpoint, response, service_type=service_type,reason='unknown_content_type')
+        return clean_up_existing_headers(endpoint, response, service_type=service_type, reason='unknown_content_type')
     if service_type == "RESTRICTED":
         return clean_up_existing_headers(endpoint, response, service_type=service_type,
                                          reason='authentication_required')
