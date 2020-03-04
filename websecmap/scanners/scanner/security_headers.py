@@ -99,6 +99,17 @@ def discover_service_type(headers: Dict = None):
         log.debug('Service type to be discovered as: SOAP.')
         return "SOAP"
 
+    # Do not assume headers for sites with Basic Authentication and login portals. The application behind the
+    # login can set the headers to whatever it sees fit. Connecting those sites to the internet is still stupid,
+    # but there's probably a reason for it.
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
+    # https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml
+    # In the future we _CAN_ however list insecure authentication methods as such, meaning getting rid of
+    # basic authentication.
+    if "www-authenticate" in headers:
+        log.debug('Authentication required to discover headers. Reporting this as unknown.')
+        return "RESTRICTED"
+
     # We're going to ignore all service types, except whatever looks like html/xhtml/etc
     # So text/plain, text/json and such are ignored.
     content_type = headers.get('Content-Type', "UNKNOWN")
@@ -150,6 +161,11 @@ def analyze_headers(result: requests.Response, endpoint):
         # does not want to talk with us.
         # 104 = Connection reset (includes ECONNRESET)
         # 54 = Connection aborted (includes ECONNRESET)
+        # This happens with PR_END_OF_FILE_ERROR
+        # unreachable endpoints also trigger this error. Keeping the endpoints up to date would make sure
+        # this error is triggered only for special cases. A special cleanup is not needed when the endpoint is
+        # unreachable.
+
         if "ECONNRESET" not in str(result):
             log.exception("Connection failed, but headers currently exist. Please investigate the cause and "
                           "add a cleanup exception to the code for this specific case. (Not a CONNECTION RESET).")
@@ -162,14 +178,6 @@ def analyze_headers(result: requests.Response, endpoint):
 
     response = result
 
-    # scratch it, for debugging.
-    # todo: only scratch when debugging, or explicitly instructed. This causes an enormous amount of data.
-    # egss = EndpointGenericScanScratchpad()
-    # egss.at_when = datetime.now(pytz.utc)
-    # egss.data = "Status: %s, Headers: %s, Redirects: %s" % (response.status_code, response.headers, response.history)
-    # egss.type = "security headers"
-    # egss.save()
-
     # determine what kind of service we're dealing with.
     service_type = discover_service_type(response.headers)
 
@@ -178,7 +186,10 @@ def analyze_headers(result: requests.Response, endpoint):
     if service_type == "SOAP":
         return analyze_soap_headers(endpoint, response)
     if service_type == "UNKNOWN":
-        return clean_up_existing_headers(endpoint, response)
+        return clean_up_existing_headers(endpoint, response, service_type=service_type,reason='unknown_content_type')
+    if service_type == "RESTRICTED":
+        return clean_up_existing_headers(endpoint, response, service_type=service_type,
+                                         reason='authentication_required')
 
 
 def analyze_soap_headers(endpoint, response):
@@ -206,12 +217,16 @@ def analyze_soap_headers(endpoint, response):
     return {'status': 'success'}
 
 
-def clean_up_existing_headers(endpoint, response):
+def clean_up_existing_headers(endpoint, response, service_type: str, reason: str):
     """
     Unknown headers for a content type we can't handle.
 
+    We do NOT create new headers, meaning that if no relevant data was found, no records are added to the database.
+
     :param endpoint:
     :param response:
+    :param service_type: What type of service has been discovered that prevents further processing: RESTRICTED, UNKNOWN
+    :param reason: More verbose explanation of the service type.
     :return:
     """
 
@@ -220,7 +235,7 @@ def clean_up_existing_headers(endpoint, response):
         endpoint=endpoint, type__in=SECURITY_HEADER_SCAN_TYPES, is_the_latest_scan=True)
 
     for scan in existing_header_scans:
-        store_endpoint_scan_result(scan.type, endpoint, 'UNKNOWN', "Unsupported content type found.")
+        store_endpoint_scan_result(scan.type, endpoint, service_type, reason)
 
     return {'status': 'success'}
 
