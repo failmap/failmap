@@ -84,10 +84,6 @@ def sidn_domain_upload(user, csv_data):
     if not csv_data:
         return
 
-    f = StringIO(csv_data)
-    reader = csv.reader(f, delimiter=',')
-    added = []
-
     # all mashed up in a single routine, should be separate tasks...
     upload = SIDNUpload()
     upload.at_when = datetime.now(pytz.utc)
@@ -96,10 +92,32 @@ def sidn_domain_upload(user, csv_data):
     upload.posted_data = csv_data
     upload.save()
 
+    sidn_handle_domain_upload(upload.id)
+
+
+@app.task(queue='storage')
+def sidn_handle_domain_upload(upload_id: int):
+
+    upload = SIDNUpload.objects.all().filter(id=upload_id).first()
+
+    if not upload:
+        return
+
+    csv_data = upload.posted_data
+
+    f = StringIO(csv_data)
+    reader = csv.reader(f, delimiter=',')
+    added = []
+
     for row in reader:
 
         if len(row) < 4:
             continue
+
+        if row[1] == '2ndlevel':
+            continue
+
+        log.debug(f'Processing {row[2]}.')
 
         existing_second_level_url = Url.objects.all().filter(
             Q(computed_subdomain__isnull=True) | Q(computed_subdomain=""),
@@ -119,8 +137,15 @@ def sidn_domain_upload(user, csv_data):
             continue
 
         new_subdomain = remove_last_dot(row[2])
-        # the entire domain is included:
-        new_subdomain = new_subdomain[0:len(new_subdomain) - len(row[1])]
+
+        if new_subdomain == remove_last_dot(row[1]):
+            log.debug(f"New subdomain is the same as domain, skipping.")
+            continue
+
+        # the entire domain is included, len of new subdomain + dot (1).
+        new_subdomain = new_subdomain[0:(len(new_subdomain) - 1) - len(row[1])]
+
+        log.debug(f'Going to try to add add {new_subdomain} as a subdomain to {row[1]}. Pending to correctness.')
 
         has_been_added = existing_second_level_url.add_subdomain(new_subdomain)
         if has_been_added:
