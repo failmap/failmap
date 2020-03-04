@@ -101,7 +101,7 @@ def discover_service_type(headers: Dict = None):
 
     # We're going to ignore all service types, except whatever looks like html/xhtml/etc
     # So text/plain, text/json and such are ignored.
-    content_type = headers.get('Content-Type', "text/html; charset=UTF-8")
+    content_type = headers.get('Content-Type', "UNKNOWN")
     html_content_types = ['text/html; charset=utf-8', 'text/html', 'application/xhtml+xml', 'application/xhtml',
                           'html', 'htm', 'xhtml', 'application/xhtml + xml', 'text/html;charset=utf-8']
 
