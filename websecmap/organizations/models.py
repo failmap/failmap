@@ -111,6 +111,14 @@ class Organization(models.Model):
                   "Example: nl:Heemstede (Noord-Holland)"
     )
 
+    surrogate_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Any ID used to identify this organization in an external system. Used in automated imports via "
+                  "the API. Otherwise leave this field empty."
+    )
+
     class Meta:
         managed = True
         db_table = 'organization'

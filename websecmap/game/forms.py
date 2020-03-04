@@ -393,7 +393,8 @@ class UrlSubmissionForm(forms.Form):
             url = url.replace("https://", "")
             url = url.replace("http://", "")
 
-            extract = tldextract.extract(url)
+            extract = \
+                tldextract.extract(url)
             if not extract.suffix:
                 incomplete.append(url)
                 continue
