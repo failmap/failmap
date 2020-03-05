@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from websecmap.api.logic import (get_2ndlevel_domains, get_map_configuration, get_uploads,
-                                 sidn_domain_upload)
+                                 get_uploads_with_results, sidn_domain_upload)
 
 log = logging.getLogger(__package__)
 
@@ -72,5 +72,12 @@ def sidn_domain_upload_(request):
 @user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
 def sidn_get_uploads_(request):
     return JsonResponse(get_uploads(request.user), safe=False, json_dumps_params={
+        'sort_keys': False, 'indent': 4, 'separators': (',', ': ')
+    })
+
+
+@user_passes_test(has_SIDN_permissions, login_url=SIDN_LOGIN_URL)
+def sidn_get_uploads_with_results_(request):
+    return JsonResponse(get_uploads_with_results(request.user), safe=False, json_dumps_params={
         'sort_keys': False, 'indent': 4, 'separators': (',', ': ')
     })

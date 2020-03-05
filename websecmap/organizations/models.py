@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import pytz
 import tldextract
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
@@ -432,6 +432,7 @@ class Url(models.Model):
             return True
         return False
 
+    @transaction.atomic
     def add_subdomain(self, subdomain):
         # import here to prevent circular/cyclic imports, this module imports Url.
         from websecmap.scanners.scanner.http import resolves

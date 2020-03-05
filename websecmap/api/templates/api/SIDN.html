@@ -122,13 +122,16 @@
             </form>
 
         <h2>Step 4: View the status of your uploads</h2>
-        <p>You can view the status of your uploads here:</p>
+        <p>You can view the status of your last 500 uploads here:</p>
         <pre>/api/SIDN/uploads/</pre>(<a href="./uploads/">direct link</a>)<br>
-        <p>Using the requests library, it would read something like this.</p>
+        <p>Using the requests library, it would read something like this:</p>
         <code>
             r = client.get(f"{your_api_endpoint}/api/SIDN/uploads/")<br>
             print(r.json())<br>
         </code>
+
+        <p>To view only uploads that added urls to the database, perform this request. This will show all
+        uploads with new urls.</p>
 
     </div>
 </body>
