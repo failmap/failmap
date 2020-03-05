@@ -23,4 +23,5 @@ urlpatterns = [
     path('SIDN/2nd_level_urls_on_map/<c:country>/<slug:organization_type>/', views.sidn_get_2ndlevel_domains_),
     path('SIDN/upload/', views.sidn_domain_upload_),
     path('SIDN/uploads/', views.sidn_get_uploads_),
+    path('SIDN/uploads_with_results/', views.sidn_get_uploads_with_results_),
 ]

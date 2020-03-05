@@ -65,6 +65,22 @@ def get_uploads(user):
     return list(serialable_uploads)
 
 
+def get_uploads_with_results(user):
+    uploads = SIDNUpload.objects.all().filter(by_user=user, amount_of_newly_added_domains__gt=0
+                                              ).defer('posted_data').order_by('-at_when')
+
+    serialable_uploads = []
+    for upload in uploads:
+        serialable_uploads.append({
+            'when': upload.at_when.isoformat(),
+            'state': upload.state,
+            'amount_of_newly_added_domains': upload.amount_of_newly_added_domains,
+            'newly_added_domains': upload.newly_added_domains,
+        })
+
+    return list(serialable_uploads)
+
+
 def remove_last_dot(my_text):
     return my_text[0:len(my_text)-1] if my_text[len(my_text)-1:len(my_text)] == "." else my_text
 
@@ -103,7 +119,6 @@ def sidn_domain_upload(user, csv_data):
 
 
 @app.task(queue='storage')
-@transaction.atomic
 def sidn_handle_domain_upload(upload_id: int):
 
     upload = SIDNUpload.objects.all().filter(id=upload_id).first()
