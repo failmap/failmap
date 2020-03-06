@@ -17,10 +17,22 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
 
+from websecmap.celery import app
 from websecmap.organizations.models import Url
 from websecmap.scanners.models import EndpointGenericScan
 
 log = logging.getLogger(__package__)
+
+
+@app.task(queue="storage")
+def autoexplain():
+    """
+    Collective method to run various autoexplain scripts. Used to keep the call to these methods consistent when
+    more autoexplains are added.
+    :return:
+    """
+
+    autoexplain_trust_microsoft()
 
 
 def autoexplain_trust_microsoft():

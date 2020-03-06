@@ -422,7 +422,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-23T21:00:00Z",
-      "total_run_count": 279,
+      "total_run_count": 0,
       "date_changed": "2019-01-23T21:00:40Z",
       "description": ""
     }
@@ -447,7 +447,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 57,
+      "total_run_count": 0,
       "date_changed": "2019-01-20T00:00:45Z",
       "description": ""
     }
@@ -472,7 +472,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T02:00:00Z",
-      "total_run_count": 279,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T02:01:20Z",
       "description": ""
     }
@@ -497,7 +497,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T04:00:00Z",
-      "total_run_count": 354,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T04:00:45Z",
       "description": ""
     }
@@ -522,7 +522,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-23T20:00:00Z",
-      "total_run_count": 279,
+      "total_run_count": 0,
       "date_changed": "2019-01-23T20:02:30Z",
       "description": ""
     }
@@ -547,7 +547,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 76,
+      "total_run_count": 0,
       "date_changed": "2019-01-20T00:00:45Z",
       "description": ""
     }
@@ -572,7 +572,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 230,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T00:01:45Z",
       "description": ""
     }
@@ -597,7 +597,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 107,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T00:01:45Z",
       "description": ""
     }
@@ -622,7 +622,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T15:46:00Z",
-      "total_run_count": 96032,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T15:46:25Z",
       "description": ""
     }
@@ -647,7 +647,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-23T00:00:00Z",
-      "total_run_count": 31,
+      "total_run_count": 0,
       "date_changed": "2019-01-23T00:03:00Z",
       "description": ""
     }
@@ -672,7 +672,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 10,
+      "total_run_count": 0,
       "date_changed": "2019-01-20T00:00:45Z",
       "description": ""
     }
@@ -697,7 +697,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 73,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T00:01:45Z",
       "description": ""
     }
@@ -722,7 +722,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T03:00:00Z",
-      "total_run_count": 73,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T03:02:35Z",
       "description": ""
     }
@@ -747,7 +747,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-23T19:00:00Z",
-      "total_run_count": 73,
+      "total_run_count": 0,
       "date_changed": "2019-01-23T19:01:10Z",
       "description": ""
     }
@@ -772,7 +772,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T05:00:00Z",
-      "total_run_count": 73,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T05:02:10Z",
       "description": ""
     }
@@ -797,7 +797,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T04:00:00Z",
-      "total_run_count": 73,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T04:00:45Z",
       "description": ""
     }
@@ -822,7 +822,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 42,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T00:01:45Z",
       "description": ""
     }
@@ -847,7 +847,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T15:30:00Z",
-      "total_run_count": 2983,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T15:31:05Z",
       "description": ""
     }
@@ -872,7 +872,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-20T00:00:00Z",
-      "total_run_count": 8,
+      "total_run_count": 0,
       "date_changed": "2019-01-20T00:00:45Z",
       "description": ""
     }
@@ -897,7 +897,7 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T11:00:00Z",
-      "total_run_count": 7,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T11:00:55Z",
       "description": ""
     }
@@ -997,8 +997,58 @@
       "start_time": null,
       "enabled": false,
       "last_run_at": "2019-01-24T00:00:00Z",
-      "total_run_count": 42,
+      "total_run_count": 0,
       "date_changed": "2019-01-24T00:01:45Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 28,
+    "fields": {
+      "name": "&#x2795 Discover wildcards on urls",
+      "task": "websecmap.app.models.create_discover_job",
+      "interval": null,
+      "crontab": 7,
+      "solar": null,
+      "args": "[\"websecmap.scanners.scanner.dns_wildcards\"]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "priority": null,
+      "expires": null,
+      "one_off": false,
+      "start_time": null,
+      "enabled": false,
+      "last_run_at": "2019-01-20T00:00:00Z",
+      "total_run_count": 0,
+      "date_changed": "2019-01-20T00:00:45Z",
+      "description": ""
+    }
+  },
+  {
+    "model": "django_celery_beat.periodictask",
+    "pk": 29,
+    "fields": {
+      "name": "&#x1F501; Perform automatic comply or explain (hidden)",
+      "task": "websecmap.scanners.autoexplain.autoexplain",
+      "interval": null,
+      "crontab": 7,
+      "solar": null,
+      "args": "[]",
+      "kwargs": "{}",
+      "queue": "storage",
+      "exchange": null,
+      "routing_key": null,
+      "priority": null,
+      "expires": null,
+      "one_off": false,
+      "start_time": null,
+      "enabled": false,
+      "last_run_at": "2019-01-24T15:30:00Z",
+      "total_run_count": 0,
+      "date_changed": "2019-01-24T15:31:05Z",
       "description": ""
     }
   }
