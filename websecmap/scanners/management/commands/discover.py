@@ -1,7 +1,7 @@
 import logging
 
 from websecmap.app.management.commands._private import DiscoverTaskCommand
-from websecmap.scanners.scanner import dns_endpoints, dns_known_subdomains, ftp, http, subdomains
+from websecmap.scanners.scanner import dns_endpoints, dns_known_subdomains, ftp, http, subdomains, dns_wildcards
 
 log = logging.getLogger(__name__)
 
@@ -11,7 +11,8 @@ scanners = {
     'http': http,
     'subdomains': subdomains,
     'known_subdomains': dns_known_subdomains,
-    'dns_endpoints': dns_endpoints
+    'dns_endpoints': dns_endpoints,
+    'wildcards': dns_wildcards,
 }
 
 

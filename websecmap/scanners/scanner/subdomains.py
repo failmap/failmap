@@ -156,6 +156,7 @@ def url_discover_wildcard(url: Url):
     return discover_wildcard(url.url)
 
 
+@app.task(queue="internet")
 def discover_wildcard(url: str):
     """
     We need to perform a check ourselves, since we cannot get from the DNSRecon report if the url
