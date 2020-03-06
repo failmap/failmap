@@ -3,10 +3,11 @@ import logging
 
 from celery import group
 
-from websecmap.scanners.scanner import (dns_endpoints, dnssec, dummy, ftp, http, internet_nl_mail,
-                                        internet_nl_web, plain_http, security_headers, subdomains,
-                                        tls_qualys, tls_qualys_periodic_task, dns_wildcards)
 from websecmap.scanners.autoexplain import autoexplain
+from websecmap.scanners.scanner import (dns_endpoints, dns_wildcards, dnssec, dummy, ftp, http,
+                                        internet_nl_mail, internet_nl_web, plain_http,
+                                        security_headers, subdomains, tls_qualys,
+                                        tls_qualys_periodic_task)
 
 log = logging.getLogger(__name__)
 
