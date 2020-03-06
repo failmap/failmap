@@ -451,17 +451,17 @@ class Url(models.Model):
             log.debug("New subdomain did not resolve on either ipv4 and ipv6: %s" % new_url)
             return
 
-        u = Url()
+        # we found something that gives the idea that transactions are not working.
+        u, created = Url.objects.get_or_create(url=new_url)
+        if not created:
+            log.warning("The url already existed in the database, even while all prior checks in "
+                        "this transaction told us otherwise.")
+
         # A Url needs to have a value for field "id" before a many-to-many relationship can be used.
-        u.url = new_url
-        u.save()
         for organization in self.organization.all():
             u.organization.add(organization)
             u.save()
             log.info("Added url: %s to organization: %s" % (new_url, organization))
-
-        # run standard checks, so you know the
-        # discover_wildcards([u])
 
         return u
 
