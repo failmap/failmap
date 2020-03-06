@@ -409,10 +409,17 @@ class HasEndpointScansListFilter(admin.SimpleListFilter):
 
 @admin.register(Url)
 class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmin):
+
+    # It's efficient to already get all endpints. Makes 30 second load into 8 second load.
+    def get_queryset(self, request):
+        queryset = super(UrlAdmin, self).get_queryset(request)
+        queryset = queryset.prefetch_related('endpoint_set')
+        return queryset
+
     form = MyUrlAdminForm
 
     list_display = ('url', 'sub', 'domain', 'tld',
-                    'visit', 'current_rating', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
+                    'visit', 'onboarded', 'onboarding_stage', 'uses_dns_wildcard',
                     'dead_for', 'unresolvable_for', 'created_on')
 
     search_fields = ('url', 'computed_subdomain', 'computed_domain', 'computed_suffix')
@@ -500,7 +507,7 @@ class UrlAdmin(ActionMixin, ImportExportModelAdmin, nested_admin.NestedModelAdmi
 
     @staticmethod
     def current_rating(obj):
-        x = UrlReport.objects.filter(url=obj).latest('at_when')
+        x = UrlReport.objects.filter(url=obj).only('high', 'medium', 'low').latest('at_when')
 
         if not any([x.high, x.medium, x.low]):
             return "✅ Perfect"
