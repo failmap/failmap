@@ -1,24 +1,10 @@
-import builtins
-import itertools
 import logging
-import random
-import string
-import sys
-import tempfile
-from datetime import datetime
-from typing import List
 
-import pytz
 from celery import Task, group
-from django.conf import settings
-from django.db.models import Q
-from tenacity import before_log, retry, wait_fixed
 
 from websecmap.celery import app
-from websecmap.organizations.models import Organization, Url
-from websecmap.scanners.scanner.__init__ import q_configurations_to_scan, url_filters
-from websecmap.scanners.scanner.http import get_ips
-from websecmap.scanners.scanner.subdomains import url_by_filters, discover_wildcard
+from websecmap.organizations.models import Url
+from websecmap.scanners.scanner.subdomains import discover_wildcard, url_by_filters
 
 log = logging.getLogger(__package__)
 
