@@ -437,6 +437,9 @@ class Url(models.Model):
         # import here to prevent circular/cyclic imports, this module imports Url.
         from websecmap.scanners.scanner.http import resolves
 
+        if not subdomain:
+            return
+
         new_url = (subdomain + "." + self.url).lower()
 
         if not Url.is_valid_url(new_url):
