@@ -23,7 +23,8 @@ TIMEOUT = timedelta(seconds=30)
 KILL_TIMEOUT = timedelta(seconds=3)
 
 REDIS_INFO = """
-In order to run a full Failmap development instance Docker is required.
+In order to run a full Failmap development instance Docker is required. For Linux systems the user should be
+in the 'docker' group to be able to run Docker commands.
 
 Please follow these instructions to install Docker and try again: https://docs.docker.com/engine/installation/
 
@@ -32,7 +33,13 @@ processing you can start the devserver with backend disabled:
 
 websecmap devserver --no-backend
 
+or when running from `make`:
+
+make run_no_backend
+
 """
+
+DEVELOPMENT_FIXTURES = 'development_user,development_scandata,development_periodic_tasks,testdata'
 
 
 def start_borker(uuid):
@@ -84,7 +91,7 @@ class Command(RunserverCommand):
     processes = []
 
     def add_arguments(self, parser):
-        parser.add_argument('-l', '--loaddata', default='development,testdata', type=str,
+        parser.add_argument('-l', '--loaddata', default=DEVELOPMENT_FIXTURES, type=str,
                             help='Comma separated list of data fixtures to load.')
         parser.add_argument('--no-backend', action='store_true',
                             help='Do not start backend services (redis broker & task worker).')
