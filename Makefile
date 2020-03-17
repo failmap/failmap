@@ -99,6 +99,10 @@ run: ${app}  ## run complete application stack (frontend, worker, broker)
 	# start server (this can take a while)
 	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver
 
+run_no_backend: ${app}  ## run application stack without broker/worker
+	# start server (this can take a while)
+	DEBUG=1 NETWORK_SUPPORTS_IPV6=1 ${env} ${app} devserver --no-backend
+
 run-frontend: ${app}  ## only run frontend component
 	DEBUG=1 DJANGO_SETTINGS_MODULE=${app_name}.settings NETWORK_SUPPORTS_IPV6=1 ${env} ${app} runserver
 
