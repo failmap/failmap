@@ -850,6 +850,12 @@ CONSTANCE_CONFIG = {
     # Screenshots:
     'SCREENSHOT_API_URL_V4': ('http://screenshot_v4:1337', 'Use this service to create a screenshot over v4.', str),
     'SCREENSHOT_API_URL_V6': ('http://screenshot_v6:1337', 'Use this service to create a screenshot over v6.', str),
+
+    # tilanus zorgkaart nederland:
+    'ZORGKAART_ENDPOINT': ('https://', 'Endpoint of the zorgkaart service.', str),
+    'ZORGKAART_USERNAME': ('', 'Username to connect to the zorgkaart service.', str),
+    'ZORGKAART_PASSWORD': ('', 'Password to connect to the zorgkaart service.', str),
+    'ZORGKAART_FILTER': ('{}', 'Filter options, stored as string.', str),
 }
 
 CONSTANCE_CONFIG = add_scanner_fields(CONSTANCE_CONFIG)
@@ -906,7 +912,10 @@ CONSTANCE_CONFIG_FIELDSETS.update([
 
     ('<span class="beta">beta</span> Pro Mail Settings (in development)',
      ('PRO_EMAIL_HOST', 'PRO_EMAIL_PORT', 'PRO_EMAIL_USERNAME', 'PRO_EMAIL_PASSWORD',
-      'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE'))
+      'PRO_EMAIL_USE_TLS', 'PRO_EMAIL_USE_SSL', 'PRO_EMAIL_SSL_KEYFILE', 'PRO_EMAIL_SSL_CERTFILE')),
+
+    ('<span class="beta">beta</span> Zorgkaart Nederland (Tilanus)',
+     ('ZORGKAART_ENDPOINT', 'ZORGKAART_USERNAME', 'ZORGKAART_PASSWORD', 'ZORGKAART_FILTER'))
 ])
 
 # try / except: Prevent QA to move the import to the top of the file before the apps are loaded.
