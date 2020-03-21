@@ -44,7 +44,7 @@ from websecmap.api.logic import organization_and_url_import
 _all_ = organization_and_url_import
 
 # Periodic task name
-TaskName = 'zorgkaart import'
+TaskName = 'zorgkaart import (hidden)'
 
 # right now we there is a page limit of 1000 and max 123000 items
 # so the the default limit of 1000 is OK but not future proof
