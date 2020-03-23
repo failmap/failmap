@@ -69,10 +69,10 @@ def create_task():
 def do_request(url, params={}, previous_items=[]):
     """Internal function, performs API requests and merges paginated data"""
     # default to max limit of API
-    if not 'limit' in params.keys():
+    if 'limit' not in params.keys():
         params['limit'] = 10000
     # set page
-    if not 'page' in params.keys():
+    if 'page' not in params.keys():
         params['page'] = 1
     log.debug(f"Zorgkaart scraper request with parameters: {params}")
     # setup for API call use Debian ca-certificats
@@ -97,7 +97,7 @@ def do_request(url, params={}, previous_items=[]):
     else:
         if not result["count"] == len(items):
             log.error(
-                f"Zogkaart scraper: the amount of records reported by Zorgkaart ({result['count']}) is not equal to the amount of records recieved ({len(itmes)})")
+                f"Zogkaart scraper: Zorgkaart reported {result['count']} records but we recieved {len(items)} records.")
     return items
 
 
@@ -148,7 +148,8 @@ def translate(orglist):
             'country': 'NL',
             'coordinate_type': 'Point',
             'coordinate_area': [org['location']['longitude'], org['location']['latitude']],
-            'address': org['addresses'][0]['address'] + ', ' + org['addresses'][0]['zipcode'] + ' ' + org['addresses'][0]['city'] + ', ' + org['addresses'][0]['country'],
+            'address': org['addresses'][0]['address'] + ', ' + org['addresses'][0]['zipcode'] + \
+                ' ' + org['addresses'][0]['city'] + ', ' + org['addresses'][0]['country'],
             'surrogate_id': org['name']+'_'+org['type']+'_'+org['id'],
             'urls': org['websites']
         })
