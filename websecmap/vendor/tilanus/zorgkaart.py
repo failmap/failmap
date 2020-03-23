@@ -147,9 +147,10 @@ def translate(orglist):
             'layer': 'Zorg',
             'country': 'NL',
             'coordinate_type': 'Point',
-            'coordinate_area': [org['location']['longitude'], org['location']['latitude']],
-            'address': org['addresses'][0]['address'] + ', ' + org['addresses'][0]['zipcode'] + \
-                ' ' + org['addresses'][0]['city'] + ', ' + org['addresses'][0]['country'],
+            'coordinate_area': [org['location']['longitude'],
+                                org['location']['latitude']],
+            'address': org['addresses'][0]['address'] + ', ' + org['addresses'][0]['zipcode']
+            + ' ' + org['addresses'][0]['city'] + ', ' + org['addresses'][0]['country'],
             'surrogate_id': org['name']+'_'+org['type']+'_'+org['id'],
             'urls': org['websites']
         })
