@@ -5,6 +5,7 @@ import pytz
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from jsonfield import JSONField
 
 from websecmap.organizations.models import Url
 
@@ -582,6 +583,90 @@ class Screenshot(models.Model):
     width_pixels = models.IntegerField(default=0)
     height_pixels = models.IntegerField(default=0)
     created_on = models.DateTimeField(auto_now_add=True, db_index=True)
+
+
+class InternetNLV2Scan(models.Model):
+    """
+
+    Version 2 of the Internet.nl API is implemented here.
+
+    """
+    type = models.CharField(
+        max_length=30,
+        help_text="mail, mail_dashboard or web",
+        blank=True,
+        null=True
+    )
+
+    scan_id = models.CharField(
+        max_length=32,
+        help_text="The scan ID that is used to request status and report information.",
+        blank=True,
+        null=True
+    )
+
+    # registered, scanning, finished
+    state = models.CharField(
+        max_length=200,
+        help_text="where the scan is: registered, scanning, creating_report, finished, failed",
+        blank=True,
+        null=True
+    )
+
+    state_message = models.CharField(
+        max_length=200,
+        help_text="Information about the status, for example error information.",
+        blank=True,
+        null=True
+    )
+
+    last_state_check = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    # metadata returned from the scan, contains info about the api version, tracking info, scan type etc.
+    metadata = JSONField()
+
+    # this allows filtering during the creation of a scan.
+    # todo: what if a url is deleted, this relation should also be deleted, is that happening?
+    subject_urls = models.ManyToManyField(
+        Url
+    )
+
+    # for error recovery and debugging reasons, store the entire result (which can be pretty huge).
+    retrieved_scan_report = JSONField()
+
+
+class InternetNLV2StateLog(models.Model):
+    scan = models.ForeignKey(
+        InternetNLV2Scan,
+        on_delete=models.CASCADE,
+    )
+
+    state = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        help_text="The state that was registered at a certain moment in time."
+    )
+
+    state_message = models.CharField(
+        max_length=200,
+        help_text="Information about the status, for example error information.",
+        blank=True,
+        null=True
+    )
+
+    last_state_check = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    at_when = models.DateTimeField(
+        blank=True,
+        null=True
+    )
 
 
 class InternetNLScan(models.Model):
