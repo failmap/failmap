@@ -327,12 +327,19 @@ def store(result: dict, internet_nl_scan_type: str = 'mail'):
             log.debug("No matching endpoint found, perhaps this was deleted / resolvable meanwhile. Skipping")
             continue
 
-        # link changes every time, so can't save that as message.
+        # link changes every time, so can't save that as message. -> _wrong_
+        # The link changes every time and thus does the link to the report that will be referred in our own reports
+        # and the latest link is always the one that people are interested in. Even more so: the installations of
+        # internet.nl sometimes change these links, causing old links to not work anymore.
+        # What CAN happen is that several scans are ran by different accounts, and that the latest result is picked
+        # which was from another user. But that will take all updates from that scan, so it's up to date. These are
+        # edge cases that are in here by design: we always want to get data from a certain point in time, regardless
+        # who started the scan.
         store_endpoint_scan_result(
             scan_type='internet_nl_%s_overall_score' % internet_nl_scan_type,
             endpoint=endpoint,
             rating=domain['score'],
-            message='ok',
+            message=domain['link'],
             evidence=domain['link']
         )
 
