@@ -1,5 +1,7 @@
 # Dependencies for this project are manager using pip-tools (https://github.com/jazzband/pip-tools).
 # This is a simple management tool to manage version pinnin build on top of Pip and requirements.txt.
+# See upgrade commands here: https://github.com/jazzband/pip-tools/
+# eg: pip-compile --upgrade-package django
 
 # Please also refer to: https://gitlab.com/internet-cleanup-foundation/web-security-map/blob/master/docs/source/topics/development/development.md#python-dependencies-managment
 
