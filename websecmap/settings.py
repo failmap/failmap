@@ -813,6 +813,10 @@ CONSTANCE_CONFIG = {
     'INTERNET_NL_API_USERNAME': ('', 'Username for the internet.nl API. You can request one via the contact '
                                      'options on their site, https://internet.nl.', str),
     'INTERNET_NL_API_PASSWORD': ('', 'Password for the internet.nl API', str),
+    'INTERNET_NL_API_URL': ('https://batch.internet.nl/api/batch/v2',
+                            'The internet address for the Internet.nl API installation. Defaults to a version from '
+                            '2020.', str),
+    'INTERNET_NL_MAXIMUM_URLS':  (1000, 'The maximum amount of domains per scan.', int),
 
     # scanning pre-requisites
     'CONNECTIVITY_TEST_DOMAIN': (
@@ -902,7 +906,7 @@ CONSTANCE_CONFIG_FIELDSETS.update([
      ('CONNECTIVITY_TEST_DOMAIN', 'IPV6_TEST_DOMAIN', 'SCAN_PROXY_TESTING_URL',)),
 
     ('Internet.nl Scans',
-     ('INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD')),
+     ('INTERNET_NL_API_USERNAME', 'INTERNET_NL_API_PASSWORD', 'INTERNET_NL_API_URL', 'INTERNET_NL_MAXIMUM_URLS')),
 
     ('Screenshot service options',
      ('SCREENSHOT_API_URL_V4', 'SCREENSHOT_API_URL_V6')),
