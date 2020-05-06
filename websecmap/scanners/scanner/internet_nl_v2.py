@@ -40,9 +40,6 @@ def return_save_response(answer):
 def register(domains: List[str], scan_type: str, tracking_information: str,
              settings: InternetNLApiSettings) -> (str, str):
 
-    if len(domains) > settings.maximum_domains:
-        raise ValueError("Amount of domains given is higher than the API can handle.")
-
     data = {
         "type": scan_type,
         "tracking_information": tracking_information,
@@ -51,7 +48,7 @@ def register(domains: List[str], scan_type: str, tracking_information: str,
 
     try:
         response = requests.post(
-            f'{settings.url}/scans',
+            f'{settings.url}/requests',
             json=data,
             auth=HTTPBasicAuth(settings.username, settings.password), timeout=(300, 300)
         )
@@ -67,7 +64,7 @@ def metadata(settings: InternetNLApiSettings):
 
     try:
         response = requests.get(
-            f'{settings.url}/scans/metadata',
+            f'{settings.url}/metadata/report',
             auth=HTTPBasicAuth(settings.username, settings.password)
         )
     except requests.RequestException as e:
@@ -81,7 +78,21 @@ def status(scan_id: int, settings: InternetNLApiSettings):
 
     try:
         response = requests.get(
-            f'{settings.url}/scans/status/{scan_id}',
+            f'{settings.url}/requests/{scan_id}',
+            auth=HTTPBasicAuth(settings.username, settings.password)
+        )
+    except requests.RequestException as e:
+        return 599, {"network_error": e.strerror}
+
+    return return_save_response(response)
+
+
+@app.task(queue="storage")
+def cancel(scan_id: int, settings: InternetNLApiSettings):
+
+    try:
+        response = requests.patch(
+            f'{settings.url}/requests/{scan_id}',
             auth=HTTPBasicAuth(settings.username, settings.password)
         )
     except requests.RequestException as e:
@@ -95,7 +106,7 @@ def result(scan_id: int, settings: InternetNLApiSettings):
 
     try:
         response = requests.get(
-            f'{settings.url}/scans/result/{scan_id}',
+            f'{settings.url}/requests/{scan_id}/results',
             auth=HTTPBasicAuth(settings.username, settings.password)
         )
     except requests.RequestException as e:

@@ -3,19 +3,18 @@ Web Security Map implementation of internet.nl scans.
 """
 
 import hashlib
+import ipaddress
 import json
 import logging
-from datetime import datetime
+from copy import copy
+from datetime import datetime, timedelta
 from typing import List, Tuple
 
 import pytz
+import tldextract
 from celery import Task, group
 from constance import config
 from django.db import transaction
-
-import tldextract
-import ipaddress
-
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -29,18 +28,21 @@ log = logging.getLogger(__name__)
 
 def valid_api_settings(scan: InternetNLV2Scan):
     if not config.INTERNET_NL_API_USERNAME:
-        update_state(scan, "error", "Username for internet.nl scan not configured. Configure the username in the "
-                                    "settings on the admin page.")
+        update_state(scan, "configuration_error",
+                     "Username for internet.nl scan not configured. "
+                     "This setting can be configured in the settings on the admin page.")
         return False
 
     if not config.INTERNET_NL_API_PASSWORD:
-        update_state(scan, "error", "Password for internet.nl scan not configured. Configure the username in the "
-                                    "settings on the admin page.")
+        update_state(scan, "configuration_error",
+                     "Password for internet.nl scan not configured. "
+                     "This setting can be configured in the settings on the admin page.")
         return False
 
     if not config.INTERNET_NL_API_URL:
-        update_state(scan, "error", "No url supplied for internet.nl scans. The url can be configured in the "
-                                    "settings on the admin page.")
+        update_state(scan, "configuration_error",
+                     "No url supplied for internet.nl scans. "
+                     "This setting can be configured in the settings on the admin page.")
         return False
 
     # validate the url itself:
@@ -50,22 +52,23 @@ def valid_api_settings(scan: InternetNLV2Scan):
         try:
             ipaddress.ip_address(extract.domain)
         except ValueError:
-            update_state(scan, "error", "The internet.nl api url is not a valid url or IP format. Always start with "
-                                        "https:// and then the address.")
+            update_state(scan, "configuration_error",
+                         "The internet.nl api url is not a valid url or IP format. Always start with "
+                         "https:// and then the address. "
+                         "This setting can be configured in the settings on the admin page.")
+            return False
 
     if not config.INTERNET_NL_MAXIMUM_URLS:
-        update_state(scan, "error", "No maximum supplied for the amount of urls in an internet.nl scans. "
-                                    "This can be configured in the settings on the admin page.")
+        update_state(scan,
+                     "configuration_error",
+                     "No maximum supplied for the amount of urls in an internet.nl scans. "
+                     "This setting can be configured in the settings on the admin page.")
         return False
 
     return True
 
 
 def create_api_settings(scan: InternetNLV2Scan):
-    if not valid_api_settings(scan):
-        raise ValueError("Internet.nl scan settings are not configured correctly. The specific error is located in "
-                         "the created internet.nl scan and visible on the admin page.")
-
     s = InternetNLApiSettings()
     s.username = config.INTERNET_NL_API_USERNAME
     s.password = config.INTERNET_NL_API_PASSWORD
@@ -79,17 +82,25 @@ def create_api_settings(scan: InternetNLV2Scan):
     return s
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def initialize_scan(scan_type: str, domains: List[Url]):
     scan = InternetNLV2Scan()
     scan.type = scan_type
     scan.save()
 
-    # many to many requires an object to exist.
-    scan.subject_urls = domains
-    scan.save()
+    max_urls = config.INTERNET_NL_MAXIMUM_URLS
+    if len(domains) > max_urls:
+        update_state(scan, "configuration_error",
+                     f"Too many domains: {len(domains)} is more than {max_urls}. Not registering. Try "
+                     f"again with fewer domains or change the maximum accordingly.")
+        return scan
 
-    update_state(scan, "requested", "requested a scan to be performed on internet.nl")
+    # many to many requires an object to exist.
+    scan.subject_urls.set(domains)
+
+    update_state(scan, "requested", "requested a scan to be performed on internet.nl api")
+
+    return scan
 
 
 @app.task(queue='storage')
@@ -101,6 +112,7 @@ def check_running_internet_nl_scans() -> Task:
     return group(tasks)
 
 
+@app.task(queue='storage')
 def progress_running_scan(scan: InternetNLV2Scan) -> Task:
     """
     This monitors the state of an internet.nl scan. Depending on the state, it determines if an action is needed and
@@ -152,31 +164,60 @@ def progress_running_scan(scan: InternetNLV2Scan) -> Task:
 
         # recovery steps in case of (network) errors
         "network_error": recover_and_retry,
-        "error": recover_and_retry
+        "configuration_error": recover_and_retry,
+        "timeout": recover_and_retry
     }
 
     with transaction.atomic():
         # always get the latest state, so we'll not have outdated information if we had to wait in a queue a long while.
         # also run this in a transaction, so it's only possible to get a state and update it to an active state once.
+        # because this is a transaction, crashes such as value errors are not written to the database.
         scan = InternetNLV2Scan.objects.get(id=scan.id)
         next_step = steps.get(scan.state, handle_unknown_state)
+        log.debug(f"Internet.nl scan #{scan.id} is being progressed from {scan.state}.")
         return next_step(scan)
 
 
+@app.task(queue="storage")
 def recover_and_retry(scan: InternetNLV2Scan):
-    # todo: implement.
     # check the latest valid state from progress running scan, set the state to that state.
 
     valid_states = ['requested', 'registered', 'running scan', 'scan results ready', 'scan results stored']
+    error_states = ["network_error", "configuration_error", "timeout"]
+
+    if scan.state in valid_states:
+        # no recovery needed
+        return group([])
 
     # get the latest valid state from the scan log:
     latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by('-id').first()
 
-    return group(update_state(scan, latest_valid.state, "Recovered from error state."))
+    log.debug(f"Internet.nl scan #{scan.id} is rolled back to retry from '{scan.state}' to '{latest_valid.state}'.")
+
+    if scan.state in error_states:
+        update_state(scan, latest_valid.state, f"Rolled back from error state '{scan.state}', retrying.")
+    else:
+        update_state(scan, latest_valid.state, f"Rolled back from miscellaneous state '{scan.state}', retrying.")
+
+    return group([])
 
 
 def handle_unknown_state(scan):
     # probably nothing to be done... there are many intermediate states that hold all kinds of in between states.
+
+    # we can however deal with timeouts. If an unknown state is over a certain time, the task should be tried again.
+
+    timeouts = {
+        'registering': 3600 * 24,  # 24 hours
+        'storing scan results': 3600 * 24,
+        'processing scan results': 3600 * 24
+    }
+
+    # not the state check, but the moment the state was created...
+    if scan.state in timeouts:
+        if scan.last_state_change + timedelta(seconds=timeouts[scan.state]) < datetime.now(pytz.utc):
+            return group(update_state(scan, "timeout", f"The state '{scan.state}' timed out, attempting to retry."))
+
     return group([])
 
 
@@ -190,12 +231,14 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
         'type': scan.type
     }
 
+    if not valid_api_settings(scan):
+        return group([])
+
     return (
         get_relevant_urls.si(scan)
         | register.s(
             scan.type,
             json.dumps(scan_name),
-
             create_api_settings(scan)
         )
         | registration_administration.s(scan)
@@ -205,17 +248,27 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
 def running_scan(scan: InternetNLV2Scan):
     update_state(scan, "running scan", "Running scan at internet.nl")
 
+    if not valid_api_settings(scan):
+        return group([])
+
     return (status.si(scan.scan_id, create_api_settings(scan))
             | status_administration.s(scan))
 
 
 def continue_running_scan(scan: InternetNLV2Scan):
+
+    if not valid_api_settings(scan):
+        return group([])
+
     return (status.si(scan.scan_id, create_api_settings(scan))
             | status_administration.s(scan))
 
 
 def storing_scan_results(scan: InternetNLV2Scan):
     update_state(scan, "storing scan results", "")
+
+    if not valid_api_settings(scan):
+        return group([])
 
     return (result.si(scan.scan_id, create_api_settings(scan))
             | result_administration.s(scan))
@@ -243,9 +296,11 @@ def update_state(scan: InternetNLV2Scan, new_state: str, new_state_message: str)
             existing_log.save()
             return
 
+    old_state = copy(scan.state)
     scan.state = new_state
     scan.state_message = new_state_message
     scan.last_state_check = datetime.now(pytz.utc)
+    scan.last_state_change = datetime.now(pytz.utc)
     scan.save()
 
     statelog = InternetNLV2StateLog()
@@ -256,6 +311,8 @@ def update_state(scan: InternetNLV2Scan, new_state: str, new_state_message: str)
     statelog.last_state_check = datetime.now(pytz.utc)
     statelog.save()
 
+    log.debug(f"Internet.nl scan #{scan.id} state changed from '{old_state}' to '{new_state}'.")
+
 
 def api_has_usable_response(response, scan):
 
@@ -263,7 +320,7 @@ def api_has_usable_response(response, scan):
 
     if status_code == 599:
         # using the log the previous actionable state can be retrieved as a recovery strategy.
-        update_state(scan, "network_error", response_content['error_message'])
+        update_state(scan, "network_error", response_content['error']['label'])
         return False
 
     if status_code == 500:
@@ -272,6 +329,10 @@ def api_has_usable_response(response, scan):
 
     if status_code == 401:
         update_state(scan, "credential_error", "")
+        return False
+
+    if status_code == 400:
+        update_state(scan, "error", json.dumps(response_content))
         return False
 
     if status_code == 200:
@@ -286,10 +347,10 @@ def api_has_usable_response(response, scan):
 
 @app.task(queue="storage")
 def get_relevant_urls(scan: InternetNLV2Scan) -> List[str]:
-    return scan.subject_urls.objects.all().values_list('url', flat=True)
+    return list(scan.subject_urls.all().values_list('url', flat=True))
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def registration_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     """
     {
@@ -317,16 +378,16 @@ def registration_administration(response: Tuple[int, dict], scan: InternetNLV2Sc
 
     status_code, response_content = response
 
-    scan = InternetNLV2Scan()
-    scan.scan_id = response_content['id']
-    scan.metadata = response_content['metadata']
-    scan.type = response_content['metadata']['scan_type']
+    # todo: duplicated "request" in "request".
+    scan.scan_id = response_content['request']['request_id']
+    scan.metadata = response_content['request']
+    scan.type = response_content['request']['request_type']
     scan.save()
 
     update_state(scan, "registered", "scan registered at internet.nl")
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def status_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     """
     {
@@ -370,7 +431,7 @@ def status_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     raise ValueError("Unsupported response from the Internet.nl API received.")
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     """
     Stores the scan metadata and domains.
@@ -397,7 +458,7 @@ def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     update_state(scan, "scan results stored", "")
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def process_scan_results(scan: InternetNLV2Scan):
     scan_type_to_protocol = {
         # mail is used for web security map, it is a subset of mail servers that dedupes servers on cnames.
@@ -425,7 +486,7 @@ def process_scan_results(scan: InternetNLV2Scan):
     update_state(scan, "finished", "")
 
 
-@app.Task(queue="storage")
+@app.task(queue="storage")
 def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endpoint_protocol: str):
     """
 
@@ -514,7 +575,6 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
     # standard tests:
     store_test_results(endpoint, scan_data['results']['tests'])
-
 
     if scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)

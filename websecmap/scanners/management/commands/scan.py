@@ -1,7 +1,7 @@
 import logging
 
 from websecmap.app.management.commands._private import ScannerTaskCommand
-from websecmap.scanners.scanner import (dnssec, dummy, ftp, internet_nl_mail, internet_nl_web,
+from websecmap.scanners.scanner import (dnssec, dummy, ftp, internet_nl_v2_mail, internet_nl_v2_web,
                                         onboard, plain_http, screenshot, security_headers,
                                         tls_qualys)
 
@@ -15,9 +15,9 @@ scanners = {
     'plain': plain_http,
     'tlsq': tls_qualys,
     'ftp': ftp,
-    'mail': internet_nl_mail,
+    'mail': internet_nl_v2_mail,
     'screenshot': screenshot,
-    'internet_nl_web': internet_nl_web
+    'internet_nl_web': internet_nl_v2_web
 }
 
 

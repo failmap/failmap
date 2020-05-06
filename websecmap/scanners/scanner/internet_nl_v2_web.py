@@ -32,16 +32,16 @@ def compose_task(
     urls_filter = {**urls_filter, **default_filter}
     urls = Url.objects.all().filter(q_configurations_to_scan(level='url'), **urls_filter)
 
-    endpoints_filter = {'is_dead': False, "protocol": 'dns_mx_no_cname'}
+    endpoints_filter = {'is_dead': False, "protocol": 'dns_a_aaaa'}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = urls.only("url")
 
     if not urls:
-        log.warning('Applied filters resulted in no urls, thus no mail scan tasks!')
+        log.warning('Applied filters resulted in no urls, thus no web scan tasks!')
         return group()
 
     urls = list(set(urls))
 
-    log.info('Creating internet.nl api mail scan task for %s urls.', len(urls))
+    log.info('Creating internet.nl api web scan task for %s urls.', len(urls))
 
-    return group([initialize_scan.si("mail", urls)])
+    return group([initialize_scan.si("web", urls)])

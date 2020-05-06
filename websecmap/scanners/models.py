@@ -625,8 +625,18 @@ class InternetNLV2Scan(models.Model):
         null=True
     )
 
+    last_state_change = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text="When this state changed the last time, so no in-between updates about the state."
+    )
+
     # metadata returned from the scan, contains info about the api version, tracking info, scan type etc.
-    metadata = JSONField()
+    metadata = JSONField(
+        default=None,
+        blank=True,
+        null=True
+    )
 
     # this allows filtering during the creation of a scan.
     # todo: what if a url is deleted, this relation should also be deleted, is that happening?
@@ -635,7 +645,11 @@ class InternetNLV2Scan(models.Model):
     )
 
     # for error recovery and debugging reasons, store the entire result (which can be pretty huge).
-    retrieved_scan_report = JSONField()
+    retrieved_scan_report = JSONField(
+        default=None,
+        blank=True,
+        null=True
+    )
 
 
 class InternetNLV2StateLog(models.Model):
@@ -660,7 +674,8 @@ class InternetNLV2StateLog(models.Model):
 
     last_state_check = models.DateTimeField(
         blank=True,
-        null=True
+        null=True,
+        help_text="Last time this state was written to this field, which can happen regularly."
     )
 
     at_when = models.DateTimeField(
