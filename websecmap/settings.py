@@ -352,6 +352,7 @@ LOGGING = {
         },
         'color': {
             '()': 'colorlog.ColoredFormatter',
+            # to get the name of the logger a message came from, add %(name)s.
             'format': '%(log_color)s%(asctime)s\t%(levelname)-8s - '
                       '%(message)s',
             'datefmt': '%Y-%m-%d %H:%M',
@@ -371,6 +372,12 @@ LOGGING = {
         #     'handlers': ['console'],
         #     'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         # },
+
+        # get debug log output when running direct celery scans.
+        'celery.app.trace': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+        },
 
         # Default Django logging, we expect django to work, and therefore only show INFO messages.
         # It can be smart to sometimes want to see what's going on here, but not all the time.
@@ -1027,7 +1034,8 @@ JET_SIDE_MENU_ITEMS = [  # A list of application or custom item dicts
                 '?endpoint__is_dead__exact=0&endpoint__url__is_dead__exact=0&is_the_latest_scan__exact=1&o=5.-6',
          'url_blank': False},
         {'name': 'scanners.urlgenericscan', 'label': 'URL Scans'},
-        {'name': 'scanners.internetnlscan', 'label': 'Internet.nl Scan Tasks'},
+        {'name': 'scanners.internetnlv2scan', 'label': 'Internet.nl API V2 Scan Tasks'},
+        {'name': 'scanners.internetnlv2statelog', 'label': 'Internet.nl API V2 Scan Log'},
         {'name': 'scanners.screenshot', 'label': "Screenshots"},
     ]},
 

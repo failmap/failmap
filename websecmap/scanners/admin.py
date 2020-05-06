@@ -5,6 +5,8 @@ from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
 
 from websecmap.scanners import models
+from websecmap.scanners.scanner.internet_nl_v2_websecmap import (progress_running_scan,
+                                                                 recover_and_retry)
 from websecmap.scanners.scanner.tls_qualys import check_proxy
 
 
@@ -211,6 +213,46 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ('started_on', 'finished_on', 'success', 'message', 'type')
     fields = ('type', 'started', 'started_on', 'finished', 'finished_on', 'success', 'message', 'friendly_message',
               'status_url')
+
+
+@admin.register(models.InternetNLV2Scan)
+class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'type', 'scan_id', 'state', 'state_message', 'last_state_check', 'last_state_change',
+                    'domains')
+    search_fields = ('subject_urls__url', 'scan_id')
+    list_filter = ('state', 'state_message', 'last_state_check', 'last_state_change', 'type')
+    fields = ('type', 'scan_id', 'state', 'state_message', 'last_state_check', 'last_state_change', 'metadata',
+              'retrieved_scan_report')
+    # todo: subject_urls inline
+
+    @staticmethod
+    def domains(obj):
+        return obj.subject_urls.count()
+
+    actions = []
+
+    def attempt_rollback(self, request, queryset):
+        for scan in queryset:
+            recover_and_retry.apply_async([scan])
+        self.message_user(request, "Rolling back asynchronously. May take a while.")
+    attempt_rollback.short_description = "Attempt rollback (async)"
+    actions.append('attempt_rollback')
+
+    def progress_scan(self, request, queryset):
+        for scan in queryset:
+            tasks = progress_running_scan(scan)
+            tasks.apply_async()
+        self.message_user(request, "Attempting to progress scans (async).")
+    progress_scan.short_description = "Progress scan (async)"
+    actions.append('progress_scan')
+
+
+@admin.register(models.InternetNLV2StateLog)
+class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('pk', 'scan', 'state', 'state_message', 'last_state_check', 'at_when')
+    search_fields = ('scan__scan_id', )
+    list_filter = ('state', 'state_message', 'last_state_check', 'at_when')
+    fields = ('scan', 'state', 'state_message', 'last_state_check', 'at_when')
 
 
 @admin.register(models.ScanProxy)

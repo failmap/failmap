@@ -35,7 +35,6 @@ def compose_task(
     endpoints_filter = {'is_dead': False, "protocol": 'dns_mx_no_cname'}
     urls = url_filters(urls, organizations_filter, urls_filter, endpoints_filter)
     urls = urls.only("url")
-    urls = urls.value_list("url", flat=True)
 
     if not urls:
         log.warning('Applied filters resulted in no urls, thus no mail scan tasks!')
@@ -43,6 +42,6 @@ def compose_task(
 
     urls = list(set(urls))
 
-    log.info('Creating internetnl mail scan task for %s urls.', len(urls))
+    log.info('Creating internet.nl api mail scan task for %s urls.', len(urls))
 
     return group([initialize_scan.si("mail", urls)])
