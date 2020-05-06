@@ -1,6 +1,7 @@
 """
 Web Security Map implementation of internet.nl scans.
 """
+import hashlib
 import json
 import logging
 from datetime import datetime
@@ -10,6 +11,8 @@ import pytz
 from celery import Task, group
 from constance import config
 from django.db import transaction
+import tldextract
+import ipaddress
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -21,17 +24,55 @@ from websecmap.scanners.scanner.internet_nl_v2 import (InternetNLApiSettings, re
 log = logging.getLogger(__name__)
 
 
-def create_api_settings():
-    # todo: add validation here. Raise errors when settings are not set. Can that be done in a task also? with
-    # some error recovery included?
+def valid_api_settings(scan: InternetNLV2Scan):
+    if not config.INTERNET_NL_API_USERNAME:
+        update_state(scan, "error", "Username for internet.nl scan not configured. Configure the username in the "
+                                    "settings on the admin page.")
+        return False
+
+    if not config.INTERNET_NL_API_PASSWORD:
+        update_state(scan, "error", "Password for internet.nl scan not configured. Configure the username in the "
+                                    "settings on the admin page.")
+        return False
+
+    if not config.INTERNET_NL_API_URL:
+        update_state(scan, "error", "No url supplied for internet.nl scans. The url can be configured in the "
+                                    "settings on the admin page.")
+        return False
+
+    # validate the url itself:
+    extract = tldextract.extract(config.INTERNET_NL_API_URL)
+    if not extract.suffix:
+        # can can still be an IP address, which should work too
+        try:
+            ipaddress.ip_address(extract.domain)
+        except ValueError:
+            update_state(scan, "error", "The internet.nl api url is not a valid url or IP format. Always start with "
+                                        "https:// and then the address.")
+
+    if not config.INTERNET_NL_MAXIMUM_URLS:
+        update_state(scan, "error", "No maximum supplied for the amount of urls in an internet.nl scans. "
+                                    "This can be configured in the settings on the admin page.")
+        return False
+
+    return True
+
+
+def create_api_settings(scan: InternetNLV2Scan):
+    if not valid_api_settings(scan):
+        raise ValueError("Internet.nl scan settings are not configured correctly. The specific error is located in "
+                         "the created internet.nl scan and visible on the admin page.")
 
     s = InternetNLApiSettings()
     s.username = config.INTERNET_NL_API_USERNAME
     s.password = config.INTERNET_NL_API_PASSWORD
 
-    # todo: URL + maximum from settings, add them to settings.
-    s.url = config.INTERNET_NL_API_PASSWORD
-    s.maximum_domains = config.INTERNET_NL_API_PASSWORD
+    s.url = config.INTERNET_NL_API_URL
+
+    # for convenience, remove trailing slashes from the url, this will be entered incorrectly.
+    s.url = s.url.rstrip("/")
+
+    s.maximum_domains = config.INTERNET_NL_MAXIMUM_URLS
     return s
 
 
@@ -107,7 +148,8 @@ def progress_running_scan(scan: InternetNLV2Scan) -> Task:
         # "finished"
 
         # recovery steps in case of (network) errors
-        "network_error": recover_and_retry
+        "network_error": recover_and_retry,
+        "error": recover_and_retry
     }
 
     with transaction.atomic():
@@ -121,15 +163,17 @@ def progress_running_scan(scan: InternetNLV2Scan) -> Task:
 def recover_and_retry(scan: InternetNLV2Scan):
     # todo: implement.
     # check the latest valid state from progress running scan, set the state to that state.
-    raise NotImplementedError()
+
+    valid_states = ['requested', 'registered', 'running scan', 'scan results ready', 'scan results stored']
+
+    # get the latest valid state from the scan log:
+    latest_valid = InternetNLV2StateLog.objects.all().filter(scan=scan, state__in=valid_states).order_by('-id').first()
+
+    return group(update_state(scan, latest_valid.state, "Recovered from error state."))
 
 
 def handle_unknown_state(scan):
-    # probably nothing to be done...
-
-    # please pep
-    _all_ = scan
-
+    # probably nothing to be done... there are many intermediate states that hold all kinds of in between states.
     return group([])
 
 
@@ -148,7 +192,7 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
         | register.s(
             scan.type,
             json.dumps(scan_name),
-            create_api_settings()
+            create_api_settings(scan)
         )
         | registration_administration.s(scan)
     )
@@ -157,19 +201,19 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
 def running_scan(scan: InternetNLV2Scan):
     update_state(scan, "running scan", "Running scan at internet.nl")
 
-    return (status.si(scan.scan_id, create_api_settings())
+    return (status.si(scan.scan_id, create_api_settings(scan))
             | status_administration.s(scan))
 
 
 def continue_running_scan(scan: InternetNLV2Scan):
-    return (status.si(scan.scan_id, create_api_settings())
+    return (status.si(scan.scan_id, create_api_settings(scan))
             | status_administration.s(scan))
 
 
 def storing_scan_results(scan: InternetNLV2Scan):
     update_state(scan, "storing scan results", "")
 
-    return (result.si(scan.scan_id, create_api_settings())
+    return (result.si(scan.scan_id, create_api_settings(scan))
             | result_administration.s(scan))
 
 
@@ -432,28 +476,40 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         log.debug("No matching endpoint found, perhaps this was deleted / resolvable meanwhile. Skipping")
         return
 
+    # link changes every time, so can't save that as message. -> _wrong_
+    # The link changes every time and thus does the link to the report that will be referred in our own reports
+    # and the latest link is always the one that people are interested in. Even more so: the installations of
+    # internet.nl sometimes change these links, causing old links to not work anymore.
+    # What CAN happen is that several scans are ran by different accounts, and that the latest result is picked
+    # which was from another user. But that will take all updates from that scan, so it's up to date. These are
+    # edge cases that are in here by design: we always want to get data from a certain point in time, regardless
+    # who started the scan.
     store_endpoint_scan_result(
         scan_type=f'internet_nl_{scan_type}_overall_score',
         endpoint=endpoint,
-        rating=scan_data['score']['percentage'],
-        message='ok',
-        evidence=scan_data['report']['address']['address']
+        rating=scan_data['scoring']['percentage'],
+        message=scan_data['report'],
+        evidence=scan_data['report']
     )
 
-    # this way new fields are automatically added
-    test_results_keys = scan_data['results'].keys()
-
-    for test_result_key in test_results_keys:
-        test_result = scan_data['results'][test_result_key]
-
-        scan_type = f'internet_nl_{test_result_key}'
+    # categories (ie, derived from the test results)
+    for category in scan_data['categories'].keys():
+        scan_type = f'internet_nl_{scan_type}_{category}'
         store_endpoint_scan_result(
             scan_type=scan_type,
             endpoint=endpoint,
-            rating=test_result['test_result'],
-            message="{'translation': '', 'verdict': ''}",
-            evidence=json.dumps(test_result['technical_details'])
+            rating=scan_data["category"][category]["verdict"],
+            message='',
+            evidence=scan_data['report']
         )
+
+    # There are a number of "custom" fields that should be treated the same. These are calculations over the
+    # scan results and help users deriving certain conclusions.
+    # todo: does that contain the not_applicable stuff? that should be moved to the API
+    store_test_results(endpoint, scan_data['results']['custom'])
+
+    # standard tests:
+    store_test_results(endpoint, scan_data['results']['tests'])
 
     if scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)
@@ -473,6 +529,34 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
             evidence=json.dumps(test_result['technical_details'])
         )
 
+
+def store_test_results(endpoint, test_results):
+
+    # this way new fields are automatically added
+    test_results_keys = test_results.keys()
+
+    for test_result_key in test_results_keys:
+        test_result = test_results[test_result_key]
+
+        scan_type = f'internet_nl_{test_result_key}'
+
+        # technical_details can change, and these changes should always be reflected in the data. In our model
+        # only rating and message are treated as unique. The technical data is often very long and will not fit
+        # in either rating and message, and will cause delays in working with these fields. What we do instead is
+        # create a hash and append it to the message. Technical details are an array of array of string
+        dumped_technical_details = json.dumps(test_result['technical_details'])
+        technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
+
+        store_endpoint_scan_result(
+            scan_type=scan_type,
+            endpoint=endpoint,
+            rating=test_result['status'],
+            message=json.dumps(
+                {'translation': test_result['verdict'],
+                 'technical_details_hash': technical_details_hash}
+            ),
+            evidence=json.dumps(test_result['technical_details'])
+        )
 
 def add_calculation(scan_data, new_key: str, required_values: List[str]):
     scan_data['derived_results'][new_key] = {
@@ -562,6 +646,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
     # START TLS NCSC
     # mail_starttls_cert_domain is mandatory ONLY when mail_starttls_dane_ta is True.
     # todo: the mail_starttls_dane_ta value is not returned anymore. Is there a verdict that matches this scenario?
+    # todo: this will problably be a custom field?
     start_tls_ncsc_fields = \
         ['mail_starttls_tls_available', 'mail_starttls_tls_version', 'mail_starttls_tls_ciphers',
          'mail_starttls_tls_keyexchange', 'mail_starttls_tls_compress', 'mail_starttls_tls_secreneg',
