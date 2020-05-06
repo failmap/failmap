@@ -1,6 +1,7 @@
 """
 Web Security Map implementation of internet.nl scans.
 """
+
 import hashlib
 import json
 import logging
@@ -11,8 +12,10 @@ import pytz
 from celery import Task, group
 from constance import config
 from django.db import transaction
+
 import tldextract
 import ipaddress
+
 
 from websecmap.celery import app
 from websecmap.organizations.models import Url
@@ -68,11 +71,11 @@ def create_api_settings(scan: InternetNLV2Scan):
     s.password = config.INTERNET_NL_API_PASSWORD
 
     s.url = config.INTERNET_NL_API_URL
-
     # for convenience, remove trailing slashes from the url, this will be entered incorrectly.
     s.url = s.url.rstrip("/")
 
     s.maximum_domains = config.INTERNET_NL_MAXIMUM_URLS
+
     return s
 
 
@@ -192,6 +195,7 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
         | register.s(
             scan.type,
             json.dumps(scan_name),
+
             create_api_settings(scan)
         )
         | registration_administration.s(scan)
@@ -511,6 +515,7 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # standard tests:
     store_test_results(endpoint, scan_data['results']['tests'])
 
+
     if scan_type == "web":
         scan_data = calculate_forum_standaardisatie_views_web(scan_data)
     else:
@@ -557,6 +562,7 @@ def store_test_results(endpoint, test_results):
             ),
             evidence=json.dumps(test_result['technical_details'])
         )
+
 
 def add_calculation(scan_data, new_key: str, required_values: List[str]):
     scan_data['derived_results'][new_key] = {
