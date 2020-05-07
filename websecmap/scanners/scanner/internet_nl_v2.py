@@ -27,7 +27,7 @@ class InternetNLApiSettings:
     maximum_domains: int = 5000
 
 
-def return_save_response(answer):
+def return_safe_response(answer):
     # Only with a status code of 200 and 512 a json message is returned.
     if answer.status_code in [200, 512]:
         return answer.status_code, answer.json()
@@ -42,7 +42,7 @@ def register(domains: List[str], scan_type: str, tracking_information: str,
 
     data = {
         "type": scan_type,
-        "tracking_information": tracking_information,
+        "name": tracking_information,
         "domains": domains
     }
 
@@ -56,60 +56,38 @@ def register(domains: List[str], scan_type: str, tracking_information: str,
         # This is returned as a catch all for network errors. A network error can be retried.
         return 599, {"network_error": e.strerror}
 
-    return return_save_response(response)
+    return return_safe_response(response)
 
 
 @app.task(queue="storage")
 def metadata(settings: InternetNLApiSettings):
-
-    try:
-        response = requests.get(
-            f'{settings.url}/metadata/report',
-            auth=HTTPBasicAuth(settings.username, settings.password)
-        )
-    except requests.RequestException as e:
-        return 599, {"network_error": e.strerror}
-
-    return return_save_response(response)
+    return generic_internet_nl_api_request("get", f'{settings.url}/metadata/report', settings)
 
 
 @app.task(queue="storage")
 def status(scan_id: int, settings: InternetNLApiSettings):
-
-    try:
-        response = requests.get(
-            f'{settings.url}/requests/{scan_id}',
-            auth=HTTPBasicAuth(settings.username, settings.password)
-        )
-    except requests.RequestException as e:
-        return 599, {"network_error": e.strerror}
-
-    return return_save_response(response)
+    return generic_internet_nl_api_request("get", f'{settings.url}/requests/{scan_id}', settings)
 
 
 @app.task(queue="storage")
 def cancel(scan_id: int, settings: InternetNLApiSettings):
-
-    try:
-        response = requests.patch(
-            f'{settings.url}/requests/{scan_id}',
-            auth=HTTPBasicAuth(settings.username, settings.password)
-        )
-    except requests.RequestException as e:
-        return 599, {"network_error": e.strerror}
-
-    return return_save_response(response)
+    return generic_internet_nl_api_request("patch", f'{settings.url}/requests/{scan_id}', settings)
 
 
 @app.task(queue="storage")
 def result(scan_id: int, settings: InternetNLApiSettings):
+    return generic_internet_nl_api_request("get", f'{settings.url}/requests/{scan_id}/results', settings)
+
+
+def generic_internet_nl_api_request(operation, url, settings):
+    # We're dealing with all kinds of network issues by returning a network issue as a status code.
+    # Network issues can be recovered and the next step can be retried. Network issues can take a long time and
+    # should not break the process of gathering results.
 
     try:
-        response = requests.get(
-            f'{settings.url}/requests/{scan_id}/results',
-            auth=HTTPBasicAuth(settings.username, settings.password)
-        )
+        requests_function = getattr(requests, operation)
+        response = requests_function(url, auth=HTTPBasicAuth(settings.username, settings.password), timeout=(300, 300))
     except requests.RequestException as e:
         return 599, {"network_error": e.strerror}
 
-    return return_save_response(response)
+    return return_safe_response(response)
