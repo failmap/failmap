@@ -217,9 +217,9 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(models.InternetNLV2Scan)
-class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('id', 'type', 'scan_id', 'online', 'state', 'state_message', 'last_state_check', 'last_state_change',
-                    'domains')
+class InternetNLV2ScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    list_display = ('id', 'type', 'scan_id', 'online', 'state', 'state_message', 'last_state_check',
+                    'last_state_change', 'domains')
     search_fields = ('subject_urls__url', 'scan_id')
     list_filter = ('state', 'state_message', 'last_state_check', 'last_state_change', 'type')
     fields = ('type', 'scan_id', 'state', 'state_message', 'last_state_check', 'last_state_change', 'metadata',
@@ -257,7 +257,7 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 
 @admin.register(models.InternetNLV2StateLog)
-class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+class InternetNLV2StateLogAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ('pk', 'scan', 'state', 'state_message', 'last_state_check', 'at_when')
     search_fields = ('scan__scan_id', )
     list_filter = ('state', 'state_message', 'last_state_check', 'at_when')
