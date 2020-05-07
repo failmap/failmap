@@ -651,6 +651,9 @@ class InternetNLV2Scan(models.Model):
         null=True
     )
 
+    def __str__(self):
+        return "%s: %s %s" % (self.pk, self.scan_id, self.state)
+
 
 class InternetNLV2StateLog(models.Model):
     scan = models.ForeignKey(
@@ -682,6 +685,9 @@ class InternetNLV2StateLog(models.Model):
         blank=True,
         null=True
     )
+
+    def __str__(self):
+        return "%s.%s: %s" % (self.scan.pk, self.pk, self.state)
 
 
 class InternetNLScan(models.Model):

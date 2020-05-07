@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from jet.admin import CompactInline
 from jet.filters import RelatedFieldAjaxListFilter
@@ -217,17 +218,25 @@ class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 @admin.register(models.InternetNLV2Scan)
 class InternetNLScanAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ('id', 'type', 'scan_id', 'state', 'state_message', 'last_state_check', 'last_state_change',
+    list_display = ('id', 'type', 'scan_id', 'online', 'state', 'state_message', 'last_state_check', 'last_state_change',
                     'domains')
     search_fields = ('subject_urls__url', 'scan_id')
     list_filter = ('state', 'state_message', 'last_state_check', 'last_state_change', 'type')
     fields = ('type', 'scan_id', 'state', 'state_message', 'last_state_check', 'last_state_change', 'metadata',
-              'retrieved_scan_report')
+              'retrieved_scan_report', 'subject_urls')
     # todo: subject_urls inline
+
+    readonly_fields = ['subject_urls', 'metadata', 'retrieved_scan_report']
 
     @staticmethod
     def domains(obj):
         return obj.subject_urls.count()
+
+    @staticmethod
+    def online(obj):
+        from constance import config
+        return mark_safe(f"<a href='{config.INTERNET_NL_API_USERNAME}:{config.INTERNET_NL_API_PASSWORD}"
+                         f"@{config.INTERNET_NL_API_URL}/requests/{obj.scan_id}' target='_blank'>online</a>")
 
     actions = []
 

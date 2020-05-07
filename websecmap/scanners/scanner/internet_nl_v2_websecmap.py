@@ -413,22 +413,32 @@ def status_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
 
     status_code, response_content = response
 
-    if response_content['status'] == 'error':
-        update_state(scan, "error", response_content['message'])
-        return
-
-    if response_content['status'] == 'running':
+    if response_content['request']['status'] == 'registering':
         # follow scan progression at internet.nl, update the status message with that information.
-        update_state(scan, "running scan", response_content['message'])
+        update_state(scan, "running scan", response_content['request']['status'])
         return
 
-    if response_content['status'] == 'finished':
-        update_state(scan, "scan results ready", response_content['message'])
+    if response_content['request']['status'] == 'running':
+        # follow scan progression at internet.nl, update the status message with that information.
+        update_state(scan, "running scan", response_content['request']['status'])
+        return
+
+    if response_content['request']['status'] == 'generating':
+        # follow scan progression at internet.nl, update the status message with that information.
+        update_state(scan, "running scan", response_content['request']['status'])
+        return
+
+    if response_content['request']['status'] == 'done':
+        update_state(scan, "scan results ready", response_content['request']['status'])
+        return
+
+    if response_content['request']['status'] == 'error':
+        update_state(scan, "error", response_content['request']['status'])
         return
 
     # handle any other API result, that does not conform with the API spec. Update the state for debugging information.
-    update_state(scan, response_content['status'], response_content['message'])
-    raise ValueError("Unsupported response from the Internet.nl API received.")
+    # the progress will most likely hang. Such as with cancelled.
+    update_state(scan, response_content['request']['status'], response_content['request']['status'])
 
 
 @app.task(queue="storage")
@@ -437,8 +447,8 @@ def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
     Stores the scan metadata and domains.
 
     {
-        "id": "f284049256dd4ca793edbcd4ae41759a",
-        "metadata": {},
+        api_version...
+        "request": {},
         "domains": {}
     }
     :param response:
@@ -451,7 +461,7 @@ def result_administration(response: Tuple[int, dict], scan: InternetNLV2Scan):
 
     status_code, response_content = response
 
-    scan.metadata = response_content['metadata']
+    scan.metadata = response_content['request']
     scan.retrieved_scan_report = response_content['domains']
     scan.save()
 
