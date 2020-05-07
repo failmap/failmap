@@ -563,46 +563,31 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         scan_type=f'internet_nl_{scan_type}_overall_score',
         endpoint=endpoint,
         rating=scan_data['scoring']['percentage'],
-        message=scan_data['report'],
-        evidence=scan_data['report']
+        message=scan_data['report']['url'],
+        evidence=scan_data['report']['url']
     )
 
     # categories (ie, derived from the test results)
-    for category in scan_data['categories'].keys():
-        scan_type = f'internet_nl_{scan_type}_{category}'
+    for category in scan_data['results']['categories'].keys():
         store_endpoint_scan_result(
-            scan_type=scan_type,
+            scan_type=f'internet_nl_{scan_type}_{category}',
             endpoint=endpoint,
-            rating=scan_data["category"][category]["verdict"],
+            rating=scan_data['results']['categories'][category]["status"],
             message='',
-            evidence=scan_data['report']
+            evidence=scan_data['report']['url']
         )
-
-    # There are a number of "custom" fields that should be treated the same. These are calculations over the
-    # scan results and help users deriving certain conclusions.
-    # todo: does that contain the not_applicable stuff? that should be moved to the API
-    store_test_results(endpoint, scan_data['results']['custom'])
 
     # standard tests:
     store_test_results(endpoint, scan_data['results']['tests'])
 
+    # prepare for calculated results
+    scan_data['results']['calculated_results'] = {}
     if scan_type == "web":
-        scan_data = calculate_forum_standaardisatie_views_web(scan_data)
-    else:
-        scan_data = calculate_forum_standaardisatie_views_mail(scan_data)
+        scan_data = calculate_forum_standaardisatie_views_web(scan_data, scan_data['results']['custom'])
+    elif scan_type == 'mail_dashboard':
+        scan_data = calculate_forum_standaardisatie_views_mail(scan_data, scan_data['results']['custom'])
 
-    test_results_keys = scan_data['derived_results'].keys()
-    for test_result_key in test_results_keys:
-        test_result = scan_data['results'][test_result_key]
-
-        scan_type = f'internet_nl_{test_result_key}'
-        store_endpoint_scan_result(
-            scan_type=scan_type,
-            endpoint=endpoint,
-            rating=test_result['test_result'],
-            message="{'translation': '', 'verdict': ''}",
-            evidence=json.dumps(test_result['technical_details'])
-        )
+    store_test_results(endpoint, scan_data['results']['calculated_results'])
 
 
 def store_test_results(endpoint, test_results):
@@ -619,6 +604,7 @@ def store_test_results(endpoint, test_results):
         # only rating and message are treated as unique. The technical data is often very long and will not fit
         # in either rating and message, and will cause delays in working with these fields. What we do instead is
         # create a hash and append it to the message. Technical details are an array of array of string
+        log.debug(f"{scan_type}  = {test_result}")
         dumped_technical_details = json.dumps(test_result['technical_details'])
         technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
 
@@ -635,8 +621,21 @@ def store_test_results(endpoint, test_results):
 
 
 def add_calculation(scan_data, new_key: str, required_values: List[str]):
-    scan_data['derived_results'][new_key] = {
-        'result': true_when_all_pass(scan_data, required_values)
+    could_be_true = true_when_all_pass(scan_data, required_values)
+
+    scan_data['results']['calculated_results'][new_key] = {
+        'status': 'passed' if could_be_true else 'failed',
+        'verdict': 'passed' if could_be_true else 'failed',
+        'technical_details': [],
+    }
+
+
+def add_instant_calculation(scan_data, key, value):
+
+    scan_data['results']['calculated_results'][key] = {
+        'status': value,
+        'verdict': value,
+        'technical_details': [],
     }
 
 
@@ -649,13 +648,13 @@ def true_when_all_pass(scan_data, test_names) -> {}:
         raise ValueError('No values provided. Would always result in True, which could be risky.')
 
     for test_name in test_names:
-        if scan_data['results'][test_name]['test_result'] not in ['pass']:
+        if scan_data['results']['tests'][test_name]['status'] not in ['passed']:
             return False
 
     return True
 
 
-def calculate_forum_standaardisatie_views_web(scan_data):
+def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_results):
     # These values are published in the forum standaardisatie magazine.
 
     # DNSSEC
@@ -669,7 +668,7 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     # TLS_NCSC
     add_calculation(scan_data=scan_data, new_key='web_legacy_tls_ncsc_web',
                     required_values=['web_https_tls_version', 'web_https_tls_ciphers', 'web_https_tls_keyexchange',
-                                     'web_https_tls_compress', 'web_https_tls_secreneg', 'web_https_tls_clientreneg',
+                                     'web_https_tls_compression', 'web_https_tls_secreneg', 'web_https_tls_clientreneg',
                                      'web_https_cert_chain', 'web_https_cert_pubkey', 'web_https_cert_sig',
                                      'web_https_cert_domain'])
 
@@ -696,28 +695,37 @@ def calculate_forum_standaardisatie_views_web(scan_data):
     return scan_data
 
 
-def calculate_forum_standaardisatie_views_mail(scan_data):
+def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_results):
     # These values are published in the forum standaardisatie magazine.
 
     # DMARC
     add_calculation(scan_data=scan_data, new_key='mail_legacy_dmarc', required_values=['mail_auth_dmarc_exist'])
 
     # DKIM
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
+    if custom_api_field_results['mail_non_sending_domain']:
+        add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_dkim', required_values=['mail_auth_dkim_exist'])
 
     # SPF
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf', required_values=['mail_auth_spf_exist'])
 
     # DMARC Policy
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dmarc_policy',
-                    required_values=['mail_auth_dmarc_policy_only'])
+    #
+    add_instant_calculation(scan_data, "mail_legacy_dmarc_policy",
+                            'passed' if custom_api_field_results['mail_auth_dmarc_policy_only'] else 'failed')
 
     # SPF Policy
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf_policy', required_values=['mail_auth_spf_policy'])
 
     # START TLS
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls',
-                    required_values=['mail_starttls_tls_available'])
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_legacy_start_tls', "not_applicable")
+    elif not custom_api_field_results['mail_servers_testable']:
+        add_instant_calculation(scan_data, 'mail_legacy_start_tls', "not_testable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls',
+                        required_values=['mail_starttls_tls_available'])
 
     # START TLS NCSC
     # mail_starttls_cert_domain is mandatory ONLY when mail_starttls_dane_ta is True.
@@ -728,29 +736,49 @@ def calculate_forum_standaardisatie_views_mail(scan_data):
          'mail_starttls_tls_keyexchange', 'mail_starttls_tls_compress', 'mail_starttls_tls_secreneg',
          'mail_starttls_cert_pubkey', 'mail_starttls_cert_sig']
 
-    if scan_data['results']['mail_starttls_dane_ta']['verdict'] == "[TODO]":
+    if custom_api_field_results['mail_starttls_dane_ta']:
         start_tls_ncsc_fields.append('mail_starttls_cert_domain')
 
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls_ncsc', required_values=start_tls_ncsc_fields)
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "not_applicable")
+    elif not custom_api_field_results['mail_servers_testable']:
+        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "not_testable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls_ncsc',
+                        required_values=start_tls_ncsc_fields)
 
     # Not in forum standardisatie magazine, but used internally
     add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_email_domain',
                     required_values=['mail_dnssec_mailto_exist', 'mail_dnssec_mailto_valid'])
 
     # DNSSEC MX
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_mx',
-                    required_values=['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid'])
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_dnssec_mx_exist', "not_applicable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_mx',
+                        required_values=['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid'])
 
     # DANE
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_dane',
-                    required_values=['mail_starttls_dane_exist', 'mail_starttls_dane_valid'])
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_legacy_dane', "not_applicable")
+    elif not custom_api_field_results['mail_servers_testable']:
+        add_instant_calculation(scan_data, 'mail_legacy_dane', "not_testable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_dane',
+                        required_values=['mail_starttls_dane_exist', 'mail_starttls_dane_valid'])
 
     # Not in forum standardisatie magazine, but used internally
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_nameserver',
-                    required_values=['mail_ipv6_ns_address', 'mail_ipv6_ns_reach'])
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_ipv6_ns_address', "not_applicable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_nameserver',
+                        required_values=['mail_ipv6_ns_address', 'mail_ipv6_ns_reach'])
 
     # Not in forum standardisatie magazine, but used internally
-    add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_mailserver',
-                    required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
+    if not custom_api_field_results['mail_server_configured']:
+        add_instant_calculation(scan_data, 'mail_ipv6_mx_address', "not_applicable")
+    else:
+        add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_mailserver',
+                        required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
 
     return scan_data
