@@ -568,12 +568,16 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     )
 
     # categories (ie, derived from the test results)
+    # no technical details here:
     for category in scan_data['results']['categories'].keys():
         store_endpoint_scan_result(
             scan_type=f'internet_nl_{scan_type}_{category}',
             endpoint=endpoint,
             rating=scan_data['results']['categories'][category]["status"],
-            message='',
+            message=json.dumps(
+                {'translation': scan_data['results']['categories'][category]["verdict"],
+                 'technical_details_hash': ''}
+            ),
             evidence=scan_data['report']['url']
         )
 

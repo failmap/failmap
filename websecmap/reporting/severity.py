@@ -4,6 +4,7 @@ Business logic that determines what points and calculations are stored.
 This file contains (or should) verbose explantion of why points are given.
 
 """
+import json
 import logging
 from datetime import datetime
 
@@ -296,6 +297,43 @@ def change_internet_nl_severity_to_websecmap_severity(scan, original_requirement
 
 
 def internet_nl_requirement_tilde_value_format(scan):
+
+    # To support old metrics:
+    if "~" in scan.rating:
+        return internet_nl_api_v1_requirement_tilde_value_format(scan)
+
+    # New metrics are a lot simpler, let's hope it stays that way :)
+
+    # the explanation contains the translation and technical details and can be used elsewhere.
+    if scan.rating in ['passed', 'good_not_tested']:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0,
+                                                    technical_details=scan.evidence)
+
+    if scan.rating == 'failed':
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0,
+                                                    technical_details=scan.evidence)
+
+    if scan.rating == 'warning':
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0,
+                                                    technical_details=scan.evidence)
+
+    if scan.rating == 'info':
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1,
+                                                    technical_details=scan.evidence)
+
+    if scan.rating == 'not_tested':
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True,
+                                                    technical_details=scan.evidence)
+
+    # todo: this is probably wrong.
+    if scan.rating in ['not_applicable']:
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True,
+                                                    technical_details=scan.evidence)
+
+    raise ValueError(f"Rating {scan.rating} not supported for scan {scan}.")
+
+
+def internet_nl_api_v1_requirement_tilde_value_format(scan):
     """
     See documentation of upgrade_api_response to learn how this parsing works.
 
@@ -354,6 +392,7 @@ def internet_nl_requirement_tilde_value_format(scan):
     if scan_value == 'not_testable':
         return standard_calculation(scan=scan, explanation=explanation, not_testable=True)
 
+    # todo: is this used? And is that used correctly?
     if scan_value == 'not_applicable':
         return standard_calculation(scan=scan, explanation=explanation, not_applicable=True)
 
@@ -403,6 +442,21 @@ def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0,
         "not_testable": not_testable,
         "not_applicable": not_applicable
     }
+
+
+def standard_calculation_for_internet_nl(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
+                                         not_testable: bool = False, not_applicable: bool = False,
+                                         technical_details=None):
+
+    # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
+    # and should be the same for everything except the score.
+    calc = standard_calculation(scan, "", high, medium, low, not_testable, not_applicable)
+
+    data = json.loads(explanation)
+    calc['translation'] = data.get('translation', "")
+    calc['technical_details'] = json.loads(technical_details)
+
+    return calc
 
 
 # don't re-create the dict every time.
@@ -536,7 +590,7 @@ def get_severity(scan):
     calculation = calculation_methods[scan.type](scan)
 
     if not calculation:
-        raise ValueError(f'No calculation available for scan {scan.type}')
+        raise ValueError(f'No calculation created for scan {scan.type}')
 
     # handle comply or explain
     # only when an explanation is given AND the explanation is still valid when creating the report.
