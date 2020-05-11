@@ -306,29 +306,23 @@ def internet_nl_requirement_tilde_value_format(scan):
 
     # the explanation contains the translation and technical details and can be used elsewhere.
     if scan.rating in ['passed', 'good_not_tested']:
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=0)
 
     if scan.rating == 'failed':
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=1, medium=0, low=0)
 
     if scan.rating == 'warning':
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=1, low=0)
 
     if scan.rating == 'info':
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
 
     if scan.rating == 'not_tested':
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
     # todo: this is probably wrong.
     if scan.rating in ['not_applicable']:
-        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True,
-                                                    technical_details=scan.evidence)
+        return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
 
     raise ValueError(f"Rating {scan.rating} not supported for scan {scan}.")
 
@@ -445,8 +439,7 @@ def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0,
 
 
 def standard_calculation_for_internet_nl(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
-                                         not_testable: bool = False, not_applicable: bool = False,
-                                         technical_details=None):
+                                         not_testable: bool = False, not_applicable: bool = False):
 
     # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
     # and should be the same for everything except the score.
@@ -454,7 +447,12 @@ def standard_calculation_for_internet_nl(scan, explanation: str, high: int = 0, 
 
     data = json.loads(explanation)
     calc['translation'] = data.get('translation', "")
-    calc['technical_details'] = json.loads(technical_details)
+    calc['technical_details'] = scan.evidence
+
+    # The original value contains more nuance than the agregation to high, medium and low. So use the translation but
+    # also the original rating to show the correct icon. This is also used to determine the progression compared to
+    # the previous scan. This nuance is important as good > good_not_tested.
+    calc['test_result'] = scan.rating
 
     return calc
 
