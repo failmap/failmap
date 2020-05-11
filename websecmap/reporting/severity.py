@@ -555,8 +555,16 @@ calculation_methods = {
     'internet_nl_web_https_http_redirect': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_https_cert_domain': internet_nl_requirement_tilde_value_format,
 
+    # api v2.0 renamed 1 web field and added four new fields, todo: this should be rolled back to the old name:
+    # this will be rolled back
+    'internet_nl_web_https_tls_compression': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_cipherorder': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_0rtt': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_ocsp': internet_nl_requirement_tilde_value_format,
+    'internet_nl_web_https_tls_keyexchangehash': internet_nl_requirement_tilde_value_format,
+
     # Categories have an old format
-    '≈': internet_nl_generic_boolean_value,
+    'internet_nl_web_tls': internet_nl_generic_boolean_value,
     'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
     'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
     'internet_nl_web_overall_score': internet_nl_score,

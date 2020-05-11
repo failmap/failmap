@@ -265,3 +265,16 @@ def test_internet_nl_store_testresults(db):
 
     # have the legacy views run?
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_legacy_dnssec").count() == 2
+
+    # The categories are imported
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_ipv6").count() == 2
+
+    # The new fields of api v2.0 have been imported:
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_cipherorder").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_0rtt").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_ocsp").count() == 2
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_keyexchangehash").count() == 2
+
+    # in api 2.0 web_https_tls_compress renamed to web_https_tls_compression, todo: this should be rolled back
+    # assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_compression").count() == 2
+    # assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_compress").count() == 0
