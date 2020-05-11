@@ -295,6 +295,12 @@ SCANNERS = [
             'internet_nl_web_appsecpriv_x_content_type_options',
             'internet_nl_web_appsecpriv_x_frame_options',
             'internet_nl_web_appsecpriv_x_xss_protection',
+
+            # added with api v2.0 May 2020:
+            'internet_nl_web_https_tls_cipherorder',
+            'internet_nl_web_https_tls_0rtt',
+            'internet_nl_web_https_tls_ocsp',
+            'internet_nl_web_https_tls_keyexchangehash'
         ],
         'creates url scan types': []
     },

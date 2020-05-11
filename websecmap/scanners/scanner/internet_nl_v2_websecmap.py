@@ -570,8 +570,15 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
     # categories (ie, derived from the test results)
     # no technical details here:
     for category in scan_data['results']['categories'].keys():
+
+        # to keep APIv2 in line with APIv2, so we don't have to rename fields:
+        if scan_type == "web":
+            scan_type_field = f'internet_nl_{category}'
+        else:
+            scan_type_field = f'internet_nl_{scan_type}_{category}',
+
         store_endpoint_scan_result(
-            scan_type=f'internet_nl_{scan_type}_{category}',
+            scan_type=scan_type_field,
             endpoint=endpoint,
             rating=scan_data['results']['categories'][category]["status"],
             message=json.dumps(
@@ -608,7 +615,7 @@ def store_test_results(endpoint, test_results):
         # only rating and message are treated as unique. The technical data is often very long and will not fit
         # in either rating and message, and will cause delays in working with these fields. What we do instead is
         # create a hash and append it to the message. Technical details are an array of array of string
-        log.debug(f"{scan_type}  = {test_result}")
+        # log.debug(f"{scan_type}  = {test_result}")
         dumped_technical_details = json.dumps(test_result['technical_details'])
         technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
 
