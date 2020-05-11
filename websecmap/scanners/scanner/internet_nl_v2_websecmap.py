@@ -679,7 +679,7 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
     # TLS_NCSC
     add_calculation(scan_data=scan_data, new_key='web_legacy_tls_ncsc_web',
                     required_values=['web_https_tls_version', 'web_https_tls_ciphers', 'web_https_tls_keyexchange',
-                                     'web_https_tls_compression', 'web_https_tls_secreneg', 'web_https_tls_clientreneg',
+                                     'web_https_tls_compress', 'web_https_tls_secreneg', 'web_https_tls_clientreneg',
                                      'web_https_cert_chain', 'web_https_cert_pubkey', 'web_https_cert_sig',
                                      'web_https_cert_domain'])
 
