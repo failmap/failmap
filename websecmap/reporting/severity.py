@@ -270,11 +270,19 @@ def internet_nl_mail_auth_dmarc_exist(scan):
 
 
 def internet_nl_generic_boolean_value(scan):
-    if scan.rating == "True":
-        return standard_calculation(scan=scan, explanation="%s available" % scan.type, high=0, medium=0, low=0)
 
-    # medium and low don't impact percentages. Therefore, categories that are not complete should be treaded as high.
-    return standard_calculation(scan=scan, explanation="%s missing" % scan.type, high=1, medium=0, low=0)
+    # old school:
+    if scan.rating in ["True", "False"]:
+        if scan.rating == "True":
+            return standard_calculation_for_internet_nl(scan=scan, explanation="%s available" % scan.type,
+                                                        high=0, medium=0, low=0)
+
+        # medium and low don't impact percentages. Therefore, categories that are not complete should be treaded as high
+        return standard_calculation_for_internet_nl(scan=scan, explanation="%s missing" % scan.type,
+                                                    high=1, medium=0, low=0)
+
+    # API V2 has a better and more nuanced approach to category output.
+    return internet_nl_requirement_tilde_value_format(scan)
 
 
 def change_internet_nl_severity_to_websecmap_severity(scan, original_requirement_level):
@@ -548,7 +556,7 @@ calculation_methods = {
     'internet_nl_web_https_cert_domain': internet_nl_requirement_tilde_value_format,
 
     # Categories have an old format
-    'internet_nl_web_tls': internet_nl_generic_boolean_value,
+    '≈': internet_nl_generic_boolean_value,
     'internet_nl_web_dnssec': internet_nl_generic_boolean_value,
     'internet_nl_web_ipv6': internet_nl_generic_boolean_value,
     'internet_nl_web_overall_score': internet_nl_score,
