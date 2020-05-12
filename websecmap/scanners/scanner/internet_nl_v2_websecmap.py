@@ -231,13 +231,19 @@ def registering_scan_at_internet_nl(scan: InternetNLV2Scan):
         'type': scan.type
     }
 
+    scan_types = {
+        'mail': 'mail',
+        'mail_dashboard': 'mail',
+        'web': 'web'
+    }
+
     if not valid_api_settings(scan):
         return group([])
 
     return (
         get_relevant_urls.si(scan)
         | register.s(
-            scan.type,
+            scan_types[scan.type],
             json.dumps(scan_name),
             create_api_settings(scan)
         )
@@ -734,6 +740,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     add_calculation(scan_data=scan_data, new_key='mail_legacy_dmarc', required_values=['mail_auth_dmarc_exist'])
 
     # DKIM
+    # api v2: custom field exists.
     if custom_api_field_results['mail_non_sending_domain']:
         add_instant_calculation(scan_data, "mail_legacy_dkim", "not_applicable")
     else:
@@ -743,7 +750,10 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf', required_values=['mail_auth_spf_exist'])
 
     # DMARC Policy
-    #
+    # Api v2 changes:
+    # 1a/b mail_auth_dmarc_policy_only has been removed, and can be replaced with internet_nl_mail_auth_dmarc_policy.
+    # Todo: get the internet_nl_mail_auth_dmarc_policy data and see if that is passes, else it fails.
+    # 2a/b: ignore
     add_instant_calculation(scan_data, "mail_legacy_dmarc_policy",
                             'passed' if custom_api_field_results['mail_auth_dmarc_policy_only'] else 'failed')
 
@@ -751,6 +761,11 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf_policy', required_values=['mail_auth_spf_policy'])
 
     # START TLS
+    # Api v2 changes:
+    # 4: mail_server_configured will probably be a mail server configured.
+    # 5: not_testable, A "mail_starttls_tls_available": "failed": ["detail verdict could-not-test"] or
+    #  "mail_starttls_tls_available": "warning": ["other"]
+    #  if some mailservers not testable_ -> good_not_tested is relevant?
     if not custom_api_field_results['mail_server_configured']:
         add_instant_calculation(scan_data, 'mail_legacy_start_tls', "not_applicable")
     elif not custom_api_field_results['mail_servers_testable']:
@@ -763,11 +778,15 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     # mail_starttls_cert_domain is mandatory ONLY when mail_starttls_dane_ta is True.
     # todo: the mail_starttls_dane_ta value is not returned anymore. Is there a verdict that matches this scenario?
     # todo: this will problably be a custom field?
+    # 3a/3b todo: will be checked lateron. -> have to check how this fits in tls ncsc. ta means trust anchor.
     start_tls_ncsc_fields = \
         ['mail_starttls_tls_available', 'mail_starttls_tls_version', 'mail_starttls_tls_ciphers',
          'mail_starttls_tls_keyexchange', 'mail_starttls_tls_compress', 'mail_starttls_tls_secreneg',
          'mail_starttls_cert_pubkey', 'mail_starttls_cert_sig']
 
+    # info bad is OK. -> dus niet alles passed is goed.
+    # mogelijk sprake van phase out (warnings), is dat wel / niet duidelijk?
+    # idee is nu dat laagst scorende tests is het niveau.
     if custom_api_field_results['mail_starttls_dane_ta']:
         start_tls_ncsc_fields.append('mail_starttls_cert_domain')
 
