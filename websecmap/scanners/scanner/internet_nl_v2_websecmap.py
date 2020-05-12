@@ -567,15 +567,36 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
         evidence=scan_data['report']['url']
     )
 
+    api_v2_categories_to_v1_categories = {
+        "mail": {
+            "mail_ipv6": "ipv6",
+            "mail_dnssec": "dnssec",
+            "mail_auth": "auth",
+            "mail_starttls": "tls",
+        },
+
+        # this is the same as mail, and a trivial way to write this fallback
+        "mail_dashboard": {
+            "mail_ipv6": "ipv6",
+            "mail_dnssec": "dnssec",
+            "mail_auth": "auth",
+            "mail_starttls": "tls",
+        },
+
+        "web": {
+            "web_ipv6": "ipv6",
+            "web_dnssec": "dnssec",
+            "web_https": "tls",
+            "web_appsecpriv": "appsecpriv",
+        }
+    }
+
     # categories (ie, derived from the test results)
     # no technical details here:
     for category in scan_data['results']['categories'].keys():
 
-        # to keep APIv2 in line with APIv2, so we don't have to rename fields:
-        if scan_type == "web":
-            scan_type_field = f'internet_nl_{category}'
-        else:
-            scan_type_field = f'internet_nl_{scan_type}_{category}',
+        # to keep APIv2 field names in line with APIv1, so we don't have to rename fields and all reports stay valid.
+        scan_type_field = f'internet_nl_{scan_type}_{api_v2_categories_to_v1_categories[scan_type][category]}'
 
         store_endpoint_scan_result(
             scan_type=scan_type_field,
