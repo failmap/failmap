@@ -562,6 +562,9 @@ calculation_methods = {
     'internet_nl_web_https_tls_0rtt': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_https_tls_ocsp': internet_nl_requirement_tilde_value_format,
     'internet_nl_web_https_tls_keyexchangehash': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_cipherorder': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_keyexchangehash': internet_nl_requirement_tilde_value_format,
+    'internet_nl_mail_starttls_tls_0rtt': internet_nl_requirement_tilde_value_format,
 
     # Categories have an old format
     'internet_nl_web_tls': internet_nl_generic_boolean_value,
@@ -580,6 +583,7 @@ calculation_methods = {
 
     # Feature flags are not reported, these are the feature flags that should not be in any report. Only
     # the consequences of these flags will be visible.
+    # these flags are removed in api 2.0, are kept for parsing old reports if need be.
     'internet_nl_mail_non_sending_domain': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_mail_server_configured': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
     'internet_nl_mail_servers_testable': internet_nl_requirement_tilde_value_format,  # Added 24th of May 2019
