@@ -235,6 +235,11 @@ SCANNERS = [
             'internet_nl_mail_starttls_dane_ta',  # Added 24th of May 2019
             'internet_nl_mail_auth_dmarc_policy_only',  # Added 24th of May 2019
             'internet_nl_mail_auth_dmarc_ext_destination',  # Added 24th of May 2019
+
+            # added with api v2.0 May 2020:
+            'internet_nl_mail_starttls_tls_cipherorder',
+            'internet_nl_mail_starttls_tls_keyexchangehash',
+            'internet_nl_mail_starttls_tls_0rtt',
         ],
         'creates url scan types': []
     },
@@ -300,7 +305,7 @@ SCANNERS = [
             'internet_nl_web_https_tls_cipherorder',
             'internet_nl_web_https_tls_0rtt',
             'internet_nl_web_https_tls_ocsp',
-            'internet_nl_web_https_tls_keyexchangehash'
+            'internet_nl_web_https_tls_keyexchangehash',
         ],
         'creates url scan types': []
     },
