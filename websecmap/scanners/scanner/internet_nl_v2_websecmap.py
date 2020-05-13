@@ -736,6 +736,13 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
 def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_results):
     # These values are published in the forum standaardisatie magazine.
 
+    # not all custom fields are defined yet, temporarily all will be false, these fields will be defined next week:
+    custom_api_field_results['mail_non_sending_domain'] = False
+    custom_api_field_results['mail_server_configured'] = False
+    custom_api_field_results['mail_servers_testable'] = False
+    custom_api_field_results['mail_starttls_dane_ta'] = False
+    custom_api_field_results['mail_auth_dmarc_policy_only'] = False
+
     # DMARC
     add_calculation(scan_data=scan_data, new_key='mail_legacy_dmarc', required_values=['mail_auth_dmarc_exist'])
 
