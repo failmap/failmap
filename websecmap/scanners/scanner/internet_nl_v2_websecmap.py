@@ -387,7 +387,10 @@ def registration_administration(response: Tuple[int, dict], scan: InternetNLV2Sc
     # todo: duplicated "request" in "request".
     scan.scan_id = response_content['request']['request_id']
     scan.metadata = response_content['request']
-    scan.type = response_content['request']['request_type']
+
+    # do not update the scan type. The internet.nl scan types are only web and mail, while websecmap and others
+    # can use all kinds of tests.
+    # scan.type = response_content['request']['request_type']
     scan.save()
 
     update_state(scan, "registered", "scan registered at internet.nl")
