@@ -814,7 +814,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
 
     # DNSSEC MX
     if not custom_api_field_results['mail_server_configured']:
-        add_instant_calculation(scan_data, 'mail_dnssec_mx_exist', "not_applicable")
+        add_instant_calculation(scan_data, 'mail_legacy_dnssec_mx', "not_applicable")
     else:
         add_calculation(scan_data=scan_data, new_key='mail_legacy_dnssec_mx',
                         required_values=['mail_dnssec_mx_exist', 'mail_dnssec_mx_valid'])
@@ -830,14 +830,14 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
 
     # Not in forum standardisatie magazine, but used internally
     if not custom_api_field_results['mail_server_configured']:
-        add_instant_calculation(scan_data, 'mail_ipv6_ns_address', "not_applicable")
+        add_instant_calculation(scan_data, 'mail_legacy_ipv6_nameserver', "not_applicable")
     else:
         add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_nameserver',
                         required_values=['mail_ipv6_ns_address', 'mail_ipv6_ns_reach'])
 
     # Not in forum standardisatie magazine, but used internally
     if not custom_api_field_results['mail_server_configured']:
-        add_instant_calculation(scan_data, 'mail_ipv6_mx_address', "not_applicable")
+        add_instant_calculation(scan_data, 'mail_legacy_ipv6_mailserver', "not_applicable")
     else:
         add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_mailserver',
                         required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
