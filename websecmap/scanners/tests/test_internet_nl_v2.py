@@ -130,7 +130,7 @@ def test_internet_nl_store_testresults(db):
                                                 'technical_details': []}},
                     'custom': {
                         'tls_1_3_support': 'yes'
-                    }}}, 'lyncdiscover.vng.nl': {
+        }}}, 'lyncdiscover.vng.nl': {
         'report': {'url': 'https://dev.batch.internet.nl/site/lyncdiscover.vng.nl/665166/'},
         'scoring': {'percentage': 66}, 'results': {'categories': {'web_ipv6': {'verdict': 'passed', 'status': 'passed'},
                                                                   'web_dnssec': {'verdict': 'failed',
@@ -186,7 +186,7 @@ def test_internet_nl_store_testresults(db):
                                                             ['52.112.196.45', 'TLS 1.1', 'phase out'],
                                                             ['...', 'TLS 1.0', 'phase out']]},
             'web_https_tls_compress': {'status': 'passed', 'verdict': 'good',
-                                          'technical_details': [['2603:1027::e', 'no'], ['52.112.196.45', 'no']]},
+                                       'technical_details': [['2603:1027::e', 'no'], ['52.112.196.45', 'no']]},
             'web_https_tls_secreneg': {'status': 'passed', 'verdict': 'good',
                                        'technical_details': [['2603:1027::e', 'yes'], ['52.112.196.45', 'yes']]},
             'web_https_tls_clientreneg': {'status': 'passed', 'verdict': 'good',
@@ -229,7 +229,7 @@ def test_internet_nl_store_testresults(db):
             'web_appsecpriv_x_xss_protection': {'status': 'warning', 'verdict': 'bad',
                                                 'technical_details': [['2603:1027::e', 'None'],
                                                                       ['52.112.196.45', 'None']]}},
-                                                   'custom': {'tls_1_3_support': 'yes'}}}}
+            'custom': {'tls_1_3_support': 'yes'}}}}
 
     scan = InternetNLV2Scan()
     scan.retrieved_scan_report = test_results
