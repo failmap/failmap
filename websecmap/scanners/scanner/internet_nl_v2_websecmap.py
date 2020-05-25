@@ -632,7 +632,6 @@ def store_domain_scan_results(domain: str, scan_data: dict, scan_type: str, endp
 
 
 def store_test_results(endpoint, test_results):
-
     # this way new fields are automatically added
     test_results_keys = test_results.keys()
 
@@ -648,7 +647,6 @@ def store_test_results(endpoint, test_results):
         # log.debug(f"{scan_type}  = {test_result}")
         dumped_technical_details = json.dumps(test_result['technical_details'])
         technical_details_hash = hashlib.md5(dumped_technical_details.encode('utf-8')).hexdigest()
-
         store_endpoint_scan_result(
             scan_type=scan_type,
             endpoint=endpoint,
@@ -662,11 +660,11 @@ def store_test_results(endpoint, test_results):
 
 
 def add_calculation(scan_data, new_key: str, required_values: List[str]):
-    could_be_true = true_when_all_pass(scan_data, required_values)
+    lowest_value = lowest_value_in_results(scan_data, required_values)
 
     scan_data['results']['calculated_results'][new_key] = {
-        'status': 'passed' if could_be_true else 'failed',
-        'verdict': 'passed' if could_be_true else 'failed',
+        'status': lowest_value,
+        'verdict': lowest_value,
         'technical_details': [],
     }
 
@@ -683,7 +681,7 @@ def add_instant_calculation(scan_data, key, value):
 # Todo: this will be: lowest denominator. So: failed, to good (see comparison elsewhere). The lowest is the
 # value for this field. What will not testable not
 # not_testable < failed < warning < info < good_not_testable < good
-def true_when_all_pass(scan_data, test_names) -> {}:
+def lowest_value_in_results(scan_data, test_names: List[str]) -> str:
 
     if not scan_data:
         raise ValueError('No views provided. Something went wrong in the API response?')
@@ -691,11 +689,26 @@ def true_when_all_pass(scan_data, test_names) -> {}:
     if not test_names:
         raise ValueError('No values provided. Would always result in True, which could be risky.')
 
-    for test_name in test_names:
-        if scan_data['results']['tests'][test_name]['status'] not in ['passed']:
-            return False
+    test_order = {
+        'not_applicable': -1,
+        'not_tested': 0,
+        'failed': 1,
+        'warning': 2,
+        'info': 3,
+        'good_not_tested': 4,
+        'passed': 5
+    }
 
-    return True
+    lowest_test_outcome = 5
+    lowest_test_status = "passed"
+    for test_name in test_names:
+        current_status = scan_data['results']['tests'][test_name]['status']
+        # Never up the status with an unknown status. Those are ignored with the random high value of 9000.
+        if test_order.get(current_status, 9000) < lowest_test_outcome:
+            lowest_test_outcome = test_order[current_status]
+            lowest_test_status = current_status
+
+    return lowest_test_status
 
 
 def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_results):
