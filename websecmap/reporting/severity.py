@@ -329,12 +329,22 @@ def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, 
     if scan.rating == 'info':
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, high=0, medium=0, low=1)
 
-    if scan.rating == 'not_tested':
+    if scan.rating in ['not_tested', 'not_testable']:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_testable=True)
 
     # todo: this is probably wrong.
     if scan.rating in ['not_applicable']:
         return standard_calculation_for_internet_nl(scan=scan, explanation=scan.explanation, not_applicable=True)
+
+    # new internet.nl values for special case. They cannot be aggregated, and are moved into not_applicable
+    # so there are still stats made for them. Perhaps they can be removed as they complicate things?
+    if scan.rating in ['unreachable']:
+        return standard_calculation_for_internet_nl(
+            scan=scan, explanation=scan.explanation, not_testable=True)
+
+    if scan.rating in ['no_mx']:
+        return standard_calculation_for_internet_nl(
+            scan=scan, explanation=scan.explanation, not_applicable=True)
 
     raise ValueError(f"Rating {scan.rating} not supported for scan {scan}.")
 
