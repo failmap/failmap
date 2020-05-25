@@ -764,6 +764,10 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
     elif custom_api_field_results['tls_1_3_support'] == "undetermined":
         add_instant_calculation(scan_data, 'web_legacy_tls_1_3', "not_testable")
 
+    # add custom field for the ipv6 test, so this can be labelled individually
+    add_instant_calculation(scan_data, "web_legacy_category_ipv6",
+                            scan_data['results']['categories']['web_ipv6']['status'])
+
     return scan_data
 
 
@@ -911,5 +915,9 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
         add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "passed")
     else:
         add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "failed")
+
+    # add custom field for the ipv6 test, so this can be labelled individually
+    add_instant_calculation(scan_data, "mail_legacy_category_ipv6",
+                            scan_data['results']['categories']['mail_ipv6']['status'])
 
     return scan_data

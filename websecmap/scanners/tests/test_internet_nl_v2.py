@@ -263,7 +263,7 @@ def test_internet_nl_store_testresults(db):
     process_scan_results(scan)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 92
+    assert EndpointGenericScan.objects.all().count() == 94
 
     # are the web scans imported
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_x_xss_protection").count() == 2
@@ -405,4 +405,6 @@ def test_internet_nl_store_testresults(db):
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_start_tls_ncsc").count() == 1
 
-    assert EndpointGenericScan.objects.all().count() == 92 + 52
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_category_ipv6").count() == 1
+
+    assert EndpointGenericScan.objects.all().count() == 94 + 53
