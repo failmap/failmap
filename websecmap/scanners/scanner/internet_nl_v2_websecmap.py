@@ -783,7 +783,7 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     # Todo: get the internet_nl_mail_auth_dmarc_policy data and see if that is passes, else it fails.
     # 2a/b: ignore
     add_instant_calculation(scan_data, "mail_legacy_dmarc_policy",
-                            'passed' if custom_api_field_results['mail_auth_dmarc_policy'] else 'failed')
+                            scan_data['results']['tests']['mail_auth_dmarc_policy']['status'])
 
     # SPF Policy
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf_policy', required_values=['mail_auth_spf_policy'])
