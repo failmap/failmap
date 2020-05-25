@@ -7,14 +7,17 @@ This file contains (or should) verbose explantion of why points are given.
 import json
 import logging
 from datetime import datetime
+from typing import Union
 
 import pytz
 from django.conf import settings
 
+from websecmap.scanners.models import EndpointGenericScan, UrlGenericScan
+
 log = logging.getLogger(__package__)
 
 
-def get_security_header_calculation(scan):
+def get_security_header_calculation(scan: Union[EndpointGenericScan, UrlGenericScan]):
     """
     Rationale for classifcation
 
@@ -131,7 +134,7 @@ def get_security_header_calculation(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def plain_https(scan):
+def plain_https(scan: Union[EndpointGenericScan, UrlGenericScan]):
     high, medium, low = 0, 0, 0
 
     # changed the ratings in the database. They are not really correct.
@@ -150,7 +153,7 @@ def plain_https(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def ftp(scan):
+def ftp(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # outdated, insecure
     high, medium, low = 0, 0, 0
 
@@ -171,7 +174,7 @@ def ftp(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def DNSSEC(scan):
+def DNSSEC(scan: Union[EndpointGenericScan, UrlGenericScan]):
     """
         See: https://en.wikipedia.org/wiki/Domain_Name_System_Security_Extensions
 
@@ -185,7 +188,7 @@ def DNSSEC(scan):
     return standard_calculation(scan, scan.explanation, high, medium, low)
 
 
-def tls_qualys_certificate_trusted(scan):
+def tls_qualys_certificate_trusted(scan: Union[EndpointGenericScan, UrlGenericScan]):
     high, medium, low = 0, 0, 0
 
     explanations = {
@@ -201,7 +204,7 @@ def tls_qualys_certificate_trusted(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def tls_qualys_encryption_quality(scan):
+def tls_qualys_encryption_quality(scan: Union[EndpointGenericScan, UrlGenericScan]):
     high, medium, low = 0, 0, 0
 
     explanations = {
@@ -224,7 +227,7 @@ def tls_qualys_encryption_quality(scan):
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def internet_nl_mail_starttls_tls_available(scan):
+def internet_nl_mail_starttls_tls_available(scan: Union[EndpointGenericScan, UrlGenericScan]):
     if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="STARTTLS Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
@@ -235,7 +238,7 @@ def internet_nl_mail_starttls_tls_available(scan):
         return standard_calculation(scan=scan, explanation="STARTTLS Missing", high=1, medium=0, low=0)
 
 
-def internet_nl_mail_auth_spf_exist(scan):
+def internet_nl_mail_auth_spf_exist(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # https://blog.returnpath.com/how-to-explain-spf-in-plain-english/
     if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="SPF Available", high=0, medium=0, low=0)
@@ -247,7 +250,7 @@ def internet_nl_mail_auth_spf_exist(scan):
         return standard_calculation(scan=scan, explanation="SPF Missing", high=0, medium=1, low=0)
 
 
-def internet_nl_mail_auth_dkim_exist(scan):
+def internet_nl_mail_auth_dkim_exist(scan: Union[EndpointGenericScan, UrlGenericScan]):
     if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="DKIM Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
@@ -258,7 +261,7 @@ def internet_nl_mail_auth_dkim_exist(scan):
         return standard_calculation(scan=scan, explanation="DKIM Missing", high=0, medium=1, low=0)
 
 
-def internet_nl_mail_auth_dmarc_exist(scan):
+def internet_nl_mail_auth_dmarc_exist(scan: Union[EndpointGenericScan, UrlGenericScan]):
     if scan.rating == "True":
         return standard_calculation(scan=scan, explanation="DMARC Available", high=0, medium=0, low=0)
     elif scan.rating == "mx removed":
@@ -269,7 +272,7 @@ def internet_nl_mail_auth_dmarc_exist(scan):
         return standard_calculation(scan=scan, explanation="DMARC Missing", high=0, medium=1, low=0)
 
 
-def internet_nl_generic_boolean_value(scan):
+def internet_nl_generic_boolean_value(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     # old school:
     if scan.rating in ["True", "False"]:
@@ -285,7 +288,8 @@ def internet_nl_generic_boolean_value(scan):
     return internet_nl_requirement_tilde_value_format(scan)
 
 
-def change_internet_nl_severity_to_websecmap_severity(scan, original_requirement_level):
+def change_internet_nl_severity_to_websecmap_severity(scan: Union[EndpointGenericScan, UrlGenericScan],
+                                                      original_requirement_level):
     # Only affected when in settings APPLICATION_NAME = "websecmap", since other apps use
     # other setting files, this would work.
     # how does this code quickly recognize being a standalone websecmap, and not something else.
@@ -304,7 +308,7 @@ def change_internet_nl_severity_to_websecmap_severity(scan, original_requirement
     return original_requirement_level
 
 
-def internet_nl_requirement_tilde_value_format(scan):
+def internet_nl_requirement_tilde_value_format(scan: Union[EndpointGenericScan, UrlGenericScan]):
 
     # To support old metrics:
     if "~" in scan.rating:
@@ -335,7 +339,7 @@ def internet_nl_requirement_tilde_value_format(scan):
     raise ValueError(f"Rating {scan.rating} not supported for scan {scan}.")
 
 
-def internet_nl_api_v1_requirement_tilde_value_format(scan):
+def internet_nl_api_v1_requirement_tilde_value_format(scan: Union[EndpointGenericScan, UrlGenericScan]):
     """
     See documentation of upgrade_api_response to learn how this parsing works.
 
@@ -401,7 +405,7 @@ def internet_nl_api_v1_requirement_tilde_value_format(scan):
     raise ValueError(f'Cannot determine severity for internet.nl scan type {scan.type}')
 
 
-def internet_nl_score(scan):
+def internet_nl_score(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # Todo: these numbers are completely chosen at random and need to be defined.
     # todo: how to add the score and url to each url in a report? / other special values?
     score = int(scan.rating)
@@ -421,13 +425,14 @@ def internet_nl_score(scan):
     return standard_calculation(scan=scan, explanation=f"{scan.rating} {scan.evidence}", high=1, medium=0, low=0)
 
 
-def dummy_calculated_values(scan):
+def dummy_calculated_values(scan: Union[EndpointGenericScan, UrlGenericScan]):
     explanation = "This is a dummy scan."
     high, medium, low = 0, 0, 0
     return standard_calculation(scan, explanation, high, medium, low)
 
 
-def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
+def standard_calculation(scan: Union[EndpointGenericScan, UrlGenericScan],
+                         explanation: str, high: int = 0, medium: int = 0, low: int = 0,
                          not_testable: bool = False, not_applicable: bool = False):
 
     ok = 0 if high or medium or low or not_testable or not_testable else 1
@@ -446,16 +451,24 @@ def standard_calculation(scan, explanation: str, high: int = 0, medium: int = 0,
     }
 
 
-def standard_calculation_for_internet_nl(scan, explanation: str, high: int = 0, medium: int = 0, low: int = 0,
+def standard_calculation_for_internet_nl(scan: Union[EndpointGenericScan, UrlGenericScan], explanation: str,
+                                         high: int = 0, medium: int = 0, low: int = 0,
                                          not_testable: bool = False, not_applicable: bool = False):
 
     # the explanation is a bunch of json, that is not really workable. These fields are split into separate data
     # and should be the same for everything except the score.
     calc = standard_calculation(scan, "", high, medium, low, not_testable, not_applicable)
 
-    data = json.loads(explanation)
-    calc['translation'] = data.get('translation', "")
-    calc['technical_details'] = scan.evidence
+    # V1 reports do not have json stored in the explanation, only text messages or nothing.
+    # So, only parse this is it contains json at all. To improve speed, first check the first letter.
+    if explanation[0:1] == "{":
+        try:
+            data = json.loads(explanation)
+            calc['translation'] = data.get('translation', "")
+            calc['technical_details'] = scan.evidence
+        except json.decoder.JSONDecodeError:
+            # not a json value, nothing is done with the explanation field otherwise
+            pass
 
     # The original value contains more nuance than the agregation to high, medium and low. So use the translation but
     # also the original rating to show the correct icon. This is also used to determine the progression compared to
@@ -600,7 +613,7 @@ calculation_methods = {
 }
 
 
-def get_severity(scan):
+def get_severity(scan: Union[EndpointGenericScan, UrlGenericScan]):
     # Can be probably more efficient by adding some methods to scan.
     if not calculation_methods.get(scan.type, None):
         raise ValueError("No calculation available for this scan type: %s" % scan.type)

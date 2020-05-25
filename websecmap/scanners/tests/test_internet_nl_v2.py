@@ -107,7 +107,7 @@ def test_internet_nl_store_testresults(db):
             'web_https_tls_ciphers': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
             'web_https_tls_cipherorder': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
             'web_https_tls_version': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
-            'web_https_tls_compression': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
+            'web_https_tls_compress': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
             'web_https_tls_secreneg': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
             'web_https_tls_clientreneg': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
             'web_https_cert_chain': {'status': 'not_tested', 'verdict': 'not-tested', 'technical_details': []},
@@ -127,7 +127,10 @@ def test_internet_nl_store_testresults(db):
             'web_appsecpriv_x_content_type_options': {'status': 'not_tested', 'verdict': 'not-tested',
                                                       'technical_details': []},
             'web_appsecpriv_x_xss_protection': {'status': 'not_tested', 'verdict': 'not-tested',
-                                                'technical_details': []}}, 'custom': {}}}, 'lyncdiscover.vng.nl': {
+                                                'technical_details': []}},
+                    'custom': {
+                        'tls_1_3_support': 'yes'
+                    }}}, 'lyncdiscover.vng.nl': {
         'report': {'url': 'https://dev.batch.internet.nl/site/lyncdiscover.vng.nl/665166/'},
         'scoring': {'percentage': 66}, 'results': {'categories': {'web_ipv6': {'verdict': 'passed', 'status': 'passed'},
                                                                   'web_dnssec': {'verdict': 'failed',
@@ -182,7 +185,7 @@ def test_internet_nl_store_testresults(db):
                                                             ['...', 'TLS 1.0', 'phase out'],
                                                             ['52.112.196.45', 'TLS 1.1', 'phase out'],
                                                             ['...', 'TLS 1.0', 'phase out']]},
-            'web_https_tls_compression': {'status': 'passed', 'verdict': 'good',
+            'web_https_tls_compress': {'status': 'passed', 'verdict': 'good',
                                           'technical_details': [['2603:1027::e', 'no'], ['52.112.196.45', 'no']]},
             'web_https_tls_secreneg': {'status': 'passed', 'verdict': 'good',
                                        'technical_details': [['2603:1027::e', 'yes'], ['52.112.196.45', 'yes']]},
@@ -225,7 +228,8 @@ def test_internet_nl_store_testresults(db):
                                                                             ['52.112.196.45', 'nosniff']]},
             'web_appsecpriv_x_xss_protection': {'status': 'warning', 'verdict': 'bad',
                                                 'technical_details': [['2603:1027::e', 'None'],
-                                                                      ['52.112.196.45', 'None']]}}, 'custom': {}}}}
+                                                                      ['52.112.196.45', 'None']]}},
+                                                   'custom': {'tls_1_3_support': 'yes'}}}}
 
     scan = InternetNLV2Scan()
     scan.retrieved_scan_report = test_results
@@ -258,7 +262,7 @@ def test_internet_nl_store_testresults(db):
     process_scan_results(scan)
 
     # is there a series of imports?
-    assert EndpointGenericScan.objects.all().count() == 90
+    assert EndpointGenericScan.objects.all().count() == 92
 
     # are the web scans imported
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_appsecpriv_x_xss_protection").count() == 2
@@ -274,6 +278,8 @@ def test_internet_nl_store_testresults(db):
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_0rtt").count() == 2
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_ocsp").count() == 2
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_keyexchangehash").count() == 2
+
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_legacy_tls_1_3").count() == 2
 
     # in api 2.0 web_https_tls_compress renamed to web_https_tls_compression, todo: this should be rolled back
     # assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_compression").count() == 2

@@ -710,7 +710,7 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
                     required_values=['web_https_http_available'])
 
     # TLS_NCSC
-    # v2: web_https_tls_* 10 and web_https_cert_* 4
+    # v2: web_https_tls_* 10 and web_https_cert_* 4, not including: web_https_http_available
     add_calculation(
         scan_data=scan_data,
         new_key='web_legacy_tls_ncsc_web',
@@ -738,6 +738,7 @@ def calculate_forum_standaardisatie_views_web(scan_data, custom_api_field_result
                     required_values=['web_ipv6_ws_address', 'web_ipv6_ws_reach', 'web_ipv6_ws_similar'])
 
     # Not in forum standaardisatie magazine, but used internally
+    # This is not displayed and can be removed since 2020.
     add_calculation(scan_data=scan_data, new_key='web_legacy_dane',
                     required_values=['web_https_dane_exist', 'web_https_dane_valid'])
 
@@ -787,15 +788,6 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     # SPF Policy
     add_calculation(scan_data=scan_data, new_key='mail_legacy_spf_policy', required_values=['mail_auth_spf_policy'])
 
-    # TLS 1.3, added in v2
-    # todo: add new field to report
-    if custom_api_field_results['tls_1_3_support'] == "yes":
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "passed")
-    elif custom_api_field_results['tls_1_3_support'] == "no":
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "failed")
-    elif custom_api_field_results['tls_1_3_support'] == "undetermined":
-        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "not_testable")
-
     # START TLS
     # Api v2 changes:
     # 4: mail_server_configured will probably be a mail server configured.
@@ -804,16 +796,12 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     #  if some mailservers not testable_ -> good_not_tested is relevant?
     if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
         add_instant_calculation(scan_data, 'mail_legacy_start_tls', "no_mx")
-        # todo: add new field to report
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "no_mx")  # todo: welk icoon?
+        # todo: add new field to repor
     elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
         add_instant_calculation(scan_data, 'mail_legacy_start_tls', "unreachable")
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "failed")
     elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
         add_instant_calculation(scan_data, 'mail_legacy_start_tls', "not_testable")
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "failed")
     else:
-        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "passed")
         add_calculation(scan_data=scan_data, new_key='mail_legacy_start_tls',
                         required_values=['mail_starttls_tls_available'])
 
@@ -829,9 +817,11 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
          'mail_starttls_cert_domain']
 
     # dane_ta of v1 is removed, that's now included in the above values.
-
+    # todo: no_mx equals not_applicable in the UI and graphs. unreachable, untestable gebruiken we de bolt.
     if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
         add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "no_mx")
+    elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
+        add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "unreachable")
     elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
         add_instant_calculation(scan_data, 'mail_legacy_start_tls_ncsc', "not_testable")
     else:
@@ -852,6 +842,8 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     # DANE
     if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
         add_instant_calculation(scan_data, 'mail_legacy_dane', "no_mx")
+    elif custom_api_field_results['mail_servers_testable_status'] == "unreachable":
+        add_instant_calculation(scan_data, 'mail_legacy_dane', "unreachable")
     elif custom_api_field_results['mail_servers_testable_status'] == "untestable":
         add_instant_calculation(scan_data, 'mail_legacy_dane', "not_testable")
     else:
@@ -873,5 +865,38 @@ def calculate_forum_standaardisatie_views_mail(scan_data, custom_api_field_resul
     else:
         add_calculation(scan_data=scan_data, new_key='mail_legacy_ipv6_mailserver',
                         required_values=['mail_ipv6_mx_address', 'mail_ipv6_mx_reach'])
+
+    # V2 New Mail Server status fields, extra fields.
+    # TLS 1.3, added in v2
+    # todo: add new field to report
+    if custom_api_field_results['tls_1_3_support'] == "yes":
+        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "passed")
+    elif custom_api_field_results['tls_1_3_support'] == "no":
+        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "failed")
+    elif custom_api_field_results['tls_1_3_support'] == "undetermined":
+        # Todo: should be a bolt.
+        add_instant_calculation(scan_data, 'mail_legacy_tls_1_3', "not_testable")
+
+    # The double negation is solved by renaming these fields. One field is split into three
+    if custom_api_field_results['mail_servers_testable_status'] == "no_mx":
+        add_instant_calculation(scan_data, 'mail_legacy_domain_has_mx', "failed")
+    else:
+        add_instant_calculation(scan_data, 'mail_legacy_domain_has_mx', "passed")
+
+    if custom_api_field_results['mail_servers_testable_status'] == "unreachable":
+        add_instant_calculation(scan_data, 'mail_legacy_mail_server_reachable', "failed")
+    else:
+        add_instant_calculation(scan_data, 'mail_legacy_mail_server_reachable', "passed")
+
+    if custom_api_field_results['mail_servers_testable_status'] == "untestable":
+        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "failed")
+    else:
+        add_instant_calculation(scan_data, 'mail_legacy_mail_server_testable', "passed")
+
+    # Kept the double negation to see if this causes confusion or not.
+    if custom_api_field_results['mail_non_sending_domain'] == "true":
+        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "passed")
+    else:
+        add_instant_calculation(scan_data, 'mail_legacy_mail_non_sending_domain', "failed")
 
     return scan_data
