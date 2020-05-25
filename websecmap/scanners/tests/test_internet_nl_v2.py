@@ -5,6 +5,7 @@ from websecmap.organizations.models import Url
 from websecmap.scanners.models import (Endpoint, EndpointGenericScan, InternetNLV2Scan,
                                        InternetNLV2StateLog)
 from websecmap.scanners.scanner.internet_nl_v2_websecmap import (initialize_scan,
+                                                                 lowest_value_in_results,
                                                                  process_scan_results,
                                                                  progress_running_scan,
                                                                  update_state)
@@ -281,6 +282,127 @@ def test_internet_nl_store_testresults(db):
 
     assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_legacy_tls_1_3").count() == 2
 
-    # in api 2.0 web_https_tls_compress renamed to web_https_tls_compression, todo: this should be rolled back
-    # assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_compression").count() == 2
-    # assert EndpointGenericScan.objects.all().filter(type="internet_nl_web_https_tls_compress").count() == 0
+    scan_data = test_results['lyncdiscover.vng.nl']
+
+    # passed, failed = failed
+    assert lowest_value_in_results(scan_data, ['web_ipv6_ws_reach', 'web_dnssec_exist']) == "failed"
+
+    # not_tested, failed
+    assert lowest_value_in_results(scan_data, ['web_dnssec_valid', 'web_dnssec_exist']) == "not_tested"
+
+    # warning, passed
+    assert lowest_value_in_results(scan_data, ['web_https_tls_ciphers', 'web_ipv6_ws_reach']) == "warning"
+
+    # passed, warning, flip it around.
+    assert lowest_value_in_results(scan_data, ['web_ipv6_ws_reach', 'web_https_tls_ciphers']) == "warning"
+
+    # passed, passed, passed, passed, passed, failed, passed, passed
+    assert lowest_value_in_results(scan_data, ['web_ipv6_ws_reach', 'web_ipv6_ws_reach',
+                                               'web_ipv6_ws_reach', 'web_ipv6_ws_reach',
+                                               'web_ipv6_ws_reach', 'web_dnssec_exist',
+                                               'web_ipv6_ws_reach', 'web_ipv6_ws_reach']) == "failed"
+
+    # store mail scan results:
+    mail_results = {
+        'dommel.nl': {'status': 'ok', 'report': {'url': 'https://dev.batch.internet.nl/mail/dommel.nl/287994/'},
+                      'scoring': {'percentage': 83}, 'results': {
+            'categories': {'mail_ipv6': {'verdict': 'failed', 'status': 'failed'},
+                           'mail_dnssec': {'verdict': 'passed', 'status': 'passed'},
+                           'mail_auth': {'verdict': 'passed', 'status': 'passed'},
+                           'mail_starttls': {'verdict': 'failed', 'status': 'failed'}}, 'tests': {
+                'mail_ipv6_ns_address': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                    'data_matrix': [['ns1.qsp.nl.', '2a04:c580:0:f0::1', '193.254.215.240'],
+                                    ['ns2.qsp.nl.', '2a04:c580:0:f1::1', '193.254.215.241']]}},
+                'mail_ipv6_ns_reach': {'status': 'passed', 'verdict': 'good',
+                                       'technical_details': {'data_matrix': []}},
+                    'mail_ipv6_mx_address': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'None', '81.175.72.228'],
+                                        ['fallback.dommel.nl.', 'None', '89.106.167.130']]}},
+                    'mail_ipv6_mx_reach': {'status': 'not_tested', 'verdict': 'not-tested',
+                                           'technical_details': {'data_matrix': []}},
+                    'mail_dnssec_mailto_exist': {'status': 'passed', 'verdict': 'good',
+                                                 'technical_details': {'data_matrix': [['dommel.nl', 'None']]}},
+                    'mail_dnssec_mailto_valid': {'status': 'passed', 'verdict': 'good',
+                                                 'technical_details': {'data_matrix': [['dommel.nl', 'secure']]}},
+                    'mail_dnssec_mx_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'yes'], ['fallback.dommel.nl.', 'yes']]}},
+                    'mail_dnssec_mx_valid': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['mail.dommel.nl.', 'secure'], ['fallback.dommel.nl.', 'secure']]}},
+                    'mail_auth_dmarc_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['v=DMARC1; p=quarantine; pct=100; rua=mailto:dmarcreports@dommel.nl;']]}},
+                    'mail_auth_dmarc_policy': {'status': 'passed', 'verdict': 'good',
+                                               'technical_details': {'data_matrix': []}},
+                    'mail_auth_dkim_exist': {'status': 'passed', 'verdict': 'good',
+                                             'technical_details': {'data_matrix': []}},
+                    'mail_auth_spf_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [
+                            ['v=spf1 ip4:81.175.72.228 ip4:85.17.2.13 ip4:46.31.48.0/21 a:fallback.dommel.nl -all']]}},
+                    'mail_auth_spf_policy': {'status': 'passed', 'verdict': 'good',
+                                             'technical_details': {'data_matrix': []}},
+                    'mail_starttls_tls_available': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_tls_keyexchange': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'DH-2048', 'insufficient'],
+                                        ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_ciphers': {'status': 'warning', 'verdict': 'phase-out', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'AES256-GCM-SHA384', 'phase out'],
+                                        ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_cipherorder': {'status': 'failed', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_version': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_tls_compress': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_secreneg': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_tls_clientreneg': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_cert_chain': {'status': 'info', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'fallback.dommel.nl'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_pubkey': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_sig': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_cert_domain': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'None'], ['mail.dommel.nl.', 'None']]}},
+                    'mail_starttls_dane_exist': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.',
+                                         '3 0 1 7E27A55454560F21B829DC501691C6780A086A445FF549DC36065BE43896FB17'],
+                                        ['mail.dommel.nl.',
+                                         '3 0 1 002E3C83A3EC137AA0C395F32AD3C3DDAF68DECE6F8AE9066AF1DA62554E53DE']]}},
+                    'mail_starttls_dane_valid': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}},
+                    'mail_starttls_dane_rollover': {'status': 'info', 'verdict': 'bad', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_0rtt': {'status': 'passed', 'verdict': 'na', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'no'], ['mail.dommel.nl.', 'no']]}},
+                    'mail_starttls_tls_keyexchangehash': {'status': 'passed', 'verdict': 'good', 'technical_details': {
+                        'data_matrix': [['fallback.dommel.nl.', 'yes'], ['mail.dommel.nl.', 'yes']]}}},
+            'custom': {'mail_non_sending_domain': False, 'mail_servers_testable_status': 'ok',
+                       'tls_1_3_support': 'no'}}}}
+
+    scan = InternetNLV2Scan()
+    scan.retrieved_scan_report = mail_results
+    scan.type = "mail_dashboard"
+    scan.save()
+
+    url1 = Url()
+    url1.url = "dommel.nl"
+    url1.save()
+
+    endpoint1 = Endpoint()
+    endpoint1.url = url1
+    endpoint1.protocol = "dns_soa"
+    endpoint1.port = 0
+    endpoint1.ip_version = 4
+    endpoint1.save()
+
+    process_scan_results(scan)
+
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_starttls_dane_rollover").count() == 1
+
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_tls_1_3").count() == 1
+
+    assert EndpointGenericScan.objects.all().filter(type="internet_nl_mail_legacy_start_tls_ncsc").count() == 1
+
+    assert EndpointGenericScan.objects.all().count() == 92 + 52
